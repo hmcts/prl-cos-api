@@ -370,6 +370,44 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testPopulatePreviewOrderWhenOrderUploadedForCustomOrder() throws Exception {
+        // For custom orders, preview rendering is deferred to Page 19 (hearing data page)
+        // This callback should just set loggedInUserType and return
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        objectMapper1.findAndRegisterModules();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(objectMapper1);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn("COURT_ADMIN");
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getData());
+        assertEquals("COURT_ADMIN", callbackResponse.getData().get("loggedInUserType"));
+        // Verify that renderAndUploadHeaderPreview was NOT called (deferred to Page 19)
+        verify(customOrderService, never()).renderAndUploadHeaderPreview(any(), any(), any(), any());
+    }
+
+    @Test
     public void testPopulatePreviewOrderWithError() throws Exception {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -1093,7 +1131,7 @@ public class ManageOrdersControllerTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
-            = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -1649,7 +1687,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -2639,7 +2677,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.sendEmailNotificationOnClosingOrder(authToken, s2sToken, callbackRequest);
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
@@ -3054,6 +3092,45 @@ public class ManageOrdersControllerTest {
             .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
 
         assertNotNull(callbackResponse);
+    }
+
+    @Test
+    public void testValidateAndPopulateHearingDataForCustomOrder() throws Exception {
+        Document previewDoc = Document.builder()
+            .documentUrl("http://test.url/preview.docx")
+            .documentBinaryUrl("http://test.url/binary/preview.docx")
+            .documentFileName("preview.docx")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .courtName("Test Court")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(customOrderService.resolveCourtName(any(), any())).thenReturn("Test Court");
+        when(customOrderService.renderAndUploadHeaderPreview(any(), any(), any(), any())).thenReturn(previewDoc);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getData());
+        assertEquals(previewDoc, callbackResponse.getData().get("previewOrderDoc"));
+        verify(customOrderService).renderAndUploadHeaderPreview(any(), any(), any(), any());
     }
 
     @Test
@@ -4128,7 +4205,7 @@ public class ManageOrdersControllerTest {
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
-            = manageOrdersController.sendEmailNotificationOnClosingOrder(
+            = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -4377,7 +4454,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void sendEmailNotificationOnClosingOrder_customOrder_shouldUseCallbackDataNotDatabase() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldUseCallbackDataNotDatabase() throws Exception {
         // Test that custom order fields are retrieved from callback request data, not database
         // This is critical because the database won't have these fields until after the event completes
 
@@ -4439,7 +4516,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
 
         // Call the method
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -4452,7 +4529,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void sendEmailNotificationOnClosingOrder_nonCustomOrder_shouldNotCallCombine() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_nonCustomOrder_shouldNotCallCombine() throws Exception {
         // Test that when customOrderDoc is not present, combineAndFinalizeCustomOrder is not called
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -4494,7 +4571,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -4506,7 +4583,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void sendEmailNotificationOnClosingOrder_customOrder_shouldCopyAllFieldsFromCallbackData() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyAllFieldsFromCallbackData() throws Exception {
         // Test that all custom order fields are copied from callback data to caseDataUpdated
 
         Document customOrderDoc = Document.builder()
@@ -4583,7 +4660,7 @@ public class ManageOrdersControllerTest {
             return null;
         }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.sendEmailNotificationOnClosingOrder(
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest

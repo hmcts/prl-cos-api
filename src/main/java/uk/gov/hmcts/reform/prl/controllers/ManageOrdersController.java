@@ -72,14 +72,17 @@ import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOGGED_IN_USER_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIEW_ORDER_DOC;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -132,48 +135,11 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            // Custom order flow - render header preview if document uploaded
+            // Custom order flow - skip preview rendering here, it will be done on Page 19 with hearing data
             if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(createCustomOrder)) {
                 // Set loggedInUserType for field show conditions
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-                caseDataUpdated.put("loggedInUserType", loggedInUserType);
-
-                // Only render header preview if custom order document has been uploaded
-                Object customOrderDocObj = caseDataUpdated.get("customOrderDoc");
-                if (customOrderDocObj != null) {
-                    try {
-                        // Debug: log the judge and date values from CCD
-                        log.info("CCD data - judgeOrMagistratesLastName={}, dateOrderMade={}",
-                            caseDataUpdated.get("judgeOrMagistratesLastName"),
-                            caseDataUpdated.get("dateOrderMade"));
-
-                        // Resolve court name from various possible sources
-                        String courtNameValue = customOrderService.resolveCourtName(caseData, caseDataUpdated);
-                        if (courtNameValue != null && !courtNameValue.isEmpty()) {
-                            caseData.setCourtName(courtNameValue);
-                        }
-
-                        // Render the header preview with the populated values
-                        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
-                            customOrderService.renderAndUploadHeaderPreview(
-                                authorisation,
-                                callbackRequest.getCaseDetails().getId(),
-                                caseData,
-                                caseDataUpdated
-                            );
-                        caseDataUpdated.put("previewOrderDoc", previewDoc);
-
-                        log.info("Custom order header preview uploaded: {}", previewDoc.getDocumentFileName());
-                    } catch (Exception e) {
-                        log.error("Failed to render custom order header preview", e);
-                        return AboutToStartOrSubmitCallbackResponse.builder()
-                            .errors(List.of("Failed to render custom order header: " + e.getMessage()))
-                            .build();
-                    }
-                } else {
-                    log.info("Custom order document not yet uploaded, skipping header preview render");
-                }
-
+                caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
@@ -349,7 +315,7 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse sendEmailNotificationOnClosingOrder(
+    public AboutToStartOrSubmitCallbackResponse finalizeOrderSubmissionAndSendNotifications(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
@@ -364,38 +330,10 @@ public class ManageOrdersController {
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
 
             // Custom order flow: combine header preview + user content, update the order
-            // Note: caseDataUpdated from allTabService is from the DATABASE (old data before this event).
-            // The callback request data has the CURRENT data from the aboutToSubmit response (not yet persisted).
-            // For custom order fields, we must use callbackRequest data.
             Map<String, Object> callbackData = callbackRequest.getCaseDetails().getData();
-
-            // Copy all custom order fields from callback data to caseDataUpdated
-            // These fields are set during this event and won't be in the database yet
-            String[] customOrderFields = {
-                "customOrderDoc", "previewOrderDoc", "customOrderNameOption",
-                "nameOfOrder", "amendOrderSelectCheckOptions", "whatDoWithOrder", "doYouWantToServeOrder"
-            };
-            for (String field : customOrderFields) {
-                Object value = callbackData.get(field);
-                if (value != null) {
-                    caseDataUpdated.put(field, value);
-                }
-            }
-
-            boolean isCustomOrder = callbackData.get("customOrderDoc") != null;
+            boolean isCustomOrder = copyCustomOrderFieldsFromCallback(callbackData, caseDataUpdated);
             if (isCustomOrder) {
-                // Determine if this is a draft order based on user type and settings
-                // Use callback data for amendOrderSelectCheckOptions since it may have been set during this event
-                String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-                Object amendCheckObj = caseDataUpdated.get("amendOrderSelectCheckOptions");
-                AmendOrderCheckEnum amendCheck = amendCheckObj != null
-                    ? objectMapper.convertValue(amendCheckObj, AmendOrderCheckEnum.class)
-                    : (caseData.getManageOrders() != null ? caseData.getManageOrders().getAmendOrderSelectCheckOptions() : null);
-                boolean isDraftOrder = UserRoles.JUDGE.name().equals(loggedInUserType)
-                    || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-                        && (!AmendOrderCheckEnum.noCheck.equals(amendCheck)
-                            || manageOrderService.isSaveAsDraft(caseData)));
-                customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
+                processCustomOrder(authorisation, caseData, caseDataUpdated);
             }
 
             // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
@@ -438,14 +376,7 @@ public class ManageOrdersController {
 
             // Clean up custom order fields to prevent them affecting subsequent order creations
             if (isCustomOrder) {
-                caseDataUpdated.remove("customOrderDoc");
-                caseDataUpdated.remove("customOrderNameOption");
-                caseDataUpdated.remove("previewOrderDoc");
-                caseDataUpdated.remove("nameOfOrder");
-                caseDataUpdated.remove("amendOrderSelectCheckOptions");
-                caseDataUpdated.remove("whatDoWithOrder");
-                caseDataUpdated.remove("doYouWantToServeOrder");
-                log.info("Cleaned up custom order fields after processing");
+                cleanupCustomOrderFields(caseDataUpdated);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -543,11 +474,11 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
-            // Custom order flow: add order to collection using customOrderDoc
+            // Custom order flow: add order to collection using CUSTOM_ORDER_DOC
             // The submitted callback will later replace it with the combined header + content (sealed for non-draft)
             // Only add if order wasn't already added in mid-event (when serving immediately)
             if (!orderAlreadyAddedInMidEvent) {
-                log.info("Custom order flow: adding order to collection with customOrderDoc");
+                log.info("Custom order flow: adding order to collection with CUSTOM_ORDER_DOC");
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData,
@@ -879,6 +810,11 @@ public class ManageOrdersController {
                     .build();
             }
 
+            // For custom orders, render header preview with hearing data
+            if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                return renderCustomOrderPreviewWithHearingData(authorisation, callbackRequest, caseData);
+            }
+
             //handle preview order
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation, PrlAppsConstants.ENGLISH))
@@ -905,5 +841,79 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private AboutToStartOrSubmitCallbackResponse renderCustomOrderPreviewWithHearingData(
+        String authorisation,
+        CallbackRequest callbackRequest,
+        CaseData caseData
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        try {
+            String courtNameValue = customOrderService.resolveCourtName(caseData, caseDataUpdated);
+            if (courtNameValue != null && !courtNameValue.isEmpty()) {
+                caseData.setCourtName(courtNameValue);
+            }
+
+            uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+                customOrderService.renderAndUploadHeaderPreview(
+                    authorisation,
+                    callbackRequest.getCaseDetails().getId(),
+                    caseData,
+                    caseDataUpdated
+                );
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, previewDoc);
+            log.info("Custom order header preview rendered with hearing data: {}", previewDoc.getDocumentFileName());
+        } catch (Exception e) {
+            log.error("Failed to render custom order header preview with hearing data", e);
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(List.of("Failed to render custom order preview: " + e.getMessage()))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
+    }
+
+    private boolean copyCustomOrderFieldsFromCallback(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
+        // Note: caseDataUpdated from allTabService is from the DATABASE (old data before this event).
+        // The callback request data has the CURRENT data from the aboutToSubmit response (not yet persisted).
+        // For custom order fields, we must use callbackRequest data.
+        String[] customOrderFields = {
+            CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, "customOrderNameOption",
+            "nameOfOrder", "amendOrderSelectCheckOptions", "whatDoWithOrder", "doYouWantToServeOrder"
+        };
+        for (String field : customOrderFields) {
+            Object value = callbackData.get(field);
+            if (value != null) {
+                caseDataUpdated.put(field, value);
+            }
+        }
+        return callbackData.get(CUSTOM_ORDER_DOC) != null;
+    }
+
+    private void processCustomOrder(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        // Determine if this is a draft order based on user type and settings
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        Object amendCheckObj = caseDataUpdated.get("amendOrderSelectCheckOptions");
+        AmendOrderCheckEnum amendCheck = amendCheckObj != null
+            ? objectMapper.convertValue(amendCheckObj, AmendOrderCheckEnum.class)
+            : (caseData.getManageOrders() != null ? caseData.getManageOrders().getAmendOrderSelectCheckOptions() : null);
+        boolean isDraftOrder = UserRoles.JUDGE.name().equals(loggedInUserType)
+            || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+                && (!AmendOrderCheckEnum.noCheck.equals(amendCheck)
+                    || manageOrderService.isSaveAsDraft(caseData)));
+        customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
+    }
+
+    private void cleanupCustomOrderFields(Map<String, Object> caseDataUpdated) {
+        caseDataUpdated.remove(CUSTOM_ORDER_DOC);
+        caseDataUpdated.remove(PREVIEW_ORDER_DOC);
+        caseDataUpdated.remove("customOrderNameOption");
+        caseDataUpdated.remove("nameOfOrder");
+        caseDataUpdated.remove("amendOrderSelectCheckOptions");
+        caseDataUpdated.remove("whatDoWithOrder");
+        caseDataUpdated.remove("doYouWantToServeOrder");
+        log.info("Cleaned up custom order fields after processing");
     }
 }
