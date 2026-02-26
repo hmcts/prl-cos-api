@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataService;
 import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class CafCassControllerTest {
     private UserInfo userInfo;
 
     @Mock
-    private CaseDataService caseDataService;
+    private CafcassCaseDataService cafcassCaseDataService;
 
     private static final String RESPONSE_JSON =
         "classpath:response/CafCaasResponse.json";
@@ -74,7 +74,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(caseDataService.getCaseData("authorisation", startDate, endDate))
+        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(expectedCafCassResponse);
         ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates(
             "authorisation",
@@ -97,7 +97,7 @@ public class CafCassControllerTest {
     public void testInvalidServiceAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.empty());
-        final ResponseEntity response = cafCassController.searchCasesByDates(
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
             "authorisation",
             "inValidServiceAuthorisation",
             "startDate",
@@ -105,6 +105,7 @@ public class CafCassControllerTest {
         );
         assertEquals(UNAUTHORIZED, response.getStatusCode());
         final ApiError body = (ApiError) response.getBody();
+        assertNotNull(body);
         assertEquals("401 UNAUTHORIZED", body.getMessage());
 
     }
@@ -114,8 +115,8 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
-                                         endDate
+        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
+                                                endDate
         )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
@@ -131,7 +132,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
+        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
                                          endDate
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
@@ -148,8 +149,8 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(caseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                         "endDate"
+        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
+                                                "endDate"
         )).thenThrow(new RuntimeException());
         final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
@@ -172,6 +173,7 @@ public class CafCassControllerTest {
             "2022-08-22T11:54:43.49"
         );
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("Difference between end date and start date should not be more than 15 minutes",
                      ((ApiError)response.getBody()).getMessage());
     }
@@ -237,7 +239,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(caseDataService.getCaseData("authorisation", startDate, endDate))
+        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(cafCassResponse);
 
         // Act
@@ -253,7 +255,7 @@ public class CafCassControllerTest {
         assertEquals(1, body.getCases().size());
 
         // And the problematic part didn’t crash the controller
-        var caseOrder = body.getCases().getFirst().getCaseData().getOrderCollection().get(0).getValue();
+        var caseOrder = body.getCases().getFirst().getCaseData().getOrderCollection().getFirst().getValue();
         assertNull(caseOrder.getHearingDetails());
         assertNull(caseOrder.getHearingId());
     }
@@ -313,7 +315,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(caseDataService.getCaseData("authorisation", startDate, endDate))
+        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(cafCassResponse);
 
         // Act

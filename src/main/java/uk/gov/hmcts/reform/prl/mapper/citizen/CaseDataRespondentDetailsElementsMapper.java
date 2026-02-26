@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -29,6 +30,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataRespondentDetailsElementsMapper {
 
     private CaseDataRespondentDetailsElementsMapper() {
@@ -89,7 +91,19 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static LocalDate buildDateOfBirth(RespondentDetails respondentDetails) {
         LocalDate dateOfBirth = buildDateOfBirth(respondentDetails.getPersonalDetails().getDateOfBirth());
-        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(respondentDetails.getPersonalDetails().getApproxDateOfBirth());
+
+        if (dateOfBirth != null) {
+            return dateOfBirth;
+        }
+
+        try {
+            return buildDateOfBirth(respondentDetails.getPersonalDetails().getApproxDateOfBirth());
+        } catch (Exception e) {
+            log.warn("Unable to parse approx date of birth {} for respondent with id: {}",
+                     respondentDetails.getPersonalDetails().getApproxDateOfBirth(),
+                     respondentDetails.getId());
+            return null;
+        }
     }
 
     private static LocalDate buildDateOfBirth(DateofBirth date) {
