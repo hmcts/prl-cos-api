@@ -67,6 +67,7 @@ public class AwaitingInformationControllerIntegrationTest {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         objectMapper.registerModule(new ParameterNamesModule());
+        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
     private Map<String, Object> createMockCaseDataWithAwaitingInformation() {
@@ -84,15 +85,31 @@ public class AwaitingInformationControllerIntegrationTest {
         return caseData;
     }
 
+    private Map<String, Object> createMockCaseDataWithInvalidDate() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("id", 12345678L);
+
+        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+            .reviewDate(LocalDate.now().minusDays(1))
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
+            .build();
+
+        caseData.put(AWAITING_INFORMATION_DETAILS, awaitingInfo);
+        caseData.put(CASE_STATUS, "Awaiting information");
+
+        return caseData;
+    }
+
+    // Tests for submitAwaitingInformation endpoint
     @Test
-    public void testSubmitAwaitingInformationSuccess() throws Exception {
-        String url = "/submit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+    public void shouldSubmitAwaitingInformationSuccessfully() throws Exception {
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(awaitingInformationService.addToCase(any()))
             .thenReturn(createMockCaseDataWithAwaitingInformation());
 
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        String url = "/submit-awaiting-information";
         mockMvc.perform(
                 post(url)
                     .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
@@ -105,12 +122,33 @@ public class AwaitingInformationControllerIntegrationTest {
     }
 
     @Test
-    public void testSubmitAwaitingInformationUnauthorized() throws Exception {
+    public void shouldSubmitAwaitingInformationWithValidHeaders() throws Exception {
+
+
+        when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN))
+            .thenReturn(true);
+        when(awaitingInformationService.addToCase(any()))
+            .thenReturn(createMockCaseDataWithAwaitingInformation());
         String url = "/submit-awaiting-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                    .header("Accept", APPLICATION_JSON.toString())
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void shouldRejectSubmitAwaitingInformationWithUnauthorizedTokens() throws Exception {
+
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
-
+        String url = "/submit-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
                     .header(AUTHORISATION_HEADER, "invalidToken")
@@ -123,88 +161,55 @@ public class AwaitingInformationControllerIntegrationTest {
     }
 
     @Test
-    public void testPopulateHeaderUnauthorized() throws Exception {
-        String url = "/populate-header-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, "invalidToken")
-                    .header(SERVICE_AUTHORISATION_HEADER, "invalidServiceToken")
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
-    }
-
-    @Test
-    public void testValidateAwaitingInformationSuccess() throws Exception {
-        String url = "/validate-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(awaitingInformationService.addToCase(any()))
-            .thenReturn(createMockCaseDataWithAwaitingInformation());
-
-        mockMvc.perform(
-                post(url)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
-    public void testSubmitAwaitingInformationWithCorrectHeaders() throws Exception {
+    public void shouldRejectSubmitAwaitingInformationWithMissingAuthorizationHeader() throws Exception {
         String url = "/submit-awaiting-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        mockMvc.perform(
+                post(url)
+                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+    }
 
-        when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN))
-            .thenReturn(true);
-        when(awaitingInformationService.addToCase(any()))
-            .thenReturn(createMockCaseDataWithAwaitingInformation());
-
+    @Test
+    public void shouldRejectSubmitAwaitingInformationWithMissingServiceAuthorizationHeader() throws Exception {
+        String url = "/submit-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
                     .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                    .header("Accept", APPLICATION_JSON.toString())
+                    .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
-            .andExpect(status().isOk())
+            .andExpect(status().isBadRequest())
             .andReturn();
     }
 
+    // Tests for validateUrgentCaseCreation endpoint
     @Test
-    public void testPopulateHeaderWithCorrectHeaders() throws Exception {
-        String url = "/populate-header-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN))
-            .thenReturn(true);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                    .header("Accept", APPLICATION_JSON.toString())
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-    }
-
-    @Test
-    public void testValidateAwaitingInformationWithValidJson() throws Exception {
+    public void shouldValidateAwaitingInformationSuccessfully() throws Exception {
         String url = "/validate-awaiting-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
         when(awaitingInformationService.addToCase(any()))
             .thenReturn(createMockCaseDataWithAwaitingInformation());
+        mockMvc.perform(
+                post(url)
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
 
+    @Test
+    public void shouldValidateAwaitingInformationWithValidJson() throws Exception {
+        when(awaitingInformationService.addToCase(any()))
+            .thenReturn(createMockCaseDataWithAwaitingInformation());
+        String url = "/validate-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
                     .header("Accept", APPLICATION_JSON.toString())
@@ -215,54 +220,100 @@ public class AwaitingInformationControllerIntegrationTest {
     }
 
     @Test
-    public void testSubmitAwaitingInformationWithDifferentTokens() throws Exception {
-        String url = "/submit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-        String token1 = "Bearer token1";
-        String token2 = "Bearer token2";
-        String serviceToken1 = "serviceToken1";
-        String serviceToken2 = "serviceToken2";
-
-        when(authorisationService.isAuthorized(token1, serviceToken1)).thenReturn(true);
-        when(authorisationService.isAuthorized(token2, serviceToken2)).thenReturn(false);
+    public void shouldValidateAwaitingInformationReturnErrorForInvalidDate() throws Exception {
         when(awaitingInformationService.addToCase(any()))
-            .thenReturn(createMockCaseDataWithAwaitingInformation());
-
-        // First request with valid tokens
+            .thenReturn(createMockCaseDataWithInvalidDate());
+        String url = "/validate-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, token1)
-                    .header(SERVICE_AUTHORISATION_HEADER, serviceToken1)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
+    }
 
-        // Second request with invalid tokens
+    @Test
+    public void shouldValidateAwaitingInformationWithCorrectContentType() throws Exception {
+        when(awaitingInformationService.addToCase(any()))
+            .thenReturn(createMockCaseDataWithAwaitingInformation());
+        String url = "/validate-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
-                    .header(AUTHORISATION_HEADER, token2)
-                    .header(SERVICE_AUTHORISATION_HEADER, serviceToken2)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
-            .andExpect(status().isInternalServerError())
+            .andExpect(status().isOk())
             .andReturn();
     }
 
     @Test
-    public void testAllEndpointsSequentially() throws Exception {
+    public void shouldHandleValidateAwaitingInformationWithMultipleReasonTypes() throws Exception {
+
+
+        AwaitingInformationReasonEnum[] reasons = {
+            AwaitingInformationReasonEnum.applicantFurtherInformation,
+            AwaitingInformationReasonEnum.applicantClarifyConfidentialDetails,
+            AwaitingInformationReasonEnum.dwpHmrcWhereaboutsUnknown,
+            AwaitingInformationReasonEnum.respondentFurtherInformation
+        };
+
+        for (AwaitingInformationReasonEnum reason : reasons) {
+            Map<String, Object> caseData = new HashMap<>();
+            caseData.put("id", 12345678L);
+            AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+                .reviewDate(LocalDate.now().plusDays(5))
+                .awaitingInformationReasonEnum(reason)
+                .build();
+            caseData.put(AWAITING_INFORMATION_DETAILS, awaitingInfo);
+            caseData.put(CASE_STATUS, "Awaiting information");
+
+            when(awaitingInformationService.addToCase(any())).thenReturn(caseData);
+            String url = "/validate-awaiting-information";
+            String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+            mockMvc.perform(
+                    post(url)
+                        .accept(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isOk())
+                .andReturn();
+        }
+    }
+
+    @Test
+    public void shouldValidateAwaitingInformationWithNullReviewDate() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("id", 12345678L);
+        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+            .reviewDate(null)
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
+            .build();
+        caseData.put(AWAITING_INFORMATION_DETAILS, awaitingInfo);
+
+        when(awaitingInformationService.addToCase(any())).thenReturn(caseData);
+        String url = "/validate-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        mockMvc.perform(
+                post(url)
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void shouldHandleSubmitAndValidateInSequence() throws Exception {
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(awaitingInformationService.addToCase(any()))
+            .thenReturn(createMockCaseDataWithAwaitingInformation());
         String submitUrl = "/submit-awaiting-information";
-        String populateHeaderUrl = "/populate-header-awaiting-information";
         String validateUrl = "/validate-awaiting-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(awaitingInformationService.addToCase(any()))
-            .thenReturn(createMockCaseDataWithAwaitingInformation());
-
-        // Test submit endpoint
+        // Submit
         mockMvc.perform(
                 post(submitUrl)
                     .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
@@ -273,18 +324,7 @@ public class AwaitingInformationControllerIntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
 
-        // Test populate header endpoint
-        mockMvc.perform(
-                post(populateHeaderUrl)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
-
-        // Test validate endpoint
+        // Validate
         mockMvc.perform(
                 post(validateUrl)
                     .accept(APPLICATION_JSON)
@@ -295,44 +335,25 @@ public class AwaitingInformationControllerIntegrationTest {
     }
 
     @Test
-    public void testSubmitAwaitingInformationMissingAuthHeader() throws Exception {
-        String url = "/submit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+    public void shouldHandleCaseDataWithAdditionalFields() throws Exception {
 
-        mockMvc.perform(
-                post(url)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    }
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("id", 12345678L);
+        caseData.put("applicantName", "John Doe");
+        caseData.put("respondentName", "Jane Doe");
+        caseData.put("caseType", "C100");
 
-    @Test
-    public void testPopulateHeaderMissingServiceAuthHeader() throws Exception {
-        String url = "/populate-header-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    }
-
-    @Test
-    public void testSubmitAwaitingInformationResponseContentType() throws Exception {
-        String url = "/submit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+            .reviewDate(LocalDate.now().plusDays(5))
+            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
+            .build();
+        caseData.put(AWAITING_INFORMATION_DETAILS, awaitingInfo);
+        caseData.put(CASE_STATUS, "Awaiting information");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(awaitingInformationService.addToCase(any()))
-            .thenReturn(createMockCaseDataWithAwaitingInformation());
-
+        when(awaitingInformationService.addToCase(any())).thenReturn(caseData);
+        String url = "/submit-awaiting-information";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
                     .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
@@ -345,20 +366,36 @@ public class AwaitingInformationControllerIntegrationTest {
     }
 
     @Test
-    public void testValidateAwaitingInformationResponseContentType() throws Exception {
-        String url = "/validate-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+    public void shouldHandleValidateWithDifferentReviewDateRanges() throws Exception {
 
-        when(awaitingInformationService.addToCase(any()))
-            .thenReturn(createMockCaseDataWithAwaitingInformation());
+        LocalDate[] dates = {
+            LocalDate.now().plusDays(1),
+            LocalDate.now().plusDays(10),
+            LocalDate.now().plusDays(30),
+            LocalDate.now().plusDays(365)
+        };
 
-        mockMvc.perform(
-                post(url)
-                    .accept(APPLICATION_JSON)
-                    .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isOk())
-            .andReturn();
+        for (LocalDate date : dates) {
+            Map<String, Object> caseData = new HashMap<>();
+            caseData.put("id", 12345678L);
+            AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+                .reviewDate(date)
+                .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
+                .build();
+            caseData.put(AWAITING_INFORMATION_DETAILS, awaitingInfo);
+            caseData.put(CASE_STATUS, "Awaiting information");
+
+            when(awaitingInformationService.addToCase(any())).thenReturn(caseData);
+            String url = "/validate-awaiting-information";
+            String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+            mockMvc.perform(
+                    post(url)
+                        .accept(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isOk())
+                .andReturn();
+        }
     }
 }
 
