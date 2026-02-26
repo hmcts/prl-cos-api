@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -407,7 +408,9 @@ public class HearingServiceTest {
     @Test
     public void shouldFilterCasesWithHearingsStartingOnDate() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        List<Long> caseIds = List.of(123L, 456L);
+        List<CaseDetails> caseDetails = List.of(CaseDetails.builder().id(123L).build(),
+                                                CaseDetails.builder().id(456L).build()
+        );
         LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5);
 
         Hearings hearingsResponse123 = Hearings.hearingsWith()
@@ -432,18 +435,20 @@ public class HearingServiceTest {
             any()
         )).thenReturn(List.of(hearingsResponse123, hearingsResponse456));
 
-        List<Long> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(caseIds, auth, hearingStartDate.toLocalDate());
-        assertEquals(List.of(123L), filteredCaseIds);
+        List<CaseDetails> filteredCases = hearingService.filterCasesWithHearingsStartingOnDate(caseDetails, auth, hearingStartDate.toLocalDate());
+        assertEquals(123L, filteredCases.getFirst().getId());
+        assertEquals(1, filteredCases.size());
     }
 
     @Test
     public void shouldReturnEmptyListWhenNoCasesGiven() {
-        List<Long> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(null, auth, LocalDate.now().plusDays(5));
-        assertEquals(List.of(), filteredCaseIds);
+        List<CaseDetails> filteredCases = hearingService.filterCasesWithHearingsStartingOnDate(null, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCases);
     }
 
     @Test
     public void shouldIgnoreEmptyHearings() {
+        List<CaseDetails> cases = List.of(CaseDetails.builder().id(123L).build());
         Hearings hearingsResponse = Hearings.hearingsWith()
             .caseRef("123")
             .caseHearings(null)
@@ -454,12 +459,13 @@ public class HearingServiceTest {
             any()
         )).thenReturn(List.of(hearingsResponse));
 
-        List<Long> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(List.of(123L), auth, LocalDate.now().plusDays(5));
+        List<CaseDetails> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(cases, auth, LocalDate.now().plusDays(5));
         assertEquals(List.of(), filteredCaseIds);
     }
 
     @Test
     public void shouldIgnoreEmptyHearingSchedules() {
+        List<CaseDetails> cases = List.of(CaseDetails.builder().id(123L).build());
         Hearings hearingsResponse = Hearings.hearingsWith()
             .caseRef("123")
             .caseHearings(List.of(CaseHearing.caseHearingWith()
@@ -472,7 +478,7 @@ public class HearingServiceTest {
             any()
         )).thenReturn(List.of(hearingsResponse));
 
-        List<Long> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(List.of(123L), auth, LocalDate.now().plusDays(5));
+        List<CaseDetails> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(cases, auth, LocalDate.now().plusDays(5));
         assertEquals(List.of(), filteredCaseIds);
     }
 }

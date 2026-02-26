@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
@@ -247,29 +248,30 @@ public class HearingService {
         FeignException.InternalServerError.class},
         backoff = @Backoff (delay = 500, multiplier = 2, maxDelay = 2000),
         recover = "recoverFromFilterCasesFailure")
-    public List<Long> filterCasesWithHearingsStartingOnDate(List<Long> caseIds, String userToken, LocalDate dateToCheck) {
-        List<Long> filteredCaseIds = new ArrayList<>();
-        if (caseIds == null || caseIds.isEmpty()) {
-            return filteredCaseIds;
+    public List<CaseDetails> filterCasesWithHearingsStartingOnDate(List<CaseDetails> cases, String userToken, LocalDate dateToCheck) {
+        List<CaseDetails> filteredCases = new ArrayList<>();
+        if (cases == null || cases.isEmpty()) {
+            return cases;
         }
         int batchSize = 25;
 
-        for (int i = 0; i < caseIds.size(); i += batchSize) {
-            List<String> batch = caseIds.subList(i, Math.min(i + batchSize, caseIds.size()))
+        for (int i = 0; i < cases.size(); i += batchSize) {
+            List<String> batch = cases.subList(i, Math.min(i + batchSize, cases.size()))
                 .stream().map(String::valueOf).toList();
             List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(userToken, authTokenGenerator.generate(), batch);
             for (Hearings hearing : hearingsList) {
-                String caseId = hearing.getCaseRef();
+                Long caseId = Long.parseLong(hearing.getCaseRef());
+                CaseDetails caseDetail = cases.stream().filter(cd -> cd.getId().equals(caseId)).findFirst().orElse(null);
                 if (isNotEmpty(hearing.getCaseHearings()) && hasHearingStartingOnDate(hearing, dateToCheck)) {
-                    filteredCaseIds.add(Long.parseLong(caseId));
+                    filteredCases.add(caseDetail);
                 }
             }
         }
-        return filteredCaseIds;
+        return filteredCases;
     }
 
     @Recover
-    public List<Long> recoverFromFilterCasesFailure(FeignException ex, List<Long> caseIds, String userToken, LocalDate dateToCheck) {
+    public List<CaseDetails> recoverFromFilterCasesFailure(FeignException ex, List<CaseDetails> caseIds, String userToken, LocalDate dateToCheck) {
         log.error("Failed to filter cases with hearings starting on date {} after retries", dateToCheck, ex);
         return Collections.emptyList();
     }

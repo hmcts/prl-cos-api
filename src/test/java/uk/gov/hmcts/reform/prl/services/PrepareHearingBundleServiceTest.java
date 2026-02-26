@@ -10,12 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -34,6 +38,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
 class PrepareHearingBundleServiceTest {
@@ -59,13 +66,16 @@ class PrepareHearingBundleServiceTest {
     @Mock
     private AllTabServiceImpl allTabService;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
     private PrepareHearingBundleService prepareHearingBundleService;
 
     @BeforeEach
     void setup() {
-        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
-        when(esQueryService.getObjectMapper()).thenReturn(getObjectMapper());
+        Mockito.lenient().when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+        Mockito.lenient().when(esQueryService.getObjectMapper()).thenReturn(getObjectMapper());
     }
 
     @Test
@@ -80,14 +90,14 @@ class PrepareHearingBundleServiceTest {
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
-        List<Long> actualCases = prepareHearingBundleService.getCasesWithNextHearingDateByDate(
+        List<CaseDetails> actualCases = prepareHearingBundleService.getCasesWithNextHearingDateByDate(
             LocalDate.now().plusDays(7),
             USER_TOKEN
         );
 
         assertNotNull(actualCases);
         assertEquals(1, actualCases.size());
-        assertEquals(123L, actualCases.getFirst());
+        assertEquals(123L, actualCases.getFirst().getId());
     }
 
     @Test
@@ -103,21 +113,135 @@ class PrepareHearingBundleServiceTest {
     }
 
     @Test
+    void shouldFilterOutCaseWithC100ApplicantRepresentation() {
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+
+        CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
+        CaseData caseData = CaseData.builder()
+            .id(111L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())))
+            .build();
+
+        SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
+
+        when(objectMapper.convertValue(case1.getData(), CaseData.class))
+            .thenReturn(caseData);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        // mock hearings to always say yes to all of our cases if any make it this far
+        when(hearingService.filterCasesWithHearingsStartingOnDate(anyList(), anyString(), any(LocalDate.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        prepareHearingBundleService.searchForHearingsIn5DaysAndCreateTasks();
+
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void shouldFilterOutCaseWithC100RespondentRepresentation() {
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+
+        CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
+        CaseData caseData = CaseData.builder()
+            .id(111L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())))
+            .build();
+
+        SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
+
+        when(objectMapper.convertValue(case1.getData(), CaseData.class))
+            .thenReturn(caseData);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        // mock hearings to always say yes to all of our cases if any make it this far
+        when(hearingService.filterCasesWithHearingsStartingOnDate(anyList(), anyString(), any(LocalDate.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        prepareHearingBundleService.searchForHearingsIn5DaysAndCreateTasks();
+
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void shouldFilterOutCaseWithFL401ApplicantRepresentation() {
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+
+        CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
+        CaseData caseData = CaseData.builder()
+            .id(111L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())
+            .build();
+
+        SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
+
+        when(objectMapper.convertValue(case1.getData(), CaseData.class))
+            .thenReturn(caseData);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        // mock hearings to always say yes to all of our cases if any make it this far
+        when(hearingService.filterCasesWithHearingsStartingOnDate(anyList(), anyString(), any(LocalDate.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        prepareHearingBundleService.searchForHearingsIn5DaysAndCreateTasks();
+
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    void shouldFilterOutCaseWithFL401RespondentRepresentation() {
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+
+        CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
+        CaseData caseData = CaseData.builder()
+            .id(111L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())
+            .build();
+
+        SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
+
+        when(objectMapper.convertValue(case1.getData(), CaseData.class))
+            .thenReturn(caseData);
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        // mock hearings to always say yes to all of our cases if any make it this far
+        when(hearingService.filterCasesWithHearingsStartingOnDate(anyList(), anyString(), any(LocalDate.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        prepareHearingBundleService.searchForHearingsIn5DaysAndCreateTasks();
+
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
     void shouldTriggerEventsOnlyOnCasesWithHearingsIn5Days() {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
 
-        CaseDetails case1 = CaseDetails.builder().id(111L).build();
-        CaseDetails case2 = CaseDetails.builder().id(222L).build();
+        CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
+        CaseDetails case2 = CaseDetails.builder().data(Map.of()).id(222L).build();
 
         SearchResult searchResult = SearchResult.builder()
             .cases(List.of(case1, case2))
             .total(2)
             .build();
 
+        when(objectMapper.convertValue(case1.getData(), CaseData.class))
+            .thenReturn(CaseData.builder().id(111L).caseTypeOfApplication(C100_CASE_TYPE).applicants(List.of(element(PartyDetails.builder().build()))).build());
+        when(objectMapper.convertValue(case2.getData(), CaseData.class))
+            .thenReturn(CaseData.builder().id(222L).caseTypeOfApplication(FL401_CASE_TYPE).build());
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
+
+        // mock hearings to always say yes to all of our cases
         when(hearingService.filterCasesWithHearingsStartingOnDate(anyList(), anyString(), any(LocalDate.class)))
-            .thenReturn(List.of(111L, 222L));
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
         StartAllTabsUpdateDataContent mockContent = org.mockito.Mockito.mock(StartAllTabsUpdateDataContent.class);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(mockContent);
@@ -154,16 +278,16 @@ class PrepareHearingBundleServiceTest {
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(firstPage, secondPage);
 
-        List<Long> caseIds = prepareHearingBundleService.getCasesWithNextHearingDateByDate(
+        List<CaseDetails> cases = prepareHearingBundleService.getCasesWithNextHearingDateByDate(
             LocalDate.now().plusDays(7),
             USER_TOKEN
         );
 
-        assertNotNull(caseIds);
-        assertEquals(105, caseIds.size());
+        assertNotNull(cases);
+        assertEquals(105, cases.size());
 
-        assertEquals(100, caseIds.stream().filter(id -> id.equals(1L)).count());
-        assertEquals(5, caseIds.stream().filter(id -> id.equals(2L)).count());
+        assertEquals(100, cases.stream().filter(caseDetails -> caseDetails.getId().equals(1L)).count());
+        assertEquals(5, cases.stream().filter(caseDetails -> caseDetails.getId().equals(2L)).count());
     }
 
     public ObjectMapper getObjectMapper() {

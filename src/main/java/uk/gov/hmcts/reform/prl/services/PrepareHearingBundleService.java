@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -25,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,7 +37,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Service
@@ -46,6 +52,7 @@ public class PrepareHearingBundleService {
     private final AllTabServiceImpl allTabService;
     private final EsQueryService esQueryService;
     private final HearingService hearingService;
+    private final ObjectMapper objectMapper;
 
     @Value("${prepare-hearing-bundle.calendar-days-before-hearing:7}")
     private int calendarDaysBeforeHearing;
@@ -58,13 +65,15 @@ public class PrepareHearingBundleService {
         log.info("Running create 'Prepare Hearing Bundle' Work Allocation Task creation job");
         String userToken = systemUserService.getSysUserToken();
 
-        List<Long> caseIds = getCasesWithNextHearingDateByDate(dateToCheck, userToken);
+        List<CaseDetails> cases = getCasesWithNextHearingDateByDate(dateToCheck, userToken);
         try {
-            if (isNotEmpty(caseIds)) {
-                log.info("Found {} cases with nextHearingDate between now and {}", caseIds.size(), dateToCheck);
-                caseIds = hearingService.filterCasesWithHearingsStartingOnDate(caseIds, userToken, dateToCheck);
-                log.info("After filtering against HMC, {} cases have hearings on {}", caseIds.size(), dateToCheck);
-                createPrepareBundleWaTask(caseIds);
+            if (isNotEmpty(cases)) {
+                log.info("Found {} cases with nextHearingDate between now and {}", cases.size(), dateToCheck);
+                cases = filterCasesWithNoRepresentation(cases);
+                log.info("Found {} cases with no representation", cases.size());
+                cases = hearingService.filterCasesWithHearingsStartingOnDate(cases, userToken, dateToCheck);
+                log.info("After filtering against HMC, {} cases have hearings on {}", cases.size(), dateToCheck);
+                createPrepareBundleWaTask(cases);
             } else {
                 log.info("No cases exist with hearings on {}", dateToCheck);
             }
@@ -73,10 +82,44 @@ public class PrepareHearingBundleService {
         }
     }
 
-    private void createPrepareBundleWaTask(List<Long> caseIds) {
-        caseIds.forEach(caseId ->
+    private List<CaseDetails> filterCasesWithNoRepresentation(List<CaseDetails> caseDetails) {
+        List<CaseDetails> filteredCases = new ArrayList<>();
+        caseDetails.stream().forEach(caseDetail -> {
+            if (areNoPartiesRepresented(caseDetail)) {
+                filteredCases.add(caseDetail);
+            } else {
+                log.info("Case {} has representation, skipping creation of 'Prepare Hearing Bundle' task",
+                         caseDetail.getId());
+            }
+        });
+        return filteredCases;
+    }
+
+    private boolean areNoPartiesRepresented(CaseDetails caseDetail) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetail, objectMapper);
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            return nullSafeList(caseData.getApplicants()).stream().noneMatch(
+                el -> hasLegalRepresentation(el.getValue())
+            ) &&
+                nullSafeList(caseData.getRespondents()).stream().noneMatch(
+                    el -> hasLegalRepresentation(el.getValue())
+                );
+        } else {
+            return !hasLegalRepresentation(caseData.getApplicantsFL401()) && !hasLegalRepresentation(caseData.getRespondentsFL401());
+        }
+    }
+
+    private boolean hasLegalRepresentation(PartyDetails partyDetails) {
+        if (isNotEmpty(partyDetails)) {
+            return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        }
+        return false;
+    }
+
+    private void createPrepareBundleWaTask(List<CaseDetails> cases) {
+        cases.forEach(caseDetails ->
                             triggerSystemEventForWorkAllocationTask(
-                                caseId.toString(),
+                                caseDetails.getId().toString(),
                                 CaseEvent.ENABLE_PREPARE_HEARING_BUNDLE_TASK.getValue()
                             )
         );
@@ -102,10 +145,10 @@ public class PrepareHearingBundleService {
         }
     }
 
-    public List<Long> getCasesWithNextHearingDateByDate(LocalDate dateToCheck, String userToken) {
+    public List<CaseDetails> getCasesWithNextHearingDateByDate(LocalDate dateToCheck, String userToken) {
         ObjectMapper esQueryObjectMapper = esQueryService.getObjectMapper();
         try {
-            List<Long> caseDetailsList = new ArrayList<>();
+            List<CaseDetails> caseDetailsList = new ArrayList<>();
             QueryParam ccdQueryParam = buildCcdQueryParam(dateToCheck);
 
             String searchString = esQueryObjectMapper.writeValueAsString(ccdQueryParam);
@@ -123,7 +166,7 @@ public class PrepareHearingBundleService {
 
             if (isNotEmpty(searchResult)) {
                 // add first page from initial search
-                caseDetailsList.addAll(searchResult.getCases().stream().map(CaseDetails::getId).toList());
+                caseDetailsList.addAll(searchResult.getCases());
 
                 // process remaining pages
                 for (int i = 1; i < pages; i++) {
@@ -138,11 +181,11 @@ public class PrepareHearingBundleService {
                         paginatedSearchString
                     );
                     caseDetailsList.addAll(
-                        paginatedSearchResult.getCases().stream().map(CaseDetails::getId).toList());
+                        paginatedSearchResult.getCases());
                 }
             }
 
-            log.info("Total no. of case ids to process {}", caseDetailsList.size());
+            log.info("Total no. of cases to process {}", caseDetailsList.size());
             return caseDetailsList;
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
