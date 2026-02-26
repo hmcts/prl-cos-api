@@ -347,7 +347,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: versions.httpComponents
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: versions.springBoot
   implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.1.1'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '2.1.2'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.5'
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
