@@ -111,7 +111,8 @@ public class PrepareHearingBundleService {
 
     private boolean hasLegalRepresentation(PartyDetails partyDetails) {
         if (isNotEmpty(partyDetails)) {
-            return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+            return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+                || isNotEmpty(partyDetails.getSolicitorOrg());
         }
         return false;
     }
