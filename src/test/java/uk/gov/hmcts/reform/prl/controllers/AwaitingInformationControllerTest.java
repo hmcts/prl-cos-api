@@ -31,9 +31,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.  times;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AwaitingInformationControllerTest {
@@ -172,8 +173,14 @@ public class AwaitingInformationControllerTest {
     @Test
     public void testValidateAwaitingInformationWithValidDate() {
         // Given
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, awaitingInformation);
+
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+        when(objectMapper.convertValue(awaitingInformation, AwaitingInformation.class))
             .thenReturn(awaitingInformation);
+
         List<String> emptyErrorList = new ArrayList<>();
         when(awaitingInformationService.validate(awaitingInformation))
             .thenReturn(emptyErrorList);
@@ -185,6 +192,7 @@ public class AwaitingInformationControllerTest {
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertTrue(response.getErrors().isEmpty());
+        verify(awaitingInformationService, times(1)).addToCase(callbackRequest);
         verify(awaitingInformationService, times(1)).validate(awaitingInformation);
     }
 
@@ -196,7 +204,12 @@ public class AwaitingInformationControllerTest {
             .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, invalidAwaitingInfo);
+
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+        when(objectMapper.convertValue(invalidAwaitingInfo, AwaitingInformation.class))
             .thenReturn(invalidAwaitingInfo);
 
         List<String> errorList = new ArrayList<>();
@@ -224,7 +237,12 @@ public class AwaitingInformationControllerTest {
             .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, nullDateAwaitingInfo);
+
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+        when(objectMapper.convertValue(nullDateAwaitingInfo, AwaitingInformation.class))
             .thenReturn(nullDateAwaitingInfo);
 
         List<String> emptyErrorList = new ArrayList<>();
@@ -248,7 +266,12 @@ public class AwaitingInformationControllerTest {
             .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, todayDateAwaitingInfo);
+
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+        when(objectMapper.convertValue(todayDateAwaitingInfo, AwaitingInformation.class))
             .thenReturn(todayDateAwaitingInfo);
 
         List<String> errorList = new ArrayList<>();
@@ -274,8 +297,14 @@ public class AwaitingInformationControllerTest {
         multipleErrors.add("Error 2");
         multipleErrors.add("Error 3");
 
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, awaitingInformation);
+
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+        when(objectMapper.convertValue(awaitingInformation, AwaitingInformation.class))
             .thenReturn(awaitingInformation);
+
         when(awaitingInformationService.validate(awaitingInformation))
             .thenReturn(multipleErrors);
 
@@ -298,7 +327,12 @@ public class AwaitingInformationControllerTest {
             .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
             .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), AwaitingInformation.class))
+        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, infoWithOther);
+
+        when(awaitingInformationService.addToCase(callbackRequest))
+            .thenReturn(updatedCaseData);
+        when(objectMapper.convertValue(infoWithOther, AwaitingInformation.class))
             .thenReturn(infoWithOther);
         when(awaitingInformationService.validate(infoWithOther))
             .thenReturn(new ArrayList<>());

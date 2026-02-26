@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -66,13 +67,14 @@ public class AwaitingInformationController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse validateUrgentCaseCreation(
-        @RequestBody CallbackRequest callbackRequest
-    ) {
+    public CallbackResponse validateUrgentCaseCreation(@RequestBody CallbackRequest callbackRequest) {
 
         if (featureToggleService.isAwaitingInformationEnabled()) {
+            Map<String, Object> caseDataUpdated = awaitingInformationService.addToCase(callbackRequest);
+
             AwaitingInformation awaitingInformation = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(), AwaitingInformation.class);
+                caseDataUpdated.get(AWAITING_INFORMATION_DETAILS), AwaitingInformation.class);
+
             List<String> errorList = awaitingInformationService.validate(awaitingInformation);
 
             return CallbackResponse.builder()
