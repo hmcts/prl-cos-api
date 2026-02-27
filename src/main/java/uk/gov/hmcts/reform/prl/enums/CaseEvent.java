@@ -65,6 +65,9 @@ public enum CaseEvent {
 
     HWF_PROCESS_CASE_UPDATE("hwfProcessCaseUpdate"),
     HWF_PROCESS_AWP_STATUS_UPDATE("processHwfUpdateAwpStatus"),
+    MANAGE_ORDERS("manageOrders"),
+    INTERNAL_CUSTOM_ORDER_SUBMIT("internal-custom-order-submit"),
+    INTERNAL_CUSTOM_ORDER_SEAL("internal-custom-order-seal"),
 
     CITIZEN_AWP_CREATE("citizenAwpCreate"),
     CITIZEN_AWP_HWF_CREATE("citizenAwpHwfCreate"),

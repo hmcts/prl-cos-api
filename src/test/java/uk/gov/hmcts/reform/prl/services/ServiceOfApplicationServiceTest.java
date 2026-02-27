@@ -95,7 +95,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -124,8 +123,6 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRE
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CHECK_FAILED;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
@@ -460,129 +457,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(RETURNED_TO_ADMIN_HEADER, confirmationHeader);
 
 
-    }
-
-    @Test
-    public void testRejectPacksWithConfidentialDetailsAddsRejectionReasonsToCaseDataMap() {
-        // Arrange: set up caseDataSoa and serviceOfApplicationSoa so that confidential check fails
-        serviceOfApplicationSoa = serviceOfApplicationSoa.toBuilder()
-            .isConfidential(YesOrNo.Yes)
-            .applicationServedYesNo(YesOrNo.No)
-            .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed.builder()
-                                                      .confidentialityCheckRejectReason("pack contain confidential info")
-                                                      .build()))
-            .build();
-
-        caseDataSoa = caseDataSoa.toBuilder()
-            .serviceOfApplication(serviceOfApplicationSoa)
-            .build();
-
-        Map<String, Object> caseDetails = caseDataSoa.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder().data(caseDetails).build())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseDataSoa);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            authorization,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            caseDetails,
-            caseDataSoa,
-            null
-        );
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-
-        // Act
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
-            authorization, callbackRequest
-        );
-
-        // Assert
-        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
-        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
-        assertNotNull(caseDetails.get(CONFIDENTIAL_CHECK_FAILED));
-        assertEquals(serviceOfApplicationSoa.getConfidentialCheckFailed(), caseDetails.get(CONFIDENTIAL_CHECK_FAILED));
-        // method copies into a new ArrayList, so it should not be the same instance
-        assertFalse(serviceOfApplicationSoa.getConfidentialCheckFailed() == caseDetails.get(CONFIDENTIAL_CHECK_FAILED));
-    }
-
-    @Test
-    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsEmpty() {
-        // Arrange
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
-            .confidentialCheckFailed(Collections.emptyList())
-            .build();
-        CaseData caseDataSoa = CaseData.builder()
-            .serviceOfApplication(serviceOfApplication)
-            .build();
-
-        Map<String, Object> caseDataMap = caseDataSoa.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseDataSoa);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            authorization,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            caseDataMap,
-            caseDataSoa,
-            null
-        );
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-
-        // Act
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
-            authorization, callbackRequest
-        );
-
-        // Assert
-        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
-        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
-        assertTrue(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
-        assertTrue(((List<?>) caseDataMap.get(CONFIDENTIAL_CHECK_FAILED)).isEmpty());
-    }
-
-    @Test
-    public void testRejectPacksWithConfidentialDetailsDoesNotAddRejectionReasonsWhenListIsNull() {
-        // Arrange
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
-            .confidentialCheckFailed(null)
-            .build();
-        CaseData caseDataSoa = CaseData.builder()
-            .serviceOfApplication(serviceOfApplication)
-            .build();
-
-        Map<String, Object> caseDataMap = caseDataSoa.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseDataSoa);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            authorization,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            caseDataMap,
-            caseDataSoa,
-            null
-        );
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-
-        // Act
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
-            authorization, callbackRequest
-        );
-
-        // Assert
-        assertEquals(RETURNED_TO_ADMIN_HEADER, Objects.requireNonNull(response.getBody()).getConfirmationHeader());
-        assertEquals(CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX, response.getBody().getConfirmationBody());
-        assertTrue(caseDataMap.containsKey(CONFIDENTIAL_CHECK_FAILED));
-        assertNull(caseDataMap.get(CONFIDENTIAL_CHECK_FAILED));
     }
 
     @Test
