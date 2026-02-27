@@ -1727,9 +1727,23 @@ public class SendAndReplyServiceTest {
             .id(1234L).state("SUBMITTED").createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
         CallbackRequest request = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        String context = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : true
+            }
+          }
+        }
+        """;
+        String clientContext = new String(Base64.getEncoder().encode(context.getBytes()));
 
-
-        Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(request, auth, null);
+        Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(request, auth, clientContext);
         MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
 
         assertNotNull(updatedResponse.get("messageReplyDynamicList"));
