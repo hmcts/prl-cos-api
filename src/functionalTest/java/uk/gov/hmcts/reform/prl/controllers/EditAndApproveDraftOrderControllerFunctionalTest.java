@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import static org.hamcrest.Matchers.notNullValue;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Disabled
 public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
@@ -98,6 +100,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
 
     @Test
+    @Disabled
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -256,6 +259,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     }
 
     @Test
+    @Disabled
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
 

@@ -39,6 +39,7 @@ public class ReviewDocuments {
 
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
     private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
@@ -60,6 +61,7 @@ public class ReviewDocuments {
         return Stream.of(
                 legalProfUploadDocListDocTab,
                 cafcassUploadDocListDocTab,
+                localAuthorityUploadDocListDocTab,
                 courtStaffUploadDocListDocTab,
                 bulkScannedDocListDocTab,
                 citizenUploadedDocListDocTab,

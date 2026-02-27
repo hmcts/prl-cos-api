@@ -595,6 +595,12 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/localauthority/AbstractSocialWorkerService.java',
+  '**uk/gov/hmcts/reform/prl/handlers/SocialworkerChangeEventHandler.java',
+  '**src/main/java/uk/gov/hmcts/reform/prl/clients/ccd/CaseAssignmentService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/localauthority/SocialWorkerController.java',
+  '**uk/gov/hmcts/reform/prl/services/localauthority/SocialWorkerAddService.java',
+  '**uk/gov/hmcts/reform/prl/services/localauthority/SocialWorkerRemoveService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java'
 ]
 

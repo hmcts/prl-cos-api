@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -158,4 +159,11 @@ public class BaseCaseData {
     private TTL retainAndDisposeTimeToLive;
 
     private List<Element<Document>> miamDocumentsCopy;
+
+    /* Local authority policies */
+    @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
+    private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
+
+    @JsonProperty("isLocalAuthorityInvolvedInCase")
+    private YesOrNo isLocalAuthorityInvolvedInCase;
 }
