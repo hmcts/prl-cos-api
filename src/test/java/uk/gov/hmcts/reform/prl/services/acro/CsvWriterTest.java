@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
@@ -45,13 +44,14 @@ class CsvWriterTest {
     private static final String TEST_ORDER_FILENAME = "test-order.pdf";
 
     private static final String[] EXPECTED_CSV_HEADERS = {
-        "Case No.", "Court Name/Location", "Court Code", "Order Name", "Court Date", "Order Expiry Date",
-        "Respondent Surname", "Respondent Forename(s)", "Respondent DOB", "Respondent 1st Line of Address",
-        "Respondent 2nd Line of Address", "Respondent Postcode", "Respondent Phone", "Respondent Email",
-        "Is Respondent Address Confidential", "Is Respondent Phone Confidential", "Is Respondent Email Confidential",
-        "Applicant Surname", "Applicant Forename(s)", "Applicant DOB", "Applicant 1st Line of Address",
-        "Applicant 2nd Line of Address", "Applicant Postcode", "Applicant Phone", "Applicant Safe Time to Call", "Applicant Email",
-        "Is Applicant Address Confidential", "Is Applicant Phone Confidential", "Is Applicant Email Confidential", "Order File Name"
+        "Case No. FamilyMan", "Case No. Manage Cases", "Court Name/Location", "Court Code", "Order Name", "Court Date",
+        "Order Expiry Date", "Respondent Surname", "Respondent Forename(s)", "Respondent DOB",
+        "Respondent 1st Line of Address", "Respondent 2nd Line of Address", "Respondent Postcode", "Respondent Phone",
+        "Respondent Email", "Is Respondent Address Confidential", "Is Respondent Phone Confidential",
+        "Is Respondent Email Confidential", "Applicant Surname", "Applicant Forename(s)", "Applicant DOB",
+        "Applicant 1st Line of Address", "Applicant 2nd Line of Address", "Applicant Postcode", "Applicant Phone",
+        "Applicant Safe Time to Call", "Applicant Email", "Is Applicant Address Confidential",
+        "Is Applicant Phone Confidential", "Is Applicant Email Confidential", "Order File Name"
     };
 
     private static final String APPLICANT_PHONE = "1234567890";
@@ -277,8 +277,8 @@ class CsvWriterTest {
                 arguments("applicant.firstName", "Jane", standardCase),
                 arguments("applicant.phoneNumber", APPLICANT_PHONE, standardCase),
                 arguments("applicant.email", APPLICANT_EMAIL, standardCase),
-                arguments("dateOrderMade", "9 Oct 2025", standardCase),
-                arguments("orderExpiryDate", LocalDateTime.of(2024, 6, 15, 23, 59), standardCase)
+                arguments("dateOrderMade", "09/10/2025", standardCase),
+                arguments("orderExpiryDate", "15/06/2024_23:59", standardCase)
             );
         }
     }
@@ -348,8 +348,8 @@ class CsvWriterTest {
                 .respondent(respondent)
                 .applicant(applicant)
                 .daApplicantContactInstructions(contactInstructions)
-                .dateOrderMade("9 Oct 2025")
-                .orderExpiryDate(LocalDateTime.of(2024, 6, 15, 23, 59))
+                .dateOrderMade("09/10/2025")
+                .orderExpiryDate("15/06/2024_23:59")
                 .build();
         }
     }
