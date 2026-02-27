@@ -40,11 +40,11 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class RemoveLocalAuthoritySolicitorsTest {
+public class RemoveLocalAuthoritySolicitorServiceTest {
 
     public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
     @InjectMocks
-    public RemoveLocalAuthoritySolicitors service;
+    public RemoveLocalAuthoritySolicitorService service;
 
     @Mock
     private CaseAssignmentApi caseAssignmentApi;
@@ -103,7 +103,7 @@ public class RemoveLocalAuthoritySolicitorsTest {
         CaseData caseData = buildCaseData(caseId, orgId);
 
         // Act
-        service.removeLocalAuthoritySolicitors(caseData);
+        service.removeLocalAuthoritySolicitor(caseData);
 
         // Assert: CCD API called once with tokens and correctly built request
         verify(caseAssignmentApi, times(1))
@@ -133,7 +133,7 @@ public class RemoveLocalAuthoritySolicitorsTest {
     }
 
     @Test
-    void removeLocalAuthoritySolicitors_whenCcdApiThrowsFeign_shouldThrowGrantCaseAccessException() {
+    void removeLocalAuthoritySolicitor_whenCcdApiThrowsFeign_shouldThrowGrantCaseAccessException() {
         // Arrange
         long caseId = 9876543210L;
 
@@ -160,7 +160,7 @@ public class RemoveLocalAuthoritySolicitorsTest {
         // Act + Assert
         GrantCaseAccessException ex = assertThrows(
             GrantCaseAccessException.class,
-            () -> service.removeLocalAuthoritySolicitors(caseData),
+            () -> service.removeLocalAuthoritySolicitor(caseData),
             "Expected GrantCaseAccessException when FeignException occurs"
         );
 
@@ -175,7 +175,7 @@ public class RemoveLocalAuthoritySolicitorsTest {
     }
 
     @Test
-    void removeLocalAuthoritySolicitors_whenNoMatchingRoles_callsApiWithEmptyList() {
+    void removeLocalAuthoritySolicitor_whenNoMatchingRoles_callsApiWithEmptyList() {
         // Arrange
 
         RoleAssignmentResponse other1 = mock(RoleAssignmentResponse.class);
@@ -193,7 +193,7 @@ public class RemoveLocalAuthoritySolicitorsTest {
         CaseData caseData = buildCaseData(caseId, orgId);
 
         // Act
-        service.removeLocalAuthoritySolicitors(caseData);
+        service.removeLocalAuthoritySolicitor(caseData);
 
         // Assert
         verify(caseAssignmentApi, never())

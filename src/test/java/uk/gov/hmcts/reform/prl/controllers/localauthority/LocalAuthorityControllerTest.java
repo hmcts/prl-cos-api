@@ -11,12 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitors;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 
 @Slf4j
@@ -55,7 +57,7 @@ class LocalAuthorityControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    private RemoveLocalAuthoritySolicitors removeLocalAuthoritySolicitors;
+    private RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     private CaseData buildCaseDataWithOrgPolicy(String orgId) {
         return CaseData.builder()
@@ -85,6 +87,12 @@ class LocalAuthorityControllerTest {
         // Assert
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data map should not be null");
+
+        assertTrue(
+            response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+            "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+        );
+        assertEquals(YesOrNo.Yes, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
         assertTrue(
             response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
             "Expected policy to be set in response map"
@@ -104,7 +112,7 @@ class LocalAuthorityControllerTest {
         // Verify authorisation check and mapping were used
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
         verify(objectMapper, times(1)).convertValue(inputData, CaseData.class);
-        verifyNoInteractions(removeLocalAuthoritySolicitors);
+        verifyNoInteractions(removeLocalAuthoritySolicitorService);
     }
 
     @Test
@@ -124,7 +132,7 @@ class LocalAuthorityControllerTest {
         );
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
-        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitors);
+        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitorService);
     }
 
     @Test
@@ -153,14 +161,19 @@ class LocalAuthorityControllerTest {
         // Assert
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data should not be null");
+        assertTrue(
+            response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+            "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+        );
+        assertEquals(YesOrNo.No, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
         assertFalse(
             response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
             "Policy key should be removed from map"
         );
 
         ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
-        verify(removeLocalAuthoritySolicitors, times(1))
-            .removeLocalAuthoritySolicitors(caseDataCaptor.capture());
+        verify(removeLocalAuthoritySolicitorService, times(1))
+            .removeLocalAuthoritySolicitor(caseDataCaptor.capture());
 
         CaseData passedToService = caseDataCaptor.getValue();
         assertNotNull(passedToService, "CaseData passed to service should not be null");
@@ -187,6 +200,6 @@ class LocalAuthorityControllerTest {
         );
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
-        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitors);
+        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitorService);
     }
 }

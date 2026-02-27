@@ -15,16 +15,19 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitors;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 
 @Slf4j
@@ -33,12 +36,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY
 @RequestMapping("/localauthority")
 public class LocalAuthorityController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
-    private final RemoveLocalAuthoritySolicitors removeLocalAuthoritySolver;
+    private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolver;
 
     @Autowired
     public LocalAuthorityController(ObjectMapper objectMapper, EventService eventPublisher,
                                     AuthorisationService authorisationService,
-                                    RemoveLocalAuthoritySolicitors removeLocalAuthoritySolver) {
+                                    RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolver) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
         this.removeLocalAuthoritySolver = removeLocalAuthoritySolver;
@@ -63,8 +66,10 @@ public class LocalAuthorityController extends AbstractCallbackController {
             OrganisationPolicy localAuthorityOrganisationPolicy = caseData.getLocalAuthoritySolicitorOrganisationPolicy();
             caseDataUpdated.put(
                 LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
-                localAuthorityOrganisationPolicy.toBuilder().orgPolicyCaseAssignedRole("[LASOLICITOR]").build()
+                localAuthorityOrganisationPolicy.toBuilder()
+                    .orgPolicyCaseAssignedRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE).build()
             );
+            caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -86,10 +91,11 @@ public class LocalAuthorityController extends AbstractCallbackController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            removeLocalAuthoritySolver.removeLocalAuthoritySolicitors(caseData);
+            removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+            caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
