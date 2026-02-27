@@ -1,0 +1,58 @@
+package uk.gov.hmcts.reform.prl.services;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
+
+@Slf4j
+@Builder
+@RequiredArgsConstructor
+@Service
+public class AwaitingInformationService {
+
+    private final FeatureToggleService featureToggleService;
+    private final ObjectMapper objectMapper;
+    private final CaseSummaryTabService caseSummaryTab;
+
+    public List<String> validate(AwaitingInformation awaitingInformation) {
+        List<String> errorList = new ArrayList<>();
+        if (featureToggleService.isAwaitingInformationEnabled() && awaitingInformation.getReviewDate()
+            != null && !awaitingInformation.getReviewDate().isAfter(LocalDate.now())) {
+            errorList.add("The date must be in the future");
+        }
+        return errorList;
+    }
+
+    public  Map<String, Object> addToCase(CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(
+            CASE_STATUS, CaseStatus.builder()
+                .state(AWAITING_INFORMATION.getLabel())
+                .build()
+        );
+        Map<String, Object> awaitingInformationDetails = new HashMap<>();
+        awaitingInformationDetails.put("reviewByDate", caseDataUpdated.get("reviewByDate"));
+        awaitingInformationDetails.put("awaitingInformationReasonList", caseDataUpdated.get("awaitingInformationReasonList"));
+        caseDataUpdated.put(AWAITING_INFORMATION_DETAILS,awaitingInformationDetails);
+
+        CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+        return caseDataUpdated;
+    }
+}
