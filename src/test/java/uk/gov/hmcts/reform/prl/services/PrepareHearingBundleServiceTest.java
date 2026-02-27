@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -47,6 +48,7 @@ class PrepareHearingBundleServiceTest {
 
     private static final String USER_TOKEN = "userToken";
     private static final String S2S_TOKEN = "s2sToken";
+    private static final Organisation SOLICITOR_ORG = Organisation.builder().organisationID("orgId").build();
 
     @Mock
     private EsQueryService esQueryService;
@@ -120,7 +122,10 @@ class PrepareHearingBundleServiceTest {
         CaseData caseData = CaseData.builder()
             .id(111L)
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())))
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                            .solicitorOrg(SOLICITOR_ORG)
+                                            .build())))
             .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
@@ -147,7 +152,10 @@ class PrepareHearingBundleServiceTest {
         CaseData caseData = CaseData.builder()
             .id(111L)
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .respondents(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .solicitorOrg(SOLICITOR_ORG)
+                                             .build())))
             .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
@@ -174,7 +182,10 @@ class PrepareHearingBundleServiceTest {
         CaseData caseData = CaseData.builder()
             .id(111L)
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())
+            .applicantsFL401(PartyDetails.builder()
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                 .solicitorOrg(SOLICITOR_ORG)
+                                 .build())
             .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
@@ -201,7 +212,10 @@ class PrepareHearingBundleServiceTest {
         CaseData caseData = CaseData.builder()
             .id(111L)
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .respondentsFL401(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.yes).build())
+            .respondentsFL401(PartyDetails.builder()
+                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                  .solicitorOrg(SOLICITOR_ORG)
+                                  .build())
             .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();

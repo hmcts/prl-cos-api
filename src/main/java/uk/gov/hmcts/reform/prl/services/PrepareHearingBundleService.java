@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
@@ -111,8 +110,8 @@ public class PrepareHearingBundleService {
 
     private boolean hasLegalRepresentation(PartyDetails partyDetails) {
         if (isNotEmpty(partyDetails)) {
-            return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
-                || isNotEmpty(partyDetails.getSolicitorOrg());
+            return isNotEmpty(partyDetails.getSolicitorOrg())
+                && isNotEmpty(partyDetails.getSolicitorOrg().getOrganisationID());
         }
         return false;
     }
