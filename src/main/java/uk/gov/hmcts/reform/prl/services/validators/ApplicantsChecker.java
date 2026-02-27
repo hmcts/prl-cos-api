@@ -84,7 +84,7 @@ public class ApplicantsChecker implements EventChecker {
     @Override
     public boolean isStarted(CaseData caseData) {
 
-        return (caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)
+        return (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
             ? caseData.getApplicantsFL401() != null
             : caseData.getApplicants() != null);
     }
