@@ -247,7 +247,11 @@ class PrepareHearingBundleServiceTest {
             .build();
 
         when(objectMapper.convertValue(case1.getData(), CaseData.class))
-            .thenReturn(CaseData.builder().id(111L).caseTypeOfApplication(C100_CASE_TYPE).applicants(List.of(element(PartyDetails.builder().build()))).build());
+            .thenReturn(CaseData.builder()
+                            .id(111L)
+                            .caseTypeOfApplication(C100_CASE_TYPE)
+                            .applicants(List.of(element(PartyDetails.builder().build())))
+                            .build());
         when(objectMapper.convertValue(case2.getData(), CaseData.class))
             .thenReturn(CaseData.builder().id(222L).caseTypeOfApplication(FL401_CASE_TYPE).build());
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))

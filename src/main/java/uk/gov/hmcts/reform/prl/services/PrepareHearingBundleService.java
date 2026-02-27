@@ -98,11 +98,9 @@ public class PrepareHearingBundleService {
         CaseData caseData = CaseUtils.getCaseData(caseDetail, objectMapper);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return nullSafeList(caseData.getApplicants()).stream().noneMatch(
-                el -> hasLegalRepresentation(el.getValue())
-            ) &&
-                nullSafeList(caseData.getRespondents()).stream().noneMatch(
-                    el -> hasLegalRepresentation(el.getValue())
-                );
+                el -> hasLegalRepresentation(el.getValue()))
+                && nullSafeList(caseData.getRespondents()).stream().noneMatch(
+                el -> hasLegalRepresentation(el.getValue()));
         } else {
             return !hasLegalRepresentation(caseData.getApplicantsFL401()) && !hasLegalRepresentation(caseData.getRespondentsFL401());
         }
