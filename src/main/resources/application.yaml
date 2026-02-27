@@ -64,6 +64,9 @@ logging:
     org.springframework.web: INFO
     uk.gov.hmcts.reform.prl: INFO
     au.com.dius.pact: INFO
+    org.springframework.integration: DEBUG
+    org.springframework.integration.sftp: DEBUG
+    com.jcraft.jsch: DEBUG
   pattern:
     console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
@@ -812,6 +815,18 @@ acro:
   search-case-type-id: PRLAPPS
   cronjob:
     enabled: false
+  sftp:
+    host: ${ACRO_SFTP_HOST:some-host}
+    port: ${ACRO_SFTP_PORT:22}
+    user: ${ACRO_SFTP_USER:some-user}
+    azure-deployment: false
+    private-key: /mnt/secrets/private-law/bais-xerox-key
+    private-key-pass-phrase: ""
+    session-wait-timeout: 10000
+    pool-size: 10
+    allow-unknown-keys: true
+    remote-directory: /
+    password: ${ACRO_SFTP_USER_PASSWORD:test_password}
 
 hwf-update-case-state-task:
   last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}

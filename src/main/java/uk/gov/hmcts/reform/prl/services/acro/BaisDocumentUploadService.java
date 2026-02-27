@@ -17,9 +17,13 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +38,7 @@ public class BaisDocumentUploadService {
     private final AcroZipService acroZipService;
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
+    private final SftpService sftpService;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -57,12 +62,12 @@ public class BaisDocumentUploadService {
                 log.info("Search has resulted empty cases with Final FL404a orders, creating empty CSV file");
                 csvWriter.appendCsvRowToFile(csvFile, CsvData.builder().build(), null);
             } else {
-                processCasesAndCreateCsvRows(csvFile, acroResponse, sysUserToken);
+                createCsvRowsForFl404aOrders(csvFile, acroResponse, sysUserToken);
             }
 
             log.info("All FL404a documents and manifest files prepared. Creating zip archive...");
-            acroZipService.zip();
-
+            String archivePath = acroZipService.zip();
+            sftpService.uploadFile(new File(archivePath));
             log.info(
                 "*** Total time taken to run Bais Document upload task - {}s ***",
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
@@ -73,7 +78,7 @@ public class BaisDocumentUploadService {
         }
     }
 
-    private void processCasesAndCreateCsvRows(File csvFile, AcroResponse acroResponse, String sysUserToken) {
+    private void createCsvRowsForFl404aOrders(File csvFile, AcroResponse acroResponse, String sysUserToken) {
         log.info(
             "Processing {} cases for FL404a document extraction and CSV generation",
             acroResponse.getCases().size()
@@ -139,20 +144,43 @@ public class BaisDocumentUploadService {
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
-            .dateOrderMade(order.getOtherDetails().getOrderMadeDate())
+            .dateOrderMade(formatOrderMadeDate(order))
             .orderExpiryDate(getOrderExpiryDate(order))
+            .familymanCaseNumber(caseData.getFamilymanCaseNumber())
             .build();
     }
+
+    private String formatOrderMadeDate(OrderDetails order) {
+        String orderMadeDate = order.getOtherDetails().getOrderMadeDate();
+
+        if (orderMadeDate == null || orderMadeDate.isBlank()) {
+            return "";
+        }
+
+        DateTimeFormatter inputFormatter =
+            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            LocalDate date = LocalDate.parse(orderMadeDate.trim(), inputFormatter);
+            return date.format(outputFormatter);
+        } catch (DateTimeParseException e) {
+            log.error("Invalid date format: {}", orderMadeDate);
+            return "";
+        }
+    }
+
 
     private String getFilePrefix(String caseId, LocalDateTime orderCreatedDate) {
         ZonedDateTime zdt = ZonedDateTime.of(orderCreatedDate, ZoneId.systemDefault());
         return sourceDirectory + "/FL404A-" + caseId + "-" + zdt.toEpochSecond();
     }
 
-    private LocalDateTime getOrderExpiryDate(OrderDetails order) {
+    private String getOrderExpiryDate(OrderDetails order) {
 
         if (order.getFl404CustomFields() != null && order.getFl404CustomFields().getOrderSpecifiedDateTime() != null) {
-            return order.getFl404CustomFields().getOrderSpecifiedDateTime();
+            return order.getFl404CustomFields().getOrderSpecifiedDateTime()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy_HH:mm"));
         }
         return null;
     }
