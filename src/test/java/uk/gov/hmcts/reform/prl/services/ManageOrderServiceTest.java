@@ -6845,4 +6845,154 @@ public class ManageOrderServiceTest {
         assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
         assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
     }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43Fields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of("childArrangementsOrder", "specificIssueOrder"));
+        c43Details.put("childArrangementsOrderType", "liveWithOrder");
+        caseDataUpdated.put("customC43OrderDetails", c43Details);
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C43 fields synced
+        assertEquals(List.of("childArrangementsOrder", "specificIssueOrder"),
+            caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertEquals("liveWithOrder", caseDataUpdated.get("selectChildArrangementsOrder"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43AFields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "specialGuardianShip");
+        caseDataUpdated.put("customAppointedGuardianName", "John Smith");
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C43A field synced
+        assertEquals("John Smith", caseDataUpdated.get("appointedGuardianName"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC21Fields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+
+        Map<String, Object> c21Details = new HashMap<>();
+        c21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", c21Details);
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C21 field synced
+        assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenNoOrderTypeSelected() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", null);
+
+        // Pre-populate all fields
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - all fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenOtherOrderTypeSelected() {
+        // Given - selecting "other" order type which has no sub-selections
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "other");
+
+        // Pre-populate all fields
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - all fields cleared (other order type has no sub-selections)
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC43Details() {
+        // Given - C43 selected but no details filled in
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataUpdated.put("customC43OrderDetails", new HashMap<>());
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - no errors, fields remain null
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC21Details() {
+        // Given - C21 selected but no details filled in
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataUpdated.put("customC21OrderDetails", new HashMap<>());
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - no errors, field remains null
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
 }

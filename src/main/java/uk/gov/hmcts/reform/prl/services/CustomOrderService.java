@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -29,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,28 +76,12 @@ public class CustomOrderService {
      * @return The effective order name, or "custom_order" as fallback
      */
     public String getEffectiveOrderName(CaseData caseData, Map<String, Object> caseDataMap) {
-        // Read customOrderNameOption from raw map (not in CaseData model due to constructor param limit)
-        CustomOrderNameOptionsEnum selectedOption = null;
-        Object rawOption = caseDataMap != null ? caseDataMap.get("customOrderNameOption") : null;
-        if (rawOption != null) {
-            try {
-                if (rawOption instanceof String) {
-                    selectedOption = CustomOrderNameOptionsEnum.getValue((String) rawOption);
-                } else if (rawOption instanceof CustomOrderNameOptionsEnum) {
-                    selectedOption = (CustomOrderNameOptionsEnum) rawOption;
-                }
-            } catch (IllegalArgumentException e) {
-                log.warn("Could not parse customOrderNameOption: {}", rawOption);
-            }
-        }
+        CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
 
-        // If a dropdown option is selected and it's not "Other", use the dropdown display value
         if (selectedOption != null && !selectedOption.isOther()) {
-            log.info("Using order name from dropdown: {}", selectedOption.getDisplayedValue());
-            return selectedOption.getDisplayedValue();
+            return getOrderNameFromSelection(selectedOption, caseDataMap);
         }
 
-        // Otherwise, use the text field (for "Other" selection or backwards compatibility)
         String textFieldName = caseData.getNameOfOrder();
         if (textFieldName != null && !textFieldName.isBlank()) {
             log.info("Using order name from text field: {}", textFieldName);
@@ -104,6 +90,66 @@ public class CustomOrderService {
 
         log.info("No order name found, using default: {}", DEFAULT_ORDER_NAME);
         return DEFAULT_ORDER_NAME;
+    }
+
+    private CustomOrderNameOptionsEnum parseCustomOrderNameOption(Map<String, Object> caseDataMap) {
+        Object rawOption = caseDataMap != null ? caseDataMap.get("customOrderNameOption") : null;
+        if (rawOption == null) {
+            return null;
+        }
+        try {
+            if (rawOption instanceof String rawOptionStr) {
+                return CustomOrderNameOptionsEnum.getValue(rawOptionStr);
+            } else if (rawOption instanceof CustomOrderNameOptionsEnum customOrderNameOptionsEnum) {
+                return customOrderNameOptionsEnum;
+            }
+        } catch (IllegalArgumentException e) {
+            log.warn("Could not parse customOrderNameOption: {}", rawOption);
+        }
+        return null;
+    }
+
+    private String getOrderNameFromSelection(CustomOrderNameOptionsEnum selectedOption, Map<String, Object> caseDataMap) {
+        if ("blankOrderOrDirections".equals(selectedOption.name())) {
+            String c21SubOption = getC21SubOptionDisplayValue(caseDataMap);
+            if (c21SubOption != null) {
+                log.info("Using C21 sub-option order name: {}", c21SubOption);
+                return c21SubOption;
+            }
+        }
+        log.info("Using order name from dropdown: {}", selectedOption.getDisplayedValue());
+        return selectedOption.getDisplayedValue();
+    }
+
+    /**
+     * Extracts C21 sub-option display value from customC21OrderDetails ComplexType.
+     */
+    @SuppressWarnings("unchecked")
+    private String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
+        if (caseDataMap == null) {
+            return null;
+        }
+
+        Object customC21Details = caseDataMap.get("customC21OrderDetails");
+        if (customC21Details instanceof Map<?, ?> c21Map) {
+            Object orderOptions = c21Map.get("orderOptions");
+            if (orderOptions != null) {
+                try {
+                    C21OrderOptionsEnum c21Option;
+                    if (orderOptions instanceof String orderOptionsStr) {
+                        c21Option = C21OrderOptionsEnum.getValue(orderOptionsStr);
+                    } else if (orderOptions instanceof C21OrderOptionsEnum c21OrderOptionsEnum) {
+                        c21Option = c21OrderOptionsEnum;
+                    } else {
+                        return null;
+                    }
+                    return c21Option.getDisplayedValue();
+                } catch (IllegalArgumentException e) {
+                    log.warn("Could not parse C21 order option: {}", orderOptions);
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -453,8 +499,8 @@ public class CustomOrderService {
         if (caseDataMap != null && caseDataMap.get(DATE_ORDER_MADE) != null) {
             Object dateValue = caseDataMap.get(DATE_ORDER_MADE);
             String result;
-            if (dateValue instanceof java.time.LocalDate) {
-                result = ((java.time.LocalDate) dateValue).format(DATE_FORMATTER);
+            if (dateValue instanceof LocalDate localDate) {
+                result = localDate.format(DATE_FORMATTER);
             } else {
                 // Date may come as ISO string (yyyy-MM-dd) from JSON - parse and reformat to UK format
                 result = reformatDateToUkFormat(dateValue.toString());
@@ -578,13 +624,14 @@ public class CustomOrderService {
         safePut(data, "hearingType", () -> "hearing");
 
         // Future hearing details
-        populateFutureHearingPlaceholders(data, caseData);
+        populateFutureHearingPlaceholders(data, caseData, caseDataMap);
 
         // Determine case type and populate party details
         boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
         populateApplicantPlaceholders(data, caseData, isFL401);
         populateRespondents(data, caseData, isFL401);
         populateChildrensGuardian(data, caseData);
+        populateAppointedGuardianPlaceholders(data, caseData, caseDataMap);
         populateChildrenPlaceholders(data, caseData);
 
         log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
@@ -594,19 +641,45 @@ public class CustomOrderService {
 
     /**
      * Populates future hearing placeholders from ordersHearingDetails.
+     * Checks both caseData and caseDataMap since the hearing data entered on Page 19
+     * may be in the raw map but not yet converted to the CaseData object.
      * Provides both individual placeholders and a combined clause that's empty if no hearing scheduled.
      */
-    private void populateFutureHearingPlaceholders(Map<String, Object> data, CaseData caseData) {
-        if (caseData.getManageOrders() == null
-            || caseData.getManageOrders().getOrdersHearingDetails() == null
-            || caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-            setEmptyFutureHearingPlaceholders(data);
-            return;
+    @SuppressWarnings("unchecked")
+    private void populateFutureHearingPlaceholders(Map<String, Object> data, CaseData caseData, Map<String, Object> caseDataMap) {
+        // First try to get from caseData
+        if (caseData.getManageOrders() != null
+            && caseData.getManageOrders().getOrdersHearingDetails() != null
+            && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+            var hearingDetails = caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue();
+            if (hearingDetails.getFirstDateOfTheHearing() != null) {
+                populateFromHearingDetails(data, hearingDetails);
+                return;
+            }
         }
 
-        var hearingDetails = caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue();
+        // Fall back to caseDataMap - the hearing data might be there but not yet in caseData
+        if (caseDataMap != null && caseDataMap.get("ordersHearingDetails") != null) {
+            try {
+                Object hearingDetailsObj = caseDataMap.get("ordersHearingDetails");
+                if (hearingDetailsObj instanceof List && !((List<?>) hearingDetailsObj).isEmpty()) {
+                    List<Map<String, Object>> hearingList = (List<Map<String, Object>>) hearingDetailsObj;
+                    Map<String, Object> firstHearing = (Map<String, Object>) hearingList.get(0).get("value");
+                    if (firstHearing != null) {
+                        populateFromHearingDetailsMap(data, firstHearing);
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Could not extract hearing details from caseDataMap: {}", e.getMessage());
+            }
+        }
 
-        // Check if we have a date - if not, no future hearing is scheduled
+        setEmptyFutureHearingPlaceholders(data);
+    }
+
+    private void populateFromHearingDetails(Map<String, Object> data,
+                                            uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData hearingDetails) {
         if (hearingDetails.getFirstDateOfTheHearing() == null) {
             setEmptyFutureHearingPlaceholders(data);
             return;
@@ -615,28 +688,83 @@ public class CustomOrderService {
         String date = hearingDetails.getFirstDateOfTheHearing().format(DATE_FORMATTER);
         data.put("futureHearingDate", date);
 
-        // Future hearing time
         String hour = hearingDetails.getHearingMustTakePlaceAtHour();
         String minute = hearingDetails.getHearingMustTakePlaceAtMinute();
-        String time = "";
-        if (hour != null && !hour.isEmpty()) {
-            time = hour + ":" + (minute != null && !minute.isEmpty() ? minute : "00");
-        }
+        String time = formatHearingTime(hour, minute);
         data.put("futureHearingTime", time);
 
-        // Future hearing type
         String hearingType = "";
         if (hearingDetails.getHearingTypes() != null && hearingDetails.getHearingTypes().getValue() != null) {
             hearingType = hearingDetails.getHearingTypes().getValue().getLabel();
         }
         data.put("futureHearingType", hearingType);
 
-        // Build the full clause - only populated if there's a future hearing
         String clause = buildFutureHearingClause(date, time, hearingType);
         data.put("futureHearingClause", clause);
 
-        log.info("Future hearing placeholders - date={}, time={}, type={}, clause={}",
-            date, time, hearingType, clause);
+        log.info("Future hearing placeholders from caseData - date={}, time={}, type={}", date, time, hearingType);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void populateFromHearingDetailsMap(Map<String, Object> data, Map<String, Object> hearingMap) {
+        String date = parseDateFromHearingMap(hearingMap.get("firstDateOfTheHearing"));
+
+        if (date.isEmpty()) {
+            setEmptyFutureHearingPlaceholders(data);
+            return;
+        }
+
+        data.put("futureHearingDate", date);
+
+        String hour = getStringOrEmpty(hearingMap.get("hearingMustTakePlaceAtHour"));
+        String minute = getStringOrEmpty(hearingMap.get("hearingMustTakePlaceAtMinute"));
+        String time = formatHearingTime(hour, minute);
+        data.put("futureHearingTime", time);
+
+        String hearingType = extractHearingTypeLabel(hearingMap.get("hearingTypes"));
+        data.put("futureHearingType", hearingType);
+
+        String clause = buildFutureHearingClause(date, time, hearingType);
+        data.put("futureHearingClause", clause);
+
+        log.info("Future hearing placeholders from caseDataMap - date={}, time={}, type={}", date, time, hearingType);
+    }
+
+    private String parseDateFromHearingMap(Object dateObj) {
+        if (dateObj instanceof String dateStr) {
+            try {
+                return LocalDate.parse(dateStr).format(DATE_FORMATTER);
+            } catch (Exception e) {
+                return dateStr;
+            }
+        } else if (dateObj instanceof LocalDate localDate) {
+            return localDate.format(DATE_FORMATTER);
+        }
+        return "";
+    }
+
+    private String getStringOrEmpty(Object obj) {
+        return obj != null ? obj.toString() : "";
+    }
+
+    @SuppressWarnings("unchecked")
+    private String extractHearingTypeLabel(Object hearingTypesObj) {
+        if (!(hearingTypesObj instanceof Map<?, ?> hearingTypesMap)) {
+            return "";
+        }
+        Object valueObj = hearingTypesMap.get("value");
+        if (!(valueObj instanceof Map<?, ?> valueMap)) {
+            return "";
+        }
+        Object label = valueMap.get("label");
+        return label != null ? label.toString() : "";
+    }
+
+    private String formatHearingTime(String hour, String minute) {
+        if (hour != null && !hour.isEmpty()) {
+            return hour + ":" + (minute != null && !minute.isEmpty() ? minute : "00");
+        }
+        return "";
     }
 
     private void setEmptyFutureHearingPlaceholders(Map<String, Object> data) {
@@ -972,6 +1100,66 @@ public class CustomOrderService {
         } else {
             data.put("childrenAsRespondentsClause", "");
         }
+    }
+
+    /**
+     * Populates appointed guardian placeholders for special guardianship custom orders.
+     * Reads from customAppointedGuardianName in caseDataMap (the custom field on Page 5).
+     * Provides both names list and a formatted clause for the header.
+     */
+    private void populateAppointedGuardianPlaceholders(Map<String, Object> data, CaseData caseData, Map<String, Object> caseDataMap) {
+        List<String> guardianNames = extractGuardianNames(caseDataMap);
+        String appointedGuardianNamesStr = String.join(", ", guardianNames);
+        data.put("appointedGuardianNames", appointedGuardianNamesStr);
+        data.put("appointedGuardianClause", buildGuardianClause(guardianNames, appointedGuardianNamesStr));
+        log.debug("Appointed guardian names: '{}', clause: '{}'", appointedGuardianNamesStr, data.get("appointedGuardianClause"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> extractGuardianNames(Map<String, Object> caseDataMap) {
+        List<String> guardianNames = new ArrayList<>();
+        if (caseDataMap == null || caseDataMap.get("customAppointedGuardianName") == null) {
+            return guardianNames;
+        }
+        try {
+            Object customGuardianObj = caseDataMap.get("customAppointedGuardianName");
+            if (customGuardianObj instanceof List<?> guardianList && !guardianList.isEmpty()) {
+                for (Object element : guardianList) {
+                    String name = extractGuardianNameFromElement(element);
+                    if (name != null) {
+                        guardianNames.add(name);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not extract customAppointedGuardianName from caseDataMap: {}", e.getMessage());
+        }
+        return guardianNames;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String extractGuardianNameFromElement(Object element) {
+        if (!(element instanceof Map<?, ?> guardianElement)) {
+            return null;
+        }
+        Object valueObj = guardianElement.get("value");
+        if (!(valueObj instanceof Map<?, ?> valueMap)) {
+            return null;
+        }
+        Object nameObj = valueMap.get("guardianFullName");
+        if (nameObj != null && !nameObj.toString().trim().isEmpty()) {
+            return nameObj.toString().trim();
+        }
+        return null;
+    }
+
+    private String buildGuardianClause(List<String> guardianNames, String namesStr) {
+        if (guardianNames.isEmpty()) {
+            return "";
+        }
+        return guardianNames.size() == 1
+            ? "The appointed guardian is " + namesStr
+            : "The appointed guardians are " + namesStr;
     }
 
     /**

@@ -2517,12 +2517,94 @@ public class ManageOrderService {
             }
         }
 
+        log.info("getLoggedInUserType returning: '{}' for user: {}", loggedInUserType, userDetails.getEmail());
         return loggedInUserType;
     }
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
             caseDataUpdated.remove(field.getValue());
+        }
+    }
+
+    /**
+     * Syncs custom order field values to their pre-existing equivalents for Check Your Answers display.
+     * Also clears sub-selections for non-selected order types.
+     */
+    @SuppressWarnings("unchecked")
+    public void syncCustomOrderFieldsToPreExisting(Map<String, Object> caseDataUpdated) {
+        Object customOrderNameOptionObj = caseDataUpdated.get("customOrderNameOption");
+        String customOrderNameOption = customOrderNameOptionObj != null ? customOrderNameOptionObj.toString() : null;
+
+        // Clear all custom sub-selections first, then populate only the relevant ones
+        clearCustomOrderSubSelections(caseDataUpdated);
+
+        if (customOrderNameOption == null) {
+            return;
+        }
+
+        switch (customOrderNameOption) {
+            case "childArrangementsSpecificProhibitedOrder":
+                // C43 - Copy from customC43OrderDetails ComplexType to pre-existing fields
+                syncC43Fields(caseDataUpdated);
+                break;
+            case "specialGuardianShip":
+                // C43A - Copy from customAppointedGuardianName to pre-existing field
+                syncC43AFields(caseDataUpdated);
+                break;
+            case "blankOrderOrDirections":
+                // C21 - Copy from customC21OrderOptions to pre-existing field
+                syncC21Fields(caseDataUpdated);
+                break;
+            default:
+                // No sub-selections to copy for other order types
+                break;
+        }
+    }
+
+    private void clearCustomOrderSubSelections(Map<String, Object> caseDataUpdated) {
+        // Clear C43 pre-existing fields
+        caseDataUpdated.remove("childArrangementsOrdersToIssue");
+        caseDataUpdated.remove("selectChildArrangementsOrder");
+        // Clear C43A pre-existing field
+        caseDataUpdated.remove("appointedGuardianName");
+        // Clear C21 pre-existing field
+        caseDataUpdated.remove("c21OrderOptions");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void syncC43Fields(Map<String, Object> caseDataUpdated) {
+        Object customC43Details = caseDataUpdated.get("customC43OrderDetails");
+        if (customC43Details instanceof Map) {
+            Map<String, Object> c43Map = (Map<String, Object>) customC43Details;
+            Object ordersToIssue = c43Map.get("ordersToIssue");
+            Object childArrangementsOrderType = c43Map.get("childArrangementsOrderType");
+
+            if (ordersToIssue != null) {
+                caseDataUpdated.put("childArrangementsOrdersToIssue", ordersToIssue);
+            }
+            if (childArrangementsOrderType != null) {
+                caseDataUpdated.put("selectChildArrangementsOrder", childArrangementsOrderType);
+            }
+        }
+    }
+
+    private void syncC43AFields(Map<String, Object> caseDataUpdated) {
+        Object customGuardianName = caseDataUpdated.get("customAppointedGuardianName");
+        if (customGuardianName != null) {
+            caseDataUpdated.put("appointedGuardianName", customGuardianName);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void syncC21Fields(Map<String, Object> caseDataUpdated) {
+        Object customC21Details = caseDataUpdated.get("customC21OrderDetails");
+        if (customC21Details instanceof Map) {
+            Map<String, Object> c21Map = (Map<String, Object>) customC21Details;
+            Object orderOptions = c21Map.get("orderOptions");
+            if (orderOptions != null) {
+                caseDataUpdated.put("c21OrderOptions", orderOptions);
+            }
         }
     }
 

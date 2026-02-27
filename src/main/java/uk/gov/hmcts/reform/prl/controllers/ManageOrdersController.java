@@ -140,6 +140,8 @@ public class ManageOrdersController {
                 // Set loggedInUserType for field show conditions
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
                 caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
+                // Copy custom order sub-selections to pre-existing fields and clear irrelevant ones
+                manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 

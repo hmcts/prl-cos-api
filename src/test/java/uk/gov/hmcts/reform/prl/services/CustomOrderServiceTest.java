@@ -1757,4 +1757,161 @@ public class CustomOrderServiceTest {
         // Assert - should skip processing (no download attempts)
         verify(documentGenService, never()).getDocumentBytes(any(), any(), any());
     }
+
+    // ========== Tests for APPOINTED GUARDIAN PLACEHOLDERS ==========
+
+    @Test
+    public void testBuildHeaderPlaceholders_appointedGuardianSingleName() throws IOException {
+        // Arrange
+        final Long caseId = 1234567890123456L;
+        final CaseData caseData = CaseData.builder().build();
+
+        // Build customAppointedGuardianName as raw map (simulating what comes from Page 5)
+        Map<String, Object> guardianValue = new HashMap<>();
+        guardianValue.put("guardianFullName", "John Guardian");
+
+        Map<String, Object> guardianElement = new HashMap<>();
+        guardianElement.put("value", guardianValue);
+
+        List<Map<String, Object>> guardianList = new ArrayList<>();
+        guardianList.add(guardianElement);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customAppointedGuardianName", guardianList);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("John Guardian", placeholders.get("appointedGuardianNames"));
+        assertEquals("The appointed guardian is John Guardian", placeholders.get("appointedGuardianClause"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_appointedGuardianMultipleNames() throws IOException {
+        // Arrange
+        final Long caseId = 1234567890123456L;
+        final CaseData caseData = CaseData.builder().build();
+
+        // Build customAppointedGuardianName with multiple names
+        Map<String, Object> guardianValue1 = new HashMap<>();
+        guardianValue1.put("guardianFullName", "John Guardian");
+        Map<String, Object> guardianElement1 = new HashMap<>();
+        guardianElement1.put("value", guardianValue1);
+
+        Map<String, Object> guardianValue2 = new HashMap<>();
+        guardianValue2.put("guardianFullName", "Jane Guardian");
+        Map<String, Object> guardianElement2 = new HashMap<>();
+        guardianElement2.put("value", guardianValue2);
+
+        List<Map<String, Object>> guardianList = new ArrayList<>();
+        guardianList.add(guardianElement1);
+        guardianList.add(guardianElement2);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customAppointedGuardianName", guardianList);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("John Guardian, Jane Guardian", placeholders.get("appointedGuardianNames"));
+        assertEquals("The appointed guardians are John Guardian, Jane Guardian", placeholders.get("appointedGuardianClause"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_appointedGuardianEmpty() throws IOException {
+        // Arrange
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("appointedGuardianNames"));
+        assertEquals("", placeholders.get("appointedGuardianClause"));
+    }
+
+    // ========== Tests for FUTURE HEARING PLACEHOLDERS from caseDataMap ==========
+
+    @Test
+    public void testBuildHeaderPlaceholders_futureHearingFromCaseDataMap() throws IOException {
+        // Arrange - hearing data in caseDataMap, not in caseData
+        final Long caseId = 1234567890123456L;
+
+        final CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build()) // No hearing details in caseData
+            .build();
+
+        // Build hearing details as raw map (simulating what comes from Page 19)
+        Map<String, Object> hearingValue = new HashMap<>();
+        hearingValue.put("firstDateOfTheHearing", "2025-03-15");
+        hearingValue.put("hearingMustTakePlaceAtHour", "10");
+        hearingValue.put("hearingMustTakePlaceAtMinute", "30");
+
+        Map<String, Object> hearingTypeValue = new HashMap<>();
+        hearingTypeValue.put("label", "Final Hearing");
+        Map<String, Object> hearingTypes = new HashMap<>();
+        hearingTypes.put("value", hearingTypeValue);
+        hearingValue.put("hearingTypes", hearingTypes);
+
+        Map<String, Object> hearingElement = new HashMap<>();
+        hearingElement.put("value", hearingValue);
+
+        List<Map<String, Object>> hearingList = new ArrayList<>();
+        hearingList.add(hearingElement);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("ordersHearingDetails", hearingList);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("15 March 2025", placeholders.get("futureHearingDate"));
+        assertEquals("10:30", placeholders.get("futureHearingTime"));
+        assertEquals("Final Hearing", placeholders.get("futureHearingType"));
+        assertEquals("The next hearing is scheduled for 15 March 2025 at 10:30 (Final Hearing)",
+            placeholders.get("futureHearingClause"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_futureHearingEmptyWhenNoData() throws IOException {
+        // Arrange - no hearing data anywhere
+        Long caseId = 1234567890123456L;
+
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("futureHearingDate"));
+        assertEquals("", placeholders.get("futureHearingTime"));
+        assertEquals("", placeholders.get("futureHearingType"));
+        assertEquals("", placeholders.get("futureHearingClause"));
+    }
 }
