@@ -13,10 +13,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RespondentWelshNeedsListEnum {
     @JsonProperty("speakWelsh")
-    speakWelsh("Will need to speak Welsh"),
+    speakWelsh("Will want to speak Welsh"),
 
     @JsonProperty("readAndWriteWelsh")
-    readAndWriteWelsh("Will need to read and write in Welsh");
+    readAndWriteWelsh("Will want to read and write in Welsh");
 
     private final String displayedValue;
 
