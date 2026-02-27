@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitors;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,7 @@ class LocalAuthorityControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    private RemoveLocalAuthoritySolicitors removeLocalAuthoritySolicitors;
+    private RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     private CaseData buildCaseDataWithOrgPolicy(String orgId) {
         return CaseData.builder()
@@ -112,7 +112,7 @@ class LocalAuthorityControllerTest {
         // Verify authorisation check and mapping were used
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
         verify(objectMapper, times(1)).convertValue(inputData, CaseData.class);
-        verifyNoInteractions(removeLocalAuthoritySolicitors);
+        verifyNoInteractions(removeLocalAuthoritySolicitorService);
     }
 
     @Test
@@ -132,7 +132,7 @@ class LocalAuthorityControllerTest {
         );
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
-        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitors);
+        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitorService);
     }
 
     @Test
@@ -172,8 +172,8 @@ class LocalAuthorityControllerTest {
         );
 
         ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
-        verify(removeLocalAuthoritySolicitors, times(1))
-            .removeLocalAuthoritySolicitors(caseDataCaptor.capture());
+        verify(removeLocalAuthoritySolicitorService, times(1))
+            .removeLocalAuthoritySolicitor(caseDataCaptor.capture());
 
         CaseData passedToService = caseDataCaptor.getValue();
         assertNotNull(passedToService, "CaseData passed to service should not be null");
@@ -200,6 +200,6 @@ class LocalAuthorityControllerTest {
         );
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
-        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitors);
+        verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitorService);
     }
 }

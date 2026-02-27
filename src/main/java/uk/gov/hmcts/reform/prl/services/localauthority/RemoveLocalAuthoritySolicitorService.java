@@ -20,19 +20,19 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RemoveLocalAuthoritySolicitors {
+public class RemoveLocalAuthoritySolicitorService {
 
-    public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
     private final CaseAssignmentApi caseAssignmentApi;
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
     private final RoleAssignmentService roleAssignmentService;
 
-    public void removeLocalAuthoritySolicitors(CaseData caseData) {
+    public void removeLocalAuthoritySolicitor(CaseData caseData) {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
             .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
 
@@ -43,13 +43,13 @@ public class RemoveLocalAuthoritySolicitors {
 
         if (!solicitors.isEmpty()) {
             log.info("Removing local authority solicitors {} for case id {}", solicitors, caseData.getId());
-            removeAmBarristerCaseRole(caseData, solicitors);
+            removeAmSolicitorCaseRole(caseData, solicitors);
         } else {
             log.info("No roles to remove for local authority solicitors for case id {}", caseData.getId());
         }
     }
 
-    private void removeAmBarristerCaseRole(CaseData caseData, Set<String> userIds) {
+    private void removeAmSolicitorCaseRole(CaseData caseData, Set<String> userIds) {
         try {
             log.info(
                 "On case id {}, about to start remove case access {} for users {}",
@@ -59,7 +59,6 @@ public class RemoveLocalAuthoritySolicitors {
             );
             CaseAssignmentUserRolesRequest removeCaseAssignedUserRolesRequest = buildCaseAssignedUserRequest(
                 caseData.getId(),
-                LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE,
                 caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation().getOrganisationID(),
                 userIds
             );
@@ -83,7 +82,6 @@ public class RemoveLocalAuthoritySolicitors {
 
 
     private CaseAssignmentUserRolesRequest buildCaseAssignedUserRequest(Long caseId,
-                                                                        String caseRole,
                                                                         String orgId,
                                                                         Set<String> users) {
         return users.stream()
@@ -91,7 +89,7 @@ public class RemoveLocalAuthoritySolicitors {
                 .caseDataId(caseId.toString())
                 .organisationId(orgId)
                 .userId(user)
-                .caseRole(caseRole)
+                .caseRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE)
                 .build())
             .collect(collectingAndThen(
                 toList(),
