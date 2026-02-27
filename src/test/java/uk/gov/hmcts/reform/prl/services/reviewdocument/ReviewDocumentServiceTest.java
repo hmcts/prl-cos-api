@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -61,11 +62,14 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabsService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -1849,5 +1853,37 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verifyNoInteractions(manageDocumentsService);
+    }
+
+    @Test
+    public void testThrowBadRequestWhenCategoryIdIsNull() {
+        QuarantineLegalDoc document = QuarantineLegalDoc.builder()
+            .categoryId(null)
+            .categoryName("Confidential")
+            .applicantApplicationDocument(Document.builder()
+                                              .documentFileName("test.pdf")
+                                              .documentUrl("http://test.link")
+                                              .build())
+            .build();
+
+        Element<QuarantineLegalDoc> badElement = element(UUID.randomUUID(), document);
+
+        CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(List.of(badElement))
+                                 .build())
+            .build();
+
+        CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(Collections.emptyList())
+                                 .build())
+            .build();
+
+        MissingCaseDataFieldException exception = assertThrows(MissingCaseDataFieldException.class, () -> {
+            reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
+        });
+
+        assertEquals("CategoryId cannot be null or empty", exception.getMessage());
     }
 }
