@@ -126,6 +126,9 @@ public class DocumentUtils {
             loggedInUserType = COURT_STAFF;
         } else if (roles.contains(Roles.SOLICITOR.getValue())) {
             loggedInUserType = LEGAL_PROFESSIONAL;
+            if (roles.contains(LOCAL_AUTHORITY)) {
+                loggedInUserType = LOCAL_AUTHORITY;
+            }
         } else if (roles.contains(Roles.CITIZEN.getValue())) {
             loggedInUserType = CITIZEN;
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
