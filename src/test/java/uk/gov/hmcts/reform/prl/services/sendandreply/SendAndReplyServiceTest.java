@@ -85,7 +85,6 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendAndReplyDynamicDoc;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
-import uk.gov.hmcts.reform.prl.models.wa.*;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -105,15 +104,21 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
@@ -299,7 +304,6 @@ public class SendAndReplyServiceTest {
             .messageHistory("")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
-            .messageIdentifier(UUID.randomUUID().toString())
             .build();
         message2 = Message.builder()
             .senderEmail("sender@email.com")
@@ -314,7 +318,6 @@ public class SendAndReplyServiceTest {
             .messageHistory("Message 2 message history")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.LEGAL_ADVISER)
             .internalMessageUrgent(YesOrNo.Yes)
-            .messageIdentifier(UUID.randomUUID().toString())
             .build();
         message3 = Message.builder()
             .senderEmail("sender@email.com")
@@ -329,7 +332,6 @@ public class SendAndReplyServiceTest {
             .messageHistory("Message 3 message history")
             .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
             .internalMessageUrgent(YesOrNo.Yes)
-            .messageIdentifier(UUID.randomUUID().toString())
             .build();
 
         messageHistoryList = new ArrayList<>();
@@ -1728,19 +1730,19 @@ public class SendAndReplyServiceTest {
         CallbackRequest request = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         String context = """
-        {
-          "client_context": {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
+            {
+              "client_context": {
+                "user_task": {
+                  "task_data": {
+                    "additional_properties": {
+                    }
+                  },
+                  "complete_task" : true
                 }
-              },
-              "complete_task" : true
+              }
             }
-          }
-        }
-        """;
+            """;
+
         String clientContext = new String(Base64.getEncoder().encode(context.getBytes()));
 
         Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(request, auth, clientContext);
