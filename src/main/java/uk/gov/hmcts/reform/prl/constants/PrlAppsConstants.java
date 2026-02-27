@@ -87,6 +87,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
+    public  static final String LOCAL_AUTHORITY = "LOCAL_AUTHORITY";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 

@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
@@ -62,6 +63,7 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_QUARANTINE_DOCS_LIST = "courtStaffQuarantineDocsList";
     public static final String CITIZEN_QUARANTINE_DOCS_LIST = "citizenQuarantineDocsList";
     public static final String COURTNAV_QUARANTINE_DOCUMENT_LIST = "courtNavQuarantineDocumentList";
+    public static final String LOCAL_AUTHORITY_QUARANTINE_DOCS_LIST = "localAuthorityQuarantineDocsList";
 
     private final AllTabServiceImpl allTabService;
     private final ManageDocumentsService manageDocumentsService;
@@ -148,6 +150,21 @@ public class ReviewDocumentService {
         //Cafcass
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList().stream()
+                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                   element.getValue().getUploaderRole(),
+                                                   element.getValue()
+                                               ).getDocumentFileName()
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
+                                               .build())
+                                           .toList());
+        }
+        //Local Authority
+        if (isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())) {
+            dynamicListElements.addAll(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(manageDocumentsService.getQuarantineDocumentForUploader(
                                                    element.getValue().getUploaderRole(),
@@ -253,6 +270,9 @@ public class ReviewDocumentService {
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList());
         }
+        if (isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())) {
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList());
+        }
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())) {
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList());
         }
@@ -332,6 +352,15 @@ public class ReviewDocumentService {
                                                         caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
                                                         uuid, UserDetails.builder().roles(List.of(CAFCASS)).build(),
                                                         CAFCASS, CAFCASS_QUARANTINE_DOCS_LIST
+                );
+
+            }
+            //LA uploaded docs
+            if (!isDocumentFound && null != caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList()) {
+                isDocumentFound = processReviewDocument(caseData, caseDataUpdated,
+                                                        caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList(),
+                                                        uuid, UserDetails.builder().roles(List.of(LOCAL_AUTHORITY)).build(),
+                                                        LOCAL_AUTHORITY, LOCAL_AUTHORITY_QUARANTINE_DOCS_LIST
                 );
 
             }
@@ -506,6 +535,7 @@ public class ReviewDocumentService {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
+            && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             && CollectionUtils.isEmpty(caseData.getScannedDocuments())) {
