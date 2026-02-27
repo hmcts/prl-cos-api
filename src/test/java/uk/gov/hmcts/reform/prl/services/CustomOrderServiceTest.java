@@ -1886,10 +1886,10 @@ public class CustomOrderServiceTest {
 
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("15 March 2025", placeholders.get("futureHearingDate"));
+        assertEquals("15/03/2025", placeholders.get("futureHearingDate"));
         assertEquals("10:30", placeholders.get("futureHearingTime"));
         assertEquals("Final Hearing", placeholders.get("futureHearingType"));
-        assertEquals("The next hearing is scheduled for 15 March 2025 at 10:30 (Final Hearing)",
+        assertEquals("The next hearing is scheduled for 15/03/2025 at 10:30 (Final Hearing)",
             placeholders.get("futureHearingClause"));
     }
 
