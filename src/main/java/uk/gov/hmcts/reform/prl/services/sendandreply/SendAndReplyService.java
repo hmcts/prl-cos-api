@@ -169,6 +169,7 @@ public class SendAndReplyService {
 
     public static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
     public static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
+    private static final String MESSAGE_OBJECT = "messageObject";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -1124,7 +1125,7 @@ public class SendAndReplyService {
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(authorisation))
             .build();
-        data.put("messageObject", messageMetaData);
+        data.put(MESSAGE_OBJECT, messageMetaData);
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
@@ -1139,7 +1140,7 @@ public class SendAndReplyService {
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(authorisation))
             .build();
-        data.put("messageObject", messageMetaData);
+        data.put(MESSAGE_OBJECT, messageMetaData);
 
         String messageIdentifier = getMessageIdentifierAssociatedWithTask(clientContext);
 
