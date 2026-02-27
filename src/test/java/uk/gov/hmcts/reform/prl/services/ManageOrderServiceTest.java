@@ -4941,6 +4941,11 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings("testAuth", "12345678")).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(eq("testAuth"), eq("12345678"), any(), any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingDates(DynamicList.builder().build())
+                .build());
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
