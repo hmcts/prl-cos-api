@@ -1725,7 +1725,9 @@ public class ServiceOfApplicationService {
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(CaseUtils.getCurrentDate())
-            .personalServiceBy(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().toString())
+            .personalServiceBy(Optional.ofNullable(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                                   .map(SoaCitizenServingRespondentsEnum::getId)
+                                   .orElse("Not Applicable"))
             .coverLettersMap(coverLetters)
             .build();
     }
@@ -3339,8 +3341,14 @@ public class ServiceOfApplicationService {
             || SoaCitizenServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
             caseDataUpdated.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, null);
-            generateUnServedPacksForCourtAdminBailiff(authorization, caseDataUpdated, caseData, c100StaticDocs, true,
-                                                      caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions().toString());
+            generateUnServedPacksForCourtAdminBailiff(authorization,
+                                                      caseDataUpdated,
+                                                      caseData,
+                                                      c100StaticDocs,
+                                                      true,
+                                                      Optional.ofNullable(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
+                                                          .map(SoaCitizenServingRespondentsEnum::getId)
+                                                          .orElse("Not Applicable"));
         }
     }
 
