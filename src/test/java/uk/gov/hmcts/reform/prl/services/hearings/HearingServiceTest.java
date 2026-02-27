@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -401,6 +403,83 @@ public class HearingServiceTest {
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNull(automatedHearingsResponse);
 
+    }
+
+    @Test
+    public void shouldFilterCasesWithHearingsStartingOnDate() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        List<CaseDetails> caseDetails = List.of(CaseDetails.builder().id(123L).build(),
+                                                CaseDetails.builder().id(456L).build()
+        );
+        LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5);
+
+        Hearings hearingsResponse123 = Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                                              .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+                                                              .build()))
+                                      .build()))
+            .build();
+        Hearings hearingsResponse456 = Hearings.hearingsWith()
+            .caseRef("456")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                                              .hearingStartDateTime(LocalDateTime.now().plusDays(10))
+                                                              .build()))
+                                      .build()))
+            .build();
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            any(),
+            any(),
+            any()
+        )).thenReturn(List.of(hearingsResponse123, hearingsResponse456));
+
+        List<CaseDetails> filteredCases = hearingService.filterCasesWithHearingsStartingOnDate(caseDetails, auth, hearingStartDate.toLocalDate());
+        assertEquals(123L, filteredCases.getFirst().getId());
+        assertEquals(1, filteredCases.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoCasesGiven() {
+        List<CaseDetails> filteredCases = hearingService.filterCasesWithHearingsStartingOnDate(null, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCases);
+    }
+
+    @Test
+    public void shouldIgnoreEmptyHearings() {
+        List<CaseDetails> cases = List.of(CaseDetails.builder().id(123L).build());
+        Hearings hearingsResponse = Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(null)
+            .build();
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            any(),
+            any(),
+            any()
+        )).thenReturn(List.of(hearingsResponse));
+
+        List<CaseDetails> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(cases, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCaseIds);
+    }
+
+    @Test
+    public void shouldIgnoreEmptyHearingSchedules() {
+        List<CaseDetails> cases = List.of(CaseDetails.builder().id(123L).build());
+        Hearings hearingsResponse = Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingDaySchedule(null)
+                                      .build()))
+            .build();
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            any(),
+            any(),
+            any()
+        )).thenReturn(List.of(hearingsResponse));
+
+        List<CaseDetails> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(cases, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCaseIds);
     }
 }
 

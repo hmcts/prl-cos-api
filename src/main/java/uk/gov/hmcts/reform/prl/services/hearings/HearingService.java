@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
@@ -20,13 +24,18 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -232,5 +241,60 @@ public class HearingService {
         }
         return null;
     }
+
+    @Retryable(retryFor = {
+        FeignException.GatewayTimeout.class,
+        FeignException.BadGateway.class,
+        FeignException.InternalServerError.class},
+        backoff = @Backoff (delay = 500, multiplier = 2, maxDelay = 2000))
+    public List<CaseDetails> filterCasesWithHearingsStartingOnDate(List<CaseDetails> cases, String userToken, LocalDate dateToCheck) {
+        List<CaseDetails> filteredCases = new ArrayList<>();
+        if (cases == null || cases.isEmpty()) {
+            return List.of();
+        }
+        int batchSize = 25;
+
+        for (int i = 0; i < cases.size(); i += batchSize) {
+            List<String> batch = cases.subList(i, Math.min(i + batchSize, cases.size()))
+                .stream().map(String::valueOf).toList();
+            List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(userToken, authTokenGenerator.generate(), batch);
+            for (Hearings hearing : hearingsList) {
+                Long caseId = Long.parseLong(hearing.getCaseRef());
+                CaseDetails caseDetail = cases.stream().filter(cd -> cd.getId().equals(caseId)).findFirst().orElse(null);
+                if (isNotEmpty(hearing.getCaseHearings()) && hasHearingStartingOnDate(hearing, dateToCheck)) {
+                    filteredCases.add(caseDetail);
+                }
+            }
+        }
+        return filteredCases;
+    }
+
+    @Recover
+    public List<CaseDetails> recoverFromFilterCasesFailure(FeignException ex, List<CaseDetails> caseIds, String userToken, LocalDate dateToCheck) {
+        log.error("Failed to filter cases with hearings starting on date {} after retries", dateToCheck, ex);
+        return Collections.emptyList();
+    }
+
+    private boolean hasHearingStartingOnDate(Hearings hearing, LocalDate dateToCheck) {
+        if (isEmpty(hearing) || isEmpty(hearing.getCaseHearings())) {
+            return false;
+        }
+        return hearing.getCaseHearings().stream().anyMatch(ch -> {
+            if (isEmpty(ch.getHearingDaySchedule())) {
+                return false;
+            }
+            return ch.getHearingDaySchedule().stream()
+                // Get the earliest day of the hearing
+                .map(HearingDaySchedule::getHearingStartDateTime)
+                .filter(Objects::nonNull)
+                .map(LocalDateTime::toLocalDate)
+                .min(LocalDate::compareTo)
+                // and check if it's 5 working days from now
+                .map(dateToCheck::equals)
+                .orElse(false);
+        });
+    }
+
+
 
 }

@@ -816,3 +816,6 @@ acro:
 hwf-update-case-state-task:
   last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}
 
+prepare-hearing-bundle:
+  calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
+
