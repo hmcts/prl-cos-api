@@ -250,7 +250,7 @@ public class HearingService {
     public List<CaseDetails> filterCasesWithHearingsStartingOnDate(List<CaseDetails> cases, String userToken, LocalDate dateToCheck) {
         List<CaseDetails> filteredCases = new ArrayList<>();
         if (cases == null || cases.isEmpty()) {
-            return cases;
+            return List.of();
         }
         int batchSize = 25;
 
