@@ -3609,7 +3609,10 @@ public class ManageOrderService {
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
+        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+        HearingDataPrePopulatedDynamicLists hearingLists = hearingDataService.populateHearingDynamicLists(
+            authorisation, String.valueOf(caseData.getId()), caseData, hearings);
+        caseDataUpdated.put(HEARINGS_TYPE, hearingLists.getRetrievedHearingDates());
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
