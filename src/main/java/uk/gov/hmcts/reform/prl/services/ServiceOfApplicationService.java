@@ -1362,10 +1362,9 @@ public class ServiceOfApplicationService {
                                                      List<Document> c100StaticDocs,
                                                      Map<String, Object> caseDataMap) {
         String whoIsResponsibleForServing;
-        //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
-        log.info("Service of application, unrepresented applicant/citizen case");
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+            log.info("Service of application, unrepresented applicant/citizen case");
             whoIsResponsibleForServing = UNREPRESENTED_APPLICANT;
             List<Document> respondentCoverLetters = new ArrayList<>();
             List<Element<CoverLetterMap>> coverLetterMap = new ArrayList<>();
@@ -1720,6 +1719,7 @@ public class ServiceOfApplicationService {
                                                                           PRL_LET_ENG_C100_RE5, PrlAppsConstants.K, c100StaticDocs,
                                                                           coverLetters
         );
+        log.info("Generating respondentsPack for case {}", caseData.getId());
         return SoaPack.builder()
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
