@@ -92,6 +92,14 @@ public class CustomOrderService {
         return DEFAULT_ORDER_NAME;
     }
 
+    /**
+     * Overload for backwards compatibility when map is not available.
+     * Falls back to nameOfOrder text field only.
+     */
+    public String getEffectiveOrderName(CaseData caseData) {
+        return getEffectiveOrderName(caseData, null);
+    }
+
     private CustomOrderNameOptionsEnum parseCustomOrderNameOption(Map<String, Object> caseDataMap) {
         Object rawOption = caseDataMap != null ? caseDataMap.get("customOrderNameOption") : null;
         if (rawOption == null) {
@@ -150,14 +158,6 @@ public class CustomOrderService {
             }
         }
         return null;
-    }
-
-    /**
-     * Overload for backwards compatibility when map is not available.
-     * Falls back to nameOfOrder text field only.
-     */
-    public String getEffectiveOrderName(CaseData caseData) {
-        return getEffectiveOrderName(caseData, null);
     }
 
     private final ObjectMapper objectMapper;
