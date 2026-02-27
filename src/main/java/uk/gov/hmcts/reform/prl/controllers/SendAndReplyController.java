@@ -40,6 +40,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
@@ -202,15 +203,15 @@ public class SendAndReplyController extends AbstractCallbackController {
 
     @PostMapping("/send-or-reply-to-messages/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStart(@RequestHeader("Authorization")
-                                                                                @Parameter(hidden = true) String authorisation,
-                                                                                @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+                     @Parameter(hidden = true) String authorisation,
+                     @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+                     @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToStart());
 
-        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation));
+        caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(callbackRequest, authorisation, clientContext));
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
