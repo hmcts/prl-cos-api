@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CaseAssignmentService;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -105,69 +104,69 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class NoticeOfChangePartiesServiceTest {
     @InjectMocks
-    NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private NoticeOfChangePartiesService noticeOfChangePartiesService;
 
-    CaseData caseData;
+    private CaseData caseData;
 
-    CaseData caseDataForDa;
-    SolicitorRole role;
+    private CaseData caseDataForDa;
+    private SolicitorRole role;
 
-    SolicitorRole roleForDa;
-
-    @Mock
-    RespondentPolicyConverter policyConverter;
+    private SolicitorRole roleForDa;
 
     @Mock
-    NoticeOfChangePartiesConverter partiesConverter;
-
-    Optional<Element<PartyDetails>> optionalParty;
-
-    PartyDetails daParty;
-
-    PartyDetails partyDetails;
-
-    PartyDetails partyDetailsNoRep;
-
-    Element<PartyDetails> wrappedRespondents;
-
-    NoticeOfChangeParties noticeOfChangeParties = NoticeOfChangeParties.builder().build();
-
-    OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().build();
-    @Mock
-    AssignCaseAccessClient assignCaseAccessClient;
-    @Mock
-    AuthTokenGenerator tokenGenerator;
+    private RespondentPolicyConverter policyConverter;
 
     @Mock
-    DynamicMultiSelectListService dynamicMultiSelectListService;
-    @Mock
-    ObjectMapper objectMapper;
+    private NoticeOfChangePartiesConverter partiesConverter;
 
-    ObjectMapper realObjectMapper;
+    private Optional<Element<PartyDetails>> optionalParty;
 
+    private PartyDetails daParty;
+
+    private PartyDetails partyDetails;
+
+    private PartyDetails partyDetailsNoRep;
+
+    private Element<PartyDetails> wrappedRespondents;
+
+    private NoticeOfChangeParties noticeOfChangeParties = NoticeOfChangeParties.builder().build();
+
+    private OrganisationPolicy organisationPolicy = OrganisationPolicy.builder().build();
     @Mock
-    AllTabServiceImpl tabService;
+    private AssignCaseAccessClient assignCaseAccessClient;
     @Mock
-    UserService userService;
-    @Mock
-    EventService eventPublisher;
-    @Mock
-    CcdDataStoreService ccdDataStoreService;
-    @Mock
-    SystemUserService systemUserService;
-    @Mock
-    CaseInviteManager caseInviteManager;
-    @Mock
-    CcdCoreCaseDataService ccdCoreCaseDataService;
-    @Mock
-    OrganisationService organisationService;
+    private AuthTokenGenerator tokenGenerator;
 
     @Mock
-    CaseEventService caseEventService;
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    @Mock
+    private ObjectMapper objectMapper;
+
+    private ObjectMapper realObjectMapper;
+
+    @Mock
+    private AllTabServiceImpl tabService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private EventService eventPublisher;
+    @Mock
+    private CcdDataStoreService ccdDataStoreService;
+    @Mock
+    private SystemUserService systemUserService;
+    @Mock
+    private CaseInviteManager caseInviteManager;
+    @Mock
+    private CcdCoreCaseDataService ccdCoreCaseDataService;
+    @Mock
+    private OrganisationService organisationService;
+
+    @Mock
+    private CaseEventService caseEventService;
     @Mock
     private Time time;
     @Mock
-    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     @Mock
     private CaseAssignmentService caseAssignmentService;
     @Mock
@@ -640,7 +639,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .respondentsFL401(partyDetails)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -717,7 +716,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .changeOrganisationRequestField(ChangeOrganisationRequest.builder()
                                                 .createdBy("test_solicitor@mailinator.com")
@@ -972,7 +971,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1021,7 +1020,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .respondentsFL401(partyDetails)
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1110,6 +1109,168 @@ public class NoticeOfChangePartiesServiceTest {
             .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
         assertNotNull(caseDataUpdated);
     }
+
+
+    @Test
+    public void testPopulateAboutToStartStopRepresentationDaApplicant_NullPointerException_Scenario() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[APPLICANTSOLICITOR]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(applicant))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicants(applicant)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+
+    @Test
+    public void testPopulateAboutToStartStopRepresentationDaApplicant() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[APPLICANTSOLICITOR]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(applicant))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
+    @Test
+    public void testPopulateAboutToStartStopRepresentationDaRespondent() {
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetails.getPartyId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        List<Element<PartyDetails>> applicant = new ArrayList<>();
+        Element partyDetailsElement = element(partyDetails);
+        applicant.add(partyDetailsElement);
+
+
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        findUserCaseRolesResponse.setCaseUsers(List.of(CaseUser.builder().caseId("12345678").caseRole(
+            "[FL401RESPONDENTSOLICITOR]").build()));
+
+        when(dynamicMultiSelectListService
+                 .getSolicitorRepresentedParties(applicant))
+            .thenReturn(DynamicMultiSelectList
+                            .builder().value(List.of(dynamicListElement)).listItems(List.of(dynamicListElement))
+                            .build());
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(partyDetails)
+            .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        when(ccdDataStoreService.findUserCaseRoles(anyString(), anyString()))
+            .thenReturn(findUserCaseRolesResponse);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+
+        String authToken = "test";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
+            .populateAboutToStartStopRepresentation(authToken, callbackRequest, new ArrayList<>());
+        assertNotNull(caseDataUpdated);
+    }
+
 
     @Test
     public void testPopulateAboutToStartStopRepresentationCaRespondent() {
@@ -1489,7 +1650,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
             .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
@@ -1529,7 +1690,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsNoRep)
             .respondentsFL401(partyDetails)
             .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
@@ -1570,7 +1731,7 @@ public class NoticeOfChangePartiesServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsNoRep)
             .respondentsFL401(partyDetails)
             .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(

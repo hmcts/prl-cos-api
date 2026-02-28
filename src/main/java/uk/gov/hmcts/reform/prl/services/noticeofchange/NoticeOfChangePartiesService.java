@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.noticeofchange;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -609,7 +612,7 @@ public class NoticeOfChangePartiesService {
         DynamicMultiSelectList solicitorRepresentedParties
             = dynamicMultiSelectListService.getSolicitorRepresentedParties(partyElementList);
 
-        if (solicitorRepresentedParties.getListItems().isEmpty()) {
+        if (isNull(solicitorRepresentedParties) || CollectionUtils.isEmpty(solicitorRepresentedParties.getListItems())) {
             errorList.add(NO_REPRESENTATION_FOUND_ERROR);
         } else {
             caseDataUpdated.put(SOL_STOP_REP_CHOOSE_PARTIES, solicitorRepresentedParties);
@@ -996,10 +999,15 @@ public class NoticeOfChangePartiesService {
                             solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
                             break;
                         case DAAPPLICANT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
-                                caseData.getApplicantsFL401().getPartyId(),
-                                caseData.getApplicantsFL401()
-                            ));
+                            PartyDetails applicantsFL401 = caseData.getApplicantsFL401();
+                            if (nonNull(applicantsFL401)) {
+                                solicitorRepresentedParties.add(ElementUtils.element(
+                                    applicantsFL401.getPartyId(),
+                                    applicantsFL401
+                                ));
+                            } else {
+                                log.info("applicant PartyDetails is null");
+                            }
                             break;
                         case DARESPONDENT:
                             solicitorRepresentedParties.add(ElementUtils.element(
