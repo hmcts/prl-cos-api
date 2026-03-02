@@ -256,7 +256,7 @@ public class HearingService {
 
         for (int i = 0; i < cases.size(); i += batchSize) {
             List<String> batch = cases.subList(i, Math.min(i + batchSize, cases.size()))
-                .stream().map(String::valueOf).toList();
+                .stream().map(CaseDetails::getId).map(String::valueOf).toList();
             List<Hearings> hearingsList = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(userToken, authTokenGenerator.generate(), batch);
             for (Hearings hearing : hearingsList) {
                 Long caseId = Long.parseLong(hearing.getCaseRef());
