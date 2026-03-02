@@ -108,8 +108,12 @@ public class PrepareHearingBundleService {
 
     private boolean hasLegalRepresentation(PartyDetails partyDetails) {
         if (isNotEmpty(partyDetails)) {
-            return isNotEmpty(partyDetails.getSolicitorOrg())
-                && isNotEmpty(partyDetails.getSolicitorOrg().getOrganisationID());
+            return (isNotEmpty(partyDetails.getSolicitorOrg())
+                && isNotEmpty(partyDetails.getSolicitorOrg().getOrganisationID()))
+                || isNotEmpty(partyDetails.getRepresentativeFirstName())
+                || isNotEmpty(partyDetails.getRepresentativeLastName())
+                || isNotEmpty(partyDetails.getSolicitorEmail())
+                || isNotEmpty(partyDetails.getSolicitorTelephone());
         }
         return false;
     }
