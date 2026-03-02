@@ -142,6 +142,9 @@ public class ManageOrdersController {
                 caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
                 // Copy custom order sub-selections to pre-existing fields and clear irrelevant ones
                 manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+                // Populate hearings dropdown for "was order approved at hearing" question
+                caseDataUpdated.put(PrlAppsConstants.HEARINGS_TYPE,
+                    manageOrderService.populateHearingsDropdown(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
