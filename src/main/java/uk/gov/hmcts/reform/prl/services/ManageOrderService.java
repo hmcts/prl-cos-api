@@ -3448,7 +3448,7 @@ public class ManageOrderService {
                                                        CallbackRequest callbackRequest,
                                                        String language,
                                                        String clientContext) {
-
+        log.info("handleFetchOrderDetails called");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -3613,6 +3613,7 @@ public class ManageOrderService {
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
+        log.info("About to call populateHearingsDropdown for case {}", caseData.getId());
         caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
