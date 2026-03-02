@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -11,16 +10,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.awaitinginformation.AwaitingInformationReasonEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +26,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AwaitingInformationControllerTest {
@@ -49,19 +45,18 @@ public class AwaitingInformationControllerTest {
     private FeatureToggleService featureToggleService;
 
     @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
     private AuthorisationService authorisationService;
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-    public static final String S2S_TOKEN = "s2s AuthToken";
-    public static final String INVALID_CLIENT_ERROR = "Invalid Client";
+    @Mock
+    private ObjectMapper objectMapper;
 
-    Map<String, Object> caseDataMap;
-    CaseDetails caseDetails;
-    CallbackRequest callbackRequest;
-    AwaitingInformation awaitingInformation;
+    private static final String AUTH_TOKEN = "Bearer testAuthToken";
+    private static final String S2S_TOKEN = "s2sTestToken";
+
+    private CallbackRequest callbackRequest;
+    private CaseDetails caseDetails;
+    private Map<String, Object> caseDataMap;
+    private Map<String, Object> updatedCaseData;
 
     @Before
     public void setUp() {
@@ -78,280 +73,175 @@ public class AwaitingInformationControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        awaitingInformation = AwaitingInformation.builder()
-            .reviewDate(LocalDate.now().plusDays(5))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-            .build();
+        updatedCaseData = new HashMap<>(caseDataMap);
+        updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state("Awaiting information").build());
 
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
     }
 
-    // Tests for submitAwaitingInformation method
+    // Tests for submitAwaitingInformation endpoint
+
     @Test
-    public void testSubmitAwaitingInformationSuccessfully() {
-        // Given
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(
-            PrlAppsConstants.CASE_STATUS,
-            CaseStatus.builder().state("Awaiting information").build()
-        );
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
+    public void shouldSubmitAwaitingInformationSuccessfully() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
-        // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.submitAwaitingInformation(
-            AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
-        );
+        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+            .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
-        // Then
         assertNotNull(response);
         assertNotNull(response.getData());
-        assertTrue(response.getData().containsKey(PrlAppsConstants.CASE_STATUS));
+        assertTrue(response.getData().containsKey(CASE_STATUS));
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-    }
-
-    @Test
-    public void testSubmitAwaitingInformationCallsAddToCaseService() {
-        // Given
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-
-        // When
-        awaitingInformationController.submitAwaitingInformation(
-            AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
-        );
-
-        // Then
         verify(awaitingInformationService, times(1)).addToCase(callbackRequest);
     }
 
     @Test
-    public void testSubmitAwaitingInformationThrowsExceptionWhenUnauthorized() {
-        // Given
+    public void shouldThrowExceptionWhenUnauthorized() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
-        // When & Then
-        assertExpectedException(
-            () -> awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest),
-            RuntimeException.class,
-            INVALID_CLIENT_ERROR
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
+
+        assertEquals("Invalid Client", exception.getMessage());
+        verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
+        verify(awaitingInformationService, times(0)).addToCase(any());
     }
 
     @Test
-    public void testSubmitAwaitingInformationPreservesExistingCaseData() {
-        // Given
-        caseDataMap.put("testKey", "testValue");
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(
-            PrlAppsConstants.CASE_STATUS,
-            CaseStatus.builder().state("Awaiting information").build()
-        );
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
+    public void shouldThrowExceptionWhenFeatureToggleDisabled() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
 
-        // When
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController.submitAwaitingInformation(
-            AUTH_TOKEN,
-            S2S_TOKEN,
-            callbackRequest
-        );
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+            awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
-        // Then
-        assertTrue(response.getData().containsKey("testKey"));
-        assertEquals("testValue", response.getData().get("testKey"));
+        assertEquals("Invalid Client", exception.getMessage());
+        verify(awaitingInformationService, times(0)).addToCase(any());
     }
 
-
-    // Tests for validateUrgentCaseCreation (validateAwaitingInformation) method
     @Test
-    public void testValidateAwaitingInformationWithValidDate() {
-        // Given
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, awaitingInformation);
+    public void shouldPreserveExistingCaseDataWhenSubmitting() {
+        caseDataMap.put("applicantName", "John Doe");
+        caseDataMap.put("respondentName", "Jane Doe");
+        updatedCaseData.put("applicantName", "John Doe");
+        updatedCaseData.put("respondentName", "Jane Doe");
 
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-        when(objectMapper.convertValue(awaitingInformation, AwaitingInformation.class))
-            .thenReturn(awaitingInformation);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
-        List<String> emptyErrorList = new ArrayList<>();
-        when(awaitingInformationService.validate(awaitingInformation))
-            .thenReturn(emptyErrorList);
+        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+            .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
-        // When
-        CallbackResponse response = awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
+        assertNotNull(response.getData());
+        assertEquals("John Doe", response.getData().get("applicantName"));
+        assertEquals("Jane Doe", response.getData().get("respondentName"));
+    }
 
-        // Then
+    @Test
+    public void shouldHandleNullCaseData() {
+        Map<String, Object> emptyCaseData = new HashMap<>();
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(emptyCaseData);
+
+        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+            .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+    }
+
+    // Tests for validateReviewDate endpoint
+
+    @Test
+    public void shouldValidateReviewDateSuccessfully() {
+        List<String> emptyErrors = new ArrayList<>();
+        when(awaitingInformationService.validate(callbackRequest)).thenReturn(emptyErrors);
+
+        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertTrue(response.getErrors().isEmpty());
-        verify(awaitingInformationService, times(1)).addToCase(callbackRequest);
-        verify(awaitingInformationService, times(1)).validate(awaitingInformation);
+        verify(awaitingInformationService, times(1)).validate(callbackRequest);
     }
 
     @Test
-    public void testValidateAwaitingInformationWithInvalidDate() {
-        // Given
-        AwaitingInformation invalidAwaitingInfo = AwaitingInformation.builder()
-            .reviewDate(LocalDate.now().minusDays(1))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-            .build();
-
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, invalidAwaitingInfo);
-
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-        when(objectMapper.convertValue(invalidAwaitingInfo, AwaitingInformation.class))
-            .thenReturn(invalidAwaitingInfo);
-
+    public void shouldReturnValidationErrorsForInvalidDate() {
         List<String> errorList = new ArrayList<>();
-        errorList.add("The date must be in the future");
+        errorList.add("Please enter a future date");
 
-        when(awaitingInformationService.validate(invalidAwaitingInfo))
-            .thenReturn(errorList);
+        when(awaitingInformationService.validate(callbackRequest)).thenReturn(errorList);
 
-        // When
-        CallbackResponse response = awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
+        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
 
-        // Then
-        assertNotNull(response);
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
-        assertEquals("The date must be in the future", response.getErrors().getFirst());
-        verify(awaitingInformationService, times(1)).validate(invalidAwaitingInfo);
-    }
-
-    @Test
-    public void testValidateAwaitingInformationWithNullDate() {
-        // Given
-        AwaitingInformation nullDateAwaitingInfo = AwaitingInformation.builder()
-            .reviewDate(null)
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-            .build();
-
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, nullDateAwaitingInfo);
-
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-        when(objectMapper.convertValue(nullDateAwaitingInfo, AwaitingInformation.class))
-            .thenReturn(nullDateAwaitingInfo);
-
-        List<String> emptyErrorList = new ArrayList<>();
-        when(awaitingInformationService.validate(nullDateAwaitingInfo))
-            .thenReturn(emptyErrorList);
-
-        // When
-        CallbackResponse response = awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
-
-        // Then
-        assertNotNull(response);
-        assertNotNull(response.getErrors());
-        assertTrue(response.getErrors().isEmpty());
-    }
-
-    @Test
-    public void testValidateAwaitingInformationWithTodayDate() {
-        // Given
-        AwaitingInformation todayDateAwaitingInfo = AwaitingInformation.builder()
-            .reviewDate(LocalDate.now())
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-            .build();
-
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, todayDateAwaitingInfo);
-
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-        when(objectMapper.convertValue(todayDateAwaitingInfo, AwaitingInformation.class))
-            .thenReturn(todayDateAwaitingInfo);
-
-        List<String> errorList = new ArrayList<>();
-        errorList.add("The date must be in the future");
-
-        when(awaitingInformationService.validate(todayDateAwaitingInfo))
-            .thenReturn(errorList);
-
-        // When
-        CallbackResponse response = awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
-
-        // Then
         assertNotNull(response);
         assertEquals(1, response.getErrors().size());
-    }
-
-
-    @Test
-    public void testMultipleValidationErrorsReturned() {
-        // Given
-        List<String> multipleErrors = new ArrayList<>();
-        multipleErrors.add("Error 1");
-        multipleErrors.add("Error 2");
-        multipleErrors.add("Error 3");
-
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, awaitingInformation);
-
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-        when(objectMapper.convertValue(awaitingInformation, AwaitingInformation.class))
-            .thenReturn(awaitingInformation);
-
-        when(awaitingInformationService.validate(awaitingInformation))
-            .thenReturn(multipleErrors);
-
-        // When
-        CallbackResponse response = awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
-
-        // Then
-        assertNotNull(response);
-        assertEquals(3, response.getErrors().size());
-        assertTrue(response.getErrors().contains("Error 1"));
-        assertTrue(response.getErrors().contains("Error 2"));
-        assertTrue(response.getErrors().contains("Error 3"));
+        assertEquals("Please enter a future date", response.getErrors().get(0));
     }
 
     @Test
-    public void testAwaitingInformationWithDifferentReasons() {
-        // Given
-        AwaitingInformation infoWithOther = AwaitingInformation.builder()
-            .reviewDate(LocalDate.now().plusDays(10))
-            .awaitingInformationReasonEnum(AwaitingInformationReasonEnum.applicantFurtherInformation)
-            .build();
+    public void shouldReturnEmptyErrorsWhenFeatureToggleDisabled() {
+        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
 
-        Map<String, Object> updatedCaseData = new HashMap<>(caseDataMap);
-        updatedCaseData.put(AWAITING_INFORMATION_DETAILS, infoWithOther);
+        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
 
-        when(awaitingInformationService.addToCase(callbackRequest))
-            .thenReturn(updatedCaseData);
-        when(objectMapper.convertValue(infoWithOther, AwaitingInformation.class))
-            .thenReturn(infoWithOther);
-        when(awaitingInformationService.validate(infoWithOther))
-            .thenReturn(new ArrayList<>());
-
-        // When
-        CallbackResponse response = awaitingInformationController.validateUrgentCaseCreation(callbackRequest);
-
-        // Then
         assertNotNull(response);
         assertTrue(response.getErrors().isEmpty());
     }
 
-    // Helper method for assertion
-    protected <T extends Throwable> void assertExpectedException(
-        ThrowingRunnable methodExpectedToFail,
-        Class<T> expectedThrowableClass,
-        String expectedMessage) {
-        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
-        assertEquals(expectedMessage, exception.getMessage());
+    @Test
+    public void shouldReturnMultipleValidationErrors() {
+        List<String> errorList = new ArrayList<>();
+        errorList.add("Please enter a future date");
+        errorList.add("Review date cannot be more than 12 months away");
+
+        when(awaitingInformationService.validate(callbackRequest)).thenReturn(errorList);
+
+        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+
+        assertNotNull(response);
+        assertEquals(2, response.getErrors().size());
+        verify(awaitingInformationService, times(1)).validate(callbackRequest);
+    }
+
+    @Test
+    public void shouldCallFeatureToggleServiceBeforeValidation() {
+        when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
+        when(awaitingInformationService.validate(callbackRequest)).thenReturn(new ArrayList<>());
+
+        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+
+        assertNotNull(response);
+        verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
+    }
+
+    @Test
+    public void shouldHandleCaseDataWithMultipleFields() {
+        caseDataMap.put("caseType", "C100");
+        caseDataMap.put("eventId", "123456");
+        updatedCaseData.put("caseType", "C100");
+        updatedCaseData.put("eventId", "123456");
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+
+        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+            .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        assertNotNull(response.getData());
+        assertEquals("C100", response.getData().get("caseType"));
+        assertEquals("123456", response.getData().get("eventId"));
+    }
+
+    @Test
+    public void shouldVerifyCorrectHeadersUsedInSubmit() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
+        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+
+        awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+
+        verify(authorisationService, times(1)).isAuthorized(eq(AUTH_TOKEN), eq(S2S_TOKEN));
     }
 }
 

@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum AwaitingInformationReasonEnum {
+public enum RequestFurtherInformationReasonEnum {
 
     @JsonProperty("miamFurtherInformation")
     miamFurtherInformation("miamFurtherInformation", "MIAM - further information required"),
@@ -37,8 +37,8 @@ public enum AwaitingInformationReasonEnum {
     }
 
     @JsonCreator
-    public static AwaitingInformationReasonEnum getValue(String key) {
-        return AwaitingInformationReasonEnum.valueOf(key);
+    public static RequestFurtherInformationReasonEnum getValue(String key) {
+        return RequestFurtherInformationReasonEnum.valueOf(key);
     }
 
 }

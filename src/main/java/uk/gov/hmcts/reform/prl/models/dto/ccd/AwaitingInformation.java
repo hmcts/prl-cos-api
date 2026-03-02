@@ -5,9 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.awaitinginformation.AwaitingInformationReasonEnum;
+import uk.gov.hmcts.reform.prl.enums.awaitinginformation.RequestFurtherInformationReasonEnum;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -16,6 +17,6 @@ import java.time.LocalDate;
 public class AwaitingInformation {
     @JsonProperty("reviewByDate")
     private LocalDate reviewDate;
-    @JsonProperty("awaitingInformation")
-    private AwaitingInformationReasonEnum awaitingInformationReasonEnum;
+    @JsonProperty("requestFurtherInformationReasonList")
+    private List<RequestFurtherInformationReasonEnum> requestFurtherInformationReasonEnum;
 }

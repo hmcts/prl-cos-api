@@ -19,17 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
-import java.util.List;
-import java.util.Map;
-
+import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_INFORMATION_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -51,11 +47,11 @@ public class AwaitingInformationController {
     public AboutToStartOrSubmitCallbackResponse submitAwaitingInformation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+        @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)
             && featureToggleService.isAwaitingInformationEnabled()) {
-            Map<String, Object> caseDataUpdated = awaitingInformationService.addToCase(callbackRequest);
+            var caseDataUpdated = awaitingInformationService.addToCase(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }
         throw (new RuntimeException(INVALID_CLIENT));
@@ -67,20 +63,14 @@ public class AwaitingInformationController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse validateUrgentCaseCreation(@RequestBody CallbackRequest callbackRequest) {
-
-        if (featureToggleService.isAwaitingInformationEnabled()) {
-            Map<String, Object> caseDataUpdated = awaitingInformationService.addToCase(callbackRequest);
-
-            AwaitingInformation awaitingInformation = objectMapper.convertValue(
-                caseDataUpdated.get(AWAITING_INFORMATION_DETAILS), AwaitingInformation.class);
-
-            List<String> errorList = awaitingInformationService.validate(awaitingInformation);
-
+    public CallbackResponse validateReviewDate(@RequestBody CallbackRequest callbackRequest) {
+        if (!featureToggleService.isAwaitingInformationEnabled()) {
             return CallbackResponse.builder()
-                .errors(errorList)
+                .errors(emptyList())
                 .build();
         }
-        throw new RuntimeException(INVALID_CLIENT);
+        return CallbackResponse.builder()
+            .errors(awaitingInformationService.validate(callbackRequest))
+            .build();
     }
 }

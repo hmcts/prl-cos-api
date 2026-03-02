@@ -1126,7 +1126,7 @@ public class PrlAppsConstants {
 
     public static final String CASE_STATUS = "caseStatus";
 
-    public static final String AWAITING_INFORMATION_DETAILS = "awaitingInformationDetails";
+    public static final String REQUEST_FURTHER_INFORMATION_DETAILS = "requestFurtherInformationDetails";
 
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
