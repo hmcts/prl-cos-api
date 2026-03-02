@@ -207,7 +207,10 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("Debugging FPVTL-2047 : Event id is {}", callbackRequest.getEventId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Debugging FPVTL-2047 : Client context id is {}", clientContext);
+
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -294,7 +297,9 @@ public class EditAndApproveDraftOrderController {
         String draftOrderId = null;
         if (clientContext != null) {
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            log.info("Debugging FPVTL-2047 : waMapper is {}", waMapper);
             draftOrderId = CaseUtils.getDraftOrderId(waMapper);
+            log.info("Debugging FPVTL-2047 : draftOrderId is {}", draftOrderId);
         }
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
@@ -307,6 +312,7 @@ public class EditAndApproveDraftOrderController {
             caseData.getDraftOrderCollection(),
             UUID.fromString(draftOrderId)
         );
+        log.info("Debugging FPVTL-2047 : selectedOrder is {}", selectedOrder);
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
