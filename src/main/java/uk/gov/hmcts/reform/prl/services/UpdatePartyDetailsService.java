@@ -956,12 +956,12 @@ public class UpdatePartyDetailsService {
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
             removeParty.addAll(caseDataBefore.getApplicants().stream()
                 .filter(appBefore -> caseData.getApplicants().stream()
-                    .noneMatch(app -> app.getId().equals(appBefore.getId())))
+                    .noneMatch(app -> appBefore.getId().equals(app.getId())))
                 .toList());
 
             removeParty.addAll(caseDataBefore.getRespondents().stream()
                 .filter(respBefore -> caseData.getRespondents().stream()
-                    .noneMatch(resp -> resp.getId().equals(respBefore.getId())))
+                    .noneMatch(resp -> respBefore.getId().equals(resp.getId())))
                 .toList());
 
             if (!removeParty.isEmpty()) {

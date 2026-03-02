@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -78,6 +79,9 @@ public class CourtNavCaseControllerTest {
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
+    @Mock
+    private UserInfo userInfo;
+
     @Before
     public void setUp() {
         file
@@ -95,7 +99,7 @@ public class CourtNavCaseControllerTest {
             .applicantCaseName("test")
             .build();
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
 
@@ -121,12 +125,9 @@ public class CourtNavCaseControllerTest {
     public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of("COURTNAV"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
-
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of("COURTNAV")).build();
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
 
         ResponseEntity response = courtNavCaseController.uploadDocument(
             AUTH,
@@ -143,13 +144,10 @@ public class CourtNavCaseControllerTest {
     public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(cafcassUploadDocService).uploadDocument(any(), any(), any(), any());
 
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of(CAFCASS_USER_ROLE)).build();
-
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
 
         ResponseEntity response = courtNavCaseController.uploadDocument(
             AUTH,
@@ -184,7 +182,7 @@ public class CourtNavCaseControllerTest {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
@@ -211,11 +209,9 @@ public class CourtNavCaseControllerTest {
     @Test
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of("COURTNAV"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of("COURTNAV")).build();
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
 
         ResponseEntity response = courtNavCaseController
             .uploadDocument("Bearer:test", "s2s token",
@@ -258,7 +254,7 @@ public class CourtNavCaseControllerTest {
             .home(testHome)
             .build();
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
 

@@ -92,6 +92,13 @@ public class PaymentRequestService {
 
     public PaymentResponse createPayment(String authorization,
                                          CreatePaymentRequest createPaymentRequest) throws Exception {
+        FeeResponse feeResponse = feeService.fetchFeeDetails(createPaymentRequest.getFeeType());
+        if (null == feeResponse) {
+            log.error("Error in fetching fee details for caseId {} feeType {}", createPaymentRequest.getCaseId(),
+                      createPaymentRequest.getFeeType());
+            return null;
+        }
+
         log.info("Retrieving caseData for caseId : {}", createPaymentRequest.getCaseId());
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificEvent(
@@ -107,11 +114,7 @@ public class PaymentRequestService {
             );
             return null;
         }
-        FeeResponse feeResponse = feeService.fetchFeeDetails(createPaymentRequest.getFeeType());
-        if (null == feeResponse) {
-            log.info("Error in fetching fee details for feeType {}", createPaymentRequest.getFeeType());
-            return null;
-        }
+
         createPaymentRequest = createPaymentRequest.toBuilder()
             .applicantCaseName(caseData.getApplicantCaseName()).build();
 

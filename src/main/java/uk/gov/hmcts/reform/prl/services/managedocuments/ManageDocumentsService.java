@@ -240,7 +240,9 @@ public class ManageDocumentsService {
         if (isUserRoleLA) {
             userRole = LOCAL_AUTHORITY;
         }
-        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+        List<Element<ManageDocuments>> manageDocuments =
+            Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
+                .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
