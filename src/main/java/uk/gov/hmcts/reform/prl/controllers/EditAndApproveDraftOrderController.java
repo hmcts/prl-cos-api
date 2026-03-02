@@ -515,7 +515,9 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getId()));
             Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
             CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            log.info("Yogesh==> About to add addSealToOrders");
             manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
+            log.info("Yogesh==> After adding addSealToOrders");
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
