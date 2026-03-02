@@ -2537,48 +2537,56 @@ public class ManageOrderService {
         String customOrderNameOption = customOrderNameOptionObj != null ? customOrderNameOptionObj.toString() : null;
 
         // Clear all custom sub-selections first, then populate only the relevant ones
-        clearCustomOrderSubSelections(caseDataUpdated);
+        // Extract data from currently selected order type BEFORE clearing
+        Object c43Details = caseDataUpdated.get("customC43OrderDetails");
+        Object c43aGuardianName = caseDataUpdated.get("customAppointedGuardianName");
+        Object c21Details = caseDataUpdated.get("customC21OrderDetails");
+
+        // Clear all custom order fields (source and synced)
+        clearAllCustomOrderFields(caseDataUpdated);
 
         if (customOrderNameOption == null) {
             return;
         }
 
+        // Sync only the fields for the currently selected order type
         switch (customOrderNameOption) {
             case "childArrangementsSpecificProhibitedOrder":
-                // C43 - Copy from customC43OrderDetails ComplexType to pre-existing fields
-                syncC43Fields(caseDataUpdated);
+                syncC43Fields(caseDataUpdated, c43Details);
                 break;
             case "specialGuardianShip":
-                // C43A - Copy from customAppointedGuardianName to pre-existing field
-                syncC43AFields(caseDataUpdated);
+                syncC43AFields(caseDataUpdated, c43aGuardianName);
                 break;
             case "blankOrderOrDirections":
-                // C21 - Copy from customC21OrderOptions to pre-existing field
-                syncC21Fields(caseDataUpdated);
+                syncC21Fields(caseDataUpdated, c21Details);
                 break;
             default:
-                // No sub-selections to copy for other order types
                 break;
         }
     }
 
-    private void clearCustomOrderSubSelections(Map<String, Object> caseDataUpdated) {
-        // Clear C43 pre-existing fields
+    private void clearAllCustomOrderFields(Map<String, Object> caseDataUpdated) {
+        // Clear C43 fields
         caseDataUpdated.remove("childArrangementsOrdersToIssue");
         caseDataUpdated.remove("selectChildArrangementsOrder");
-        // Clear C43A pre-existing field
+        caseDataUpdated.remove("customC43OrderDetails");
+        // Clear C43A fields
         caseDataUpdated.remove("appointedGuardianName");
-        // Clear C21 pre-existing field
+        caseDataUpdated.remove("customAppointedGuardianName");
+        // Clear C21 fields
         caseDataUpdated.remove("c21OrderOptions");
+        caseDataUpdated.remove("customC21OrderDetails");
     }
 
     @SuppressWarnings("unchecked")
-    private void syncC43Fields(Map<String, Object> caseDataUpdated) {
-        Object customC43Details = caseDataUpdated.get("customC43OrderDetails");
+    private void syncC43Fields(Map<String, Object> caseDataUpdated, Object customC43Details) {
         if (customC43Details instanceof Map) {
             Map<String, Object> c43Map = (Map<String, Object>) customC43Details;
             Object ordersToIssue = c43Map.get("ordersToIssue");
             Object childArrangementsOrderType = c43Map.get("childArrangementsOrderType");
+
+            // Restore the source field
+            caseDataUpdated.put("customC43OrderDetails", customC43Details);
 
             if (ordersToIssue != null) {
                 caseDataUpdated.put("childArrangementsOrdersToIssue", ordersToIssue);
@@ -2589,19 +2597,23 @@ public class ManageOrderService {
         }
     }
 
-    private void syncC43AFields(Map<String, Object> caseDataUpdated) {
-        Object customGuardianName = caseDataUpdated.get("customAppointedGuardianName");
+    private void syncC43AFields(Map<String, Object> caseDataUpdated, Object customGuardianName) {
         if (customGuardianName != null) {
+            // Restore the source field
+            caseDataUpdated.put("customAppointedGuardianName", customGuardianName);
             caseDataUpdated.put("appointedGuardianName", customGuardianName);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void syncC21Fields(Map<String, Object> caseDataUpdated) {
-        Object customC21Details = caseDataUpdated.get("customC21OrderDetails");
+    private void syncC21Fields(Map<String, Object> caseDataUpdated, Object customC21Details) {
         if (customC21Details instanceof Map) {
             Map<String, Object> c21Map = (Map<String, Object>) customC21Details;
             Object orderOptions = c21Map.get("orderOptions");
+
+            // Restore the source field
+            caseDataUpdated.put("customC21OrderDetails", customC21Details);
+
             if (orderOptions != null) {
                 caseDataUpdated.put("c21OrderOptions", orderOptions);
             }

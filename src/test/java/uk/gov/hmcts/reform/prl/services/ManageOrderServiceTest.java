@@ -7018,4 +7018,97 @@ public class ManageOrderServiceTest {
         // Then - no errors, field remains null
         assertNull(caseDataUpdated.get("c21OrderOptions"));
     }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC43ToC21() {
+        // Given - user previously had C43 data, now switching to C21
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+
+        // Old C43 data that should be cleared
+        Map<String, Object> oldC43Details = new HashMap<>();
+        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        oldC43Details.put("childArrangementsOrderType", "liveWithOrder");
+        caseDataUpdated.put("customC43OrderDetails", oldC43Details);
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "liveWithOrder");
+
+        // New C21 data
+        Map<String, Object> newC21Details = new HashMap<>();
+        newC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", newC21Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C21 data preserved
+        assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
+        assertNotNull(caseDataUpdated.get("customC21OrderDetails"));
+
+        // C43 source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC43OrderDetails"));
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC21ToC43() {
+        // Given - user previously had C21 data, now switching to C43
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        // Old C21 data that should be cleared
+        Map<String, Object> oldC21Details = new HashMap<>();
+        oldC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", oldC21Details);
+        caseDataUpdated.put("c21OrderOptions", "power_of_arrest");
+
+        // New C43 data
+        Map<String, Object> newC43Details = new HashMap<>();
+        newC43Details.put("ordersToIssue", List.of("specificIssueOrder"));
+        caseDataUpdated.put("customC43OrderDetails", newC43Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C43 data preserved
+        assertEquals(List.of("specificIssueOrder"), caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNotNull(caseDataUpdated.get("customC43OrderDetails"));
+
+        // C21 source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC21OrderDetails"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllSourceFieldsWhenSwitchingToOther() {
+        // Given - user had data for multiple order types, now switching to "other"
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "other");
+
+        // Old C43 data
+        Map<String, Object> oldC43Details = new HashMap<>();
+        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("customC43OrderDetails", oldC43Details);
+
+        // Old C21 data
+        Map<String, Object> oldC21Details = new HashMap<>();
+        oldC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", oldC21Details);
+
+        // Old C43A data
+        caseDataUpdated.put("customAppointedGuardianName", "Old Guardian");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - all source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC43OrderDetails"));
+        assertNull(caseDataUpdated.get("customC21OrderDetails"));
+        assertNull(caseDataUpdated.get("customAppointedGuardianName"));
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+    }
 }
