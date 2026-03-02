@@ -4,15 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -66,13 +67,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -83,8 +85,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTIO
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class CaseDataServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class CafcassCaseDataServiceTest {
     private final String s2sToken = "s2s token";
 
     private final String userToken = "Bearer testToken";
@@ -104,7 +107,7 @@ public class CaseDataServiceTest {
     AuthTokenGenerator authTokenGenerator;
 
     @InjectMocks
-    private CaseDataService caseDataService;
+    private CafcassCaseDataService cafcassCaseDataService;
 
     @Mock
     SystemUserService systemUserService;
@@ -125,18 +128,17 @@ public class CaseDataServiceTest {
     private FeatureToggleService featureToggleService;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
     @Nested
-    public class GetCaseData {
+    class GetCaseData {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
 
         @BeforeEach
-        public void init() {
+        void init() {
             objectMapper.registerModule(new ParameterNamesModule());
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -193,16 +195,16 @@ public class CaseDataServiceTest {
 
             List<String> caseStateList = new LinkedList<>();
             caseStateList.add("DECISION_OUTCOME");
-            ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+            ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
             List<String> caseTypeList = new ArrayList<>();
             caseTypeList.add("C100");
-            ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+            ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
 
         }
 
         @Test
-        public void shouldNotThrowExceptionForFailedBundles() throws IOException {
+        void shouldNotThrowExceptionForFailedBundles() throws IOException {
             String expectedCafCassResponse =
                 TestResourceUtil.readFileFrom("classpath:response/CafcassResponseNullBundles.json");
 
@@ -212,11 +214,11 @@ public class CaseDataServiceTest {
             when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenReturn(searchResult);
             Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
 
-            assertDoesNotThrow(() -> caseDataService.getCaseData("authorisation", "start", "end"));
+            assertDoesNotThrow(() -> cafcassCaseDataService.getCaseData("authorisation", "start", "end"));
         }
 
         @Test
-        public void getCaseData() throws IOException {
+        void getCaseData() throws IOException {
             String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
             SearchResult searchResult = objectMapper.readValue(
                 expectedCafCassResponse,
@@ -232,7 +234,7 @@ public class CaseDataServiceTest {
             )).thenReturn(searchResult);
             Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
 
-            CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "start", "end");
+            CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation", "start", "end");
             assertEquals(
                 objectMapper.writeValueAsString(cafCassResponse),
                 objectMapper.writeValueAsString(realCafCassResponse)
@@ -240,7 +242,7 @@ public class CaseDataServiceTest {
         }
 
         @Test
-        public void getCaseDataWhenCafcassDateTimeFeatureFlagIsEnabled() throws IOException {
+        void getCaseDataWhenCafcassDateTimeFeatureFlagIsEnabled() throws IOException {
             String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponse.json");
             SearchResult searchResult = objectMapper.readValue(
                 expectedCafCassResponse,
@@ -258,16 +260,44 @@ public class CaseDataServiceTest {
             )).thenReturn(searchResult);
             Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
 
-            CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation", "start", "end");
+            CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation", "start", "end");
             assertEquals(
                 objectMapper.writeValueAsString(cafCassResponse),
                 objectMapper.writeValueAsString(realCafCassResponse)
             );
         }
+
+        @Test
+        void shouldMapAdditionalAdditionalDocuments() throws IOException {
+            String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponseWithDocument.json");
+            SearchResult searchResult = objectMapper.readValue(
+                expectedCafCassResponse,
+                SearchResult.class
+            );
+            CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
+
+            when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+
+            when(cafcassCcdDataStoreService.searchCases(
+                anyString(),
+                anyString(),
+                any(),
+                any()
+            )).thenReturn(searchResult);
+
+            Mockito.doNothing().when(cafCassFilter).filter(cafCassResponse);
+
+            CafCassResponse response = cafcassCaseDataService.getCaseData("auth", "2025-01-01T12:00:00", "2025-01-01T12:15:00");
+
+            // Ensure the (only) test case with two served documents are present in the response after processing
+            List<Element<OtherDocuments>> docs = response.getCases().getFirst().getCaseData().getOtherDocuments();
+            assertTrue(Stream.of("testOtherServedDocumentName.pdf", "testSecondDoc.pdf")
+                .allMatch(str -> docs.stream().anyMatch(doc -> doc.getValue().getDocumentName().equals(str))));
+        }
     }
 
     @Test
-    public void testGetCaseDataWithRegion() throws IOException {
+    void testGetCaseDataWithRegion() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -315,11 +345,11 @@ public class CaseDataServiceTest {
                             .build());
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
 
 
         Map<String, String> refDataMap = new HashMap<>();
@@ -327,11 +357,11 @@ public class CaseDataServiceTest {
         when(refDataService.getRefDataCategoryValueMap(anyString(),anyString(),anyString(),anyString())).thenReturn(refDataMap);
         List<String> excludedDocumentCategoryList = new ArrayList<>();
         excludedDocumentCategoryList.add("draftOrders");
-        ReflectionTestUtils.setField(caseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
-        ReflectionTestUtils.setField(caseDataService, "excludedDocumentList", excludedDocumentList);
-        ReflectionTestUtils.setField(caseDataService, "objMapper", objectMapper);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "objMapper", objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -347,7 +377,7 @@ public class CaseDataServiceTest {
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+        CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
         assertNotNull(objectMapper.writeValueAsString(realCafCassResponse));
@@ -359,7 +389,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataWithZeroRecords() throws IOException {
+    void testGetCaseDataWithZeroRecords() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
@@ -372,9 +402,9 @@ public class CaseDataServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+        CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
         assertEquals(cafCassResponse, realCafCassResponse);
@@ -384,7 +414,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataWithConvertError() throws IOException {
+    void testGetCaseDataWithConvertError() throws IOException {
 
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
@@ -412,12 +442,12 @@ public class CaseDataServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseTypeList = new LinkedList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
+        CafCassResponse realCafCassResponse = cafcassCaseDataService.getCaseData("authorisation",
                                                                           "start", "end"
         );
         assertTrue(searchResult.getTotal() > realCafCassResponse.getTotal());
@@ -431,7 +461,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testGetCaseDataThrowingException() throws Exception {
+    void testGetCaseDataThrowingException() throws Exception {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -449,36 +479,29 @@ public class CaseDataServiceTest {
         hearings.setCaseRef("1673970714366224");
         hearings.setCaseHearings(caseHearings);
 
-        List<Hearings> listOfHearings = new ArrayList<>();
-        listOfHearings.add(hearings);
-
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String expectedCafCassResponse = TestResourceUtil.readFileFrom("classpath:response/CafCaasResponseWithRegion.json");
-        SearchResult searchResult = objectMapper.readValue(expectedCafCassResponse,
-                                                           SearchResult.class);
-        CafCassResponse cafCassResponse = objectMapper.readValue(expectedCafCassResponse, CafCassResponse.class);
         Exception exception = new RuntimeException();
         when(cafcassCcdDataStoreService.searchCases(anyString(),anyString(),any(),any())).thenThrow(exception);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
         List<String> caseTypeList = new ArrayList<>();
         caseTypeList.add("C100");
-        ReflectionTestUtils.setField(caseDataService, "caseTypeList", caseTypeList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseTypeList", caseTypeList);
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
-        ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
+        ReflectionTestUtils.setField(cafcassCaseDataService, "caseStateList", caseStateList);
 
-        assertThrows(RuntimeException.class, () -> caseDataService.getCaseData("authorisation",
+        assertThrows(RuntimeException.class, () -> cafcassCaseDataService.getCaseData("authorisation",
                                                                                "start", "end"
         ));
 
     }
 
     @Test
-    public void testFilterCancelledHearingsBeforeListing() {
+    void testFilterCancelledHearingsBeforeListing() {
 
         final List<CaseHearing> caseHearings = new ArrayList();
 
@@ -517,14 +540,14 @@ public class CaseDataServiceTest {
         List<Hearings> listOfHearings = new ArrayList<>();
         listOfHearings.add(hearings);
 
-        caseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
+        cafcassCaseDataService.filterCancelledHearingsBeforeListing(listOfHearings);
 
         assertEquals(2, listOfHearings.get(0).getCaseHearings().size());
 
     }
 
     @Test
-    public void testCheckIfDocumentsNeedToExcludeScenario1() {
+    void testCheckIfDocumentsNeedToExcludeScenario1() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",
             "C8Document",
@@ -532,11 +555,11 @@ public class CaseDataServiceTest {
             "C100FinalDocument"
         );
         String documentFilename = "Draft_C100_application.pdf";
-        assertTrue(caseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
+        assertTrue(cafcassCaseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
     }
 
     @Test
-    public void testCheckIfDocumentsNeedToExcludeScenario2() {
+    void testCheckIfDocumentsNeedToExcludeScenario2() {
         List<String> excludedDocumentList = List.of(
             "Draft_C100_application",
             "C8Document",
@@ -544,11 +567,11 @@ public class CaseDataServiceTest {
             "C100FinalDocument"
         );
         String documentFilename = "abc.pdf";
-        assertFalse(caseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
+        assertFalse(cafcassCaseDataService.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename));
     }
 
     @Test
-    public void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+    void testaddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl("test").documentFileName("test").build();
         when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
@@ -602,12 +625,12 @@ public class CaseDataServiceTest {
             .caseData(cafCassCaseData)
             .build();
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, cafCassResponse);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
 
         assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
@@ -615,7 +638,7 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testRedactedDocumentsOnAddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
+    void testRedactedDocumentsOnAddSpecificDocumentsFromCaseFileViewBasedOnCategories() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("MIAMCertificate")
@@ -651,12 +674,12 @@ public class CaseDataServiceTest {
             .caseData(cafCassCaseData)
             .build();
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, cafCassResponse);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
 
         assertEquals("test", cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments().get(0).getValue().getDocumentName());
         assertNull(cafCassResponse.getCases().get(0).getCaseData().getCourtStaffUploadDocListDocTab());
@@ -665,41 +688,41 @@ public class CaseDataServiceTest {
     }
 
     @Test
-    public void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
+    void testRedactedDocumentsOnAddInOtherDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addInOtherDocuments",
             String.class, Document.class, List.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList);
 
         assertTrue(otherDocsList.isEmpty());
 
     }
 
     @Test
-    public void testAddInOtherDocuments() throws NoSuchMethodException,
+    void testAddInOtherDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl("http://test").documentFileName("test").build();
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addInOtherDocuments",
             String.class, Document.class, List.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, category, document, otherDocsList);
+        privateMethod.invoke(cafcassCaseDataService, category, document, otherDocsList);
 
         assertFalse(otherDocsList.isEmpty());
         assertEquals("test", otherDocsList.get(0).getValue().getDocumentName());
     }
 
     @Test
-    public void shouldMapFinalisedServiceOfApplicationDocuments() throws NoSuchMethodException,
+    void shouldMapFinalisedServiceOfApplicationDocuments() throws NoSuchMethodException,
         InvocationTargetException, IllegalAccessException {
         Document document = Document.builder().documentUrl("test").documentFileName("test").build();
         when(objMapper.convertValue(any(QuarantineLegalDoc.class), eq(Map.class))).thenReturn(new HashMap<>());
@@ -732,12 +755,12 @@ public class CaseDataServiceTest {
             .caseData(cafCassCaseData)
             .build();
         CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
-        Method privateMethod = CaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
             "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
             CafCassResponse.class
         );
         privateMethod.setAccessible(true);
-        privateMethod.invoke(caseDataService, cafCassResponse);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
 
         CafCassCaseData response = cafCassResponse.getCases().get(0).getCaseData();
         assertEquals(2, response.getOtherDocuments().size());
