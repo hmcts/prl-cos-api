@@ -428,6 +428,7 @@ public class ManageDocumentsService {
         }
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
@@ -745,7 +746,7 @@ public class ManageDocumentsService {
             case LOCAL_AUTHORITY -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
                 caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab(),
-                caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()//not in use
+                caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList()
             );
             case BULK_SCAN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
