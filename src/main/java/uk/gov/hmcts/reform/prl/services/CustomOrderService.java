@@ -21,8 +21,12 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -163,6 +167,7 @@ public class CustomOrderService {
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingDataService hearingDataService;
+    private final HearingService hearingService;
     private final PoiTlDocxRenderer poiTlDocxRenderer;
     private final UploadDocumentService uploadService;
     private final DocumentGenService documentGenService;
@@ -418,7 +423,7 @@ public class CustomOrderService {
         log.info("Rendering and uploading header preview for case {}", caseId);
 
         // Render header
-        byte[] headerBytes = renderHeaderPreview(caseId, caseData, caseDataMap);
+        byte[] headerBytes = renderHeaderPreview(authorisation, caseId, caseData, caseDataMap);
 
         // Upload for preview
         String previewName = HEADER_PREVIEW_FILENAME_PATTERN + "_" + caseId + ".docx";
@@ -440,19 +445,20 @@ public class CustomOrderService {
     /**
      * Renders the header template from resources with case data placeholders.
      *
+     * @param authorisation Auth token for fetching hearing data from HMC
      * @param caseId The case ID
      * @param caseData The case data
      * @param caseDataMap Raw case data map for reading fields not in CaseData model
      * @return Rendered header as byte array
      */
-    public byte[] renderHeaderPreview(Long caseId, CaseData caseData, Map<String, Object> caseDataMap) throws IOException {
+    public byte[] renderHeaderPreview(String authorisation, Long caseId, CaseData caseData, Map<String, Object> caseDataMap) throws IOException {
         log.info("Rendering header preview for case {}", caseId);
 
         // Load template from resources
         byte[] templateBytes = loadTemplateFromResources();
 
         // Build placeholders from case data
-        Map<String, Object> placeholders = buildHeaderPlaceholders(caseId, caseData, caseDataMap);
+        Map<String, Object> placeholders = buildHeaderPlaceholders(authorisation, caseId, caseData, caseDataMap);
         log.info("Header placeholders: {}", placeholders.keySet());
 
         // Render template with placeholders
@@ -596,7 +602,7 @@ public class CustomOrderService {
     /**
      * Builds placeholder map for the header template from case data.
      */
-    private Map<String, Object> buildHeaderPlaceholders(Long caseId, CaseData caseData, Map<String, Object> caseDataMap) {
+    private Map<String, Object> buildHeaderPlaceholders(String authorisation, Long caseId, CaseData caseData, Map<String, Object> caseDataMap) {
         Map<String, Object> data = new HashMap<>();
 
         // Case details
@@ -624,7 +630,7 @@ public class CustomOrderService {
         safePut(data, "hearingType", () -> "hearing");
 
         // Future hearing details
-        populateFutureHearingPlaceholders(data, caseData, caseDataMap);
+        populateFutureHearingPlaceholders(authorisation, caseId, data, caseData, caseDataMap);
 
         // Determine case type and populate party details
         boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
@@ -640,14 +646,14 @@ public class CustomOrderService {
     }
 
     /**
-     * Populates future hearing placeholders from ordersHearingDetails.
-     * Checks both caseData and caseDataMap since the hearing data entered on Page 19
-     * may be in the raw map but not yet converted to the CaseData object.
-     * Provides both individual placeholders and a combined clause that's empty if no hearing scheduled.
+     * Populates future hearing placeholders.
+     * For non-custom orders: uses ordersHearingDetails from Page 19.
+     * For custom orders: fetches LISTED hearings from HMC API.
      */
     @SuppressWarnings("unchecked")
-    private void populateFutureHearingPlaceholders(Map<String, Object> data, CaseData caseData, Map<String, Object> caseDataMap) {
-        // First try to get from caseData
+    private void populateFutureHearingPlaceholders(String authorisation, Long caseId,
+                                                    Map<String, Object> data, CaseData caseData, Map<String, Object> caseDataMap) {
+        // First try to get from caseData (Page 19 hearing details)
         if (caseData.getManageOrders() != null
             && caseData.getManageOrders().getOrdersHearingDetails() != null
             && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
@@ -675,7 +681,63 @@ public class CustomOrderService {
             }
         }
 
+        // For custom orders, try to fetch LISTED hearings from HMC
+        if (populateFutureHearingFromHmc(authorisation, caseId, data)) {
+            return;
+        }
+
         setEmptyFutureHearingPlaceholders(data);
+    }
+
+    /**
+     * Fetches LISTED hearings from HMC and populates the next future hearing.
+     * @return true if a future hearing was found and populated
+     */
+    private boolean populateFutureHearingFromHmc(String authorisation, Long caseId, Map<String, Object> data) {
+        try {
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseId));
+            if (hearings == null || hearings.getCaseHearings() == null) {
+                log.info("No hearings found from HMC for case {}", caseId);
+                return false;
+            }
+
+            // Find the next LISTED hearing (future hearing)
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            CaseHearing nextHearing = hearings.getCaseHearings().stream()
+                .filter(h -> "LISTED".equals(h.getHmcStatus()))
+                .filter(h -> h.getHearingDaySchedule() != null && !h.getHearingDaySchedule().isEmpty())
+                .filter(h -> {
+                    HearingDaySchedule schedule = h.getHearingDaySchedule().get(0);
+                    return schedule.getHearingStartDateTime() != null
+                        && schedule.getHearingStartDateTime().isAfter(now);
+                })
+                .min((h1, h2) -> h1.getHearingDaySchedule().get(0).getHearingStartDateTime()
+                    .compareTo(h2.getHearingDaySchedule().get(0).getHearingStartDateTime()))
+                .orElse(null);
+
+            if (nextHearing == null) {
+                log.info("No future LISTED hearings found for case {}", caseId);
+                return false;
+            }
+
+            HearingDaySchedule schedule = nextHearing.getHearingDaySchedule().get(0);
+            String date = schedule.getHearingStartDateTime().toLocalDate().format(DATE_FORMATTER);
+            String time = schedule.getHearingStartDateTime().toLocalTime()
+                .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+            String hearingType = nextHearing.getHearingTypeValue() != null
+                ? nextHearing.getHearingTypeValue() : "";
+
+            data.put("futureHearingDate", date);
+            data.put("futureHearingTime", time);
+            data.put("futureHearingType", hearingType);
+            data.put("futureHearingClause", buildFutureHearingClause(date, time, hearingType));
+
+            log.info("Future hearing from HMC - date={}, time={}, type={}", date, time, hearingType);
+            return true;
+        } catch (Exception e) {
+            log.warn("Failed to fetch future hearings from HMC for case {}: {}", caseId, e.getMessage());
+            return false;
+        }
     }
 
     private void populateFromHearingDetails(Map<String, Object> data,

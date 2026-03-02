@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
@@ -71,6 +72,8 @@ public class CustomOrderServiceTest {
     private uk.gov.hmcts.reform.prl.clients.DgsApiClient dgsApiClient;
     @Mock
     private DocumentSealingService documentSealingService;
+    @Mock
+    private HearingService hearingService;
 
     @InjectMocks
     private CustomOrderService customOrderService;
@@ -352,7 +355,7 @@ public class CustomOrderServiceTest {
         });
 
         // Act - renderHeaderPreview calls buildHeaderPlaceholders internally
-        byte[] result = customOrderService.renderHeaderPreview(caseId, caseData, null);
+        byte[] result = customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         // Assert
         assertNotNull(result);
@@ -369,7 +372,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("1234-5678-9012-3456", placeholders.get("caseNumber"));
@@ -385,7 +388,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Central Family Court", placeholders.get("courtName"));
@@ -401,7 +404,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("HHJ Richardson", placeholders.get("judgeName"));
@@ -422,7 +425,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Sarah Johnson", placeholders.get("applicantName"));
@@ -445,7 +448,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Michael Solicitor", placeholders.get("applicantRepresentativeName"));
@@ -466,7 +469,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("David Williams", placeholders.get("respondent1Name"));
@@ -488,7 +491,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Father", placeholders.get("respondent1RelationshipToChild"));
@@ -511,7 +514,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Emma Barrister", placeholders.get("respondent1RepresentativeName"));
@@ -554,7 +557,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
 
@@ -607,7 +610,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
 
@@ -642,7 +645,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("", placeholders.get("respondent1RepresentativeName"));
@@ -673,7 +676,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("David Williams", placeholders.get("respondent1Name"));
@@ -715,7 +718,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Mother", placeholders.get("respondent1RelationshipToChild"));
@@ -760,7 +763,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         // Should deduplicate to just "Mother"
@@ -806,7 +809,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         // Should show both unique relationships
@@ -859,7 +862,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Mother", placeholders.get("respondent1RelationshipToChild"));
@@ -882,7 +885,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("", placeholders.get("respondent1RepresentativeClause"));
@@ -906,7 +909,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals(", legally represented", placeholders.get("respondent1RepresentativeClause"));
@@ -1013,7 +1016,7 @@ public class CustomOrderServiceTest {
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
-        customOrderService.renderHeaderPreview(caseId, caseData, null);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
 
@@ -1071,7 +1074,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert - should use value from map, not from caseData
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1091,7 +1094,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert - should use formatted date from map
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1111,7 +1114,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert - should use string value directly
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1133,7 +1136,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert - should fall back to caseData value
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1155,7 +1158,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert - should fall back to caseData value with correct format
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1178,7 +1181,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert - both values should come from map
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1783,7 +1786,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1819,7 +1822,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1838,7 +1841,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1882,7 +1885,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
@@ -1905,7 +1908,7 @@ public class CustomOrderServiceTest {
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
 
         // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
