@@ -2697,6 +2697,10 @@ public class ManageOrderService {
         List<CaseHearing> filteredHearings = caseHearings.stream()
             .filter(caseHearing -> hearingStatusFilterList.contains(caseHearing.getHmcStatus()))
             .toList();
+        log.info("Filtered hearings count: {}, statuses filter: {}", filteredHearings.size(), hearingStatusFilterList);
+        filteredHearings.forEach(h -> log.info("Hearing ID: {}, status: {}, daySchedule size: {}",
+            h.getHearingID(), h.getHmcStatus(),
+            h.getHearingDaySchedule() != null ? h.getHearingDaySchedule().size() : "null"));
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
@@ -3609,10 +3613,7 @@ public class ManageOrderService {
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-        HearingDataPrePopulatedDynamicLists hearingLists = hearingDataService.populateHearingDynamicLists(
-            authorisation, String.valueOf(caseData.getId()), caseData, hearings);
-        caseDataUpdated.put(HEARINGS_TYPE, hearingLists.getRetrievedHearingDates());
+        caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
