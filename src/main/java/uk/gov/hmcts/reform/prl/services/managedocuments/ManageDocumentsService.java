@@ -244,7 +244,9 @@ public class ManageDocumentsService {
         if (isUserRoleLA) {
             userRole = LOCAL_AUTHORITY;
         }
-        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+        List<Element<ManageDocuments>> manageDocuments =
+            Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
+                .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
@@ -588,6 +590,7 @@ public class ManageDocumentsService {
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
+            case LOCAL_AUTHORITY -> quarantineLegalDoc.getLocalAuthorityQuarantineDocument();
             case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
             case COURTNAV -> quarantineLegalDoc.getCourtNavQuarantineDocument();
             default -> null;
@@ -602,6 +605,8 @@ public class ManageDocumentsService {
                 quarantineLegalDoc.toBuilder().cafcassQuarantineDocument(manageDocument.getDocument()).build();
             case COURT_STAFF ->
                 quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(manageDocument.getDocument()).build();
+            case LOCAL_AUTHORITY ->
+                quarantineLegalDoc.toBuilder().localAuthorityQuarantineDocument(manageDocument.getDocument()).build();
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
             case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(manageDocument.getDocument()).build();
             case COURTNAV -> quarantineLegalDoc.toBuilder().courtNavQuarantineDocument(manageDocument.getDocument()).build();
@@ -645,6 +650,8 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CITIZEN");
         } else if (COURTNAV.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "COURTNAV");
+        } else if (LOCAL_AUTHORITY.equals(userRole)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "LOCAL_AUTHORITY");
         }
     }
 
@@ -676,6 +683,11 @@ public class ManageDocumentsService {
             case COURT_STAFF ->
                 caseDataUpdated.put(
                     isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
+                    quarantineDocs
+                );
+            case LOCAL_AUTHORITY ->
+                caseDataUpdated.put(
+                    isDocumentTab ? "localAuthorityUploadDocListDocTab" : "localAuthorityQuarantineDocsList",
                     quarantineDocs
                 );
             case COURT_ADMIN -> {
@@ -729,6 +741,11 @@ public class ManageDocumentsService {
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
+            );
+            case LOCAL_AUTHORITY -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                isDocumentTab,
+                caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab(),
+                caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()//not in use
             );
             case BULK_SCAN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
