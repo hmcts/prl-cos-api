@@ -125,7 +125,8 @@ public class CourtNavCaseController {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN);
                 }
             }
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: " + file.getOriginalFilename()));
+            return ResponseEntity.ok().body(new ResponseMessage(
+                "Document has been uploaded successfully: " + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
