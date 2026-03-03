@@ -123,16 +123,8 @@ public class ManageDocumentsService {
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
-        UserDetails userDetails = userService.getUserDetails(authorization);
-        boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
-
         ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentCategories(getCategoriesSubcategories(
-                authorization,
-                String.valueOf(caseData.getId()),
-                isUserRoleLA
-            ))
-            .documentParty(setDefaultDocumentParty(isUserRoleLA))
+            .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
             .build();
 
         return caseData.toBuilder()
@@ -143,7 +135,7 @@ public class ManageDocumentsService {
             .build();
     }
 
-    private DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA) {
+    private DynamicList getCategoriesSubcategories(String authorisation, String caseReference) {
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
@@ -153,13 +145,6 @@ public class ManageDocumentsService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
-                    .filter(category -> {
-                        if (isUserRoleLA) {
-                            return category.getCategoryId().equals("localAuthorityDocuments");
-                        } else {
-                            return !category.getCategoryId().equals("localAuthorityDocuments");
-                        }
-                    })
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .toList();
 
@@ -943,8 +928,6 @@ public class ManageDocumentsService {
                     loggedInUserType.add(COURT_ADMIN_ROLE);
                 } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
                     loggedInUserType.add(UserRoles.CAFCASS.name());
-                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
-                    loggedInUserType.add(UserRoles.LOCAL_AUTHORITY.name());
                 }
             } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
                 loggedInUserType.add(BULK_SCAN);
@@ -977,19 +960,5 @@ public class ManageDocumentsService {
         } else {
             loggedInUserType.add(UserRoles.CAFCASS.name());
         }
-    }
-
-    private DocumentPartyEnum setDefaultDocumentParty(boolean isUserRoleLA) {
-        return isUserRoleLA ? DocumentPartyEnum.LOCAL_AUTHORITY : null;
-    }
-
-    private boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
-        return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
-            || roleAssignmentService.isUserAllocatedRoleForCase(
-            caseId,
-            idamId,
-            Roles.LOCAL_AUTHORITY_SOLICITOR.getValue()
-        );
-        //return true;
     }
 }
