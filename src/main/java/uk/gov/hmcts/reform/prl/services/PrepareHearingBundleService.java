@@ -38,6 +38,7 @@ import java.util.List;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
@@ -101,8 +102,10 @@ public class PrepareHearingBundleService {
                     el -> hasLegalRepresentation(el.getValue()))
                 && nullSafeList(caseData.getRespondents()).stream().noneMatch(
                     el -> hasLegalRepresentation(el.getValue()));
-        } else {
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return !hasLegalRepresentation(caseData.getApplicantsFL401()) && !hasLegalRepresentation(caseData.getRespondentsFL401());
+        } else {
+            throw new IllegalArgumentException("Case " + caseDetail +  " has no case type");
         }
     }
 
@@ -234,7 +237,12 @@ public class PrepareHearingBundleService {
             .from(String.valueOf(from))
             .query(Query.builder().bool(finalFilter).build())
             .size(String.valueOf(PAGE_SIZE))
-            .dataToReturn(List.of("data.nextHearingDate"))
+            .dataToReturn(List.of("data.nextHearingDate",
+                                  "data.caseTypeOfApplication",
+                                  "data.applicantsFL401",
+                                  "data.respondentsFL401",
+                                  "data.applicants",
+                                  "data.respondents"))
             .build();
     }
 }
