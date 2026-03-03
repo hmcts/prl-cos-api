@@ -237,8 +237,7 @@ public class ConfidentialityTabService {
         Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
             childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
         if (partyDetails.isPresent()) {
-            Element<OtherPersonConfidentialityDetails> otherElement = Element
-                .<OtherPersonConfidentialityDetails>builder()
+            return Element.<OtherPersonConfidentialityDetails>builder()
                 .value(OtherPersonConfidentialityDetails.builder()
                            .firstName(partyDetails.get().getFirstName())
                            .lastName(partyDetails.get().getLastName())
@@ -252,8 +251,6 @@ public class ConfidentialityTabService {
                            .email(partyDetails.get().getEmail())
                            .phoneNumber(partyDetails.get().getPhoneNumber())
                            .build()).build();
-
-            return otherElement;
         }
         return null;
     }
@@ -324,7 +321,7 @@ public class ConfidentialityTabService {
             && ofNullable(caseData.getHome()).isPresent() && ofNullable(caseData.getHome().getChildren()).isPresent()) {
             List<ChildrenLiveAtAddress> children = unwrapElements(caseData.getHome().getChildren());
             for (ChildrenLiveAtAddress child : children) {
-                if (child.getKeepChildrenInfoConfidential().equals(YesOrNo.Yes)) {
+                if (child != null && YesOrNo.Yes.equals(child.getKeepChildrenInfoConfidential())) {
                     Element<Fl401ChildConfidentialityDetails> childElement = Element
                         .<Fl401ChildConfidentialityDetails>builder()
                         .value(Fl401ChildConfidentialityDetails.builder()
