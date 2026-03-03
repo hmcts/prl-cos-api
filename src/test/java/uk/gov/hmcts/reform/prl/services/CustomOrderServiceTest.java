@@ -379,6 +379,57 @@ public class CustomOrderServiceTest {
     }
 
     @Test
+    public void testBuildHeaderPlaceholders_familymanCaseNumberPopulated() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .familymanCaseNumber("SA26P12345")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("FamilyMan:", placeholders.get("familymanLabel"));
+        assertEquals("SA26P12345", placeholders.get("familymanCaseNumber"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_familymanCaseNumberEmpty_whenNull() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .familymanCaseNumber(null)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("familymanLabel"));
+        assertEquals("", placeholders.get("familymanCaseNumber"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_familymanCaseNumberEmpty_whenBlank() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .familymanCaseNumber("   ")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("familymanLabel"));
+        assertEquals("", placeholders.get("familymanCaseNumber"));
+    }
+
+    @Test
     public void testBuildHeaderPlaceholders_courtNamePopulated() throws IOException {
         Long caseId = 1234567890123456L;
         CaseData caseData = CaseData.builder()

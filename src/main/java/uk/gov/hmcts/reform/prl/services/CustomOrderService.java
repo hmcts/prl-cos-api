@@ -566,6 +566,23 @@ public class CustomOrderService {
     }
 
     /**
+     * Populates FamilyMan case number placeholders for the header template.
+     * Only includes the label and value if familymanCaseNumber exists.
+     */
+    private void populateFamilymanPlaceholders(Map<String, Object> data, CaseData caseData) {
+        String familymanNumber = caseData.getFamilymanCaseNumber();
+        if (familymanNumber != null && !familymanNumber.isBlank()) {
+            log.info("FamilyMan case number found: {}", familymanNumber);
+            data.put("familymanLabel", "FamilyMan:");
+            data.put("familymanCaseNumber", familymanNumber);
+        } else {
+            log.info("No FamilyMan case number, leaving placeholders empty");
+            data.put("familymanLabel", "");
+            data.put("familymanCaseNumber", "");
+        }
+    }
+
+    /**
      * Populates applicant placeholders for the header template.
      */
     private void populateApplicantPlaceholders(Map<String, Object> data, CaseData caseData, boolean isFL401) {
@@ -607,6 +624,7 @@ public class CustomOrderService {
 
         // Case details
         data.put("caseNumber", formatCaseNumber(String.valueOf(caseId)));
+        populateFamilymanPlaceholders(data, caseData);
         safePut(data, "courtName", caseData::getCourtName);
         safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
 
