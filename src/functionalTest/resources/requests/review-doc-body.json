@@ -4044,6 +4044,9 @@
       "cafcassQuarantineDocsList": [
 
       ],
+      "localAuthorityQuarantineDocsList": [
+
+      ],
       "isEngDocGen": "Yes",
       "reviewDoc": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/139bbdeb-4b66-4ef7-a44b-79d98b3570c2",
