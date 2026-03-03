@@ -105,7 +105,7 @@ public class PrepareHearingBundleService {
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return !hasLegalRepresentation(caseData.getApplicantsFL401()) && !hasLegalRepresentation(caseData.getRespondentsFL401());
         } else {
-            throw new IllegalArgumentException("Case " + caseDetail +  " has no case type");
+            throw new IllegalArgumentException("Case " + caseDetail.getId() +  " has no case type");
         }
     }
 
