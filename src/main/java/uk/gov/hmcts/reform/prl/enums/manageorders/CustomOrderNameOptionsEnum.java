@@ -9,8 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 /**
  * Enum for custom order name selection dropdown.
- * Used in the Create Custom Order flow to allow selection of standard order names
- * or "Other" for a custom name.
+ * Used in the Create Custom Order flow to allow selection of standard order names.
  */
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
@@ -50,9 +49,7 @@ public enum CustomOrderNameOptionsEnum {
     @JsonProperty("generalForm")
     generalForm("generalForm", "General form of undertaking (N117)"),
     @JsonProperty("noticeOfProceedings")
-    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)"),
-    @JsonProperty("other")
-    other("other", "Other");
+    noticeOfProceedings("noticeOfProceedings", "Notice of proceedings (FL402)");
 
     private final String id;
     private final String displayedValue;
@@ -69,13 +66,5 @@ public enum CustomOrderNameOptionsEnum {
     @JsonCreator
     public static CustomOrderNameOptionsEnum getValue(String key) {
         return CustomOrderNameOptionsEnum.valueOf(key);
-    }
-
-    /**
-     * Checks if this option represents the "Other" selection,
-     * which means the user should provide a custom name.
-     */
-    public boolean isOther() {
-        return this == other;
     }
 }

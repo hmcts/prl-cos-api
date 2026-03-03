@@ -1354,18 +1354,6 @@ public class CustomOrderServiceTest {
         }
     }
 
-    @Test
-    public void testGetEffectiveOrderName_onlyOtherOptionIsOther() {
-        // Verify only the "other" option returns true for isOther()
-        for (CustomOrderNameOptionsEnum option : CustomOrderNameOptionsEnum.values()) {
-            if (option == CustomOrderNameOptionsEnum.other) {
-                assertTrue(option.isOther(), "other option should return true for isOther()");
-            } else {
-                assertFalse(option.isOther(), option.name() + " should return false for isOther()");
-            }
-        }
-    }
-
     // ========== Tests for resolveCourtName ==========
 
     @Test

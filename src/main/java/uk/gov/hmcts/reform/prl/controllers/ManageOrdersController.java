@@ -712,6 +712,13 @@ public class ManageOrdersController {
             //PRL-4212 - populate fields only when it's needed
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
 
+            // Populate hearings dropdown for custom order flow
+            if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
+                log.info("Custom order selected on Page 1, populating hearings dropdown");
+                caseDataUpdated.put(PrlAppsConstants.HEARINGS_TYPE,
+                    manageOrderService.populateHearingsDropdown(authorisation, caseData));
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

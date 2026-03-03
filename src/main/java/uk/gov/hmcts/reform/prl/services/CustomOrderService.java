@@ -73,7 +73,7 @@ public class CustomOrderService {
     /**
      * Gets the effective order name for a custom order.
      * If a standard order name is selected from the dropdown, returns that display value.
-     * If "Other" is selected or no dropdown selection, falls back to the nameOfOrder text field.
+     * If no dropdown selection, falls back to the nameOfOrder text field.
      *
      * @param caseData The case data
      * @param caseDataMap The raw case data map (needed because customOrderNameOption is not in CaseData due to param limit)
@@ -82,7 +82,7 @@ public class CustomOrderService {
     public String getEffectiveOrderName(CaseData caseData, Map<String, Object> caseDataMap) {
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
 
-        if (selectedOption != null && !selectedOption.isOther()) {
+        if (selectedOption != null) {
             return getOrderNameFromSelection(selectedOption, caseDataMap);
         }
 
