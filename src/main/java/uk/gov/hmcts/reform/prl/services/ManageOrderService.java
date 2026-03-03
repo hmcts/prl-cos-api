@@ -2459,7 +2459,8 @@ public class ManageOrderService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         log.info("Debugging FPVTL-2052: User details: {}", userDetails);
         String loggedInUserType;
-        log.info("Debugging FPVTL-2052 : Is role-assignment-api-in-orders-journey enabled {}", launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY));
+        log.info("Debugging FPVTL-2052 : Is role-assignment-api-in-orders-journey enabled {}",
+                 launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY));
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
