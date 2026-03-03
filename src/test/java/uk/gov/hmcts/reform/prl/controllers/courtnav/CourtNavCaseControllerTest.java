@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
@@ -103,7 +103,7 @@ public class CourtNavCaseControllerTest {
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV));
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
 
@@ -129,7 +129,7 @@ public class CourtNavCaseControllerTest {
     public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV));
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
 
@@ -236,7 +236,7 @@ public class CourtNavCaseControllerTest {
     @Test
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV));
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
 
@@ -286,7 +286,7 @@ public class CourtNavCaseControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV));
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
 

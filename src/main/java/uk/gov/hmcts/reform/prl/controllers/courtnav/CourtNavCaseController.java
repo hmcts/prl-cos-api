@@ -37,7 +37,7 @@ import java.util.Optional;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 
 @Slf4j
@@ -75,7 +75,7 @@ public class CourtNavCaseController {
         }
 
         Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-        if (userInfo.isEmpty() || !userInfo.get().getRoles().contains(COURTNAV)) {
+        if (userInfo.isEmpty() || !userInfo.get().getRoles().contains(COURTNAV_USER)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -119,7 +119,7 @@ public class CourtNavCaseController {
                     caseId
                 );
             } else {
-                if (userInfo.get().getRoles().contains(COURTNAV)) {
+                if (userInfo.get().getRoles().contains(COURTNAV_USER)) {
                     courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
                 } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN);
