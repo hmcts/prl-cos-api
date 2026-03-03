@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.exception.ReviewDocumentException;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -113,6 +114,7 @@ public class ReviewDocumentsController {
             CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
         } else {
             log.info("reviewDocsDynamicList is null for caseId {}", caseData.getId());
+            throw new ReviewDocumentException(String.format("reviewDocsDynamicList is null for caseId %s", caseData.getId()));
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
