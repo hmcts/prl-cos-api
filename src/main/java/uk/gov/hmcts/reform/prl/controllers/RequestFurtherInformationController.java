@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,8 +20,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
+import uk.gov.hmcts.reform.prl.services.RequestFurtherInformaitonService;
 
 import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -31,13 +30,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class AwaitingInformationController {
-    private final AwaitingInformationService awaitingInformationService;
-    private final ObjectMapper objectMapper;
+public class RequestFurtherInformationController {
+    private final RequestFurtherInformaitonService requestFurtherInformaitonService;
     private final AuthorisationService authorisationService;
     private final FeatureToggleService featureToggleService;
 
-    @PostMapping(path = "/submit-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/submit-request-further-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Awaiting On Information callback to update case data and set case status to awaiting information")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
@@ -51,14 +49,14 @@ public class AwaitingInformationController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)
             && featureToggleService.isAwaitingInformationEnabled()) {
-            var caseDataUpdated = awaitingInformationService.addToCase(callbackRequest);
+            var caseDataUpdated = requestFurtherInformaitonService.addToCase(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }
         throw (new RuntimeException(INVALID_CLIENT));
     }
 
 
-    @PostMapping(path = "/validate-awaiting-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/validate-request-further-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate review date")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Child details are fetched"),
@@ -70,7 +68,7 @@ public class AwaitingInformationController {
                 .build();
         }
         return CallbackResponse.builder()
-            .errors(awaitingInformationService.validate(callbackRequest))
+            .errors(requestFurtherInformaitonService.validate(callbackRequest))
             .build();
     }
 }

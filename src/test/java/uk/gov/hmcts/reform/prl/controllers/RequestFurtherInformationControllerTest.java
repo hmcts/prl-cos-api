@@ -13,8 +13,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
+import uk.gov.hmcts.reform.prl.services.RequestFurtherInformaitonService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,13 +33,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class AwaitingInformationControllerTest {
+public class RequestFurtherInformationControllerTest {
 
     @InjectMocks
-    private AwaitingInformationController awaitingInformationController;
+    private RequestFurtherInformationController requestFurtherInformationController;
 
     @Mock
-    private AwaitingInformationService awaitingInformationService;
+    private RequestFurtherInformaitonService requestFurtherInformaitonService;
 
     @Mock
     private FeatureToggleService featureToggleService;
@@ -84,16 +84,16 @@ public class AwaitingInformationControllerTest {
     @Test
     public void shouldSubmitAwaitingInformationSuccessfully() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformaitonService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+        AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response);
         assertNotNull(response.getData());
         assertTrue(response.getData().containsKey(CASE_STATUS));
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(awaitingInformationService, times(1)).addToCase(callbackRequest);
+        verify(requestFurtherInformaitonService, times(1)).addToCase(callbackRequest);
     }
 
     @Test
@@ -101,11 +101,11 @@ public class AwaitingInformationControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
+            requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
         assertEquals("Invalid Client", exception.getMessage());
         verify(authorisationService, times(1)).isAuthorized(AUTH_TOKEN, S2S_TOKEN);
-        verify(awaitingInformationService, times(0)).addToCase(any());
+        verify(requestFurtherInformaitonService, times(0)).addToCase(any());
     }
 
     @Test
@@ -114,10 +114,10 @@ public class AwaitingInformationControllerTest {
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-            awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
+            requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
         assertEquals("Invalid Client", exception.getMessage());
-        verify(awaitingInformationService, times(0)).addToCase(any());
+        verify(requestFurtherInformaitonService, times(0)).addToCase(any());
     }
 
     @Test
@@ -128,9 +128,9 @@ public class AwaitingInformationControllerTest {
         updatedCaseData.put("respondentName", "Jane Doe");
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformaitonService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+        AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response.getData());
@@ -142,9 +142,9 @@ public class AwaitingInformationControllerTest {
     public void shouldHandleNullCaseData() {
         Map<String, Object> emptyCaseData = new HashMap<>();
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(emptyCaseData);
+        when(requestFurtherInformaitonService.addToCase(callbackRequest)).thenReturn(emptyCaseData);
 
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+        AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response);
@@ -156,14 +156,14 @@ public class AwaitingInformationControllerTest {
     @Test
     public void shouldValidateReviewDateSuccessfully() {
         List<String> emptyErrors = new ArrayList<>();
-        when(awaitingInformationService.validate(callbackRequest)).thenReturn(emptyErrors);
+        when(requestFurtherInformaitonService.validate(callbackRequest)).thenReturn(emptyErrors);
 
-        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
 
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertTrue(response.getErrors().isEmpty());
-        verify(awaitingInformationService, times(1)).validate(callbackRequest);
+        verify(requestFurtherInformaitonService, times(1)).validate(callbackRequest);
     }
 
     @Test
@@ -171,9 +171,9 @@ public class AwaitingInformationControllerTest {
         List<String> errorList = new ArrayList<>();
         errorList.add("Please enter a future date");
 
-        when(awaitingInformationService.validate(callbackRequest)).thenReturn(errorList);
+        when(requestFurtherInformaitonService.validate(callbackRequest)).thenReturn(errorList);
 
-        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
 
         assertNotNull(response);
         assertEquals(1, response.getErrors().size());
@@ -184,7 +184,7 @@ public class AwaitingInformationControllerTest {
     public void shouldReturnEmptyErrorsWhenFeatureToggleDisabled() {
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
 
-        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
 
         assertNotNull(response);
         assertTrue(response.getErrors().isEmpty());
@@ -196,21 +196,21 @@ public class AwaitingInformationControllerTest {
         errorList.add("Please enter a future date");
         errorList.add("Review date cannot be more than 12 months away");
 
-        when(awaitingInformationService.validate(callbackRequest)).thenReturn(errorList);
+        when(requestFurtherInformaitonService.validate(callbackRequest)).thenReturn(errorList);
 
-        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
 
         assertNotNull(response);
         assertEquals(2, response.getErrors().size());
-        verify(awaitingInformationService, times(1)).validate(callbackRequest);
+        verify(requestFurtherInformaitonService, times(1)).validate(callbackRequest);
     }
 
     @Test
     public void shouldCallFeatureToggleServiceBeforeValidation() {
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(true);
-        when(awaitingInformationService.validate(callbackRequest)).thenReturn(new ArrayList<>());
+        when(requestFurtherInformaitonService.validate(callbackRequest)).thenReturn(new ArrayList<>());
 
-        CallbackResponse response = awaitingInformationController.validateReviewDate(callbackRequest);
+        CallbackResponse response = requestFurtherInformationController.validateReviewDate(callbackRequest);
 
         assertNotNull(response);
         verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
@@ -224,9 +224,9 @@ public class AwaitingInformationControllerTest {
         updatedCaseData.put("eventId", "123456");
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformaitonService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
-        AboutToStartOrSubmitCallbackResponse response = awaitingInformationController
+        AboutToStartOrSubmitCallbackResponse response = requestFurtherInformationController
             .submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         assertNotNull(response.getData());
@@ -237,9 +237,9 @@ public class AwaitingInformationControllerTest {
     @Test
     public void shouldVerifyCorrectHeadersUsedInSubmit() {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
-        when(awaitingInformationService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
+        when(requestFurtherInformaitonService.addToCase(callbackRequest)).thenReturn(updatedCaseData);
 
-        awaitingInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        requestFurtherInformationController.submitAwaitingInformation(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         verify(authorisationService, times(1)).isAuthorized(eq(AUTH_TOKEN), eq(S2S_TOKEN));
     }

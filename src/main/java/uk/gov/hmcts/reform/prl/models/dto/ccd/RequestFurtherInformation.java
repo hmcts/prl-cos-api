@@ -14,7 +14,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AwaitingInformation {
+public class RequestFurtherInformation {
     @JsonProperty("reviewByDate")
     private LocalDate reviewDate;
     @JsonProperty("requestFurtherInformationReasonList")

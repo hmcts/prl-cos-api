@@ -10,7 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestFurtherInformation;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -25,10 +25,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-public class AwaitingInformationServiceTest {
+public class RequestFurtherInformationServiceTest {
 
     @InjectMocks
-    private AwaitingInformationService awaitingInformationService;
+    private RequestFurtherInformaitonService requestFurtherInformaitonService;
 
     @Mock
     private FeatureToggleService featureToggleService;
@@ -60,16 +60,16 @@ public class AwaitingInformationServiceTest {
 
     @Test
     public void validateSuccessfullyProcessesValidFutureDate() {
-        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+        RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
             .reviewDate(LocalDate.now().plusDays(10))
             .build();
 
         caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, awaitingInfo);
 
-        when(objectMapper.convertValue(awaitingInfo, AwaitingInformation.class))
+        when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = awaitingInformationService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
         verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
@@ -77,16 +77,16 @@ public class AwaitingInformationServiceTest {
 
     @Test
     public void validateHandlesNullReviewDateWithoutError() {
-        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+        RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
             .reviewDate(null)
             .build();
 
         caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, awaitingInfo);
 
-        when(objectMapper.convertValue(awaitingInfo, AwaitingInformation.class))
+        when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = awaitingInformationService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
     }
@@ -95,42 +95,42 @@ public class AwaitingInformationServiceTest {
     public void validateReturnsEmptyListWhenAwaitingInformationIsNull() {
         caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, null);
 
-        when(objectMapper.convertValue(null, AwaitingInformation.class))
-            .thenReturn(AwaitingInformation.builder().reviewDate(null).build());
+        when(objectMapper.convertValue(null, RequestFurtherInformation.class))
+            .thenReturn(RequestFurtherInformation.builder().reviewDate(null).build());
 
-        List<String> errors = awaitingInformationService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
     }
 
     @Test
     public void validateReturnsErrorMessageExactlyAsConfigured() {
-        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+        RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
             .reviewDate(LocalDate.now().minusDays(1))
             .build();
 
         caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, awaitingInfo);
 
-        when(objectMapper.convertValue(awaitingInfo, AwaitingInformation.class))
+        when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = awaitingInformationService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
 
         assertEquals("Please enter a future date", errors.getFirst());
     }
 
     @Test
     public void validateProcessesCallbackRequestCorrectly() {
-        AwaitingInformation awaitingInfo = AwaitingInformation.builder()
+        RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
             .reviewDate(LocalDate.now().plusDays(7))
             .build();
 
         caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, awaitingInfo);
 
-        when(objectMapper.convertValue(awaitingInfo, AwaitingInformation.class))
+        when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = awaitingInformationService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
         verify(featureToggleService, times(1)).isAwaitingInformationEnabled();

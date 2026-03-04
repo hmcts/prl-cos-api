@@ -17,8 +17,8 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.AwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
+import uk.gov.hmcts.reform.prl.services.RequestFurtherInformaitonService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 })
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-public class AwaitingInformationControllerIntegrationTest {
+public class RequestFurtherInformationControllerIntegrationTest {
 
     private MockMvc mockMvc;
 
@@ -51,7 +51,7 @@ public class AwaitingInformationControllerIntegrationTest {
     private AuthorisationService authorisationService;
 
     @MockBean
-    private AwaitingInformationService awaitingInformationService;
+    private RequestFurtherInformaitonService requestFurtherInformaitonService;
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -78,15 +78,15 @@ public class AwaitingInformationControllerIntegrationTest {
         return caseData;
     }
 
-    // Tests for /submit-awaiting-information endpoint
+    // Tests for /submit-request-further-information endpoint
 
     @Test
     public void shouldSubmitAwaitingInformationSuccessfully() throws Exception {
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(awaitingInformationService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
 
         mockMvc.perform(
                 post(url)
@@ -102,7 +102,7 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldRejectSubmitAwaitingInformationWithoutAuthorizationHeader() throws Exception {
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         mockMvc.perform(
@@ -117,7 +117,7 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldRejectSubmitAwaitingInformationWithoutServiceAuthorizationHeader() throws Exception {
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         mockMvc.perform(
@@ -132,7 +132,7 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldRejectSubmitAwaitingInformationWithUnauthorizedTokens() throws Exception {
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
@@ -150,11 +150,11 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldSubmitAwaitingInformationWithValidHeaders() throws Exception {
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
-        when(awaitingInformationService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
 
         mockMvc.perform(
                 post(url)
@@ -175,9 +175,9 @@ public class AwaitingInformationControllerIntegrationTest {
         caseData.put("respondentName", "Jane Doe");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(awaitingInformationService.addToCase(any())).thenReturn(caseData);
+        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(caseData);
 
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         mockMvc.perform(
@@ -193,14 +193,14 @@ public class AwaitingInformationControllerIntegrationTest {
             .andReturn();
     }
 
-    // Tests for /validate-awaiting-information endpoint
+    // Tests for /validate-request-further-information endpoint
 
     @Test
     public void shouldValidateAwaitingInformationSuccessfully() throws Exception {
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         mockMvc.perform(
@@ -215,13 +215,13 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldValidateAwaitingInformationWithErrors() throws Exception {
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         List<String> errorList = new ArrayList<>();
         errorList.add("Please enter a future date");
 
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(errorList);
 
         mockMvc.perform(
@@ -241,10 +241,10 @@ public class AwaitingInformationControllerIntegrationTest {
         errorList.add("Please enter a future date");
         errorList.add("Review date cannot be more than 12 months away");
 
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(errorList);
 
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
         mockMvc.perform(
                 post(url)
@@ -258,7 +258,7 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldValidateAwaitingInformationReturnEmptyErrorsWhenFeatureToggleDisabled() throws Exception {
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(featureToggleService.isAwaitingInformationEnabled()).thenReturn(false);
@@ -275,10 +275,10 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldValidateAwaitingInformationWithCorrectContentType() throws Exception {
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         mockMvc.perform(
@@ -292,10 +292,10 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldHandleValidateAwaitingInformationWithoutContentType() throws Exception {
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         mockMvc.perform(
@@ -309,13 +309,13 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldHandleCompleteAwaitingInformationWorkflow() throws Exception {
-        String submitUrl = "/submit-awaiting-information";
-        String validateUrl = "/validate-awaiting-information";
+        String submitUrl = "/submit-request-further-information";
+        String validateUrl = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(awaitingInformationService.addToCase(any())).thenReturn(createMockCaseData());
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         // Submit awaiting information
@@ -341,10 +341,10 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldHandleSequentialValidationCalls() throws Exception {
-        String url = "/validate-awaiting-information";
+        String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(awaitingInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         // First validation call
@@ -368,11 +368,11 @@ public class AwaitingInformationControllerIntegrationTest {
 
     @Test
     public void shouldHandleMultipleSubmitCalls() throws Exception {
-        String url = "/submit-awaiting-information";
+        String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(awaitingInformationService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
 
         // First submit
         mockMvc.perform(

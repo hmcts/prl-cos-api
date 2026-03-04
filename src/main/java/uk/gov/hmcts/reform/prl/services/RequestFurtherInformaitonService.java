@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AwaitingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestFurtherInformation;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 @Builder
 @RequiredArgsConstructor
 @Service
-public class AwaitingInformationService {
+public class RequestFurtherInformaitonService {
 
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
@@ -35,7 +35,7 @@ public class AwaitingInformationService {
         }
         var caseDataUpdated = addToCase(callbackRequest);
         var awaitingInformation = objectMapper.convertValue(
-            caseDataUpdated.get(REQUEST_FURTHER_INFORMATION_DETAILS), AwaitingInformation.class);
+            caseDataUpdated.get(REQUEST_FURTHER_INFORMATION_DETAILS), RequestFurtherInformation.class);
         List<String> errorList = new ArrayList<>();
         if (awaitingInformation.getReviewDate()
             != null && !awaitingInformation.getReviewDate().isAfter(LocalDate.now())) {
