@@ -113,7 +113,7 @@ public class ReviewDocumentsController {
             //clear fields
             CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
         } else {
-            log.info("reviewDocsDynamicList is null for caseId {}", caseData.getId());
+            log.error("reviewDocsDynamicList is null for caseId {}", caseData.getId());
             throw new ReviewDocumentException(String.format("reviewDocsDynamicList is null for caseId %s", caseData.getId()));
         }
 
