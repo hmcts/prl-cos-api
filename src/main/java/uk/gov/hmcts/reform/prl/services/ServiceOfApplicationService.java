@@ -2033,12 +2033,14 @@ public class ServiceOfApplicationService {
                                                                                 StartAllTabsUpdateDataContent updatedCaseDataContent,
                                                                                 String caseId) {
         log.info("Confidential details are NOT present");
-        Map<String,String> confirmationBanner = new HashMap<>();
+        Map<String, String> confirmationBanner = new HashMap<>();
         getConfirmationBanner(caseData, confirmationBanner);
         String confirmationBody = confirmationBanner.get(CONFIRMATION_BODY);
         if (StringUtils.isNotEmpty(confirmationBody)) {
-            confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
-                + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
+            confirmationBody = String.format(
+                confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+                    + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT
+            );
         }
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
@@ -2047,7 +2049,11 @@ public class ServiceOfApplicationService {
             log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
-        finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(caseData, authorisation, caseDataMap)));
+        finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(
+            caseData,
+            authorisation,
+            caseDataMap
+        )));
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap);
 
@@ -2055,11 +2061,11 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         allTabService.submitAllTabsUpdate(
-                updatedCaseDataContent.authorisation(),
-                caseId,
-                updatedCaseDataContent.startEventResponse(),
-                updatedCaseDataContent.eventRequestData(),
-                caseDataMap
+            updatedCaseDataContent.authorisation(),
+            caseId,
+            updatedCaseDataContent.startEventResponse(),
+            updatedCaseDataContent.eventRequestData(),
+            caseDataMap
         );
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationBanner.get(CONFIRMATION_HEADER))
@@ -2067,51 +2073,59 @@ public class ServiceOfApplicationService {
     }
 
     private void getConfirmationBanner(CaseData caseData, Map<String, String> confirmationBanner) {
-        if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+        ServiceOfApplication soa = caseData.getServiceOfApplication();
+
+        String selection = null;
+        if (soa.getSoaServeToRespondentOptions() != null) {
+            selection = soa.getSoaServeToRespondentOptions().name();
+        } else if (soa.getSoaServeToRespondentOptionsDA() != null) {
+            selection = soa.getSoaServeToRespondentOptionsDA();
+        }
+
+        if ("No".equalsIgnoreCase(selection)) {
             confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
             confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
-        } else if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
-            && YesNoNotApplicable.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+        } else if ("Yes".equalsIgnoreCase(selection)) {
             confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_PERSONAL);
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+
+            boolean isC100 = C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
+
+            if (isC100) {
+                if (isApplicantServing(soa)) {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA);
-                } else if (SoaCitizenServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    || SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                } else if (isCourtAdminServing(soa)) {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA);
-                } else if (SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())
-                    || SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())) {
+                } else if (isBailiffServing(soa)) {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA);
                 }
             } else {
-                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                if (isApplicantServing(soa)) {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA);
-                } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.courtAdmin
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                } else if (isCourtAdminServing(soa)) {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA);
-                } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptions())
-                    || SoaCitizenServingRespondentsEnum.courtBailiff
-                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptions())) {
+                } else if (isBailiffServing(soa)) {
                     confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA);
                 }
             }
         } else {
-            confirmationBanner.put(CONFIRMATION_BODY, "");
+            confirmationBanner.put(CONFIRMATION_HEADER, CONFIRMATION_HEADER_NON_PERSONAL);
+            confirmationBanner.put(CONFIRMATION_BODY, CONFIRMATION_BODY_PREFIX);
         }
+    }
+
+    private boolean isApplicantServing(ServiceOfApplication soa) {
+        return SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(soa.getSoaServingRespondentsOptions())
+            || SoaCitizenServingRespondentsEnum.unrepresentedApplicant.equals(soa.getSoaCitizenServingRespondentsOptions());
+    }
+
+    private boolean isCourtAdminServing(ServiceOfApplication soa) {
+        return SoaCitizenServingRespondentsEnum.courtAdmin.equals(soa.getSoaCitizenServingRespondentsOptions())
+            || SoaSolicitorServingRespondentsEnum.courtAdmin.equals(soa.getSoaServingRespondentsOptions());
+    }
+
+    private boolean isBailiffServing(ServiceOfApplication soa) {
+        return SoaCitizenServingRespondentsEnum.courtBailiff.equals(soa.getSoaCitizenServingRespondentsOptions())
+            || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(soa.getSoaServingRespondentsOptions());
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processConfidentialDetailsSoa(String authorisation, Map<String, Object> caseDataMap,
