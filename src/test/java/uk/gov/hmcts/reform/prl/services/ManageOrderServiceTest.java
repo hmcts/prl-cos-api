@@ -2844,23 +2844,25 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeFromIdamWhenAmCallFails() {
+    public void shouldThrowExceptionWhenRoleAssignmentApiCallFails() {
 
         String auth = "test-auth";
         String authToken = "serviceAuthToken";
         String id = "123";
 
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .id(id)
-                                                                     .roles(List.of(Roles.SOLICITOR.getValue())).build());
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder()
+                .id(id)
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build()
+        );
         when(authTokenGenerator.generate()).thenReturn(authToken);
-        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY))
+            .thenReturn(true);
         when(roleAssignmentApi.getRoleAssignments(auth, authToken, null, id))
             .thenThrow(FeignException.class);
 
-        String result = manageOrderService.getLoggedInUserType(auth);
-
-        assertEquals(UserRoles.SOLICITOR.name(), result);
+        assertThrows(FeignException.class, () -> manageOrderService.getLoggedInUserType(auth));
     }
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
