@@ -163,10 +163,12 @@ class HearingServiceTest {
             .reason("Internal Server Error")
             .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
             .build()));
-        Hearings response =
-            hearingService.getHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertThrows(
+            FeignException.InternalServerError.class, () -> {
+                hearingService.getHearings(auth, caseReferenceNumber);
+            }
+        );
 
     }
 

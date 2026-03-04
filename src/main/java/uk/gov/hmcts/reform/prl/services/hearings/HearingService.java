@@ -76,8 +76,8 @@ public class HearingService {
 
         } catch (FeignException e) {
             log.error("Error in getting hearings {}", e.getMessage());
+            throw e;
         }
-        return null;
     }
 
 
