@@ -492,7 +492,6 @@ public class ServiceOfApplicationService {
         ServiceOfApplication soa = caseData.getServiceOfApplication();
         List<Document> staticDocs = null;
 
-        // 1. Handle Respondents (Your NotApplicable logic is preserved here)
         if (shouldHandleRespondents(soa)) {
             staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData), caseData);
             whoIsResponsibleForServing = processRespondentNotifications(caseData, authorization, caseDataMap,
@@ -500,7 +499,6 @@ public class ServiceOfApplicationService {
                                                                         whoIsResponsibleForServing, staticDocs);
         }
 
-        // 2. Handle Other Parties
         if (shouldHandleOtherParties(soa)) {
             if (staticDocs == null) {
                 staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData), caseData);
@@ -509,7 +507,6 @@ public class ServiceOfApplicationService {
             sendNotificationToOthers(caseData, authorization, bulkPrintDetails, staticDocs);
         }
 
-        // 3. Statutory Bodies (Cafcass & LA)
         checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         handleLocalAuthorityNotification(caseData, authorization, emailNotificationDetails);
 
