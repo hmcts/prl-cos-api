@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.localauthority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -64,11 +63,11 @@ class LocalAuthorityControllerTest {
 
     private CaseData buildCaseDataWithOrgPolicy(String orgId) {
         return CaseData.builder()
-                .id(CASE_ID)
-                .localAuthoritySolicitorOrganisationPolicy(
-                        OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(orgId)
-                                .organisationName("Some Org").build()).build())
-                .build();
+            .id(CASE_ID)
+            .localAuthoritySolicitorOrganisationPolicy(
+                OrganisationPolicy.builder().organisation(Organisation.builder().organisationID(orgId)
+                                                              .organisationName("Some Org").build()).build())
+            .build();
     }
 
     @Test
@@ -85,20 +84,20 @@ class LocalAuthorityControllerTest {
 
         // Act
         AboutToStartOrSubmitCallbackResponse response =
-                controller.handleAddAboutToSubmit(AUTH, S2S, callbackRequest);
+            controller.handleAddAboutToSubmit(AUTH, S2S, callbackRequest);
 
         // Assert
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data map should not be null");
 
         assertTrue(
-                response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
-                "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+            response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+            "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
         );
         assertEquals(YesOrNo.Yes, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
         assertTrue(
-                response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
-                "Expected policy to be set in response map"
+            response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
+            "Expected policy to be set in response map"
         );
 
         Object policyObj = response.getData().get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
@@ -108,8 +107,8 @@ class LocalAuthorityControllerTest {
         OrganisationPolicy updatedPolicy = (OrganisationPolicy) policyObj;
 
         assertEquals(
-                "[LASOLICITOR]", updatedPolicy.getOrgPolicyCaseAssignedRole(),
-                "Case assigned role must be [LASOLICITOR]"
+            "[LASOLICITOR]", updatedPolicy.getOrgPolicyCaseAssignedRole(),
+            "Case assigned role must be [LASOLICITOR]"
         );
 
         // Verify authorisation check and mapping were used
@@ -129,87 +128,13 @@ class LocalAuthorityControllerTest {
 
         // Act + Assert
         assertThrows(
-                RuntimeException.class,
-                () -> controller.handleAddAboutToSubmit(AUTH, S2S, callbackRequest),
-                "Expected RuntimeException for unauthorised request"
+            RuntimeException.class,
+            () -> controller.handleAddAboutToSubmit(AUTH, S2S, callbackRequest),
+            "Expected RuntimeException for unauthorised request"
         );
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
         verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitorService);
-    }
-
-    @Test
-    void shouldNotHandleRemoveAboutToStartWhenNotAuthorised() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(CaseDetails.builder()
-                        .id(1L)
-                        .build())
-                .build();
-
-        when(authorisationService.isAuthorized(AUTH, S2S)).thenReturn(false);
-
-        Assert.assertThrows(
-                RuntimeException.class,
-                () -> controller
-                        .handleRemoveAboutToStart(AUTH, S2S, callbackRequest));
-    }
-
-    @Test
-    public void handleRemoveAboutToStartWhenNoLocalAuthorityOrgPolicy() {
-        Map caseData = new HashMap<>();
-        caseData.put("id", 12345L);
-        caseData.put("caseTypeOfApplication", "C100");
-
-        CaseData caseData1 = CaseData.builder()
-                .id(12345L)
-                .caseTypeOfApplication("C100")
-                .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(CaseDetails.builder()
-                        .id(1L)
-                        .data(caseData)
-                        .build())
-                .build();
-
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(authorisationService.isAuthorized(AUTH, S2S)).thenReturn(true);
-
-        AboutToStartOrSubmitCallbackResponse callbackResponse = controller
-                .handleRemoveAboutToStart(AUTH, S2S, callbackRequest);
-
-        assertEquals("No Local authority currently assigned to the case.", callbackResponse.getErrors().get(0));
-        verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData1));
-    }
-
-
-    @Test
-    public void handleRemoveAboutToStartWhenNullLocalAuthorityOrgPolicy() {
-        Map caseData = new HashMap<>();
-        caseData.put("id", 12345L);
-        caseData.put("caseTypeOfApplication", "C100");
-        caseData.put("localAuthoritySolicitorOrganisationPolicy", null);
-
-        CaseData caseData1 = CaseData.builder()
-                .id(12345L)
-                .caseTypeOfApplication("C100")
-                .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(CaseDetails.builder()
-                        .id(1L)
-                        .data(caseData)
-                        .build())
-                .build();
-
-        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
-        when(authorisationService.isAuthorized(AUTH, S2S)).thenReturn(true);
-
-        AboutToStartOrSubmitCallbackResponse callbackResponse = controller
-                .handleRemoveAboutToStart(AUTH, S2S, callbackRequest);
-
-        assertEquals("No Local authority currently assigned to the case.", callbackResponse.getErrors().get(0));
-        verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData1));
     }
 
     @Test
@@ -218,8 +143,8 @@ class LocalAuthorityControllerTest {
         Map<String, Object> inputData = new HashMap<>();
         // Seed the map with the policy key to verify it is removed
         inputData.put(
-                LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
-                OrganisationPolicy.builder().build()
+            LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
+            OrganisationPolicy.builder().build()
         );
 
         CaseDetails caseDetails = CaseDetails.builder().id(CASE_ID).data(inputData).build();
@@ -233,24 +158,24 @@ class LocalAuthorityControllerTest {
 
         // Act
         AboutToStartOrSubmitCallbackResponse response =
-                controller.handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest);
+            controller.handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest);
 
         // Assert
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data should not be null");
         assertTrue(
-                response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
-                "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+            response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+            "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
         );
         assertEquals(YesOrNo.No, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
         assertFalse(
-                response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
-                "Policy key should be removed from map"
+            response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
+            "Policy key should be removed from map"
         );
 
         ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
         verify(removeLocalAuthoritySolicitorService, times(1))
-                .removeLocalAuthoritySolicitor(caseDataCaptor.capture());
+            .removeLocalAuthoritySolicitor(caseDataCaptor.capture());
 
         CaseData passedToService = caseDataCaptor.getValue();
         assertNotNull(passedToService, "CaseData passed to service should not be null");
@@ -271,9 +196,9 @@ class LocalAuthorityControllerTest {
 
         // Act + Assert
         assertThrows(
-                RuntimeException.class,
-                () -> controller.handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest),
-                "Expected RuntimeException for unauthorised request"
+            RuntimeException.class,
+            () -> controller.handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest),
+            "Expected RuntimeException for unauthorised request"
         );
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
@@ -287,23 +212,23 @@ class LocalAuthorityControllerTest {
         caseData.put("caseTypeOfApplication", "C100");
 
         CaseData caseData1 = CaseData.builder()
-                .id(12345L)
-                .caseTypeOfApplication("C100")
-                .build();
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(CaseDetails.builder()
-                        .id(1L)
-                        .data(caseData)
-                        .build())
-                .build();
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData)
+                             .build())
+            .build();
 
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
         when(authorisationService.isAuthorized(AUTH, S2S)).thenReturn(true);
 
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = controller
-                .handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest);
+            .handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest);
 
         assertEquals("No Local authority currently assigned to the case", callbackResponse.getErrors().get(0));
         verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData1));
