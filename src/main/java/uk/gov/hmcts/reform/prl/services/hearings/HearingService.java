@@ -228,6 +228,7 @@ public class HearingService {
             }
         } catch (Exception e) {
             log.error("Error in createAutomatedHearing", e);
+            throw e;
         }
         return null;
     }

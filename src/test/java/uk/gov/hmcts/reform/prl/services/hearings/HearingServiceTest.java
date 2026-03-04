@@ -46,6 +46,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -358,8 +359,11 @@ class HearingServiceTest {
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenThrow(new RuntimeException());
-        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertThrows(
+            RuntimeException.class, () -> {
+                hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+            }
+        );
     }
 
     @Test
@@ -369,8 +373,11 @@ class HearingServiceTest {
         when(hearingApiClient.createAutomatedHearing(any(), any(), any())).thenThrow(new RuntimeException());
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
-        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertThrows(
+            RuntimeException.class, () -> {
+                hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+            }
+        );
     }
 
     @Test
