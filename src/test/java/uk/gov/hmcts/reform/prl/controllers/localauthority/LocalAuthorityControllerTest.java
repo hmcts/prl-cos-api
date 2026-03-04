@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -201,5 +203,34 @@ class LocalAuthorityControllerTest {
 
         verify(authorisationService, times(1)).isAuthorized(AUTH, S2S);
         verifyNoInteractions(objectMapper, removeLocalAuthoritySolicitorService);
+    }
+
+    @Test
+    public void handleRemoveAboutToStartWhenNoLocalAuthorityOrganisationPolicyAdded() {
+        Map caseData = new HashMap<>();
+        caseData.put("id", 12345L);
+        caseData.put("caseTypeOfApplication", "C100");
+
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseData)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH, S2S)).thenReturn(true);
+
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = controller
+            .handleRemoveAboutToSubmit(AUTH, S2S, callbackRequest);
+
+        assertEquals("No Local authority currently assigned to the case", callbackResponse.getErrors().get(0));
+        verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData1));
     }
 }

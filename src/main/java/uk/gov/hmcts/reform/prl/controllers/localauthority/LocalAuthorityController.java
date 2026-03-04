@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -71,8 +73,10 @@ public class LocalAuthorityController extends AbstractCallbackController {
                     .orgPolicyCaseAssignedRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE).build()
             );
             caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
-            caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME,
-                                localAuthorityOrganisationPolicy.getOrganisation().getOrganisationName());
+            caseDataUpdated.put(
+                LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME,
+                localAuthorityOrganisationPolicy.getOrganisation().getOrganisationName()
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -94,13 +98,21 @@ public class LocalAuthorityController extends AbstractCallbackController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
-
+            List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
-            caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME);
-            caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
+            if (caseData.getLocalAuthoritySolicitorOrganisationPolicy() != null) {
+                removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME);
+                caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
+            } else {
+                errorList.add("No Local authority currently assigned to the case");
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated)
+                .errors(errorList)
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
