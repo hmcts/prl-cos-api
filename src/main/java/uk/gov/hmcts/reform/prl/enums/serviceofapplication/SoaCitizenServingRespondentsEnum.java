@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -18,7 +19,8 @@ public enum SoaCitizenServingRespondentsEnum {
     @JsonProperty("unrepresentedApplicant")
     unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
     @JsonProperty("courtAdmin")
-    courtAdmin("courtAdmin", "Court admin");
+    courtAdmin("courtAdmin", "Court admin"),
+    UNKNOWN_VALUE("unknownValue", "Unknown value");
 
     @Getter
     private final String id;
@@ -29,10 +31,11 @@ public enum SoaCitizenServingRespondentsEnum {
         return displayedValue;
     }
 
+    @JsonCreator
     public static SoaCitizenServingRespondentsEnum getValue(String key) {
         return Arrays.stream(values())
-            .filter(v -> v.id.equalsIgnoreCase(key) || v.name().equalsIgnoreCase(key))
+            .filter(value -> value.id.equalsIgnoreCase(key) || value.name().equalsIgnoreCase(key))
             .findFirst()
-            .orElse(null);
+            .orElse(UNKNOWN_VALUE);
     }
 }
