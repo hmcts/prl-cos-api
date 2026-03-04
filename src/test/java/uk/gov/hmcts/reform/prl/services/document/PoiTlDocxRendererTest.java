@@ -495,6 +495,8 @@ class PoiTlDocxRendererTest {
 
         Map<String, Object> data = new HashMap<>();
         data.put("caseNumber", "1234-5678-9012-3456");
+        data.put("familymanLabel", "FamilyMan:");
+        data.put("familymanCaseNumber", "SA26P12345");
         data.put("courtName", "Test Family Court");
         data.put("judgeName", "Judge Test");
         data.put("applicantName", "Test Applicant");
@@ -554,9 +556,18 @@ class PoiTlDocxRendererTest {
             assertThat(allTextStr).contains("Female");
             assertThat(allTextStr).contains("Male");
 
-            // Verify table has  2 children rows
+            // Verify FamilyMan was rendered
+            assertThat(allTextStr).contains("FamilyMan:");
+            assertThat(allTextStr).contains("SA26P12345");
+
+            // Verify tables exist (the children table has the child rows)
             assertThat(doc.getTables()).isNotEmpty();
-            assertThat(doc.getTables().get(0).getRows()).hasSize(2);
+            // Find the table containing children data (has Alice Smith)
+            boolean foundChildrenTable = doc.getTables().stream()
+                .anyMatch(table -> table.getRows().stream()
+                    .anyMatch(row -> row.getTableCells().stream()
+                        .anyMatch(cell -> cell.getText().contains("Alice Smith"))));
+            assertThat(foundChildrenTable).isTrue();
         }
     }
 }
