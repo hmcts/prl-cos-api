@@ -437,9 +437,15 @@ public class ServiceOfApplicationService {
             caseData
         );
 
-        if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
-            && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
-            && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
+        ServiceOfApplication soa = caseData.getServiceOfApplication();
+
+        boolean isNonPersonalService = "No".equalsIgnoreCase(soa.getSoaServeToRespondentOptionsDA());
+        boolean hasRecipients = soa.getSoaRecipientsOptions() != null
+            && soa.getSoaRecipientsOptions().getValue() != null
+            && !soa.getSoaRecipientsOptions().getValue().isEmpty();
+
+
+        if (isNonPersonalService && hasRecipients) {
             log.info("*** Handling notifications for DA Non personal service ***");
             handleNotificationDaNonPersonalService(caseData, authorization, emailNotificationDetails, bulkPrintDetails,
                                                    staticDocs
@@ -514,8 +520,18 @@ public class ServiceOfApplicationService {
     }
 
     private boolean shouldHandleRespondents(ServiceOfApplication soa) {
-        return soa != null && soa.getSoaServeToRespondentOptions() != null
-            && !YesNoNotApplicable.NotApplicable.equals(soa.getSoaServeToRespondentOptions());
+        if (soa == null) {
+            return false;
+        }
+
+        // Check the C100 Enum Field
+        if (soa.getSoaServeToRespondentOptions() != null) {
+            // Use the Enum's own name to compare—this is always safe
+            return !soa.getSoaServeToRespondentOptions().name().equalsIgnoreCase("NotApplicable");
+        }
+
+        // Check the DA Field (which doesn't have a 'Not Applicable' option anyway)
+        return soa.getSoaServeToRespondentOptionsDA() != null;
     }
 
     private boolean shouldHandleOtherParties(ServiceOfApplication soa) {
@@ -530,7 +546,14 @@ public class ServiceOfApplicationService {
                                                   String responsibleParty, List<Document> staticDocs) {
         ServiceOfApplication soa = caseData.getServiceOfApplication();
 
-        if (YesNoNotApplicable.No.equals(soa.getSoaServeToRespondentOptions()) && hasRecipients(soa)) {
+        String selection = null;
+        if (soa.getSoaServeToRespondentOptions() != null) {
+            selection = soa.getSoaServeToRespondentOptions().name();
+        } else if (soa.getSoaServeToRespondentOptionsDA() != null) {
+            selection = soa.getSoaServeToRespondentOptionsDA();
+        }
+
+        if ("No".equalsIgnoreCase(selection) && hasRecipients(soa)) {
             List<Document> filteredDocs = staticDocs.stream()
                 .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())).toList();
             sendNotificationsSoaC100NonPersonal(caseData, auth, emails, bulk, filteredDocs);
@@ -538,9 +561,10 @@ public class ServiceOfApplicationService {
             return responsibleParty;
         }
 
-        if (YesNoNotApplicable.Yes.equals(soa.getSoaServeToRespondentOptions())) {
+        if ("Yes".equalsIgnoreCase(selection)) {
             return sendNotificationsSoaC100PersonalService(caseData, auth, caseDataMap, emails, bulk, responsibleParty, staticDocs);
         }
+
         return responsibleParty;
     }
 
@@ -1029,15 +1053,20 @@ public class ServiceOfApplicationService {
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> staticDocs) {
         staticDocs = staticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList();
-        List<Element<PartyDetails>> applicantFl401 = Arrays.asList(element(caseData.getApplicantsFL401().getPartyId(),
-                                                                           caseData.getApplicantsFL401()));
-        List<Element<PartyDetails>> respondentFl401 = Arrays.asList(element(caseData.getRespondentsFL401().getPartyId(),
-                                                                            caseData.getRespondentsFL401()));
+        List<Element<PartyDetails>> applicantFl401 = Collections.singletonList(element(
+            caseData.getApplicantsFL401().getPartyId(),
+            caseData.getApplicantsFL401()
+        ));
+        List<Element<PartyDetails>> respondentFl401 = Collections.singletonList(element(
+            caseData.getRespondentsFL401().getPartyId(),
+            caseData.getRespondentsFL401()
+        ));
 
         applicantFl401 = getSelectedPartyElements(applicantFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
         respondentFl401 = getSelectedPartyElements(respondentFl401, caseData.getServiceOfApplication()
             .getSoaRecipientsOptions().getValue());
+        log.info("Parties to notify: Applicant count {}, Respondent count {}", applicantFl401.size(), respondentFl401.size());
         sendNotificationsDaNonPersonalApplicant(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, applicantFl401);
         sendNotificationsDaNonPersonalRespondent(caseData, authorization, emailNotificationDetails, bulkPrintDetails, staticDocs, respondentFl401);
     }

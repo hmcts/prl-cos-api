@@ -34,6 +34,8 @@ public class ServiceOfApplication {
 
     @JsonProperty("soaServeToRespondentOptions")
     private final YesNoNotApplicable soaServeToRespondentOptions;
+    @JsonProperty("soaServeToRespondentOptionsDA")
+    private final String soaServeToRespondentOptionsDA;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptions;
     private final SoaCitizenServingRespondentsEnum soaCitizenServingRespondentsOptions;
 
