@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -98,11 +99,14 @@ public class LocalAuthorityController extends AbstractCallbackController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = new ArrayList<>();
 
-            if (caseData.getLocalAuthoritySolicitorOrganisationPolicy() == null) {
-                errorList.add("No Local authority currently assigned to the case");
+            if (Optional.ofNullable(caseData.getLocalAuthoritySolicitorOrganisationPolicy()).isEmpty()) {
+                log.info("No Local authority currently assigned to the case.");
+                errorList.add("No Local authority currently assigned to the case.");
             }
 
-            return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData())
+                    .errors(errorList).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
