@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -2746,5 +2747,75 @@ public class ManageDocumentsServiceTest {
         manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verifyNoInteractions(caseDocumentClient);
+    }
+
+    @Test
+    public void testThrowBadRequestWhenCategoryIdIsNull() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+        manageDocumentsElement = element(manageDocuments);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", doc);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.Yes)
+            .courtNavQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                            .documentFileName("testFileName")
+                                            .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
+            .isRestricted(YesOrNo.No)
+            .categoryId(null)
+            .build();
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString())).thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(anyString(), anyString(), any())).thenReturn(expectedResponse);
+
+        when(objectMapper.convertValue(Mockito.any(Map.class), Mockito.eq(QuarantineLegalDoc.class)))
+            .thenReturn(quarantineLegalDoc);
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtNavRole);
+
+        MissingCaseDataFieldException exception = assertThrows(MissingCaseDataFieldException.class, () -> {
+            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+                quarantineLegalDoc,
+                userDetailsCourtNavRole,
+                caseData,
+                caseDataMapInitial,
+                "CourtNav"
+            );
+        });
+
+        assertEquals("CategoryId cannot be null or empty", exception.getMessage());
     }
 }

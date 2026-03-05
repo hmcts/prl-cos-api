@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -20,6 +21,7 @@ public class QuarantineLegalDoc {
     private final Document document;
     private final String originalDocumentId;
     private final String documentType;
+    @JsonAlias("category_id")
     private final String categoryId;
     private final String categoryName;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;

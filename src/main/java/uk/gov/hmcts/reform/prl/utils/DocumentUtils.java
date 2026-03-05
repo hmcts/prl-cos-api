@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 
@@ -79,18 +80,27 @@ public class DocumentUtils {
         String wierdAttributeName = returnAttributeNameForWierdCategories(categoryId);
         if (wierdAttributeName == null) {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
-            String finalCategory = "";
-
-            for (int i = 0; i < splittedCategory.length; i++) {
-                if (i == 0) {
-                    finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
-                } else {
-                    finalCategory = finalCategory.concat(splittedCategory[i]);
-                }
-            }
+            String finalCategory = getFinalCategory(splittedCategory);
             return finalCategory + "Document";
         }
         return wierdAttributeName;
+    }
+
+    private static String getFinalCategory(String[] splittedCategory) {
+        String finalCategory = "";
+
+        if (splittedCategory == null || splittedCategory.length == 0) {
+            throw new MissingCaseDataFieldException("CategoryId cannot be null or empty");
+        }
+
+        for (int i = 0; i < splittedCategory.length; i++) {
+            if (i == 0) {
+                finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
+            } else {
+                finalCategory = finalCategory.concat(splittedCategory[i]);
+            }
+        }
+        return finalCategory;
     }
 
     private static String returnAttributeNameForWierdCategories(String categoryId) {
