@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -95,6 +96,44 @@ public class ConfidentialityCheckServiceTest {
         Assert.assertTrue(caseDetails.containsKey("respAC8EngDocument"));
         Document responseDocuments = (Document) caseDetails.get("respAC8EngDocument");
         Assert.assertEquals("with version", responseDocuments.getDocumentUrl());
+    }
+
+    @Test
+    public void shouldHandleMissingDateTimeWhenIdentifyingNewestC8Documents() {
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        respondents.add(Element.<PartyDetails>builder().value(PartyDetails.builder().firstName("firstName").lastName("lastName").build()).build());
+
+        // RespondentC8Document with dateTimeCreated
+        ResponseDocuments docWithDateTime = ResponseDocuments.builder()
+            .dateTimeCreated(LocalDateTime.now().minusDays(2))
+            .respondentC8Document(Document.builder().documentUrl("docWithDateTime").build())
+            .build();
+        Element<ResponseDocuments> docWithDateTimeElement = Element.<ResponseDocuments>builder().value(docWithDateTime).build();
+
+        // RespondentC8 with dateCreated (no dateTimeCreated)
+        ResponseDocuments docWithDateCreated = ResponseDocuments.builder()
+            .dateCreated(LocalDate.now().minusDays(1))
+            .respondentC8Document(Document.builder().documentUrl("docWithDateCreated").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .respondents(respondents)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentC8Document(RespondentC8Document.builder()
+                                      .respondentAc8Documents(List.of(docWithDateTimeElement))
+                                      .build())
+            .respondentC8(RespondentC8.builder()
+                              .respondentAc8(docWithDateCreated)
+                              .build())
+            .build();
+
+        Map<String, Object> caseDetails = new HashMap<>();
+        confidentialityCheckService.processRespondentsC8Documents(caseDetails, caseData);
+
+        assertThat(caseDetails).containsKey("respAC8EngDocument");
+        Document responseDocument = (Document) caseDetails.get("respAC8EngDocument");
+        assertThat(responseDocument.getDocumentUrl()).isEqualTo("docWithDateCreated");
     }
 
     @Test
@@ -480,7 +519,7 @@ public class ConfidentialityCheckServiceTest {
             .applicants(applicants)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        
+
         Map<String, Object> caseDetails = new HashMap<>();
         confidentialityCheckService.processOtherC8Documents(caseDetails, caseData);
 
