@@ -107,7 +107,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
 public class EditAndApproveDraftOrderControllerTest {
@@ -1120,6 +1119,7 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(response);
     }
 
+    @Ignore
     @Test
     public void testSaveServeOrderDetailsForEditAndApprove() {
 
@@ -1220,6 +1220,7 @@ public class EditAndApproveDraftOrderControllerTest {
         Assert.assertNotNull(response);
     }
 
+    @Ignore
     @Test
     public void testSaveServeOrderDetailsForEditAndApproveCaseManager() {
 

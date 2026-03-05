@@ -3377,6 +3377,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId, UUID newDraftOrderCollectionId) {
+        log.info("Debugging FPVTL-2052 : Inside setFieldsForWaTask for the case id {}", String.valueOf(caseData.getId()));
         String judgeLaReviewRequired = null;
         String performingUser = null;
         String performingAction = null;

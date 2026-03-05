@@ -167,7 +167,6 @@ import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADD
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
 
@@ -2773,6 +2772,7 @@ public class ManageOrderServiceTest {
     }
 
 
+    @Ignore
     @Test
     public void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
@@ -2788,6 +2788,7 @@ public class ManageOrderServiceTest {
         assertEquals(UserRoles.COURT_ADMIN.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
+    @Ignore
     @Test
     public void testGetLoggedInUserTypeSolicitorFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
@@ -2803,6 +2804,7 @@ public class ManageOrderServiceTest {
         assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
+    @Ignore
     @Test
     public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
@@ -2816,6 +2818,7 @@ public class ManageOrderServiceTest {
         assertEquals(UserRoles.JUDGE.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
+    @Ignore
     @Test
     public void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
@@ -2831,6 +2834,7 @@ public class ManageOrderServiceTest {
         assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
+    @Ignore
     @Test
     public void testGetLoggedInUserTypeForCitizenFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
