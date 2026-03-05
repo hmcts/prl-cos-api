@@ -61,12 +61,13 @@ import java.util.UUID;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REDACTED_DOCUMENT_UUID;
+import static uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum.applicantApplication;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CaseDataService {
+public class CafcassCaseDataService {
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
     @Value("${cafcaas.search-case-type-id}")
@@ -230,6 +231,7 @@ public class CaseDataService {
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
         cafCassResponse.getCases().parallelStream().forEach(cafCassCaseDetail -> {
+            log.info("Adding documents for case ID {} ", cafCassCaseDetail.getId());
             List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList = new ArrayList<>();
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             populateReviewDocuments(otherDocsList, caseData);
@@ -237,6 +239,7 @@ public class CaseDataService {
             populateConfidentialDoc(caseData, otherDocsList);
             populateBundleDoc(caseData, otherDocsList);
             populateAnyOtherDoc(caseData, otherDocsList);
+            populateAdditionalOrderDocuments(caseData, otherDocsList);
 
             List<Element<ApplicantDetails>> respondents = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
@@ -273,6 +276,7 @@ public class CaseDataService {
                 .stmtOfServiceForOrder(null)
                 .stmtOfServiceForApplication(null)
                 .finalServedApplicationDetailsList(null)
+                .additionalOrderDocuments(null)
                 .respondents(respondents)
                 .build();
             cafCassCaseDetail.setCaseData(cafCassCaseData);
@@ -294,8 +298,6 @@ public class CaseDataService {
         }
         populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
         populateStatementOfServiceDocs(caseData, otherDocsList);
-
-
     }
 
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
@@ -323,6 +325,13 @@ public class CaseDataService {
                     otherDocsList
                 ));
         }
+    }
+
+    private void populateAdditionalOrderDocuments(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(caseData.getAdditionalOrderDocuments())
+            .stream()
+            .flatMap(el -> el.getValue().getAdditionalDocuments().stream())
+            .forEach(doc -> addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList));
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData,
@@ -894,7 +903,8 @@ public class CaseDataService {
             "data.stmtOfServiceAddRecipient",
             "data.stmtOfServiceForOrder",
             "data.stmtOfServiceForApplication",
-            "data.finalServedApplicationDetailsList"
+            "data.finalServedApplicationDetailsList",
+            "data.additionalOrderDocuments"
         );
     }
 }
