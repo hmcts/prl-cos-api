@@ -26,9 +26,10 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE;
@@ -99,7 +100,7 @@ public class LocalAuthorityController extends AbstractCallbackController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = new ArrayList<>();
 
-            if (Optional.ofNullable(caseData.getLocalAuthoritySolicitorOrganisationPolicy()).isEmpty()) {
+            if (isEmpty(caseData.getLocalAuthoritySolicitorOrganisationPolicy())) {
                 log.info("No Local authority currently assigned to the case.");
                 errorList.add("No Local authority currently assigned to the case.");
             }
@@ -130,7 +131,7 @@ public class LocalAuthorityController extends AbstractCallbackController {
             List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            if (caseData.getLocalAuthoritySolicitorOrganisationPolicy() != null) {
+            if (isNotEmpty(caseData.getLocalAuthoritySolicitorOrganisationPolicy())) {
                 removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
                 caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
                 caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME);
