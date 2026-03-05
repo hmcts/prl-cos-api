@@ -370,8 +370,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testPopulatePreviewOrderWhenOrderUploadedForCustomOrder() throws Exception {
-        // For custom orders, preview rendering is deferred to Page 19 (hearing data page)
-        // This callback should just set loggedInUserType and return
+        // For custom orders, this callback sets up loggedInUserType and populates hearing data for Page 19
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -392,9 +391,12 @@ public class ManageOrdersControllerTest {
                 .build())
             .build();
 
+        HearingData hearingData = HearingData.builder().build();
+
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn("COURT_ADMIN");
+        when(manageOrderService.getHearingData(anyString(), any(CaseData.class))).thenReturn(hearingData);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
@@ -402,6 +404,8 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getData());
         assertEquals("COURT_ADMIN", callbackResponse.getData().get("loggedInUserType"));
+        // Verify hearing data is populated for Page 19
+        verify(manageOrderService).getHearingData(anyString(), any(CaseData.class));
         // Verify that renderAndUploadHeaderPreview was NOT called (deferred to Page 19)
         verify(customOrderService, never()).renderAndUploadHeaderPreview(any(), any(), any(), any());
     }

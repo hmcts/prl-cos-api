@@ -140,11 +140,15 @@ public class ManageOrdersController {
                 // Set loggedInUserType for field show conditions
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
                 caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
-                // Copy custom order sub-selections to pre-existing fields and clear irrelevant ones
+                // Copy custom order sub-selections to pre-existing fields and set createSelectOrderOptions
                 manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
                 // Populate hearings dropdown for "was order approved at hearing" question
                 caseDataUpdated.put(PrlAppsConstants.HEARINGS_TYPE,
                     manageOrderService.populateHearingsDropdown(authorisation, caseData));
+                // Populate hearing data for Page 19 (uses same data as create order)
+                HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+                ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 

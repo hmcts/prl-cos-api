@@ -2536,6 +2536,16 @@ public class ManageOrderService {
         Object customOrderNameOptionObj = caseDataUpdated.get("customOrderNameOption");
         String customOrderNameOption = customOrderNameOptionObj != null ? customOrderNameOptionObj.toString() : null;
 
+        // Set createSelectOrderOptions from customOrderNameOption so existing code paths work
+        if (customOrderNameOption != null) {
+            try {
+                CreateSelectOrderOptionsEnum orderType = CreateSelectOrderOptionsEnum.valueOf(customOrderNameOption);
+                caseDataUpdated.put("createSelectOrderOptions", orderType);
+            } catch (IllegalArgumentException e) {
+                log.warn("Could not convert customOrderNameOption '{}' to CreateSelectOrderOptionsEnum", customOrderNameOption);
+            }
+        }
+
         // Clear all custom sub-selections first, then populate only the relevant ones
         // Extract data from currently selected order type BEFORE clearing
         Object c43Details = caseDataUpdated.get("customC43OrderDetails");

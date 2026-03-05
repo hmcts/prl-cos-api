@@ -6945,6 +6945,10 @@ public class ManageOrderServiceTest {
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
+        // Then - createSelectOrderOptions set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder,
+            caseDataUpdated.get("createSelectOrderOptions"));
+
         // Then - C43 fields synced
         assertEquals(List.of("childArrangementsOrder", "specificIssueOrder"),
             caseDataUpdated.get("childArrangementsOrdersToIssue"));
@@ -6968,6 +6972,10 @@ public class ManageOrderServiceTest {
 
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.specialGuardianShip,
+            caseDataUpdated.get("createSelectOrderOptions"));
 
         // Then - C43A field synced
         assertEquals("John Smith", caseDataUpdated.get("appointedGuardianName"));
@@ -6995,6 +7003,10 @@ public class ManageOrderServiceTest {
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
+        // Then - createSelectOrderOptions set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            caseDataUpdated.get("createSelectOrderOptions"));
+
         // Then - C21 field synced
         assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
 
@@ -7018,6 +7030,9 @@ public class ManageOrderServiceTest {
 
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions not set when customOrderNameOption is null
+        assertNull(caseDataUpdated.get("createSelectOrderOptions"));
 
         // Then - all fields cleared
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
