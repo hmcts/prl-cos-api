@@ -277,6 +277,18 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
+            // For custom orders, copy custom field values to original fields for downstream flow
+            if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                Object customWasApproved = caseDataUpdated.get("customOrderWasApprovedAtHearing");
+                Object customHearingsType = caseDataUpdated.get("customOrderHearingsType");
+                if (customWasApproved != null) {
+                    caseDataUpdated.put("wasTheOrderApprovedAtHearing", customWasApproved);
+                }
+                if (customHearingsType != null) {
+                    caseDataUpdated.put("hearingsType", customHearingsType);
+                }
+            }
+
             // Populate fields from selected hearing (date, judge name, judge title)
             // Silently handles HMC API failures - preserves existing values on error
             manageOrderService.populateFieldsFromSelectedHearing(authorisation, caseData, caseDataUpdated);
@@ -717,10 +729,10 @@ public class ManageOrdersController {
             //PRL-4212 - populate fields only when it's needed
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
 
-            // Populate hearings dropdown for custom order flow
+            // Populate hearings dropdown for custom order flow (uses custom field name)
             if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
                 log.info("Custom order selected on Page 1, populating hearings dropdown");
-                caseDataUpdated.put(PrlAppsConstants.HEARINGS_TYPE,
+                caseDataUpdated.put("customOrderHearingsType",
                     manageOrderService.populateHearingsDropdown(authorisation, caseData));
             }
 
