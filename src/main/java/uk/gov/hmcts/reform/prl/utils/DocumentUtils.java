@@ -132,7 +132,7 @@ public class DocumentUtils {
             loggedInUserType = BULK_SCAN;
         } else if (roles.contains(Roles.COURTNAV.getValue())) {
             loggedInUserType = COURTNAV;
-        } else if (roles.contains("LOCAL_AUTHORITY")) {
+        } else if (roles.contains(LOCAL_AUTHORITY)) {
             loggedInUserType = LOCAL_AUTHORITY;
         } else {
             loggedInUserType = CAFCASS;
