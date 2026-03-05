@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import org.apache.commons.lang3.StringUtils;
+import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
