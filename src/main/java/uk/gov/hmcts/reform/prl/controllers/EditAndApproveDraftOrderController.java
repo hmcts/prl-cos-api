@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
@@ -294,13 +293,17 @@ public class EditAndApproveDraftOrderController {
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
                                      CaseData caseData, String loggedInUserType, String clientContext) {
-        String draftOrderId = null;
-        if (clientContext != null) {
-            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            log.info("Debugging FPVTL-2047 : waMapper is {}", waMapper);
-            draftOrderId = CaseUtils.getDraftOrderId(waMapper);
-            log.info("Debugging FPVTL-2047 : draftOrderId is {}", draftOrderId);
-        }
+
+        final UUID draftOrderUuid = draftAnOrderService.getSelectedDraftOrderId(
+            caseData.getDraftOrderCollection(),
+            caseData.getDraftOrdersDynamicList(),
+            clientContext,
+            callbackRequest.getEventId()
+        );
+        log.info("Debugging FPVTL-2047 : draftOrderUuid is {}", draftOrderUuid);
+
+        String draftOrderId = draftOrderUuid != null ? draftOrderUuid.toString() : null;
+
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -308,9 +311,10 @@ public class EditAndApproveDraftOrderController {
             loggedInUserType,
             draftOrderId
         );
+
         DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
             caseData.getDraftOrderCollection(),
-            UUID.fromString(draftOrderId)
+            draftOrderUuid
         );
         log.info("Debugging FPVTL-2047 : selectedOrder is {}", selectedOrder);
         caseDataUpdated.put(
