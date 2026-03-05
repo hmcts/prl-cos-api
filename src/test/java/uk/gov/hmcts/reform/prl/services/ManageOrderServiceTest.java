@@ -6701,7 +6701,7 @@ public class ManageOrderServiceTest {
     public void testPopulateFieldsFromSelectedHearing_shouldPopulateDateAndJudgeForNonJudgeUser() {
         // Given - a hearing is selected and user is NOT a judge (court admin)
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
-        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
 
         HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
             .hearingStartDateTime(hearingDateTime)
@@ -6718,15 +6718,13 @@ public class ManageOrderServiceTest {
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
             .roles(List.of("caseworker-privatelaw-courtadmin")).build());
 
-        DynamicList hearingsType = DynamicList.builder()
-            .value(DynamicListElement.builder().code(hearingLabel).label(hearingLabel).build())
-            .build();
-        CaseData caseData = CaseData.builder()
+        final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
-            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
+        // Put hearingsType in caseDataUpdated (as it would be in mid-event callback)
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
 
         // When
         manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
@@ -6736,11 +6734,20 @@ public class ManageOrderServiceTest {
         assertEquals("Judge Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
     }
 
+    private Map<String, Object> buildHearingsTypeMap(String label) {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put("code", label);
+        valueMap.put("label", label);
+        Map<String, Object> hearingsTypeMap = new HashMap<>();
+        hearingsTypeMap.put("value", valueMap);
+        return hearingsTypeMap;
+    }
+
     @Test
     public void testPopulateFieldsFromSelectedHearing_shouldPreserveJudgeNameWhenJudgeLoggedIn() {
         // Given - a hearing is selected and user IS a judge
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
-        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
 
         HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
             .hearingStartDateTime(hearingDateTime)
@@ -6757,16 +6764,13 @@ public class ManageOrderServiceTest {
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
             .roles(List.of("caseworker-privatelaw-judge")).build());
 
-        DynamicList hearingsType = DynamicList.builder()
-            .value(DynamicListElement.builder().code(hearingLabel).label(hearingLabel).build())
-            .build();
-        CaseData caseData = CaseData.builder()
+        final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
-            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("judgeOrMagistratesLastName", "Logged In Judge Name");
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
 
         // When
         manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
@@ -6779,20 +6783,16 @@ public class ManageOrderServiceTest {
     @Test
     public void testPopulateFieldsFromSelectedHearing_shouldHandleHmcApiFailureSilently() {
         // Given - HMC API fails
-        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
 
-        DynamicList hearingsType = DynamicList.builder()
-            .value(DynamicListElement.builder().code(hearingLabel).label(hearingLabel).build())
-            .build();
-
-        CaseData caseData = CaseData.builder()
+        final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
-            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         LocalDate originalDate = LocalDate.now();
         caseDataUpdated.put("dateOrderMade", originalDate);
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
 
         when(hearingService.getHearings(anyString(), anyString())).thenThrow(new RuntimeException("HMC unavailable"));
 
@@ -6807,7 +6807,7 @@ public class ManageOrderServiceTest {
     public void testPopulateFieldsFromSelectedHearing_shouldPopulateJudgeTitleFromRefData() {
         // Given - hearing selected with judge who has District Judge appointment
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
-        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
 
         HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
             .hearingStartDateTime(hearingDateTime)
@@ -6831,14 +6831,11 @@ public class ManageOrderServiceTest {
         when(refDataUserService.getAllJudicialUserDetails(any(JudicialUsersApiRequest.class)))
             .thenReturn(List.of(judgeResponse));
 
-        DynamicList hearingsType = DynamicList.builder()
-            .value(DynamicListElement.builder().code(hearingLabel).label(hearingLabel).build())
-            .build();
-        CaseData caseData = CaseData.builder()
+        final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
-            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
 
         // When
         manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
@@ -6851,15 +6848,15 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenNoHearingSelected() {
-        // Given - no hearing selected
+        // Given - no hearing selected (hearingsType not in caseDataUpdated)
         CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
-            .manageOrders(ManageOrders.builder().hearingsType(null).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         LocalDate originalDate = LocalDate.now();
         caseDataUpdated.put("dateOrderMade", originalDate);
+        // No hearingsType in caseDataUpdated - simulates no selection
 
         // When
         manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
@@ -6867,6 +6864,67 @@ public class ManageOrderServiceTest {
         // Then - nothing changed
         assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
         assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenHearingDeselected() {
+        // Given - hearing was deselected (empty value in caseDataUpdated)
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        // Empty hearingsType - simulates deselection
+        Map<String, Object> emptyHearingsType = new HashMap<>();
+        emptyHearingsType.put("value", null);
+        caseDataUpdated.put("hearingsType", emptyHearingsType);
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - nothing changed
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+        assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldFindHearingsTypeUnderManageOrders() {
+        // Given - hearingsType is nested under manageOrders in the map
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        // Put hearingsType nested under manageOrders
+        Map<String, Object> manageOrdersMap = new HashMap<>();
+        manageOrdersMap.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+        caseDataUpdated.put("manageOrders", manageOrdersMap);
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - should find and populate from nested hearingsType
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Judge Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
     }
 
     @Test

@@ -2757,17 +2757,13 @@ public class ManageOrderService {
      */
     public void populateFieldsFromSelectedHearing(String authorisation, CaseData caseData,
                                                    Map<String, Object> caseDataUpdated) {
-        // Check if a hearing was selected
-        DynamicList hearingsType = caseData.getManageOrders() != null
-            ? caseData.getManageOrders().getHearingsType() : null;
+        // Check if a hearing was selected from the callback data
+        String selectedHearingLabel = getSelectedHearingLabel(caseDataUpdated);
 
-        if (hearingsType == null || hearingsType.getValue() == null
-            || StringUtils.isEmpty(hearingsType.getValue().getLabel())) {
+        if (StringUtils.isEmpty(selectedHearingLabel)) {
             log.info("No hearing selected, skipping population from hearing");
             return;
         }
-
-        String selectedHearingLabel = hearingsType.getValue().getLabel();
         log.info("Attempting to populate fields from selected hearing: {}", selectedHearingLabel);
 
         // Check if logged-in user is a judge (preserve their name if so)
@@ -2784,7 +2780,8 @@ public class ManageOrderService {
             }
 
             // Find the matching hearing based on selected label
-            HearingDaySchedule matchedSchedule = findMatchingHearingSchedule(hearings.getCaseHearings(), selectedHearingLabel);
+            HearingDaySchedule matchedSchedule = findMatchingHearingSchedule(hearings.getCaseHearings(),
+                                                                             selectedHearingLabel);
 
             if (matchedSchedule == null) {
                 log.warn("Could not find matching hearing for selected label: {}", selectedHearingLabel);
@@ -2809,6 +2806,43 @@ public class ManageOrderService {
             // Silent failure - log warning but don't affect the user journey
             log.warn("Failed to populate fields from hearing (HMC API may be unavailable): {}", e.getMessage());
         }
+    }
+
+    /**
+     * Extracts the selected hearing label from raw map (mid-event callback).
+     * Only uses caseDataUpdated as that reflects the current selection.
+     */
+    @SuppressWarnings("unchecked")
+    private String getSelectedHearingLabel(Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated == null) {
+            log.info("caseDataUpdated is null, no hearing selection available");
+            return null;
+        }
+
+        // Try top level hearingsType
+        Object hearingsTypeObj = caseDataUpdated.get("hearingsType");
+        if (hearingsTypeObj == null) {
+            // Try under manageOrders
+            Object manageOrdersObj = caseDataUpdated.get("manageOrders");
+            if (manageOrdersObj instanceof Map) {
+                hearingsTypeObj = ((Map<String, Object>) manageOrdersObj).get("hearingsType");
+            }
+        }
+
+        if (hearingsTypeObj instanceof Map) {
+            Map<String, Object> hearingsTypeMap = (Map<String, Object>) hearingsTypeObj;
+            Object valueObj = hearingsTypeMap.get("value");
+            if (valueObj instanceof Map) {
+                Object label = ((Map<String, Object>) valueObj).get("label");
+                if (label != null && StringUtils.isNotEmpty(label.toString())) {
+                    log.info("Got hearingsType label from callback data: {}", label);
+                    return label.toString();
+                }
+            }
+        }
+
+        log.info("No hearing selected in callback data");
+        return null;
     }
 
     /**
