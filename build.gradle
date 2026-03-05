@@ -34,7 +34,7 @@ def versions = [
   dumbster                     : '1.7.1',
   googleAuth                   : '1.5.0',
   gradlePitest                 : '1.15.0',
-  guava                        : '32.1.3-jre',
+  guava                        : '33.5.0-jre',
   hmctsNotify                  : '3.19.2-RELEASE',
   httpComponents               : '4.5.14',
   jackson                      : '2.17.2',
@@ -170,7 +170,7 @@ allprojects {
         entry 'json'
       }
       //CVE-2023-2976
-      dependency group: 'com.google.guava', name: 'guava', version: '32.1.3-jre'
+      dependency group: 'com.google.guava', name: 'guava', version: '33.5.0-jre'
       //CVE-2022-1471
       dependencySet(group: 'org.yaml', version: '2.5') {
         entry 'snakeyaml'
