@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.exception.HearingException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
@@ -46,6 +47,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -162,10 +164,12 @@ class HearingServiceTest {
             .reason("Internal Server Error")
             .request(Request.create(Request.HttpMethod.GET, "/hearings", Map.of(), null, null, null))
             .build()));
-        Hearings response =
-            hearingService.getHearings(auth, caseReferenceNumber);
 
-        Assert.assertEquals(null, response);
+        assertThrows(
+            HearingException.class, () -> {
+                hearingService.getHearings(auth, caseReferenceNumber);
+            }
+        );
 
     }
 
@@ -358,8 +362,11 @@ class HearingServiceTest {
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenThrow(new RuntimeException());
-        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertThrows(
+            HearingException.class, () -> {
+                hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+            }
+        );
     }
 
     @Test
@@ -369,8 +376,11 @@ class HearingServiceTest {
         when(hearingApiClient.createAutomatedHearing(any(), any(), any())).thenThrow(new RuntimeException());
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
-        AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
-        Assert.assertNull(automatedHearingsResponse);
+        assertThrows(
+            HearingException.class, () -> {
+                hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
+            }
+        );
     }
 
     @Test
