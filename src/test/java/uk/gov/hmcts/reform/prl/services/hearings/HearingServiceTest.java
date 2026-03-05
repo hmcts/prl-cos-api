@@ -377,7 +377,7 @@ class HearingServiceTest {
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
         assertThrows(
-            RuntimeException.class, () -> {
+            HearingException.class, () -> {
                 hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
             }
         );
