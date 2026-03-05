@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.exception.HearingException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
@@ -76,7 +77,7 @@ public class HearingService {
 
         } catch (FeignException e) {
             log.error("Error in getting hearings {}", e.getMessage());
-            throw e;
+            throw new HearingException("Error in getting hearings", e);
         }
     }
 
@@ -228,7 +229,7 @@ public class HearingService {
             }
         } catch (Exception e) {
             log.error("Error in createAutomatedHearing", e);
-            throw e;
+            throw new HearingException("Error in createAutomatedHearing", e);
         }
         return null;
     }

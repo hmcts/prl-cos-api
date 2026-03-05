@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.exception.HearingException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
@@ -165,7 +166,7 @@ class HearingServiceTest {
             .build()));
 
         assertThrows(
-            FeignException.InternalServerError.class, () -> {
+            HearingException.class, () -> {
                 hearingService.getHearings(auth, caseReferenceNumber);
             }
         );
@@ -362,7 +363,7 @@ class HearingServiceTest {
         when(hearingApiClient.createAutomatedHearing(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenThrow(new RuntimeException());
         assertThrows(
-            RuntimeException.class, () -> {
+            HearingException.class, () -> {
                 hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
             }
         );
