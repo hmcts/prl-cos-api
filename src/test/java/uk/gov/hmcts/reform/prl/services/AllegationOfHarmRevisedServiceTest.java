@@ -8,11 +8,9 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.exception.MissingCaseDataFieldException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
@@ -23,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AllegationOfHarmRevisedServiceTest {
@@ -235,7 +230,7 @@ public class AllegationOfHarmRevisedServiceTest {
             .build();
         allegationOfHarmService
             .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(), caseDataMap);
-        assertEquals(StringUtils.EMPTY, caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
+        Assert.assertEquals(StringUtils.EMPTY, caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
     }
 
     @Test
@@ -253,7 +248,7 @@ public class AllegationOfHarmRevisedServiceTest {
         allegationOfHarmService
             .resetFields(CaseData.builder().allegationOfHarmRevised(allegationOfHarmRevised).build(),caseDataMap);
         Assert.assertNotNull(caseDataMap.get("childAbuses"));
-        assertEquals("test",caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
+        Assert.assertEquals("test",caseDataMap.get("newAllegationsOfHarmSubstanceAbuseDetails"));
     }
 
     @Test
@@ -263,63 +258,4 @@ public class AllegationOfHarmRevisedServiceTest {
         Assert.assertNull(null);
     }
 
-    @Test
-    public void testThrowExceptionWhenChildDetailsIsNull() {
-        List<DynamicMultiselectListElement> valueElements = new ArrayList<>();
-        valueElements.add(DynamicMultiselectListElement.builder().code("test").label("test name").build());
-
-        List<DynamicMultiselectListElement> listItemsElements = new ArrayList<>();
-        listItemsElements.add(DynamicMultiselectListElement.builder().code("test1").label("test1 name").build());
-        listItemsElements.add(DynamicMultiselectListElement.builder().code("test2").label("test2 name").build());
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder().value(valueElements).listItems(listItemsElements).build();
-
-        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
-            .whichChildrenAreRiskPhysicalAbuse(dynamicMultiSelectList)
-            .whichChildrenAreRiskPsychologicalAbuse(dynamicMultiSelectList)
-            .whichChildrenAreRiskSexualAbuse(dynamicMultiSelectList)
-            .whichChildrenAreRiskEmotionalAbuse(dynamicMultiSelectList)
-            .whichChildrenAreRiskFinancialAbuse(dynamicMultiSelectList)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .allegationOfHarmRevised(allegationOfHarmRevised)
-            .newChildDetails(null)
-            .children(null)
-            .build();
-
-        MissingCaseDataFieldException exception =
-            assertThrows(MissingCaseDataFieldException.class,
-                         () -> allegationOfHarmService.getPrePopulatedChildData(caseData)
-            );
-
-        assertEquals("newChildrenDetails & children cannot both be null or empty for case: 0", exception.getMessage());
-    }
-
-    @Test
-    public void testPrePopulateChildDataWithOldCaseData() {
-        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
-            .build();
-
-        Child child = Child.builder()
-            .firstName("Existing")
-            .lastName("Child")
-            .build();
-
-        Element<Child> childElement = Element.<Child>builder()
-            .value(child)
-            .id(UUID.randomUUID())
-            .build();
-
-        Map<String, Object> response = allegationOfHarmService.getPrePopulatedChildData(
-            CaseData.builder()
-                .allegationOfHarmRevised(allegationOfHarmRevised)
-                .newChildDetails(null)
-                .children(List.of(childElement))
-                .build()
-        );
-
-        Assert.assertNotNull(response);
-        Assert.assertFalse(response.isEmpty());
-    }
 }

@@ -96,6 +96,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabTo
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.Appointment;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -4940,6 +4941,11 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingDates(DynamicList.builder().build())
+                .build());
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6293,6 +6299,11 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingDates(DynamicList.builder().build())
+                .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
 
@@ -6325,10 +6336,14 @@ public class ManageOrderServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingDates(DynamicList.builder().build())
+                .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
-
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6359,6 +6374,11 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingDates(DynamicList.builder().build())
+                .build());
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6388,10 +6408,14 @@ public class ManageOrderServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingDates(DynamicList.builder().build())
+                .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
-
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6671,5 +6695,493 @@ public class ManageOrderServiceTest {
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
         assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
                      orders.getValue().getFinalisationDetails().getJudgeOrMagistrateTitle());
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldPopulateDateAndJudgeForNonJudgeUser() {
+        // Given - a hearing is selected and user is NOT a judge (court admin)
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("dateOrderMade", LocalDate.now());
+        // Put hearingsType in caseDataUpdated (as it would be in mid-event callback)
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - date should be populated from hearing
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Judge Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    private Map<String, Object> buildHearingsTypeMap(String label) {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put("code", label);
+        valueMap.put("label", label);
+        Map<String, Object> hearingsTypeMap = new HashMap<>();
+        hearingsTypeMap.put("value", valueMap);
+        return hearingsTypeMap;
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldPreserveJudgeNameWhenJudgeLoggedIn() {
+        // Given - a hearing is selected and user IS a judge
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Different Judge")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-judge")).build());
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("dateOrderMade", LocalDate.now());
+        caseDataUpdated.put("judgeOrMagistratesLastName", "Logged In Judge Name");
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - date should be from hearing, but judge name preserved
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Logged In Judge Name", caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldHandleHmcApiFailureSilently() {
+        // Given - HMC API fails
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        when(hearingService.getHearings(anyString(), anyString())).thenThrow(new RuntimeException("HMC unavailable"));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - original date preserved, no exception thrown
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldPopulateJudgeTitleFromRefData() {
+        // Given - hearing selected with judge who has District Judge appointment
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+        JudicialUsersApiResponse judgeResponse = JudicialUsersApiResponse.builder()
+            .surname("Smith")
+            .fullName("John Smith")
+            .appointments(List.of(Appointment.builder().appointment("District Judge").build()))
+            .build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+        when(refDataUserService.getAllJudicialUserDetails(any(JudicialUsersApiRequest.class)))
+            .thenReturn(List.of(judgeResponse));
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
+        assertEquals(JudgeOrMagistrateTitleEnum.districtJudge, caseDataUpdated.get("judgeOrMagistrateTitle"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenNoHearingSelected() {
+        // Given - no hearing selected (hearingsType not in caseDataUpdated)
+        CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        // No hearingsType in caseDataUpdated - simulates no selection
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - nothing changed
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+        assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenHearingDeselected() {
+        // Given - hearing was deselected (empty value in caseDataUpdated)
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        // Empty hearingsType - simulates deselection
+        Map<String, Object> emptyHearingsType = new HashMap<>();
+        emptyHearingsType.put("value", null);
+        caseDataUpdated.put("hearingsType", emptyHearingsType);
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - nothing changed
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+        assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    public void testPopulateFieldsFromSelectedHearing_shouldFindHearingsTypeUnderManageOrders() {
+        // Given - hearingsType is nested under manageOrders in the map
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        // Put hearingsType nested under manageOrders
+        Map<String, Object> manageOrdersMap = new HashMap<>();
+        manageOrdersMap.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+        caseDataUpdated.put("manageOrders", manageOrdersMap);
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - should find and populate from nested hearingsType
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Judge Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43Fields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of("childArrangementsOrder", "specificIssueOrder"));
+        c43Details.put("childArrangementsOrderType", "liveWithOrder");
+        caseDataUpdated.put("customC43OrderDetails", c43Details);
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder,
+            caseDataUpdated.get("createSelectOrderOptions"));
+
+        // Then - C43 fields synced
+        assertEquals(List.of("childArrangementsOrder", "specificIssueOrder"),
+            caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertEquals("liveWithOrder", caseDataUpdated.get("selectChildArrangementsOrder"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43AFields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "specialGuardianShip");
+        caseDataUpdated.put("customAppointedGuardianName", "John Smith");
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.specialGuardianShip,
+            caseDataUpdated.get("createSelectOrderOptions"));
+
+        // Then - C43A field synced
+        assertEquals("John Smith", caseDataUpdated.get("appointedGuardianName"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC21Fields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+
+        Map<String, Object> c21Details = new HashMap<>();
+        c21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", c21Details);
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            caseDataUpdated.get("createSelectOrderOptions"));
+
+        // Then - C21 field synced
+        assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenNoOrderTypeSelected() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", null);
+
+        // Pre-populate all fields
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions not set when customOrderNameOption is null
+        assertNull(caseDataUpdated.get("createSelectOrderOptions"));
+
+        // Then - all fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenOtherOrderTypeSelected() {
+        // Given - selecting "other" order type which has no sub-selections
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "other");
+
+        // Pre-populate all fields
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
+        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - all fields cleared (other order type has no sub-selections)
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC43Details() {
+        // Given - C43 selected but no details filled in
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataUpdated.put("customC43OrderDetails", new HashMap<>());
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - no errors, fields remain null
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC21Details() {
+        // Given - C21 selected but no details filled in
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataUpdated.put("customC21OrderDetails", new HashMap<>());
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - no errors, field remains null
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC43ToC21() {
+        // Given - user previously had C43 data, now switching to C21
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+
+        // Old C43 data that should be cleared
+        Map<String, Object> oldC43Details = new HashMap<>();
+        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        oldC43Details.put("childArrangementsOrderType", "liveWithOrder");
+        caseDataUpdated.put("customC43OrderDetails", oldC43Details);
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "liveWithOrder");
+
+        // New C21 data
+        Map<String, Object> newC21Details = new HashMap<>();
+        newC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", newC21Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C21 data preserved
+        assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
+        assertNotNull(caseDataUpdated.get("customC21OrderDetails"));
+
+        // C43 source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC43OrderDetails"));
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC21ToC43() {
+        // Given - user previously had C21 data, now switching to C43
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        // Old C21 data that should be cleared
+        Map<String, Object> oldC21Details = new HashMap<>();
+        oldC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", oldC21Details);
+        caseDataUpdated.put("c21OrderOptions", "power_of_arrest");
+
+        // New C43 data
+        Map<String, Object> newC43Details = new HashMap<>();
+        newC43Details.put("ordersToIssue", List.of("specificIssueOrder"));
+        caseDataUpdated.put("customC43OrderDetails", newC43Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C43 data preserved
+        assertEquals(List.of("specificIssueOrder"), caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNotNull(caseDataUpdated.get("customC43OrderDetails"));
+
+        // C21 source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC21OrderDetails"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllSourceFieldsWhenSwitchingToOther() {
+        // Given - user had data for multiple order types, now switching to "other"
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "other");
+
+        // Old C43 data
+        Map<String, Object> oldC43Details = new HashMap<>();
+        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("customC43OrderDetails", oldC43Details);
+
+        // Old C21 data
+        Map<String, Object> oldC21Details = new HashMap<>();
+        oldC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", oldC21Details);
+
+        // Old C43A data
+        caseDataUpdated.put("customAppointedGuardianName", "Old Guardian");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - all source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC43OrderDetails"));
+        assertNull(caseDataUpdated.get("customC21OrderDetails"));
+        assertNull(caseDataUpdated.get("customAppointedGuardianName"));
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+        assertNull(caseDataUpdated.get("appointedGuardianName"));
     }
 }

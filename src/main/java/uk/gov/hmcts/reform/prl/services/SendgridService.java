@@ -174,9 +174,6 @@ public class SendgridService {
                 if (HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
-                if (HttpStatus.valueOf(response.getStatusCode()).isError()) {
-                    log.error("Notification to parties failed for CASE ID: {}", emailProps.get(CASE_NUMBER));
-                }
             } catch (IOException ex) {
                 log.error("Notification to parties failed");
                 throw new IOException(ex.getMessage());
