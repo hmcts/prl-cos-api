@@ -76,8 +76,7 @@ public class HearingService {
             return hearings;
 
         } catch (FeignException e) {
-            log.error("Error in getting hearings {}", e.getMessage());
-            throw new HearingException("Error in getting hearings", e);
+            throw new HearingException("Error in getting hearings for case " + caseReferenceNumber,  e);
         }
     }
 
@@ -228,8 +227,7 @@ public class HearingService {
                 return response.getBody();
             }
         } catch (Exception e) {
-            log.error("Error in createAutomatedHearing", e);
-            throw new HearingException("Error in createAutomatedHearing", e);
+            throw new HearingException("Error in createAutomatedHearing for case " + automatedHearingCaseData.getId(), e);
         }
         return null;
     }
