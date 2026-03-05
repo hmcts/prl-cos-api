@@ -268,6 +268,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
+        log.info("populateFromHearing callback triggered for case: {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
