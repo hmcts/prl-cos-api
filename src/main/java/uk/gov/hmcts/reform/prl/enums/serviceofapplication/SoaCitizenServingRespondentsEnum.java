@@ -5,11 +5,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
-
-import java.util.Arrays;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
@@ -19,12 +16,14 @@ public enum SoaCitizenServingRespondentsEnum {
     @JsonProperty("unrepresentedApplicant")
     unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
     @JsonProperty("courtAdmin")
-    courtAdmin("courtAdmin", "Court admin"),
-    UNKNOWN_VALUE("unknownValue", "Unknown value");
+    courtAdmin("courtAdmin", "Court admin");
 
-    @Getter
     private final String id;
     private final String displayedValue;
+
+    public String getId() {
+        return id;
+    }
 
     @JsonValue
     public String getDisplayedValue() {
@@ -33,9 +32,6 @@ public enum SoaCitizenServingRespondentsEnum {
 
     @JsonCreator
     public static SoaCitizenServingRespondentsEnum getValue(String key) {
-        return Arrays.stream(values())
-            .filter(value -> value.id.equalsIgnoreCase(key) || value.name().equalsIgnoreCase(key))
-            .findFirst()
-            .orElse(UNKNOWN_VALUE);
+        return SoaCitizenServingRespondentsEnum.valueOf(key);
     }
 }
