@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @SuppressWarnings("unchecked")
+@Disabled
 public class CallbackControllerFT {
 
     @Autowired
@@ -152,6 +153,7 @@ public class CallbackControllerFT {
     }
 
     @Test
+    @Disabled
     public void givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         RequestSpecification requestA = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);

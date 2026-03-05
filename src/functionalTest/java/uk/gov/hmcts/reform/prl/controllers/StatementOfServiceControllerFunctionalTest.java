@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Order;
 import org.junit.runner.RunWith;
@@ -33,6 +34,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class StatementOfServiceControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";

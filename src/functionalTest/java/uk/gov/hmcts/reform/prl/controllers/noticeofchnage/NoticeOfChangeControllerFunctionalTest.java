@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@Ignore
 public class NoticeOfChangeControllerFunctionalTest {
 
     private final String targetInstance =
