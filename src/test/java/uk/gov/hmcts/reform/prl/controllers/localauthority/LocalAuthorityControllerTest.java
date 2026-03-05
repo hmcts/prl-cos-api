@@ -155,7 +155,7 @@ class LocalAuthorityControllerTest {
     }
 
     @Test
-    public void handleRemoveAboutToStartWhenNoBarristerList() {
+    public void handleRemoveAboutToStartWhenNoLocalAuthorityOrgPolicy() {
         Map caseData = new HashMap<>();
         caseData.put("id", 12345L);
         caseData.put("caseTypeOfApplication", "C100");
@@ -178,7 +178,37 @@ class LocalAuthorityControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = controller
                 .handleRemoveAboutToStart(AUTH, S2S, callbackRequest);
 
-        assertEquals("No Local authority currently assigned to the case", callbackResponse.getErrors().get(0));
+        assertEquals("No Local authority currently assigned to the case.", callbackResponse.getErrors().get(0));
+        verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData1));
+    }
+
+
+    @Test
+    public void handleRemoveAboutToStartWhenNullLocalAuthorityOrgPolicy() {
+        Map caseData = new HashMap<>();
+        caseData.put("id", 12345L);
+        caseData.put("caseTypeOfApplication", "C100");
+        caseData.put("localAuthoritySolicitorOrganisationPolicy", null);
+
+        CaseData caseData1 = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("C100")
+                .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
+                        .id(1L)
+                        .data(caseData)
+                        .build())
+                .build();
+
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData1);
+        when(authorisationService.isAuthorized(AUTH, S2S)).thenReturn(true);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = controller
+                .handleRemoveAboutToStart(AUTH, S2S, callbackRequest);
+
+        assertEquals("No Local authority currently assigned to the case.", callbackResponse.getErrors().get(0));
         verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData1));
     }
 
