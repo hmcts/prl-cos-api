@@ -3,13 +3,14 @@ package uk.gov.hmcts.reform.prl.services;
 import feign.FeignException;
 import feign.Request;
 import feign.Response;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import javassist.NotFoundException;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -34,15 +35,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
- class OrganisationServiceTest {
+@RunWith(MockitoJUnitRunner.Silent.class)
+public class OrganisationServiceTest {
 
     @InjectMocks
     private OrganisationService organisationService;
@@ -58,13 +58,14 @@ import static org.mockito.Mockito.when;
     private final String authToken = "Bearer testAuthtoken";
     private final String serviceAuthToken = "serviceTestAuthtoken";
 
-    @BeforeEach
-    void setUp() {
-        lenient().when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+    @Before
+    public void setUp() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
     }
 
     @Test
-    void testApplicantOrganisationDetails() {
+    public void testApplicantOrganisationDetails() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -75,6 +76,7 @@ import static org.mockito.Mockito.when;
                               .build())
             .build();
 
+        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -102,7 +104,6 @@ import static org.mockito.Mockito.when;
         Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
         List<Element<PartyDetails>> elementList = Collections.singletonList(applicants);
 
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(organisationApi.findOrganisation(authToken,
                                               serviceAuthToken,
                                               applicant.getSolicitorOrg().getOrganisationID()))
@@ -128,7 +129,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testRespondentOrganisationDetails() {
+    public void testRespondentOrganisationDetails() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -140,6 +141,7 @@ import static org.mockito.Mockito.when;
                               .build())
             .build();
 
+        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -154,8 +156,24 @@ import static org.mockito.Mockito.when;
             .contactInformation(contactInformationList)
             .build();
 
+        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .organisations(organisations)
+            .build();
 
+        Element<PartyDetails> applicants = Element.<PartyDetails>builder().value(partyDetailsWithOrganisations).build();
+        List<Element<PartyDetails>> elementList = Collections.singletonList(applicants);
 
+        CaseData caseData1 = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .applicants(elementList)
+            .build();
 
         when(organisationApi.findOrganisation(authToken,
                                               serviceAuthToken,
@@ -176,7 +194,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testRespondentOrganisationDetailsNotFound() {
+    public void testRespondentOrganisationDetailsNotFound() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -203,7 +221,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testApplicantOrganisationDetailsForFl401() {
+    public void testApplicantOrganisationDetailsForFl401() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -213,6 +231,8 @@ import static org.mockito.Mockito.when;
                               .organisationName("Civil - Organisation 2")
                               .build())
             .build();
+
+        String applicantNames = "TestFirst TestLast";
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -242,7 +262,7 @@ import static org.mockito.Mockito.when;
                                               applicant.getSolicitorOrg().getOrganisationID()))
             .thenReturn(organisations);
         String organisationId = applicant.getSolicitorOrg().getOrganisationID();
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+
         when(organisationService.getOrganisationDetails(authToken, organisationId)).thenReturn(organisations);
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -261,7 +281,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testApplicantOrganisationDetailsForFl401NotFound() {
+    public void testApplicantOrganisationDetailsForFl401NotFound() throws NotFoundException {
 
         PartyDetails applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -284,7 +304,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testRespondentOrganisationDetailsForFl401() {
+    public void testRespondentOrganisationDetailsForFl401() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
@@ -326,7 +346,6 @@ import static org.mockito.Mockito.when;
             .thenReturn(organisations);
         String organisationId = respondent.getSolicitorOrg().getOrganisationID();
 
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(organisationService.getOrganisationDetails(authToken, organisationId)).thenReturn(organisations);
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -345,12 +364,11 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testRespondentOrganisationDetailsForFl401NotFound() {
+    public void testRespondentOrganisationDetailsForFl401NotFound() throws NotFoundException {
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorOrg(Organisation.builder()
                               .organisationID("79ZRSOU")
                               .organisationName("Civil - Organisation 2")
@@ -369,7 +387,8 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
+    public void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
+
         CaseData caseData = CaseData.builder().respondentsFL401(null).build();
 
         CaseData orgData =  organisationService.getRespondentOrganisationDetailsForFL401(caseData);
@@ -378,7 +397,7 @@ import static org.mockito.Mockito.when;
 
 
     @Test
-     void findUserOrganisationTest() {
+    public void findUserOrganisationTest() {
         Organisations organisations = Organisations.builder()
             .organisationIdentifier("79ZRSOU")
             .name("Civil - Organisation 2")
@@ -393,7 +412,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void findUserOrganisationNotFoundTest() {
+    public void findUserOrganisationNotFoundTest() {
         when(organisationApi.findUserOrganisation(authToken,
                                                   serviceAuthToken))
             .thenThrow(feignException(404, "Not found"));
@@ -403,7 +422,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void getOrganisationSolicitorDetailsTest() {
+    public void getOrganisationSolicitorDetailsTest() {
         when(organisationApi.findOrganisationSolicitors(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(OrgSolicitors.builder().build());
@@ -411,7 +430,7 @@ import static org.mockito.Mockito.when;
         assertEquals(orgData,OrgSolicitors.builder().build());
     }
 
-    static FeignException feignException(int status, String message) {
+    public static FeignException feignException(int status, String message) {
         return FeignException.errorStatus(message, Response.builder()
             .status(status)
             .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
@@ -419,7 +438,7 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testGetAllActiveOrganisations() {
+    public void testGetAllActiveOrganisations() {
 
         List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
                                                                                         .addressLine1("29, SEATON DRIVE")
@@ -443,14 +462,12 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testUserFoundReturnedByFindUserByEmail() {
+    public void testUserFoundReturnedByFindUserByEmail() {
         String email = "user@malinator.com";
         when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         OrganisationUser organisationUser = OrganisationUser.builder()
             .userIdentifier(UUID.randomUUID().toString())
             .build();
-
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenReturn(organisationUser);
         Optional<String> userId = organisationService.findUserByEmail(email);
@@ -459,10 +476,9 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testNotUserNotFoundByFindUserByEmail() {
+    public void testNotUserNotFoundByFindUserByEmail() {
         String email = "user@malinator.com";
         when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenThrow(feignException(404, "Not found"));
         Optional<String> userId = organisationService.findUserByEmail(email);
@@ -471,10 +487,9 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
-     void testExceptionThrownByFindUserByEmail() {
+    public void testExceptionThrownByFindUserByEmail() {
         String email = "user@malinator.com";
         when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenThrow(feignException(500, "Internal Server Error"));
         assertThatThrownBy(() -> organisationService.findUserByEmail(email))
