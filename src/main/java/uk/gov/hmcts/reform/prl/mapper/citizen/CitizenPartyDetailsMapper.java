@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildScreeningQuestionsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
@@ -102,6 +103,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsEle
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataScreeningQuestionsElementsMapper.updateScreeningQuestionsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
@@ -984,6 +986,12 @@ public class CitizenPartyDetailsMapper {
             C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
             updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
+        }
+
+        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildScreeningQuestions())) {
+            C100RebuildScreeningQuestionsElements c100RebuildScreeningQuestionsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildScreeningQuestions(), C100RebuildScreeningQuestionsElements.class);
+            updateScreeningQuestionsElementsForCaseData(caseDataBuilder, c100RebuildScreeningQuestionsElements);
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildHearingUrgency())) {
