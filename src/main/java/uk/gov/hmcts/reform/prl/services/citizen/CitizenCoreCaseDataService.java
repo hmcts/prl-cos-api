@@ -136,7 +136,7 @@ public class CitizenCoreCaseDataService {
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
 
-    public Boolean hasAccess(String authorisation, String caseId) {
+    public boolean hasAccess(String authorisation, String caseId) {
         try {
             getCase(authorisation, caseId);
             return true;
