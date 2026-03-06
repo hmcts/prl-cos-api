@@ -19,7 +19,7 @@ public class ResponseDocuments {
 
     /**
      * This field is being deprecated as part of FPVTL-2381,
-     * as existing logic uses dateTimeCreated
+     * as existing logic uses dateTimeCreated.
      * @deprecated in favour of dateTimeCreated
      */
     @Deprecated(forRemoval = false, since = "FPVTL-2381")
