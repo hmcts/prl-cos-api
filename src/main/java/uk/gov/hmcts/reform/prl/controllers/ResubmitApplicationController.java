@@ -184,7 +184,7 @@ public class ResubmitApplicationController {
                 eventPublisher.publishEvent(courtAdminNotificationEmailEvent);
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
-            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
             if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseDataUpdated.putAll(documentGenService.generateDraftDocumentsForC100CaseResubmission(
                     authorisation,
@@ -286,7 +286,7 @@ public class ResubmitApplicationController {
             //set the resubmit fields to null so they are blank if multiple resubmissions
             caseDataUpdated.put("fl401StmtOfTruthResubmit", null);
             caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
-            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
+            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
             fl401SubmitApplicationService.cleanUpC8RefugeFields(caseData, caseDataUpdated);
             confidentialityC8RefugeService.processRefugeDocumentsOnReSubmit(caseDataUpdated, caseData);
