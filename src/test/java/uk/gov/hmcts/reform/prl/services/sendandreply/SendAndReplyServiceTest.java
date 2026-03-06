@@ -1695,6 +1695,22 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testSetSenderAndGenerateMessageReplyList() {
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .senderName("Sender-ABC")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+        List<Element<Message>> messagesWithOneAdded = Arrays.asList(element(message1));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1706,7 +1722,13 @@ public class SendAndReplyServiceTest {
         Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, auth);
         MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
 
-        assertNotNull(updatedResponse.get("messageReplyDynamicList"));
+        DynamicList messageReplyDynamicList = (DynamicList) updatedResponse.get("messageReplyDynamicList");
+        assertNotNull(messageReplyDynamicList);
+        List<DynamicListElement> listItems = messageReplyDynamicList.getListItems();
+        listItems.forEach(item -> {
+            assertTrue(item.getLabel().contains(message1.getSenderName()));
+            assertTrue(item.getLabel().contains(message1.getMessageSubject()));
+        });
         assertEquals("sender@email.com", messageMetaData.getSenderEmail());
 
     }
