@@ -176,12 +176,16 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandleSendOrMessageAboutToStart() {
+        // given
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
+        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCallbackRequest, auth, null)).thenReturn(aboutToStartMap);
 
-        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCaseData, auth)).thenReturn(aboutToStartMap);
-        sendAndReplyController.handleSendOrMessageAboutToStart(auth, sendCallbackRequest);
-        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCaseData, auth);
+        // when
+        sendAndReplyController.handleSendOrMessageAboutToStart(auth, null, sendCallbackRequest);
+
+        // then
+        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCallbackRequest, auth, null);
     }
 
     @Test
