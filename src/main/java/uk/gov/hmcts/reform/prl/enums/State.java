@@ -30,7 +30,9 @@ public enum State {
     READY_FOR_DELETION("READY_FOR_DELETION", "Ready for deletion"),
     DECISION_OUTCOME("DECISION_OUTCOME","Hearing Outcome"),
     PROCEEDS_IN_HERITAGE_SYSTEM("PROCEEDS_IN_HERITAGE_SYSTEM",
-                                "Proceeding in offline mode in familyman system");
+                                "Proceeding in offline mode in familyman system"),
+    AWAITING_INFORMATION("AWAITING_INFORMATION",
+                                    "Awaiting information");
 
     private final String value;
     private final String label;
