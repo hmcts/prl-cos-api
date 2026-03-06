@@ -233,7 +233,7 @@ public class CaseController {
             throw new RuntimeException(INVALID_ROLE);
         }
 
-        if (Boolean.FALSE.equals(citizenCoreCaseDataService.hasAccess(authorisation, caseId))) {
+        if (!citizenCoreCaseDataService.hasAccess(authorisation, caseId)) {
             throw new RuntimeException(INVALID_ACCESS);
         }
 
