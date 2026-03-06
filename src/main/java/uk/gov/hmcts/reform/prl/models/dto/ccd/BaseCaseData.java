@@ -158,4 +158,7 @@ public class BaseCaseData {
     private TTL retainAndDisposeTimeToLive;
 
     private List<Element<Document>> miamDocumentsCopy;
+
+    private YesOrNo orderInPlacePermissionRequired;
+    private String orderDetailsForPermissions;
 }
