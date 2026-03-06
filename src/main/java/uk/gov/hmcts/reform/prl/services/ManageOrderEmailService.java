@@ -55,6 +55,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
@@ -764,18 +765,23 @@ public class ManageOrderEmailService {
 
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
                                                   List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        caseData.getManageOrders().getServeOrderDynamicList().getValue()
-            .forEach(element -> nullSafeCollection(caseData.getOrderCollection())
-                .forEach(orderDetailsElement -> {
-                    if (orderDetailsElement.getId().toString().equals(element.getCode())) {
-                        List<Element<BulkPrintOrderDetail>> bulkPrints = CollectionUtils.isNotEmpty(orderDetailsElement.getValue()
-                                                                                                        .getBulkPrintOrderDetails())
-                            ? orderDetailsElement.getValue().getBulkPrintOrderDetails() : new ArrayList<>();
-                        bulkPrints.addAll(bulkPrintOrderDetails);
-                        orderDetailsElement.getValue()
-                            .setBulkPrintOrderDetails(bulkPrints);
-                    }
-                }));
+        ManageOrders manageOrders = caseData.getManageOrders();
+        DynamicMultiSelectList serveOrderDynamicList = manageOrders.getServeOrderDynamicList();
+        if (nonNull(serveOrderDynamicList)) {
+            serveOrderDynamicList.getValue()
+                .forEach(element -> nullSafeCollection(caseData.getOrderCollection())
+                    .forEach(orderDetailsElement -> {
+                        if (orderDetailsElement.getId().toString().equals(element.getCode())) {
+                            List<Element<BulkPrintOrderDetail>> bulkPrints = CollectionUtils.isNotEmpty(
+                                orderDetailsElement.getValue()
+                                    .getBulkPrintOrderDetails())
+                                ? orderDetailsElement.getValue().getBulkPrintOrderDetails() : new ArrayList<>();
+                            bulkPrints.addAll(bulkPrintOrderDetails);
+                            orderDetailsElement.getValue()
+                                .setBulkPrintOrderDetails(bulkPrints);
+                        }
+                    }));
+        }
     }
 
     private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,
