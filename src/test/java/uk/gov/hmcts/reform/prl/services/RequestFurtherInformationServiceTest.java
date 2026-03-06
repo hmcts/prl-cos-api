@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 public class RequestFurtherInformationServiceTest {
 
     @InjectMocks
-    private RequestFurtherInformaitonService requestFurtherInformaitonService;
+    private RequestFurtherInformationService requestFurtherInformationService;
 
     @Mock
     private FeatureToggleService featureToggleService;
@@ -69,7 +69,7 @@ public class RequestFurtherInformationServiceTest {
         when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
         verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
@@ -86,7 +86,7 @@ public class RequestFurtherInformationServiceTest {
         when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
     }
@@ -98,7 +98,7 @@ public class RequestFurtherInformationServiceTest {
         when(objectMapper.convertValue(null, RequestFurtherInformation.class))
             .thenReturn(RequestFurtherInformation.builder().reviewDate(null).build());
 
-        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
     }
@@ -114,7 +114,7 @@ public class RequestFurtherInformationServiceTest {
         when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
 
         assertEquals("Please enter a future date", errors.getFirst());
     }
@@ -130,7 +130,7 @@ public class RequestFurtherInformationServiceTest {
         when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
             .thenReturn(awaitingInfo);
 
-        List<String> errors = requestFurtherInformaitonService.validate(callbackRequest);
+        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
 
         assertTrue(errors.isEmpty());
         verify(featureToggleService, times(1)).isAwaitingInformationEnabled();

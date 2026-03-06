@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
-import uk.gov.hmcts.reform.prl.services.RequestFurtherInformaitonService;
+import uk.gov.hmcts.reform.prl.services.RequestFurtherInformationService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
     private AuthorisationService authorisationService;
 
     @MockBean
-    private RequestFurtherInformaitonService requestFurtherInformaitonService;
+    private RequestFurtherInformationService requestFurtherInformationService;
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -86,7 +86,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformationService.addToCase(any())).thenReturn(createMockCaseData());
 
         mockMvc.perform(
                 post(url)
@@ -154,7 +154,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
-        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformationService.addToCase(any())).thenReturn(createMockCaseData());
 
         mockMvc.perform(
                 post(url)
@@ -175,7 +175,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         caseData.put("respondentName", "Jane Doe");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(caseData);
+        when(requestFurtherInformationService.addToCase(any())).thenReturn(caseData);
 
         String url = "/submit-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
@@ -200,7 +200,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         mockMvc.perform(
@@ -221,7 +221,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         List<String> errorList = new ArrayList<>();
         errorList.add("Please enter a future date");
 
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(errorList);
 
         mockMvc.perform(
@@ -241,7 +241,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         errorList.add("Please enter a future date");
         errorList.add("Review date cannot be more than 12 months away");
 
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(errorList);
 
         String url = "/validate-request-further-information";
@@ -278,7 +278,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         mockMvc.perform(
@@ -295,7 +295,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         mockMvc.perform(
@@ -314,8 +314,8 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         // Submit awaiting information
@@ -344,7 +344,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String url = "/validate-request-further-information";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(requestFurtherInformaitonService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
+        when(requestFurtherInformationService.validate(any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)))
             .thenReturn(new ArrayList<>());
 
         // First validation call
@@ -372,7 +372,7 @@ public class RequestFurtherInformationControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(requestFurtherInformaitonService.addToCase(any())).thenReturn(createMockCaseData());
+        when(requestFurtherInformationService.addToCase(any())).thenReturn(createMockCaseData());
 
         // First submit
         mockMvc.perform(
