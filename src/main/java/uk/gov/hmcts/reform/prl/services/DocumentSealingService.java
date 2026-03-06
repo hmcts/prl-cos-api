@@ -51,7 +51,9 @@ public class DocumentSealingService {
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
+            log.info("Yogesh==> About to convert to PDF");
             document = documentGenService.convertToPdf(authorisation, document);
+            log.info("Yogesh==> After converting to PDF");
         }
 
         String s2sToken = authTokenGenerator.generate();
