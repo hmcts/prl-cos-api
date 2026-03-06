@@ -146,11 +146,10 @@ public class ConfidentialityCheckService {
 
         if (respondentDocument != null && respondentDoc != null) {
             // Pre FPVTL-2381, dateTimeCreated was only on respondentDocument, dateCreated was on respondentDoc
-            if (isNotEmpty(respondentDoc.getDateTimeCreated())
-                && respondentDoc.getDateTimeCreated().isAfter(respondentDocument.getDateTimeCreated())) {
-                return respondentDoc;
-            } else if (isNotEmpty(respondentDoc.getDateCreated())
-                && respondentDoc.getDateCreated().isAfter(respondentDocument.getDateTimeCreated().toLocalDate())) {
+            if ((isNotEmpty(respondentDoc.getDateTimeCreated())
+                    && respondentDoc.getDateTimeCreated().isAfter(respondentDocument.getDateTimeCreated()))
+                || (isNotEmpty(respondentDoc.getDateCreated())
+                    && respondentDoc.getDateCreated().isAfter(respondentDocument.getDateTimeCreated().toLocalDate()))) {
                 return respondentDoc;
             }
             return respondentDocument;
