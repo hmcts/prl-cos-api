@@ -1145,4 +1145,9 @@ public class PrlAppsConstants {
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
+
+    public static final String DOCUMENT_URL = "document_url";
+    public static final String DOCUMENT_FILENAME = "document_filename";
+    public static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    public static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
 }
