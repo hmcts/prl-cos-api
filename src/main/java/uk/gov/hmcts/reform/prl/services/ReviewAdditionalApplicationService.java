@@ -55,7 +55,7 @@ public class ReviewAdditionalApplicationService {
             additionalApplicationId = additionalApplicationCollection.getFirst().getId();
         }
         if (additionalApplicationId == null) {
-            throw new UnsupportedOperationException("Could not find additional application");
+            throw new IllegalStateException("Could not find additional application");
         }
 
         return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);

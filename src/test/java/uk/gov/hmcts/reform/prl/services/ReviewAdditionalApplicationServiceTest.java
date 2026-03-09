@@ -167,7 +167,7 @@ public class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .build();
 
-        assertThrows(UnsupportedOperationException.class,
+        assertThrows(IllegalStateException.class,
                      () -> reviewAdditionalApplicationService.populateReviewAdditionalApplication(
                          caseData, new HashMap<>(), clientContextCoded, REVIEW_ADDITIONAL_APPLICATION.getId())
         );
