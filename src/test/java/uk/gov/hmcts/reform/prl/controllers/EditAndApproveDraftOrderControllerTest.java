@@ -1219,6 +1219,36 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
+    public void shouldReturnErrorResponseWhenDraftOrderNotFoundDuringEditAndApprove() {
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        CaseData caseData = CaseData.builder().build();
+
+        objectMapper.registerModule(new JavaTimeModule());
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("editAndApproveAnOrder")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(new HashMap<>())
+                             .build())
+            .build();
+
+        String clientContext = null;
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .saveServeOrderDetails(authToken, s2sToken, clientContext, callbackRequest);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(1, response.getErrors().size());
+    }
+
+
+    @Test
     public void testSaveServeOrderDetailsForEditAndApproveCaseManager() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString("048a6b7e-e2c5-4e6f-8f81-f4926c59bb74"))

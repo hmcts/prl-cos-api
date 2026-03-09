@@ -48,11 +48,16 @@ public class ReviewAdditionalApplicationService {
         if (Event.REVIEW_ADDITIONAL_APPLICATION.getId().equals(eventId) && StringUtils.isNotEmpty(clientContext)) {
             log.info("Getting additional application id from client context");
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            additionalApplicationId = UUID.fromString(CaseUtils.getAdditionalApplicationId(waMapper));
+            String applicationId = CaseUtils.getAdditionalApplicationId(waMapper);
+            additionalApplicationId = applicationId != null ? UUID.fromString(applicationId) : null;
         } else {
             log.info("Getting first additional application id from dynamic list ");
             additionalApplicationId = additionalApplicationCollection.getFirst().getId();
         }
+        if (additionalApplicationId == null) {
+            throw new UnsupportedOperationException("Could not find additional application");
+        }
+
         return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
     }
 

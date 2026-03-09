@@ -34,6 +34,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
@@ -137,6 +138,39 @@ public class ReviewAdditionalApplicationServiceTest {
             REVIEW_ADDITIONAL_APPLICATION.getId());
 
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
+    }
+
+    @Test
+    public void testShouldReturnErrorWhenAdditionalApplicationIdCannotBeFoundFromContext() throws Exception {
+        String applicationId = null;
+        WaMapper waMapper = WaMapper.builder()
+            .clientContext(ClientContext.builder()
+                               .userLanguage(UserLanguage.builder().language("en").build())
+                               .userTask(UserTask.builder()
+                                             .completeTask(true)
+                                             .taskData(TaskData.builder()
+                                                           .id("test")
+                                                           .name("test")
+                                                           .additionalProperties(AdditionalProperties.builder()
+                                                                                     .orderId(UUID.randomUUID().toString())
+                                                                                     .additionalApplicationId(applicationId)
+                                                                                     .build())
+                                                           .build())
+                                             .build())
+                               .build())
+            .build();
+        String json = new ObjectMapper().writeValueAsString(waMapper);
+        String clientContextCoded = Base64.getEncoder().encodeToString(json.getBytes());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .build();
+
+        assertThrows(UnsupportedOperationException.class,
+                     () -> reviewAdditionalApplicationService.populateReviewAdditionalApplication(
+                         caseData, new HashMap<>(), clientContextCoded, REVIEW_ADDITIONAL_APPLICATION.getId())
+        );
     }
 
     @Test
