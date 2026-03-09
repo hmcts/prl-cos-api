@@ -45,8 +45,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingService {
 
-    private List<CaseLinkedData> caseLinkedData;
-
     private final AuthTokenGenerator authTokenGenerator;
 
     private final HearingApiClient hearingApiClient;
@@ -94,6 +92,7 @@ public class HearingService {
 
     public List<CaseLinkedData> getCaseLinkedData(String userToken, CaseLinkedRequest caseLinkedRequest) {
 
+        List<CaseLinkedData> caseLinkedData = null;
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
         } catch (FeignException e) {
