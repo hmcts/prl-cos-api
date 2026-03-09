@@ -1142,20 +1142,31 @@ public class DraftAnOrderService {
             .build();
     }
 
-    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection,
-                                                   Object dynamicList, String clientContext, String eventId) {
-        final UUID orderId;
-        log.info("Inside getSelectedDraftOrderDetails");
+    public UUID getSelectedDraftOrderId(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList,
+                                        String clientContext, String eventId) {
+        final UUID draftOrderId;
+        log.info("Debugging FPVTL-2047 : Draft order dynamic list: {}", dynamicList);
+        log.info("Debugging FPVTL-2047 : Draft order id from dynamic list: {}",
+                 elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper));
+
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId) && StringUtils.isNotEmpty(clientContext)) {
             log.info(" Getting order id from client context");
             WaMapper waMapper = getWaMapper(clientContext);
-            orderId = UUID.fromString(CaseUtils.getDraftOrderId(waMapper));
+            log.info("Debugging FPVTL-2047 : waMapper is {}", waMapper);
+            draftOrderId = UUID.fromString(CaseUtils.getDraftOrderId(waMapper));
         } else {
             log.info(" Getting order id from dynamic list");
-            orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
+            draftOrderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
         }
-        return CaseUtils.getDraftOrderFromCollectionId(draftOrderCollection, orderId);
+        return draftOrderId;
     }
+
+    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection,
+                                                   Object dynamicList, String clientContext, String eventId) {
+        final UUID draftOrderId = getSelectedDraftOrderId(draftOrderCollection, dynamicList, clientContext, eventId);
+        return CaseUtils.getDraftOrderFromCollectionId(draftOrderCollection, draftOrderId);
+    }
+
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId, String draftOrderId) {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();

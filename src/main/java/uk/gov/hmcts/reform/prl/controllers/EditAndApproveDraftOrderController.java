@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
@@ -207,7 +206,10 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("Debugging FPVTL-2047 : Event id is {}", callbackRequest.getEventId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("Debugging FPVTL-2047 : Client context id is {}", clientContext);
+
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -291,11 +293,17 @@ public class EditAndApproveDraftOrderController {
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
                                      CaseData caseData, String loggedInUserType, String clientContext) {
-        String draftOrderId = null;
-        if (clientContext != null) {
-            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            draftOrderId = CaseUtils.getDraftOrderId(waMapper);
-        }
+
+        final UUID draftOrderUuid = draftAnOrderService.getSelectedDraftOrderId(
+            caseData.getDraftOrderCollection(),
+            caseData.getDraftOrdersDynamicList(),
+            clientContext,
+            callbackRequest.getEventId()
+        );
+        log.info("Debugging FPVTL-2047 : draftOrderUuid is {}", draftOrderUuid);
+
+        String draftOrderId = draftOrderUuid != null ? draftOrderUuid.toString() : null;
+
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -303,10 +311,12 @@ public class EditAndApproveDraftOrderController {
             loggedInUserType,
             draftOrderId
         );
+
         DraftOrder selectedOrder = CaseUtils.getDraftOrderFromCollectionId(
             caseData.getDraftOrderCollection(),
-            UUID.fromString(draftOrderId)
+            draftOrderUuid
         );
+        log.info("Debugging FPVTL-2047 : selectedOrder is {}", selectedOrder);
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
