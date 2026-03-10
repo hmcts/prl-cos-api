@@ -253,7 +253,7 @@ public class ClosingCaseService {
         }
     }
 
-    private void removeLocalAuthorityFromCase(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public void removeLocalAuthorityFromCase(CaseData caseData, Map<String, Object> caseDataUpdated) {
         log.info("inside removeLocalAuthorityFromCase");
 
         try {

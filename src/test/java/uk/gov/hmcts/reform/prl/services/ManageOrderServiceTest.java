@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
@@ -66,6 +68,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -108,6 +111,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -134,13 +138,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
@@ -232,6 +242,8 @@ class ManageOrderServiceTest {
 
     @Mock
     private FinalisationDetailsService finalisationDetailsService;
+    @Mock
+    private RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -6719,5 +6731,64 @@ class ManageOrderServiceTest {
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
         assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
                      orders.getValue().getFinalisationDetails().getJudgeOrMagistrateTitle());
+    }
+
+    @Test
+    public void shouldRemoveLocalAuthorityFromCase() {
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder().organisationName("OrgName").build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("id", 12345L);
+        caseDataUpdated.put("caseTypeOfApplication", "C100");
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
+        caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
+
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .localAuthoritySolicitorOrganisationPolicy(organisationPolicy)
+            .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .build();
+
+        manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
+
+        verify(removeLocalAuthoritySolicitorService, atLeast(1)).removeLocalAuthoritySolicitor(eq(caseData));
+        Assert.assertFalse(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
+        Assert.assertFalse(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        Assert.assertEquals(caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE), YesOrNo.No);
+
+    }
+
+    @Test
+    public void shouldNotRemoveLocalAuthorityWhenOrgPolicyIsNotSet() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("id", 12345L);
+        caseDataUpdated.put("caseTypeOfApplication", "C100");
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
+        caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
+
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .build();
+
+        manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
+
+        verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData));
+        assertTrue(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
+        assertFalse(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        assertEquals(caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE), YesOrNo.Yes);
+
     }
 }
