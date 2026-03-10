@@ -22,4 +22,7 @@ public class Range {
     @JsonProperty("data.cafcassDateTime")
     private LastModified cafcassDateTime;
 
+    @JsonProperty("data.nextHearingDate")
+    private LastModified nextHearingDate;
+
 }
