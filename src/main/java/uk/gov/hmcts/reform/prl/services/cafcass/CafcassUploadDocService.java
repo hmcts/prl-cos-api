@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -23,12 +24,15 @@ import uk.gov.hmcts.reform.prl.models.documents.Document.DocumentBuilder;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -42,6 +46,8 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassUploadDocService {
+
+    private static final Set<String> CIR_DOCUMENT_TYPES = Set.of("CIR_Part1", "CIR_Part2", "CIR_Review");
 
     public static final List<String> ALLOWED_FILE_TYPES = List.of("pdf", "docx");
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
@@ -114,6 +120,8 @@ public class CafcassUploadDocService {
             CAFCASS
         );
 
+        setCirReceivedFlagIfApplicable(typeOfDocument, startAllTabsUpdateDataContent.caseData(), caseDataUpdated);
+
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -123,6 +131,24 @@ public class CafcassUploadDocService {
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
+    }
+
+    private void setCirReceivedFlagIfApplicable(String typeOfDocument, CaseData caseData,
+                                                Map<String, Object> caseDataUpdated) {
+        if (!CIR_DOCUMENT_TYPES.contains(typeOfDocument)) {
+            return;
+        }
+        if (caseData.getCirDeadlineData() == null || caseData.getCirDeadlineData().getCirDueDate() == null) {
+            log.info("No CIR due date set on case — skipping cirReceivedByDeadline flag");
+            return;
+        }
+        LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
+        LocalDate cirDueDate = caseData.getCirDeadlineData().getCirDueDate();
+        if (!today.isAfter(cirDueDate)) {
+            caseDataUpdated.put("cirReceivedByDeadline", Yes);
+            caseDataUpdated.put("cirUploadedDate", today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+            log.info("CIR document uploaded on or before due date {} — setting cirReceivedByDeadline", cirDueDate);
+        }
     }
 
     private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument,

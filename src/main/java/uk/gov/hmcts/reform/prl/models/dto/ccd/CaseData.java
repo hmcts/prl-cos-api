@@ -597,6 +597,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis;
 
     @JsonUnwrapped
+    private final CirDeadlineData cirDeadlineData;
+
+    @JsonUnwrapped
     private final StandardDirectionOrder standardDirectionOrder;
 
     @JsonUnwrapped
