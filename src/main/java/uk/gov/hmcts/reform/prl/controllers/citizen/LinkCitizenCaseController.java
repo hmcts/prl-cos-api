@@ -111,7 +111,8 @@ public class LinkCitizenCaseController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return linkCitizenCaseService.validateAccessCode(
                 accessCodeRequest.getCaseId(),
-                accessCodeRequest.getAccessCode()
+                accessCodeRequest.getAccessCode(),
+                authorisation
             );
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

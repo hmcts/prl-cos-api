@@ -59,7 +59,7 @@ public enum Event {
     TS_ADMIN_APPLICATION_NOC("testingSupportDummyAdminCreateNoc", "TS-Admin application-Noc"),
     ADMIN_EDIT_AND_APPROVE_ORDER("adminEditAndApproveAnOrder", "Edit and serve an order"),
     REMOVE_DRAFT_ORDER("removeDraftOrder", "Remove draft order"),
-    DRAFT_AN_ORDER("draftAnOrder", "Draft an order"),
+    DRAFT_AN_ORDER("draftAnOrder", "Create/upload draft order"),
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
     UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications"),
     TRANSFER_TO_ANOTHER_COURT("transferToAnotherCourt", "Transfer to another court"),

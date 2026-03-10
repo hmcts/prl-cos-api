@@ -25,6 +25,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamPreviousAttendanceChecklistEnum.miamPolicyUpgradePreviousAttendance_Value_1;
@@ -484,30 +485,72 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
 
     @Test
     public void shouldAttemptToDeletePreviousDomesticAbuseDocument() {
-        CaseData caseData = CaseData.builder()
+        CaseData previousCaseData = CaseData.builder()
             .miamPolicyUpgradeDetails(
                 MiamPolicyUpgradeDetails.builder()
                     .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
                 .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
                 .mpuDomesticAbuseEvidenceDocument(List.of(
-                    Element.<DomesticAbuseEvidenceDocument>builder().value(DomesticAbuseEvidenceDocument.builder()
-                        .domesticAbuseDocument(Document.builder()
-                                                   .documentUrl(DOCUMENT_ID).documentFileName("test").build())
-                        .build()).build()
+                    Element.<DomesticAbuseEvidenceDocument>builder().value(
+                        DomesticAbuseEvidenceDocument.builder()
+                            .domesticAbuseDocument(Document.builder()
+                                                       .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                            .build()).build()
                 ))
-                .build())
+                    .build())
             .build();
 
+        CaseData currentCaseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                    .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                    .mpuDomesticAbuseEvidenceDocument(List.of(
+                        Element.<DomesticAbuseEvidenceDocument>builder().value(
+                            DomesticAbuseEvidenceDocument.builder()
+                                .domesticAbuseDocument(Document.builder()
+                                                           .documentUrl(UUID.randomUUID().toString()).documentFileName("test").build())
+                                .build()).build()
+                    ))
+                    .build())
+            .build();
+
+
         when(authTokenGenerator.generate()).thenReturn("test");
-        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, "test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(previousCaseData, currentCaseData, "test");
 
         verify(caseDocumentClient)
             .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
     }
 
     @Test
-    public void shouldAttemptToDeletePreviousMiamAttendanceDocumentDisputeResolution() {
+    public void shouldNotAttemptToDeletePreviousDomesticAbuseDocumentIfItsStillOnTheCase() {
         CaseData caseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse))
+                    .mpuIsDomesticAbuseEvidenceProvided(YesOrNo.Yes)
+                    .mpuDomesticAbuseEvidenceDocument(List.of(
+                        Element.<DomesticAbuseEvidenceDocument>builder().value(
+                            DomesticAbuseEvidenceDocument.builder()
+                                .domesticAbuseDocument(Document.builder()
+                                                           .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                                .build()).build()
+                    ))
+                    .build())
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, caseData, "test");
+
+        verify(caseDocumentClient, never())
+            .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
+    }
+
+
+    @Test
+    public void shouldAttemptToDeletePreviousMiamAttendanceDocumentDisputeResolution() {
+        CaseData previousCaseData = CaseData.builder()
             .miamPolicyUpgradeDetails(
                 MiamPolicyUpgradeDetails.builder()
                     .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
@@ -517,16 +560,79 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
                 .build())
             .build();
 
+        CaseData currentCaseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                    .mpuDocFromDisputeResolutionProvider(Document.builder()
+                                                             .documentUrl(UUID.randomUUID().toString()).documentFileName("test").build())
+                    .build())
+            .build();
+
+
         when(authTokenGenerator.generate()).thenReturn("test");
-        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, "test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(previousCaseData, currentCaseData, "test");
 
         verify(caseDocumentClient)
             .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
     }
 
     @Test
+    public void shouldNotAttemptToDeletePreviousMiamAttendanceDocumentDisputeResolutionIfStillOnCase() {
+        CaseData previousCaseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_1)
+                    .mpuDocFromDisputeResolutionProvider(Document.builder()
+                                                             .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                    .build())
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(previousCaseData, previousCaseData, "test");
+
+        verify(caseDocumentClient, never())
+            .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
+    }
+
+
+    @Test
     public void shouldAttemptToDeletePreviousMiamAttendanceDocumentMediatorCertificate() {
-        CaseData caseData = CaseData.builder()
+        CaseData previousCaseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                    .mpuCertificateByMediator(Document.builder()
+                                                  .documentUrl(DOCUMENT_ID).documentFileName("test").build())
+                    .build())
+            .build();
+
+        CaseData currentCaseData = CaseData.builder()
+            .miamPolicyUpgradeDetails(
+                MiamPolicyUpgradeDetails.builder()
+                    .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
+                    .mpuPreviousMiamAttendanceReason(miamPolicyUpgradePreviousAttendance_Value_2)
+                    .mpuTypeOfPreviousMiamAttendanceEvidence(TypeOfMiamAttendanceEvidenceEnum.miamCertificate)
+                    .mpuCertificateByMediator(Document.builder()
+                                                  .documentUrl(UUID.randomUUID().toString()).documentFileName("test").build())
+                    .build())
+            .build();
+
+
+        when(authTokenGenerator.generate()).thenReturn("test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(previousCaseData, currentCaseData, "test");
+
+        verify(caseDocumentClient)
+            .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
+    }
+
+    @Test
+    public void shouldNotAttemptToDeletePreviousMiamAttendanceDocumentMediatorCertificateIfStillOnCase() {
+        CaseData previousCaseData = CaseData.builder()
             .miamPolicyUpgradeDetails(
                 MiamPolicyUpgradeDetails.builder()
                     .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance))
@@ -538,11 +644,12 @@ public class MiamPolicyUpgradeFileUploadServiceTest {
             .build();
 
         when(authTokenGenerator.generate()).thenReturn("test");
-        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(caseData, "test");
+        miamPolicyUpgradeFileUploadService.deleteOldMiamPolicyUpgradeDocuments(previousCaseData, previousCaseData, "test");
 
-        verify(caseDocumentClient)
+        verify(caseDocumentClient, never())
             .deleteDocument(eq("test"), eq("test"), eq(UUID.fromString(DOCUMENT_ID)), eq(true));
     }
+
 
 
 }

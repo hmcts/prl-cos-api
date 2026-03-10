@@ -57,6 +57,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -222,7 +223,10 @@ public class ManageDocumentsService {
                                           UserDetails userDetails) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
-        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+
+        List<Element<ManageDocuments>> manageDocuments =
+            Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
+                .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
@@ -546,7 +550,12 @@ public class ManageDocumentsService {
                         docData
                     ))
             );
-            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+
+            if (uploadResponse == null || CollectionUtils.isEmpty(uploadResponse.getDocuments())) {
+                throw new IllegalStateException("Upload returned no documents for id: " + documentId);
+            }
+
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().getFirst());
         } catch (Exception ex) {
             log.error("Failed to upload new document {}", ex.getMessage(), ex);
         }

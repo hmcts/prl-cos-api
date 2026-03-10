@@ -64,6 +64,9 @@ logging:
     org.springframework.web: INFO
     uk.gov.hmcts.reform.prl: INFO
     au.com.dius.pact: INFO
+    org.springframework.integration: DEBUG
+    org.springframework.integration.sftp: DEBUG
+    com.jcraft.jsch: DEBUG
   pattern:
     console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
@@ -254,7 +257,8 @@ send-grid:
           SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-c1b5991660204a9c87b70a655519f6fe}
           SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
           SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-accf073f179e4e258959a2a624eb6e01}
-          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
+          SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-febd86641af441c2a9f2c07566b3e267}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-00bc2fa3911b4b2aa95d175cfed0eec8}
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
           FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
@@ -284,7 +288,8 @@ send-grid:
           SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-007239cbbc9a44bd919e8c383b2088e2}
           SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
           SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-accf073f179e4e258959a2a624eb6e01}
-          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
+          SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-febd86641af441c2a9f2c07566b3e267}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-00bc2fa3911b4b2aa95d175cfed0eec8}
           SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
           SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
@@ -803,11 +808,6 @@ closing_case:
   unallocated_roleCategory: ADMIN,CTSC,LEGAL_OPERATIONS,JUDICIAL,OTHER_GOV_DEPT
   unallocated_roleName: allocated-admin-caseworker,allocated-ctsc-caseworker,allocated-legal-adviser,gatekeeping-judge,hearing-judge,allocated-judge,allocated-magistrate,hearing-centre-team-leader,ctsc-team-leader,ctsc,hearing-centre-admin,tribunal-caseworker,senior-tribunal-caseworker
 
-hearing:
-  preview:
-    bypass:
-      enabled: ${HEARING_PREVIEW_BYPASS_ENABLED:false}
-
 acro:
   output-directory: /tmp/acro/output
   source-directory: /tmp/acro/source
@@ -815,7 +815,22 @@ acro:
   search-case-type-id: PRLAPPS
   cronjob:
     enabled: false
+  sftp:
+    host: ${ACRO_SFTP_HOST:some-host}
+    port: ${ACRO_SFTP_PORT:22}
+    user: ${ACRO_SFTP_USER:some-user}
+    azure-deployment: false
+    private-key: /mnt/secrets/private-law/bais-xerox-key
+    private-key-pass-phrase: ""
+    session-wait-timeout: 10000
+    pool-size: 10
+    allow-unknown-keys: true
+    remote-directory: /
+    password: ${ACRO_SFTP_USER_PASSWORD:test_password}
 
 hwf-update-case-state-task:
   last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}
+
+prepare-hearing-bundle:
+  calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
 

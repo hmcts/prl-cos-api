@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.refuge.RefugeConfidentialDocumentsRecord;
 import uk.gov.hmcts.reform.prl.services.C8ArchiveService;
@@ -93,6 +94,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetails
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHelpWithFeesElementsMapper.updateHelpWithFeesDetailsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataHwnElementsMapper.updateHearingWithoutNoticeElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataInternationalElementsMapper.updateInternationalElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.buildDocument;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherPersonsElementsMapper.updateOtherPersonDetailsElementsForCaseData;
@@ -105,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapp
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Slf4j
 @Component
@@ -928,9 +931,31 @@ public class CitizenPartyDetailsMapper {
                 "applicantCaseName",
                 buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
             );
+            caseDataMapToBeUpdated.put(
+                "miamDocumentsCopy",
+                getMiamDocuments(citizenUpdatedCaseData.getC100RebuildData().getC100RebuildMaim()));
         }
         return caseDataMapToBeUpdated;
     }
+
+    private List<Element<Document>> getMiamDocuments(String jsonData) throws JsonProcessingException {
+        List<Element<Document>> miamDocuments = new ArrayList<>();
+        if (jsonData != null) {
+            C100RebuildMiamElements miamDataObject = objectMapper.readValue(jsonData, C100RebuildMiamElements.class);
+            if (isNotEmpty(miamDataObject.getMiamDomesticAbuseEvidenceDocs())) {
+                miamDocuments.addAll(wrapElements(miamDataObject.getMiamDomesticAbuseEvidenceDocs()));
+            }
+            if (isNotEmpty(miamDataObject.getMiamPreviousAttendanceEvidenceDoc())) {
+                miamDocuments.add(element(miamDataObject.getMiamPreviousAttendanceEvidenceDoc()));
+            }
+            if (isNotEmpty(miamDataObject.getMiamCertificate())) {
+                miamDocuments.add(element(buildDocument(miamDataObject.getMiamCertificate())));
+            }
+        }
+
+        return miamDocuments;
+    }
+
 
     public CaseData buildUpdatedCaseData(CaseData caseData, C100RebuildData c100RebuildData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;

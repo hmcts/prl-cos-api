@@ -13,12 +13,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,6 +48,9 @@ public class StatementOfServiceControllerIntegrationTest {
     @MockBean
     StmtOfServImplService stmtOfServImplService;
 
+    @MockBean
+    private UserInfo userInfo;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -60,7 +65,7 @@ public class StatementOfServiceControllerIntegrationTest {
         String url = "/Statement-of-service-about-to-start";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(stmtOfServImplService.retrieveRespondentsList(any())).thenReturn(new HashMap<>());
 
@@ -80,7 +85,7 @@ public class StatementOfServiceControllerIntegrationTest {
         String url = "/Statement-of-service-about-to-submit";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
         when(stmtOfServImplService.handleSosAboutToSubmit(any(), anyString())).thenReturn(new HashMap<>());
 
@@ -100,7 +105,7 @@ public class StatementOfServiceControllerIntegrationTest {
         String url = "/Statement-of-service-confirmation";
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         mockMvc.perform(
@@ -119,7 +124,7 @@ public class StatementOfServiceControllerIntegrationTest {
         String url = "/12345/67890/save-statement-of-service-by-citizen";
         String jsonRequest = ResourceLoader.loadJson("requests/service-of-application.json");
 
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         mockMvc.perform(

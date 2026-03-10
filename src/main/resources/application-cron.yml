@@ -1,12 +1,11 @@
 server:
   port: 4144
-hearing:
-  preview:
-    bypass:
-      enabled: true
 
 idam:
   s2s-auth:
     totp-secret: ${PRL_IDAM_S2S_AUTH_TOTP_SECRET}
   client:
     secret: ${PRL_IDAM_CLIENT_SECRET}
+
+prepare-hearing-bundle:
+  calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}

@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -463,14 +464,15 @@ public class TestingSupportService {
     }
 
     private boolean isAuthorized(String authorisation, String s2sToken) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
-            && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
+            && userInfo.isPresent() && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
     }
 
     private boolean isAuthorized(String authorisation) {
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
         return launchDarklyClient.isFeatureEnabled(TESTING_SUPPORT_LD_FLAG_ENABLED)
-            && Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation));
+            && userInfo.isPresent();
     }
 
 }

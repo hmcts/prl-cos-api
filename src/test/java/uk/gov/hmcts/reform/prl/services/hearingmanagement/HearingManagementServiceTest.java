@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.hearingmanagement;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,11 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -25,9 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingsUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.HearingDetailsEmail;
-import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -54,16 +56,10 @@ public class HearingManagementServiceTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @Mock
-    private AllTabServiceImpl allTabService;
-
-    @Mock
     ObjectMapper objectMapper;
 
     @Mock
     private SystemUserService systemUserService;
-
-    @Mock
-    private EmailService emailService;
 
     @Mock
     private CcdCoreCaseDataService ccdCoreCaseDataService;
@@ -76,37 +72,25 @@ public class HearingManagementServiceTest {
     private HearingDetailsEmail applicantEmailVars;
     private HearingDetailsEmail respondentEmailVars;
     private HearingDetailsEmail applicantSolicitorEmailvars;
-    private HearingDetailsEmail respondentSolicitorEmailvars;
     private String respondentEmail;
     private String applicantEmail;
-    private String respondentSolicitorEmail;
     private String applicantSolicitorEmail;
     private Map<String, Object> stringObjectMap;
     private CaseDetails caseDetails;
     private StartEventResponse startEventResponse;
 
-    private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "PRLAPPS";
-
-    public static final String HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME = "hmcCaseUpdDecOutcome";
-    public static final String HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING = "hmcCaseUpdPrepForHearing";
-    public static final String UPDATE_NEXT_HEARING_DATE_IN_CCD = "updateNextHearingInfo";
-
+    private static final String HMC_STATUS_LISTED = "LISTED";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     public static final String authToken = "Bearer TestAuthToken";
-    private final String serviceAuthToken = "Bearer testServiceAuth";
-    private final String systemUserId = "systemUserID";
-    private final String eventToken = "eventToken";
     private String dashBoardUrl = "https://privatelaw.aat.platform.hmcts.net/dashboard";
-
-    private LocalDateTime testNextHearingDate = LocalDateTime.of(2024, 04, 28, 1, 0);
 
     @Before
     public void setup() {
 
         nextHearingDateRequest = NextHearingDateRequest.builder()
             .caseRef("1669565933090179")
-            .nextHearingDetails(NextHearingDetails.builder().hearingID("123").hearingDateTime(testNextHearingDate)
+            .nextHearingDetails(NextHearingDetails.builder().hearingID("123")
+                                    .hearingDateTime(LocalDateTime.of(2024,4, 28, 1, 0))
                                     .build())
             .build();
 
@@ -119,7 +103,7 @@ public class HearingManagementServiceTest {
                                .nextHearingDate(LocalDate.parse("2022-11-27"))
                                .hearingVenueId("MRD-CRT-0817")
                                .hearingVenueName("Aldershot")
-                               .hmcStatus("LISTED")
+                               .hmcStatus(HMC_STATUS_LISTED)
                                .build())
             .nextHearingDateRequest(nextHearingDateRequest)
             .build();
@@ -184,28 +168,17 @@ public class HearingManagementServiceTest {
             .partySolicitorName(applicant.getRepresentativeFirstName() + " " + applicant.getRepresentativeLastName())
             .build();
 
-        respondentSolicitorEmailvars = HearingDetailsEmail.builder()
-            .caseReference(String.valueOf(c100CaseData.getId()))
-            .caseName(c100CaseData.getApplicantCaseName())
-            .issueDate(String.valueOf(issueDate.format(dateTimeFormatter)))
-            .typeOfHearing(" ")
-            .hearingDateAndTime(String.valueOf(hearingRequest.getHearingUpdate().getNextHearingDate()))
-            .hearingVenue(hearingRequest.getHearingUpdate().getHearingVenueName())
-            .partySolicitorName(respondent.getRepresentativeFirstName() + " " + respondent.getRepresentativeLastName())
-            .build();
-
         applicantEmail = applicant.getEmail();
         applicantSolicitorEmail = applicant.getSolicitorEmail();
         respondentEmail = respondent.getEmail();
-        respondentSolicitorEmail = respondent.getSolicitorEmail();
         stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", "1233456787678");
         caseDetails = CaseDetails.builder().id(12345L).data(stringObjectMap).build();
         startEventResponse = StartEventResponse.builder()
             .caseDetails(caseDetails)
             .token(authToken).build();
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(systemUserService.getUserId(authToken)).thenReturn(systemUserId);
+        when(authTokenGenerator.generate()).thenReturn("Bearer testServiceAuth");
+        when(systemUserService.getUserId(authToken)).thenReturn("systemUserID");
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(ccdCoreCaseDataService.submitUpdate(
             Mockito.anyString(),
@@ -227,11 +200,61 @@ public class HearingManagementServiceTest {
             Mockito.any(),
             Mockito.anyBoolean()
         )).thenReturn(caseDetails);
-        when(ccdCoreCaseDataService.startSubmitCreate(Mockito.anyString(),
-                                                      Mockito.anyString(),
-                                                      Mockito.any(),
-                                                      Mockito.anyBoolean())).thenReturn(startEventResponse);
+        when(ccdCoreCaseDataService.startSubmitCreate(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyBoolean()
+        )).thenReturn(startEventResponse);
 
+    }
+
+    @Test
+    public void testCaseStateChangeForHearingManagementUnhandledCaseStateLogsWarning() {
+        ch.qos.logback.classic.Logger logger = (Logger) LoggerFactory.getLogger(HearingManagementService.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
+
+        hearingManagementService.caseStateChangeForHearingManagement(hearingRequest, State.SUBMITTED_NOT_PAID);
+        State unhandledState = State.valueOf("SUBMITTED_NOT_PAID");
+
+        verifyNoInteractions(ccdCoreCaseDataService);
+        assertTrue(appender.getEvents().stream().anyMatch(
+            e -> e.getFormattedMessage().contains("Unhandled caseState: "
+                                                      + unhandledState + " for case " + hearingRequest.getCaseRef()
+            )
+        ));
+
+        logger.detachAppender(appender);
+    }
+
+
+
+    @Test
+    public void testSetNextHearingDetails() {
+        caseDetails = caseDetails.toBuilder().data(stringObjectMap).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(c100CaseData);
+
+        hearingManagementService.caseStateChangeForHearingManagement(
+            hearingRequest, PREPARE_FOR_HEARING_CONDUCT_HEARING
+        );
+
+        verify(ccdCoreCaseDataService).startUpdate(
+            Mockito.eq(authToken),
+            Mockito.isNull(),
+            Mockito.eq(hearingRequest.getCaseRef()),
+            Mockito.eq(true)
+        );
+
+        verify(ccdCoreCaseDataService).createCaseDataContent(
+            Mockito.eq(startEventResponse),
+            Mockito.<Map<String, Object>>argThat(data ->
+                                                     data != null
+                                                         && data.containsKey("nextHearingDetails")
+                                                         && data.containsKey("nextHearingDate")
+            )
+        );
     }
 
     @Test
@@ -366,7 +389,7 @@ public class HearingManagementServiceTest {
                                .nextHearingDate(LocalDate.parse("2022-11-27"))
                                .hearingVenueId("MRD-CRT-0817")
                                .hearingVenueName("Aldershot")
-                               .hmcStatus("LISTED")
+                               .hmcStatus(HMC_STATUS_LISTED)
                                .build())
             .nextHearingDateRequest(nextHearingDateRequest)
             .build();
@@ -562,7 +585,7 @@ public class HearingManagementServiceTest {
     @Test
     public void testValidateHearingState() {
         CaseData caseData = CaseData.builder().hearingTaskData(HearingTaskData.builder().currentHearingId("id")
-                .currentHearingStatus("LISTED").build()).build();
+                .currentHearingStatus(HMC_STATUS_LISTED).build()).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         hearingManagementService.validateHearingState(caseDataUpdated, caseData);
         Assert.assertTrue(caseDataUpdated.containsKey("hearingListed"));

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.payment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FeeAndPayServiceRequestService { 
+public class FeeAndPayServiceRequestService {
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE
         = "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
 

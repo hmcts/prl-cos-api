@@ -70,6 +70,7 @@ public class HearingManagementService {
         if (hearingRequest.getNextHearingDateRequest() != null
             && hearingRequest.getNextHearingDateRequest().getNextHearingDetails() != null
             && hearingRequest.getNextHearingDateRequest().getNextHearingDetails().getHearingDateTime() != null) {
+            fields.put("nextHearingDetails", hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
             fields.put(NEXT_HEARING_DATE, hearingRequest.getNextHearingDateRequest().getNextHearingDetails()
                 .getHearingDateTime().toLocalDate());
         }
@@ -95,9 +96,7 @@ public class HearingManagementService {
                     customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME);
                     submitUpdate(fields, customFields);
                 }
-                default -> {
-                    break;
-                }
+                default -> log.warn("Unhandled caseState: {} for case {} ", caseState, hearingRequest.getCaseRef());
             }
         }
     }

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -80,9 +81,11 @@ public class LinkCitizenCaseServiceTest {
     CaseData caseData;
     CaseData caseDataAlreadyLinked;
     CaseData caseDataEmptyCaseInvites;
+    CaseData caseDataEmailAlreadyLinked;
 
     CaseData caseDataNullCaseInvites;
     UserDetails userDetails;
+    UserInfo userInfo;
 
     @Before
     public void setUp() {
@@ -110,6 +113,17 @@ public class LinkCitizenCaseServiceTest {
                                                                          .hasLinked("Yes")
                                                                          .accessCode(accessCode).build()).build()))
             .build();
+
+        caseDataEmailAlreadyLinked = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .applicants(applicantList)
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(testUuid)
+                                                                         .accessCode(accessCode)
+                                                                         .hasLinked("Yes")
+                                                                         .invitedUserId("123").build()).build()))
+            .build();
+
         caseDataEmptyCaseInvites = CaseData.builder()
             .applicants(applicantList)
             .caseInvites(new ArrayList<>())
@@ -119,6 +133,9 @@ public class LinkCitizenCaseServiceTest {
             .caseInvites(null)
             .build();
         userDetails = UserDetails.builder().id("123").build();
+        userInfo = UserInfo.builder().uid("123").build();
+        when(idamClient.getUserInfo(authToken)).thenReturn(userInfo);
+
     }
 
     @Test
@@ -135,6 +152,17 @@ public class LinkCitizenCaseServiceTest {
         when(allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.LINK_CITIZEN.getValue())).thenReturn(startAllTabsUpdateDataContent);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn(authToken);
+
+        Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
+        Assert.assertNotNull(returnedCaseDetails);
+    }
+
+    @Test
+    public void testLinkCitizenToCaseThrowsExceptionWhenEmailAlreadyLinked() {
+        when(systemUserService.getSysUserToken()).thenReturn(s2sToken);
+        when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataEmailAlreadyLinked);
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
 
         Optional<CaseDetails> returnedCaseDetails = linkCitizenCaseService.linkCitizenToCase(authToken, caseId, accessCode);
         Assert.assertNotNull(returnedCaseDetails);
@@ -176,7 +204,7 @@ public class LinkCitizenCaseServiceTest {
         when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataNullCaseInvites);
 
-        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode, authToken);
         Assert.assertEquals("Invalid", returnedCaseStatus);
     }
 
@@ -186,7 +214,7 @@ public class LinkCitizenCaseServiceTest {
         when(ccdCoreCaseDataService.findCaseById(s2sToken, caseId)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(null);
 
-        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode, authToken);
         Assert.assertEquals("Invalid", returnedCaseStatus);
     }
 
@@ -296,7 +324,7 @@ public class LinkCitizenCaseServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class))
             .thenReturn(caseData.toBuilder().caseTypeOfApplication(FL401_CASE_TYPE).build());
         when(launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)).thenReturn(false);
-        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode);
+        String returnedCaseStatus = linkCitizenCaseService.validateAccessCode(caseId, accessCode, authToken);
         Assert.assertEquals("Invalid", returnedCaseStatus);
     }
 }
