@@ -6,8 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -37,14 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.REVIEW_ADDITIONAL_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class ReviewAdditionalApplicationServiceTest {
 
     @InjectMocks
@@ -82,8 +78,6 @@ class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .respondents(List.of(respondents))
             .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), null, REVIEW_ADDITIONAL_APPLICATION.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
@@ -127,8 +121,6 @@ class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .respondents(List.of(respondents))
             .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), clientContextCoded,
             REVIEW_ADDITIONAL_APPLICATION.getId());
@@ -188,8 +180,6 @@ class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .respondents(List.of(respondents))
             .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), null, EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));

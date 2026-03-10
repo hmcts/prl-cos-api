@@ -90,6 +90,7 @@ public class EditAndApproveDraftOrderController {
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = """
         ### What happens next \nYour message has been sent to the legal representative.
         """;
+    public static final String ERROR_RETRIEVE_DRAFT_ORDER = "Unable to retrieve the draft order";
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -231,7 +232,7 @@ public class EditAndApproveDraftOrderController {
                 String draftOrderId = getDraftOrderIdFromContext(clientContext);
                 if (draftOrderId == null) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(List.of("Unable to retrieve the draft order")).build();
+                        .errors(List.of(ERROR_RETRIEVE_DRAFT_ORDER)).build();
                 }
                 editAndApproveOrder(
                     authorisation,
