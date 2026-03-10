@@ -82,6 +82,7 @@ public class BaseCaseData {
      */
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private String applicantCaseName;
+    private String caseNameHmctsInternal;
 
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
