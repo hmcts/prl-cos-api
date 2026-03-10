@@ -1164,7 +1164,7 @@ public class SendAndReplyService {
                 CaseData caseData1 = populateMessageReplyFields(
                     caseData,
                     authorisation,
-                    openMessages.get(0).getValue()
+                    message
                 );
                 SendOrReplyMessage sendOrReplyMessage = caseData1.getSendOrReplyMessage();
                 data.put("messageReplyTable", sendOrReplyMessage.getMessageReplyTable());
