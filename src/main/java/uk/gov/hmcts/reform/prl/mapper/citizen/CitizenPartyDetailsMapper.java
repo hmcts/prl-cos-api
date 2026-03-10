@@ -63,10 +63,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -927,10 +929,9 @@ public class CitizenPartyDetailsMapper {
                 "applicantPcqId",
                 citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
             );
-            caseDataMapToBeUpdated.put(
-                "applicantCaseName",
-                buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
-            );
+            String caseName = buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData());
+            caseDataMapToBeUpdated.put(APPLICANT_CASE_NAME, caseName);
+            caseDataMapToBeUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseName);
             caseDataMapToBeUpdated.put(
                 "miamDocumentsCopy",
                 getMiamDocuments(citizenUpdatedCaseData.getC100RebuildData().getC100RebuildMaim()));
@@ -1058,7 +1059,9 @@ public class CitizenPartyDetailsMapper {
 
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
-        caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        String caseName = buildApplicantAndRespondentForCaseName(c100RebuildData);
+        caseDataBuilder.applicantCaseName(caseName);
+        caseDataBuilder.caseNameHmctsInternal(caseName);
         caseDataBuilder.caseAccessCategory(caseData.getCaseTypeOfApplication());
         //Set case type, applicant name & respondent names for case list table
         caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
@@ -1072,7 +1075,7 @@ public class CitizenPartyDetailsMapper {
         return nullSafeList(parties).get(0).getValue().getLabelForDynamicList();
     }
 
-    public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
+    private String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
         C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
@@ -1089,7 +1092,6 @@ public class CitizenPartyDetailsMapper {
         }
         return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
     }
-
 
     private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
