@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -92,7 +94,7 @@ class HearingServiceTest {
     PartyDetails respondent;
 
     @BeforeEach
-     void init() {
+    void init() {
         ReflectionTestUtils.setField(
             hearingService, "futureHearingStatusList",  Arrays.asList(
                 "HEARING_REQUESTED","AWAITING_LISTING","LISTED","UPDATE_REQUESTED","UPDATE_SUBMITTED","EXCEPTION",
@@ -123,7 +125,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings success.")
-     void getHearingsTestSuccess() {
+    void getHearingsTestSuccess() {
 
         setUpHearingsMock();
         when(hearingApiClient.getHearingDetails(
@@ -140,7 +142,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings no hearings returned.")
-     void getHearingsTestNoHearingReturned() {
+    void getHearingsTestNoHearingReturned() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
@@ -152,7 +154,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
-     void getHearingsTestException() {
+    void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(
             Mockito.any(),
             Mockito.any(),
@@ -171,7 +173,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
-     void getHearingsTestExceptionForRefData() {
+    void getHearingsTestExceptionForRefData() {
 
         setUpHearingsMock();
 
@@ -206,7 +208,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
-     void getNextHearingDateTestSuccess() {
+    void getNextHearingDateTestSuccess() {
 
         NextHearingDetails nextHearingDetails = NextHearingDetails.builder().hearingID("2030006118")
             .hearingDateTime(LocalDateTime.now().plusDays(5)).build();
@@ -224,7 +226,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate exception .")
-     void getNextHearingDateTestException() {
+    void getNextHearingDateTestException() {
         when(hearingApiClient.getNextHearingDate(
             any(),
             any(),
@@ -239,7 +241,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
-     void getCaseLinkedDataTestSuccess() {
+    void getCaseLinkedDataTestSuccess() {
         CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().build();
 
         List<CaseLinkedData> response =
@@ -250,7 +252,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getNextHearingDate success.")
-     void getCaseLinkedDataTestException() {
+    void getCaseLinkedDataTestException() {
         CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().build();
 
         when(hearingApiClient.getCaseLinkedData(
@@ -271,7 +273,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getFutureHearings success.")
-     void getFutureHearingsTestSuccess() {
+    void getFutureHearingsTestSuccess() {
 
         setUpHearingsMock();
         when(hearingApiClient.getFutureHearings(
@@ -287,7 +289,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getFutureHearings exception .")
-     void getFutureHearingsTestException() {
+    void getFutureHearingsTestException() {
         when(hearingApiClient.getFutureHearings(
             any(),
             any(),
@@ -302,7 +304,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings for given list of case ids success.")
-     void getHearingsByListOfCaseIdsTestSuccess() {
+    void getHearingsByListOfCaseIdsTestSuccess() {
 
         setUpHearingsMock();
         when(hearingApiClient.getHearingsByListOfCaseIds(
@@ -322,7 +324,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for HearingService getHearings for given list of case ids success.")
-     void getHearingsByListOfCaseIdsTestException() {
+    void getHearingsByListOfCaseIdsTestException() {
 
         when(hearingApiClient.getHearingsByListOfCaseIds(
             any(),
@@ -340,7 +342,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for Automated Hearing Management.")
-     void createAutomatedHearingManagementTestSuccess() {
+    void createAutomatedHearingManagementTestSuccess() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
@@ -352,7 +354,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for Automated Hearing Management.")
-     void createAutomatedHearingManagementTestBadRequest() {
+    void createAutomatedHearingManagementTestBadRequest() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
@@ -364,7 +366,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for Automated Hearing Management.")
-     void createAutomatedHearingManagementTestException() {
+    void createAutomatedHearingManagementTestException() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         when(hearingApiClient.createAutomatedHearing(any(), any(), any())).thenThrow(new RuntimeException());
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
@@ -375,7 +377,7 @@ class HearingServiceTest {
 
     @Test
     @DisplayName("test case for Automated Hearing Management with failure response.")
-     void createAutomatedHearingManagementTestFailure() {
+    void createAutomatedHearingManagementTestFailure() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         AutomatedHearingCaseData automatedHearingCaseData = AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build());
@@ -384,6 +386,83 @@ class HearingServiceTest {
         AutomatedHearingResponse automatedHearingsResponse = hearingService.createAutomatedHearing(auth, automatedHearingCaseData);
         Assert.assertNull(automatedHearingsResponse);
 
+    }
+
+    @Test
+    void shouldFilterCasesWithHearingsStartingOnDate() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        List<CaseDetails> caseDetails = List.of(CaseDetails.builder().id(123L).build(),
+                                                CaseDetails.builder().id(456L).build()
+        );
+        LocalDateTime hearingStartDate = LocalDateTime.now().plusDays(5);
+
+        Hearings hearingsResponse123 = Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                                              .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+                                                              .build()))
+                                      .build()))
+            .build();
+        Hearings hearingsResponse456 = Hearings.hearingsWith()
+            .caseRef("456")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                                              .hearingStartDateTime(LocalDateTime.now().plusDays(10))
+                                                              .build()))
+                                      .build()))
+            .build();
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            any(),
+            any(),
+            any()
+        )).thenReturn(List.of(hearingsResponse123, hearingsResponse456));
+
+        List<CaseDetails> filteredCases = hearingService.filterCasesWithHearingsStartingOnDate(caseDetails, auth, hearingStartDate.toLocalDate());
+        assertEquals(123L, filteredCases.getFirst().getId());
+        assertEquals(1, filteredCases.size());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoCasesGiven() {
+        List<CaseDetails> filteredCases = hearingService.filterCasesWithHearingsStartingOnDate(null, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCases);
+    }
+
+    @Test
+    void shouldIgnoreEmptyHearings() {
+        List<CaseDetails> cases = List.of(CaseDetails.builder().id(123L).build());
+        Hearings hearingsResponse = Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(null)
+            .build();
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            any(),
+            any(),
+            any()
+        )).thenReturn(List.of(hearingsResponse));
+
+        List<CaseDetails> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(cases, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCaseIds);
+    }
+
+    @Test
+    void shouldIgnoreEmptyHearingSchedules() {
+        List<CaseDetails> cases = List.of(CaseDetails.builder().id(123L).build());
+        Hearings hearingsResponse = Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingDaySchedule(null)
+                                      .build()))
+            .build();
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
+            any(),
+            any(),
+            any()
+        )).thenReturn(List.of(hearingsResponse));
+
+        List<CaseDetails> filteredCaseIds = hearingService.filterCasesWithHearingsStartingOnDate(cases, auth, LocalDate.now().plusDays(5));
+        assertEquals(List.of(), filteredCaseIds);
     }
 
     private void setUpHearingsMock() {
