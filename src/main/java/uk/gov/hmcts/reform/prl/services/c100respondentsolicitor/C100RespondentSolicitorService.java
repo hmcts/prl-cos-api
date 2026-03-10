@@ -686,6 +686,7 @@ public class C100RespondentSolicitorService {
                         .partyName(respondentName)
                         .createdBy(solicitorName)
                         .dateCreated(LocalDate.now())
+                        .dateTimeCreated(LocalDateTime.now())
                         .citizenDocument(document)
                         .build())))
                 .build();
