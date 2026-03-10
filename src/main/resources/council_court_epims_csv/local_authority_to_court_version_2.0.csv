@@ -168,7 +168,7 @@ North Somerset Council ,Bristol Civil and Family Justice Centre,Bristol Civil An
 Bath and North East Somerset Council ,Bristol Civil and Family Justice Centre,Bristol Civil And Family Justice Centre,114,,,819890,"Redcliff Street,BS1 6GR",,Open,Bristol,South West
 Swindon County Council ,Swindon Combined Court ,Swindon Combined Court,3935,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Swindon County Council ,South West
 Wiltshire Council ,Swindon Combined Court ,Swindon Combined Court,3940,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Wiltshire Council ,South West
-Hampshire County Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1770,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Hampshire County Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1770,GU31;GU32;GU33;PO7;PO8;PO9:PO10;PO11;PO12;PO13;PO14;PO15;PO16,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
 Southampton City Council ,Southampton Combined Court,Southampton Combined Court Centre,1780,,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council ,South West
 Isle of Wight Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,2114,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Isle of Wight Council ,South West
 Portsmouth City Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1775,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Portsmouth City Council ,South West
@@ -182,7 +182,7 @@ Plymouth City Council,Plymouth Combined Court ,Plymouth Combined Court,1160,PL;T
 Torbay Council,Exeter Law Courts,Exeter Combined Court,1165,EX,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Torbay Council ,South West
 Torbay Council,Plymouth Combined Court ,Plymouth Combined Court,1165,PL;TQ,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Torbay Council ,South West
 Somerset Council ,Taunton Combined Court ,"Taunton Crown, County And Family Court",3300,,,382409,"Shire Hall,TA1 4EU",,Open,Somerset Council ,South West
-Hampshire County Council,Basingstoke County Court and Family Court,Basingstoke County Court And Family Court,1770,RG21;RG22;RG23;RG24,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Hampshire County Council,Basingstoke County Court and Family Court,Basingstoke County Court And Family Court,1770,,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
 Burnley Borough Council,Preston Family Court,Preston Family Court,2315,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
 Chorley Borough Council,Preston Family Court,Preston Family Court,2320,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
 Fylde Borough Council,Preston Family Court,Preston Family Court,2325,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
@@ -331,7 +331,7 @@ East Hampshire District Council,Portsmouth Combined Court,Portsmouth Combined Co
 Eastleigh Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1715,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
 Fareham Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1720,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
 Gosport Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1725,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
-Hampshire County Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1770,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Hampshire County Council,Southampton Combined Court,Southampton Combined Court Centre,1770,SO16;SO30;SO32;SO40;SO41;SO42;SO45;SO50;SO51;SO52;SO53,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council,South West
 Hart District Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1730,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
 Havant Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1735,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
 Isle Of Wight Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,2114,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
