@@ -13,22 +13,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 
 @Slf4j
 @RestController
@@ -51,28 +56,59 @@ public class LocalAuthorityController extends AbstractCallbackController {
     @Operation(description = "Callback to add a Local authority on about to submit")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAddAboutToSubmit(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
+            @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Inside Local authority/add/submitted for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
+                    callbackRequest.getCaseDetails().getData(),
+                    CaseData.class
             );
 
             OrganisationPolicy localAuthorityOrganisationPolicy = caseData.getLocalAuthoritySolicitorOrganisationPolicy();
             caseDataUpdated.put(
-                LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
-                localAuthorityOrganisationPolicy.toBuilder()
-                    .orgPolicyCaseAssignedRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE).build()
+                    LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY,
+                    localAuthorityOrganisationPolicy.toBuilder()
+                            .orgPolicyCaseAssignedRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE).build()
             );
             caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
+            caseDataUpdated.put(
+                    LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME,
+                    localAuthorityOrganisationPolicy.getOrganisation().getOrganisationName()
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/remove/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to remove a local authority on about-to-start")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleRemoveAboutToStart(
+            @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Inside localauthority/remove/about-to-start for case {}", callbackRequest.getCaseDetails().getId());
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            List<String> errorList = new ArrayList<>();
+
+            if (null == caseData.getLocalAuthoritySolicitorOrganisationPolicy()
+                    || null == caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
+                log.info("No Local authority currently assigned to the case.");
+                errorList.add("No Local authority currently assigned to the case.");
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData())
+                    .errors(errorList).build();
+        } else {
+            throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
 
@@ -80,23 +116,33 @@ public class LocalAuthorityController extends AbstractCallbackController {
     @Operation(description = "Callback to remove a local authority on about to submit")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleRemoveAboutToSubmit(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
+            @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+            @RequestHeader(SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+            @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Inside local authority/remove/about to submit for case {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
             CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
+                    callbackRequest.getCaseDetails().getData(),
+                    CaseData.class
             );
-            removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
-
+            List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
-            caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+
+            if (null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
+                    && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
+                removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME);
+                caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
+            } else {
+                errorList.add("No Local authority currently assigned to the case");
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated)
+                    .errors(errorList)
+                    .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
