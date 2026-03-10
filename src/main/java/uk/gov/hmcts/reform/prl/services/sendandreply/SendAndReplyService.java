@@ -117,8 +117,10 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.http.ResponseEntity.ok;
@@ -153,8 +155,10 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getMessageIdentifierAssociatedWithTask;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -166,6 +170,7 @@ public class SendAndReplyService {
 
     public static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
     public static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
+    private static final String MESSAGE_OBJECT = "messageObject";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -1121,7 +1126,7 @@ public class SendAndReplyService {
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(authorisation))
             .build();
-        data.put("messageObject", messageMetaData);
+        data.put(MESSAGE_OBJECT, messageMetaData);
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
@@ -1129,6 +1134,55 @@ public class SendAndReplyService {
         }
         return data;
     }
+
+    public Map<String, Object> setSenderAndGenerateMessageReplyList(CallbackRequest callbackRequest, String authorisation, String clientContext) {
+        Map<String, Object> data = new HashMap<>();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        MessageMetaData messageMetaData = MessageMetaData.builder()
+            .senderEmail(getLoggedInUserEmail(authorisation))
+            .build();
+        data.put(MESSAGE_OBJECT, messageMetaData);
+
+        String messageIdentifier = getMessageIdentifierAssociatedWithTask(clientContext);
+        log.info("Yogesh===>messageIdentifier {}", messageIdentifier);
+        List<Element<Message>> openMessages = emptyIfNull(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()));
+        Element<Message> messageElement = null;
+        if (StringUtils.isNotBlank(messageIdentifier)) {
+            messageElement = openMessages.stream()
+                .filter(element -> messageIdentifier.equalsIgnoreCase(element.getValue().getMessageIdentifier()))
+                .findFirst()
+                .orElse(null);
+        }
+
+        Message message = nonNull(messageElement) ? messageElement.getValue() : null;
+
+        if (isNotEmpty(openMessages)) {
+            if (nonNull(message)) {
+                log.info("Yogesh===>Inside If {}", message);
+                data.put("taskAssociatedWithMessage", Yes);
+                data.put("chooseSendOrReply", "REPLY");
+                CaseData caseData1 = populateMessageReplyFields(
+                    caseData,
+                    authorisation,
+                    message
+                );
+                SendOrReplyMessage sendOrReplyMessage = caseData1.getSendOrReplyMessage();
+                data.put("messageReplyTable", sendOrReplyMessage.getMessageReplyTable());
+                data.put("replyMessageObject", sendOrReplyMessage.getReplyMessageObject());
+                data.put("internalMessageAttachDocsList", sendOrReplyMessage.getInternalMessageAttachDocsList());
+            } else {
+                log.info("Yogesh===>Inside else");
+                data.put("taskAssociatedWithMessage", YesOrNo.No);
+                data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
+            }
+        } else {
+            log.info("Yogesh===>No Open messages available");
+            data.put("taskAssociatedWithMessage", YesOrNo.No);
+        }
+        return data;
+    }
+
+
 
     public DynamicList getReplyMessagesList(List<Element<Message>> openMessages) {
         return ElementUtils.asDynamicList(
@@ -1161,9 +1215,14 @@ public class SendAndReplyService {
         }
 
         //populate message table
-        String messageReply = renderMessageTable(previousMessage.get());
+        Message message = previousMessage.get();
+        return populateMessageReplyFields(caseData, authorization, message);
+    }
+
+    private CaseData populateMessageReplyFields(CaseData caseData, String authorization, Message message) {
+        String messageReply = renderMessageTable(message);
         //PRL-4411 - consolidate & add docs to display in reply history
-        List<Element<SendReplyTempDoc>> sendReplyTempDocs = getSendReplyTempDocs(previousMessage.get());
+        List<Element<SendReplyTempDoc>> sendReplyTempDocs = getSendReplyTempDocs(message);
         DynamicList legalAdviserList = getLegalAdviserList();
 
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
@@ -2128,7 +2187,7 @@ public class SendAndReplyService {
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
         DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
-        return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
+        return nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && nonNull(
             applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
 
@@ -2139,7 +2198,7 @@ public class SendAndReplyService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
@@ -2172,10 +2231,10 @@ public class SendAndReplyService {
 
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
 
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        if (Objects.nonNull(message)
+        if (nonNull(message)
             && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
             && !atLeastOnePartySelectedForExternalMessage(message)) {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
