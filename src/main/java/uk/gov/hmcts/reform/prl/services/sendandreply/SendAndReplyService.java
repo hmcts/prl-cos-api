@@ -1144,7 +1144,7 @@ public class SendAndReplyService {
         data.put(MESSAGE_OBJECT, messageMetaData);
 
         String messageIdentifier = getMessageIdentifierAssociatedWithTask(clientContext);
-
+        log.info("Yogesh===>messageIdentifier {}", messageIdentifier);
         List<Element<Message>> openMessages = emptyIfNull(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()));
         Element<Message> messageElement = null;
         if (StringUtils.isNotBlank(messageIdentifier)) {
@@ -1157,8 +1157,8 @@ public class SendAndReplyService {
         Message message = nonNull(messageElement) ? messageElement.getValue() : null;
 
         if (isNotEmpty(openMessages)) {
-            data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
             if (nonNull(message)) {
+                log.info("Yogesh===>Inside If {}", message);
                 data.put("taskAssociatedWithMessage", Yes);
                 data.put("chooseSendOrReply", "REPLY");
                 CaseData caseData1 = populateMessageReplyFields(
@@ -1171,9 +1171,12 @@ public class SendAndReplyService {
                 data.put("replyMessageObject", sendOrReplyMessage.getReplyMessageObject());
                 data.put("internalMessageAttachDocsList", sendOrReplyMessage.getInternalMessageAttachDocsList());
             } else {
+                log.info("Yogesh===>Inside else");
                 data.put("taskAssociatedWithMessage", YesOrNo.No);
+                data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
             }
         } else {
+            log.info("Yogesh===>No Open messages available");
             data.put("taskAssociatedWithMessage", YesOrNo.No);
         }
         return data;
