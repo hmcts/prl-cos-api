@@ -5,14 +5,18 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestFurtherInformation;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +24,10 @@ import java.util.Map;
 import static java.lang.String.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.REQUEST_FURTHER_INFORMATION;
+import static org.apache.commons.lang3.StringUtils.SPACE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.REQUEST_FURTHER_INFORMATION_HISTORY;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
 
 @Slf4j
@@ -75,111 +81,61 @@ public class RequestFurtherInformationService {
      * @param requestFurtherInformation The RequestFurtherInformation object
      * @return Formatted event description string
      */
-    private Event buildEventWithDescription(RequestFurtherInformation requestFurtherInformation) {
+    public Event buildEventWithDescription(RequestFurtherInformation requestFurtherInformation) {
         StringBuilder description = new StringBuilder();
-        // Add review date to description
+
+        // Add review date with DD/Month/YYYY format
         if (requestFurtherInformation.getReviewDate() != null) {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+            String formattedDate = requestFurtherInformation.getReviewDate().format(dateFormatter);
             description.append("Review By Date: ")
-                .append(requestFurtherInformation.getReviewDate());
+                .append(formattedDate)
+                .append(SPACE)
+                .append(".\n");
         }
-        // Add reasons to description
-        if (requestFurtherInformation.getRequestFurtherInformationReasonEnum() != null
-            && !requestFurtherInformation.getRequestFurtherInformationReasonEnum().isEmpty()) {
+
+        // Add reasons
+        var reasons = requestFurtherInformation.getRequestFurtherInformationReasonEnum();
+        if (reasons != null && !reasons.isEmpty()) {
+            // Add newline if something already exists
             if (description.length() > 0) {
-                description.append(" | ");
+                description.append("\n");
             }
-            String reasons = requestFurtherInformation.getRequestFurtherInformationReasonEnum()
-                .stream()
-                .map(reason -> reason.getDisplayedValue())
-                .collect(joining(", "));
-            description.append("Reasons: ").append(reasons);
+            description.append("Awaiting Information Reasons:\n");
+            // Join all displayed values with newlines
+            String reasonText = reasons.stream()
+                .map(r -> r.getDisplayedValue())
+                .collect(joining(", \n"));
+            description.append(reasonText);
         }
+
         // Create Event with description
         return Event.builder()
-            .id(REQUEST_FURTHER_INFORMATION_DETAILS)
+            .id(REQUEST_FURTHER_INFORMATION_HISTORY.getValue())
             .description(description.toString())
             .build();
     }
 
-    public CaseDetails updateHistoryTab(CallbackRequest callbackRequest, String authorisationComingFromAPI, String s2sTokenComingFromAPI) {
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc In method During RequestFurtherInformation with event description");
-        String caseId = valueOf(callbackRequest.getCaseDetails().getId());
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc Case ID  : {}", caseId);
+    public CaseDetails updateHistoryTab(CallbackRequest callbackRequest) {
         String systemAuthToken = systemUserService.getSysUserToken();
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc systemAuthToken : {}", systemAuthToken);
         String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc systemAuthToken : {}", systemUpdateUserId);
 
         EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
-            CaseEvent.REQUEST_FURTHER_INFORMATION,
-            systemUpdateUserId
-        );
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc eventRequestData : {}", eventRequestData);
-        StartEventResponse startEventResponse =
-            ccdCoreCaseDataService.startUpdate(
-                systemAuthToken,
-                eventRequestData,
-                caseId,
-                true
-            );
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc startEventResponse : {}", startEventResponse);
-        var requestFurtherInformation = getRequestFurtherInformation(callbackRequest.getCaseDetails().getData());
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc requestFurtherInformation : {}", requestFurtherInformation);
-        CaseDataContent caseDataContent = CaseDataContent.builder()
+            REQUEST_FURTHER_INFORMATION_HISTORY, systemUpdateUserId);
+
+        String caseId = valueOf(callbackRequest.getCaseDetails().getId());
+        var startEventResponse =
+            ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
+        var requestFurtherInformation = getRequestFurtherInformation(startEventResponse.getCaseDetails().getData());
+
+        var caseDataContent = CaseDataContent.builder()
             .eventToken(startEventResponse.getToken())
             .event(buildEventWithDescription(requestFurtherInformation))
             .data(startEventResponse.getCaseDetails().getData())
             .build();
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc caseDataContent : {}", caseDataContent);
-        CaseDetails caseDetails = null;
-        try {
-            caseDetails = ccdCoreCaseDataService.submitUpdate(
-                systemAuthToken,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                true
-            );
-        } catch (RuntimeException ex) {
-            log.error(
-                "CCCCCCCCCCCCCCCCCCCCCCc systemAuthToken    UnauthorizedException while updating history tab for caseId {}: {}",
-                caseId,
-                ex.getMessage()
-            );
-        }
-
-        try {
-            caseDetails = ccdCoreCaseDataService.submitUpdate(
-                s2sTokenComingFromAPI,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                true
-            );
-        } catch (RuntimeException ex) {
-            log.error(
-                "CCCCCCCCCCCCCCCCCCCCCCB s2sTokenComingFromAPI UnauthorizedException while updating history tab for caseId {}: {}",
-                caseId,
-                ex.getMessage()
-            );
-        }
-
-        try {
-            caseDetails = ccdCoreCaseDataService.submitUpdate(
-                authorisationComingFromAPI,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                true
-            );
-        } catch (RuntimeException ex) {
-            log.error(
-                "CCCCCCCCCCCCCCCCCCCCCCB authorisationComingFromAPI UnauthorizedException while updating history tab for caseId {}: {}",
-                caseId,
-                ex.getMessage()
-            );
-        }
-        log.info("CCCCCCCCCCCCCCCCCCCCCCc caseDetails : {}", caseDetails);
+        CaseDetails caseDetails = ccdCoreCaseDataService.submitUpdate(
+            systemAuthToken, eventRequestData, caseDataContent, caseId, true);
+        log.info("History tab updated for case id: {}", caseId);
         return caseDetails;
     }
 

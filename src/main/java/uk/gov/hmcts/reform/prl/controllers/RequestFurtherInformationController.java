@@ -71,9 +71,10 @@ public class RequestFurtherInformationController {
                 .errors(emptyList())
                 .build();
         }
-        return CallbackResponse.builder()
+        CallbackResponse build = CallbackResponse.builder()
             .errors(requestFurtherInformationService.validate(callbackRequest))
             .build();
+        return build;
     }
 
     @PostMapping(path = "/history-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -88,10 +89,9 @@ public class RequestFurtherInformationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-
         if (authorisationService.isAuthorized(authorisation, s2sToken)
             && featureToggleService.isAwaitingInformationEnabled()) {
-            requestFurtherInformationService.updateHistoryTab(callbackRequest, authorisation,s2sToken);
+            requestFurtherInformationService.updateHistoryTab(callbackRequest);
             return ok(SubmittedCallbackResponse.builder().build());
         }
         throw (new RuntimeException(INVALID_CLIENT));

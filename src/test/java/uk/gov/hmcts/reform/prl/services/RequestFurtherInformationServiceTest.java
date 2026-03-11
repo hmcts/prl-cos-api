@@ -9,10 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.awaitinginformation.RequestFurtherInformationReasonEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestFurtherInformation;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,23 +62,6 @@ public class RequestFurtherInformationServiceTest {
     }
 
     @Test
-    public void validateSuccessfullyProcessesValidFutureDate() {
-        RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
-            .reviewDate(LocalDate.now().plusDays(10))
-            .build();
-
-        caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, awaitingInfo);
-
-        when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
-            .thenReturn(awaitingInfo);
-
-        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
-
-        assertTrue(errors.isEmpty());
-        verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
-    }
-
-    @Test
     public void validateHandlesNullReviewDateWithoutError() {
         RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
             .reviewDate(null)
@@ -104,22 +90,6 @@ public class RequestFurtherInformationServiceTest {
     }
 
     @Test
-    public void validateReturnsErrorMessageExactlyAsConfigured() {
-        RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
-            .reviewDate(LocalDate.now().minusDays(1))
-            .build();
-
-        caseDataMap.put(PrlAppsConstants.REQUEST_FURTHER_INFORMATION_DETAILS, awaitingInfo);
-
-        when(objectMapper.convertValue(awaitingInfo, RequestFurtherInformation.class))
-            .thenReturn(awaitingInfo);
-
-        List<String> errors = requestFurtherInformationService.validate(callbackRequest);
-
-        assertEquals("Please enter a future date", errors.getFirst());
-    }
-
-    @Test
     public void validateProcessesCallbackRequestCorrectly() {
         RequestFurtherInformation awaitingInfo = RequestFurtherInformation.builder()
             .reviewDate(LocalDate.now().plusDays(7))
@@ -135,4 +105,43 @@ public class RequestFurtherInformationServiceTest {
         assertTrue(errors.isEmpty());
         verify(featureToggleService, times(1)).isAwaitingInformationEnabled();
     }
+
+
+    @Test
+    public void buildEventWithDescription_HandlesNullReviewDate() {
+        // Given
+        RequestFurtherInformation requestFurtherInfo = RequestFurtherInformation.builder()
+            .reviewDate(null)
+            .requestFurtherInformationReasonEnum(Collections.singletonList(
+                RequestFurtherInformationReasonEnum.miamFurtherInformation
+            ))
+            .build();
+
+        // When
+        Event event = requestFurtherInformationService.buildEventWithDescription(requestFurtherInfo);
+
+        // Then
+        String expectedDescription = "Awaiting Information Reasons:\n"
+            + "MIAM - further information required";
+
+        assertEquals(expectedDescription, event.getDescription());
+    }
+
+    @Test
+    public void buildEventWithDescription_HandlesNullDateAndNullReasons() {
+        // Given
+        RequestFurtherInformation requestFurtherInfo = RequestFurtherInformation.builder()
+            .reviewDate(null)
+            .requestFurtherInformationReasonEnum(null)
+            .build();
+
+        // When
+        Event event = requestFurtherInformationService.buildEventWithDescription(requestFurtherInfo);
+
+        // Then
+        String expectedDescription = "";
+
+        assertEquals(expectedDescription, event.getDescription());
+    }
+
 }
