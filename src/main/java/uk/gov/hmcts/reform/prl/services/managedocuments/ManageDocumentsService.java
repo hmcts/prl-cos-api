@@ -236,10 +236,6 @@ public class ManageDocumentsService {
                                           UserDetails userDetails) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
-        boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
-        if (isUserRoleLA) {
-            userRole = LOCAL_AUTHORITY;
-        }
         List<Element<ManageDocuments>> manageDocuments =
             Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
                 .orElse(Collections.emptyList());
