@@ -439,7 +439,7 @@ public class ServiceOfApplicationService {
 
         ServiceOfApplication soa = caseData.getServiceOfApplication();
 
-        boolean isNonPersonalService = "No".equalsIgnoreCase(soa.getSoaServeToRespondentOptionsDA());
+        boolean isNonPersonalService = YesOrNo.No.equals(soa.getSoaServeToRespondentOptionsDA());
         boolean hasRecipients = soa.getSoaRecipientsOptions() != null
             && soa.getSoaRecipientsOptions().getValue() != null
             && !soa.getSoaRecipientsOptions().getValue().isEmpty();
@@ -524,13 +524,10 @@ public class ServiceOfApplicationService {
             return false;
         }
 
-        // Check the C100 Enum Field
         if (soa.getSoaServeToRespondentOptions() != null) {
-            // Use the Enum's own name to compare—this is always safe
-            return !soa.getSoaServeToRespondentOptions().name().equalsIgnoreCase("NotApplicable");
+            return !YesNoNotApplicable.NotApplicable.equals(soa.getSoaServeToRespondentOptions());
         }
 
-        // Check the DA Field (which doesn't have a 'Not Applicable' option anyway)
         return soa.getSoaServeToRespondentOptionsDA() != null;
     }
 
@@ -550,7 +547,7 @@ public class ServiceOfApplicationService {
         if (soa.getSoaServeToRespondentOptions() != null) {
             selection = soa.getSoaServeToRespondentOptions().name();
         } else if (soa.getSoaServeToRespondentOptionsDA() != null) {
-            selection = soa.getSoaServeToRespondentOptionsDA();
+            selection = soa.getSoaServeToRespondentOptionsDA().getDisplayedValue();
         }
 
         if ("No".equalsIgnoreCase(selection) && hasRecipients(soa)) {
@@ -2077,9 +2074,9 @@ public class ServiceOfApplicationService {
 
         String selection = null;
         if (soa.getSoaServeToRespondentOptions() != null) {
-            selection = soa.getSoaServeToRespondentOptions().name();
+            selection = soa.getSoaServeToRespondentOptions().getDisplayedValue();
         } else if (soa.getSoaServeToRespondentOptionsDA() != null) {
-            selection = soa.getSoaServeToRespondentOptionsDA();
+            selection = soa.getSoaServeToRespondentOptionsDA().getDisplayedValue();
         }
 
         if ("No".equalsIgnoreCase(selection)) {
@@ -3577,7 +3574,7 @@ public class ServiceOfApplicationService {
         List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization,
                                                                                        CaseUtils.getCaseTypeOfApplication(caseData),
                                                                                        caseData);
-        if (YesNoNotApplicable.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
+        if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptionsDA())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             caseDataUpdated.putAll(getPacksForConfidentialCheckDaNonPersonalService(authorization, caseData,
