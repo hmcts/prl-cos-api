@@ -154,4 +154,19 @@ public class CitizenCoreCaseDataServiceTest {
 
         Assert.assertEquals(caseDetails, retrievedCaseDetails);
     }
+
+    @Test
+    public void shouldReturnTrueWhenUserHasAccessToCase() {
+        when(citizenCoreCaseDataService.getCase(bearerToken, "12345L")).thenReturn(caseDetails);
+        boolean hasAccess = citizenCoreCaseDataService.hasAccess(bearerToken, "12345L");
+        Assert.assertTrue(hasAccess);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenUserDoesNotHaveAccessToCase() {
+        when(citizenCoreCaseDataService.getCase(bearerToken, "12345L"))
+            .thenThrow(new CoreCaseDataStoreException("Case not found"));
+        boolean hasAccess = citizenCoreCaseDataService.hasAccess(bearerToken, "12345L");
+        Assert.assertFalse(hasAccess);
+    }
 }
