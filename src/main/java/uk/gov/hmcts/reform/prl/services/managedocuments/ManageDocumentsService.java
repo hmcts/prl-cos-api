@@ -180,10 +180,6 @@ public class ManageDocumentsService {
         List<String> errorList = new ArrayList<>();
         String userRole = CaseUtils.getUserRole(userDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
-        if (isUserRoleLA) {
-            userRole = LOCAL_AUTHORITY;
-        }
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
 
         for (Element<ManageDocuments> element : manageDocuments) {
