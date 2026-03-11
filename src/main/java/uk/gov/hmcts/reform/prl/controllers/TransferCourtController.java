@@ -12,6 +12,7 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,11 +31,13 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -69,6 +72,7 @@ public class TransferCourtController {
     private final AllTabServiceImpl allTabsService;
     private final CourtFinderService courtLocatorService;
     private final EventService eventPublisher;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/transfer-court/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
@@ -168,8 +172,20 @@ public class TransferCourtController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            Court closestChildArrangementsCourt = courtLocatorService
-                .getNearestFamilyCourt(caseData);
+
+            Court closestChildArrangementsCourt = null;
+            if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
+                ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(caseData);
+                if (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null) {
+                    closestChildArrangementsCourt = courtCourtVenueMap.getRight();
+                }
+                if (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null) {
+                    caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
+                }
+            } else {
+                closestChildArrangementsCourt = courtLocatorService.getNearestFamilyCourt(caseData);
+            }
+
             Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
                 .getEmailAddress(closestChildArrangementsCourt);
             if (courtEmailAddress.isPresent()) {

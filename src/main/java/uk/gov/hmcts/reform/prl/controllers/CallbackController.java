@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,9 +46,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
-import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
@@ -63,8 +59,6 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.DfjLookupService;
-import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
@@ -173,7 +167,6 @@ public class CallbackController {
     private final SystemUserService systemUserService;
     private final DfjLookupService dfjLookupService;
     private final CafcassDateTimeService cafcassDateTimeService;
-    private final FeatureToggleService featureToggleService;
 
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -282,48 +275,6 @@ public class CallbackController {
                 .build();
         }
         return caseData;
-    }
-
-    @PostMapping(path = "/pre-populate-court-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to Generate document after submit application")
-    public AboutToStartOrSubmitCallbackResponse prePopulateCourtDetails(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-            Court closestChildArrangementsCourt = null;
-            if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
-                ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(caseData);
-                if (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null) {
-                    closestChildArrangementsCourt = courtCourtVenueMap.getRight();
-                }
-                if (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null) {
-                    caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
-                }
-            } else {
-                closestChildArrangementsCourt = courtLocatorService.getNearestFamilyCourt(caseData);
-            }
-
-            Optional<CourtEmailAddress> courtEmailAddress = closestChildArrangementsCourt == null ? Optional.empty() : courtLocatorService
-                .getEmailAddress(closestChildArrangementsCourt);
-            if (courtEmailAddress.isPresent()) {
-                log.info("Found court email for case id {}", caseData.getId());
-                caseDataUpdated.put("localCourtAdmin", List.of(
-                    Element.<LocalCourtAdminEmail>builder().value(LocalCourtAdminEmail.builder().email(courtEmailAddress.get().getAddress()).build())
-                        .build()));
-            } else {
-                log.info("Court email not found for case id {}", caseData.getId());
-            }
-            List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
-            addAndSelectCourtList(caseDataUpdated, courtList, authorisation);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
     }
 
     @PostMapping(path = "/generate-document-submit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

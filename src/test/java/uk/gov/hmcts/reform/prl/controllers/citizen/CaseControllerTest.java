@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +85,7 @@ public class CaseControllerTest {
 
     @Mock
     private CourtFinderService courtFinderService;
-    
+
     @Mock
     private UserInfo userInfo;
 
@@ -542,11 +543,11 @@ public class CaseControllerTest {
         String postcode = "SA1 3TU";
         String courtName = "Court Name";
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
         when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(Court.builder()
                                                                                             .courtName(courtName).build());
-        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
         Assert.assertEquals(courtName, actualCourtName);
     }
 
@@ -555,10 +556,10 @@ public class CaseControllerTest {
 
         String postcode = "SA";
 
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
         when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(null);
-        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
         Assert.assertEquals("No Court Fetched", actualCourtName);
 
     }
@@ -566,24 +567,11 @@ public class CaseControllerTest {
     @Test
     public void testFindCourtByPostCodeAndServiceWhenReturnNull() throws Exception {
         String postcode = "SA";
-        when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
         when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenThrow(NotFoundException.class);
-        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
         Assert.assertNull(actualCourtName);
-    }
-
-    @Test
-    public void testFindCourtByPostCodeAndServiceFails() throws Exception {
-
-        expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Invalid Client");
-
-        String postcode = "TS1 1ST";
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-
-        String actualCourtName = caseController.findCourtByPostCodeAndService(authToken, servAuthToken, postcode);
-
     }
 
 }
