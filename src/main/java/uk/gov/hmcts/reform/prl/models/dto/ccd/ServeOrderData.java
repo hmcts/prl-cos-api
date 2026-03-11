@@ -24,6 +24,12 @@ public class ServeOrderData {
     private final List<CafcassCymruDocumentsEnum> cafcassCymruDocuments;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate whenReportsMustBeFiled;
+    @JsonProperty("localAuthorityNeedToProvideReport")
+    private final YesOrNo localAuthorityNeedToProvideReport;
+    @JsonProperty("localAuthorityMultipleDocuments")
+    private final List<CafcassCymruDocumentsEnum> localAuthorityMultipleDocuments;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate whenReportsMustBeFiledByLocalAuthority;
     @JsonProperty("orderEndsInvolvementOfCafcassOrCymru")
     private final YesOrNo orderEndsInvolvementOfCafcassOrCymru;
     @JsonProperty("doYouWantToServeOrder")

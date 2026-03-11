@@ -38,6 +38,11 @@ public class ServeOrderDetails {
     private final YesOrNo cafcassOrCymruNeedToProvideReport;
     private final List<CafcassCymruDocumentsEnum> cafcassCymruDocuments;
     private final String whenReportsMustBeFiled;
+
+    private final YesOrNo localAuthorityNeedToProvideReport;
+    private final List<CafcassCymruDocumentsEnum> localAuthorityMultipleDocuments;
+    private final String whenReportsMustBeFiledByLocalAuthority;
+
     private final YesOrNo orderEndsInvolvementOfCafcassOrCymru;
     private final YesOrNo doYouWantToServeOrder;
     private final WhatToDoWithOrderEnum whatDoWithOrder;
