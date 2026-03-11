@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -224,7 +225,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper()), caseData, null
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -258,7 +259,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper()), caseData, null
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -292,7 +293,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper()), caseData, null
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -356,7 +357,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper()), caseData, null
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
