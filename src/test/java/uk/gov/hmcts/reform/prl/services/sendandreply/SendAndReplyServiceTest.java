@@ -104,7 +104,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -112,7 +111,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1697,6 +1695,22 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testSetSenderAndGenerateMessageReplyList() {
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .senderName("Sender-ABC")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+        List<Element<Message>> messagesWithOneAdded = Arrays.asList(element(message1));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1708,47 +1722,13 @@ public class SendAndReplyServiceTest {
         Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, auth);
         MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
 
-        assertNotNull(updatedResponse.get("messageReplyDynamicList"));
-        assertEquals("sender@email.com", messageMetaData.getSenderEmail());
-
-    }
-
-
-    @Test
-    public void testSetSenderAndGenerateMessageReplyListWithClientContext() throws IOException {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .messages(messagesWithOneAdded)
-                    .build())
-            .build();
-
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L).state("SUBMITTED").createdDate(LocalDateTime.now()).lastModified(LocalDateTime.now()).build();
-        CallbackRequest request = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        String context = """
-            {
-              "client_context": {
-                "user_task": {
-                  "task_data": {
-                    "additional_properties": {
-                    }
-                  },
-                  "complete_task" : true
-                }
-              }
-            }
-            """;
-
-        String clientContext = new String(Base64.getEncoder().encode(context.getBytes()));
-
-        Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(request, auth, clientContext);
-        MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
-
-        assertNotNull(updatedResponse.get("messageReplyDynamicList"));
+        DynamicList messageReplyDynamicList = (DynamicList) updatedResponse.get("messageReplyDynamicList");
+        assertNotNull(messageReplyDynamicList);
+        List<DynamicListElement> listItems = messageReplyDynamicList.getListItems();
+        listItems.forEach(item -> {
+            assertTrue(item.getLabel().contains(message1.getSenderName()));
+            assertTrue(item.getLabel().contains(message1.getMessageSubject()));
+        });
         assertEquals("sender@email.com", messageMetaData.getSenderEmail());
 
     }

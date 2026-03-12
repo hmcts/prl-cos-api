@@ -114,9 +114,13 @@ public class Message extends MessageMetaData {
 
     @JsonIgnore
     public String getLabelForReplyDynamicList() {
+        String messageSubject = super.getMessageSubject();
+        String subject = "Subject: " + (messageSubject.length() > 100 ? messageSubject.substring(0,97) + "..." : messageSubject);
+        String sender = "From: " + senderName;
         return String.format(
-            "%s, %s, %s",
-            super.getMessageSubject(),
+            "%s, %s, %s %s",
+            sender,
+            subject,
             this.dateSent,
             YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
         );

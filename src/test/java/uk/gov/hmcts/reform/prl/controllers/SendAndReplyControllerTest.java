@@ -182,7 +182,7 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCallbackRequest, auth, null)).thenReturn(aboutToStartMap);
 
         // when
-        sendAndReplyController.handleSendOrMessageAboutToStart(auth, null, sendCallbackRequest);
+        sendAndReplyController.handleSendOrMessageAboutToStart(auth, null, null, sendCallbackRequest);
 
         // then
         verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCallbackRequest, auth, null);

@@ -130,6 +130,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHOOSE_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -144,7 +145,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIFIER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_REPLY_DYNAMIC_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED_WITH_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -168,9 +173,10 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
-    public static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
-    public static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
+    private static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
+    private static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
     private static final String MESSAGE_OBJECT = "messageObject";
+    private static final String REPLY_1 = "REPLY";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -1130,7 +1136,7 @@ public class SendAndReplyService {
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
-            data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
+            data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
         }
         return data;
     }
@@ -1144,7 +1150,6 @@ public class SendAndReplyService {
         data.put(MESSAGE_OBJECT, messageMetaData);
 
         String messageIdentifier = getMessageIdentifierAssociatedWithTask(clientContext);
-        log.info("Yogesh===>messageIdentifier {}", messageIdentifier);
         List<Element<Message>> openMessages = emptyIfNull(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()));
         Element<Message> messageElement = null;
         if (StringUtils.isNotBlank(messageIdentifier)) {
@@ -1158,36 +1163,52 @@ public class SendAndReplyService {
 
         if (isNotEmpty(openMessages)) {
             if (nonNull(message)) {
-                log.info("Yogesh===>Inside If {}", message);
-                data.put("taskAssociatedWithMessage", Yes);
-                data.put("chooseSendOrReply", "REPLY");
+                DynamicList replyMessagesList = getReplyMessagesList(List.of(messageElement));
+                data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
+                data.put(MESSAGE_IDENTIFIER, messageIdentifier);
+                data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
+                data.put(CHOOSE_SEND_OR_REPLY, REPLY_1);
+                data.put(OPTION_REPLY, REPLY_1);
                 CaseData caseData1 = populateMessageReplyFields(
                     caseData,
                     authorisation,
                     message
                 );
-                SendOrReplyMessage sendOrReplyMessage = caseData1.getSendOrReplyMessage();
-                data.put("messageReplyTable", sendOrReplyMessage.getMessageReplyTable());
-                data.put("replyMessageObject", sendOrReplyMessage.getReplyMessageObject());
-                data.put("internalMessageAttachDocsList", sendOrReplyMessage.getInternalMessageAttachDocsList());
+                data.putAll(objectMapper.convertValue(caseData1, Map.class));
             } else {
-                log.info("Yogesh===>Inside else");
-                data.put("taskAssociatedWithMessage", YesOrNo.No);
-                data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
+                data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
+                data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
+                data.put(MESSAGE_IDENTIFIER, null);
+                data.put(OPTION_REPLY, null);
             }
         } else {
-            log.info("Yogesh===>No Open messages available");
-            data.put("taskAssociatedWithMessage", YesOrNo.No);
+            data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
+            data.put(MESSAGE_IDENTIFIER, null);
+            data.put(OPTION_REPLY, null);
         }
         return data;
     }
 
-
+    public DynamicList getDynamicMessagesListAssociatedWithTask(CaseData caseData, String messageIdentifier) {
+        List<Element<Message>> openMessages = emptyIfNull(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()));
+        Element<Message> messageElement = null;
+        if (StringUtils.isNotBlank(messageIdentifier)) {
+            messageElement = openMessages.stream()
+                .filter(element -> messageIdentifier.equalsIgnoreCase(element.getValue().getMessageIdentifier()))
+                .findFirst()
+                .orElse(null);
+        }
+        return nonNull(messageElement) ? getReplyMessagesList(List.of(messageElement), messageElement.getId()) : null;
+    }
 
     public DynamicList getReplyMessagesList(List<Element<Message>> openMessages) {
+        return getReplyMessagesList(openMessages, null);
+    }
+
+    public DynamicList getReplyMessagesList(List<Element<Message>> openMessages, UUID messageId) {
         return ElementUtils.asDynamicList(
             openMessages,
-            null,
+            messageId,
             Message::getLabelForReplyDynamicList
         );
     }
@@ -2232,7 +2253,7 @@ public class SendAndReplyService {
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails, objectMapper);
-
+        checkTaskAssociatedWithMessage(caseData);
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         if (nonNull(message)
             && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
@@ -2246,5 +2267,17 @@ public class SendAndReplyService {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
+
+
+    public void checkTaskAssociatedWithMessage(CaseData caseData) {
+        if (REPLY.name().equalsIgnoreCase(caseData.getOptionReply())) {
+            caseData.setChooseSendOrReply(REPLY);
+            DynamicList dynamicMessagesListAssociatedWithTask = getDynamicMessagesListAssociatedWithTask(
+                caseData,
+                caseData.getMessageIdentifier()
+            );
+            caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
+        }
     }
 }
