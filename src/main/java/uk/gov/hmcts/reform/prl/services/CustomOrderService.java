@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -474,6 +475,35 @@ public class CustomOrderService {
         return judgeName;
     }
 
+    private String extractJudgeTitle(CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseDataMap != null && caseDataMap.get("judgeOrMagistrateTitle") != null) {
+            Object titleObj = caseDataMap.get("judgeOrMagistrateTitle");
+            String title = extractEnumDisplayValue(titleObj);
+            log.info("Judge title from caseDataMap: {}", title);
+            return title;
+        }
+        if (caseData.getManageOrders() != null && caseData.getManageOrders().getJudgeOrMagistrateTitle() != null) {
+            String title = caseData.getManageOrders().getJudgeOrMagistrateTitle().getDisplayedValue();
+            log.info("Judge title from caseData.manageOrders: {}", title);
+            return title;
+        }
+        return null;
+    }
+
+    private String extractEnumDisplayValue(Object enumObj) {
+        if (enumObj instanceof JudgeOrMagistrateTitleEnum titleEnum) {
+            return titleEnum.getDisplayedValue();
+        } else if (enumObj instanceof String enumStr) {
+            try {
+                return JudgeOrMagistrateTitleEnum.getValue(enumStr).getDisplayedValue();
+            } catch (IllegalArgumentException e) {
+                // May already be the display value
+                return enumStr;
+            }
+        }
+        return enumObj != null ? enumObj.toString() : null;
+    }
+
     /**
      * Extracts and formats order date from case data map or CaseData object.
      * If the order was approved at a hearing, extracts the date from the selected hearing.
@@ -617,6 +647,10 @@ public class CustomOrderService {
         if (judgeName != null && !judgeName.isEmpty()) {
             data.put("judgeName", judgeName);
         }
+        String judgeTitle = extractJudgeTitle(caseData, caseDataMap);
+        if (judgeTitle != null && !judgeTitle.isEmpty()) {
+            data.put("judgeTitle", judgeTitle);
+        }
 
         // Order date
         String orderDate = extractOrderDate(caseData, caseDataMap);
@@ -639,8 +673,8 @@ public class CustomOrderService {
         populateAppointedGuardianPlaceholders(data, caseDataMap);
         populateChildrenPlaceholders(data, caseData, isFL401);
 
-        log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
-            data.get("judgeName"), data.get("orderDate"), data.get(APPLICANT_NAME), data.get("respondent1Name"));
+        log.info("Final header placeholders - judgeTitle={}, judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
+            data.get("judgeTitle"), data.get("judgeName"), data.get("orderDate"), data.get(APPLICANT_NAME), data.get("respondent1Name"));
         return data;
     }
 
@@ -1457,206 +1491,6 @@ public class CustomOrderService {
             updateOrderDocumentInCaseData(caseData, combinedDoc, caseDataUpdated, location);
         } else {
             log.warn("Could not find custom order header preview to update in either collection!");
-        }
-    }
-
-    /**
-     * Seals the custom order document synchronously and returns the updated case data.
-     * Called after submitAllTabsUpdate to ensure CDAM association is complete.
-     *
-     * @param caseId The case ID
-     * @return Map containing the sealed orderCollection, or null if sealing fails
-     */
-    public Map<String, Object> sealCustomOrderSynchronously(String caseId) {
-        log.info("Sealing custom order synchronously for case {}", caseId);
-
-        try {
-            // Start the internal seal event to get fresh case data
-            StartAllTabsUpdateDataContent startContent = allTabService.getStartUpdateForSpecificEvent(
-                caseId,
-                CaseEvent.INTERNAL_CUSTOM_ORDER_SEAL.getValue()
-            );
-
-            final String authorisation = startContent.authorisation();
-            final CaseData caseData = startContent.caseData();
-            final Map<String, Object> caseDataMap = new HashMap<>(startContent.caseDataMap());
-
-            if (caseData.getOrderCollection() == null || caseData.getOrderCollection().isEmpty()) {
-                log.warn("No orders to seal in case {}", caseId);
-                return null;
-            }
-
-            // Find the most recent order (first in collection)
-            Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement =
-                caseData.getOrderCollection().get(0);
-            uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails = orderElement.getValue();
-
-            if (orderDetails.getOrderDocument() == null) {
-                log.warn("Order document is null for case {}, skipping seal", caseId);
-                return null;
-            }
-
-            // Check if order actually needs sealing (avoid double-sealing)
-            if (orderDetails.getDoesOrderDocumentNeedSeal() != null
-                && YesOrNo.No.equals(orderDetails.getDoesOrderDocumentNeedSeal())) {
-                log.info("Order already sealed for case {}, skipping", caseId);
-                return null;
-            }
-
-            log.info("Sealing order document: {}", orderDetails.getOrderDocument().getDocumentFileName());
-
-            // Seal the document
-            uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
-                documentSealingService.sealDocument(
-                    orderDetails.getOrderDocument(),
-                    caseData,
-                    authorisation
-                );
-
-            log.info("Document sealed successfully: {}", sealedDoc.getDocumentFileName());
-
-            // Update the order with the sealed document
-            uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderDetails.toBuilder()
-                .orderDocument(sealedDoc)
-                .doesOrderDocumentNeedSeal(YesOrNo.No)
-                .build();
-
-            List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedOrderCollection =
-                new ArrayList<>(caseData.getOrderCollection());
-            updatedOrderCollection.set(0, Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
-                .id(orderElement.getId())
-                .value(updatedOrder)
-                .build());
-
-            caseDataMap.put(ORDER_COLLECTION, updatedOrderCollection);
-
-            // Submit the update
-            allTabService.submitAllTabsUpdate(
-                authorisation,
-                caseId,
-                startContent.startEventResponse(),
-                startContent.eventRequestData(),
-                caseDataMap
-            );
-
-            log.info("Custom order sealed and saved for case synchronous{}", caseId);
-
-            // Return the updated orderCollection so it can be included in the response
-            Map<String, Object> result = new HashMap<>();
-            result.put(ORDER_COLLECTION, updatedOrderCollection);
-            return result;
-
-        } catch (Exception e) {
-            log.error("Failed to seal custom order synchronously for case {}: {}", caseId, e.getMessage(), e);
-            throw new RuntimeException("Synchronous sealing failed", e);
-        }
-    }
-
-    /**
-     * Schedules an async sealing event for the custom order.
-     * This is called after the main submitted callback completes, allowing CDAM to associate
-     * the document with the case before we attempt to seal it.
-     *
-     * @param caseId The case ID
-     */
-    public void scheduleSealingEvent(String caseId) {
-        log.info("Scheduling custom order sealing event for case {}", caseId);
-
-        // Run sealing in a separate thread to allow the main callback to complete first
-        // This ensures CDAM has time to associate the document with the case
-        java.util.concurrent.CompletableFuture.runAsync(() -> {
-            try {
-                // Small delay to ensure CDAM association is complete
-                Thread.sleep(2000);
-                sealCustomOrderViaInternalEvent(caseId);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.error("Sealing thread interrupted for case {}", caseId);
-            } catch (Exception e) {
-                log.error("Failed to seal custom order for case {}: {}", caseId, e.getMessage(), e);
-            }
-        });
-    }
-
-    /**
-     * Seals the custom order document via an internal event.
-     * This method fetches fresh case data, seals the order document, and saves it.
-     *
-     * @param caseId The case ID
-     */
-    private void sealCustomOrderViaInternalEvent(String caseId) {
-        log.info("Starting internal sealing event for case {}", caseId);
-
-        try {
-            // Start the internal seal event to get fresh case data
-            StartAllTabsUpdateDataContent startContent = allTabService.getStartUpdateForSpecificEvent(
-                caseId,
-                CaseEvent.INTERNAL_CUSTOM_ORDER_SEAL.getValue()
-            );
-
-            final String authorisation = startContent.authorisation();
-            final CaseData caseData = startContent.caseData();
-            final Map<String, Object> caseDataMap = new HashMap<>(startContent.caseDataMap());
-
-            log.info("Fetched case data for sealing - orderCollection size: {}",
-                caseData.getOrderCollection() != null ? caseData.getOrderCollection().size() : 0);
-
-            if (caseData.getOrderCollection() == null || caseData.getOrderCollection().isEmpty()) {
-                log.warn("No orders to seal in case {}", caseId);
-                return;
-            }
-
-            // Find the most recent order (first in collection) that needs sealing
-            Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement =
-                caseData.getOrderCollection().get(0);
-            uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails = orderElement.getValue();
-
-            if (orderDetails.getOrderDocument() == null) {
-                log.warn("Order document is null for case {}, skipping seal", caseId);
-                return;
-            }
-
-            log.info("Sealing order document: {}", orderDetails.getOrderDocument().getDocumentFileName());
-
-            // Seal the document
-            uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
-                documentSealingService.sealDocument(
-                    orderDetails.getOrderDocument(),
-                    caseData,
-                    authorisation
-                );
-
-            log.info("Document sealed successfully: {}", sealedDoc.getDocumentFileName());
-
-            // Update the order with the sealed document
-            uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderDetails.toBuilder()
-                .orderDocument(sealedDoc)
-                .doesOrderDocumentNeedSeal(YesOrNo.No)
-                .build();
-
-            List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedOrderCollection =
-                new ArrayList<>(caseData.getOrderCollection());
-            updatedOrderCollection.set(0, Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
-                .id(orderElement.getId())
-                .value(updatedOrder)
-                .build());
-
-            caseDataMap.put(ORDER_COLLECTION, updatedOrderCollection);
-
-            // Submit the update
-            allTabService.submitAllTabsUpdate(
-                authorisation,
-                caseId,
-                startContent.startEventResponse(),
-                startContent.eventRequestData(),
-                caseDataMap
-            );
-
-            log.info("Custom order sealed and saved for case Internal Event{}", caseId);
-
-        } catch (Exception e) {
-            log.error("Failed to seal custom order via internal event for case {}: {}",
-                caseId, e.getMessage(), e);
         }
     }
 

@@ -7339,4 +7339,188 @@ public class ManageOrderServiceTest {
         // Then
         assertEquals(JudgeOrMagistrateTitleEnum.deputyCircuitJudge, result);
     }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForMaleHighCourtJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Mr")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrJustice, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForFemaleHighCourtJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Mrs")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsNullForHighCourtJudgeWithNoPostNominals() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals(null)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForDeputyHighCourtJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Deputy High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Mr")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrJustice, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForSir() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Sir")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrJustice, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForLady() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Lady")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMs() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Ms")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMiss() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Miss")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
 }

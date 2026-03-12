@@ -59,6 +59,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +67,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.ws.rs.core.HttpHeaders;
+
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -364,7 +366,7 @@ public class ManageOrdersController {
             }
 
             // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
-            // (association happens during submitAllTabsUpdate below). sealCustomOrderSynchronously handles sealing after.
+            // (association happens during submitAllTabsUpdate below). sealing is done inline in combineAndFinalizeCustomOrder.
             if (!isCustomOrder) {
                 try {
                     manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
@@ -502,17 +504,7 @@ public class ManageOrdersController {
         } else if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
             // Custom order flow: add order to collection using CUSTOM_ORDER_DOC
             // The submitted callback will later replace it with the combined header + content (sealed for non-draft)
-            // Only add if order wasn't already added in mid-event (when serving immediately)
-            if (!orderAlreadyAddedInMidEvent) {
-                log.info("Custom order flow: adding order to collection with CUSTOM_ORDER_DOC");
-                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                    authorisation,
-                    caseData,
-                    PrlAppsConstants.ENGLISH
-                ));
-            } else {
-                log.info("Custom order flow: order already added in mid-event (serve flow), skipping duplicate add");
-            }
+            addOrderToCollectionIfNotAlreadyAdded(caseData, caseDataUpdated, authorisation, orderAlreadyAddedInMidEvent);
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
             || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -531,21 +523,22 @@ public class ManageOrdersController {
                 && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
-            // Only add if order wasn't already added in mid-event (when serving immediately)
-            if (!orderAlreadyAddedInMidEvent) {
-                caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                    authorisation,
-                    caseData,
-                    PrlAppsConstants.ENGLISH
-                ));
-            } else {
-                log.info("Order already added in mid-event (serve flow), skipping duplicate add");
-            }
+            addOrderToCollectionIfNotAlreadyAdded(caseData, caseDataUpdated, authorisation, orderAlreadyAddedInMidEvent);
         } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put(
                 ORDER_COLLECTION,
                 manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
             );
+        }
+    }
+
+    private void addOrderToCollectionIfNotAlreadyAdded(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                                       String authorisation, boolean orderAlreadyAddedInMidEvent) {
+        if (!orderAlreadyAddedInMidEvent) {
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation, caseData, PrlAppsConstants.ENGLISH));
+        } else {
+            log.info("Order already added in mid-event (serve flow), skipping duplicate add");
         }
     }
 

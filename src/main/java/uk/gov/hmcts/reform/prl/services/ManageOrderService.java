@@ -608,8 +608,6 @@ public class ManageOrderService {
 
     private final DocumentLanguageService documentLanguageService;
 
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
-
     private final DgsService dgsService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
@@ -2520,6 +2518,64 @@ public class ManageOrderService {
         return loggedInUserType;
     }
 
+    /**
+     * Gets the judge title for the logged-in user based on their judicial appointments.
+     *
+     * @param idamUserId The IDAM user ID
+     * @return The judge title enum, or null if not found or not a judge
+     */
+    public JudgeOrMagistrateTitleEnum getLoggedInJudgeTitle(String idamUserId) {
+        if (idamUserId == null || idamUserId.isEmpty()) {
+            return null;
+        }
+        try {
+            List<JudicialUsersApiResponse> judicialUsers = refDataUserService.getJudicialUserBySidamId(idamUserId);
+            if (judicialUsers == null || judicialUsers.isEmpty()) {
+                return null;
+            }
+            JudicialUsersApiResponse judgeDetails = judicialUsers.get(0);
+            if (judgeDetails.getAppointments() == null || judgeDetails.getAppointments().isEmpty()) {
+                return null;
+            }
+            String appointmentName = judgeDetails.getAppointments().get(0).getAppointment();
+            String postNominals = judgeDetails.getPostNominals();
+            return mapAppointmentToJudgeTitle(appointmentName, postNominals);
+        } catch (Exception e) {
+            log.warn("Failed to get judge title for user {}: {}", idamUserId, e.getMessage());
+            return null;
+        }
+    }
+
+    private JudgeOrMagistrateTitleEnum mapAppointmentToJudgeTitle(String appointmentName, String postNominals) {
+        if (appointmentName == null) {
+            return null;
+        }
+        return switch (appointmentName.toLowerCase()) {
+            case "circuit judge" -> JudgeOrMagistrateTitleEnum.circuitJudge;
+            case "district judge" -> JudgeOrMagistrateTitleEnum.districtJudge;
+            case "district judge (magistrates' court)" -> JudgeOrMagistrateTitleEnum.districtJudgeMagistratesCourt;
+            case "deputy circuit judge" -> JudgeOrMagistrateTitleEnum.deputyCircuitJudge;
+            case "deputy district judge" -> JudgeOrMagistrateTitleEnum.deputyDistrictJudge;
+            case "recorder" -> JudgeOrMagistrateTitleEnum.recorder;
+            case "high court judge", "deputy high court judge" -> mapHighCourtJudgeByGender(postNominals);
+            default -> null;
+        };
+    }
+
+    private JudgeOrMagistrateTitleEnum mapHighCourtJudgeByGender(String postNominals) {
+        if (postNominals == null) {
+            return null;
+        }
+        String lowerPostNominals = postNominals.toLowerCase();
+        if (lowerPostNominals.contains("mr") || lowerPostNominals.contains("sir")) {
+            return JudgeOrMagistrateTitleEnum.theHonourableMrJustice;
+        } else if (lowerPostNominals.contains("mrs") || lowerPostNominals.contains("ms")
+            || lowerPostNominals.contains("miss") || lowerPostNominals.contains("lady")) {
+            return JudgeOrMagistrateTitleEnum.theHonourableMrsJustice;
+        }
+        return null;
+    }
+
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
             caseDataUpdated.remove(field.getValue());
@@ -3619,7 +3675,7 @@ public class ManageOrderService {
     public HearingData getHearingData(String authorization,
                                       CaseData caseData,
                                       Supplier<Hearings> hearingsSupplier) {
-        log.info("Inside Prepopulate getHearingData for the case id {}", String.valueOf(caseData.getId()));
+        log.info("Inside Prepopulate getHearingData for the case id {}", caseData.getId());
         Hearings hearings = hearingsSupplier.get();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorization,
@@ -3672,7 +3728,7 @@ public class ManageOrderService {
         caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
-            ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
+            ? caseData.getMagistrateLastName() : List.of(element(MagistrateLastName.builder().build())));
     }
 
     public Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
@@ -3701,7 +3757,7 @@ public class ManageOrderService {
             Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
             if (rawOrders instanceof List) {
                 // Convert to ensure proper typing (handles both typed lists and raw map lists)
-                orders = objectMapper.convertValue(rawOrders, new TypeReference<List<Element<OrderDetails>>>() {});
+                orders = objectMapper.convertValue(rawOrders, new TypeReference<>() {});
                 log.info("addSealToOrders: using orderCollection from caseDataUpdated");
             } else {
                 orders = caseData.getOrderCollection();
@@ -3757,8 +3813,10 @@ public class ManageOrderService {
         String orderNameForWA = null;
         Map<String, Object> waFieldsMap = new HashMap<>();
         if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())
+            || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+                || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
                 orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(
                     caseData.getCreateSelectOrderOptions() != null
                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ",
@@ -3775,7 +3833,8 @@ public class ManageOrderService {
 
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser, null);
-            } else if (uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+            } else if (ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())
+                || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
                 waFieldsMap.put(
                     WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED,
                     null != caseData.getManageOrders().getAmendOrderSelectCheckOptions()

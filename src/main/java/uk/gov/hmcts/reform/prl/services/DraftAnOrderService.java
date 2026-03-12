@@ -2499,7 +2499,7 @@ public class DraftAnOrderService {
             }
             caseDataUpdated.put(DATE_ORDER_MADE, LocalDate.now());
             caseDataUpdated.put("magistrateLastName", CollectionUtils.isNotEmpty(caseData.getMagistrateLastName())
-                ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
+                ? caseData.getMagistrateLastName() : List.of(element(MagistrateLastName.builder().build())));
 
             //PRL-4212 - Fetch & populate hearing data only in case order needs
             if (isHearingPageNeeded(
