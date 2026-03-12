@@ -749,8 +749,7 @@ public class ManageOrderService {
                                                      .getChildOption());
         caseDataUpdated.put("childrenList", childList);
         caseDataUpdated.put("childListForSpecialGuardianship", childList);
-        caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData, language) != null
-            ? BOLD_BEGIN + getSelectedOrderInfo(caseData, language) + BOLD_END : "");
+        caseDataUpdated.put("selectedOrder", BOLD_BEGIN + getSelectedOrderInfo(caseData, language) + BOLD_END);
         return caseDataUpdated;
     }
 
@@ -3987,7 +3986,7 @@ public class ManageOrderService {
                 && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
                 && checkForContactPreference(party) && !checkIfAddressIsPresent(party.getValue().getAddress())) {
                 errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
-            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIsPresent(party.getValue().getAddress()))) {
+            } else if (!isRespondent && !(checkIfAddressIsPresent(party.getValue().getAddress()))) {
                 errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
             }
             if (!errorList.isEmpty()) {

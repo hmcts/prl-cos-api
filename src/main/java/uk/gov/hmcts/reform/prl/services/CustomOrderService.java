@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -161,7 +160,6 @@ public class CustomOrderService {
     private final DocumentGenService documentGenService;
     private final SystemUserService systemUserService;
     private final AllTabServiceImpl allTabService;
-    private final DgsApiClient dgsApiClient;
     private final DocumentSealingService documentSealingService;
 
     /**
@@ -174,7 +172,6 @@ public class CustomOrderService {
      * @param populateJudgeNames Function to populate judge names on case data
      * @param populatePartyDetails Function to populate party details on case data
      * @return Updated case data map with rendered document
-     * @throws IOException If document processing fails
      */
     public Map<String, Object> renderUploadedCustomOrderAndStoreOnManageOrders(
         String authorisation,
@@ -183,9 +180,8 @@ public class CustomOrderService {
         Map<String, Object> caseDataUpdated,
         java.util.function.Function<CaseData, CaseData> populateJudgeNames,
         java.util.function.Function<CaseData, CaseData> populatePartyDetails
-    ) throws IOException {
+    ) {
         log.info("into render with caseId: {}", caseId);
-
         // Read customOrderDoc from raw map (not in CaseData model due to constructor param limit)
         uk.gov.hmcts.reform.prl.models.documents.Document templateDoc = objectMapper.convertValue(
             caseDataUpdated.get(CUSTOM_ORDER_DOC),
@@ -640,7 +636,7 @@ public class CustomOrderService {
         populateApplicantPlaceholders(data, caseData, isFL401);
         populateRespondents(data, caseData, isFL401);
         populateChildrensGuardian(data, caseData);
-        populateAppointedGuardianPlaceholders(data, caseData, caseDataMap);
+        populateAppointedGuardianPlaceholders(data, caseDataMap);
         populateChildrenPlaceholders(data, caseData, isFL401);
 
         log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
@@ -1005,7 +1001,7 @@ public class CustomOrderService {
      * Reads from customAppointedGuardianName in caseDataMap (the custom field on Page 5).
      * Provides both names list and a formatted clause for the header.
      */
-    private void populateAppointedGuardianPlaceholders(Map<String, Object> data, CaseData caseData, Map<String, Object> caseDataMap) {
+    private void populateAppointedGuardianPlaceholders(Map<String, Object> data, Map<String, Object> caseDataMap) {
         List<String> guardianNames = extractGuardianNames(caseDataMap);
         String appointedGuardianNamesStr = String.join(", ", guardianNames);
         data.put("appointedGuardianNames", appointedGuardianNamesStr);
