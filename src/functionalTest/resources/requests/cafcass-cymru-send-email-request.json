@@ -185,6 +185,15 @@
             },
             "c21OrderOptions": "c21WithdrawApplication",
             "isOrderUploaded": "No",
+            "localAuthoritySolicitorOrganisationName": "Local Authority Private Law AAT Test Organisation",
+            "localAuthoritySolicitorOrganisationPolicy": {
+              "Organisation": {
+                "OrganisationID": "I1SL2TZ",
+                "OrganisationName": "Local Authority Private Law AAT Test Organisation"
+              },
+              "OrgPolicyReference": null,
+              "OrgPolicyCaseAssignedRole": "[LASOLICITOR]"
+            },
             "orderClosesCase": "Yes",
             "serveOrderDetails": {
               "otherParties": "",
