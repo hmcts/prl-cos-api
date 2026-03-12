@@ -6746,12 +6746,17 @@ class ManageOrderServiceTest {
         caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
         caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
 
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes)
+                                                     .doesOrderClosesCase(Yes)
+                                                     .build()));
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .orderCollection(newOrderDetails)
             .localAuthoritySolicitorOrganisationPolicy(organisationPolicy)
-            .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+            .isLocalAuthorityInvolvedInCase(Yes)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(Yes)
             .build();
@@ -6775,9 +6780,16 @@ class ManageOrderServiceTest {
         caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
 
 
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder()
+                                                     .orderClosesCase(Yes)
+                                                     .doesOrderClosesCase(Yes)
+                                                     .build()));
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
+            .orderCollection(newOrderDetails)
             .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(Yes)

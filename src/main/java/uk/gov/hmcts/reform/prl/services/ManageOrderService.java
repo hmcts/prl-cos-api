@@ -3696,8 +3696,11 @@ public class ManageOrderService {
         log.info("inside removeLocalAuthorityFromCase");
         try {
 
-            if (SelectTypeOfOrderEnum.finl.equals(caseData.getSelectTypeOfOrder())
-                && caseData.getDoesOrderClosesCase().equals(Yes)
+            Optional<OrderDetails> orderDetails
+                = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
+
+            if (orderDetails.isPresent() && orderDetails.get().getDoesOrderClosesCase().equals(Yes)
+                && orderDetails.get().getOrderClosesCase().equals(Yes)
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
