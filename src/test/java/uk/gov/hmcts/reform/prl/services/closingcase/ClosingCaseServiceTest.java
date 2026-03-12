@@ -54,6 +54,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_DETAILS_REVISED_TABLE;
@@ -562,8 +564,8 @@ public class ClosingCaseServiceTest {
         closingCaseService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
         verify(removeLocalAuthoritySolicitorService, atLeast(1)).removeLocalAuthoritySolicitor(eq(caseData));
-        assertFalse(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
-        assertFalse(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
+        assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
         assertEquals(caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE), YesOrNo.No);
 
     }
@@ -576,7 +578,10 @@ public class ClosingCaseServiceTest {
         caseDataUpdated.put("caseTypeOfApplication", "C100");
         caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
         caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
-
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder().organisationName("OrgName").build())
+            .build();
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -587,8 +592,8 @@ public class ClosingCaseServiceTest {
         closingCaseService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
         verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData));
-        assertTrue(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
-        assertFalse(caseDataUpdated.containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
+        assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
         assertEquals(caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE), YesOrNo.Yes);
 
     }

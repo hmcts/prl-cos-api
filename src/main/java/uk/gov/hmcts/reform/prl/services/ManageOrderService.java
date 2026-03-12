@@ -3703,8 +3703,8 @@ public class ManageOrderService {
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
-                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
-                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME);
+                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, null);
+                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, null);
                 caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
             }
         } catch (Exception exp) {
