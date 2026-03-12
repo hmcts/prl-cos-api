@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -58,8 +59,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +66,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import javax.ws.rs.core.HttpHeaders;
-
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -240,6 +238,13 @@ public class ManageOrdersController {
             if (userDetails != null && userDetails.getFullName() != null) {
                 caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
                 log.info("Pre-populated judge name for manage orders: {}", userDetails.getFullName());
+
+                // Look up judge title from Judicial Reference Data
+                JudgeOrMagistrateTitleEnum judgeTitle = manageOrderService.getLoggedInJudgeTitle(userDetails.getId());
+                if (judgeTitle != null) {
+                    caseData.put("judgeOrMagistrateTitle", judgeTitle);
+                    log.info("Pre-populated judge title for manage orders: {}", judgeTitle);
+                }
             }
         }
     }
@@ -474,7 +479,7 @@ public class ManageOrdersController {
                 DRAFT_ORDER_COLLECTION);
 
             newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                ? draftOrderCollection.get(0).getId() : null;
+                ? draftOrderCollection.getFirst().getId() : null;
         }
         return newDraftOrderCollectionId;
     }
@@ -486,8 +491,7 @@ public class ManageOrdersController {
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
      */
-    private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation)
-        throws IOException {
+    private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         // Check if order was already added in mid-event whenToServeOrder (when serving immediately)
         // If doYouWantToServeOrder=Yes, order was already added - don't duplicate
         boolean orderAlreadyAddedInMidEvent = caseData.getServeOrderData() != null
@@ -545,7 +549,8 @@ public class ManageOrdersController {
         }
     }
 
-    private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation, CallbackRequest callbackRequest) {
+    private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation,
+                                               CallbackRequest callbackRequest) {
         if (null != caseData.getManageOrders().getAmendOrderSelectCheckOptions()
             && caseData.getManageOrders().getAmendOrderSelectCheckOptions()
             .equals(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)) {
@@ -910,7 +915,8 @@ public class ManageOrdersController {
         // For custom order fields, we must use callbackRequest data.
         String[] customOrderFields = {
             CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, "customOrderNameOption",
-            "nameOfOrder", "amendOrderSelectCheckOptions", "whatDoWithOrder", "doYouWantToServeOrder"
+            "nameOfOrder", "amendOrderSelectCheckOptions", "whatDoWithOrder", "doYouWantToServeOrder",
+            "customOrderDateEnds"
         };
         for (String field : customOrderFields) {
             Object value = callbackData.get(field);
@@ -918,7 +924,33 @@ public class ManageOrdersController {
                 caseDataUpdated.put(field, value);
             }
         }
-        return callbackData.get(CUSTOM_ORDER_DOC) != null;
+
+        // Check if this is a custom order - customOrderDoc being present is the indicator
+        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_DOC) != null;
+        if (isCustomOrder) {
+            // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
+            copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
+        }
+        return isCustomOrder;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void copyCustomOrderDateEndsToFl404(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
+        Object customOrderDateEnds = callbackData.get("customOrderDateEnds");
+        Object customOrderNameOption = callbackData.get("customOrderNameOption");
+        if (customOrderDateEnds != null && customOrderNameOption != null) {
+            String orderType = customOrderNameOption.toString();
+            // Check if this is an FL404-related order type (nonMolestation, occupation, powerOfArrest)
+            if ("nonMolestation".equals(orderType) || "occupation".equals(orderType) || "powerOfArrest".equals(orderType)) {
+                Map<String, Object> fl404CustomFields = (Map<String, Object>) caseDataUpdated.get("fl404CustomFields");
+                if (fl404CustomFields == null) {
+                    fl404CustomFields = new HashMap<>();
+                }
+                fl404CustomFields.put("fl404bDateOrderEnd", customOrderDateEnds);
+                caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
+                log.info("Copied customOrderDateEnds to fl404CustomFields.fl404bDateOrderEnd for custom order type: {}", orderType);
+            }
+        }
     }
 
     private void processCustomOrder(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -943,6 +975,7 @@ public class ManageOrdersController {
         caseDataUpdated.remove("amendOrderSelectCheckOptions");
         caseDataUpdated.remove("whatDoWithOrder");
         caseDataUpdated.remove("doYouWantToServeOrder");
+        caseDataUpdated.remove("customOrderDateEnds");
         log.info("Cleaned up custom order fields after processing");
     }
 }

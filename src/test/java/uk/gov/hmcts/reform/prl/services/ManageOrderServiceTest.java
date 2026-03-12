@@ -7184,4 +7184,159 @@ public class ManageOrderServiceTest {
         assertNull(caseDataUpdated.get("c21OrderOptions"));
         assertNull(caseDataUpdated.get("appointedGuardianName"));
     }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsCircuitJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Circuit Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .surname("Smith")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsDistrictJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("District Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.districtJudge, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsNullWhenUserNotFound() {
+        // Given
+        String idamUserId = "unknown-idam-id";
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of());
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsEmpty() {
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle("");
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsNull() {
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(null);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsNullWhenNoAppointments() {
+        // Given
+        String idamUserId = "test-idam-id";
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .surname("Smith")
+            .appointments(null)
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsNullWhenApiThrowsException() {
+        // Given
+        String idamUserId = "test-idam-id";
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenThrow(new RuntimeException("API error"));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsRecorder() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Recorder")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.recorder, result);
+    }
+
+    @Test
+    public void testGetLoggedInJudgeTitleReturnsDeputyCircuitJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Deputy Circuit Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.deputyCircuitJudge, result);
+    }
 }

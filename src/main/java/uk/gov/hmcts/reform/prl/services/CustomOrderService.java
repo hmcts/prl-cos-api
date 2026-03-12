@@ -18,15 +18,12 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -96,14 +93,6 @@ public class CustomOrderService {
         return DEFAULT_ORDER_NAME;
     }
 
-    /**
-     * Overload for backwards compatibility when map is not available.
-     * Falls back to nameOfOrder text field only.
-     */
-    public String getEffectiveOrderName(CaseData caseData) {
-        return getEffectiveOrderName(caseData, null);
-    }
-
     private CustomOrderNameOptionsEnum parseCustomOrderNameOption(Map<String, Object> caseDataMap) {
         Object rawOption = caseDataMap != null ? caseDataMap.get("customOrderNameOption") : null;
         if (rawOption == null) {
@@ -167,7 +156,6 @@ public class CustomOrderService {
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingDataService hearingDataService;
-    private final HearingService hearingService;
     private final PoiTlDocxRenderer poiTlDocxRenderer;
     private final UploadDocumentService uploadService;
     private final DocumentGenService documentGenService;
@@ -647,16 +635,13 @@ public class CustomOrderService {
         });
         safePut(data, "hearingType", () -> "hearing");
 
-        // Future hearing details
-        populateFutureHearingPlaceholders(authorisation, caseId, data, caseData, caseDataMap);
-
         // Determine case type and populate party details
         boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
         populateApplicantPlaceholders(data, caseData, isFL401);
         populateRespondents(data, caseData, isFL401);
         populateChildrensGuardian(data, caseData);
         populateAppointedGuardianPlaceholders(data, caseData, caseDataMap);
-        populateChildrenPlaceholders(data, caseData);
+        populateChildrenPlaceholders(data, caseData, isFL401);
 
         log.info("Final header placeholders - judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
             data.get("judgeName"), data.get("orderDate"), data.get(APPLICANT_NAME), data.get("respondent1Name"));
@@ -664,218 +649,25 @@ public class CustomOrderService {
     }
 
     /**
-     * Populates future hearing placeholders.
-     * For non-custom orders: uses ordersHearingDetails from Page 19.
-     * For custom orders: fetches LISTED hearings from HMC API.
-     */
-    @SuppressWarnings("unchecked")
-    private void populateFutureHearingPlaceholders(String authorisation, Long caseId,
-                                                    Map<String, Object> data, CaseData caseData, Map<String, Object> caseDataMap) {
-        // First try to get from caseData (Page 19 hearing details)
-        if (caseData.getManageOrders() != null
-            && caseData.getManageOrders().getOrdersHearingDetails() != null
-            && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-            var hearingDetails = caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue();
-            if (hearingDetails.getFirstDateOfTheHearing() != null) {
-                populateFromHearingDetails(data, hearingDetails);
-                return;
-            }
-        }
-
-        // Fall back to caseDataMap - the hearing data might be there but not yet in caseData
-        if (caseDataMap != null && caseDataMap.get("ordersHearingDetails") != null) {
-            try {
-                Object hearingDetailsObj = caseDataMap.get("ordersHearingDetails");
-                if (hearingDetailsObj instanceof List && !((List<?>) hearingDetailsObj).isEmpty()) {
-                    List<Map<String, Object>> hearingList = (List<Map<String, Object>>) hearingDetailsObj;
-                    Map<String, Object> firstHearing = (Map<String, Object>) hearingList.get(0).get("value");
-                    if (firstHearing != null) {
-                        populateFromHearingDetailsMap(data, firstHearing);
-                        return;
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Could not extract hearing details from caseDataMap: {}", e.getMessage());
-            }
-        }
-
-        // For custom orders, try to fetch LISTED hearings from HMC
-        if (populateFutureHearingFromHmc(authorisation, caseId, data)) {
-            return;
-        }
-
-        setEmptyFutureHearingPlaceholders(data);
-    }
-
-    /**
-     * Fetches LISTED hearings from HMC and populates the next future hearing.
-     * @return true if a future hearing was found and populated
-     */
-    private boolean populateFutureHearingFromHmc(String authorisation, Long caseId, Map<String, Object> data) {
-        try {
-            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseId));
-            if (hearings == null || hearings.getCaseHearings() == null) {
-                log.info("No hearings found from HMC for case {}", caseId);
-                return false;
-            }
-
-            // Find the next LISTED hearing (future hearing)
-            java.time.LocalDateTime now = java.time.LocalDateTime.now();
-            CaseHearing nextHearing = hearings.getCaseHearings().stream()
-                .filter(h -> "LISTED".equals(h.getHmcStatus()))
-                .filter(h -> h.getHearingDaySchedule() != null && !h.getHearingDaySchedule().isEmpty())
-                .filter(h -> {
-                    HearingDaySchedule schedule = h.getHearingDaySchedule().get(0);
-                    return schedule.getHearingStartDateTime() != null
-                        && schedule.getHearingStartDateTime().isAfter(now);
-                })
-                .min((h1, h2) -> h1.getHearingDaySchedule().get(0).getHearingStartDateTime()
-                    .compareTo(h2.getHearingDaySchedule().get(0).getHearingStartDateTime()))
-                .orElse(null);
-
-            if (nextHearing == null) {
-                log.info("No future LISTED hearings found for case {}", caseId);
-                return false;
-            }
-
-            HearingDaySchedule schedule = nextHearing.getHearingDaySchedule().get(0);
-            String date = schedule.getHearingStartDateTime().toLocalDate().format(DATE_FORMATTER);
-            String time = schedule.getHearingStartDateTime().toLocalTime()
-                .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
-            String hearingType = nextHearing.getHearingTypeValue() != null
-                ? nextHearing.getHearingTypeValue() : "";
-
-            data.put("futureHearingDate", date);
-            data.put("futureHearingTime", time);
-            data.put("futureHearingType", hearingType);
-            data.put("futureHearingClause", buildFutureHearingClause(date, time, hearingType));
-
-            log.info("Future hearing from HMC - date={}, time={}, type={}", date, time, hearingType);
-            return true;
-        } catch (Exception e) {
-            log.warn("Failed to fetch future hearings from HMC for case {}: {}", caseId, e.getMessage());
-            return false;
-        }
-    }
-
-    private void populateFromHearingDetails(Map<String, Object> data,
-                                            uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData hearingDetails) {
-        if (hearingDetails.getFirstDateOfTheHearing() == null) {
-            setEmptyFutureHearingPlaceholders(data);
-            return;
-        }
-
-        String date = hearingDetails.getFirstDateOfTheHearing().format(DATE_FORMATTER);
-        data.put("futureHearingDate", date);
-
-        String hour = hearingDetails.getHearingMustTakePlaceAtHour();
-        String minute = hearingDetails.getHearingMustTakePlaceAtMinute();
-        String time = formatHearingTime(hour, minute);
-        data.put("futureHearingTime", time);
-
-        String hearingType = "";
-        if (hearingDetails.getHearingTypes() != null && hearingDetails.getHearingTypes().getValue() != null) {
-            hearingType = hearingDetails.getHearingTypes().getValue().getLabel();
-        }
-        data.put("futureHearingType", hearingType);
-
-        String clause = buildFutureHearingClause(date, time, hearingType);
-        data.put("futureHearingClause", clause);
-
-        log.info("Future hearing placeholders from caseData - date={}, time={}, type={}", date, time, hearingType);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void populateFromHearingDetailsMap(Map<String, Object> data, Map<String, Object> hearingMap) {
-        String date = parseDateFromHearingMap(hearingMap.get("firstDateOfTheHearing"));
-
-        if (date.isEmpty()) {
-            setEmptyFutureHearingPlaceholders(data);
-            return;
-        }
-
-        data.put("futureHearingDate", date);
-
-        String hour = getStringOrEmpty(hearingMap.get("hearingMustTakePlaceAtHour"));
-        String minute = getStringOrEmpty(hearingMap.get("hearingMustTakePlaceAtMinute"));
-        String time = formatHearingTime(hour, minute);
-        data.put("futureHearingTime", time);
-
-        String hearingType = extractHearingTypeLabel(hearingMap.get("hearingTypes"));
-        data.put("futureHearingType", hearingType);
-
-        String clause = buildFutureHearingClause(date, time, hearingType);
-        data.put("futureHearingClause", clause);
-
-        log.info("Future hearing placeholders from caseDataMap - date={}, time={}, type={}", date, time, hearingType);
-    }
-
-    private String parseDateFromHearingMap(Object dateObj) {
-        if (dateObj instanceof String dateStr) {
-            try {
-                return LocalDate.parse(dateStr).format(DATE_FORMATTER);
-            } catch (Exception e) {
-                return dateStr;
-            }
-        } else if (dateObj instanceof LocalDate localDate) {
-            return localDate.format(DATE_FORMATTER);
-        }
-        return "";
-    }
-
-    private String getStringOrEmpty(Object obj) {
-        return obj != null ? obj.toString() : "";
-    }
-
-    @SuppressWarnings("unchecked")
-    private String extractHearingTypeLabel(Object hearingTypesObj) {
-        if (!(hearingTypesObj instanceof Map<?, ?> hearingTypesMap)) {
-            return "";
-        }
-        Object valueObj = hearingTypesMap.get("value");
-        if (!(valueObj instanceof Map<?, ?> valueMap)) {
-            return "";
-        }
-        Object label = valueMap.get("label");
-        return label != null ? label.toString() : "";
-    }
-
-    private String formatHearingTime(String hour, String minute) {
-        if (hour != null && !hour.isEmpty()) {
-            return hour + ":" + (minute != null && !minute.isEmpty() ? minute : "00");
-        }
-        return "";
-    }
-
-    private void setEmptyFutureHearingPlaceholders(Map<String, Object> data) {
-        data.put("futureHearingDate", "");
-        data.put("futureHearingTime", "");
-        data.put("futureHearingType", "");
-        data.put("futureHearingClause", "");
-    }
-
-    private String buildFutureHearingClause(String date, String time, String hearingType) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("The next hearing is scheduled for ").append(date);
-        if (!time.isEmpty()) {
-            sb.append(" at ").append(time);
-        }
-        if (!hearingType.isEmpty()) {
-            sb.append(" (").append(hearingType).append(")");
-        }
-        return sb.toString();
-    }
-
-    /**
      * Populates children placeholders based on order selection (all children or selected children).
      * Provides both list format for poi-tl table looping and individual placeholders.
+     * Handles both C100 (newChildDetails) and FL401 (applicantChildDetails) case types.
      */
-    private void populateChildrenPlaceholders(Map<String, Object> data, CaseData caseData) {
-        List<ChildDetailsRevised> selectedChildren = getSelectedChildren(caseData);
-
-        // Build children list for LoopRowTableRenderPolicy
-        // poi-tl will create a table row for each child in the list
+    private void populateChildrenPlaceholders(Map<String, Object> data, CaseData caseData, boolean isFL401) {
         List<Map<String, String>> childrenRows = new ArrayList<>();
+
+        if (isFL401) {
+            populateFl401Children(childrenRows, caseData);
+        } else {
+            populateC100Children(childrenRows, caseData);
+        }
+
+        data.put("children", childrenRows);
+        log.info("Populated {} children for dynamic table rows", childrenRows.size());
+    }
+
+    private void populateC100Children(List<Map<String, String>> childrenRows, CaseData caseData) {
+        List<ChildDetailsRevised> selectedChildren = getSelectedChildren(caseData);
 
         for (ChildDetailsRevised child : selectedChildren) {
             String fullName = getFullName(child.getFirstName(), child.getLastName());
@@ -890,9 +682,35 @@ public class CustomOrderService {
             childRow.put("dob", dob);
             childrenRows.add(childRow);
         }
+    }
 
-        data.put("children", childrenRows);
-        log.info("Populated {} children for dynamic table rows", childrenRows.size());
+    private void populateFl401Children(List<Map<String, String>> childrenRows, CaseData caseData) {
+        if (caseData.getApplicantChildDetails() == null || caseData.getApplicantChildDetails().isEmpty()) {
+            log.info("No children found in applicantChildDetails for FL401");
+            return;
+        }
+
+        // Check if order is about children
+        if (caseData.getManageOrders() != null
+            && YesOrNo.No.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())) {
+            log.info("FL401 order is not about children, skipping children population");
+            return;
+        }
+
+        for (Element<ApplicantChild> childElement : caseData.getApplicantChildDetails()) {
+            ApplicantChild child = childElement.getValue();
+            String fullName = nullToEmpty(child.getFullName());
+            String dob = child.getDateOfBirth() != null
+                ? child.getDateOfBirth().format(DATE_FORMATTER)
+                : "";
+
+            Map<String, String> childRow = new HashMap<>();
+            childRow.put("fullName", fullName);
+            childRow.put("gender", ""); // FL401 ApplicantChild does not have gender field
+            childRow.put("dob", dob);
+            childrenRows.add(childRow);
+        }
+        log.info("Populated {} FL401 children from applicantChildDetails", childrenRows.size());
     }
 
     /**

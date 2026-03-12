@@ -4370,6 +4370,7 @@ public class ManageOrdersControllerTest {
 
         // Callback data - HAS the custom order fields (from aboutToSubmit response)
         Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("previewOrderDoc", previewOrderDoc);
         callbackDataMap.put("nameOfOrder", "Test Custom Order");
@@ -4424,7 +4425,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void finalizeOrderSubmissionAndSendNotifications_nonCustomOrder_shouldNotCallCombine() throws Exception {
-        // Test that when customOrderDoc is not present, combineAndFinalizeCustomOrder is not called
+        // Test that when manageOrdersOptions is not createCustomOrder, combineAndFinalizeCustomOrder is not called
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
@@ -4509,6 +4510,7 @@ public class ManageOrdersControllerTest {
 
         // Callback data with all custom order fields
         Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("previewOrderDoc", previewOrderDoc);
         callbackDataMap.put("customOrderNameOption", "other");
@@ -4571,6 +4573,167 @@ public class ManageOrdersControllerTest {
         assertEquals("noCheck", capturedValues.get("amendOrderSelectCheckOptions"));
         assertEquals("finalize", capturedValues.get("whatDoWithOrder"));
         assertEquals("Yes", capturedValues.get("doYouWantToServeOrder"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyDateEndsToFl404ForNonMolestation() throws Exception {
+        // Test that customOrderDateEnds is copied to fl404CustomFields.fl404bDateOrderEnd for FL404-related orders
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("FL401")
+            .manageOrders(manageOrders)
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+
+        // Callback data with FL404-related order type (nonMolestation)
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("customOrderNameOption", "nonMolestation");
+        callbackDataMap.put("customOrderDateEnds", "2025-06-30T14:00:00.000");
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // Capture fl404CustomFields to verify date was copied
+        Map<String, Object> capturedFl404Fields = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            Map<String, Object> mapArg = invocation.getArgument(2);
+            Object fl404CustomFields = mapArg.get("fl404CustomFields");
+            if (fl404CustomFields instanceof Map) {
+                capturedFl404Fields.putAll((Map<String, Object>) fl404CustomFields);
+            }
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        verify(customOrderService).combineAndFinalizeCustomOrder(eq(authToken), any(), any(), anyBoolean());
+
+        // Verify customOrderDateEnds was copied to fl404CustomFields.fl404bDateOrderEnd
+        assertEquals("2025-06-30T14:00:00.000", capturedFl404Fields.get("fl404bDateOrderEnd"));
+    }
+
+    @Test
+    public void testPopulateHeaderPreFillsJudgeTitleWhenJudgeLoggedIn() throws Exception {
+        // Given - a judge is logged in
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id("judge-idam-id")
+                .email("judge@test.com")
+                .forename("Test")
+                .surname("Judge")
+                .roles(List.of(Roles.JUDGE.getValue()))
+                .build()
+        );
+        when(manageOrderService.getLoggedInJudgeTitle("judge-idam-id"))
+            .thenReturn(JudgeOrMagistrateTitleEnum.circuitJudge);
+
+        // When
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        // Then
+        assertNotNull(response);
+        assertEquals("Test Judge", response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, response.getData().get("judgeOrMagistrateTitle"));
+    }
+
+    @Test
+    public void testPopulateHeaderDoesNotPreFillJudgeTitleWhenCourtAdminLoggedIn() throws Exception {
+        // Given - a court admin is logged in (not a judge)
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // When
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        // Then
+        assertNotNull(response);
+        assertNull(response.getData().get("judgeOrMagistratesLastName"));
+        assertNull(response.getData().get("judgeOrMagistrateTitle"));
     }
 
 }

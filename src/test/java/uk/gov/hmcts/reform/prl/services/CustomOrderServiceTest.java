@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
@@ -72,8 +71,6 @@ public class CustomOrderServiceTest {
     private uk.gov.hmcts.reform.prl.clients.DgsApiClient dgsApiClient;
     @Mock
     private DocumentSealingService documentSealingService;
-    @Mock
-    private HearingService hearingService;
 
     @InjectMocks
     private CustomOrderService customOrderService;
@@ -1886,74 +1883,5 @@ public class CustomOrderServiceTest {
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("", placeholders.get("appointedGuardianNames"));
         assertEquals("", placeholders.get("appointedGuardianClause"));
-    }
-
-    // ========== Tests for FUTURE HEARING PLACEHOLDERS from caseDataMap ==========
-
-    @Test
-    public void testBuildHeaderPlaceholders_futureHearingFromCaseDataMap() throws IOException {
-        // Arrange - hearing data in caseDataMap, not in caseData
-        final Long caseId = 1234567890123456L;
-
-        final CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().build()) // No hearing details in caseData
-            .build();
-
-        // Build hearing details as raw map (simulating what comes from Page 19)
-        Map<String, Object> hearingValue = new HashMap<>();
-        hearingValue.put("firstDateOfTheHearing", "2025-03-15");
-        hearingValue.put("hearingMustTakePlaceAtHour", "10");
-        hearingValue.put("hearingMustTakePlaceAtMinute", "30");
-
-        Map<String, Object> hearingTypeValue = new HashMap<>();
-        hearingTypeValue.put("label", "Final Hearing");
-        Map<String, Object> hearingTypes = new HashMap<>();
-        hearingTypes.put("value", hearingTypeValue);
-        hearingValue.put("hearingTypes", hearingTypes);
-
-        Map<String, Object> hearingElement = new HashMap<>();
-        hearingElement.put("value", hearingValue);
-
-        List<Map<String, Object>> hearingList = new ArrayList<>();
-        hearingList.add(hearingElement);
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("ordersHearingDetails", hearingList);
-
-        byte[] renderedBytes = new byte[]{1, 2, 3};
-        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
-
-        // Act
-        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
-
-        // Assert
-        Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("15/03/2025", placeholders.get("futureHearingDate"));
-        assertEquals("10:30", placeholders.get("futureHearingTime"));
-        assertEquals("Final Hearing", placeholders.get("futureHearingType"));
-        assertEquals("The next hearing is scheduled for 15/03/2025 at 10:30 (Final Hearing)",
-            placeholders.get("futureHearingClause"));
-    }
-
-    @Test
-    public void testBuildHeaderPlaceholders_futureHearingEmptyWhenNoData() throws IOException {
-        // Arrange - no hearing data anywhere
-        Long caseId = 1234567890123456L;
-
-        CaseData caseData = CaseData.builder().build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-
-        byte[] renderedBytes = new byte[]{1, 2, 3};
-        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
-
-        // Act
-        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
-
-        // Assert
-        Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("", placeholders.get("futureHearingDate"));
-        assertEquals("", placeholders.get("futureHearingTime"));
-        assertEquals("", placeholders.get("futureHearingType"));
-        assertEquals("", placeholders.get("futureHearingClause"));
     }
 }

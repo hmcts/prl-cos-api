@@ -631,5 +631,50 @@ public class RefDataUserServiceTest {
         );
         assertNull(commonResponse);
     }
+
+    @Test
+    public void testGetJudicialUserBySidamIdReturnsUserDetails() {
+        String sidamId = "test-sidam-id-123";
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        JudicialUsersApiResponse judge = JudicialUsersApiResponse.builder()
+            .surname("Smith")
+            .fullName("Judge Smith")
+            .sidamId(sidamId)
+            .build();
+        List<JudicialUsersApiResponse> judicialUsers = List.of(judge);
+
+        when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            authToken,
+            s2sToken,
+            java.util.Map.of("sidam_ids", new String[]{sidamId})
+        )).thenReturn(judicialUsers);
+
+        List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Smith", result.get(0).getSurname());
+        assertEquals(sidamId, result.get(0).getSidamId());
+    }
+
+    @Test
+    public void testGetJudicialUserBySidamIdReturnsEmptyListWhenNotFound() {
+        String sidamId = "unknown-sidam-id";
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            authToken,
+            s2sToken,
+            java.util.Map.of("sidam_ids", new String[]{sidamId})
+        )).thenReturn(List.of());
+
+        List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 }
 

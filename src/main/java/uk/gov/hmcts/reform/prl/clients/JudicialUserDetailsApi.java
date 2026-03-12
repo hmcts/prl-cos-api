@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = "judicial-ref-data-api", url = "${judicialUsers.api.url}", configuration = FeignClientProperties.FeignClientConfiguration.class)
 public interface JudicialUserDetailsApi {
@@ -32,5 +33,15 @@ public interface JudicialUserDetailsApi {
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestBody JudicialUsersApiRequest judicialUsersApiRequest
+    );
+
+    @PostMapping(value = "/refdata/judicial/users",
+        consumes = CONTENT_TYPE_VAL,
+        headers = ACCEPT + "=" + CONTENT_TYPE_V2
+    )
+    List<JudicialUsersApiResponse> getJudicialUsersByRequestMap(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestBody Map<String, Object> requestBody
     );
 }

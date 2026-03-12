@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,6 +51,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
+
+    public static final String JUDICIAL_USER_CACHE = "judicialUserCache";
+
     private final AuthTokenGenerator authTokenGenerator;
     private final StaffResponseDetailsApi staffResponseDetailsApi;
     private final JudicialUserDetailsApi judicialUserDetailsApi;
@@ -158,6 +165,30 @@ public class RefDataUserService {
             authTokenGenerator.generate(),
             judicialUsersApiRequest
         );
+    }
+
+    /**
+     * Gets judicial user details by IDAM ID (sidamId) with caching.
+     * Cache is evicted every 30 minutes.
+     *
+     * @param sidamId The IDAM user ID
+     * @return List of judicial user details, or empty list if not found
+     */
+    @Cacheable(cacheNames = JUDICIAL_USER_CACHE, key = "#sidamId")
+    public List<JudicialUsersApiResponse> getJudicialUserBySidamId(String sidamId) {
+        log.info("Fetching judicial user details for sidamId: {} (not cached)", sidamId);
+        Map<String, Object> requestBody = Map.of("sidam_ids", new String[]{sidamId});
+        return judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+            authTokenGenerator.generate(),
+            requestBody
+        );
+    }
+
+    @CacheEvict(allEntries = true, cacheNames = JUDICIAL_USER_CACHE)
+    @Scheduled(fixedDelay = 1800000) // 30 minutes
+    public void evictJudicialUserCache() {
+        log.info("Evicting judicial user cache");
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
