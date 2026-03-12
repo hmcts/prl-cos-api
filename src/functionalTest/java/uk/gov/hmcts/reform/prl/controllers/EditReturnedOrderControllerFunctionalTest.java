@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Disabled
 public class EditReturnedOrderControllerFunctionalTest {
 
     @Autowired
@@ -62,7 +60,6 @@ public class EditReturnedOrderControllerFunctionalTest {
     private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "requests/editreturnedorder/CallBackRequestEditReturnedOrder.json";
 
     @Test
-    @Disabled
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -130,7 +127,6 @@ public class EditReturnedOrderControllerFunctionalTest {
     }
 
     @Test
-    @Disabled
     public void givenBody_whenSubmittedToResubmit() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         String requestBodyRevised = requestBody
