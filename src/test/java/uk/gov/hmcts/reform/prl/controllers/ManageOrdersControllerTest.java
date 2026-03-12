@@ -4358,18 +4358,17 @@ public class ManageOrdersControllerTest {
             .documentFileName("custom-order.docx")
             .build();
 
-        Document previewOrderDoc = Document.builder()
-            .documentUrl("http://test.url/preview.pdf")
-            .documentBinaryUrl("http://test.url/binary/preview.pdf")
-            .documentFileName("preview.pdf")
-            .build();
-
         // Database map - empty of custom order fields
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("id", 12345L);
 
         // Callback data - HAS the custom order fields (from aboutToSubmit response)
         Map<String, Object> callbackDataMap = new HashMap<>();
+        Document previewOrderDoc = Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("previewOrderDoc", previewOrderDoc);
