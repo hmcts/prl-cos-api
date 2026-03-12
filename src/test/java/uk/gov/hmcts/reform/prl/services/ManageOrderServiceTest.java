@@ -6747,9 +6747,7 @@ class ManageOrderServiceTest {
         caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
 
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
-        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes)
-                                                     .doesOrderClosesCase(Yes)
-                                                     .build()));
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes).build()));
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -6781,10 +6779,7 @@ class ManageOrderServiceTest {
 
 
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
-        newOrderDetails.add(ElementUtils.element(OrderDetails.builder()
-                                                     .orderClosesCase(Yes)
-                                                     .doesOrderClosesCase(Yes)
-                                                     .build()));
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes).build()));
 
         CaseData caseData = CaseData.builder()
             .id(12345L)

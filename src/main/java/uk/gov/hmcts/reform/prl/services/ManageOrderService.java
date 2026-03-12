@@ -3699,8 +3699,7 @@ public class ManageOrderService {
             Optional<OrderDetails> orderDetails
                 = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
 
-            if (orderDetails.isPresent() && orderDetails.get().getDoesOrderClosesCase().equals(Yes)
-                && orderDetails.get().getOrderClosesCase().equals(Yes)
+            if (orderDetails.isPresent() && Yes.equals(orderDetails.get().getOrderClosesCase())
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
