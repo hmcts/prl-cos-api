@@ -3701,6 +3701,8 @@ public class ManageOrderService {
 
             log.info("Order deatils order close case {}", orderDetails.get().getOrderClosesCase());
             log.info("Order deatils type {}", orderDetails.get().getTypeOfOrder());
+            log.info("Order deatils type {}", caseData.getLocalAuthoritySolicitorOrganisationPolicy());
+            log.info("org policy {}", caseData.getLocalAuthoritySolicitorOrganisationPolicy());
 
             if (orderDetails.isPresent() && Yes.equals(orderDetails.get().getOrderClosesCase())
                 && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(orderDetails.get().getTypeOfOrder())
