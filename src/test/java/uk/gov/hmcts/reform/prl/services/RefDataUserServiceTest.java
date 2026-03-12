@@ -39,6 +39,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
@@ -646,9 +648,9 @@ public class RefDataUserServiceTest {
         List<JudicialUsersApiResponse> judicialUsers = List.of(judge);
 
         when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
-            authToken,
-            s2sToken,
-            java.util.Map.of("sidam_ids", new String[]{sidamId})
+            eq(authToken),
+            eq(s2sToken),
+            anyMap()
         )).thenReturn(judicialUsers);
 
         List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
@@ -666,9 +668,9 @@ public class RefDataUserServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
-            authToken,
-            s2sToken,
-            java.util.Map.of("sidam_ids", new String[]{sidamId})
+            eq(authToken),
+            eq(s2sToken),
+            anyMap()
         )).thenReturn(List.of());
 
         List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
