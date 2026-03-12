@@ -2567,11 +2567,11 @@ public class ManageOrderService {
             return null;
         }
         String lowerPostNominals = postNominals.toLowerCase();
-        if (lowerPostNominals.contains("mr") || lowerPostNominals.contains("sir")) {
-            return JudgeOrMagistrateTitleEnum.theHonourableMrJustice;
-        } else if (lowerPostNominals.contains("mrs") || lowerPostNominals.contains("ms")
+        if (lowerPostNominals.contains("mrs") || lowerPostNominals.contains("ms")
             || lowerPostNominals.contains("miss") || lowerPostNominals.contains("lady")) {
             return JudgeOrMagistrateTitleEnum.theHonourableMrsJustice;
+        } else if (lowerPostNominals.contains("mr") || lowerPostNominals.contains("sir")) {
+            return JudgeOrMagistrateTitleEnum.theHonourableMrJustice;
         }
         return null;
     }
