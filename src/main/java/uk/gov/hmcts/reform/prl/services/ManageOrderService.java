@@ -3699,7 +3699,11 @@ public class ManageOrderService {
             Optional<OrderDetails> orderDetails
                 = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
 
+            log.info("Order deatils order close case {}", orderDetails.get().getOrderClosesCase());
+            log.info("Order deatils type {}", orderDetails.get().getTypeOfOrder());
+
             if (orderDetails.isPresent() && Yes.equals(orderDetails.get().getOrderClosesCase())
+                && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(orderDetails.get().getTypeOfOrder())
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
