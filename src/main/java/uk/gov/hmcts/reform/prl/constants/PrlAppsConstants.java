@@ -1150,4 +1150,5 @@ public class PrlAppsConstants {
     public static final String TASK_ASSOCIATED_WITH_MESSAGE = "taskAssociatedWithMessage";
     public static final String CHOOSE_SEND_OR_REPLY = "chooseSendOrReply";
     public static final String OPTION_REPLY = "optionReply";
+    public static final String DO_NOT_SHOW = "DO_NOT_SHOW";
 }

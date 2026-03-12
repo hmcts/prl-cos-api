@@ -137,6 +137,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_NOT_SHOW;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -1178,13 +1179,13 @@ public class SendAndReplyService {
             } else {
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
-                data.put(MESSAGE_IDENTIFIER, null);
-                data.put(OPTION_REPLY, null);
+                data.put(MESSAGE_IDENTIFIER, DO_NOT_SHOW);
+                data.put(OPTION_REPLY, DO_NOT_SHOW);
             }
         } else {
             data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
-            data.put(MESSAGE_IDENTIFIER, null);
-            data.put(OPTION_REPLY, null);
+            data.put(MESSAGE_IDENTIFIER, DO_NOT_SHOW);
+            data.put(OPTION_REPLY, DO_NOT_SHOW);
         }
         return data;
     }
