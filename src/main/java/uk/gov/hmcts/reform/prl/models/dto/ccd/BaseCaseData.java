@@ -155,6 +155,10 @@ public class BaseCaseData {
 
     private String dfjArea;
 
+    private String optionReply;
+
+    private String messageIdentifier;
+
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
 
