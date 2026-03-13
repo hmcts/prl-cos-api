@@ -226,6 +226,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                      @Parameter(hidden = true) String authorisation,
                      @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
                      @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("/send-or-reply-to-messages/about-to-start-task started");
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
@@ -234,6 +236,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation, clientContext));
 
+        log.info("/send-or-reply-to-messages/about-to-start-task about to return response");
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
