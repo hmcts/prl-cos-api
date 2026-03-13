@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.closingcase;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.DateFinalDecisionWasMade;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.deleteroleassignment.RoleAssignmentDeleteQueryRequest;
@@ -60,12 +62,13 @@ import static org.testng.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_DETAILS_REVISED_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOSED_DATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService.CHILD_OPTIONS_FOR_FINAL_DECISION;
 import static uk.gov.hmcts.reform.prl.services.closingcase.ClosingCaseService.FINAL_OUTCOME_FOR_CHILDREN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -550,23 +553,25 @@ public class ClosingCaseServiceTest {
         caseDataUpdated.put("id", 12345L);
         caseDataUpdated.put("caseTypeOfApplication", "C100");
         caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
-        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
-        caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
 
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
             .localAuthoritySolicitorOrganisationPolicy(organisationPolicy)
-            .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+            .localAuthority(localAuthority)
             .build();
 
         closingCaseService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
         verify(removeLocalAuthoritySolicitorService, atLeast(1)).removeLocalAuthoritySolicitor(eq(caseData));
-        assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
         assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
-        assertEquals(caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE), YesOrNo.No);
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        Assertions.assertEquals(No, updated.getIsLocalAuthorityInvolvedInCase());
 
     }
 
@@ -576,8 +581,11 @@ public class ClosingCaseServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("id", 12345L);
         caseDataUpdated.put("caseTypeOfApplication", "C100");
-        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
-        caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
+
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder().organisationName("OrgName").build())
             .build();
@@ -586,15 +594,16 @@ public class ClosingCaseServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
-            .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+            .localAuthority(localAuthority)
             .build();
 
         closingCaseService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
         verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData));
-        assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
         assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
-        assertEquals(caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE), YesOrNo.Yes);
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNotNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        Assertions.assertEquals(YesOrNo.Yes, updated.getIsLocalAuthorityInvolvedInCase());
 
     }
 }

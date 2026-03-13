@@ -165,6 +165,5 @@ public class BaseCaseData {
     @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
-    @JsonProperty("isLocalAuthorityInvolvedInCase")
-    private YesOrNo isLocalAuthorityInvolvedInCase;
+    private LocalAuthority localAuthority;
 }

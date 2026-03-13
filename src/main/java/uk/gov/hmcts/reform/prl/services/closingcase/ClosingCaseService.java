@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
@@ -57,8 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOSED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CHILD_DETAILS_TABLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -261,8 +261,10 @@ public class ClosingCaseService {
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
                 caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, null);
-                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, null);
-                caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
+                LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                    .localAuthoritySolicitorOrganisationName(null)
+                    .build();
+                caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
             }
         } catch (Exception exp) {
             log.info(

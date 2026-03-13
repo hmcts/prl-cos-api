@@ -74,6 +74,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -145,8 +146,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
@@ -3699,19 +3699,16 @@ public class ManageOrderService {
             Optional<OrderDetails> orderDetails
                 = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
 
-            log.info("Order deatils order close case {}", orderDetails.get().getOrderClosesCase());
-            log.info("Order deatils type {}", orderDetails.get().getTypeOfOrder());
-            log.info("Order deatils type {}", caseData.getLocalAuthoritySolicitorOrganisationPolicy());
-            log.info("org policy {}", caseData.getLocalAuthoritySolicitorOrganisationPolicy());
-
             if (orderDetails.isPresent() && Yes.equals(orderDetails.get().getOrderClosesCase())
                 && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(orderDetails.get().getTypeOfOrder())
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
                 caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, null);
-                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, null);
-                caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.No);
+                LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                    .localAuthoritySolicitorOrganisationName(null)
+                    .build();
+                caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
             }
         } catch (Exception exp) {
             log.info(

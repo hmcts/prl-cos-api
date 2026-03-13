@@ -93,6 +93,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -147,8 +148,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -6742,8 +6742,10 @@ class ManageOrderServiceTest {
         caseDataUpdated.put("id", 12345L);
         caseDataUpdated.put("caseTypeOfApplication", "C100");
         caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
-        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
-        caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
 
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes)
@@ -6755,7 +6757,7 @@ class ManageOrderServiceTest {
             .caseTypeOfApplication("C100")
             .orderCollection(newOrderDetails)
             .localAuthoritySolicitorOrganisationPolicy(organisationPolicy)
-            .isLocalAuthorityInvolvedInCase(Yes)
+            .localAuthority(localAuthority)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(Yes)
             .build();
@@ -6763,9 +6765,10 @@ class ManageOrderServiceTest {
         manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
         verify(removeLocalAuthoritySolicitorService, atLeast(1)).removeLocalAuthoritySolicitor(eq(caseData));
-        assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
         assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
-        assertEquals(YesOrNo.No, caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        assertEquals(No, updated.getIsLocalAuthorityInvolvedInCase());
 
     }
 
@@ -6775,8 +6778,11 @@ class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("id", 12345L);
         caseDataUpdated.put("caseTypeOfApplication", "C100");
-        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME, "OrgName");
-        caseDataUpdated.put(LOCAL_AUTHORITY_INVOLVED_IN_CASE, YesOrNo.Yes);
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+
         OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
             .organisation(Organisation.builder().organisationName("OrgName").build())
             .build();
@@ -6792,7 +6798,7 @@ class ManageOrderServiceTest {
             .id(12345L)
             .caseTypeOfApplication("C100")
             .orderCollection(newOrderDetails)
-            .isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+            .localAuthority(localAuthority)
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(Yes)
             .build();
@@ -6800,9 +6806,10 @@ class ManageOrderServiceTest {
         manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
         verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData));
-        assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME));
         assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
-        assertEquals(YesOrNo.Yes, caseDataUpdated.get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNotNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        assertEquals(YesOrNo.Yes, updated.getIsLocalAuthorityInvolvedInCase());
 
     }
 }
