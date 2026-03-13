@@ -1134,6 +1134,7 @@ public class SendAndReplyService {
             .senderEmail(getLoggedInUserEmail(authorisation))
             .build();
         data.put(MESSAGE_OBJECT, messageMetaData);
+        data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
@@ -1142,9 +1143,8 @@ public class SendAndReplyService {
         return data;
     }
 
-    public Map<String, Object> setSenderAndGenerateMessageReplyList(CallbackRequest callbackRequest, String authorisation, String clientContext) {
+    public Map<String, Object> setSenderAndGenerateMessageReplyList(CaseData caseData, String authorisation, String clientContext) {
         Map<String, Object> data = new HashMap<>();
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(authorisation))
             .build();
