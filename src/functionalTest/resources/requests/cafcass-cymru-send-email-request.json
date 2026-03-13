@@ -17,8 +17,10 @@
       "performingAction": null,
       "judgeLaReviewRequired": null,
       "markedToServeEmailNotification": "No",
-      "isLocalAuthorityInvolvedInCase": "Yes",
-      "localAuthoritySolicitorOrganisationName": "Local Authority Private Law AAT Test Organisation",
+      "localAuthority":{
+        "isLocalAuthorityInvolvedInCase": "Yes",
+        "localAuthoritySolicitorOrganisationName": "Local Authority Private Law AAT Test Organisation"
+       },
       "localAuthoritySolicitorOrganisationPolicy": {
         "Organisation": {
           "OrganisationID": "I1SL2TZ",
