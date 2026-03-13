@@ -1164,18 +1164,18 @@ public class SendAndReplyService {
 
         if (isNotEmpty(openMessages)) {
             if (nonNull(message)) {
-                DynamicList replyMessagesList = getReplyMessagesList(List.of(messageElement));
-                data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
-                data.put(MESSAGE_IDENTIFIER, messageIdentifier);
-                data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
-                data.put(CHOOSE_SEND_OR_REPLY, REPLY_1);
-                data.put(OPTION_REPLY, REPLY_1);
                 CaseData caseData1 = populateMessageReplyFields(
                     caseData,
                     authorisation,
                     message
                 );
                 data.putAll(objectMapper.convertValue(caseData1, Map.class));
+                DynamicList replyMessagesList = getReplyMessagesList(List.of(messageElement));
+                data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
+                data.put(MESSAGE_IDENTIFIER, messageIdentifier);
+                data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
+                data.put(CHOOSE_SEND_OR_REPLY, REPLY_1);
+                data.put(OPTION_REPLY, REPLY_1);
             } else {
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
