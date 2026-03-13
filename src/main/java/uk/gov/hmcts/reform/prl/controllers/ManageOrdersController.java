@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -191,8 +192,10 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestBody CallbackRequest callbackRequest,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestParam(defaultValue = "task") String invokedBy
     ) {
+        log.info("Invoked by {}", invokedBy);
         return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
                                                        authorisation,
                                                        s2sToken,
