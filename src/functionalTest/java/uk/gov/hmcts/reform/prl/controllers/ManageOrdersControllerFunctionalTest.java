@@ -23,8 +23,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -516,8 +518,8 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.cafcassCymruServedOptions", equalTo(null))
             .body("data.emailInformationCaOnlyC47a", equalTo(null))
             .body("data.localAuthoritySolicitorOrganisationPolicy", equalTo(null))
-            .body("data.localAuthoritySolicitorOrganisationName", equalTo(null))
-            .body("data.isLocalAuthorityInvolvedInCase", equalTo("No"))
+            .body("data.localAuthority", equalTo(LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                                                     .localAuthoritySolicitorOrganisationName(null).build()))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
                   equalTo("Yes"))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
