@@ -149,7 +149,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_J
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -6122,8 +6121,8 @@ class ManageOrderServiceTest {
             MANAGE_ORDERS.getId()
         );
 
-        assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
-        assertEquals(LocalDate.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
+        assertEquals("CIR", updatedCaseData.get(WA_REQ_SER_UPDATE));
+        assertEquals(LocalDate.now().plusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
     }
 
     @Test
