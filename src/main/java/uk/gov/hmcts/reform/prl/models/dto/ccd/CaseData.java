@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
@@ -114,7 +114,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
+@Jacksonized
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @SuperBuilder(toBuilder = true)
 public class CaseData extends BaseCaseData implements MappableObject {
@@ -595,6 +595,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonProperty("applicantChildDetailsForDocmosis")
     private List<Element<ApplicantChild>> applicantChildDetailsForDocmosis;
+
+    @JsonUnwrapped
+    private final CirDeadlineData cirDeadlineData;
 
     @JsonUnwrapped
     private final StandardDirectionOrder standardDirectionOrder;

@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,12 +25,16 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CirDeadlineData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -199,6 +205,172 @@ class CafcassUploadDocServiceTest {
             cafcassUploadDocService.uploadDocument(authToken, file, "16_4_Report", TEST_CASE_ID)
         );
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void whenCirDocUploadedOnOrBeforeDueDate_shouldSetCirReceivedByDeadlineFlag() {
+        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
+            .cirDueDate(LocalDate.now().plusDays(1))
+            .build();
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName("xyz")
+            .cirDeadlineData(cirDeadlineData)
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+        );
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        ArgumentCaptor<Map<String, Object>> caseDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Part1", TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
+        Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertEquals(YesOrNo.Yes, savedData.get("cirReceivedByDeadline"));
+        assertNotNull(savedData.get("cirUploadedDate"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void whenCirDocUploadedOnDueDate_shouldSetCirReceivedByDeadlineFlag() {
+        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
+            .cirDueDate(LocalDate.now())
+            .build();
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName("xyz")
+            .cirDeadlineData(cirDeadlineData)
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+        );
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        ArgumentCaptor<Map<String, Object>> caseDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Review", TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
+        Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertEquals(YesOrNo.Yes, savedData.get("cirReceivedByDeadline"));
+        assertNotNull(savedData.get("cirUploadedDate"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void whenCirDocUploadedAfterDueDate_shouldNotSetCirReceivedByDeadlineFlag() {
+        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
+            .cirDueDate(LocalDate.now().minusDays(1))
+            .build();
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName("xyz")
+            .cirDeadlineData(cirDeadlineData)
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+        );
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        ArgumentCaptor<Map<String, Object>> caseDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Part2", TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
+        Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertNull(savedData.get("cirReceivedByDeadline"));
+        assertNull(savedData.get("cirUploadedDate"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void whenCirDocUploadedButNoCirDueDateOnCase_shouldNotSetCirReceivedByDeadlineFlag() {
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName("xyz")
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper()), caseData, null
+        );
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        ArgumentCaptor<Map<String, Object>> caseDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Part1", TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
+        Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertNull(savedData.get("cirReceivedByDeadline"));
+        assertNull(savedData.get("cirUploadedDate"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void whenNonCirDocUploaded_shouldNotSetCirReceivedByDeadlineFlag() {
+        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
+            .cirDueDate(LocalDate.now().plusDays(1))
+            .build();
+        caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName("xyz")
+            .cirDeadlineData(cirDeadlineData)
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+        );
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        ArgumentCaptor<Map<String, Object>> caseDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "16_4_Report", TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
+        Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertNull(savedData.get("cirReceivedByDeadline"));
+        assertNull(savedData.get("cirUploadedDate"));
     }
 
     private Document testDocument() {
