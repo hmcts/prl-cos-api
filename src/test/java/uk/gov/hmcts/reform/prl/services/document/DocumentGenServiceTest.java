@@ -62,6 +62,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -291,6 +292,7 @@ public class DocumentGenServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
+            .issueDate(LocalDate.now())
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -433,15 +435,16 @@ public class DocumentGenServiceTest {
 
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataFinal);
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
-                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
+        // Verify that if a case is issued then only C8 documents are updated and not C100 or C1A
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
+        verifyDocumentsNotUpdated(stringObjectMap, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
         );
-        verify(dgsService, times(2)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
@@ -1234,7 +1237,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForWelsh() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForWelsh() {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
 
@@ -1255,7 +1258,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForCitizen() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizen() {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
                                                                                    .builder().isGenEng(true).build());
@@ -1736,7 +1739,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateC7Document() throws Exception {
+    public void testGenerateC7Document() {
         CaseData caseData = CaseData.builder()
             .id(123456789123L)
             .welshLanguageRequirement(Yes)
@@ -2972,6 +2975,51 @@ public class DocumentGenServiceTest {
         assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
 
+    @Test
+    public void givenIssueCaseEvent_whenCreateIssueCaseDocuments_thenUpdateDocuments() throws Exception {
+        // Amend case data to trigger update of C1A document
+        c100CaseDataFinal = c100CaseDataFinal.toBuilder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .build())
+            .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(any(CaseData.class))).thenReturn(
+            c100CaseDataFinal);
+
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN,
+                                                                                                    c100CaseDataFinal,
+                                                                                                    true);
+
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL,
+                               DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
+
+        verify(dgsService, times(3)).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        verify(dgsService, times(3)).generateWelshDocument(
+            anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
     private Map<String, String> createDocumentValues(String documentType) {
         Map<String, String> documentValues = new HashMap<>();
 
@@ -2992,4 +3040,11 @@ public class DocumentGenServiceTest {
             assertTrue(caseData.containsKey(documentField));
         }
     }
+
+    private void verifyDocumentsNotUpdated(Map<String, Object> caseData, String... documentFields) {
+        for (String documentField : documentFields) {
+            assertFalse(caseData.containsKey(documentField));
+        }
+    }
 }
+
