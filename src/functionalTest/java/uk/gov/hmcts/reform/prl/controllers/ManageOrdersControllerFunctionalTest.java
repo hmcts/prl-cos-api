@@ -518,8 +518,8 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.cafcassCymruServedOptions", equalTo(null))
             .body("data.emailInformationCaOnlyC47a", equalTo(null))
             .body("data.localAuthoritySolicitorOrganisationPolicy", equalTo(null))
-            .body("data.localAuthority", equalTo(LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
-                                                     .localAuthoritySolicitorOrganisationName(null).build()))
+            .body("data.localAuthority",
+                  equalTo("{isLocalAuthorityInvolvedInCase=No, localAuthoritySolicitorOrganisationName=null}"))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
                   equalTo("Yes"))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
