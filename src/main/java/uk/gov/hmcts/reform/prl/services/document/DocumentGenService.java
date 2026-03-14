@@ -1506,6 +1506,7 @@ public class DocumentGenService {
             Map<String, Object> tempCaseDetails = new HashMap<>();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = null;
+            log.info(" Yogesh==> About to call dgsApiClient.convertDocToPdf");
             try {
                 generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                     document.getDocumentFileName(),
