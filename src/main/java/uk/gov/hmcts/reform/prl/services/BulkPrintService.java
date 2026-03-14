@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.exception.BulkPrintException;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.sendletter.api.LetterWithPdfsRequest;
@@ -58,7 +59,7 @@ public class BulkPrintService {
             for (Document doc:documents) {
                 pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
             }
-        } catch (NullPointerException e) {
+        } catch (PdfConversionException e) {
             throw new BulkPrintException("Null Pointer exception at bulk print send : " + e);
         } catch (Exception e) {
             log.info("The bulk print service has failed during convertToPdf", e);

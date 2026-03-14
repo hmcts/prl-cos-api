@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -50,9 +51,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
@@ -1184,7 +1185,7 @@ public class DocumentGenService {
 
         if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
             FL401OrderTypeEnum.occupationOrder)
-            && Objects.nonNull(caseData.getHome())
+            && nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
                 caseData.getHome().getChildren().stream().map(Element::getValue).toList();
@@ -1517,11 +1518,15 @@ public class DocumentGenService {
             } catch (Exception e) {
                 log.error("Exception while converting document to PDF: {}", e.getMessage());
             }
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName(generatedDocumentInfo.getDocName())
-                .build();
+            if (nonNull(generatedDocumentInfo)) {
+                return Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentFileName(generatedDocumentInfo.getDocName())
+                    .build();
+            } else {
+                throw new PdfConversionException("PDF Conversion error");
+            }
 
 
         }
