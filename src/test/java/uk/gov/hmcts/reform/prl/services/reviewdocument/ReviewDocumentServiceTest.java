@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -1850,4 +1851,68 @@ public class ReviewDocumentServiceTest {
 
         verifyNoInteractions(manageDocumentsService);
     }
+
+    //Local Authority
+    @Test
+    public void testReviewForLocalAuthorityDocsMoveToConfidentialDocsInConfTab() {
+        List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .isConfidential(YesOrNo.Yes)
+            .isRestricted(YesOrNo.No)
+            .restrictedDetails("test details")
+            .build();
+        quarantineDocsList.add(element(
+            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+            quarantineLegalDoc
+        ));
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .localAuthorityQuarantineDocsList(quarantineDocsList)
+                                           .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes)
+                                 .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
+            .thenReturn(quarantineConfidentialDoc);
+
+        reviewDocumentService.processReviewDocument(
+            caseDataMap,
+            caseData,
+            UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
+        );
+
+
+        Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
+        List<Element<QuarantineLegalDoc>> restrictedDocs =
+            (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
+        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
+        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
+        Assert.assertEquals(YesOrNo.No, restrictedDocs.get(0).getValue().getIsRestricted());
+    }
+
+    @Test
+    public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForLocalAuthorityQuarantineDocsList() {
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .localAuthorityQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder().uploaderRole(LOCAL_AUTHORITY)
+                                                                      .documentUploadedDate(LocalDateTime.now())
+                                                                      .document(Document.builder().build())
+                                                                      .localAuthorityOtherDocDocument(Document.builder()
+                                                                                                        .documentFileName(
+                                                                                                            "filename")
+                                                                                                        .build())
+                                                                      .build())))
+                    .build()
+            ).build();
+
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
+    }
+
 }
