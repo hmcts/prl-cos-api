@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,11 +24,13 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
+import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -83,6 +86,9 @@ public class CaseControllerTest {
 
     @Mock
     private LaunchDarklyClient launchDarklyClient;
+
+    @Mock
+    private CourtFinderService courtFinderService;
 
     @Mock
     private UserInfo userInfo;
@@ -546,6 +552,42 @@ public class CaseControllerTest {
 
         //Then
         assertThat(actualCaseData).isEqualTo(caseData);
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndService() throws Exception {
+        String postcode = "SA1 3TU";
+        String courtName = "Court Name";
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(Court.builder()
+                                                                                            .courtName(courtName).build());
+        String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
+        Assert.assertEquals(courtName, actualCourtName);
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndServiceWhenNoCourtFetched() throws Exception {
+
+        String postcode = "SA";
+
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenReturn(null);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
+        Assert.assertEquals("No Court Fetched", actualCourtName);
+
+    }
+
+    @Test
+    public void testFindCourtByPostCodeAndServiceWhenReturnNull() throws Exception {
+        String postcode = "SA";
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
+        when(courtFinderService.getC100NearestFamilyCourt(postcode)).thenThrow(NotFoundException.class);
+        String actualCourtName = caseController.findCourtByPostCodeAndService(AUTH_TOKEN, SERV_AUTH_TOKEN, postcode);
+        Assert.assertNull(actualCourtName);
     }
 
 }
