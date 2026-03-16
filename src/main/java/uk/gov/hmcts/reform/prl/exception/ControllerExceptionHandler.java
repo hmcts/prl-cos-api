@@ -33,6 +33,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(ReviewDocumentException.class)
+    public ResponseEntity<ErrorResponse> handleDocumentGenerationException(ReviewDocumentException ex) {
+        log.error("Exception occurred while reviewing document {}", ex.getMessage());
+        ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
+                                                                                         ex.getMessage())).build();
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(InvalidClientException.class)
     public ResponseEntity<ErrorResponse> handleInvalidClientException(InvalidClientException ex) {
         log.error("Exception occurred while validating the client: {}", ex.getMessage());
