@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,6 +151,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -2887,6 +2889,28 @@ class ManageOrderServiceTest {
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
             roleAssignmentServiceResponse);
         assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenRoleAssignmentApiCallFails() {
+
+        String auth = "test-auth";
+        String authToken = "serviceAuthToken";
+        String id = "123";
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder()
+                .id(id)
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build()
+        );
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY))
+            .thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authToken, null, id))
+            .thenThrow(FeignException.class);
+
+        assertThrows(FeignException.class, () -> manageOrderService.getLoggedInUserType(auth));
     }
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
