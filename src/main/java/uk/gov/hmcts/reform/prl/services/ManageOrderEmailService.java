@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -306,7 +307,7 @@ public class ManageOrderEmailService {
         ManageOrders manageOrders = caseData.getManageOrders();
         final String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
-        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData, caseDataMap);
         log.info("in sendEmailWhenOrderIsServed on case id {}", caseData.getId());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
@@ -949,12 +950,23 @@ public class ManageOrderEmailService {
         );
     }
 
-    private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
+    @SuppressWarnings("unchecked")
+    private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData,
+                                                                                 Map<String, Object> caseDataMap) {
         List<Document> orderDocuments = new ArrayList<>();
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            caseData.getOrderCollection().stream()
+            // Use orderCollection from caseDataMap if available (for custom orders served immediately),
+            // otherwise fall back to caseData
+            List<Element<OrderDetails>> orderCollection = caseDataMap != null
+                && caseDataMap.containsKey("orderCollection")
+                ? (List<Element<OrderDetails>>) caseDataMap.get("orderCollection")
+                : caseData.getOrderCollection();
+            if (orderCollection == null) {
+                return orderDocuments;
+            }
+            orderCollection.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (isNotEmpty(order.getValue().getOrderDocument())) {
