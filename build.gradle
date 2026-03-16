@@ -41,11 +41,11 @@ def versions = [
   jacksonDatatypeJsr           : '2.20.1',
   jsonAssert                   : '1.5.3',
   junit                        : '6.0.3',
-  lombok                       : '1.18.42',
+  lombok                       : '1.18.44',
   pact                         : '4.1.11',
   pitest                       : '1.22.1',
   puppyCrawl                   : '8.45.1',
-  reformsJavaLogging           : '6.1.9',
+  reformsJavaLogging           : '8.0.0',
   sendLetterClient             : '5.1.1',
   serenity                     : '4.3.4',
   serenityCucumber             : '4.3.4',
@@ -55,7 +55,7 @@ def versions = [
   springSecurityRsa            : '1.1.5',
   springBoot                   : '3.5.10',
   springCloud                  : '4.3.0',
-  tomcat                       : '10.1.26',
+  tomcat                       : '10.1.52',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
   pdfbox                       : '2.0.35',
@@ -337,7 +337,6 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.6.2'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.25.3'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.25.3'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.25.3'
@@ -352,7 +351,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.12.0'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.11'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.12'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
@@ -597,6 +596,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
   '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*'
 ]
 
