@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.OtherP
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.SpecialArrangements;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.Urgency;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 
 import java.util.List;
 
@@ -34,6 +35,7 @@ public class CaseSummary implements MappableObject {
     private final AllegationOfHarmRevised allegationOfHarmRevised;
     //private final Hearings hearings;
     private final SpecialArrangements specialArrangement;
+    private final LocalAuthority localAuthority;
     private final OrderAppliedFor summaryTabForOrderAppliedFor;
     private final List<Element<OtherProceedings>> otherProceedingsForSummaryTab;
     private final OtherProceedingEmptyTable otherProceedingEmptyTable;
