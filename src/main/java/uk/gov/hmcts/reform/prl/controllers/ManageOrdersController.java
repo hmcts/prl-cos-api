@@ -435,6 +435,15 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = caseDetails.getData();
 
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+            // Clear doYouWantToServeOrder if order needs judge/manager review (stale value from previous order)
+            // Must be done BEFORE setHearingData which checks this value to decide if order needs to be added
+            AmendOrderCheckEnum amendCheck = caseData.getManageOrders() != null
+                ? caseData.getManageOrders().getAmendOrderSelectCheckOptions()
+                : null;
+            if (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendCheck)
+                || AmendOrderCheckEnum.managerCheck.equals(amendCheck)) {
+                caseDataUpdated.remove("doYouWantToServeOrder");
+            }
             try {
                 setHearingData(caseData, caseDataUpdated, authorisation);
             } catch (Exception e) {
@@ -499,7 +508,14 @@ public class ManageOrdersController {
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         // Check if order was already added in mid-event whenToServeOrder (when serving immediately)
         // If doYouWantToServeOrder=Yes, order was already added - don't duplicate
-        boolean orderAlreadyAddedInMidEvent = caseData.getServeOrderData() != null
+        // BUT if order needs judge/manager review, ignore stale doYouWantToServeOrder value (serve page was skipped)
+        AmendOrderCheckEnum amendCheck = caseData.getManageOrders() != null
+            ? caseData.getManageOrders().getAmendOrderSelectCheckOptions()
+            : null;
+        boolean needsReview = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendCheck)
+            || AmendOrderCheckEnum.managerCheck.equals(amendCheck);
+        boolean orderAlreadyAddedInMidEvent = !needsReview
+            && caseData.getServeOrderData() != null
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder());
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {

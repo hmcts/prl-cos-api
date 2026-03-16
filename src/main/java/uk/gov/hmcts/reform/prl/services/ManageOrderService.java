@@ -3067,8 +3067,11 @@ public class ManageOrderService {
     }
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (servedSavedOrders.equals(caseData.getManageOrdersOptions())
-            || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+        // Check caseDataUpdated for doYouWantToServeOrder (stale values are removed before this is called)
+        Object doYouWantToServe = caseDataUpdated.get("doYouWantToServeOrder");
+        boolean wantsToServe = doYouWantToServe != null && Yes.toString().equals(doYouWantToServe.toString());
+
+        if (servedSavedOrders.equals(caseData.getManageOrdersOptions()) || wantsToServe) {
             log.info("inside Mark to serve email notification");
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {
