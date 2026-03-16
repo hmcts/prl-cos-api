@@ -155,6 +155,10 @@ public class CitizenCaseUpdateService {
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
         throws JsonProcessingException, NotFoundException {
+
+        // Find nearest court for the child post code
+        String courtName = getNearestCourtName(citizenUpdatedCaseData);
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(
                 caseId,
@@ -170,11 +174,10 @@ public class CitizenCaseUpdateService {
             .lastName(userDetails.getSurname().orElse(null))
             .emailAddress(userDetails.getEmail())
             .build();
-        // Find nearest court for the child post code
-        Court nearestCourt = courtLocatorService.getNearestFamilyCourt(citizenUpdatedCaseData);
+
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
-            .courtName((nearestCourt != null) ? nearestCourt.getCourtName() : "No Court Fetched")
+            .courtName(courtName)
             .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
 
@@ -212,6 +215,11 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+    }
+
+    private String getNearestCourtName(CaseData caseData) throws NotFoundException {
+        Court nearestCourt = courtLocatorService.getNearestFamilyCourt(caseData);
+        return nearestCourt != null ? nearestCourt.getCourtName() : "No Court Fetched";
     }
 
     private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
