@@ -505,43 +505,47 @@ public class CustomOrderService {
     }
 
     /**
-     * Extracts and formats order date from case data map or CaseData object.
-     * If the order was approved at a hearing, extracts the date from the selected hearing.
+     * Extracts and formats order date.
+     * Priority: hearing date (if approved at hearing) > dateOrderMade > current date.
      */
     private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
-        // If order was approved at a hearing, use the hearing date
-        String hearingDate = extractHearingDateIfApproved(caseData);
+        // If approved at a hearing with a hearing selected, use the hearing date
+        String hearingDate = extractHearingDateFromSelection(caseData);
         if (hearingDate != null) {
-            log.info("Order date from hearing: {}", hearingDate);
+            log.info("Order date from selected hearing: {}", hearingDate);
             return hearingDate;
         }
 
+        // Fall back to dateOrderMade if set
         if (caseDataMap != null && caseDataMap.get(DATE_ORDER_MADE) != null) {
             Object dateValue = caseDataMap.get(DATE_ORDER_MADE);
             String result;
             if (dateValue instanceof LocalDate localDate) {
                 result = localDate.format(DATE_FORMATTER);
             } else {
-                // Date may come as ISO string (yyyy-MM-dd) from JSON - parse and reformat to UK format
                 result = reformatDateToUkFormat(dateValue.toString());
             }
-            log.info("Order date from caseDataMap: {}", result);
+            log.info("Order date from dateOrderMade (map): {}", result);
             return result;
         }
         if (caseData.getDateOrderMade() != null) {
             String result = caseData.getDateOrderMade().format(DATE_FORMATTER);
-            log.info("Order date from caseData: {}", result);
+            log.info("Order date from dateOrderMade (caseData): {}", result);
             return result;
         }
-        log.warn("No order date found");
-        return null;
+
+        // Final fallback - current date
+        String currentDate = LocalDate.now().format(DATE_FORMATTER);
+        log.info("No hearing or dateOrderMade, using current date: {}", currentDate);
+        return currentDate;
     }
 
     /**
-     * Extracts the hearing date if the order was approved at a hearing.
+     * Extracts the hearing date if a hearing is selected AND wasTheOrderApprovedAtHearing is Yes.
      * The hearingsType label format is "hearingType - dd/MM/yyyy hh:mm:ss"
+     * Returns null if no hearing is selected or wasTheOrderApprovedAtHearing is not Yes.
      */
-    private String extractHearingDateIfApproved(CaseData caseData) {
+    private String extractHearingDateFromSelection(CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getWasTheOrderApprovedAtHearing())
             && caseData.getManageOrders() != null
             && caseData.getManageOrders().getHearingsType() != null
@@ -652,16 +656,19 @@ public class CustomOrderService {
             data.put("judgeTitle", judgeTitle);
         }
 
-        // Order date
+        // Order date and hearing/papers text
+        String hearingDate = extractHearingDateFromSelection(caseData);
+        boolean hasHearing = hearingDate != null;
         String orderDate = extractOrderDate(caseData, caseDataMap);
         if (orderDate != null && !orderDate.isEmpty()) {
             data.put("orderDate", orderDate);
         }
+        data.put("hearingOrPapers", hasHearing ? "at a hearing" : "on the papers");
 
         // Hearing date with fallback to order date
         safePut(data, "hearingDate", () -> {
-            String hearingDate = extractHearingDate(caseData, caseDataMap);
-            return hearingDate != null ? hearingDate : "";
+            String extractedHearingDate = extractHearingDate(caseData, caseDataMap);
+            return extractedHearingDate != null ? extractedHearingDate : "";
         });
         safePut(data, "hearingType", () -> "hearing");
 
@@ -1281,9 +1288,10 @@ public class CustomOrderService {
         CaseData caseData,
         String userDocUrl,
         String headerDocUrl,
-        Map<String, Object> caseDataMap
+        Map<String, Object> caseDataMap,
+        boolean isDraftOrder
     ) throws IOException {
-        log.info("Processing custom order on submitted callback for case {}", caseId);
+        log.info("Processing custom order on submitted callback for case {}, isDraft={}", caseId, isDraftOrder);
 
         // Get system auth for document downloads
         String systemAuth = systemUserService.getSysUserToken();
@@ -1292,45 +1300,22 @@ public class CustomOrderService {
         // 1. Download the pre-rendered header (rendered in mid-event before cleanup, has children info)
         log.info("Downloading header from URL: {}", headerDocUrl);
         byte[] headerBytes = documentGenService.getDocumentBytes(headerDocUrl, systemAuth, s2sToken);
-        log.info("Downloaded pre-rendered header: {} bytes, first bytes: [{}, {}, {}, {}]",
-            headerBytes.length,
-            headerBytes.length > 0 ? headerBytes[0] : "N/A",
-            headerBytes.length > 1 ? headerBytes[1] : "N/A",
-            headerBytes.length > 2 ? headerBytes[2] : "N/A",
-            headerBytes.length > 3 ? headerBytes[3] : "N/A");
+        log.info("Downloaded pre-rendered header: {} bytes", headerBytes.length);
 
         // 2. Download user's uploaded content (CDAM works now after submit)
         log.info("Downloading user content from URL: {}", userDocUrl);
         byte[] userContentBytes = documentGenService.getDocumentBytes(userDocUrl, systemAuth, s2sToken);
-        log.info("Downloaded user content: {} bytes, first bytes: [{}, {}, {}, {}]",
-            userContentBytes.length,
-            userContentBytes.length > 0 ? userContentBytes[0] : "N/A",
-            userContentBytes.length > 1 ? userContentBytes[1] : "N/A",
-            userContentBytes.length > 2 ? userContentBytes[2] : "N/A",
-            userContentBytes.length > 3 ? userContentBytes[3] : "N/A");
-
-        // DOCX files start with PK (0x50, 0x4B) - ZIP signature
-        // PDF files start with %PDF (0x25, 0x50, 0x44, 0x46)
-        boolean headerLooksLikeDocx = headerBytes.length > 1 && headerBytes[0] == 0x50 && headerBytes[1] == 0x4B;
-        boolean userLooksLikeDocx = userContentBytes.length > 1 && userContentBytes[0] == 0x50 && userContentBytes[1] == 0x4B;
-        log.info("Header looks like DOCX (PK signature): {}, User content looks like DOCX: {}",
-            headerLooksLikeDocx, userLooksLikeDocx);
-
-        if (!headerLooksLikeDocx) {
-            log.error("Header document is NOT a valid DOCX file! First 4 bytes suggest different format.");
-        }
-        if (!userLooksLikeDocx) {
-            log.error("User content document is NOT a valid DOCX file! First 4 bytes suggest different format.");
-        }
+        log.info("Downloaded user content: {} bytes", userContentBytes.length);
 
         // 3. Combine header + user content
         byte[] combinedBytes = combineHeaderAndContent(headerBytes, userContentBytes);
         log.info("Combined document: {} bytes", combinedBytes.length);
 
-        // 4. Upload combined document (sealing happens via separate event after CDAM association)
+        // 4. For final orders, seal before uploading to avoid timing issues
         String orderName = getEffectiveOrderName(caseData, caseDataMap);
         String fileName = orderName + "_" + caseId + ".docx";
 
+        // Upload DOCX first
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded = uploadService.uploadDocument(
             combinedBytes,
             fileName,
@@ -1338,12 +1323,21 @@ public class CustomOrderService {
             authorisation
         );
 
-        return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentBinaryUrl(uploaded.links.binary.href)
-            .documentUrl(uploaded.links.self.href)
-            .documentFileName(uploaded.originalDocumentName)
-            .documentCreatedOn(uploaded.createdOn)
-            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document uploadedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl(uploaded.links.binary.href)
+                .documentUrl(uploaded.links.self.href)
+                .documentFileName(uploaded.originalDocumentName)
+                .documentCreatedOn(uploaded.createdOn)
+                .build();
+
+        if (!isDraftOrder) {
+            // Final orders - seal the uploaded document using original proven approach
+            log.info("Sealing final order document: {}", uploadedDoc.getDocumentUrl());
+            return documentSealingService.sealDocument(uploadedDoc, caseData, authorisation);
+        }
+
+        return uploadedDoc;
     }
 
     /**
@@ -1643,31 +1637,25 @@ public class CustomOrderService {
                 return;
             }
 
-            // Combine header preview + user content
-            uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc =
+            // Combine header preview + user content (sealing happens inside for final orders)
+            uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
                 processCustomOrderOnSubmitted(
                     authorisation,
                     caseData.getId(),
                     caseData,
                     customOrderDoc.getDocumentBinaryUrl(),
                     headerPreview.getDocumentBinaryUrl(),
-                    caseDataUpdated
+                    caseDataUpdated,
+                    isDraftOrder
                 );
 
-            log.info("Custom order combined doc created: {}", combinedDoc.getDocumentFileName());
-            log.info("Updating custom order: isDraftOrder={}", isDraftOrder);
-
-            // For final orders (not draft), seal the combined document
-            uk.gov.hmcts.reform.prl.models.documents.Document docToStore = combinedDoc;
-            if (!isDraftOrder) {
-                docToStore = sealCombinedDocument(combinedDoc, caseData, authorisation);
-            }
+            log.info("Custom order processed: {}, isDraftOrder={}", finalDoc.getDocumentFileName(), isDraftOrder);
 
             // Update the appropriate collection
             if (isDraftOrder) {
-                updateDraftOrderCollection(caseDataUpdated, docToStore);
+                updateDraftOrderCollection(caseDataUpdated, finalDoc);
             } else {
-                updateFinalOrderCollection(caseDataUpdated, docToStore);
+                updateFinalOrderCollection(caseDataUpdated, finalDoc);
             }
 
             // Clean up previewOrderDoc now that we've used it
@@ -1675,23 +1663,6 @@ public class CustomOrderService {
 
         } catch (Exception e) {
             log.error("Failed to process custom order in submitted callback", e);
-        }
-    }
-
-    private uk.gov.hmcts.reform.prl.models.documents.Document sealCombinedDocument(
-        uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc,
-        CaseData caseData,
-        String authorisation
-    ) {
-        try {
-            log.info("Sealing combined custom order document: {}", combinedDoc.getDocumentFileName());
-            uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
-                documentSealingService.sealDocument(combinedDoc, caseData, authorisation);
-            log.info("Sealed custom order document: {}", sealedDoc.getDocumentFileName());
-            return sealedDoc;
-        } catch (Exception e) {
-            log.error("Failed to seal custom order document, will use unsealed: {}", e.getMessage());
-            return combinedDoc;
         }
     }
 

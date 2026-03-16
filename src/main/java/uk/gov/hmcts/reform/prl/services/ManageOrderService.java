@@ -2042,7 +2042,7 @@ public class ManageOrderService {
         } catch (DocumentGenerationException ex) {
             log.error("Error occured while generating Draft document ==> ", ex);
         } catch (Exception ex) {
-            log.error("Error occured while generating Draft document ==> ", ex);
+            log.error("Error occured in getCaseData ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -2526,20 +2526,29 @@ public class ManageOrderService {
      */
     public JudgeOrMagistrateTitleEnum getLoggedInJudgeTitle(String idamUserId) {
         if (idamUserId == null || idamUserId.isEmpty()) {
+            log.info("getLoggedInJudgeTitle: no idamUserId provided");
             return null;
         }
         try {
             List<JudicialUsersApiResponse> judicialUsers = refDataUserService.getJudicialUserBySidamId(idamUserId);
             if (judicialUsers == null || judicialUsers.isEmpty()) {
+                log.info("getLoggedInJudgeTitle: no judicial users found for idamUserId={}", idamUserId);
                 return null;
             }
             JudicialUsersApiResponse judgeDetails = judicialUsers.get(0);
+            log.info("getLoggedInJudgeTitle: postNominals={}, appointmentsCount={}",
+                judgeDetails.getPostNominals(),
+                judgeDetails.getAppointments() != null ? judgeDetails.getAppointments().size() : 0);
             if (judgeDetails.getAppointments() == null || judgeDetails.getAppointments().isEmpty()) {
+                log.info("getLoggedInJudgeTitle: no appointments found for user");
                 return null;
             }
             String appointmentName = judgeDetails.getAppointments().get(0).getAppointment();
             String postNominals = judgeDetails.getPostNominals();
-            return mapAppointmentToJudgeTitle(appointmentName, postNominals);
+            log.info("getLoggedInJudgeTitle: appointmentName={}, postNominals={}", appointmentName, postNominals);
+            JudgeOrMagistrateTitleEnum result = mapAppointmentToJudgeTitle(appointmentName, postNominals);
+            log.info("getLoggedInJudgeTitle: mapped to {}", result);
+            return result;
         } catch (Exception e) {
             log.warn("Failed to get judge title for user {}: {}", idamUserId, e.getMessage());
             return null;
@@ -3812,6 +3821,10 @@ public class ManageOrderService {
         String performingAction = null;
         String orderNameForWA = null;
         Map<String, Object> waFieldsMap = new HashMap<>();
+        log.info("setFieldsForWaTask: manageOrdersOptions={}, createSelectOrderOptions={}, eventId={}",
+            caseData.getManageOrdersOptions(),
+            caseData.getCreateSelectOrderOptions(),
+            eventId);
         if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
             || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())
             || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
@@ -3853,8 +3866,13 @@ public class ManageOrderService {
                 }
 
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
+                log.info("setFieldsForWaTask: setting WA_ORDER_NAME_JUDGE_CREATED={}", orderNameForWA);
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
             }
+            log.info("setFieldsForWaTask: performingUser={}, orderNameForWA={}", performingUser, orderNameForWA);
+        } else {
+            log.info("setFieldsForWaTask: manageOrdersOptions did not match create/upload/custom, value was: {}",
+                caseData.getManageOrdersOptions());
         }
         setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);

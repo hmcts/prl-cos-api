@@ -40,10 +40,8 @@ public class DocumentSealingService {
     private static final long SEAL_WIDTH = mm2pt(25);
     private static final long MARGIN_TOP = mm2pt(10);
     private static final long MARGIN_RIGHT = mm2pt(19.0);
-    private static final String USER_IMAGE_COURT_SEAL_BILINGUAL = "[userImage:familycourtseal-bilingual.png]";
-    private static final String USER_IMAGE_COURT_SEAL = "[userImage:familycourtseal.png]";
-    private static final String COURT_SEAL_BILINGUAL = "/familycourtseal-bilingual.png";
-    private static final String COURT_SEAL = "/familycourtseal.png";
+    private static final String COURT_SEAL_BILINGUAL = "familycourtseal-bilingual.png";
+    private static final String COURT_SEAL = "familycourtseal.png";
 
     private final DgsApiClient dgsApiClient;
     private final DocumentGenService documentGenService;
@@ -61,7 +59,9 @@ public class DocumentSealingService {
             s2sToken
         );
 
-        byte[] seal = readBytes(getCourtSealImage(caseData.getCaseManagementLocation().getRegion()));
+        String region = caseData.getCaseManagementLocation() != null
+            ? caseData.getCaseManagementLocation().getRegion() : null;
+        byte[] seal = readBytes(getCourtSealImage(region));
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
@@ -98,8 +98,10 @@ public class DocumentSealingService {
 
             return getBinary(document);
         } catch (IllegalStateException ise) {
+            log.error("Exception adding seal:", ise);
             throw ise;
         } catch (IOException e) {
+            log.error("Exception adding seal:", e);
             throw new UncheckedIOException(e);
         }
     }
@@ -116,12 +118,9 @@ public class DocumentSealingService {
     }
 
     private static String getCourtSealImage(String region) {
-        String courtSeal = "";
-        if (region.equals(REGION_WALES)) {
-            courtSeal = COURT_SEAL_BILINGUAL;
-        } else {
-            courtSeal = COURT_SEAL;
+        if (REGION_WALES.equals(region)) {
+            return COURT_SEAL_BILINGUAL;
         }
-        return courtSeal;
+        return COURT_SEAL;
     }
 }

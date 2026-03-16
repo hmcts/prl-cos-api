@@ -308,7 +308,7 @@ public class CustomOrderServiceTest {
         // For now, we verify the setup is correct and the exception is expected
         try {
             customOrderService.processCustomOrderOnSubmitted(
-                authorisation, caseId, caseData, userDocUrl, headerDocUrl, null);
+                authorisation, caseId, caseData, userDocUrl, headerDocUrl, null, false);
         } catch (RuntimeException e) {
             // Expected - combineHeaderAndContent needs real DOCX bytes
             // Verify that we got to the point of downloading both documents
@@ -1130,13 +1130,24 @@ public class CustomOrderServiceTest {
     }
 
     @Test
-    public void testBuildHeaderPlaceholders_orderDateFromMap_whenSetDuringCallback() throws IOException {
-        // Arrange - simulates controller setting dateOrderMade to current date during mid-event callback
+    public void testBuildHeaderPlaceholders_orderDateFromHearing_whenHearingSelected() throws IOException {
+        // Arrange - hearing is selected, should use hearing date
         Long caseId = 1234567890123456L;
-        CaseData caseData = CaseData.builder().build();
+        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement hearingElement =
+            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement.builder()
+                .code("hearing-123")
+                .label("Final Hearing - 15/03/2026 10:00:00")
+                .build();
+        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList hearingsType =
+            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList.builder()
+                .value(hearingElement)
+                .build();
+        CaseData caseData = CaseData.builder()
+            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
+            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
+            .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("dateOrderMade", java.time.LocalDate.of(2025, 2, 2)); // Set by controller to current date
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1144,19 +1155,20 @@ public class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
-        // Assert - should use formatted date from map
+        // Assert - should use hearing date and "at a hearing"
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("02/02/2025", placeholders.get("orderDate"));
+        assertEquals("15/03/2026", placeholders.get("orderDate"));
+        assertEquals("at a hearing", placeholders.get("hearingOrPapers"));
     }
 
     @Test
-    public void testBuildHeaderPlaceholders_orderDateFromMap_asString() throws IOException {
-        // Arrange - dateOrderMade might be a string in some contexts
+    public void testBuildHeaderPlaceholders_orderDateFromDateOrderMade_whenNoHearing() throws IOException {
+        // Arrange - no hearing, but dateOrderMade is set
         Long caseId = 1234567890123456L;
         CaseData caseData = CaseData.builder().build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("dateOrderMade", "15-01-2025"); // String format
+        caseDataMap.put("dateOrderMade", LocalDate.of(2026, 3, 10));
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1164,9 +1176,31 @@ public class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
-        // Assert - should use string value directly
+        // Assert - should use dateOrderMade and "on the papers"
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("15-01-2025", placeholders.get("orderDate"));
+        assertEquals("10/03/2026", placeholders.get("orderDate"));
+        assertEquals("on the papers", placeholders.get("hearingOrPapers"));
+    }
+
+    @Test
+    public void testBuildHeaderPlaceholders_orderDateCurrentDate_whenNoHearingSelected() throws IOException {
+        // Arrange - no hearing selected, no dateOrderMade, should use current date
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
+
+        // Assert - should use current date and "on the papers"
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String expectedDate = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        assertEquals(expectedDate, placeholders.get("orderDate"));
+        assertEquals("on the papers", placeholders.get("hearingOrPapers"));
     }
 
     @Test
@@ -1192,15 +1226,14 @@ public class CustomOrderServiceTest {
     }
 
     @Test
-    public void testBuildHeaderPlaceholders_orderDateFallsBackToCaseData_whenNotInMap() throws IOException {
-        // Arrange - map doesn't have dateOrderMade, should fall back to caseData
+    public void testBuildHeaderPlaceholders_hearingOrPapersOnPapers_whenNoHearing() throws IOException {
+        // Arrange - no hearing selected
         Long caseId = 1234567890123456L;
         CaseData caseData = CaseData.builder()
-            .dateOrderMade(java.time.LocalDate.of(2024, 12, 25))
+            .manageOrders(ManageOrders.builder().build()) // No hearingsType set
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        // No dateOrderMade in map
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1208,22 +1241,32 @@ public class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
-        // Assert - should fall back to caseData value with correct format
+        // Assert - should show "on the papers"
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("25/12/2024", placeholders.get("orderDate"));
+        assertEquals("on the papers", placeholders.get("hearingOrPapers"));
     }
 
     @Test
-    public void testBuildHeaderPlaceholders_bothJudgeAndDateFromMap() throws IOException {
-        // Arrange - full scenario: both judge name and date set by controller in map
+    public void testBuildHeaderPlaceholders_judgeFromMapAndDateFromHearing() throws IOException {
+        // Arrange - judge name from map, date from selected hearing
         final Long caseId = 1234567890123456L;
+        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement hearingElement =
+            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement.builder()
+                .code("hearing-456")
+                .label("Case Management - 02/02/2025 14:30:00")
+                .build();
+        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList hearingsType =
+            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList.builder()
+                .value(hearingElement)
+                .build();
         final CaseData caseData = CaseData.builder()
             .courtName("Central Family Court")
+            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
+            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistratesLastName", "District Judge Taylor");
-        caseDataMap.put("dateOrderMade", java.time.LocalDate.of(2025, 2, 2));
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1231,11 +1274,12 @@ public class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
 
-        // Assert - both values should come from map
+        // Assert - judge from map, date from hearing, "at a hearing"
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("District Judge Taylor", placeholders.get("judgeName"));
         assertEquals("02/02/2025", placeholders.get("orderDate"));
         assertEquals("Central Family Court", placeholders.get("courtName"));
+        assertEquals("at a hearing", placeholders.get("hearingOrPapers"));
     }
 
     // ========== Tests for getEffectiveOrderName (custom order dropdown feature) ==========

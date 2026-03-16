@@ -291,8 +291,11 @@ public class ManageOrdersController {
                 if (customWasApproved != null) {
                     caseDataUpdated.put("wasTheOrderApprovedAtHearing", customWasApproved);
                 }
-                if (customHearingsType != null) {
+                // Only copy hearingsType if approved at hearing, clear it otherwise
+                if ("Yes".equals(String.valueOf(customWasApproved)) && customHearingsType != null) {
                     caseDataUpdated.put("hearingsType", customHearingsType);
+                } else {
+                    caseDataUpdated.remove("hearingsType");
                 }
             }
 

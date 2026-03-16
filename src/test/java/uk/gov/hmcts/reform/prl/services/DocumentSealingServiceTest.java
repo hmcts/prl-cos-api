@@ -80,7 +80,7 @@ public class DocumentSealingServiceTest {
         )).thenReturn(inputDocumentBinaries);
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
         MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
-        mockResourceReader.when(() -> ResourceReader.readBytes("/familycourtseal.png")).thenReturn(sealBinaries);
+        mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal.png")).thenReturn(sealBinaries);
         CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal.png]")
             .caseManagementLocation(CaseManagementLocation.builder()
                                         .region("2")
@@ -127,7 +127,7 @@ public class DocumentSealingServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
 
         MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
-        mockResourceReader.when(() -> ResourceReader.readBytes("/familycourtseal-bilingual.png")).thenReturn(
+        mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal-bilingual.png")).thenReturn(
             sealBinaries);
 
         CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]")
@@ -167,7 +167,7 @@ public class DocumentSealingServiceTest {
         )).thenReturn(inputDocumentBinaries);
 
         MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
-        mockResourceReader.when(() -> ResourceReader.readBytes("/familycourtseal-bilingual.png")).thenReturn(
+        mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal-bilingual.png")).thenReturn(
             sealBinaries);
 
         CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]")
