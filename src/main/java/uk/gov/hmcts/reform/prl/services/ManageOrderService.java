@@ -2600,11 +2600,12 @@ public class ManageOrderService {
         Object customOrderNameOptionObj = caseDataUpdated.get("customOrderNameOption");
         String customOrderNameOption = customOrderNameOptionObj != null ? customOrderNameOptionObj.toString() : null;
 
-        // Set createSelectOrderOptions from customOrderNameOption so existing code paths work
+        // Set createSelectOrderOptions and nameOfOrder from customOrderNameOption so existing code paths work
         if (customOrderNameOption != null) {
             try {
                 CreateSelectOrderOptionsEnum orderType = CreateSelectOrderOptionsEnum.valueOf(customOrderNameOption);
                 caseDataUpdated.put("createSelectOrderOptions", orderType);
+                caseDataUpdated.put("nameOfOrder", orderType.getDisplayedValue());
             } catch (IllegalArgumentException e) {
                 log.warn("Could not convert customOrderNameOption '{}' to CreateSelectOrderOptionsEnum", customOrderNameOption);
             }
@@ -2613,7 +2614,6 @@ public class ManageOrderService {
         // Clear all custom sub-selections first, then populate only the relevant ones
         // Extract data from currently selected order type BEFORE clearing
         Object c43Details = caseDataUpdated.get("customC43OrderDetails");
-        Object c43aGuardianName = caseDataUpdated.get("customAppointedGuardianName");
         Object c21Details = caseDataUpdated.get("customC21OrderDetails");
 
         // Clear all custom order fields (source and synced)
@@ -2628,9 +2628,6 @@ public class ManageOrderService {
             case "childArrangementsSpecificProhibitedOrder":
                 syncC43Fields(caseDataUpdated, c43Details);
                 break;
-            case "specialGuardianShip":
-                syncC43AFields(caseDataUpdated, c43aGuardianName);
-                break;
             case "blankOrderOrDirections":
                 syncC21Fields(caseDataUpdated, c21Details);
                 break;
@@ -2644,9 +2641,6 @@ public class ManageOrderService {
         caseDataUpdated.remove("childArrangementsOrdersToIssue");
         caseDataUpdated.remove("selectChildArrangementsOrder");
         caseDataUpdated.remove("customC43OrderDetails");
-        // Clear C43A fields
-        caseDataUpdated.remove("appointedGuardianName");
-        caseDataUpdated.remove("customAppointedGuardianName");
         // Clear C21 fields
         caseDataUpdated.remove("c21OrderOptions");
         caseDataUpdated.remove("customC21OrderDetails");
@@ -2668,14 +2662,6 @@ public class ManageOrderService {
             if (childArrangementsOrderType != null) {
                 caseDataUpdated.put("selectChildArrangementsOrder", childArrangementsOrderType);
             }
-        }
-    }
-
-    private void syncC43AFields(Map<String, Object> caseDataUpdated, Object customGuardianName) {
-        if (customGuardianName != null) {
-            // Restore the source field
-            caseDataUpdated.put("customAppointedGuardianName", customGuardianName);
-            caseDataUpdated.put("appointedGuardianName", customGuardianName);
         }
     }
 

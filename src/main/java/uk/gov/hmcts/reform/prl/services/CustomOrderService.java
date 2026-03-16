@@ -677,7 +677,6 @@ public class CustomOrderService {
         populateApplicantPlaceholders(data, caseData, isFL401);
         populateRespondents(data, caseData, isFL401);
         populateChildrensGuardian(data, caseData);
-        populateAppointedGuardianPlaceholders(data, caseDataMap);
         populateChildrenPlaceholders(data, caseData, isFL401);
 
         log.info("Final header placeholders - judgeTitle={}, judgeName={}, orderDate={}, applicantName={}, respondent1Name={}",
@@ -1035,66 +1034,6 @@ public class CustomOrderService {
         } else {
             data.put("childrenAsRespondentsClause", "");
         }
-    }
-
-    /**
-     * Populates appointed guardian placeholders for special guardianship custom orders.
-     * Reads from customAppointedGuardianName in caseDataMap (the custom field on Page 5).
-     * Provides both names list and a formatted clause for the header.
-     */
-    private void populateAppointedGuardianPlaceholders(Map<String, Object> data, Map<String, Object> caseDataMap) {
-        List<String> guardianNames = extractGuardianNames(caseDataMap);
-        String appointedGuardianNamesStr = String.join(", ", guardianNames);
-        data.put("appointedGuardianNames", appointedGuardianNamesStr);
-        data.put("appointedGuardianClause", buildGuardianClause(guardianNames, appointedGuardianNamesStr));
-        log.debug("Appointed guardian names: '{}', clause: '{}'", appointedGuardianNamesStr, data.get("appointedGuardianClause"));
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<String> extractGuardianNames(Map<String, Object> caseDataMap) {
-        List<String> guardianNames = new ArrayList<>();
-        if (caseDataMap == null || caseDataMap.get("customAppointedGuardianName") == null) {
-            return guardianNames;
-        }
-        try {
-            Object customGuardianObj = caseDataMap.get("customAppointedGuardianName");
-            if (customGuardianObj instanceof List<?> guardianList && !guardianList.isEmpty()) {
-                for (Object element : guardianList) {
-                    String name = extractGuardianNameFromElement(element);
-                    if (name != null) {
-                        guardianNames.add(name);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not extract customAppointedGuardianName from caseDataMap: {}", e.getMessage());
-        }
-        return guardianNames;
-    }
-
-    @SuppressWarnings("unchecked")
-    private String extractGuardianNameFromElement(Object element) {
-        if (!(element instanceof Map<?, ?> guardianElement)) {
-            return null;
-        }
-        Object valueObj = guardianElement.get("value");
-        if (!(valueObj instanceof Map<?, ?> valueMap)) {
-            return null;
-        }
-        Object nameObj = valueMap.get("guardianFullName");
-        if (nameObj != null && !nameObj.toString().trim().isEmpty()) {
-            return nameObj.toString().trim();
-        }
-        return null;
-    }
-
-    private String buildGuardianClause(List<String> guardianNames, String namesStr) {
-        if (guardianNames.isEmpty()) {
-            return "";
-        }
-        return guardianNames.size() == 1
-            ? "The appointed guardian is " + namesStr
-            : "The appointed guardians are " + namesStr;
     }
 
     /**
