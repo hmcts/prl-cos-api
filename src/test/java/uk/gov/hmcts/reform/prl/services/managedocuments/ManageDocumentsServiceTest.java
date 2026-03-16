@@ -89,9 +89,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_CATEGORY_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLCATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
@@ -1344,6 +1348,15 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testCopyDocumentIfNotRestrictedAndUploadedOnBehalfOfCourt() {
+        DynamicListElement element = DynamicListElement.builder()
+            .code(INTERNAL_CORRESPONDENCE_CATEGORY_ID)
+            .label(INTERNAL_CORRESPONDENCE_LABEL)
+            .build();
+
+        dynamicList = DynamicList.builder()
+            .value(element)
+            .build();
+
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.COURT)
             .documentCategories(dynamicList)
@@ -1394,6 +1407,70 @@ public class ManageDocumentsServiceTest {
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
+
+    @Test
+    public void testUseSelectedCategoryWhenPartyIsCourt() {
+        DynamicListElement element = DynamicListElement.builder()
+            .code(SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID)
+            .label(SOLICITOR_RESPONDENT_APPLCATION)
+            .build();
+
+        dynamicList = DynamicList.builder()
+            .value(element)
+            .build();
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.COURT)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("respondentApplicationDocument", manageDocuments.getDocument());
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "hearing-centre-admin");
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "345")).thenReturn(
+            roleAssignmentServiceResponse);
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+        QuarantineLegalDoc result = courtStaffUploadDocListDocTab.getFirst().getValue();
+
+        assertEquals(SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID, result.getCategoryId());
+        assertEquals(SOLICITOR_RESPONDENT_APPLCATION, result.getCategoryName());
     }
 
     @Test
