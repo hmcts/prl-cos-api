@@ -58,7 +58,7 @@ def versions = [
   tomcat                       : '10.1.52',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
-  pdfbox                       : '2.0.35',
+  pdfbox                       : '2.0.36',
   springFramework              : '6.2.17',
 ]
 
@@ -317,7 +317,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   implementation 'org.mapstruct:mapstruct:1.6.3'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.6'
+  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.7'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
