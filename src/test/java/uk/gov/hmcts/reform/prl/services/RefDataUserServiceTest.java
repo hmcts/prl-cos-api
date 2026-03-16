@@ -618,8 +618,8 @@ public class RefDataUserServiceTest {
     @Test
     public void testGetJudicialUserBySidamIdReturnsUserDetails() {
         String sidamId = "test-sidam-id-123";
-        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(authToken);
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         JudicialUsersApiResponse judge = JudicialUsersApiResponse.builder()
             .surname("Smith")
@@ -629,8 +629,8 @@ public class RefDataUserServiceTest {
         List<JudicialUsersApiResponse> judicialUsers = List.of(judge);
 
         when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
-            eq(authToken),
-            eq(s2sToken),
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
             anyMap()
         )).thenReturn(judicialUsers);
 
@@ -645,12 +645,12 @@ public class RefDataUserServiceTest {
     @Test
     public void testGetJudicialUserBySidamIdReturnsEmptyListWhenNotFound() {
         String sidamId = "unknown-sidam-id";
-        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(authToken);
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
-            eq(authToken),
-            eq(s2sToken),
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
             anyMap()
         )).thenReturn(List.of());
 

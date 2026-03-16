@@ -6993,9 +6993,11 @@ class ManageOrderServiceTest {
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
-        // Then - createSelectOrderOptions set from customOrderNameOption
+        // Then - createSelectOrderOptions and nameOfOrder set from customOrderNameOption
         assertEquals(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder,
             caseDataUpdated.get("createSelectOrderOptions"));
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)",
+            caseDataUpdated.get("nameOfOrder"));
 
         // Then - C43 fields synced
         assertEquals(List.of("childArrangementsOrder", "specificIssueOrder"),
@@ -7004,33 +7006,6 @@ class ManageOrderServiceTest {
 
         // Other fields cleared
         assertNull(caseDataUpdated.get("appointedGuardianName"));
-        assertNull(caseDataUpdated.get("c21OrderOptions"));
-    }
-
-    @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43AFields() {
-        // Given
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("customOrderNameOption", "specialGuardianShip");
-        caseDataUpdated.put("customAppointedGuardianName", "John Smith");
-
-        // Pre-populate fields that should be cleared
-        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
-        caseDataUpdated.put("c21OrderOptions", "oldOption");
-
-        // When
-        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
-
-        // Then - createSelectOrderOptions set from customOrderNameOption
-        assertEquals(CreateSelectOrderOptionsEnum.specialGuardianShip,
-            caseDataUpdated.get("createSelectOrderOptions"));
-
-        // Then - C43A field synced
-        assertEquals("John Smith", caseDataUpdated.get("appointedGuardianName"));
-
-        // Other fields cleared
-        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
-        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
         assertNull(caseDataUpdated.get("c21OrderOptions"));
     }
 
@@ -7046,14 +7021,15 @@ class ManageOrderServiceTest {
 
         // Pre-populate fields that should be cleared
         caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
-        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
 
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
-        // Then - createSelectOrderOptions set from customOrderNameOption
+        // Then - createSelectOrderOptions and nameOfOrder set from customOrderNameOption
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections,
             caseDataUpdated.get("createSelectOrderOptions"));
+        assertEquals("Blank order or directions (C21)",
+            caseDataUpdated.get("nameOfOrder"));
 
         // Then - C21 field synced
         assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
@@ -7061,7 +7037,6 @@ class ManageOrderServiceTest {
         // Other fields cleared
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
         assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
-        assertNull(caseDataUpdated.get("appointedGuardianName"));
     }
 
     @Test
@@ -7079,8 +7054,9 @@ class ManageOrderServiceTest {
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
-        // Then - createSelectOrderOptions not set when customOrderNameOption is null
+        // Then - createSelectOrderOptions and nameOfOrder not set when customOrderNameOption is null
         assertNull(caseDataUpdated.get("createSelectOrderOptions"));
+        assertNull(caseDataUpdated.get("nameOfOrder"));
 
         // Then - all fields cleared
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
@@ -7103,6 +7079,12 @@ class ManageOrderServiceTest {
 
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions and nameOfOrder set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.other,
+            caseDataUpdated.get("createSelectOrderOptions"));
+        assertEquals("Other (upload an order)",
+            caseDataUpdated.get("nameOfOrder"));
 
         // Then - all fields cleared (other order type has no sub-selections)
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
@@ -7217,20 +7199,15 @@ class ManageOrderServiceTest {
         oldC21Details.put("orderOptions", "power_of_arrest");
         caseDataUpdated.put("customC21OrderDetails", oldC21Details);
 
-        // Old C43A data
-        caseDataUpdated.put("customAppointedGuardianName", "Old Guardian");
-
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
         // Then - all source and synced fields cleared
         assertNull(caseDataUpdated.get("customC43OrderDetails"));
         assertNull(caseDataUpdated.get("customC21OrderDetails"));
-        assertNull(caseDataUpdated.get("customAppointedGuardianName"));
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
         assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
         assertNull(caseDataUpdated.get("c21OrderOptions"));
-        assertNull(caseDataUpdated.get("appointedGuardianName"));
     }
 
     @Test
