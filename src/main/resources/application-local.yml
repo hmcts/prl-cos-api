@@ -8,3 +8,6 @@ idam:
     totp-secret: ${PRL_IDAM_S2S_AUTH_TOTP_SECRET:}
   client:
     secret: ${PRL_IDAM_CLIENT_SECRET}
+prl:
+  request-body-logger:
+    enabled: {PRL_REQUEST_BODY_LOGGER_ENABLED:false}

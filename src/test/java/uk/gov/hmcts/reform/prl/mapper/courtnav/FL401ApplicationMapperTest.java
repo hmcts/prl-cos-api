@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum.noneOfTheAbove;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum.cousin;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_8;
@@ -75,6 +76,20 @@ class FL401ApplicationMapperTest {
         courtNavApplicant = buildApplicantsDetails(applicantAddress);
         home = buildCourtNavHome(applicantAddress);
         courtNavFl401 = buildCourtNavFl401(courtNavApplicant, applicantAddress);
+    }
+
+    @Test
+    void shouldSetCaseName() {
+        courtNavFl401 = courtNavFl401.toBuilder()
+            .fl401(courtNavFl401.getFl401().toBuilder()
+                       .situation(situationWithOnlyOccupationOrder)
+                       .courtNavHome(home)
+                       .build())
+            .build();
+        CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
+        String expectedCaseName = "applicant_first_name applicant_last_name & resp test fl401";
+        assertEquals(expectedCaseName, caseData.getApplicantCaseName());
+        assertEquals(expectedCaseName, caseData.getCaseNameHmctsInternal());
     }
 
     @Test
@@ -495,7 +510,7 @@ class FL401ApplicationMapperTest {
 
         CaseData caseData = fl401ApplicationMapper.mapCourtNavData(courtNavFl401);
 
-        assertNull(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing());
+        assertTrue(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing().isEmpty());
         assertEquals(
             List.of(applicantStopFromRespondentDoingToChildEnum_Value_1),
             caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild()
@@ -525,7 +540,7 @@ class FL401ApplicationMapperTest {
             List.of(applicantStopFromRespondentEnum_Value_8),
             caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoing()
         );
-        assertNull(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild());
+        assertTrue(caseData.getRespondentBehaviourData().getApplicantWantToStopFromRespondentDoingToChild().isEmpty());
     }
 
     @Test

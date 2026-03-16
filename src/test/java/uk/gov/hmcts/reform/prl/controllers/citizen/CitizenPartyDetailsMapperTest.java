@@ -62,7 +62,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -98,7 +100,7 @@ class CitizenPartyDetailsMapperTest {
     DocumentGenService documentGenService;
     @Mock
     C8ArchiveService c8ArchiveService;
-    @Mock
+    @Spy
     CaseNameService caseNameService;
     @Spy
     ObjectMapper objectMapper = new ObjectMapper();
@@ -494,9 +496,46 @@ class CitizenPartyDetailsMapperTest {
     }
 
     @Test
+    void testBuildUpdatedCaseDataSetsCaseNameFields() throws IOException {
+        when(caseNameService.getCaseNameForCA(anyString(), anyString())).thenCallRealMethod();
+
+        c100RebuildData = C100RebuildData.builder()
+            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
+            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
+            .build();
+        CaseData citizenUpdatedCaseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .c100RebuildData(c100RebuildData)
+            .build();
+
+        CaseData caseDataResult = citizenPartyDetailsMapper.buildUpdatedCaseData(citizenUpdatedCaseData, c100RebuildData);
+
+        String expectedCaseName = "applicantLN1 V respLN1";
+        assertEquals(expectedCaseName, caseDataResult.getApplicantCaseName());
+        assertEquals(expectedCaseName, caseDataResult.getCaseNameHmctsInternal());
+    }
+
+    @Test
     void testGetC100RebuildCaseDataMap() throws IOException {
-        Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(caseData);
-        assertNotNull(caseDataResult);
+        when(caseNameService.getCaseNameForCA(anyString(), anyString())).thenCallRealMethod();
+
+        c100RebuildData = C100RebuildData.builder()
+            .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
+            .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
+            .build();
+        CaseData citizenUpdatedCaseData = CaseData.builder()
+            .id(1234567891234567L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .c100RebuildData(c100RebuildData)
+            .build();
+
+        Map<String, Object> caseDataResult = citizenPartyDetailsMapper.getC100RebuildCaseDataMap(citizenUpdatedCaseData);
+
+        String expectedCaseName = "applicantLN1 V respLN1";
+        assertEquals(expectedCaseName, caseDataResult.get(APPLICANT_CASE_NAME));
+        assertEquals(expectedCaseName, caseDataResult.get(CASE_NAME_HMCTS_INTERNAL));
     }
 
     @Test
