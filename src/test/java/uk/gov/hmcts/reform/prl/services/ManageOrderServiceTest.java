@@ -6393,6 +6393,8 @@ class ManageOrderServiceTest {
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
 
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
         assertEquals(Yes, caseDataUpdated.get("isSdoSelected"));
@@ -6464,6 +6466,8 @@ class ManageOrderServiceTest {
                 .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6987,7 +6991,6 @@ class ManageOrderServiceTest {
         caseDataUpdated.put("customC43OrderDetails", c43Details);
 
         // Pre-populate fields that should be cleared
-        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
         caseDataUpdated.put("c21OrderOptions", "oldOption");
 
         // When
@@ -7005,7 +7008,6 @@ class ManageOrderServiceTest {
         assertEquals("liveWithOrder", caseDataUpdated.get("selectChildArrangementsOrder"));
 
         // Other fields cleared
-        assertNull(caseDataUpdated.get("appointedGuardianName"));
         assertNull(caseDataUpdated.get("c21OrderOptions"));
     }
 
@@ -7048,7 +7050,6 @@ class ManageOrderServiceTest {
         // Pre-populate all fields
         caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
         caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
-        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
         caseDataUpdated.put("c21OrderOptions", "oldOption");
 
         // When
@@ -7061,7 +7062,6 @@ class ManageOrderServiceTest {
         // Then - all fields cleared
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
         assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
-        assertNull(caseDataUpdated.get("appointedGuardianName"));
         assertNull(caseDataUpdated.get("c21OrderOptions"));
     }
 
@@ -7074,7 +7074,6 @@ class ManageOrderServiceTest {
         // Pre-populate all fields
         caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
         caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
-        caseDataUpdated.put("appointedGuardianName", "Old Guardian");
         caseDataUpdated.put("c21OrderOptions", "oldOption");
 
         // When
@@ -7089,7 +7088,6 @@ class ManageOrderServiceTest {
         // Then - all fields cleared (other order type has no sub-selections)
         assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
         assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
-        assertNull(caseDataUpdated.get("appointedGuardianName"));
         assertNull(caseDataUpdated.get("c21OrderOptions"));
     }
 
