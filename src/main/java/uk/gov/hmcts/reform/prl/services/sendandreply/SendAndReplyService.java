@@ -148,7 +148,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIFIER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_REPLY_DYNAMIC_LIST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_REPLY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED_WITH_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
@@ -1175,17 +1175,17 @@ public class SendAndReplyService {
                 data.put(MESSAGE_IDENTIFIER, messageIdentifier);
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
                 data.put(CHOOSE_SEND_OR_REPLY, REPLY_1);
-                data.put(OPTION_REPLY, REPLY_1);
+                data.put(OPTION_SEND_OR_REPLY, REPLY_1);
             } else {
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
                 data.put(MESSAGE_IDENTIFIER, EMPTY_VALUE);
-                data.put(OPTION_REPLY, EMPTY_VALUE);
+                data.put(OPTION_SEND_OR_REPLY, EMPTY_VALUE);
             }
         } else {
             data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
             data.put(MESSAGE_IDENTIFIER, EMPTY_VALUE);
-            data.put(OPTION_REPLY, EMPTY_VALUE);
+            data.put(OPTION_SEND_OR_REPLY, EMPTY_VALUE);
         }
         return data;
     }
@@ -2272,7 +2272,7 @@ public class SendAndReplyService {
 
 
     public void checkTaskAssociatedWithMessage(CaseData caseData) {
-        if (REPLY.name().equalsIgnoreCase(caseData.getOptionReply())) {
+        if (REPLY.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
             caseData.setChooseSendOrReply(REPLY);
             DynamicList dynamicMessagesListAssociatedWithTask = getDynamicMessagesListAssociatedWithTask(
                 caseData,

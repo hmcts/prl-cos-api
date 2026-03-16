@@ -155,7 +155,7 @@ public class BaseCaseData {
 
     private String dfjArea;
 
-    private String optionReply;
+    private String optionSendOrReply;
 
     private String messageIdentifier;
 

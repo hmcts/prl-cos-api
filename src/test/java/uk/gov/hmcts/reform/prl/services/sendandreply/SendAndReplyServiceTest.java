@@ -3714,7 +3714,7 @@ public class SendAndReplyServiceTest {
         // given
         CaseData tempCaseData = Instancio.create(CaseData.class);
         CaseData caseData = tempCaseData.toBuilder()
-            .optionReply(REPLY.name())
+            .optionSendOrReply(REPLY.name())
             .messageIdentifier(UUID.randomUUID().toString())
             .build();
 

@@ -41,7 +41,7 @@ public class SendOrReplyMessage {
 
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
-            "messageContent", "optionReply", "messageIdentifier",
+            "messageContent", "optionSendOrReply", "messageIdentifier",
             "messageMetaData", "messageReplyDynamicList", "messageReplyTable","externalMessageAttachDocsList",
             "internalMessageAttachDocsList"
         };
