@@ -376,8 +376,6 @@ public class ManageDocumentsService {
     }
 
     private QuarantineLegalDoc covertManageDocToQuarantineDoc(ManageDocuments manageDocument, UserDetails userDetails) {
-        boolean isCourtPartySelected = DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty());
-
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
