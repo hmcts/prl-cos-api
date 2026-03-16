@@ -59,7 +59,7 @@ def versions = [
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
   pdfbox                       : '2.0.35',
-  springFramework              : '6.2.16',
+  springFramework              : '6.2.17',
 ]
 
 allprojects {
@@ -310,7 +310,7 @@ configurations.configureEach {
 }
 
 dependencies {
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.15'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.16'
   implementation group: 'org.springframework', name: 'spring-context-support', version: versions.springFramework
   annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
   implementation("org.projectlombok:lombok:${versions.lombok}")
