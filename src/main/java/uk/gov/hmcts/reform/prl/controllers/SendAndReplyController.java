@@ -41,8 +41,6 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIFIER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
@@ -227,7 +225,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                      @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
                      @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("/send-or-reply-to-messages/about-to-start-task started");
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
@@ -236,7 +234,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         caseDataMap.putAll(sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, authorisation, clientContext));
 
-        log.info("/send-or-reply-to-messages/about-to-start-task about to return response");
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
@@ -284,8 +282,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
         caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-        caseDataMap.put(OPTION_REPLY, null);
-        caseDataMap.put(MESSAGE_IDENTIFIER, null);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }

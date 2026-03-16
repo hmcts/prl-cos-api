@@ -25,6 +25,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BEGIN_INDEX;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.END_INDEX;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAX_SUBJECT_LENGTH;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -33,6 +36,7 @@ import static java.util.Optional.ofNullable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Message extends MessageMetaData {
+
 
     private String dateSent;
     private String messageContent;
@@ -115,7 +119,8 @@ public class Message extends MessageMetaData {
     @JsonIgnore
     public String getLabelForReplyDynamicList() {
         String messageSubject = super.getMessageSubject();
-        String subject = "Subject: " + (messageSubject.length() > 100 ? messageSubject.substring(0,97) + "..." : messageSubject);
+        String subject = "Subject: " + (messageSubject.length() > MAX_SUBJECT_LENGTH ? messageSubject.substring(
+            BEGIN_INDEX, END_INDEX) + "..." : messageSubject);
         String sender = "From: " + senderName;
         return String.format(
             "%s, %s, %s %s",
