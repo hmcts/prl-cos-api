@@ -306,7 +306,7 @@ class CafcassUploadDocServiceTest {
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
         assertNull(savedData.get("cirReceivedByDeadline"));
-        assertNull(savedData.get("cirUploadedDate"));
+        assertNotNull(savedData.get("cirUploadedDate"));
     }
 
     @Test

@@ -144,10 +144,12 @@ public class CafcassUploadDocService {
         }
         LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
         LocalDate cirDueDate = caseData.getCirDeadlineData().getCirDueDate();
+        caseDataUpdated.put("cirUploadedDate", today.format(DateTimeFormatter.ISO_LOCAL_DATE));
         if (!today.isAfter(cirDueDate)) {
             caseDataUpdated.put("cirReceivedByDeadline", Yes);
-            caseDataUpdated.put("cirUploadedDate", today.format(DateTimeFormatter.ISO_LOCAL_DATE));
             log.info("CIR document uploaded on or before due date {} — setting cirReceivedByDeadline", cirDueDate);
+        } else {
+            log.info("CIR document uploaded after due date {} — setting cirUploadedDate only", cirDueDate);
         }
     }
 
