@@ -565,13 +565,14 @@ public class ManageOrdersController {
                                                CallbackRequest callbackRequest) {
         if (null != caseData.getManageOrders().getAmendOrderSelectCheckOptions()
             && caseData.getManageOrders().getAmendOrderSelectCheckOptions()
-            .equals(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)) {
+            .equals(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
+            && caseData.getManageOrders().getAmendOrderSelectJudgeOrLa() != null) {
             RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                .judicialUser(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa()
-                                  .equals(JudgeOrLegalAdvisorCheckEnum.judge)
+                .judicialUser(JudgeOrLegalAdvisorCheckEnum.judge
+                                  .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                   ? caseData.getManageOrders().getNameOfJudgeToReviewOrder() : null)
-                .legalAdviserList(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa()
-                                      .equals(JudgeOrLegalAdvisorCheckEnum.legalAdvisor)
+                .legalAdviserList(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
+                                      .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                       ? caseData.getManageOrders().getNameOfLaToReviewOrder() : null)
                 .build();
 
