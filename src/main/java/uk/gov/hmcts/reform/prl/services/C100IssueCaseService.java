@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -80,10 +83,10 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 Map<String, String> dfjAreaFields = dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId);
-                if(MapUtils.isNotEmpty(dfjAreaFields)){
+                if (MapUtils.isNotEmpty(dfjAreaFields)) {
                     caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
-                } else{
+                } else {
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.No);
                 }
             }
