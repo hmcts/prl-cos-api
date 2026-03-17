@@ -4,14 +4,18 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import feign.FeignException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -121,11 +125,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -145,6 +150,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -164,9 +170,9 @@ import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADD
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class ManageOrderServiceTest {
-
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class ManageOrderServiceTest {
 
     @InjectMocks
     private ManageOrderService manageOrderService;
@@ -336,10 +342,9 @@ public class ManageOrderServiceTest {
            ]
          }
         """;
-    private ObjectMapper mapper;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         now = dateTime.now();
         DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
         dynamicList = DynamicList.builder()
@@ -386,7 +391,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void getUpdatedCaseDataCaTest() {
+    void getUpdatedCaseDataCaTest() {
         Child child = Child.builder()
             .firstName("Test")
             .lastName("Name")
@@ -416,7 +421,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void getUpdatedCaseDataFl401() {
+    void getUpdatedCaseDataFl401() {
 
         ApplicantChild child = ApplicantChild.builder()
             .fullName("TestName")
@@ -451,7 +456,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void getUpdatedCaseDataFl401Welsh() {
+    void getUpdatedCaseDataFl401Welsh() {
 
         ApplicantChild child = ApplicantChild.builder()
             .fullName("TestName")
@@ -486,7 +491,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPupulateHeader() {
+    void testPopulateHeaderFL401() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -505,7 +510,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void whenFl404bOrder_thenPopulateCustomFields() {
+    void whenFl404bOrder_thenPopulateCustomFields() {
         CaseData caseData = CaseData.builder()
             .id(12345674L)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
@@ -563,7 +568,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void whenFl402Order_thenPopulateCustomFields() {
+    void whenFl402Order_thenPopulateCustomFields() {
         ManageOrders expectedDetails = ManageOrders.builder()
             .manageOrdersFl402CaseNo("12345674")
             .manageOrdersFl402CourtName("Court name")
@@ -606,7 +611,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testPopulatePreviewOrderFromCaSpecificOrder() throws Exception {
+    void testPopulatePreviewOrderFromCaSpecificOrder() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -637,7 +642,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromBlankOrderWithdrawn() throws Exception {
+    void testPopulatePreviewOrderFromBlankOrderWithdrawn() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -673,7 +678,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromAppointmentOfGuardian() throws Exception {
+    void testPopulatePreviewOrderFromAppointmentOfGuardian() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -709,7 +714,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromParentalResponsibility() throws Exception {
+    void testPopulatePreviewOrderFromParentalResponsibility() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -745,7 +750,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromTransferOfCase() throws Exception {
+    void testPopulatePreviewOrderFromTransferOfCase() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -781,7 +786,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromSpecificGuardian() throws Exception {
+    void testPopulatePreviewOrderFromSpecificGuardian() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -817,7 +822,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromPowerOfArrest() throws Exception {
+    void testPopulatePreviewOrderFromPowerOfArrest() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -854,7 +859,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testPopulateHeaderC100Test() {
+    void testPopulateHeaderC100Test() {
         CaseData.CaseDataBuilder builder = CaseData.builder();
         builder.id(12345L);
         builder.caseTypeOfApplication(C100_CASE_TYPE);
@@ -876,7 +881,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateHeaderC100TestWithCafcass() {
+    void testPopulateHeaderC100TestWithCafcass() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -897,7 +902,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateHeaderC100TestWithRegionId() {
+    void testPopulateHeaderC100TestWithRegionId() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -918,7 +923,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateHeaderNoFl401FamilyManTest() {
+    void testPopulateHeaderNoFl401FamilyManTest() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -935,7 +940,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderBlankOrderFromCaseData() throws Exception {
+    void testPopulatePreviewOrderBlankOrderFromCaseData() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -970,7 +975,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderCAorderFromCaseData() throws Exception {
+    void testPopulatePreviewOrderCAorderFromCaseData() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1005,7 +1010,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderSpecificGuardianOrderFromCaseData() throws Exception {
+    void testPopulatePreviewOrderSpecificGuardianOrderFromCaseData() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1042,7 +1047,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseData() throws Exception {
+    void testPopulatePreviewOrderFromCaseData() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1079,7 +1084,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalOrderFromCaseData() throws Exception {
+    void testPopulateFinalOrderFromCaseData() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
@@ -1132,7 +1137,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataWithNoCheck() throws Exception {
+    void testPopulateFinalOrderFromCaseDataWithNoCheck() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
@@ -1202,7 +1207,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalWelshOrderFromCaseData() throws Exception {
+    void testPopulateFinalWelshOrderFromCaseData() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1253,7 +1258,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalUploadOrderFromCaseData() throws Exception {
+    void testPopulateFinalUploadOrderFromCaseData() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1291,7 +1296,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrders() throws Exception {
+    void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrders() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1334,7 +1339,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testUpdateCaseDataWithAppointedGuardianNames() {
+    void testUpdateCaseDataWithAppointedGuardianNames() {
 
         List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
         AppointedGuardianFullName appointedGuardianFullName = AppointedGuardianFullName.builder()
@@ -1361,7 +1366,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataFL401() throws Exception {
+    void testPopulateFinalOrderFromCaseDataFL401() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1426,7 +1431,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataFL401ForMultipleOrders() throws Exception {
+    void testPopulateFinalOrderFromCaseDataFL401ForMultipleOrders() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1479,7 +1484,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseDataCaseAmendDischargedVariedFl404b() throws Exception {
+    void testPopulatePreviewOrderFromCaseDataCaseAmendDischargedVariedFl404b() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1516,7 +1521,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseDataCaseBlankOrderFl404b() throws Exception {
+    void testPopulatePreviewOrderFromCaseDataCaseBlankOrderFl404b() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1549,7 +1554,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseDataNonMolestationOrderFl404a() throws Exception {
+    void testPopulatePreviewOrderFromCaseDataNonMolestationOrderFl404a() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1586,7 +1591,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseDataNonMolestationOrderFl404aForC100() throws Exception {
+    void testPopulatePreviewOrderFromCaseDataNonMolestationOrderFl404aForC100() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1634,7 +1639,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseDataGeneralN117() throws Exception {
+    void testPopulatePreviewOrderFromCaseDataGeneralN117() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1671,7 +1676,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromCaseDataNoticeOfProceedingsFl402() throws Exception {
+    void testPopulatePreviewOrderFromCaseDataNoticeOfProceedingsFl402() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1708,7 +1713,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderFromSdo() throws Exception {
+    void testPopulatePreviewOrderFromSdo() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1743,7 +1748,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataCaseAmendDischargedVariedFl404b() throws Exception {
+    void testPopulateFinalOrderFromCaseDataCaseAmendDischargedVariedFl404b() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1789,7 +1794,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testAddOrderDetailsAndReturnReverseSortedListWithNullOrgName() throws Exception {
+    void testAddOrderDetailsAndReturnReverseSortedListWithNullOrgName() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1834,7 +1839,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateHeader() {
+    void testPopulateHeader() {
 
         List<OrderRecipientsEnum> recipientList = new ArrayList<>();
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
@@ -1867,7 +1872,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateHeaderWithCafcass() {
+    void testPopulateHeaderWithCafcass() {
 
         List<OrderRecipientsEnum> recipientList = new ArrayList<>();
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
@@ -1902,7 +1907,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataCaseOccupationOrder() throws Exception {
+    void testPopulateFinalOrderFromCaseDataCaseOccupationOrder() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1946,7 +1951,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testgetOrderToAmendDownloadLink() {
+    void testgetOrderToAmendDownloadLink() {
 
         CaseData caseData = CaseData.builder()
             .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
@@ -1961,7 +1966,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testpopulateCustomOrderFieldsGeneralForm() {
+    void testpopulateCustomOrderFieldsGeneralForm() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("fn")
             .lastName("ln")
@@ -1983,7 +1988,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testpopulateCustomOrderFieldsNoticeOfProceedings() {
+    void testpopulateCustomOrderFieldsNoticeOfProceedings() {
         ManageOrders expectedDetails = ManageOrders.builder()
             .manageOrdersFl402CaseNo("12345674")
             .manageOrdersFl402CourtName("Court name")
@@ -2011,7 +2016,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderCA() throws Exception {
+    void testServeOrderCA() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2095,7 +2100,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderCAexception() throws Exception {
+    void testServeOrderCAexception() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2133,7 +2138,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderCaCafcassServedOptionsYes() throws Exception {
+    void testServeOrderCaCafcassServedOptionsYes() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2194,7 +2199,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderCaCafcassServedOptionsYesAndOtherPartiesOnlyC47a() throws Exception {
+    void testServeOrderCaCafcassServedOptionsYesAndOtherPartiesOnlyC47a() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2255,7 +2260,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderDA() throws Exception {
+    void testServeOrderDA() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2344,37 +2349,37 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testgetOrderTemplateAndFileForSdo() {
+    void testgetOrderTemplateAndFileForSdo() {
         Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.standardDirectionsOrder);
         assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
     }
 
     @Test
-    public void testgetOrderTemplateAndFileForNoticeOfProceedingsParties() {
+    void testgetOrderTemplateAndFileForNoticeOfProceedingsParties() {
         Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.noticeOfProceedingsParties);
         assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
     }
 
     @Test
-    public void testgetOrderTemplateAndFileForNoticeOfProceedingsNonParties() {
+    void testgetOrderTemplateAndFileForNoticeOfProceedingsNonParties() {
         Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties);
         assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
     }
 
     @Test
-    public void testgetOrderTemplateAndFileForOccupation() {
+    void testgetOrderTemplateAndFileForOccupation() {
         Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.occupation);
         assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
     }
 
     @Test
-    public void testgetOrderTemplateAndFileForDoi() {
+    void testgetOrderTemplateAndFileForDoi() {
         Map<String, String> fieldsMap = manageOrderService.getOrderTemplateAndFile(CreateSelectOrderOptionsEnum.directionOnIssue);
         assertTrue(fieldsMap.containsKey(PrlAppsConstants.FILE_NAME));
     }
 
     @Test
-    public void testpopulateCustomOrderFieldsForUploadAnOrder() {
+    void testpopulateCustomOrderFieldsForUploadAnOrder() {
         ManageOrders expectedDetails = ManageOrders.builder()
             .manageOrdersFl402CaseNo("12345674")
             .manageOrdersFl402CourtName("Court name")
@@ -2402,7 +2407,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testpopulateCustomOrderFieldsForUploadAnOrderWelsh() {
+    void testpopulateCustomOrderFieldsForUploadAnOrderWelsh() {
         ManageOrders expectedDetails = ManageOrders.builder()
             .manageOrdersFl402CaseNo("12345674")
             .manageOrdersFl402CourtName("Court name")
@@ -2430,7 +2435,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAllRecipientsForC100() {
+    void testGetAllRecipientsForC100() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -2449,7 +2454,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAllRecipientsForFL401() {
+    void testGetAllRecipientsForFL401() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -2468,7 +2473,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAllRecipientsForC100ApplicantOrApplicantSolicitor() {
+    void testGetAllRecipientsForC100ApplicantOrApplicantSolicitor() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -2487,7 +2492,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAllRecipientsForFL401ApplicantOrApplicantSolicitor() {
+    void testGetAllRecipientsForFL401ApplicantOrApplicantSolicitor() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("")
@@ -2506,7 +2511,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderInfoForUploadDomesticAbuseOrders() {
+    void testGetSelectedOrderInfoForUploadDomesticAbuseOrders() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .domesticAbuseOrders(DomesticAbuseOrdersEnum.blankOrder)
@@ -2515,7 +2520,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderInfoForUploadFcOrders() {
+    void testGetSelectedOrderInfoForUploadFcOrders() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .fcOrders(FcOrdersEnum.summonToAppearToCourt)
@@ -2524,7 +2529,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderInfoForUploadOtherOrdersOption() {
+    void testGetSelectedOrderInfoForUploadOtherOrdersOption() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .otherOrdersOption(OtherOrdersOptionEnum.other)
@@ -2534,7 +2539,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderInForUpload() {
+    void testGetSelectedOrderInForUpload() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .build();
@@ -2542,7 +2547,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderIdForUploadDomesticAbuseOrders() {
+    void testGetSelectedOrderIdForUploadDomesticAbuseOrders() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .domesticAbuseOrders(DomesticAbuseOrdersEnum.blankOrder)
@@ -2551,7 +2556,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderIdForUploadFcOrders() {
+    void testGetSelectedOrderIdForUploadFcOrders() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .fcOrders(FcOrdersEnum.summonToAppearToCourt)
@@ -2560,7 +2565,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderIdForUploadOtherOrdersOption() {
+    void testGetSelectedOrderIdForUploadOtherOrdersOption() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .otherOrdersOption(OtherOrdersOptionEnum.other)
@@ -2570,7 +2575,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderIdForUpload() {
+    void testGetSelectedOrderIdForUpload() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .build();
@@ -2578,7 +2583,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetSelectedOrderIdForUploadforChildArrOrder() {
+    void testGetSelectedOrderIdForUploadforChildArrOrder() {
         CaseData caseData = CaseData.builder()
             .childArrangementOrders(ChildArrangementOrdersEnum.blankOrderOrDirections)
             .caseTypeOfApplication("FL401")
@@ -2586,8 +2591,53 @@ public class ManageOrderServiceTest {
         assertEquals("blankOrderOrDirections", manageOrderService.getSelectedOrderIdForUpload(caseData));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"fee-paid-judge", "allocated-magistrate", "judge"})
+    void testPopulateDraftOrderForJudge(String amRole) {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            amRole);
+
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(any(), any(), any(), any()))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        Document orderDocument = Document.builder().documentUrl("test.doc").documentFileName("test order").build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .fcOrders(FcOrdersEnum.warrantOfCommittal)
+            .judgeOrMagistratesLastName("test")
+            .dateOrderMade(LocalDate.now())
+            .uploadOrderDoc(orderDocument)
+            .manageOrders(ManageOrders.builder()
+                              .recitalsOrPreamble("test")
+                              .isCaseWithdrawn(Yes)
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .orderDirections("test")
+                              .furtherDirectionsIfRequired("test")
+                              .childOption(dynamicMultiSelectList)
+                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                                                                        .hearingDateConfirmOptionEnum(
+                                                                            HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+                                                                        .build())))
+                              .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test", caseData, ENGLISH);
+
+        List<Element<DraftOrder>> drafts = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertThat(drafts).hasSize(1);
+        assertThat(drafts.getFirst().getValue().getOrderDocument()).isEqualTo(orderDocument);
+    }
+
+
     @Test
-    public void testPopulateDraftOrderForJudge() throws Exception {
+    void testPopulateDraftOrderForJudge() {
         when(userService.getUserDetails(Mockito.anyString()))
             .thenReturn(UserDetails.builder().roles(List.of(Roles.JUDGE.getValue())).build());
 
@@ -2621,25 +2671,25 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testOrderStatusCreatedByAdmin() {
+    void testOrderStatusCreatedByAdmin() {
         String status = manageOrderService.getOrderStatus("createAnOrder", "COURT_ADMIN", null, null);
         assertEquals(OrderStatusEnum.createdByCA.getDisplayedValue(), status);
     }
 
     @Test
-    public void testOrderStatusCreatedByJudge() {
+    void testOrderStatusCreatedByJudge() {
         String status = manageOrderService.getOrderStatus("createAnOrder", "JUDGE", null, " ");
         assertEquals(OrderStatusEnum.createdByJudge.getDisplayedValue(), status);
     }
 
     @Test
-    public void testOrderStatusCreatedBySolicitor() {
+    void testOrderStatusCreatedBySolicitor() {
         String status = manageOrderService.getOrderStatus("draftAnOrder", "SOLICITOR", null, "");
         assertEquals(OrderStatusEnum.draftedByLR.getDisplayedValue(), status);
     }
 
     @Test
-    public void testOrderStatusReviewByAdminAlreadyReviewedByJudge() {
+    void testOrderStatusReviewByAdminAlreadyReviewedByJudge() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",
             "COURT_ADMIN",
@@ -2650,7 +2700,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testOrderStatusReviewByAdminNotReviewedByJudge() {
+    void testOrderStatusReviewByAdminNotReviewedByJudge() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",
             "COURT_ADMIN",
@@ -2661,7 +2711,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testOrderStatusReviewByJudge() {
+    void testOrderStatusReviewByJudge() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",
             "JUDGE",
@@ -2672,7 +2722,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testOrderStatusReviewByManager() {
+    void testOrderStatusReviewByManager() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",
             "COURT_ADMIN",
@@ -2683,7 +2733,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalUploadOrder() throws Exception {
+    void testPopulateFinalUploadOrder() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -2715,7 +2765,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalUploadOrderWithDateOrderMade() throws Exception {
+    void testPopulateFinalUploadOrderWithDateOrderMade() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -2748,21 +2798,21 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeSolicitor() {
+    void testGetLoggedInUserTypeSolicitor() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.SOLICITOR.getValue())).build());
         assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
     @Test
-    public void testGetLoggedInUserTypeCitizen() {
+    void testGetLoggedInUserTypeCitizen() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.CITIZEN.getValue())).build());
         assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
     @Test
-    public void testGetLoggedInUserTypeSystemUpdate() {
+    void testGetLoggedInUserTypeSystemUpdate() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
         assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
@@ -2770,7 +2820,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
+    void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "hearing-centre-admin");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -2785,7 +2835,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeSolicitorFromIdam() {
+    void testGetLoggedInUserTypeSolicitorFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "caseworker-privatelaw-solicitor");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -2800,7 +2850,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
+    void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
@@ -2813,7 +2863,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
+    void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
             "caseworker-privatelaw-systemupdate");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -2828,7 +2878,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInUserTypeForCitizenFromIdam() {
+    void testGetLoggedInUserTypeForCitizenFromIdam() {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
@@ -2839,6 +2889,28 @@ public class ManageOrderServiceTest {
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
             roleAssignmentServiceResponse);
         assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenRoleAssignmentApiCallFails() {
+
+        String auth = "test-auth";
+        String authToken = "serviceAuthToken";
+        String id = "123";
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder()
+                .id(id)
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build()
+        );
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY))
+            .thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authToken, null, id))
+            .thenThrow(FeignException.class);
+
+        assertThrows(FeignException.class, () -> manageOrderService.getLoggedInUserType(auth));
     }
 
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
@@ -2853,7 +2925,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testServeOrderCaWithRecipients() throws Exception {
+    void testServeOrderCaWithRecipients() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2925,7 +2997,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderCaWithRecipientsOptionsOnlyC47a() throws Exception {
+    void testServeOrderCaWithRecipientsOptionsOnlyC47a() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -3001,7 +3073,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testCheckOnlyC47aOrderSelectedToServeForC47A() {
+    void testCheckOnlyC47aOrderSelectedToServeForC47A() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
             .label("testC47A")
@@ -3058,11 +3130,11 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testCheckOnlyC47aOrderSelectedToServeForC21() {
+    void testCheckOnlyC47aOrderSelectedToServeForC21() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
             .label("testC21")
@@ -3125,11 +3197,11 @@ public class ManageOrderServiceTest {
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(Mockito.any())).thenReturn(courtEmail);
 
         Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
-        Assert.assertTrue(!stringObjectMap.isEmpty());
+        assertFalse(stringObjectMap.isEmpty());
     }
 
     @Test
-    public void testPopulatePreviewOrder() throws Exception {
+    void testPopulatePreviewOrder() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -3208,11 +3280,11 @@ public class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
             .build();
         Map<String, Object> result = manageOrderService.populatePreviewOrder("test", callbackRequest, caseData, ENGLISH);
-        Assert.assertTrue(!result.isEmpty());
+        assertFalse(result.isEmpty());
     }
 
     @Test
-    public void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrdersForWelsh() throws Exception {
+    void testPopulateFinalUploadOrderFromCaseDataWithMultipleOrdersForWelsh() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -3262,7 +3334,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHearingsDropdownWhenNoHearings() {
+    void testHearingsDropdownWhenNoHearings() {
         //when
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -3284,7 +3356,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHearingsDropdownWhenNoCompletedHearings() {
+    void testHearingsDropdownWhenNoCompletedHearings() {
         //when
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -3312,7 +3384,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHearingsDropdownWhenNoHearingDate() {
+    void testHearingsDropdownWhenNoHearingDate() {
         //when
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -3341,7 +3413,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHearingsDropdownWhenCompletedHearingsAvailable() {
+    void testHearingsDropdownWhenCompletedHearingsAvailable() {
         //when
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -3375,7 +3447,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHearingsDropdownWhenMultipleHearingsAvailable() {
+    void testHearingsDropdownWhenMultipleHearingsAvailable() {
         //when
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -3426,7 +3498,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testResetChildOptions() {
+    void testResetChildOptions() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
             .label("testC47A")
@@ -3484,11 +3556,11 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         manageOrderService.resetChildOptions(callbackRequest);
-        Assert.assertEquals(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+        assertEquals(null, callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
     }
 
     @Test
-    public void testPopulateJudgeNameForFinalDoc() throws Exception {
+    void testPopulateJudgeNameForFinalDoc() {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -3540,7 +3612,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetJudgeFullName() {
+    void testGetJudgeFullName() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("1234").personalCode("ABC").build())
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
@@ -3565,7 +3637,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testResetChildOptionsWithIsTheOderAboutAllChildren() {
+    void testResetChildOptionsWithIsTheOderAboutAllChildren() {
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
             .label("testC47A")
@@ -3624,11 +3696,11 @@ public class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         manageOrderService.resetChildOptions(callbackRequest);
-        Assert.assertNotNull(null,callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+        assertNotNull(callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
     }
 
     @Test
-    public void testSetChildOptionsIfOrderAboutAllChildrenYes() {
+    void testSetChildOptionsIfOrderAboutAllChildrenYes() {
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("test")
@@ -3686,11 +3758,11 @@ public class ManageOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(List.of(dynamicMultiselectListElementUpdated));
 
         CaseData caseData1 = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-        Assert.assertEquals("John (Child 1)",caseData1.getManageOrders().getChildOption().getListItems().get(0).getLabel());
+        assertEquals("John (Child 1)", caseData1.getManageOrders().getChildOption().getListItems().get(0).getLabel());
     }
 
     @Test
-    public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedYes() {
+    void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedYes() {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(Yes)
@@ -3712,12 +3784,12 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setMarkedToServeEmailNotification(caseData,caseDataUpdated);
-        Assert.assertEquals(Yes, caseDataUpdated.get("markedToServeEmailNotification"));
+        assertEquals(Yes, caseDataUpdated.get("markedToServeEmailNotification"));
 
     }
 
     @Test
-    public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedNo() {
+    void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedNo() {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .ordersNeedToBeServed(No)
@@ -3739,21 +3811,21 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setMarkedToServeEmailNotification(caseData,caseDataUpdated);
-        Assert.assertEquals(Yes, caseDataUpdated.get("markedToServeEmailNotification"));
+        assertEquals(Yes, caseDataUpdated.get("markedToServeEmailNotification"));
 
     }
 
     @Test
-    public void testCleanUpSelectedManageOrderOptions() {
+    void testCleanUpSelectedManageOrderOptions() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("manageOrdersOptions","manageOrdersOptions");
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-        Assert.assertNull(caseDataUpdated.get("manageOrdersOptions"));
+        assertNull(caseDataUpdated.get("manageOrdersOptions"));
 
     }
 
     @Test
-    public void testServeFinalOrderC43() throws Exception {
+    void testServeFinalOrderC43() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -3821,7 +3893,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSaveAdditionalOrderDocuments() {
+    void testSaveAdditionalOrderDocuments() {
         //Given
         Document document1 = Document.builder().documentFileName("abc.pdf").build();
         Document document2 = Document.builder().documentFileName("xyz.pdf").build();
@@ -3859,7 +3931,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSkipSaveAdditionalOrderDocumentsIfEmpty() {
+    void testSkipSaveAdditionalOrderDocumentsIfEmpty() {
         //Given
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3878,7 +3950,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetGeneratedDocument() {
+    void testGetGeneratedDocument() {
         GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
         assertNotNull(manageOrderService.getGeneratedDocument(
             generatedDocumentInfo1, true, new HashMap<>())
@@ -3886,15 +3958,15 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testCleanUpServeOrderOptions() {
+    void testCleanUpServeOrderOptions() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("serveOrderAdditionalDocuments","serveOrderAdditionalDocuments");
         manageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-        Assert.assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
+        assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
     }
 
     @Test
-    public void testSetFieldsForWaTaskForJudgeCreateOrder() {
+    void testSetFieldsForWaTaskForJudgeCreateOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
@@ -3918,7 +3990,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
+    void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
@@ -3942,7 +4014,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForWaTaskForUploadOrder() {
+    void testSetFieldsForWaTaskForUploadOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
@@ -3967,7 +4039,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrderC100() throws Exception {
+    void testServeOrderC100() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -4058,7 +4130,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAdditionalRequirementsForHearingReqForOtherOrderDraft() {
+    void testGetAdditionalRequirementsForHearingReqForOtherOrderDraft() {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -4088,7 +4160,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAdditionalRequirementsForHearingReqForOtherOrderFinal() {
+    void testGetAdditionalRequirementsForHearingReqForOtherOrderFinal() {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -4118,7 +4190,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAdditionalRequirementsForHearingReqForSdoDraft() {
+    void testGetAdditionalRequirementsForHearingReqForSdoDraft() {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -4156,7 +4228,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetAdditionalRequirementsForHearingReqForSdoFinal() {
+    void testGetAdditionalRequirementsForHearingReqForSdoFinal() {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -4192,7 +4264,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeOrder() {
+    void testServeOrder() {
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code("00000000-0000-0000-0000-000000000000")
@@ -4240,7 +4312,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testServeFL401Order() throws Exception {
+    void testServeFL401Order() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -4329,7 +4401,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateServeOrderDetails() {
+    void testPopulateServeOrderDetails() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4348,7 +4420,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenRespondentLipNonPersonalServicePrefPostShouldGiveErrorIfAddressIsNotPresent() {
+    void givenRespondentLipNonPersonalServicePrefPostShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .contactPreferences(ContactPreferences.post)
@@ -4381,7 +4453,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenRespondentLipNonPersonalServiceContactPrefNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+    void givenRespondentLipNonPersonalServiceContactPrefNotPresentShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                     .email("test@test.com")
@@ -4414,7 +4486,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenRespondentLipNonPersonalServiceEmailAddressNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+    void givenRespondentLipNonPersonalServiceEmailAddressNotPresentShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4447,7 +4519,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenRespondenNonPersonalServiceIfRepresentedShouldNotGiveErrorIfAddressIsNotPresent() {
+    void givenRespondenNonPersonalServiceIfRepresentedShouldNotGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -4480,7 +4552,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenRespondentLipNonPersonalServiceShouldNotGiveErrorIfAddressIsPresent() {
+    void givenRespondentLipNonPersonalServiceShouldNotGiveErrorIfAddressIsPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                     .email("test@test.com")
@@ -4512,7 +4584,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenRespondentLipPersonalServiceShouldNotGiveError() {
+    void givenRespondentLipPersonalServiceShouldNotGiveError() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4543,7 +4615,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenOtherPartyNonPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+    void givenOtherPartyNonPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4577,7 +4649,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+    void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4612,7 +4684,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenOtherPartyShouldNotGiveErrorIfAddressIsPresent() {
+    void givenOtherPartyShouldNotGiveErrorIfAddressIsPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4683,7 +4755,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
+    void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -4728,7 +4800,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
+    void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -4768,7 +4840,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourney() {
+    void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourney() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -4809,7 +4881,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaIsHearingTaskNeeded_whenRejected_thenHearingTaskNeeded_shuldbe_No() {
+    void testWaIsHearingTaskNeeded_whenRejected_thenHearingTaskNeeded_shuldbe_No() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -4837,7 +4909,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaIsHearingTaskNeeded_whenJudgeLaReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
+    void testWaIsHearingTaskNeeded_whenJudgeLaReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -4865,7 +4937,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaIsHearingTaskNeeded_whenManagerReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
+    void testWaIsHearingTaskNeeded_whenManagerReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -4893,7 +4965,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testUpdateOrderFieldsForDocmosis() {
+    void testUpdateOrderFieldsForDocmosis() {
 
         DraftOrder draftOrder = DraftOrder.builder().judgeOrMagistratesLastName("testJudge").build();
 
@@ -4909,7 +4981,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetails() {
+    void testHandleFetchOrderDetails() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4942,7 +5014,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testGetHearingDataFromExistingHearingData() {
+    void testGetHearingDataFromExistingHearingData() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -4968,7 +5040,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataForUploadAnOrder() throws Exception {
+    void testPopulateFinalOrderFromCaseDataForUploadAnOrder() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
@@ -5034,7 +5106,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGenerateOrderDocumentFromDocmosis() throws Exception {
+    void testGenerateOrderDocumentFromDocmosis() throws Exception {
         ReflectionTestUtils.setField(manageOrderService, "sdoWelshDraftTemplate", "sdoWelshDraftTemplate");
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -5106,7 +5178,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testIsOrderApprovedSolicitorCreated() {
+    void testIsOrderApprovedSolicitorCreated() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -5129,7 +5201,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void setHearingSelectedInfoForTaskWithMultipleHearings() {
+    void setHearingSelectedInfoForTaskWithMultipleHearings() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata1 = HearingData.builder()
@@ -5154,7 +5226,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void setHearingSelectedInfoForTaskWitNoHearings() {
+    void setHearingSelectedInfoForTaskWitNoHearings() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -5168,7 +5240,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void setHearingSelectedInfoForTaskWitHearingsButNoHearingDateConfirmOptionEnum() {
+    void setHearingSelectedInfoForTaskWitHearingsButNoHearingDateConfirmOptionEnum() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata1 = HearingData.builder()
@@ -5187,7 +5259,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void setHearingSelectedInfoForTaskWitMultipleHearingsButOnlyOneHearingDateConfirmOptionEnum() {
+    void setHearingSelectedInfoForTaskWitMultipleHearingsButOnlyOneHearingDateConfirmOptionEnum() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata1 = HearingData.builder()
@@ -5222,7 +5294,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void setHearingSelectedInfoForTaskWitMultipleHearingsButMoreThnOneHearingDateConfirmOptionEnum() {
+    void setHearingSelectedInfoForTaskWitMultipleHearingsButMoreThnOneHearingDateConfirmOptionEnum() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata1 = HearingData.builder()
@@ -5256,7 +5328,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandlePreviewOrderScenario1() throws Exception {
+    void testHandlePreviewOrderScenario1() {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5299,7 +5371,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandlePreviewOrderScenario2() throws Exception {
+    void testHandlePreviewOrderScenario2() {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5347,7 +5419,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandlePreviewOrderScenario3() throws Exception {
+    void testHandlePreviewOrderScenario3() {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -5392,7 +5464,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetHearingDataForSdo() {
+    void testSetHearingDataForSdo() {
 
         UUID uuid = UUID.randomUUID();
         HearingDataFromTabToDocmosis hearingDataFromTabToDocmosis = HearingDataFromTabToDocmosis.builder().hearingType(
@@ -5447,13 +5519,13 @@ public class ManageOrderServiceTest {
             .thenReturn(hearingDataRevised);
 
         CaseData caseDataResp = manageOrderService.setHearingDataForSdo(caseData, hearings, "auth");
-        Assert.assertNull(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab());
-        Assert.assertEquals(uuid, caseDataResp.getStandardDirectionOrder()
+        assertNull(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab());
+        assertEquals(uuid, caseDataResp.getStandardDirectionOrder()
             .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().get(0).getId());
     }
 
     @Test
-    public void testServeOrderC100WithAmendedParties() throws Exception {
+    void testServeOrderC100WithAmendedParties() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -5564,7 +5636,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYesForSdo() {
+    void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYesForSdo() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -5617,7 +5689,7 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNoForSdo() {
+    void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNoForSdo() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -5669,7 +5741,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourneyForSdo() {
+    void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourneyForSdo() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -5712,7 +5784,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testCreateAutomatedHearingManagementForOptionFour() throws Exception {
+    void testCreateAutomatedHearingManagementForOptionFour() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -5840,7 +5912,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testCreateAutomatedHearingManagementForOptionThree() throws Exception {
+    void testCreateAutomatedHearingManagementForOptionThree() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -5968,7 +6040,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testCreateAutomatedHearingManagementException() {
+    void testCreateAutomatedHearingManagementException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -6048,7 +6120,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForRequestSafeGuardingReportWaTaskMoreThan7Days() {
+    void testSetFieldsForRequestSafeGuardingReportWaTaskMoreThan7Days() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -6072,7 +6144,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForRequestSafeGuardingReportWaTaskLessThan7Days() {
+    void testSetFieldsForRequestSafeGuardingReportWaTaskLessThan7Days() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -6096,7 +6168,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForRequestSafeGuardingReportWaTaskForManageOrder() {
+    void testSetFieldsForRequestSafeGuardingReportWaTaskForManageOrder() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -6119,7 +6191,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForRequestSafeGuardingReportWaTaskForAdminEditAndApproveOrder() {
+    void testSetFieldsForRequestSafeGuardingReportWaTaskForAdminEditAndApproveOrder() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -6142,7 +6214,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetHearingData() {
+    void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any(Hearings.class)))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
@@ -6155,7 +6227,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandlePreviewOrderScenario4() throws Exception {
+    void testHandlePreviewOrderScenario4() {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -6200,7 +6272,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFinalOrderFromCaseDataWithNoCheck1() throws Exception {
+    void testPopulateFinalOrderFromCaseDataWithNoCheck1() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
@@ -6263,7 +6335,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetails1() {
+    void testHandleFetchOrderDetails1() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -6295,7 +6367,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetails2() {
+    void testHandleFetchOrderDetails2() {
         manageOrders = manageOrders.toBuilder()
             .c21OrderOptions(C21OrderOptionsEnum.c21other).build();
         CaseData caseData = CaseData.builder()
@@ -6330,7 +6402,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetails3() {
+    void testHandleFetchOrderDetails3() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -6360,7 +6432,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetails4() {
+    void testHandleFetchOrderDetails4() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -6393,7 +6465,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetailsWithClientContext() throws JsonProcessingException {
+    void testHandleFetchOrderDetailsWithClientContext() throws JsonProcessingException {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -6478,7 +6550,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testHandleFetchOrderDetailsWithClientContextWithoutUserTask() throws JsonProcessingException {
+    void testHandleFetchOrderDetailsWithClientContextWithoutUserTask() throws JsonProcessingException {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -6561,7 +6633,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetCurrentUploadDraftOrderDetails() {
+    void testGetCurrentUploadDraftOrderDetails() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -6602,7 +6674,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testShouldFinaliseOrderAndPopulateTierOfJudge() throws Exception {
+    void testShouldFinaliseOrderAndPopulateTierOfJudge() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
