@@ -3435,9 +3435,9 @@ public class ManageOrderService {
             && ObjectUtils.isNotEmpty(caseData.getServeOrderData().getWhenReportsMustBeFiled())
             && DAYS.between(LocalDate.now(), caseData.getServeOrderData().getWhenReportsMustBeFiled()) >= 7
             && YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
-            waFieldsMap.put(WA_REQ_SER_UPDATE, YesOrNo.Yes.equals(caseData.getIsPathfinderCase()) ? "CIR" : "SER");
+            waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
             waFieldsMap.put(
-                WA_SER_DUE_DATE, caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(7).format(DateTimeFormatter.ISO_LOCAL_DATE));
+                WA_SER_DUE_DATE, caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
     }
 
