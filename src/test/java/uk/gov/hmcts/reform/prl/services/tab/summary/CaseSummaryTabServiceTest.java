@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseClosedDateGene
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.LocalAuthorityGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
@@ -78,8 +77,6 @@ public class CaseSummaryTabServiceTest {
 
     @Mock
     CaseClosedDateGenerator caseClosedDateGenerator;
-    @Mock
-    LocalAuthorityGenerator localAuthorityGenerator;
 
     private static final CaseData CASE_DATA = mock(CaseData.class);
     private static final CaseSummary CASE_SUMMARY0 = mock(CaseSummary.class);
@@ -110,7 +107,6 @@ public class CaseSummaryTabServiceTest {
         when(otherProceedingsGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(caseClosedDateGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
         when(otherProceedingsGenerator.getOtherProceedingsDetails(CASE_DATA)).thenReturn(new ArrayList<>());
-        when(localAuthorityGenerator.generate(CASE_DATA)).thenReturn(CASE_SUMMARY9);
 
         when(objectMapper.convertValue(eq(CASE_SUMMARY0),
                                        Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(Map.of("field0", "value0"));

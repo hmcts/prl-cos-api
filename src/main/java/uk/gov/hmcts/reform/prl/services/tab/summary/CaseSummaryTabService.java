@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerato
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.DateOfSubmissionGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.FieldGenerator;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.LocalAuthorityGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OrderAppliedForGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.OtherProceedingsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.SpecialArrangementsGenerator;
@@ -58,7 +57,6 @@ public class CaseSummaryTabService implements TabService {
     private final RefugeCaseGenerator refugeCaseGenerator;
 
     private final CaseClosedDateGenerator caseClosedDateGenerator;
-    private final LocalAuthorityGenerator localAuthorityGenerator;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -111,8 +109,7 @@ public class CaseSummaryTabService implements TabService {
                         || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator
                         : allegationOfHarmGenerator,
                 dateOfSubmissionGenerator,
-                caseClosedDateGenerator,
-                localAuthorityGenerator
+                caseClosedDateGenerator
         );
     }
 
