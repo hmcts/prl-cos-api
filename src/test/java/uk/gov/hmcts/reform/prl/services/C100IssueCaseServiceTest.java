@@ -9,7 +9,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -50,6 +55,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -138,6 +144,12 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     private CaseSummaryTabService caseSummaryTab;
+
+    @Mock
+    private CcdCoreCaseDataService ccdCoreCaseDataService;
+
+    @Mock
+    private SystemUserService systemUserService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -670,5 +682,41 @@ public class C100IssueCaseServiceTest {
         Assertions.assertNull(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
         assertThat(updates).extracting("dfjArea").isEqualTo("SWANSEA");
         assertThat(updates).extracting("swanseaDFJCourt").isEqualTo("234946");
+    }
+
+    @Test
+    public void testUpdateHistoryTab() {
+        CaseData caseData = CaseData.builder().id(123L).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        String systemAuthToken = "systemToken";
+        String systemUpdateUserId = "systemUserId";
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .eventId("eventId")
+            .token("token")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(systemAuthToken);
+        when(systemUserService.getUserId(systemAuthToken)).thenReturn(systemUpdateUserId);
+        when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
+        when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
+
+        c100IssueCaseService.updateHistoryTab(callbackRequest);
+
+        verify(systemUserService).getSysUserToken();
+        verify(systemUserService).getUserId(systemAuthToken);
+        verify(ccdCoreCaseDataService).eventRequest(any(), eq(systemUpdateUserId));
+        verify(ccdCoreCaseDataService).startUpdate(systemAuthToken, eventRequestData, "123", true);
+        verify(ccdCoreCaseDataService).submitUpdate(eq(systemAuthToken), eq(eventRequestData), any(CaseDataContent.class), eq("123"), eq(true));
     }
 }
