@@ -128,9 +128,7 @@ public class C100IssueCaseService {
                 .build());
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
-        if(caseData.getIsPathfinderCase() == null || YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
-            updateHistoryTab(callbackRequest);
-        }
+
         return caseDataUpdated;
     }
 
@@ -165,7 +163,9 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
-
+//        if(YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+//            updateHistoryTab(callbackRequest);
+//        }
     }
 
     public void updateHistoryTab(CallbackRequest callbackRequest) {
