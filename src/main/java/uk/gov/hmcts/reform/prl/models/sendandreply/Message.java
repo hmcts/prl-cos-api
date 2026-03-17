@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAX_SUBJECT_LENGTH;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
