@@ -35,6 +35,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAX_SUBJECT_LEN
 @AllArgsConstructor
 public class Message extends MessageMetaData {
 
+    public static final int MAX_SUBJECT_LENGTH = 100;
+    public static final String DOTS = "...";
 
     private String dateSent;
     private String messageContent;
@@ -118,7 +120,7 @@ public class Message extends MessageMetaData {
     public String getLabelForReplyDynamicList() {
         String messageSubject = super.getMessageSubject();
         String subject = "Subject: " + (messageSubject.length() > MAX_SUBJECT_LENGTH ? messageSubject.substring(
-            0, 97) + "..." : messageSubject);
+            0, MAX_SUBJECT_LENGTH - DOTS.length()) + DOTS : messageSubject);
         String sender = "From: " + senderName;
         return String.format(
             "%s, %s, %s %s",
