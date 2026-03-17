@@ -97,7 +97,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -300,6 +304,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(serviceOfApplicationSoa).build();
 
         caseDetailsSoa = caseDataSoa.toMap(new ObjectMapper());
+        serviceOfApplicationService = Mockito.spy(serviceOfApplicationService);
     }
 
     @Test
@@ -3513,8 +3518,18 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
 
+        UUID recipientId = UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f");
+        Element<PartyDetails> wrappedParty = element(recipientId, partyDetails);
+
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
-        partyDetailsList.add(element(partyDetails));
+        partyDetailsList.add(wrappedParty);
+
+        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(recipientId.toString())
+                               .label("recipient1")
+                               .build()))
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3525,6 +3540,7 @@ public class ServiceOfApplicationServiceTest {
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaRecipientsOptions(soaRecipientsOptions)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -3547,6 +3563,193 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
     }
 
+    @Test
+    public void testSendNotificationForSoaCitizenC100NotApplicableScenario() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("fn").lastName("ln")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        List<Element<PartyDetails>> partyDetailsList = List.of(element(partyDetails));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partyDetailsList)
+            .respondents(partyDetailsList)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(YesNoNotApplicable.NotApplicable) // The key toggle
+                                      .soaCafcassCymruServedOptions(Yes)
+                                      .soaCafcassEmailId("cymruemail@test.com")
+                                      .soaCafcassCymruEmail("cymruemail@test.com")
+                                      .soaServeLocalAuthorityYesOrNo(YesOrNo.No) // For this test, just Cafcass
+                                      .build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization,
+            new HashMap<>()
+        );
+
+        assertNotNull(servedApplicationDetails);
+
+        verifyNoInteractions(serviceOfApplicationPostService);
+
+        // 1. Verify Cafcass was called (This matches the "interaction" Mockito found)
+        verify(serviceOfApplicationEmailService, atLeastOnce()).sendEmailNotificationToCafcass(
+            any(CaseData.class),
+            eq("cymruemail@test.com"),
+            anyString()
+        );
+
+        // 2. Verify Local Authority was NOT called (Since you set it to No)
+        verify(serviceOfApplicationEmailService, times(0)).sendEmailNotificationToLocalAuthority(
+            anyString(), any(), anyString(), anyList(), anyString()
+        );
+
+        assertNotNull(servedApplicationDetails.getWhoIsResponsible());
+    }
+
+    @Test
+    public void testSoaC100NotApplicable_OnlyCafcass() {
+        ServiceOfApplication localSoa = ServiceOfApplication.builder()
+            .soaServeToRespondentOptions(YesNoNotApplicable.NotApplicable)
+            .soaCafcassCymruServedOptions(Yes)
+            .soaCafcassCymruEmail("cymru@test.com")
+            .soaServeLocalAuthorityYesOrNo(YesOrNo.No) // Toggle LA off
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplication(localSoa)
+            .build();
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        serviceOfApplicationService.sendNotificationForServiceOfApplication(caseData, authorization, new HashMap<>());
+
+        verify(serviceOfApplicationEmailService, times(1)).sendEmailNotificationToCafcass(
+            any(CaseData.class),
+            eq("cymru@test.com"),
+            anyString()
+        );
+
+        verify(serviceOfApplicationEmailService, times(0)).sendEmailNotificationToLocalAuthority(
+            anyString(), any(), anyString(), anyList(), anyString()
+        );
+    }
+
+    @Test
+    public void testSoaC100NotApplicable_OnlyLocalAuthority() {
+        uk.gov.hmcts.reform.ccd.client.model.Document mockCcdDoc = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL", "fileName.pdf", "binaryUrl", "attributePath", LocalDateTime.now()
+        );
+
+        DocumentListForLa docForLa = DocumentListForLa.builder()
+            .documentsListForLa(DynamicList.builder()
+                                    .value(DynamicListElement.builder().code("test-doc-id").label("Test Document").build())
+                                    .build())
+            .build();
+
+        ServiceOfApplication localSoa = ServiceOfApplication.builder()
+            .soaServeToRespondentOptions(YesNoNotApplicable.NotApplicable)
+            .soaCafcassCymruServedOptions(No) // Toggle Cafcass off
+            .soaServeLocalAuthorityYesOrNo(YesOrNo.Yes)
+            .soaLaEmailAddress("la@test.com")
+            .soaDocumentDynamicListForLa(List.of(element(docForLa)))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplication(localSoa)
+            .build();
+
+        doReturn(mockCcdDoc).when(serviceOfApplicationService)
+            .getSelectedDocumentFromDynamicList(anyString(), any(), anyString());
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        serviceOfApplicationService.sendNotificationForServiceOfApplication(caseData, authorization, new HashMap<>());
+
+        verify(serviceOfApplicationEmailService, times(0)).sendEmailNotificationToCafcass(
+            any(), anyString(), anyString()
+        );
+
+        verify(serviceOfApplicationEmailService, times(1)).sendEmailNotificationToLocalAuthority(
+            anyString(),
+            any(CaseData.class),
+            eq("la@test.com"),
+            anyList(),
+            eq(PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)
+        );
+    }
+
+    @Test
+    public void testSoaC100NotApplicable_BothCafcassAndLocalAuthority() {
+        uk.gov.hmcts.reform.ccd.client.model.Document mockCcdDoc = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL", "fileName.pdf", "binaryUrl", "attributePath", LocalDateTime.now()
+        );
+
+        DocumentListForLa docForLa = DocumentListForLa.builder()
+            .documentsListForLa(DynamicList.builder()
+                                    .value(DynamicListElement.builder().code("test-doc-id").label("Test Document").build())
+                                    .build())
+            .build();
+
+        ServiceOfApplication localSoa = ServiceOfApplication.builder()
+            .soaServeToRespondentOptions(YesNoNotApplicable.NotApplicable) // Key toggle
+            .soaCafcassCymruServedOptions(Yes)
+            .soaCafcassCymruEmail("cymru@test.com")
+            .soaServeLocalAuthorityYesOrNo(YesOrNo.Yes)
+            .soaLaEmailAddress("la@test.com")
+            .soaDocumentDynamicListForLa(List.of(element(docForLa)))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplication(localSoa)
+            .build();
+
+        doReturn(mockCcdDoc).when(serviceOfApplicationService)
+            .getSelectedDocumentFromDynamicList(anyString(), any(), anyString());
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+                                                                       .forename("first")
+                                                                       .surname("test").build());
+
+        serviceOfApplicationService.sendNotificationForServiceOfApplication(caseData, authorization, new HashMap<>());
+
+        verifyNoInteractions(serviceOfApplicationPostService);
+
+        verify(serviceOfApplicationEmailService, times(1)).sendEmailNotificationToCafcass(
+            any(CaseData.class),
+            eq("cymru@test.com"),
+            anyString()
+        );
+
+        verify(serviceOfApplicationEmailService, times(1)).sendEmailNotificationToLocalAuthority(
+            anyString(),
+            any(CaseData.class),
+            eq("la@test.com"),
+            anyList(),
+            eq(PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)
+        );
+    }
 
     @Test
     public void checkC6AOrderExistenceForSoaParties_whenNoPeopleSelected() {
@@ -4760,6 +4963,7 @@ public class ServiceOfApplicationServiceTest {
     public void testSendNotificationDaCitizenNonPersonalService() {
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
             .soaServeToRespondentOptions(YesNoNotApplicable.No)
+            .soaServeToRespondentOptionsDA(No)
             .soaOtherParties(dynamicMultiSelectList)
             .soaRecipientsOptions(dynamicMultiSelectList)
             .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtAdmin)
@@ -6268,6 +6472,7 @@ public class ServiceOfApplicationServiceTest {
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaServeToRespondentOptionsDA(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -6355,6 +6560,7 @@ public class ServiceOfApplicationServiceTest {
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaServeToRespondentOptionsDA(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
@@ -6444,6 +6650,7 @@ public class ServiceOfApplicationServiceTest {
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
+                                      .soaServeToRespondentOptionsDA(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
