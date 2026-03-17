@@ -688,12 +688,6 @@ public class C100IssueCaseServiceTest {
     public void testUpdateHistoryTab() {
         CaseData caseData = CaseData.builder().id(123L).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
 
         String systemAuthToken = "systemToken";
         String systemUpdateUserId = "systemUserId";
@@ -710,6 +704,13 @@ public class C100IssueCaseServiceTest {
         when(systemUserService.getUserId(systemAuthToken)).thenReturn(systemUpdateUserId);
         when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
         when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
 
         c100IssueCaseService.updateHistoryTab(callbackRequest);
 
