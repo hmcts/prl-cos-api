@@ -177,7 +177,6 @@ public class SendAndReplyService {
     private static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
     private static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
     private static final String MESSAGE_OBJECT = "messageObject";
-    private static final String REPLY_1 = "REPLY";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -1174,8 +1173,8 @@ public class SendAndReplyService {
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
                 data.put(MESSAGE_IDENTIFIER, messageIdentifier);
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
-                data.put(CHOOSE_SEND_OR_REPLY, REPLY_1);
-                data.put(OPTION_SEND_OR_REPLY, REPLY_1);
+                data.put(CHOOSE_SEND_OR_REPLY, REPLY.name());
+                data.put(OPTION_SEND_OR_REPLY, REPLY.name());
             } else {
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));

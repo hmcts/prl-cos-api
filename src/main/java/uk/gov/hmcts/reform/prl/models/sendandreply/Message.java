@@ -25,8 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BEGIN_INDEX;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.END_INDEX;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAX_SUBJECT_LENGTH;
 
 @Data
@@ -120,7 +118,7 @@ public class Message extends MessageMetaData {
     public String getLabelForReplyDynamicList() {
         String messageSubject = super.getMessageSubject();
         String subject = "Subject: " + (messageSubject.length() > MAX_SUBJECT_LENGTH ? messageSubject.substring(
-            BEGIN_INDEX, END_INDEX) + "..." : messageSubject);
+            0, 97) + "..." : messageSubject);
         String sender = "From: " + senderName;
         return String.format(
             "%s, %s, %s %s",
