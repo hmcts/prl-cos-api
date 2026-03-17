@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 
 @FeignClient(name = "court-finder-api", primary = false, url = "${courtfinder.api.url}",
-    configuration = FeignRetryConfig .class)
+    configuration = FeignRetryConfig.class)
 public interface CourtFinderApi {
 
     @GetMapping(value = PrlAppsConstants.CHILD_ARRANGEMENTS_POSTCODE_URL)
