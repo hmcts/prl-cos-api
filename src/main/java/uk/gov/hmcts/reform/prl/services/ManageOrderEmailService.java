@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -715,26 +715,28 @@ public class ManageOrderEmailService {
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
             AtomicBoolean newOrdersExists = new AtomicBoolean(false);
             AtomicBoolean finalOrdersExists = new AtomicBoolean(false);
-            caseData.getOrderCollection().stream()
-                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
-                .forEach(order -> {
-                    if (StringUtils.equals(
-                        order.getValue().getTypeOfOrder(),
-                        SelectTypeOfOrderEnum.interim.getDisplayedValue()
-                    ) || StringUtils.equals(
-                        order.getValue().getTypeOfOrder(),
-                        SelectTypeOfOrderEnum.general.getDisplayedValue()
-                    )) {
-                        log.info("New order is selected to serve {}",order.getId());
-                        newOrdersExists.set(true);
-                    } else if (StringUtils.equals(
-                        order.getValue().getTypeOfOrder(),
-                        SelectTypeOfOrderEnum.finl.getDisplayedValue()
-                    )) {
-                        log.info("Final order is selected to serve {}",order.getId());
-                        finalOrdersExists.set(true);
-                    }
-                });
+            if (null != caseData.getOrderCollection()) {
+                caseData.getOrderCollection().stream()
+                    .filter(order -> selectedOrderIds.contains(order.getId().toString()))
+                    .forEach(order -> {
+                        if (StringUtils.equals(
+                            order.getValue().getTypeOfOrder(),
+                            SelectTypeOfOrderEnum.interim.getDisplayedValue()
+                        ) || StringUtils.equals(
+                            order.getValue().getTypeOfOrder(),
+                            SelectTypeOfOrderEnum.general.getDisplayedValue()
+                        )) {
+                            log.info("New order is selected to serve {}",order.getId());
+                            newOrdersExists.set(true);
+                        } else if (StringUtils.equals(
+                            order.getValue().getTypeOfOrder(),
+                            SelectTypeOfOrderEnum.finl.getDisplayedValue()
+                        )) {
+                            log.info("Final order is selected to serve {}",order.getId());
+                            finalOrdersExists.set(true);
+                        }
+                    });
+            }
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             dynamicData.put(ENGLISH_EMAIL, documentLanguage.isGenEng());

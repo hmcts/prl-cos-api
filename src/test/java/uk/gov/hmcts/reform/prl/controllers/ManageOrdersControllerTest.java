@@ -4735,4 +4735,129 @@ public class ManageOrdersControllerTest {
         assertNull(response.getData().get("judgeOrMagistrateTitle"));
     }
 
+    @Test
+    public void saveOrderDetailsTest_createCustomOrder_withJudgeReview_shouldAddOrderDespiteStaleDoYouWantToServe() throws Exception {
+        // Test that when createCustomOrder with judgeOrLegalAdvisorCheck,
+        // the order IS added even if doYouWantToServeOrder=Yes (stale value from previous order)
+        // This is because judge review flow skips the serve page, so doYouWantToServeOrder is stale
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .customOrderDoc(customOrderDoc)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)  // Judge review required
+            .build();
+
+        ServeOrderData serveOrderData = ServeOrderData.builder()
+            .doYouWantToServeOrder(Yes)  // STALE value - should be ignored when judge review is selected
+            .build();
+
+        CaseData caseDataWithJudgeReview = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .serveOrderData(serveOrderData)
+            .previewOrderDoc(Document.builder()
+                .documentUrl("http://test.url/preview.pdf")
+                .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                .documentFileName("preview.pdf")
+                .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataWithJudgeReview.toMap(new ObjectMapper());
+        stringObjectMap.put("customOrderDoc", customOrderDoc);
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithJudgeReview);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithJudgeReview);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        // Verify addOrderDetailsAndReturnReverseSortedList IS called despite doYouWantToServeOrder=Yes
+        // because judge review is selected (stale value should be ignored)
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void saveOrderDetailsTest_createAnOrder_withManagerCheck_shouldAddOrderDespiteStaleDoYouWantToServe() throws Exception {
+        // Test that when createAnOrder with managerCheck,
+        // the order IS added even if doYouWantToServeOrder=Yes (stale value from previous order)
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)  // Manager review required
+            .build();
+
+        ServeOrderData serveOrderData = ServeOrderData.builder()
+            .doYouWantToServeOrder(Yes)  // STALE value - should be ignored when manager review is selected
+            .build();
+
+        CaseData caseDataWithManagerReview = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(serveOrderData)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataWithManagerReview.toMap(new ObjectMapper());
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithManagerReview);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithManagerReview);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        // Verify addOrderDetailsAndReturnReverseSortedList IS called despite doYouWantToServeOrder=Yes
+        // because manager review is selected (stale value should be ignored)
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        assertNotNull(response);
+    }
+
 }

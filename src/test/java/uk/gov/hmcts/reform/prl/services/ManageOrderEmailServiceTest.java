@@ -143,6 +143,9 @@ public class ManageOrderEmailServiceTest {
     @Mock
     Time time;
 
+    @Mock
+    com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
     Document englishOrderDoc;
     Document welshOrderDoc;
     Document additionalOrderDoc;
@@ -3987,5 +3990,125 @@ public class ManageOrderEmailServiceTest {
             .collect(Collectors.toList());
 
         assertTrue(capturedEmails.contains("respsol@law.com"));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_shouldUseOrderCollectionFromCaseDataMap() throws Exception {
+        // Test that when caseDataMap has orderCollection, ObjectMapper.convertValue is called
+        // to convert the raw map to typed list
+
+        UUID orderId = UUID.randomUUID();
+        Document orderDoc = Document.builder()
+            .documentUrl("http://test.url/order.pdf")
+            .documentBinaryUrl("http://test.url/binary/order.pdf")
+            .documentFileName("order.pdf")
+            .build();
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(orderDoc)
+            .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+            .build();
+        Element<OrderDetails> orderElement = Element.<OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build();
+        List<Element<OrderDetails>> orderCollection = List.of(orderElement);
+
+        // Create raw map representation (as it would come from caseDataUpdated)
+        List<Map<String, Object>> rawOrderCollection = new ArrayList<>();
+        rawOrderCollection.add(Map.of("id", orderId.toString()));
+
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(orderCollection)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("orderCollection", rawOrderCollection);
+
+        // Mock ObjectMapper to return the typed list
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(orderCollection);
+
+        // Mock documentLanguageService
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Call the method
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify ObjectMapper was called to convert the raw map (proves caseDataMap was used)
+        verify(objectMapper, times(1)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_shouldFallbackToCaseDataWhenCaseDataMapEmpty() throws Exception {
+        // Test that when caseDataMap doesn't have orderCollection, ObjectMapper is NOT called
+        // (caseData.getOrderCollection() is used directly)
+
+        UUID orderId = UUID.randomUUID();
+        Document orderDoc = Document.builder()
+            .documentUrl("http://test.url/order.pdf")
+            .documentBinaryUrl("http://test.url/binary/order.pdf")
+            .documentFileName("order.pdf")
+            .build();
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(orderDoc)
+            .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+            .build();
+
+        Element<OrderDetails> orderElement = Element.<OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build();
+        List<Element<OrderDetails>> orderCollection = List.of(orderElement);
+
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(orderCollection)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();  // Empty - no orderCollection
+
+        // Mock documentLanguageService
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Call the method
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify ObjectMapper was NOT called (fallback to caseData)
+        verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
     }
 }
