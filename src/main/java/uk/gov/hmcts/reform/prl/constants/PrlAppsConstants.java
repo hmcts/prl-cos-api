@@ -1151,6 +1151,5 @@ public class PrlAppsConstants {
     public static final String CHOOSE_SEND_OR_REPLY = "chooseSendOrReply";
     public static final String OPTION_SEND_OR_REPLY = "optionSendOrReply";
     public static final String EMPTY_VALUE = "EMPTY_VALUE";
-    public static final int MAX_SUBJECT_LENGTH = 100;
 
 }
