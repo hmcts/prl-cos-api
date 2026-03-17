@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -76,6 +77,9 @@ public class CaseControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    CitizenCoreCaseDataService citizenCoreCaseDataService;
 
     @Mock
     private LaunchDarklyClient launchDarklyClient;
@@ -452,6 +456,7 @@ public class CaseControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
         when(userInfo.getRoles()).thenReturn(List.of(CITIZEN_ROLE));
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(citizenCoreCaseDataService.hasAccess(AUTH_TOKEN, TEST_CASE_ID)).thenReturn(true);
 
         Mockito.when(hearingService.getHearings(AUTH_TOKEN, TEST_CASE_ID)).thenReturn(
             Hearings.hearingsWith().build());
@@ -476,6 +481,17 @@ public class CaseControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(false);
         assertThrows(INVALID_CLIENT, RuntimeException.class,
                      () -> caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, SERV_AUTH_TOKEN, "test"));
+    }
+
+    @Test
+    public void testGetAllHearingsForCaseInvalidAccess() {
+        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(CITIZEN_ROLE));
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(citizenCoreCaseDataService.hasAccess(AUTH_TOKEN, TEST_CASE_ID)).thenReturn(false);
+
+        assertThrows(INVALID_CLIENT, RuntimeException.class,
+                     () -> caseController.getAllHearingsForCitizenCase(AUTH_TOKEN, SERV_AUTH_TOKEN, TEST_CASE_ID));
     }
 
     @Test

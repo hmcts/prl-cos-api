@@ -50,6 +50,7 @@ public class FL401ApplicationMapper {
     private final CaseNameService caseNameService;
 
     public CaseData mapCourtNavData(CourtNavFl401 courtNavCaseData) {
+        String caseName = buildCaseName(courtNavCaseData);
         CaseData caseData = CaseData.builder()
             .isCourtNavCase(Yes)
             .state(State.SUBMITTED_PAID)
@@ -60,7 +61,8 @@ public class FL401ApplicationMapper {
             .numberOfAttachments(String.valueOf(courtNavCaseData.getMetaData().getNumberOfAttachments()))
             .specialCourtName(courtNavCaseData.getMetaData().getCourtSpecialRequirements())
             .applicantAge(buildApplicantAge(courtNavCaseData))
-            .applicantCaseName(buildCaseName(courtNavCaseData))
+            .applicantCaseName(caseName)
+            .caseNameHmctsInternal(caseName)
             .typeOfApplicationOrders(buildTypeOfApplicationOrders(courtNavCaseData))
             .orderWithoutGivingNoticeToRespondent(orderWithoutNoticeMapper.map(courtNavCaseData))
             .reasonForOrderWithoutGivingNotice(orderWithoutNoticeMapper.mapReasonForWithoutNotice(courtNavCaseData))
