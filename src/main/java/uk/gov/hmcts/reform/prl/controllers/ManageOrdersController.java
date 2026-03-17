@@ -461,7 +461,8 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,
                                                                          callbackRequest.getEventId(),
-                                                                         newDraftOrderCollectionId));
+                                                                         newDraftOrderCollectionId,
+                                                                         caseDataUpdated));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
             //Populate need to check automated hearing request

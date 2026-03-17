@@ -6,8 +6,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApproveAndServeClearFieldsEnum;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
@@ -36,6 +38,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -52,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_SUPPORTED_C100_MULTIPLE_APPLICANT_RESPONDENT_WELSH;
+import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -552,6 +557,26 @@ public class ManageOrdersUtils {
             );
         }
         return " ";
+    }
+
+    /**
+     * Builds the C43 order name from the selected order types and child arrangements sub-type.
+     * Format: "Child Arrangements Order(Live with order), Prohibited Steps Order, Specific Issue Order"
+     *
+     * @param ordersToIssue List of OrderTypeEnum values selected
+     * @param childArrangementsSubType The ChildArrangementOrderTypeEnum if child arrangements is selected
+     * @return The formatted order name string
+     */
+    public static String buildC43OrderName(List<OrderTypeEnum> ordersToIssue,
+                                           ChildArrangementOrderTypeEnum childArrangementsSubType) {
+        if (ordersToIssue == null || ordersToIssue.isEmpty()) {
+            return null;
+        }
+        return ordersToIssue.stream()
+            .flatMap(orderType -> childArrangementsOrder.equals(orderType) && childArrangementsSubType != null
+                ? Stream.of(orderType.getDisplayedValue() + "(" + childArrangementsSubType.getDisplayedValue() + ")")
+                : Stream.of(orderType.getDisplayedValue()))
+            .collect(Collectors.joining(", "));
     }
 
     public static String getOrderName(DraftOrder selectedOrder, String language) {

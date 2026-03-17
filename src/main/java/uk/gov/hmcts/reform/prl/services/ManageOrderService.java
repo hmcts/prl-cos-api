@@ -631,6 +631,7 @@ public class ManageOrderService {
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
     private final FinalisationDetailsService finalisationDetailsService;
+    private final CustomOrderService customOrderService;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -3804,44 +3805,42 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId, UUID newDraftOrderCollectionId) {
+    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId,
+                                                    UUID newDraftOrderCollectionId, Map<String, Object> caseDataUpdated) {
         String judgeLaReviewRequired = null;
         String performingUser = null;
         String performingAction = null;
         String orderNameForWA = null;
         Map<String, Object> waFieldsMap = new HashMap<>();
+        ManageOrdersOptionsEnum manageOrdersOption = caseData.getManageOrdersOptions();
         log.info("setFieldsForWaTask: manageOrdersOptions={}, createSelectOrderOptions={}, eventId={}",
-            caseData.getManageOrdersOptions(),
-            caseData.getCreateSelectOrderOptions(),
-            eventId);
-        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())
-            || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-                || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(
+            manageOrdersOption, caseData.getCreateSelectOrderOptions(), eventId);
+
+        if (manageOrdersOption == ManageOrdersOptionsEnum.createAnOrder
+            || manageOrdersOption == ManageOrdersOptionsEnum.uploadAnOrder
+            || manageOrdersOption == ManageOrdersOptionsEnum.createCustomOrder) {
+
+            orderNameForWA = switch (manageOrdersOption) {
+                case createAnOrder -> ManageOrdersUtils.getOrderNameAlongWithTime(
                     caseData.getCreateSelectOrderOptions() != null
                         ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ",
-                    dateTime.now()
-                );
-            } else if (ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(
-                    getSelectedOrderInfoForUpload(caseData),
-                    dateTime.now()
-                );
-            }
-            performingUser = getLoggedInUserType(authorisation);
-            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
+                    dateTime.now());
+                case createCustomOrder -> ManageOrdersUtils.getOrderNameAlongWithTime(
+                    getCustomOrderNameFromMap(caseDataUpdated, caseData), dateTime.now());
+                case uploadAnOrder -> ManageOrdersUtils.getOrderNameAlongWithTime(
+                    getSelectedOrderInfoForUpload(caseData), dateTime.now());
+                default -> null;
+            };
 
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            performingUser = getLoggedInUserType(authorisation);
+            performingAction = manageOrdersOption.getDisplayedValue();
+
+            if (manageOrdersOption == ManageOrdersOptionsEnum.createAnOrder) {
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser, null);
-            } else if (ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                || ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
-                waFieldsMap.put(
-                    WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED,
-                    null != caseData.getManageOrders().getAmendOrderSelectCheckOptions()
-                        ? caseData.getManageOrders().getAmendOrderSelectCheckOptions().toString() : null
-                );
+            } else {
+                waFieldsMap.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED,
+                    caseData.getManageOrders().getAmendOrderSelectCheckOptions() != null
+                        ? caseData.getManageOrders().getAmendOrderSelectCheckOptions().toString() : null);
             }
 
             if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
@@ -3861,7 +3860,7 @@ public class ManageOrderService {
             log.info("setFieldsForWaTask: performingUser={}, orderNameForWA={}", performingUser, orderNameForWA);
         } else {
             log.info("setFieldsForWaTask: manageOrdersOptions did not match create/upload/custom, value was: {}",
-                caseData.getManageOrdersOptions());
+                manageOrdersOption);
         }
         setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
@@ -3884,6 +3883,12 @@ public class ManageOrderService {
         }
     }
 
+    /**
+     * Gets the order name for custom orders using CustomOrderService.
+     */
+    private String getCustomOrderNameFromMap(Map<String, Object> caseDataUpdated, CaseData caseData) {
+        return customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
+    }
 
     private CaseData updateIsSdoSelected(CaseData caseData) {
         if (null != caseData.getManageOrdersOptions()

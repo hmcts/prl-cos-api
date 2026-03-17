@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
@@ -26,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -111,11 +114,18 @@ public class CustomOrderService {
     }
 
     private String getOrderNameFromSelection(CustomOrderNameOptionsEnum selectedOption, Map<String, Object> caseDataMap) {
-        if ("blankOrderOrDirections".equals(selectedOption.name())) {
+        if (CustomOrderNameOptionsEnum.blankOrderOrDirections == selectedOption) {
             String c21SubOption = getC21SubOptionDisplayValue(caseDataMap);
             if (c21SubOption != null) {
                 log.info("Using C21 sub-option order name: {}", c21SubOption);
                 return c21SubOption;
+            }
+        }
+        if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
+            String c43OrdersName = getC43OrdersDisplayValue(caseDataMap);
+            if (c43OrdersName != null) {
+                log.info("Using C43 combined order name: {}", c43OrdersName);
+                return c43OrdersName;
             }
         }
         log.info("Using order name from dropdown: {}", selectedOption.getDisplayedValue());
@@ -148,6 +158,63 @@ public class CustomOrderService {
                 } catch (IllegalArgumentException e) {
                     log.warn("Could not parse C21 order option: {}", orderOptions);
                 }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Extracts C43 order types display value from customC43OrderDetails ComplexType.
+     * Uses the same format as existing create order journey for consistency.
+     */
+    @SuppressWarnings("unchecked")
+    private String getC43OrdersDisplayValue(Map<String, Object> caseDataMap) {
+        if (caseDataMap == null) {
+            return null;
+        }
+
+        Object customC43Details = caseDataMap.get("customC43OrderDetails");
+        if (customC43Details instanceof Map<?, ?> c43Map) {
+            Object ordersToIssue = c43Map.get("ordersToIssue");
+            if (ordersToIssue instanceof List<?> ordersList && !ordersList.isEmpty()) {
+                // Parse the list to OrderTypeEnum
+                List<OrderTypeEnum> orderTypes = new ArrayList<>();
+                for (Object order : ordersList) {
+                    try {
+                        if (order instanceof String orderStr) {
+                            orderTypes.add(OrderTypeEnum.getValue(orderStr));
+                        } else if (order instanceof OrderTypeEnum ote) {
+                            orderTypes.add(ote);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Could not parse C43 order type: {}", order);
+                    }
+                }
+
+                // Parse the child arrangements sub-type
+                ChildArrangementOrderTypeEnum childArrangementsSubType = parseChildArrangementsSubType(c43Map);
+
+                // Use shared utility for consistent naming
+                return ManageOrdersUtils.buildC43OrderName(orderTypes, childArrangementsSubType);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parses the child arrangements sub-type from the C43 map.
+     */
+    private ChildArrangementOrderTypeEnum parseChildArrangementsSubType(Map<?, ?> c43Map) {
+        Object childArrangementsOrderType = c43Map.get("childArrangementsOrderType");
+        if (childArrangementsOrderType != null) {
+            try {
+                if (childArrangementsOrderType instanceof String str) {
+                    return ChildArrangementOrderTypeEnum.getValue(str);
+                } else if (childArrangementsOrderType instanceof ChildArrangementOrderTypeEnum cat) {
+                    return cat;
+                }
+            } catch (IllegalArgumentException e) {
+                log.warn("Could not parse child arrangements order type: {}", childArrangementsOrderType);
             }
         }
         return null;
