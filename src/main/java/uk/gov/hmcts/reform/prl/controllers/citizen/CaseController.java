@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UiCitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -58,8 +59,10 @@ public class CaseController {
     private final AuthorisationService authorisationService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CitizenCoreCaseDataService citizenCoreCaseDataService;
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String INVALID_ROLE = "Invalid Role on User";
+    private static final String INVALID_ACCESS = "User does not have access to the case";
     private final LaunchDarklyClient launchDarklyClient;
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
@@ -220,16 +223,21 @@ public class CaseController {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @PathVariable("caseId") String caseId) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-            if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
-                return hearingService.getHearings(authorisation, caseId);
-            } else {
-                throw (new RuntimeException(INVALID_ROLE));
-            }
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw new RuntimeException(INVALID_CLIENT);
         }
+
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isEmpty() || !userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+            throw new RuntimeException(INVALID_ROLE);
+        }
+
+        if (!citizenCoreCaseDataService.hasAccess(authorisation, caseId)) {
+            throw new RuntimeException(INVALID_ACCESS);
+        }
+
+        return hearingService.getHearings(authorisation, caseId);
     }
 
     @GetMapping(value = "/fetchIdam-Am-roles/{emailId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
