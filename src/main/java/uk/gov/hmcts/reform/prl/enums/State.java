@@ -32,7 +32,9 @@ public enum State {
     PROCEEDS_IN_HERITAGE_SYSTEM("PROCEEDS_IN_HERITAGE_SYSTEM",
                                 "Proceeding in offline mode in familyman system"),
     AWAITING_INFORMATION("AWAITING_INFORMATION",
-                                    "Awaiting information");
+                                    "Awaiting information"),
+    EXIT_AWAITING_INFORMATION("EXIT_AWAITING_INFORMATION",
+                             "Exit Awaiting information");
 
     private final String value;
     private final String label;

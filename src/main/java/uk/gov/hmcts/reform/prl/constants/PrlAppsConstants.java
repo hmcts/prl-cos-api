@@ -1132,6 +1132,7 @@ public class PrlAppsConstants {
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
     public static final String ENGLISH = "en";
     public static final String WELSH = "cy";
+    public static final String EXIT_AWAITING_INFORMATION_DETAILS = "exitAwaitingInformationDetails";
 
 
     public static final String MIAM_ERROR_WELSH = "Ni allwch wneud y cais hwn oni bai bod y ceisydd naill ai wedi mynychu"

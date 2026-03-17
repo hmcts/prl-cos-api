@@ -59,4 +59,8 @@ public class FeatureToggleService {
     public boolean isAwaitingInformationEnabled() {
         return isFeatureEnabled(Features.IS_AWAITING_INFORMATION_ENABLED);
     }
+
+    public boolean isExitAwaitingInformationEnabled() {
+        return isFeatureEnabled(Features.IS_EXIT_AWAITING_INFORMATION_ENABLED);
+    }
 }
