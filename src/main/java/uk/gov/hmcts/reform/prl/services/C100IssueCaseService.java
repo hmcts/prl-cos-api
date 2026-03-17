@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
@@ -29,11 +31,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.valueOf;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 
 @Service
@@ -41,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 @RequiredArgsConstructor
 public class C100IssueCaseService {
 
+    public static final String PATHFINDER_DECISION_YES = "Pathfinder Decision Yes";
     private final AllTabServiceImpl allTabsService;
     private final DocumentGenService documentGenService;
     private final CaseWorkerEmailService caseWorkerEmailService;
@@ -50,6 +55,8 @@ public class C100IssueCaseService {
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
     private final DfjLookupService dfjLookupService;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final SystemUserService systemUserService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -72,7 +79,13 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_SEAL_FIELD, courtSeal);
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
-                caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
+                Map<String, String> dfjAreaFields = dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId);
+                if(MapUtils.isNotEmpty(dfjAreaFields)){
+                    caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
+                    caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
+                } else{
+                    caseDataUpdated.put("isPathfinderCase", YesOrNo.No);
+                }
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
@@ -115,6 +128,9 @@ public class C100IssueCaseService {
                 .build());
         }
         caseDataUpdated.put("issueDate", caseData.getIssueDate());
+        if(caseData.getIsPathfinderCase() == null || YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+            updateHistoryTab(callbackRequest);
+        }
         return caseDataUpdated;
     }
 
@@ -149,5 +165,32 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
+
+    }
+
+    public void updateHistoryTab(CallbackRequest callbackRequest) {
+
+        String systemAuthToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);
+
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
+            ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK, systemUpdateUserId);
+
+        String caseId = valueOf(callbackRequest.getCaseDetails().getId());
+        var startEventResponse =
+            ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
+        Event event =  Event.builder()
+                .id(startEventResponse.getEventId())
+                .description(PATHFINDER_DECISION_YES)
+                .build();
+
+        var caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(event)
+            .data(startEventResponse.getCaseDetails().getData())
+            .build();
+        ccdCoreCaseDataService.submitUpdate(
+            systemAuthToken, eventRequestData, caseDataContent, caseId, true);
+        log.info("ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK : History tab updated for case id: {}", caseId);
     }
 }
