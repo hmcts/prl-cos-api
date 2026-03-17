@@ -166,9 +166,9 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
-//        if(YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
-//            updateHistoryTab(callbackRequest);
-//        }
+        //        if(YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+        //            updateHistoryTab(callbackRequest);
+        //        }
     }
 
     public void updateHistoryTab(CallbackRequest callbackRequest) {
