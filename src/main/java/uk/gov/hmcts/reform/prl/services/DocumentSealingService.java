@@ -118,9 +118,12 @@ public class DocumentSealingService {
     }
 
     private static String getCourtSealImage(String region) {
+        String courtSeal;
         if (REGION_WALES.equals(region)) {
-            return COURT_SEAL_BILINGUAL;
+            courtSeal = COURT_SEAL_BILINGUAL;
+        } else {
+            courtSeal = COURT_SEAL;
         }
-        return COURT_SEAL;
+        return courtSeal;
     }
 }

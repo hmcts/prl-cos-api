@@ -44,7 +44,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CustomOrderService;
-import uk.gov.hmcts.reform.prl.services.DocumentSealingService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -108,7 +107,6 @@ public class ManageOrdersController {
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final CustomOrderService customOrderService;
-    private final DocumentSealingService documentSealingService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AmendOrderService amendOrderService;
     private final RefDataUserService refDataUserService;
@@ -352,7 +350,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        log.info(">>> Submitted callback (case-order-email-notification) called");
+        log.info(">>> Submitted callback (case-order-email-notification) called for case id {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
                 = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
@@ -366,11 +364,9 @@ public class ManageOrdersController {
             boolean isCustomOrder = copyCustomOrderFieldsFromCallback(callbackData, caseDataUpdated);
             if (isCustomOrder) {
                 processCustomOrder(authorisation, caseData, caseDataUpdated);
-            }
-
-            // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
-            // (association happens during submitAllTabsUpdate below). sealing is done inline in combineAndFinalizeCustomOrder.
-            if (!isCustomOrder) {
+            } else {
+                // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
+                // (association happens during submitAllTabsUpdate below). sealing is done inline in combineAndFinalizeCustomOrder.
                 try {
                     manageOrderService.addSealToOrders(authorisation, caseData, caseDataUpdated);
                 } catch (Exception e) {

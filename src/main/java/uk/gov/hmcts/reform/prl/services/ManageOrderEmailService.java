@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +105,7 @@ public class ManageOrderEmailService {
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final DocumentLanguageService documentLanguageService;
+    private final ObjectMapper objectMapper;
     public static final String ENGLISH_EMAIL = "english";
     public static final String WELSH_EMAIL = "welsh";
 
@@ -950,19 +953,26 @@ public class ManageOrderEmailService {
         );
     }
 
-    @SuppressWarnings("unchecked")
-    private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData,
-                                                                                 Map<String, Object> caseDataMap) {
+    private List<Element<OrderDetails>> getOrderCollection(CaseData caseData, Map<String, Object> caseDataMap) {
+        // Use orderCollection from caseDataMap if available (for custom orders served immediately),
+        // otherwise fall back to caseData
+        if (caseDataMap != null && caseDataMap.containsKey(ORDER_COLLECTION)
+            && caseDataMap.get(ORDER_COLLECTION) instanceof List) {
+            return objectMapper.convertValue(
+                caseDataMap.get(ORDER_COLLECTION),
+                new TypeReference<>() {}
+            );
+        }
+        return caseData.getOrderCollection();
+    }
+
+    private List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData,
+                                                                         Map<String, Object> caseDataMap) {
         List<Document> orderDocuments = new ArrayList<>();
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            // Use orderCollection from caseDataMap if available (for custom orders served immediately),
-            // otherwise fall back to caseData
-            List<Element<OrderDetails>> orderCollection = caseDataMap != null
-                && caseDataMap.containsKey("orderCollection")
-                ? (List<Element<OrderDetails>>) caseDataMap.get("orderCollection")
-                : caseData.getOrderCollection();
+            List<Element<OrderDetails>> orderCollection = getOrderCollection(caseData, caseDataMap);
             if (orderCollection == null) {
                 return orderDocuments;
             }
