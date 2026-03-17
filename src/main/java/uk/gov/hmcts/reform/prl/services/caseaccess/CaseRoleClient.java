@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.services.caseaccess;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,9 +28,15 @@ public interface CaseRoleClient {
         @RequestBody final RemoveUserRolesRequest request
     );
 
+
     @PostMapping(
         value = "/case-users/search",
         consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Retryable(
+        value = { Exception.class },
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 500)
     )
     FindUserCaseRolesResponse findUserCaseRoles(
         @RequestHeader(AUTHORIZATION) String authorisation,

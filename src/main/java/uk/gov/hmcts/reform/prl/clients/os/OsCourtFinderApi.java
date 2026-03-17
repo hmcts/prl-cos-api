@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 
 @FeignClient(name = "os-court-finder-api", primary = false, url = "${postcodelookup.api.url}",
@@ -13,7 +14,7 @@ import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
 public interface OsCourtFinderApi {
 
     // Nested configuration class ensures it is only used for this client
-    class FeignClientConfiguration {
+    class FeignClientConfiguration extends FeignRetryConfig {
 
         @Value("${postcodelookup.api.key}")
         private String apiKey;

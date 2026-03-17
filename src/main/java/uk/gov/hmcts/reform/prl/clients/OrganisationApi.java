@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.OrganisationUser;
 import uk.gov.hmcts.reform.prl.models.Organisations;
@@ -15,7 +15,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 @FeignClient(
     name = "rd-professional-api",
     url = "${rd_professional.api.url}",
-    configuration = FeignClientProperties.FeignClientConfiguration.class
+    configuration = FeignRetryConfig.class
 )
 public interface OrganisationApi {
 
