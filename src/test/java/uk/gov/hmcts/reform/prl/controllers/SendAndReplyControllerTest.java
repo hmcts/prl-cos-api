@@ -661,7 +661,7 @@ public class SendAndReplyControllerTest {
     }
 
 
-    private CaseData getCaseDataForSubmitted(CaseDetails caseDetails ) {
+    private CaseData getCaseDataForSubmitted(CaseDetails caseDetails) {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .chooseSendOrReply(REPLY)
