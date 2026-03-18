@@ -1134,6 +1134,8 @@ public class SendAndReplyService {
             .build();
         data.put(MESSAGE_OBJECT, messageMetaData);
         data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
+        data.put(MESSAGE_IDENTIFIER, EMPTY_VALUE);
+        data.put(OPTION_SEND_OR_REPLY, EMPTY_VALUE);
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
@@ -2250,6 +2252,19 @@ public class SendAndReplyService {
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        String optionSendOrReply = caseData.getOptionSendOrReply();
+        if (REPLY.name().equalsIgnoreCase(optionSendOrReply) || REPLY.equals(caseData.getChooseSendOrReply())
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                REPLY_AND_CLOSE_MESSAGE
+            ).build());
+        }
+
+        return ok(SubmittedCallbackResponse.builder().build());
+    }
+
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = getCaseData(caseDetails, objectMapper);
@@ -2278,6 +2293,8 @@ public class SendAndReplyService {
                 caseData.getMessageIdentifier()
             );
             caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
+        } else {
+            caseData.setOptionSendOrReply(EMPTY_VALUE);
         }
     }
 }

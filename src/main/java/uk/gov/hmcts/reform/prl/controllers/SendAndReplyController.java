@@ -247,7 +247,6 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -264,8 +263,54 @@ public class SendAndReplyController extends AbstractCallbackController {
 
 
 
+    @PostMapping("/send-or-reply-to-messages/mid-event-task")
+    public CallbackResponse sendOrReplyToMessagesMidEventTask(@RequestHeader("Authorization")
+                                                          @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
+        List<String> errors = new ArrayList<>();
+        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
+                errors.add("There are no messages to respond to.");
+            } else {
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
+            }
+        } else {
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        }
+
+        return CallbackResponse.builder().data(caseData).errors(errors).build();
+    }
+
+
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
+                                                                            @Parameter(hidden = true) String authorisation,
+                                                                            @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
+        if (caseData.getChooseSendOrReply().equals(SEND)) {
+            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
+        } else {
+            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
+        }
+
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
+
+
+
+    @PostMapping("/send-or-reply-to-messages/about-to-submit-task")
+    public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmitTask(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -287,12 +332,29 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
 
+
     @PostMapping("/send-or-reply-to-messages/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
-                                                                                 @Parameter(hidden = true) String authorisation,
-                                                                                 @RequestBody CallbackRequest callbackRequest) {
+                  @Parameter(hidden = true) String authorisation,
+                  @RequestBody CallbackRequest callbackRequest,
+                  @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
+
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
+
+
+
+    @PostMapping("/send-or-reply-to-messages/submitted-task")
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReplyTask(@RequestHeader("Authorization")
+                    @Parameter(hidden = true) String authorisation,
+                    @RequestBody CallbackRequest callbackRequest,
+                    @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
+        return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation);
+    }
+
 
 
     @PostMapping("/send-or-reply-to-messages/clear-dynamic-lists")
