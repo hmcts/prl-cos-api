@@ -392,7 +392,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
     public static final String DIO_APPLICATION_TO_APPLY_PERMISSION = " Any party intending at the FHDRA to apply for permission"
-         + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
+        + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
     public static final String DIO_PARTICIPATION_DIRECTION = "If they have not already done so, any party who considers that specific "
         + "measures need to be taken to enable a party or witness to understand the proceedings and their "
         + "role in them when in court, put their views to the court, instruct their representatives before, "
@@ -605,6 +605,7 @@ public class PrlAppsConstants {
     public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
     public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
     public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
+    public static final String SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID = "respondentApplication";
     public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
     public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
     public static final String CASE_SUMMARY = "Case summary";
@@ -957,7 +958,7 @@ public class PrlAppsConstants {
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
-            "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+        "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
 
     public static final String MANDATORY_JUDGE_WELSH =
         "Mae enw llawn Cynghorydd Cyfreithiol yr Ynadon yn orfodol pan fydd Cynghorydd Cyfreithiol yr Ynadon yn cael ei ddewis fel teitl y Barnwr";
@@ -972,7 +973,7 @@ public class PrlAppsConstants {
 
     public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
-            + " Magistrates";
+        + " Magistrates";
     public static final String MANDATORY_MAGISTRATE_WELSH = "Mae enw llawn yr Ynad yn orfodol pan fydd Ynadon yn cael ei ddewis fel teitl y Barnwr";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";

@@ -72,8 +72,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_CATEGORY_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
@@ -335,8 +333,8 @@ public class ManageDocumentsService {
             //This is for both events manage documents & review documents for non-confidential documents
             //Epic-PRL-5842 - notifications to lips, solicitors, cafcass cymru
             notificationService.sendNotificationsAsync(caseData,
-                                                  quarantineLegalDoc,
-                                                  userRole);
+                                                       quarantineLegalDoc,
+                                                       userRole);
         }
     }
 
@@ -378,14 +376,12 @@ public class ManageDocumentsService {
     }
 
     private QuarantineLegalDoc covertManageDocToQuarantineDoc(ManageDocuments manageDocument, UserDetails userDetails) {
-        boolean isCourtPartySelected = DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty());
-
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .categoryId(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_CATEGORY_ID : manageDocument.getDocumentCategories().getValueCode())
-            .categoryName(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_LABEL : manageDocument.getDocumentCategories().getValueLabel())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
             //PRL-4320 - Manage documents redesign
             .isConfidential(manageDocument.getIsConfidential())
             .isRestricted(manageDocument.getIsRestricted())
@@ -500,7 +496,7 @@ public class ManageDocumentsService {
     }
 
     public QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
-                                                           QuarantineLegalDoc quarantineLegalDoc) {
+                                                          QuarantineLegalDoc quarantineLegalDoc) {
 
         return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
@@ -693,24 +689,24 @@ public class ManageDocumentsService {
 
         return switch (userRole) {
             case SOLICITOR -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
             );
             case CAFCASS -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
             );
             case COURT_STAFF -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
             );
             case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
+                isDocumentTab,
+                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
             );
             case BULK_SCAN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                 isDocumentTab,
@@ -800,7 +796,7 @@ public class ManageDocumentsService {
     }
 
     private void deleteCopyOfRenamedConfidentialDocument(List<Element<QuarantineLegalDoc>> previousConfidentialDocuments,
-                                           List<Element<QuarantineLegalDoc>> currentConfidentialDocuments) {
+                                                         List<Element<QuarantineLegalDoc>> currentConfidentialDocuments) {
 
         currentConfidentialDocuments.forEach(
             docElement -> {
