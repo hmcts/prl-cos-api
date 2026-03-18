@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnu
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document.DocumentBuilder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -120,7 +119,7 @@ public class CafcassUploadDocService {
             CAFCASS
         );
 
-        setCirReceivedFlagIfApplicable(typeOfDocument, startAllTabsUpdateDataContent.caseData(), caseDataUpdated);
+        setCirReceivedFlagIfApplicable(typeOfDocument, startAllTabsUpdateDataContent.caseDataMap(), caseDataUpdated);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -133,17 +132,18 @@ public class CafcassUploadDocService {
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
-    private void setCirReceivedFlagIfApplicable(String typeOfDocument, CaseData caseData,
+    private void setCirReceivedFlagIfApplicable(String typeOfDocument, Map<String, Object> existingCaseDataMap,
                                                 Map<String, Object> caseDataUpdated) {
         if (!CIR_DOCUMENT_TYPES.contains(typeOfDocument)) {
             return;
         }
-        if (caseData.getCirDeadlineData() == null || caseData.getCirDeadlineData().getCirDueDate() == null) {
+        Object cirDueDateValue = existingCaseDataMap.get("cirDueDate");
+        if (cirDueDateValue == null) {
             log.info("No CIR due date set on case — skipping cirReceivedByDeadline flag");
             return;
         }
         LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
-        LocalDate cirDueDate = caseData.getCirDeadlineData().getCirDueDate();
+        LocalDate cirDueDate = LocalDate.parse(cirDueDateValue.toString(), DateTimeFormatter.ISO_LOCAL_DATE);
         caseDataUpdated.put("cirUploadedDate", today.format(DateTimeFormatter.ISO_LOCAL_DATE));
         if (!today.isAfter(cirDueDate)) {
             caseDataUpdated.put("cirReceivedByDeadline", Yes);

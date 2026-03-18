@@ -25,11 +25,11 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CirDeadlineData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -210,14 +210,13 @@ class CafcassUploadDocServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void whenCirDocUploadedOnOrBeforeDueDate_shouldSetCirReceivedByDeadlineFlag() {
-        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
-            .cirDueDate(LocalDate.now().plusDays(1))
-            .build();
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName("xyz")
-            .cirDeadlineData(cirDeadlineData)
             .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
+        caseDataMap.put("cirDueDate", LocalDate.now().plusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -225,7 +224,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+            caseDataMap, caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -244,14 +243,13 @@ class CafcassUploadDocServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void whenCirDocUploadedOnDueDate_shouldSetCirReceivedByDeadlineFlag() {
-        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
-            .cirDueDate(LocalDate.now())
-            .build();
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName("xyz")
-            .cirDeadlineData(cirDeadlineData)
             .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
+        caseDataMap.put("cirDueDate", LocalDate.now().toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -259,7 +257,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+            caseDataMap, caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -278,14 +276,13 @@ class CafcassUploadDocServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void whenCirDocUploadedAfterDueDate_shouldNotSetCirReceivedByDeadlineFlag() {
-        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
-            .cirDueDate(LocalDate.now().minusDays(1))
-            .build();
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName("xyz")
-            .cirDeadlineData(cirDeadlineData)
             .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
+        caseDataMap.put("cirDueDate", LocalDate.now().minusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -293,7 +290,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+            caseDataMap, caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
@@ -342,14 +339,13 @@ class CafcassUploadDocServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void whenNonCirDocUploaded_shouldNotSetCirReceivedByDeadlineFlag() {
-        CirDeadlineData cirDeadlineData = CirDeadlineData.builder()
-            .cirDueDate(LocalDate.now().plusDays(1))
-            .build();
         caseData = CaseData.builder()
             .id(Long.parseLong(TEST_CASE_ID))
             .applicantCaseName("xyz")
-            .cirDeadlineData(cirDeadlineData)
             .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
+        caseDataMap.put("cirDueDate", LocalDate.now().plusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -357,7 +353,7 @@ class CafcassUploadDocServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
         StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
             authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())), caseData, null
+            caseDataMap, caseData, null
         );
         when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
