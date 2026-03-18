@@ -84,9 +84,11 @@ public class C100IssueCaseService {
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 Map<String, String> dfjAreaFields = dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId);
                 if (MapUtils.isNotEmpty(dfjAreaFields)) {
+                    log.info("DFJ area fields found for court id: {} and path finder set to Yes", baseLocationId);
                     caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
                 } else {
+                    log.info("DFJ area fields are not found for court id: {} and path finder set to NO", baseLocationId);
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.No);
                 }
             }
