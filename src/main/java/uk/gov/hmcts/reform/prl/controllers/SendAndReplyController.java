@@ -240,26 +240,18 @@ public class SendAndReplyController extends AbstractCallbackController {
             .build();
     }
 
+
+
+
     @PostMapping("/send-or-reply-to-messages/mid-event")
     public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
                                                                @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        List<String> errors = new ArrayList<>();
-        if (REPLY.equals(caseData.getChooseSendOrReply())) {
-            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
-                errors.add("There are no messages to respond to.");
-            } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
-            }
-        } else {
-            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
-        }
-
-        return CallbackResponse.builder().data(caseData).errors(errors).build();
+        CaseData caseData = getCaseData(callbackRequest);
+        return processMidEvent(authorisation, caseData);
     }
+
 
 
 
@@ -268,21 +260,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @Parameter(hidden = true) String authorisation,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        List<String> errors = new ArrayList<>();
-        if (REPLY.equals(caseData.getChooseSendOrReply())) {
-            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
-                errors.add("There are no messages to respond to.");
-            } else {
-                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
-            }
-        } else {
-            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
-        }
-
-        return CallbackResponse.builder().data(caseData).errors(errors).build();
+        return processMidEvent(authorisation, caseData);
     }
 
 
@@ -290,21 +270,10 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
-        if (caseData.getChooseSendOrReply().equals(SEND)) {
-            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
-        } else {
-            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
-        }
-
-        //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        return processAboutToSubmit(authorisation, caseData, caseDataMap);
     }
 
 
@@ -313,23 +282,13 @@ public class SendAndReplyController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmitTask(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
 
-        if (caseData.getChooseSendOrReply().equals(SEND)) {
-            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
-        } else {
-            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
-        }
-
-        //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        return processAboutToSubmit(authorisation, caseData, caseDataMap);
     }
+
 
 
 
@@ -349,8 +308,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                     @Parameter(hidden = true) String authorisation,
                     @RequestBody CallbackRequest callbackRequest,
                     @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation);
     }
@@ -363,5 +321,42 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                   @RequestBody CallbackRequest callbackRequest) {
 
         return sendAndReplyService.clearDynamicLists(callbackRequest);
+    }
+
+
+    private CallbackResponse processMidEvent(String authorisation, CaseData caseData) {
+        List<String> errors = new ArrayList<>();
+        if (REPLY.equals(caseData.getChooseSendOrReply())) {
+            if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
+                errors.add("There are no messages to respond to.");
+            } else {
+                caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
+            }
+        } else {
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+        }
+
+        return CallbackResponse.builder().data(caseData).errors(errors).build();
+    }
+
+
+    private CaseData getCaseData(CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        return CaseUtils.getCaseData(caseDetails, objectMapper);
+    }
+
+
+    private AboutToStartOrSubmitCallbackResponse processAboutToSubmit(String authorisation, CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseData.getChooseSendOrReply().equals(SEND)) {
+            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
+        } else {
+            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
+        }
+
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 }
