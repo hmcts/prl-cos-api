@@ -413,6 +413,11 @@ public class BundleCreateRequestMapper {
             List<Element<QuarantineLegalDoc>> cafcassUploadDocList = caseData.getReviewDocuments().getCafcassUploadDocListDocTab();
             allDocuments.addAll(cafcassUploadDocList);
         }
+        if (null != caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()
+            && !caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().isEmpty()) {
+            List<Element<QuarantineLegalDoc>> localAuthorityUploadDocList = caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab();
+            allDocuments.addAll(localAuthorityUploadDocList);
+        }
         if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()
             && !caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().isEmpty()) {
             List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
