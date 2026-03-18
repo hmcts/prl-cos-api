@@ -137,6 +137,7 @@ public class CafcassUploadDocService {
         if (!CIR_DOCUMENT_TYPES.contains(typeOfDocument)) {
             return;
         }
+        caseDataUpdated.put("cirDocUploaded", "Yes");
         Object cirDueDateValue = existingCaseDataMap.get("cirDueDate");
         if (cirDueDateValue == null) {
             log.info("No CIR due date set on case — skipping cirReceivedByDeadline flag");

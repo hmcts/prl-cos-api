@@ -236,6 +236,7 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertEquals("Yes", savedData.get("cirDocUploaded"));
         assertEquals(YesOrNo.Yes, savedData.get("cirReceivedByDeadline"));
         assertNotNull(savedData.get("cirUploadedDate"));
     }
@@ -269,6 +270,7 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertEquals("Yes", savedData.get("cirDocUploaded"));
         assertEquals(YesOrNo.Yes, savedData.get("cirReceivedByDeadline"));
         assertNotNull(savedData.get("cirUploadedDate"));
     }
@@ -302,6 +304,7 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertEquals("Yes", savedData.get("cirDocUploaded"));
         assertNull(savedData.get("cirReceivedByDeadline"));
         assertNotNull(savedData.get("cirUploadedDate"));
     }
@@ -332,6 +335,7 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertEquals("Yes", savedData.get("cirDocUploaded"));
         assertNull(savedData.get("cirReceivedByDeadline"));
         assertNull(savedData.get("cirUploadedDate"));
     }
@@ -365,6 +369,7 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
+        assertNull(savedData.get("cirDocUploaded"));
         assertNull(savedData.get("cirReceivedByDeadline"));
         assertNull(savedData.get("cirUploadedDate"));
     }
