@@ -1804,11 +1804,6 @@ public class ManageOrderService {
         SoaSolicitorServingRespondentsEnum courtPersonalService = null;
         String recipients = null;
         String otherParties = null;
-        List<Element<ServedParties>> servedParties = new ArrayList<>();
-
-        String serveRecipientName = null;
-        String whoIsResponsibleToServe = null;
-        YesOrNo multipleOrdersServed = null;
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
         }
@@ -1834,15 +1829,19 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(OTHER_PARTIES)) {
             otherParties = (String) servedOrderDetails.get(OTHER_PARTIES);
         }
+        List<Element<ServedParties>> servedParties = new ArrayList<>();
         if (servedOrderDetails.containsKey(SERVED_PARTIES)) {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
+        String serveRecipientName = null;
         if (servedOrderDetails.containsKey(SERVE_RECIPIENT_NAME)) {
             serveRecipientName = (String) servedOrderDetails.get(SERVE_RECIPIENT_NAME);
         }
+        String whoIsResponsibleToServe = null;
         if (servedOrderDetails.containsKey(WHO_IS_RESPONSIBLE_TO_SERVE)) {
             whoIsResponsibleToServe = (String) servedOrderDetails.get(WHO_IS_RESPONSIBLE_TO_SERVE);
         }
+        YesOrNo multipleOrdersServed = null;
         if (servedOrderDetails.containsKey(IS_MULTIPLE_ORDERS_SERVED)) {
             multipleOrdersServed = (boolean) servedOrderDetails.get(IS_MULTIPLE_ORDERS_SERVED) ? Yes : No;
         }

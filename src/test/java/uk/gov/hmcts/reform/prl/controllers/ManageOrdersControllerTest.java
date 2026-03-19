@@ -5315,7 +5315,7 @@ public class ManageOrdersControllerTest {
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(1, response.getErrors().size());
-        assertThat(response.getErrors().get(0)).contains("An error occurred while processing the order");
+        assertThat(response.getErrors().getFirst()).contains("Failed to set hearing data for order");
     }
 
     @Test
