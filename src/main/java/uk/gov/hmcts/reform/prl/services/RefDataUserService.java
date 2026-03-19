@@ -178,12 +178,10 @@ public class RefDataUserService {
             authTokenGenerator.generate(),
             requestBody
         );
-        log.info("Judicial API raw response for sidamId {}: {}", sidamId, response);
         if (response != null && !response.isEmpty()) {
             JudicialUsersApiResponse judge = response.get(0);
-            log.info("Judge details - fullName={}, knownAs={}, surname={}, postNominals={}, appointments={}",
-                judge.getFullName(), judge.getKnownAs(), judge.getSurname(),
-                judge.getPostNominals(), judge.getAppointments());
+            log.info("Judicial API response for sidamId {}: postNominals={}, appointments={}",
+                sidamId, judge.getPostNominals(), judge.getAppointments());
         }
         return response;
     }

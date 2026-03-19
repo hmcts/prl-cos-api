@@ -2692,6 +2692,18 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    void testOrderStatusCreatedByJudgeForCustomOrder() {
+        String status = manageOrderService.getOrderStatus("createCustomOrder", "JUDGE", null, null);
+        assertEquals(OrderStatusEnum.createdByJudge.getDisplayedValue(), status);
+    }
+
+    @Test
+    void testOrderStatusCreatedByAdminForCustomOrder() {
+        String status = manageOrderService.getOrderStatus("createCustomOrder", "COURT_ADMIN", null, null);
+        assertEquals(OrderStatusEnum.createdByCA.getDisplayedValue(), status);
+    }
+
+    @Test
     void testOrderStatusReviewByAdminAlreadyReviewedByJudge() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",

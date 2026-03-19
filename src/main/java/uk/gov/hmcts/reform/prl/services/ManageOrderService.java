@@ -1488,7 +1488,8 @@ public class ManageOrderService {
         } else if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
             return OrderStatusEnum.draftedByLR.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
-            orderSelectionType) || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
+            orderSelectionType) || createCustomOrder.toString().equals(orderSelectionType)
+            || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
             currentOrderStatus = orderStatusForCreateUploadAmend(loggedInUserType);
         } else {
