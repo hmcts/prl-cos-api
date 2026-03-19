@@ -3810,7 +3810,7 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId,
-                                                    UUID newDraftOrderCollectionId, Map<String, Object> caseDataUpdated) {
+                                                  UUID newDraftOrderCollectionId, Map<String, Object> caseDataUpdated) {
         String judgeLaReviewRequired = null;
         String performingUser = null;
         String performingAction = null;
