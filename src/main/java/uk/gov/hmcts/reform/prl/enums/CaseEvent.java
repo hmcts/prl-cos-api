@@ -76,8 +76,7 @@ public enum CaseEvent {
     AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
     APPLICANT_DETAILS("applicantsDetails"),
     REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
-    CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask"),
-    CIR_OVERDUE_TASK_CREATION("cirOverdueTaskCreation");
+    CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask");
 
     private final String value;
 

@@ -18,17 +18,10 @@ import java.time.LocalDate;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CirDeadlineData {
 
-    /**
-     * Date by which Cafcass must file the CIR. Set by the gatekeeping/LA workflow.
-     */
     @JsonProperty("whenReportsMustBeFiledByLocalAuthority")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate whenReportsMustBeFiledByLocalAuthority;
 
-    /**
-     * Set to Yes by the system when a CIR document is uploaded on or before the due date.
-     * Read by the CirDeadlineCheckTask scheduler to decide whether to create a WA task.
-     */
     @JsonProperty("cirReceivedByDeadline")
     private final YesOrNo cirReceivedByDeadline;
 
