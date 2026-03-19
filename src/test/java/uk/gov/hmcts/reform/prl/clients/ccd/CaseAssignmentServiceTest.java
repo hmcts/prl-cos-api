@@ -1194,7 +1194,49 @@ class CaseAssignmentServiceTest {
         verify(caseAssignmentApi).removeCaseUserRoles(anyString(),
                                                       anyString(),
                                                       isA(CaseAssignmentUserRolesRequest.class));
+    }
 
+    @Test
+    void shouldNotThrowNpeWhenChangeOrganisationRequestIsNull() {
+        CaseData caseDataWithNullRequest = CaseData.builder()
+            .id(1234L)
+            .caseTypeOfApplication("C100")
+            .changeOrganisationRequestField(null)
+            .applicants(List.of(Element.<PartyDetails>builder()
+                                    .value(PartyDetails.builder()
+                                               .barrister(Barrister.builder().barristerId("123").build())
+                                               .build())
+                                    .build()))
+            .build();
+
+        CaseDetails localCaseDetails = CaseDetails.builder()
+            .id(1234L)
+            .data(caseDataWithNullRequest.toMap(objectMapper))
+            .build();
+
+        when(featureToggleService.isBarristerFeatureEnabled()).thenReturn(true);
+
+        CaseAssignmentService localCaseAssignmentService = new CaseAssignmentService(
+            caseAssignmentApi,
+            systemUserService,
+            tokenGenerator,
+            organisationService,
+            roleAssignmentService,
+            maskEmail,
+            objectMapper,
+            featureToggleService,
+            barristerHelper,
+            barristerRemoveService,
+            partyLevelCaseFlagsService
+        );
+
+        localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
+
+        Barrister barristerAfterCall = caseDataWithNullRequest.getApplicants().get(0).getValue().getBarrister();
+
+        assertThat(barristerAfterCall)
+            .as("Barrister should still exist because the code should have returned early")
+            .isNotNull();
     }
 
     @ParameterizedTest

@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.exception.InvalidPartyException;
 import uk.gov.hmcts.reform.prl.exception.InvalidSolicitorRoleException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
@@ -460,10 +462,9 @@ public class CaseAssignmentService {
     }
 
     public void removeAmBarristerIfPresent(CaseDetails caseDetails) {
+
         if (featureToggleService.isBarristerFeatureEnabled()) {
             CaseData caseData = getCaseData(caseDetails, objectMapper);
-
-            log.info("Entering removeAmBarristerIfPresent. Request: caseData {}", caseData.getChangeOrganisationRequestField());
 
             removeBarristerIfPresent(caseData,
                                      caseData.getChangeOrganisationRequestField(),
@@ -480,8 +481,6 @@ public class CaseAssignmentService {
 
     public void removePartyBarristerIfPresent(CaseData caseData,
                                               ChangeOrganisationRequest changeOrganisationRequest) {
-
-        log.info("Entering removeAmBarristerIfPresent. Request: caseData {}", caseData.getChangeOrganisationRequestField());
         if (featureToggleService.isBarristerFeatureEnabled()) {
             removeBarristerIfPresent(caseData,
                                      changeOrganisationRequest,
@@ -490,6 +489,7 @@ public class CaseAssignmentService {
                                              caPartyDetailsElement.getValue(),
                                              caseData,
                                              caPartyDetailsElement.getId());
+
                                          barristerRemoveService.notifyBarrister(caseData);
                                          caPartyDetailsElement.getValue().setBarrister(null);
                                          partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
@@ -520,23 +520,19 @@ public class CaseAssignmentService {
                                          Consumer<Element<PartyDetails>> caPartyDetailsElement,
                                          Consumer<PartyDetails> daPartyDetails) {
 
-        log.info("1. Entering removeBarristerIfPresent. Request: {}", changeOrganisationRequest);
+        String solicitorRole = Optional.ofNullable(changeOrganisationRequest)
+            .map(ChangeOrganisationRequest::getCaseRoleId)
+            .map(DynamicList::getValue)
+            .map(DynamicListElement::getCode)
+            .orElse(null);
 
-        if (changeOrganisationRequest != null) {
-            log.info(" 2. CaseRoleId: {}", changeOrganisationRequest.getCaseRoleId());
-
-            if (changeOrganisationRequest.getCaseRoleId() != null) {
-                log.info(" 3. Role Value: {}", changeOrganisationRequest.getCaseRoleId().getValue());
-
-                if (changeOrganisationRequest.getCaseRoleId().getValue() != null) {
-                    log.info(" 4. Code: {}", changeOrganisationRequest.getCaseRoleId().getValue().getCode());
-                }
-            }
+        if(solicitorRole == null) {
+            log.info(" Attempting to remove Barrister but the solicitor role is null for case id {} ", caseData.getId());
+            return;
         }
 
-        String solicitorRole = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
         String barristerRole = getMatchingBarristerRole(solicitorRole);
-        log.info(" 5. value of barristerRole {}", barristerRole);
+
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             getC100SelectedParty(caseData, barristerRole)
                 .ifPresent(caPartyDetailsElement);
@@ -572,6 +568,7 @@ public class CaseAssignmentService {
     }
 
     private String getMatchingBarristerRole(String solicitorRole) {
+
         return Arrays.stream(BarristerRole.values())
             .filter(barristerRole -> barristerRole.getSolicitorCaseRole().equals(solicitorRole))
             .map(BarristerRole::getCaseRoleLabel)
