@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class CirDeadlineData {
 
     /**
-     * Set by enterCirDueDate event when court admin records the CIR due date.
+     * Date by which Cafcass must file the CIR. Set by the gatekeeping/LA workflow.
      */
     @JsonProperty("whenReportsMustBeFiledByLocalAuthority")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

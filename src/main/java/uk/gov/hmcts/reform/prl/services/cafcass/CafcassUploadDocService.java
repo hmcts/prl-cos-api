@@ -35,6 +35,10 @@ import java.util.Set;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_DOC_UPLOADED;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_DUE_DATE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
@@ -137,17 +141,17 @@ public class CafcassUploadDocService {
         if (!CIR_DOCUMENT_TYPES.contains(typeOfDocument)) {
             return;
         }
-        caseDataUpdated.put("cirDocUploaded", "Yes");
-        Object dueDateValue = existingCaseDataMap.get("whenReportsMustBeFiledByLocalAuthority");
+        caseDataUpdated.put(CIR_DOC_UPLOADED, Yes);
+        Object dueDateValue = existingCaseDataMap.get(CIR_DUE_DATE);
         if (dueDateValue == null) {
             log.info("No CIR due date set on case — skipping cirReceivedByDeadline flag");
             return;
         }
         LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
         LocalDate dueDate = LocalDate.parse(dueDateValue.toString(), DateTimeFormatter.ISO_LOCAL_DATE);
-        caseDataUpdated.put("cirUploadedDate", today.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        caseDataUpdated.put(CIR_UPLOADED_DATE, today.format(DateTimeFormatter.ISO_LOCAL_DATE));
         if (!today.isAfter(dueDate)) {
-            caseDataUpdated.put("cirReceivedByDeadline", Yes);
+            caseDataUpdated.put(CIR_RECEIVED_BY_DEADLINE, Yes);
             log.info("CIR document uploaded on or before due date {} — setting cirReceivedByDeadline", dueDate);
         } else {
             log.info("CIR document uploaded after due date {} — setting cirUploadedDate only", dueDate);

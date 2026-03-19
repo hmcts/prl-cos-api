@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +9,12 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +22,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_DUE_DATE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CIR_OVERDUE_TASK_CREATION;
 
 @Slf4j
@@ -33,7 +38,6 @@ public class CirDeadlineService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
     private final AllTabServiceImpl allTabService;
-    private final ObjectMapper objectMapper;
 
     public void checkAndCreateCirOverdueTasks() {
         final long startTime = System.currentTimeMillis();
@@ -66,41 +70,61 @@ public class CirDeadlineService {
             TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
     }
 
-    public List<CaseDetails> retrieveOverdueCirCases() {
-        String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+    private static final int PAGE_SIZE = 100;
 
-        // Find cases where whenReportsMustBeFiledByLocalAuthority exists, is in the past, and CIR was not received by deadline
-        String searchQuery = "{"
-            + "\"query\":{"
-            + "  \"bool\":{"
-            + "    \"must\":["
-            + "      {\"exists\":{\"field\":\"data.whenReportsMustBeFiledByLocalAuthority\"}},"
-            + "      {\"range\":{\"data.whenReportsMustBeFiledByLocalAuthority\":{\"lt\":\"" + today + "\"}}}"
-            + "    ],"
-            + "    \"must_not\":["
-            + "      {\"match\":{\"data.cirReceivedByDeadline\":\"Yes\"}},"
-            + "      {\"exists\":{\"field\":\"data.cirUploadedDate\"}}"
-            + "    ]"
-            + "  }"
-            + "},"
-            + "\"size\":\"100\""
-            + "}";
+    public List<CaseDetails> retrieveOverdueCirCases() {
+        String today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE)).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
         try {
             String userToken = systemUserService.getSysUserToken();
             String s2sToken = authTokenGenerator.generate();
 
-            SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchQuery);
+            SearchResult searchResult = coreCaseDataApi.searchCases(
+                userToken, s2sToken, CASE_TYPE, buildOverdueCirQuery(today, 0));
 
-            SearchResultResponse response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
-            if (response != null) {
-                log.info("CIR overdue search returned {} case(s)", response.getTotal());
-                return response.getCases();
+            int totalCases = searchResult.getTotal();
+            log.info("CIR overdue search found {} total case(s)", totalCases);
+
+            if (totalCases == 0) {
+                return Collections.emptyList();
             }
+
+            List<CaseDetails> allCases = new ArrayList<>(searchResult.getCases());
+            int pages = (int) Math.ceil((double) totalCases / PAGE_SIZE);
+
+            for (int i = 1; i < pages; i++) {
+                log.info("Processing page {} of {}", i + 1, pages);
+                SearchResult page = coreCaseDataApi.searchCases(
+                    userToken, s2sToken, CASE_TYPE, buildOverdueCirQuery(today, i * PAGE_SIZE));
+                allCases.addAll(page.getCases());
+            }
+
+            log.info("Total CIR overdue cases to process: {}", allCases.size());
+            return allCases;
+
         } catch (Exception e) {
             log.error("Exception in retrieveOverdueCirCases: {}", e.getMessage(), e);
         }
 
         return Collections.emptyList();
+    }
+
+    private String buildOverdueCirQuery(String today, int from) {
+        return "{"
+            + "\"query\":{"
+            + "  \"bool\":{"
+            + "    \"must\":["
+            + "      {\"exists\":{\"field\":\"data." + CIR_DUE_DATE + "\"}},"
+            + "      {\"range\":{\"data." + CIR_DUE_DATE + "\":{\"lt\":\"" + today + "\"}}}"
+            + "    ],"
+            + "    \"must_not\":["
+            + "      {\"match\":{\"data." + CIR_RECEIVED_BY_DEADLINE + "\":\"" + YES + "\"}},"
+            + "      {\"exists\":{\"field\":\"data." + CIR_UPLOADED_DATE + "\"}}"
+            + "    ]"
+            + "  }"
+            + "},"
+            + "\"size\":" + PAGE_SIZE + ","
+            + "\"from\":" + from
+            + "}";
     }
 }

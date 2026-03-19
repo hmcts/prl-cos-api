@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
@@ -216,7 +217,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().plusDays(1).toString());
+        caseDataMap.put(CafcassAppConstants.CIR_DUE_DATE, LocalDate.now().plusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -236,9 +237,9 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
-        assertEquals("Yes", savedData.get("cirDocUploaded"));
-        assertEquals(YesOrNo.Yes, savedData.get("cirReceivedByDeadline"));
-        assertNotNull(savedData.get("cirUploadedDate"));
+        assertEquals(YesOrNo.Yes, savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
+        assertEquals(YesOrNo.Yes, savedData.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNotNull(savedData.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 
     @Test
@@ -250,7 +251,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().toString());
+        caseDataMap.put(CafcassAppConstants.CIR_DUE_DATE, LocalDate.now().toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -270,9 +271,9 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
-        assertEquals("Yes", savedData.get("cirDocUploaded"));
-        assertEquals(YesOrNo.Yes, savedData.get("cirReceivedByDeadline"));
-        assertNotNull(savedData.get("cirUploadedDate"));
+        assertEquals(YesOrNo.Yes, savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
+        assertEquals(YesOrNo.Yes, savedData.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNotNull(savedData.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 
     @Test
@@ -284,7 +285,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().minusDays(1).toString());
+        caseDataMap.put(CafcassAppConstants.CIR_DUE_DATE, LocalDate.now().minusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -304,9 +305,9 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
-        assertEquals("Yes", savedData.get("cirDocUploaded"));
-        assertNull(savedData.get("cirReceivedByDeadline"));
-        assertNotNull(savedData.get("cirUploadedDate"));
+        assertEquals(YesOrNo.Yes, savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
+        assertNull(savedData.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNotNull(savedData.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 
     @Test
@@ -335,9 +336,9 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
-        assertEquals("Yes", savedData.get("cirDocUploaded"));
-        assertNull(savedData.get("cirReceivedByDeadline"));
-        assertNull(savedData.get("cirUploadedDate"));
+        assertEquals(YesOrNo.Yes, savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
+        assertNull(savedData.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNull(savedData.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 
     @Test
@@ -349,7 +350,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().plusDays(1).toString());
+        caseDataMap.put(CafcassAppConstants.CIR_DUE_DATE, LocalDate.now().plusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -369,9 +370,9 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
-        assertNull(savedData.get("cirDocUploaded"));
-        assertNull(savedData.get("cirReceivedByDeadline"));
-        assertNull(savedData.get("cirUploadedDate"));
+        assertNull(savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
+        assertNull(savedData.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNull(savedData.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 
     private Document testDocument() {
