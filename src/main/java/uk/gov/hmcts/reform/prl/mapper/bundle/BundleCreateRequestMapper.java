@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -28,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -89,6 +94,10 @@ public class BundleCreateRequestMapper {
     public static final String REDACTED_DOCUMENT_URL_BINARY = "documents/00000000-0000-0000-0000-000000000000/binary";
     public static final String REDACTED_DOCUMENT_FILE_NAME = "*redacted*";
 
+    private final AuthTokenGenerator authTokenGenerator;
+    private final BundleCreateRequestByCategoriesMapper bundleCreateRequestByCategoriesMapper;
+    private final SystemUserService systemUserService;
+
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
@@ -99,6 +108,7 @@ public class BundleCreateRequestMapper {
                 .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
         log.info("*** create bundle request mapped for the case id  : {}", caseData.getId());
+        List<Category> parentCategories = bundleCreateRequestByCategoriesMapper.getCategoriesAndDocuments(systemUserService.getSysUserToken(), caseData);
         return bundleCreateRequest;
     }
 
