@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildScreeningQuestionsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -35,7 +34,6 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsEle
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataScreeningQuestionsElementsMapper.updateScreeningQuestionsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 
@@ -90,12 +88,6 @@ public class CaseDataMapper {
             C100RebuildMiamElements c100RebuildMiamElements = mapper
                     .readValue(c100RebuildData.getC100RebuildMaim(), C100RebuildMiamElements.class);
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
-        }
-
-        if (isNotEmpty(c100RebuildData.getC100RebuildScreeningQuestions())) {
-            C100RebuildScreeningQuestionsElements c100RebuildScreeningQuestionsElements = mapper
-                .readValue(c100RebuildData.getC100RebuildScreeningQuestions(), C100RebuildScreeningQuestionsElements.class);
-            updateScreeningQuestionsElementsForCaseData(caseDataBuilder, c100RebuildScreeningQuestionsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
