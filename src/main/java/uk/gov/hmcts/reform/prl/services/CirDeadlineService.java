@@ -69,13 +69,13 @@ public class CirDeadlineService {
     public List<CaseDetails> retrieveOverdueCirCases() {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
-        // Find cases where cirDueDate exists, is in the past, and CIR was not received by deadline
+        // Find cases where whenReportsMustBeFiledByLocalAuthority exists, is in the past, and CIR was not received by deadline
         String searchQuery = "{"
             + "\"query\":{"
             + "  \"bool\":{"
             + "    \"must\":["
-            + "      {\"exists\":{\"field\":\"data.cirDueDate\"}},"
-            + "      {\"range\":{\"data.cirDueDate\":{\"lt\":\"" + today + "\"}}}"
+            + "      {\"exists\":{\"field\":\"data.whenReportsMustBeFiledByLocalAuthority\"}},"
+            + "      {\"range\":{\"data.whenReportsMustBeFiledByLocalAuthority\":{\"lt\":\"" + today + "\"}}}"
             + "    ],"
             + "    \"must_not\":["
             + "      {\"match\":{\"data.cirReceivedByDeadline\":\"Yes\"}},"

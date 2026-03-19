@@ -21,9 +21,9 @@ public class CirDeadlineData {
     /**
      * Set by enterCirDueDate event when court admin records the CIR due date.
      */
-    @JsonProperty("cirDueDate")
+    @JsonProperty("whenReportsMustBeFiledByLocalAuthority")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate cirDueDate;
+    private final LocalDate whenReportsMustBeFiledByLocalAuthority;
 
     /**
      * Set to Yes by the system when a CIR document is uploaded on or before the due date.

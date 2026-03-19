@@ -138,19 +138,19 @@ public class CafcassUploadDocService {
             return;
         }
         caseDataUpdated.put("cirDocUploaded", "Yes");
-        Object cirDueDateValue = existingCaseDataMap.get("cirDueDate");
-        if (cirDueDateValue == null) {
+        Object dueDateValue = existingCaseDataMap.get("whenReportsMustBeFiledByLocalAuthority");
+        if (dueDateValue == null) {
             log.info("No CIR due date set on case — skipping cirReceivedByDeadline flag");
             return;
         }
         LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
-        LocalDate cirDueDate = LocalDate.parse(cirDueDateValue.toString(), DateTimeFormatter.ISO_LOCAL_DATE);
+        LocalDate dueDate = LocalDate.parse(dueDateValue.toString(), DateTimeFormatter.ISO_LOCAL_DATE);
         caseDataUpdated.put("cirUploadedDate", today.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        if (!today.isAfter(cirDueDate)) {
+        if (!today.isAfter(dueDate)) {
             caseDataUpdated.put("cirReceivedByDeadline", Yes);
-            log.info("CIR document uploaded on or before due date {} — setting cirReceivedByDeadline", cirDueDate);
+            log.info("CIR document uploaded on or before due date {} — setting cirReceivedByDeadline", dueDate);
         } else {
-            log.info("CIR document uploaded after due date {} — setting cirUploadedDate only", cirDueDate);
+            log.info("CIR document uploaded after due date {} — setting cirUploadedDate only", dueDate);
         }
     }
 

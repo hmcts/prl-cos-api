@@ -216,7 +216,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("cirDueDate", LocalDate.now().plusDays(1).toString());
+        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().plusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -250,7 +250,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("cirDueDate", LocalDate.now().toString());
+        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -284,7 +284,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("cirDueDate", LocalDate.now().minusDays(1).toString());
+        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().minusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
@@ -349,7 +349,7 @@ class CafcassUploadDocServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>(caseData.toMap(new ObjectMapper().registerModule(new JavaTimeModule())));
-        caseDataMap.put("cirDueDate", LocalDate.now().plusDays(1).toString());
+        caseDataMap.put("whenReportsMustBeFiledByLocalAuthority", LocalDate.now().plusDays(1).toString());
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         Document document = testDocument();
