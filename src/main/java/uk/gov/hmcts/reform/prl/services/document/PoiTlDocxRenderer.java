@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,7 +39,7 @@ public class PoiTlDocxRenderer {
             return out.toByteArray();
         } catch (Exception e) {
             log.error("poi-tl rendering failed", e);
-            throw new RuntimeException("poi-tl rendering failed", e);
+            throw new ManageOrderRuntimeException("poi-tl rendering failed", e);
         }
     }
 }

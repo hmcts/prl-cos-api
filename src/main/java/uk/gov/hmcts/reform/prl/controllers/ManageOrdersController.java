@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
+import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -428,7 +429,7 @@ public class ManageOrdersController {
     public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -448,13 +449,10 @@ public class ManageOrdersController {
             }
             try {
                 setHearingData(caseData, caseDataUpdated, authorisation);
-            } catch (Exception e) {
-                String msg = (e.getMessage() == null || e.getMessage().isBlank())
-                    ? "An error occurred while processing the order. Please check the template placeholders and try again."
-                    : e.getMessage();
+            } catch (ManageOrderRuntimeException e) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated)
-                    .errors(List.of(msg))
+                    .errors(List.of(e.getMessage()))
                     .build();
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
@@ -509,6 +507,16 @@ public class ManageOrdersController {
      * @param authorisation need auth for changes
      */
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
+        try {
+            doSetHearingData(caseData, caseDataUpdated, authorisation);
+        } catch (ManageOrderRuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ManageOrderRuntimeException("Failed to set hearing data for order", e);
+        }
+    }
+
+    private void doSetHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         // Check if order was already added in mid-event whenToServeOrder (when serving immediately)
         // If doYouWantToServeOrder=Yes, order was already added - don't duplicate
         // BUT if order needs judge/manager review, ignore stale doYouWantToServeOrder value (serve page was skipped)

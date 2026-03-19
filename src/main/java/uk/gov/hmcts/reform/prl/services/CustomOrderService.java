@@ -61,6 +61,8 @@ public class CustomOrderService {
     private static final String DATE_ORDER_MADE = "dateOrderMade";
     private static final String RESPONDENT_PREFIX = "respondent";
     private static final String DEFAULT_ORDER_NAME = "custom_order";
+    private static final String DOCX_EXTENSION = ".docx";
+    private static final String COURT_NAME = "courtName";
     private static final String HEADER_PREVIEW_FILENAME_PATTERN = "custom_order_header_preview";
     private static final String ORDER_COLLECTION = "orderCollection";
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
@@ -136,7 +138,6 @@ public class CustomOrderService {
     /**
      * Extracts C21 sub-option display value from customC21OrderDetails ComplexType.
      */
-    @SuppressWarnings("unchecked")
     private String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
         if (caseDataMap == null) {
             return null;
@@ -147,15 +148,12 @@ public class CustomOrderService {
             Object orderOptions = c21Map.get("orderOptions");
             if (orderOptions != null) {
                 try {
-                    C21OrderOptionsEnum c21Option;
-                    if (orderOptions instanceof String orderOptionsStr) {
-                        c21Option = C21OrderOptionsEnum.getValue(orderOptionsStr);
-                    } else if (orderOptions instanceof C21OrderOptionsEnum c21OrderOptionsEnum) {
-                        c21Option = c21OrderOptionsEnum;
-                    } else {
-                        return null;
-                    }
-                    return c21Option.getDisplayedValue();
+                    C21OrderOptionsEnum c21Option = switch (orderOptions) {
+                        case String orderOptionsStr -> C21OrderOptionsEnum.getValue(orderOptionsStr);
+                        case C21OrderOptionsEnum c21OrderOptionsEnum -> c21OrderOptionsEnum;
+                        default -> null;
+                    };
+                    return c21Option != null ? c21Option.getDisplayedValue() : null;
                 } catch (IllegalArgumentException e) {
                     log.warn("Could not parse C21 order option: {}", orderOptions);
                 }
@@ -168,38 +166,48 @@ public class CustomOrderService {
      * Extracts C43 order types display value from customC43OrderDetails ComplexType.
      * Uses the same format as existing create order journey for consistency.
      */
-    @SuppressWarnings("unchecked")
     private String getC43OrdersDisplayValue(Map<String, Object> caseDataMap) {
         if (caseDataMap == null) {
             return null;
         }
 
         Object customC43Details = caseDataMap.get("customC43OrderDetails");
-        if (customC43Details instanceof Map<?, ?> c43Map) {
-            Object ordersToIssue = c43Map.get("ordersToIssue");
-            if (ordersToIssue instanceof List<?> ordersList && !ordersList.isEmpty()) {
-                // Parse the list to OrderTypeEnum
-                List<OrderTypeEnum> orderTypes = new ArrayList<>();
-                for (Object order : ordersList) {
-                    try {
-                        if (order instanceof String orderStr) {
-                            orderTypes.add(OrderTypeEnum.getValue(orderStr));
-                        } else if (order instanceof OrderTypeEnum ote) {
-                            orderTypes.add(ote);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        log.warn("Could not parse C43 order type: {}", order);
-                    }
-                }
+        if (!(customC43Details instanceof Map<?, ?> c43Map)) {
+            return null;
+        }
 
-                // Parse the child arrangements sub-type
-                ChildArrangementOrderTypeEnum childArrangementsSubType = parseChildArrangementsSubType(c43Map);
+        Object ordersToIssue = c43Map.get("ordersToIssue");
+        if (!(ordersToIssue instanceof List<?> ordersList) || ordersList.isEmpty()) {
+            return null;
+        }
 
-                // Use shared utility for consistent naming
-                return ManageOrdersUtils.buildC43OrderName(orderTypes, childArrangementsSubType);
+        List<OrderTypeEnum> orderTypes = parseOrderTypes(ordersList);
+        ChildArrangementOrderTypeEnum childArrangementsSubType = parseChildArrangementsSubType(c43Map);
+        return ManageOrdersUtils.buildC43OrderName(orderTypes, childArrangementsSubType);
+    }
+
+    private List<OrderTypeEnum> parseOrderTypes(List<?> ordersList) {
+        List<OrderTypeEnum> orderTypes = new ArrayList<>();
+        for (Object order : ordersList) {
+            OrderTypeEnum parsed = parseOrderType(order);
+            if (parsed != null) {
+                orderTypes.add(parsed);
             }
         }
-        return null;
+        return orderTypes;
+    }
+
+    private OrderTypeEnum parseOrderType(Object order) {
+        try {
+            return switch (order) {
+                case String orderStr -> OrderTypeEnum.getValue(orderStr);
+                case OrderTypeEnum ote -> ote;
+                default -> null;
+            };
+        } catch (IllegalArgumentException e) {
+            log.warn("Could not parse C43 order type: {}", order);
+            return null;
+        }
     }
 
     /**
@@ -247,8 +255,8 @@ public class CustomOrderService {
         Long caseId,
         CaseData caseData,
         Map<String, Object> caseDataUpdated,
-        java.util.function.Function<CaseData, CaseData> populateJudgeNames,
-        java.util.function.Function<CaseData, CaseData> populatePartyDetails
+        java.util.function.UnaryOperator<CaseData> populateJudgeNames,
+        java.util.function.UnaryOperator<CaseData> populatePartyDetails
     ) {
         log.info("into render with caseId: {}", caseId);
         // Read customOrderDoc from raw map (not in CaseData model due to constructor param limit)
@@ -306,7 +314,7 @@ public class CustomOrderService {
         // 4) Upload rendered docx
         String orderName = getEffectiveOrderName(caseData, caseDataUpdated);
 
-        String outName = orderName + "_" + caseId + ".docx";
+        String outName = orderName + "_" + caseId + DOCX_EXTENSION;
         log.info("before upload doc of rendered doc: {}", outName);
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded =
             uploadService.uploadDocument(
@@ -343,7 +351,7 @@ public class CustomOrderService {
         // Use caseId directly from controller (caseData.getId() may not be populated)
         data.put("caseNumber", String.valueOf(caseId));
         log.info("Placeholder 'caseNumber' = '{}'", caseId);
-        safePut(data, "courtName", caseData::getCourtName);
+        safePut(data, COURT_NAME, caseData::getCourtName);
         safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
         safePut(data, "respondent1Name", () -> {
             var respondent = caseData.getRespondents().getFirst().getValue();
@@ -476,10 +484,10 @@ public class CustomOrderService {
         log.info("Rendering and uploading header preview for case {}", caseId);
 
         // Render header
-        byte[] headerBytes = renderHeaderPreview(authorisation, caseId, caseData, caseDataMap);
+        byte[] headerBytes = renderHeaderPreview(caseId, caseData, caseDataMap);
 
         // Upload for preview
-        String previewName = HEADER_PREVIEW_FILENAME_PATTERN + "_" + caseId + ".docx";
+        String previewName = HEADER_PREVIEW_FILENAME_PATTERN + "_" + caseId + DOCX_EXTENSION;
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded = uploadService.uploadDocument(
             headerBytes,
             previewName,
@@ -498,20 +506,19 @@ public class CustomOrderService {
     /**
      * Renders the header template from resources with case data placeholders.
      *
-     * @param authorisation Auth token for fetching hearing data from HMC
      * @param caseId The case ID
      * @param caseData The case data
      * @param caseDataMap Raw case data map for reading fields not in CaseData model
      * @return Rendered header as byte array
      */
-    public byte[] renderHeaderPreview(String authorisation, Long caseId, CaseData caseData, Map<String, Object> caseDataMap) throws IOException {
+    public byte[] renderHeaderPreview(Long caseId, CaseData caseData, Map<String, Object> caseDataMap) throws IOException {
         log.info("Rendering header preview for case {}", caseId);
 
         // Load template from resources
         byte[] templateBytes = loadTemplateFromResources();
 
         // Build placeholders from case data
-        Map<String, Object> placeholders = buildHeaderPlaceholders(authorisation, caseId, caseData, caseDataMap);
+        Map<String, Object> placeholders = buildHeaderPlaceholders(caseId, caseData, caseDataMap);
         log.info("Header placeholders: {}", placeholders.keySet());
 
         // Render template with placeholders
@@ -642,7 +649,7 @@ public class CustomOrderService {
         if (caseData.getManageOrders() != null
             && caseData.getManageOrders().getOrdersHearingDetails() != null
             && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-            var hearingDate = caseData.getManageOrders().getOrdersHearingDetails().get(0)
+            var hearingDate = caseData.getManageOrders().getOrdersHearingDetails().getFirst()
                 .getValue().getHearingDateConfirmOptionEnum();
             if (hearingDate != null) {
                 return hearingDate.toString();
@@ -680,7 +687,7 @@ public class CustomOrderService {
             log.info("Using FL401 applicant: {} {}", applicant.getFirstName(), applicant.getLastName());
             populateApplicantData(data, applicant);
         } else if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
-            var applicant = caseData.getApplicants().get(0).getValue();
+            var applicant = caseData.getApplicants().getFirst().getValue();
             log.info("Using C100 applicant: {} {}", applicant.getFirstName(), applicant.getLastName());
             populateApplicantData(data, applicant);
         } else {
@@ -705,13 +712,13 @@ public class CustomOrderService {
     /**
      * Builds placeholder map for the header template from case data.
      */
-    private Map<String, Object> buildHeaderPlaceholders(String authorisation, Long caseId, CaseData caseData, Map<String, Object> caseDataMap) {
+    private Map<String, Object> buildHeaderPlaceholders(Long caseId, CaseData caseData, Map<String, Object> caseDataMap) {
         Map<String, Object> data = new HashMap<>();
 
         // Case details
         data.put("caseNumber", formatCaseNumber(String.valueOf(caseId)));
         populateFamilymanPlaceholders(data, caseData);
-        safePut(data, "courtName", caseData::getCourtName);
+        safePut(data, COURT_NAME, caseData::getCourtName);
         safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
 
         // Judge details
@@ -1070,7 +1077,7 @@ public class CustomOrderService {
 
         // Try to get guardian from childAndCafcassOfficers list first
         if (caseData.getChildAndCafcassOfficers() != null && !caseData.getChildAndCafcassOfficers().isEmpty()) {
-            var firstOfficer = caseData.getChildAndCafcassOfficers().get(0).getValue();
+            var firstOfficer = caseData.getChildAndCafcassOfficers().getFirst().getValue();
             if (firstOfficer != null && firstOfficer.getCafcassOfficerName() != null) {
                 guardianName = firstOfficer.getCafcassOfficerName();
             }
@@ -1320,7 +1327,7 @@ public class CustomOrderService {
 
         // 4. For final orders, seal before uploading to avoid timing issues
         String orderName = getEffectiveOrderName(caseData, caseDataMap);
-        String fileName = orderName + "_" + caseId + ".docx";
+        String fileName = orderName + "_" + caseId + DOCX_EXTENSION;
 
         // Upload DOCX first
         uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded = uploadService.uploadDocument(
@@ -1366,49 +1373,77 @@ public class CustomOrderService {
      */
     public CustomOrderLocation findCustomOrderHeaderPreview(CaseData caseData) {
         // Check orderCollection first (final orders take precedence)
-        if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-            log.info("Searching orderCollection ({} items) for custom order header preview",
-                caseData.getOrderCollection().size());
-            for (int i = 0; i < caseData.getOrderCollection().size(); i++) {
-                uk.gov.hmcts.reform.prl.models.documents.Document doc =
-                    caseData.getOrderCollection().get(i).getValue().getOrderDocument();
-                if (doc != null && doc.getDocumentFileName() != null
-                    && doc.getDocumentFileName().contains(HEADER_PREVIEW_FILENAME_PATTERN)) {
-                    log.info("Found custom order header preview in orderCollection[{}]: {}", i, doc.getDocumentFileName());
-                    return new CustomOrderLocation(doc, false, i);
-                }
-            }
+        CustomOrderLocation orderLocation = findInOrderCollection(caseData);
+        if (orderLocation != null) {
+            return orderLocation;
         }
 
-        // Then check draftOrderCollection - sorted with most recent FIRST (index 0)
-        if (caseData.getDraftOrderCollection() != null && !caseData.getDraftOrderCollection().isEmpty()) {
-            log.info("Searching draftOrderCollection ({} items) for custom order header preview",
-                caseData.getDraftOrderCollection().size());
-            // Log all draft orders for debugging
-            for (int i = 0; i < caseData.getDraftOrderCollection().size(); i++) {
-                uk.gov.hmcts.reform.prl.models.DraftOrder draft = caseData.getDraftOrderCollection().get(i).getValue();
-                uk.gov.hmcts.reform.prl.models.documents.Document doc = draft.getOrderDocument();
-                log.info("draftOrderCollection[{}]: fileName={}, dateCreated={}",
-                    i,
-                    doc != null ? doc.getDocumentFileName() : "null",
-                    draft.getOtherDetails() != null ? draft.getOtherDetails().getDateCreated() : "null");
-            }
-            // Search from the beginning (most recent is at index 0 due to reverse sort)
-            // Check that filename contains pattern AND ends with .docx (not .pdf)
-            for (int i = 0; i < caseData.getDraftOrderCollection().size(); i++) {
-                uk.gov.hmcts.reform.prl.models.documents.Document doc =
-                    caseData.getDraftOrderCollection().get(i).getValue().getOrderDocument();
-                if (doc != null && doc.getDocumentFileName() != null
-                    && doc.getDocumentFileName().contains(HEADER_PREVIEW_FILENAME_PATTERN)
-                    && doc.getDocumentFileName().toLowerCase().endsWith(".docx")) {
-                    log.info("Found custom order header preview in draftOrderCollection[{}]: {}", i, doc.getDocumentFileName());
-                    return new CustomOrderLocation(doc, true, i);
-                }
-            }
+        // Then check draftOrderCollection
+        CustomOrderLocation draftLocation = findInDraftOrderCollection(caseData);
+        if (draftLocation != null) {
+            return draftLocation;
         }
 
         log.warn("No custom order header preview document found in either collection");
         return null;
+    }
+
+    private CustomOrderLocation findInOrderCollection(CaseData caseData) {
+        if (caseData.getOrderCollection() == null || caseData.getOrderCollection().isEmpty()) {
+            return null;
+        }
+        log.info("Searching orderCollection ({} items) for custom order header preview",
+            caseData.getOrderCollection().size());
+        for (int i = 0; i < caseData.getOrderCollection().size(); i++) {
+            uk.gov.hmcts.reform.prl.models.documents.Document doc =
+                caseData.getOrderCollection().get(i).getValue().getOrderDocument();
+            if (isCustomOrderHeaderPreview(doc, false)) {
+                log.info("Found custom order header preview in orderCollection[{}]: {}", i, doc.getDocumentFileName());
+                return new CustomOrderLocation(doc, false, i);
+            }
+        }
+        return null;
+    }
+
+    private CustomOrderLocation findInDraftOrderCollection(CaseData caseData) {
+        if (caseData.getDraftOrderCollection() == null || caseData.getDraftOrderCollection().isEmpty()) {
+            return null;
+        }
+        log.info("Searching draftOrderCollection ({} items) for custom order header preview",
+            caseData.getDraftOrderCollection().size());
+        logDraftOrdersForDebugging(caseData);
+
+        for (int i = 0; i < caseData.getDraftOrderCollection().size(); i++) {
+            uk.gov.hmcts.reform.prl.models.documents.Document doc =
+                caseData.getDraftOrderCollection().get(i).getValue().getOrderDocument();
+            if (isCustomOrderHeaderPreview(doc, true)) {
+                log.info("Found custom order header preview in draftOrderCollection[{}]: {}", i, doc.getDocumentFileName());
+                return new CustomOrderLocation(doc, true, i);
+            }
+        }
+        return null;
+    }
+
+    private boolean isCustomOrderHeaderPreview(uk.gov.hmcts.reform.prl.models.documents.Document doc, boolean requireDocxExtension) {
+        if (doc == null || doc.getDocumentFileName() == null) {
+            return false;
+        }
+        boolean hasPattern = doc.getDocumentFileName().contains(HEADER_PREVIEW_FILENAME_PATTERN);
+        if (!requireDocxExtension) {
+            return hasPattern;
+        }
+        return hasPattern && doc.getDocumentFileName().toLowerCase().endsWith(DOCX_EXTENSION);
+    }
+
+    private void logDraftOrdersForDebugging(CaseData caseData) {
+        for (int i = 0; i < caseData.getDraftOrderCollection().size(); i++) {
+            uk.gov.hmcts.reform.prl.models.DraftOrder draft = caseData.getDraftOrderCollection().get(i).getValue();
+            uk.gov.hmcts.reform.prl.models.documents.Document doc = draft.getOrderDocument();
+            log.info("draftOrderCollection[{}]: fileName={}, dateCreated={}",
+                i,
+                doc != null ? doc.getDocumentFileName() : "null",
+                draft.getOtherDetails() != null ? draft.getOtherDetails().getDateCreated() : "null");
+        }
     }
 
     /**
@@ -1488,7 +1523,7 @@ public class CustomOrderService {
         }
 
         // Try raw courtName from map
-        Object rawCourtName = caseDataMap != null ? caseDataMap.get("courtName") : null;
+        Object rawCourtName = caseDataMap != null ? caseDataMap.get(COURT_NAME) : null;
         if (rawCourtName != null && !"null".equals(rawCourtName.toString())
             && !rawCourtName.toString().isEmpty()) {
             log.info("Court name found in caseDataMap: {}", rawCourtName);
@@ -1533,13 +1568,13 @@ public class CustomOrderService {
                 allocatedJudgeObj.getClass().getSimpleName(), allocatedJudgeObj);
             if (allocatedJudgeObj instanceof Map<?, ?> judgeMap) {
                 log.debug("extractCourtNameFromAllocatedJudge: map keys={}", judgeMap.keySet());
-                Object courtName = judgeMap.get("courtName");
+                Object courtNameValue = judgeMap.get(COURT_NAME);
                 log.debug("extractCourtNameFromAllocatedJudge: courtName='{}' (type={})",
-                    courtName, courtName != null ? courtName.getClass().getSimpleName() : "null");
-                if (courtName != null
-                    && !"null".equals(courtName.toString())
-                    && !courtName.toString().trim().isEmpty()) {
-                    return courtName.toString().trim();
+                    courtNameValue, courtNameValue != null ? courtNameValue.getClass().getSimpleName() : "null");
+                if (courtNameValue != null
+                    && !"null".equals(courtNameValue.toString())
+                    && !courtNameValue.toString().trim().isEmpty()) {
+                    return courtNameValue.toString().trim();
                 }
             }
         } catch (Exception e) {
@@ -1661,7 +1696,7 @@ public class CustomOrderService {
         if (rawDrafts != null) {
             drafts = objectMapper.convertValue(
                 rawDrafts,
-                new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>>() {}
+                new TypeReference<>() {}
             );
             log.info("Using draftOrderCollection from caseDataUpdated, size={}", drafts.size());
         } else if (caseData.getDraftOrderCollection() != null && !caseData.getDraftOrderCollection().isEmpty()) {
@@ -1680,7 +1715,7 @@ public class CustomOrderService {
         }
 
         // Update the first draft order with the combined document
-        Element<uk.gov.hmcts.reform.prl.models.DraftOrder> draftElement = drafts.get(0);
+        Element<uk.gov.hmcts.reform.prl.models.DraftOrder> draftElement = drafts.getFirst();
         uk.gov.hmcts.reform.prl.models.DraftOrder updatedDraft = draftElement.getValue().toBuilder()
             .orderDocument(docToStore)
             .build();
@@ -1703,7 +1738,7 @@ public class CustomOrderService {
         if (rawOrders != null) {
             orders = objectMapper.convertValue(
                 rawOrders,
-                new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {}
+                new TypeReference<>() {}
             );
             log.info("Using orderCollection from caseDataUpdated, size={}", orders.size());
         } else if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
@@ -1722,7 +1757,7 @@ public class CustomOrderService {
         }
 
         // Update the first order with the sealed document
-        Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement = orders.get(0);
+        Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement = orders.getFirst();
         uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderElement.getValue().toBuilder()
             .orderDocument(docToStore)
             .doesOrderDocumentNeedSeal(YesOrNo.No)

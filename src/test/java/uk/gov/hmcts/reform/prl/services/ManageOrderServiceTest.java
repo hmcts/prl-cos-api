@@ -6878,7 +6878,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldPopulateDateAndJudgeForNonJudgeUser() {
+    void testPopulateFieldsFromSelectedHearing_shouldPopulateDateAndJudgeForNonJudgeUser() {
         // Given - a hearing is selected and user is NOT a judge (court admin)
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
         final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
@@ -6924,7 +6924,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldPreserveJudgeNameWhenJudgeLoggedIn() {
+    void testPopulateFieldsFromSelectedHearing_shouldPreserveJudgeNameWhenJudgeLoggedIn() {
         // Given - a hearing is selected and user IS a judge
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
         final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
@@ -6961,7 +6961,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldHandleHmcApiFailureSilently() {
+    void testPopulateFieldsFromSelectedHearing_shouldHandleHmcApiFailureSilently() {
         // Given - HMC API fails
         final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
 
@@ -6984,7 +6984,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldPopulateJudgeTitleFromRefData() {
+    void testPopulateFieldsFromSelectedHearing_shouldPopulateJudgeTitleFromRefData() {
         // Given - hearing selected with judge who has District Judge appointment
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
         final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
@@ -7027,7 +7027,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenNoHearingSelected() {
+    void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenNoHearingSelected() {
         // Given - no hearing selected (hearingsType not in caseDataUpdated)
         CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -7047,7 +7047,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenHearingDeselected() {
+    void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenHearingDeselected() {
         // Given - hearing was deselected (empty value in caseDataUpdated)
         final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -7070,7 +7070,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateFieldsFromSelectedHearing_shouldFindHearingsTypeUnderManageOrders() {
+    void testPopulateFieldsFromSelectedHearing_shouldFindHearingsTypeUnderManageOrders() {
         // Given - hearingsType is nested under manageOrders in the map
         LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
         String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
@@ -7108,7 +7108,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43Fields() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43Fields() {
         // Given
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
@@ -7140,7 +7140,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldSyncC21Fields() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldSyncC21Fields() {
         // Given
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
@@ -7170,7 +7170,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenNoOrderTypeSelected() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenNoOrderTypeSelected() {
         // Given
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", null);
@@ -7194,7 +7194,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenOtherOrderTypeSelected() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenOtherOrderTypeSelected() {
         // Given - selecting "other" order type which has no sub-selections
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "other");
@@ -7220,7 +7220,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC43Details() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC43Details() {
         // Given - C43 selected but no details filled in
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
@@ -7235,7 +7235,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC21Details() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC21Details() {
         // Given - C21 selected but no details filled in
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
@@ -7249,7 +7249,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC43ToC21() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC43ToC21() {
         // Given - user previously had C43 data, now switching to C21
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
@@ -7281,7 +7281,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC21ToC43() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC21ToC43() {
         // Given - user previously had C21 data, now switching to C43
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
@@ -7310,7 +7310,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSyncCustomOrderFieldsToPreExisting_shouldClearAllSourceFieldsWhenSwitchingToOther() {
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearAllSourceFieldsWhenSwitchingToOther() {
         // Given - user had data for multiple order types, now switching to "other"
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderNameOption", "other");
@@ -7337,7 +7337,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsCircuitJudge() {
+    void testGetLoggedInJudgeTitleReturnsCircuitJudge() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7360,7 +7360,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsDistrictJudge() {
+    void testGetLoggedInJudgeTitleReturnsDistrictJudge() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7382,7 +7382,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsNullWhenUserNotFound() {
+    void testGetLoggedInJudgeTitleReturnsNullWhenUserNotFound() {
         // Given
         String idamUserId = "unknown-idam-id";
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
@@ -7396,7 +7396,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsEmpty() {
+    void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsEmpty() {
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle("");
 
@@ -7405,7 +7405,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsNull() {
+    void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsNull() {
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(null);
 
@@ -7414,7 +7414,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsNullWhenNoAppointments() {
+    void testGetLoggedInJudgeTitleReturnsNullWhenNoAppointments() {
         // Given
         String idamUserId = "test-idam-id";
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
@@ -7434,7 +7434,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsNullWhenApiThrowsException() {
+    void testGetLoggedInJudgeTitleReturnsNullWhenApiThrowsException() {
         // Given
         String idamUserId = "test-idam-id";
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
@@ -7448,7 +7448,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsRecorder() {
+    void testGetLoggedInJudgeTitleReturnsRecorder() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7470,7 +7470,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsDeputyCircuitJudge() {
+    void testGetLoggedInJudgeTitleReturnsDeputyCircuitJudge() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7492,7 +7492,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForMaleHighCourtJudge() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForMaleHighCourtJudge() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7515,7 +7515,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForFemaleHighCourtJudge() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForFemaleHighCourtJudge() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7538,7 +7538,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsNullForHighCourtJudgeWithNoPostNominals() {
+    void testGetLoggedInJudgeTitleReturnsNullForHighCourtJudgeWithNoPostNominals() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7561,7 +7561,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForDeputyHighCourtJudge() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForDeputyHighCourtJudge() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7584,7 +7584,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForSir() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForSir() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7607,7 +7607,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForLady() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForLady() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7630,7 +7630,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMs() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMs() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7653,7 +7653,7 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    public void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMiss() {
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMiss() {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
