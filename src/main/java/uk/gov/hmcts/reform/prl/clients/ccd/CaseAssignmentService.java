@@ -526,7 +526,7 @@ public class CaseAssignmentService {
             .map(DynamicListElement::getCode)
             .orElse(null);
 
-        if(solicitorRole == null) {
+        if (solicitorRole == null) {
             log.info(" Attempting to remove Barrister but the solicitor role is null for case id {} ", caseData.getId());
             return;
         }
