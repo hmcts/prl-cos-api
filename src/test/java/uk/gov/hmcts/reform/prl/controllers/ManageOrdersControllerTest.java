@@ -2139,9 +2139,13 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(taskUtils.setTaskCompletion(anyString(),
-                                         isA(CaseData.class), any(Predicate.class)))
-            .thenReturn(CLIENT_CONTEXT);
+        when(taskUtils.setTaskCompletion(anyString(), isA(CaseData.class), any(Predicate.class)))
+            .thenAnswer(invocation -> {
+                Predicate<CaseData> predicate = invocation.getArgument(2);
+                CaseData data = invocation.getArgument(1);
+                predicate.test(data);  // Execute the predicate to cover the lambda
+                return CLIENT_CONTEXT;
+            });
         when(objectMapper.convertValue(eq(stringObjectMap.get(IS_INVOKED_FROM_TASK)),
                                        ArgumentMatchers.<TypeReference<YesOrNo>>any()))
             .thenReturn(Yes);

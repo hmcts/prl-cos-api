@@ -17,16 +17,22 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
+import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
@@ -458,6 +464,90 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("Michael Solicitor", placeholders.get("applicantRepresentativeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_fl401ApplicantPopulated() throws IOException {
+        Long caseId = 1234567890123456L;
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .firstName("Jane")
+            .lastName("Doe")
+            .representativeFirstName("Legal")
+            .representativeLastName("Rep")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Jane Doe", placeholders.get("applicantName"));
+        assertEquals("Legal Rep", placeholders.get("applicantRepresentativeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_fl401ChildrenPopulated() throws IOException {
+        Long caseId = 1234567890123456L;
+        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
+            .childFullName("Tommy Test")
+            .build();
+
+        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
+            .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("Jane").lastName("Doe").build())
+            .typeOfApplicationOrders(orders)
+            .home(Home.builder()
+                .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(child).build()))
+                .build())
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
+        assertNotNull(children);
+        assertFalse(children.isEmpty());
+        assertEquals("Tommy Test", children.getFirst().get("fullName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_fl401RespondentPopulated() throws IOException {
+        Long caseId = 1234567890123456L;
+        PartyDetails fl401Respondent = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Smith")
+            .representativeFirstName("Defence")
+            .representativeLastName("Lawyer")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("Jane").lastName("Doe").build())
+            .respondentsFL401(fl401Respondent)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("John Smith", placeholders.get("respondent1Name"));
+        assertEquals("Defence Lawyer", placeholders.get("respondent1RepresentativeName"));
     }
 
     @Test
@@ -1240,6 +1330,80 @@ class CustomOrderServiceTest {
         assertEquals("at a hearing", placeholders.get("hearingOrPapers"));
     }
 
+    @Test
+    void testBuildHeaderPlaceholders_judgeTitleFromMapAsString() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistrateTitle", "herHonourJudge");
+        caseDataMap.put("judgeName", "Smith");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Her Honour Judge Smith", placeholders.get("judgeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_judgeTitleFromMapAsEnum() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.districtJudge);
+        caseDataMap.put("judgeName", "Brown");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("District Judge Brown", placeholders.get("judgeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_judgeTitleFromMapAsInvalidString() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistrateTitle", "Custom Title");  // Not a valid enum
+        caseDataMap.put("judgeName", "Jones");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        // Falls back to using the string as-is
+        assertEquals("Custom Title Jones", placeholders.get("judgeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_judgeTitleFromMapAsOtherType() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistrateTitle", 12345);  // Neither String nor Enum
+        caseDataMap.put("judgeName", "Wilson");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        // Uses toString() on the object
+        assertEquals("12345 Wilson", placeholders.get("judgeName"));
+    }
+
     // ========== Tests for getEffectiveOrderName (custom order dropdown feature) ==========
 
     @ParameterizedTest
@@ -1920,6 +2084,68 @@ class CustomOrderServiceTest {
         assertEquals("Grandparent", placeholders.get("respondent1RelationshipToChild"));
     }
 
+    // ========== Tests for findRelationshipFromOldModel ==========
+
+    @Test
+    void testRespondentRelationship_fromOldChildrenModel() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        // Old children model with respondentsRelationshipToChild
+        Child oldChild = Child.builder()
+            .firstName("Tommy")
+            .lastName("Test")
+            .respondentsRelationshipToChild(RelationshipsEnum.father)
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("David")
+            .lastName("Williams")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .children(List.of(Element.<Child>builder().value(oldChild).build()))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Father", placeholders.get("respondent1RelationshipToChild"));
+    }
+
+    @Test
+    void testRespondentRelationship_fromOldChildrenModel_noRelationshipSet() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        // Old children model WITHOUT respondentsRelationshipToChild
+        Child oldChild = Child.builder()
+            .firstName("Tommy")
+            .lastName("Test")
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("David")
+            .lastName("Williams")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .children(List.of(Element.<Child>builder().value(oldChild).build()))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        // Falls back to empty when no relationship found
+        assertEquals("", placeholders.get("respondent1RelationshipToChild"));
+    }
+
     // ========== Tests for populateChildrensGuardian ==========
 
     @Test
@@ -2347,6 +2573,104 @@ class CustomOrderServiceTest {
     }
 
     @Test
+    void testGetEffectiveOrderName_withC43Order_handlesNullC43Details() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        // No customC43OrderDetails
+
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        assertNotNull(result);
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withC43Order_handlesNonMapC43Details() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataMap.put("customC43OrderDetails", "not a map");
+
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        assertNotNull(result);
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withC43Order_handlesEmptyOrdersList() {
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataMap.put("customC43OrderDetails", c43Details);
+
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        assertNotNull(result);
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withC43Order_handlesNonListOrdersToIssue() {
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", "not a list");
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataMap.put("customC43OrderDetails", c43Details);
+
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        assertNotNull(result);
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withC43Order_handlesInvalidOrderTypeString() {
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of("invalidOrderType"));
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataMap.put("customC43OrderDetails", c43Details);
+
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Falls back to dropdown when order type can't be parsed
+        assertNotNull(result);
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withC43Order_handlesNonStringNonEnumOrderType() {
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of(12345));  // Neither String nor Enum
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataMap.put("customC43OrderDetails", c43Details);
+
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        // Falls back to dropdown when order type is neither String nor Enum
+        assertNotNull(result);
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)", result);
+    }
+
+    @Test
     void testGetEffectiveOrderName_withC21Order_parsesSubOptionFromString() {
         Map<String, Object> c21Details = new HashMap<>();
         c21Details.put("orderOptions", "c21other");
@@ -2447,6 +2771,30 @@ class CustomOrderServiceTest {
         // Falls back to dropdown display value when no C21 details
         assertNotNull(result);
         assertEquals("Blank order or directions (C21)", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withNullCaseDataMap_usesTextFieldName() {
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("Custom Text Order Name")
+            .build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, null);
+
+        // Falls back to text field when caseDataMap is null
+        assertNotNull(result);
+        assertEquals("Custom Text Order Name", result);
+    }
+
+    @Test
+    void testGetEffectiveOrderName_withNullCaseDataMap_usesDefaultWhenNoTextName() {
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getEffectiveOrderName(caseData, null);
+
+        // Falls back to default when caseDataMap is null and no text name
+        assertNotNull(result);
+        assertEquals("Order", result);
     }
 
     @Test
