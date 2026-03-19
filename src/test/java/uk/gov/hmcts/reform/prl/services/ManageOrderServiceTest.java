@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -150,6 +150,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -163,6 +164,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.INVALID_EMAIL_ADDRESS_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
@@ -2889,6 +2891,28 @@ class ManageOrderServiceTest {
         assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
+    @Test
+    public void shouldThrowExceptionWhenRoleAssignmentApiCallFails() {
+
+        String auth = "test-auth";
+        String authToken = "serviceAuthToken";
+        String id = "123";
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder()
+                .id(id)
+                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .build()
+        );
+        when(authTokenGenerator.generate()).thenReturn(authToken);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY))
+            .thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authToken, null, id))
+            .thenThrow(FeignException.class);
+
+        assertThrows(FeignException.class, () -> manageOrderService.getLoggedInUserType(auth));
+    }
+
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
@@ -4422,10 +4446,10 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertEquals(1,response.getErrors().size());
-        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertTrue(errors.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
     }
 
     @Test
@@ -4454,10 +4478,11 @@ class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertEquals(1,response.getErrors().size());
-        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertTrue(errors.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
     }
 
     @Test
@@ -4487,10 +4512,10 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertEquals(1,response.getErrors().size());
-        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertTrue(errors.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
     }
 
     @Test
@@ -4520,12 +4545,10 @@ class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().get("id"));
-        assertEquals("123", response.getData().get("id").toString());
 
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
     }
 
     @Test
@@ -4555,11 +4578,9 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().get("id"));
-        assertEquals("123", response.getData().get("id").toString());
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
     }
 
     @Test
@@ -4588,11 +4609,9 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().get("id"));
-        assertEquals("123", response.getData().get("id").toString());
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
     }
 
     @Test
@@ -4622,11 +4641,11 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertEquals(2,response.getErrors().size());
-        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
-        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(2, errors.size());
+        assertTrue(errors.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+        assertTrue(errors.contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
 
     @Test
@@ -4658,10 +4677,10 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertEquals(1, response.getErrors().size());
-        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertTrue(errors.contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
 
     @Test
@@ -4695,11 +4714,9 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
-        AboutToStartOrSubmitCallbackResponse response
-            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertNotNull(response.getData());
-        assertNotNull(response.getData().get("id"));
-        assertEquals("123", response.getData().get("id").toString());
+        List<String> errors = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
     }
 
     private CaseData getCaseData() {
@@ -6719,5 +6736,68 @@ class ManageOrderServiceTest {
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
         assertEquals(caseData.getManageOrders().getJudgeOrMagistrateTitle().name(),
                      orders.getValue().getFinalisationDetails().getJudgeOrMagistrateTitle());
+    }
+
+    @Test
+    public void validateAdditionalPartiesShouldReturnNoErrorsForValidEmails() {
+        CaseData testData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .serveOrgDetailsList(List.of(
+                                  element(ServeOrgDetails.builder()
+                                              .serveByPostOrEmail(DeliveryByEnum.email)
+                                              .emailInformation(EmailInformation.builder()
+                                                                    .emailAddress("test@test.com")
+                                                                    .build())
+                                              .build())))
+                              .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = testData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(testData, CaseData.class)).thenReturn(testData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(testData);
+
+        List<String> errors = manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest);
+
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
+    }
+
+    @Test
+    public void validateAdditionalPartiesShouldReturnErrorsForInvalidEmails() {
+        CaseData testData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .serveOrgDetailsList(List.of(
+                                  element(ServeOrgDetails.builder()
+                                              .serveByPostOrEmail(DeliveryByEnum.email)
+                                              .emailInformation(EmailInformation.builder()
+                                                                    .emailAddress("test@test.com,test2@test.com")
+                                                                    .build())
+                                              .build())))
+                              .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = testData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(testData, CaseData.class)).thenReturn(testData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(testData);
+
+        List<String> errors = manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest);
+
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertEquals(INVALID_EMAIL_ADDRESS_ERROR, errors.getFirst());
     }
 }

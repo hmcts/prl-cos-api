@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.exception.ReviewDocumentException;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -113,6 +115,21 @@ public class ReviewDocumentsControllerTest {
         verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
         verifyNoMoreInteractions(reviewDocumentService);
     }
+
+    @Test(expected = ReviewDocumentException.class)
+    public void testHandleAboutToSubmitWhenReviewDocsDynamicListIsNull() throws Exception {
+        // given
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData.getReviewDocuments().setReviewDocsDynamicList(null);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        // when
+        reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
+
+        // then
+        verifyNoInteractions(reviewDocumentService);
+    }
+
 
     @Test
     public void testHandleSubmitted() {
