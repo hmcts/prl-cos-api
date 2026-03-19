@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -26,13 +25,11 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
-import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
-import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
@@ -494,21 +491,16 @@ class CustomOrderServiceTest {
     @Test
     void testBuildHeaderPlaceholders_fl401ChildrenPopulated() throws IOException {
         Long caseId = 1234567890123456L;
-        ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
-            .childFullName("Tommy Test")
-            .build();
 
-        TypeOfApplicationOrders orders = TypeOfApplicationOrders.builder()
-            .orderType(List.of(FL401OrderTypeEnum.occupationOrder))
+        ApplicantChild child = ApplicantChild.builder()
+            .fullName("Tommy Test")
+            .dateOfBirth(LocalDate.of(2015, 5, 10))
             .build();
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .applicantsFL401(PartyDetails.builder().firstName("Jane").lastName("Doe").build())
-            .typeOfApplicationOrders(orders)
-            .home(Home.builder()
-                .children(List.of(Element.<ChildrenLiveAtAddress>builder().value(child).build()))
-                .build())
+            .applicantChildDetails(List.of(Element.<ApplicantChild>builder().value(child).build()))
             .build();
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
@@ -1337,7 +1329,6 @@ class CustomOrderServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistrateTitle", "herHonourJudge");
-        caseDataMap.put("judgeName", "Smith");
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1345,7 +1336,7 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("Her Honour Judge Smith", placeholders.get("judgeName"));
+        assertEquals("Her Honour Judge", placeholders.get("judgeTitle"));
     }
 
     @Test
@@ -1355,7 +1346,6 @@ class CustomOrderServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.districtJudge);
-        caseDataMap.put("judgeName", "Brown");
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1363,7 +1353,7 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("District Judge Brown", placeholders.get("judgeName"));
+        assertEquals("District Judge", placeholders.get("judgeTitle"));
     }
 
     @Test
@@ -1373,7 +1363,6 @@ class CustomOrderServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistrateTitle", "Custom Title");  // Not a valid enum
-        caseDataMap.put("judgeName", "Jones");
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1382,7 +1371,7 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         // Falls back to using the string as-is
-        assertEquals("Custom Title Jones", placeholders.get("judgeName"));
+        assertEquals("Custom Title", placeholders.get("judgeTitle"));
     }
 
     @Test
@@ -1392,7 +1381,6 @@ class CustomOrderServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistrateTitle", 12345);  // Neither String nor Enum
-        caseDataMap.put("judgeName", "Wilson");
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1401,7 +1389,7 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         // Uses toString() on the object
-        assertEquals("12345 Wilson", placeholders.get("judgeName"));
+        assertEquals("12345", placeholders.get("judgeTitle"));
     }
 
     // ========== Tests for getEffectiveOrderName (custom order dropdown feature) ==========
@@ -2794,7 +2782,7 @@ class CustomOrderServiceTest {
 
         // Falls back to default when caseDataMap is null and no text name
         assertNotNull(result);
-        assertEquals("Order", result);
+        assertEquals("custom_order", result);
     }
 
     @Test
