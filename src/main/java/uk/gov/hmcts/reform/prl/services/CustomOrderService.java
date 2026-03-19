@@ -1706,18 +1706,32 @@ public class CustomOrderService {
     private void updateFinalOrderCollection(Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
         Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders;
+
         if (rawOrders == null) {
-            log.warn("orderCollection is null, cannot update");
-            return;
+            log.info("orderCollection is null, creating new collection with custom order");
+            orders = new ArrayList<>();
+        } else {
+            orders = objectMapper.convertValue(
+                rawOrders,
+                new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {}
+            );
         }
 
-        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders = objectMapper.convertValue(
-            rawOrders,
-            new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {}
-        );
-
         if (orders.isEmpty()) {
-            log.warn("orderCollection is empty, cannot update");
+            // Create a new order entry for custom orders served immediately
+            log.info("orderCollection is empty, creating new order entry for custom order");
+            uk.gov.hmcts.reform.prl.models.OrderDetails newOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+                .orderDocument(docToStore)
+                .doesOrderDocumentNeedSeal(YesOrNo.No)
+                .dateCreated(java.time.LocalDateTime.now())
+                .build();
+            orders.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+                .id(java.util.UUID.randomUUID())
+                .value(newOrder)
+                .build());
+            caseDataUpdated.put(ORDER_COLLECTION, orders);
+            log.info("Created new orderCollection with custom order doc: {}", docToStore.getDocumentFileName());
             return;
         }
 
