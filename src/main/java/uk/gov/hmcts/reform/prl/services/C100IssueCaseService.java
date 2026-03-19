@@ -167,11 +167,11 @@ public class C100IssueCaseService {
         eventPublisher.publishEvent(notifyLocalCourtEvent);
         if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
             log.info("Adding the event for history tab");
-            updateHistoryTab(callbackRequest);
+            addPathFinderDecisonTotHistoryTab(callbackRequest);
         }
     }
 
-    public void updateHistoryTab(CallbackRequest callbackRequest) {
+    public void addPathFinderDecisonTotHistoryTab(CallbackRequest callbackRequest) {
 
         String systemAuthToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);
@@ -184,7 +184,7 @@ public class C100IssueCaseService {
             ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
         Event event =  Event.builder()
                 .id(startEventResponse.getEventId())
-                .description(PATHFINDER_DECISION_YES)
+                .summary(PATHFINDER_DECISION_YES)
                 .build();
 
         var caseDataContent = CaseDataContent.builder()

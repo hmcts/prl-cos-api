@@ -712,7 +712,7 @@ public class C100IssueCaseServiceTest {
                              .build())
             .build();
 
-        c100IssueCaseService.updateHistoryTab(callbackRequest);
+        c100IssueCaseService.addPathFinderDecisonTotHistoryTab(callbackRequest);
 
         verify(systemUserService).getSysUserToken();
         verify(systemUserService).getUserId(systemAuthToken);
