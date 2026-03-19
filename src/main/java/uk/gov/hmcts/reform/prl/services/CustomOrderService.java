@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 /**
@@ -97,7 +98,7 @@ public class CustomOrderService {
     }
 
     private CustomOrderNameOptionsEnum parseCustomOrderNameOption(Map<String, Object> caseDataMap) {
-        Object rawOption = caseDataMap != null ? caseDataMap.get("customOrderNameOption") : null;
+        Object rawOption = caseDataMap != null ? caseDataMap.get(CUSTOM_ORDER_NAME_OPTION) : null;
         if (rawOption == null) {
             return null;
         }

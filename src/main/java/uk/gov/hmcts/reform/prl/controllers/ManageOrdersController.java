@@ -70,18 +70,24 @@ import javax.ws.rs.core.HttpHeaders;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AMEND_ORDER_SELECT_CHECK_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOGGED_IN_USER_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIEW_ORDER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHAT_DO_WITH_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -438,7 +444,7 @@ public class ManageOrdersController {
                 : null;
             if (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendCheck)
                 || AmendOrderCheckEnum.managerCheck.equals(amendCheck)) {
-                caseDataUpdated.remove("doYouWantToServeOrder");
+                caseDataUpdated.remove(DO_YOU_WANT_TO_SERVE_ORDER);
             }
             try {
                 setHearingData(caseData, caseDataUpdated, authorisation);
@@ -924,9 +930,9 @@ public class ManageOrdersController {
         // The callback request data has the CURRENT data from the aboutToSubmit response (not yet persisted).
         // For custom order fields, we must use callbackRequest data.
         String[] customOrderFields = {
-            CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, "customOrderNameOption",
-            "nameOfOrder", "amendOrderSelectCheckOptions", "whatDoWithOrder", "doYouWantToServeOrder",
-            "customOrderDateEnds"
+            CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, CUSTOM_ORDER_NAME_OPTION,
+            NAME_OF_ORDER, AMEND_ORDER_SELECT_CHECK_OPTIONS, WHAT_DO_WITH_ORDER, DO_YOU_WANT_TO_SERVE_ORDER,
+            CUSTOM_ORDER_DATE_ENDS
         };
         for (String field : customOrderFields) {
             Object value = callbackData.get(field);
@@ -946,8 +952,8 @@ public class ManageOrdersController {
 
     @SuppressWarnings("unchecked")
     private void copyCustomOrderDateEndsToFl404(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
-        Object customOrderDateEnds = callbackData.get("customOrderDateEnds");
-        Object customOrderNameOption = callbackData.get("customOrderNameOption");
+        Object customOrderDateEnds = callbackData.get(CUSTOM_ORDER_DATE_ENDS);
+        Object customOrderNameOption = callbackData.get(CUSTOM_ORDER_NAME_OPTION);
         if (customOrderDateEnds != null && customOrderNameOption != null) {
             String orderType = customOrderNameOption.toString();
             // Check if this is an FL404-related order type (nonMolestation, occupation, powerOfArrest)
@@ -966,10 +972,15 @@ public class ManageOrdersController {
     private void processCustomOrder(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         // Determine if this is a draft order based on user type and settings
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        Object amendCheckObj = caseDataUpdated.get("amendOrderSelectCheckOptions");
-        AmendOrderCheckEnum amendCheck = amendCheckObj != null
-            ? objectMapper.convertValue(amendCheckObj, AmendOrderCheckEnum.class)
-            : (caseData.getManageOrders() != null ? caseData.getManageOrders().getAmendOrderSelectCheckOptions() : null);
+        Object amendCheckObj = caseDataUpdated.get(AMEND_ORDER_SELECT_CHECK_OPTIONS);
+        AmendOrderCheckEnum amendCheck;
+        if (amendCheckObj != null) {
+            amendCheck = objectMapper.convertValue(amendCheckObj, AmendOrderCheckEnum.class);
+        } else if (caseData.getManageOrders() != null) {
+            amendCheck = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
+        } else {
+            amendCheck = null;
+        }
         boolean isDraftOrder = UserRoles.JUDGE.name().equals(loggedInUserType)
             || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && (!AmendOrderCheckEnum.noCheck.equals(amendCheck)
@@ -980,12 +991,12 @@ public class ManageOrdersController {
     private void cleanupCustomOrderFields(Map<String, Object> caseDataUpdated) {
         caseDataUpdated.remove(CUSTOM_ORDER_DOC);
         caseDataUpdated.remove(PREVIEW_ORDER_DOC);
-        caseDataUpdated.remove("customOrderNameOption");
-        caseDataUpdated.remove("nameOfOrder");
-        caseDataUpdated.remove("amendOrderSelectCheckOptions");
-        caseDataUpdated.remove("whatDoWithOrder");
-        caseDataUpdated.remove("doYouWantToServeOrder");
-        caseDataUpdated.remove("customOrderDateEnds");
+        caseDataUpdated.remove(CUSTOM_ORDER_NAME_OPTION);
+        caseDataUpdated.remove(NAME_OF_ORDER);
+        caseDataUpdated.remove(AMEND_ORDER_SELECT_CHECK_OPTIONS);
+        caseDataUpdated.remove(WHAT_DO_WITH_ORDER);
+        caseDataUpdated.remove(DO_YOU_WANT_TO_SERVE_ORDER);
+        caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS);
         log.info("Cleaned up custom order fields after processing");
     }
 }

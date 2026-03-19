@@ -173,11 +173,19 @@ public class RefDataUserService {
     public List<JudicialUsersApiResponse> getJudicialUserBySidamId(String sidamId) {
         log.info("Fetching judicial user details for sidamId: {} (not cached)", sidamId);
         Map<String, Object> requestBody = Map.of("sidam_ids", new String[]{sidamId});
-        return judicialUserDetailsApi.getJudicialUsersByRequestMap(
+        List<JudicialUsersApiResponse> response = judicialUserDetailsApi.getJudicialUsersByRequestMap(
             idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
             authTokenGenerator.generate(),
             requestBody
         );
+        log.info("Judicial API raw response for sidamId {}: {}", sidamId, response);
+        if (response != null && !response.isEmpty()) {
+            JudicialUsersApiResponse judge = response.get(0);
+            log.info("Judge details - fullName={}, knownAs={}, surname={}, postNominals={}, appointments={}",
+                judge.getFullName(), judge.getKnownAs(), judge.getSurname(),
+                judge.getPostNominals(), judge.getAppointments());
+        }
+        return response;
     }
 
     @CacheEvict(allEntries = true, cacheNames = JUDICIAL_USER_CACHE)

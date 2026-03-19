@@ -128,6 +128,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_ORDER_FOR_CA_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -137,6 +138,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
@@ -144,6 +146,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -2598,7 +2601,7 @@ public class ManageOrderService {
      */
     @SuppressWarnings("unchecked")
     public void syncCustomOrderFieldsToPreExisting(Map<String, Object> caseDataUpdated) {
-        Object customOrderNameOptionObj = caseDataUpdated.get("customOrderNameOption");
+        Object customOrderNameOptionObj = caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION);
         String customOrderNameOption = customOrderNameOptionObj != null ? customOrderNameOptionObj.toString() : null;
 
         // Set createSelectOrderOptions and nameOfOrder from customOrderNameOption so existing code paths work
@@ -2606,7 +2609,7 @@ public class ManageOrderService {
             try {
                 CreateSelectOrderOptionsEnum orderType = CreateSelectOrderOptionsEnum.valueOf(customOrderNameOption);
                 caseDataUpdated.put("createSelectOrderOptions", orderType);
-                caseDataUpdated.put("nameOfOrder", orderType.getDisplayedValue());
+                caseDataUpdated.put(NAME_OF_ORDER, orderType.getDisplayedValue());
             } catch (IllegalArgumentException e) {
                 log.warn("Could not convert customOrderNameOption '{}' to CreateSelectOrderOptionsEnum", customOrderNameOption);
             }
@@ -3069,7 +3072,7 @@ public class ManageOrderService {
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
         // Check caseDataUpdated for doYouWantToServeOrder (stale values are removed before this is called)
-        Object doYouWantToServe = caseDataUpdated.get("doYouWantToServeOrder");
+        Object doYouWantToServe = caseDataUpdated.get(DO_YOU_WANT_TO_SERVE_ORDER);
         boolean wantsToServe = doYouWantToServe != null && Yes.toString().equals(doYouWantToServe.toString());
 
         if (servedSavedOrders.equals(caseData.getManageOrdersOptions()) || wantsToServe) {
