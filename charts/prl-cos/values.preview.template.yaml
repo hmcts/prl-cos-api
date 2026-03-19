@@ -100,5 +100,6 @@ java:
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     BARRISTER_FEATURE_ENABLED: true
     AWAITING_INFORMATION_ENABLED: true
+    EXIT_AWAITING_INFORMATION_ENABLED: true
     CAFCASS_DATE_TIME_FEATURE_ENABLED: true
     APP_ENV: "preview"
