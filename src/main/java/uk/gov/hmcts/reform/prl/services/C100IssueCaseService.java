@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 
 @Service
@@ -84,11 +84,9 @@ public class C100IssueCaseService {
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 Map<String, String> dfjAreaFields = dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId);
                 if (MapUtils.isNotEmpty(dfjAreaFields)) {
-                    log.info("DFJ area fields found for court id: {} and path finder set to Yes", baseLocationId);
                     caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
                 } else {
-                    log.info("DFJ area fields are not found for court id: {} and path finder set to NO", baseLocationId);
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.No);
                 }
             }
@@ -167,6 +165,10 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
+        if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+           log.info("Adding the event for history tab");
+           updateHistoryTab(callbackRequest);
+        }
     }
 
     public void updateHistoryTab(CallbackRequest callbackRequest) {
@@ -175,7 +177,7 @@ public class C100IssueCaseService {
         String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);
 
         EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
-            ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK, systemUpdateUserId);
+            PATH_FINDER_DECISION, systemUpdateUserId);
 
         String caseId = valueOf(callbackRequest.getCaseDetails().getId());
         var startEventResponse =
@@ -192,6 +194,6 @@ public class C100IssueCaseService {
             .build();
         ccdCoreCaseDataService.submitUpdate(
             systemAuthToken, eventRequestData, caseDataContent, caseId, true);
-        log.info("ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK : History tab updated for case id: {}", caseId);
+        log.info("PATH_FINDER_DECISION : History tab event is updated for case id: {}", caseId);
     }
 }
