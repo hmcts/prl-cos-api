@@ -1124,5 +1124,224 @@
         }
       }
     ]
+  },
+  {
+    "email": "prl-aat-superuser@justice.gov.uk",
+    "id": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+    "roleAssignments": [
+      {
+        "id": "953f4f99-6c21-4a1a-a6e5-2d2f98a5b799",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-manager",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631096Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "00923682-3331-4467-acc3-f28d06843759",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "task-supervisor",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631129Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "92644aa5-b573-4802-a776-7192753865b8",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-ctsc",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "CTSC",
+        "readOnly": true,
+        "created": "2025-05-16T13:40:59.63118Z",
+        "attributes": {
+          "substantive": "N"
+        }
+      },
+      {
+        "id": "c5b29c3b-651a-463d-918e-aa52519eb713",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "ctsc-team-leader",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631185Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "080b8ded-d101-4af8-bcca-fa487fb4bcc8",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "specific-access-approver-ctsc",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631201Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW",
+          "workTypes": "access_requests"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "693e3730-794c-4872-836b-ff51b5f44575",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631216Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "1469c0fb-632e-4b86-abbd-55aa206af41a",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "case-allocator",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631221Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "db1cfffd-047e-477c-88da-859cd44b6a3b",
+        "actorIdType": "IDAM",
+        "actorId": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
+        "roleType": "ORGANISATION",
+        "roleName": "ctsc",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "CTSC",
+        "readOnly": false,
+        "created": "2025-05-16T13:40:59.631234Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "234946",
+          "jurisdiction": "PRIVATELAW",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      }
+    ]
   }
 ]
