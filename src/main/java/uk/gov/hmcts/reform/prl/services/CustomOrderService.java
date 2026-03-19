@@ -1659,10 +1659,12 @@ public class CustomOrderService {
             log.info("Custom order processed: {}, isDraftOrder={}", finalDoc.getDocumentFileName(), isDraftOrder);
 
             // Update the appropriate collection
+            // Note: caseDataUpdated may not have the collection if it was created in about-to-submit.
+            // In that case, we need to read from caseData (persisted) and update caseDataUpdated.
             if (isDraftOrder) {
-                updateDraftOrderCollection(caseDataUpdated, finalDoc);
+                updateDraftOrderCollection(caseData, caseDataUpdated, finalDoc);
             } else {
-                updateFinalOrderCollection(caseDataUpdated, finalDoc);
+                updateFinalOrderCollection(caseData, caseDataUpdated, finalDoc);
             }
 
             // Clean up previewOrderDoc now that we've used it
@@ -1673,24 +1675,36 @@ public class CustomOrderService {
         }
     }
 
-    private void updateDraftOrderCollection(Map<String, Object> caseDataUpdated,
+    private void updateDraftOrderCollection(CaseData caseData,
+                                            Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
+        // First try caseDataUpdated (in case it was modified during this callback)
+        // Then fall back to caseData (persisted from about-to-submit)
         Object rawDrafts = caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
-        if (rawDrafts == null) {
-            log.warn("draftOrderCollection is null, cannot update");
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> drafts;
+
+        if (rawDrafts != null) {
+            drafts = objectMapper.convertValue(
+                rawDrafts,
+                new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>>() {}
+            );
+            log.info("Using draftOrderCollection from caseDataUpdated, size={}", drafts.size());
+        } else if (caseData.getDraftOrderCollection() != null && !caseData.getDraftOrderCollection().isEmpty()) {
+            // Read from persisted caseData
+            drafts = new ArrayList<>(caseData.getDraftOrderCollection());
+            log.info("Using draftOrderCollection from caseData (persisted), size={}", drafts.size());
+        } else {
+            log.error("draftOrderCollection is null/empty in both caseDataUpdated and caseData - "
+                + "draft should have been created in about-to-submit callback");
             return;
         }
-
-        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> drafts = objectMapper.convertValue(
-            rawDrafts,
-            new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>>() {}
-        );
 
         if (drafts.isEmpty()) {
-            log.warn("draftOrderCollection is empty, cannot update");
+            log.error("draftOrderCollection exists but is empty - cannot update custom order document");
             return;
         }
 
+        // Update the first draft order with the combined document
         Element<uk.gov.hmcts.reform.prl.models.DraftOrder> draftElement = drafts.get(0);
         uk.gov.hmcts.reform.prl.models.DraftOrder updatedDraft = draftElement.getValue().toBuilder()
             .orderDocument(docToStore)
@@ -1703,38 +1717,36 @@ public class CustomOrderService {
         log.info("Updated draftOrderCollection[0] with doc: {}", docToStore.getDocumentFileName());
     }
 
-    private void updateFinalOrderCollection(Map<String, Object> caseDataUpdated,
+    private void updateFinalOrderCollection(CaseData caseData,
+                                            Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore) {
+        // First try caseDataUpdated (in case it was modified during this callback)
+        // Then fall back to caseData (persisted from about-to-submit)
         Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
         List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders;
 
-        if (rawOrders == null) {
-            log.info("orderCollection is null, creating new collection with custom order");
-            orders = new ArrayList<>();
-        } else {
+        if (rawOrders != null) {
             orders = objectMapper.convertValue(
                 rawOrders,
                 new TypeReference<List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>>() {}
             );
-        }
-
-        if (orders.isEmpty()) {
-            // Create a new order entry for custom orders served immediately
-            log.info("orderCollection is empty, creating new order entry for custom order");
-            uk.gov.hmcts.reform.prl.models.OrderDetails newOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
-                .orderDocument(docToStore)
-                .doesOrderDocumentNeedSeal(YesOrNo.No)
-                .dateCreated(java.time.LocalDateTime.now())
-                .build();
-            orders.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
-                .id(java.util.UUID.randomUUID())
-                .value(newOrder)
-                .build());
-            caseDataUpdated.put(ORDER_COLLECTION, orders);
-            log.info("Created new orderCollection with custom order doc: {}", docToStore.getDocumentFileName());
+            log.info("Using orderCollection from caseDataUpdated, size={}", orders.size());
+        } else if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
+            // Read from persisted caseData
+            orders = new ArrayList<>(caseData.getOrderCollection());
+            log.info("Using orderCollection from caseData (persisted), size={}", orders.size());
+        } else {
+            log.error("orderCollection is null/empty in both caseDataUpdated and caseData - "
+                + "order should have been created in about-to-submit callback");
             return;
         }
 
+        if (orders.isEmpty()) {
+            log.error("orderCollection exists but is empty - cannot update custom order document");
+            return;
+        }
+
+        // Update the first order with the sealed document
         Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement = orders.get(0);
         uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderElement.getValue().toBuilder()
             .orderDocument(docToStore)

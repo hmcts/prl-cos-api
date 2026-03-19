@@ -1842,76 +1842,76 @@ public class CustomOrderServiceTest {
     }
 
     @Test
-    public void testUpdateFinalOrderCollection_createsCollectionWhenNull() {
-        // Arrange - orderCollection is null in caseDataUpdated
+    public void testUpdateFinalOrderCollection_readsFromCaseDataWhenNotInUpdatedMap() {
+        // Arrange - orderCollection exists in caseData but not in caseDataUpdated
+        uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder =
+            uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+                .orderType("TestOrder")
+                .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> existingOrders = new ArrayList<>();
+        existingOrders.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(UUID.randomUUID()).value(existingOrder).build());
+
+        CaseData caseData = CaseData.builder().id(123L).orderCollection(existingOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        // No orderCollection key - simulates first order on case
 
         uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                .documentFileName("sealed.pdf")
-                .documentBinaryUrl("http://sealed-binary")
-                .build();
+                .documentFileName("sealed.pdf").documentBinaryUrl("http://sealed").build();
 
         try {
             java.lang.reflect.Method method = CustomOrderService.class.getDeclaredMethod(
-                "updateFinalOrderCollection",
-                Map.class,
-                uk.gov.hmcts.reform.prl.models.documents.Document.class
-            );
+                "updateFinalOrderCollection", CaseData.class, Map.class,
+                uk.gov.hmcts.reform.prl.models.documents.Document.class);
             method.setAccessible(true);
-            method.invoke(customOrderService, caseDataUpdated, sealedDoc);
+            method.invoke(customOrderService, caseData, caseDataUpdated, sealedDoc);
         } catch (Exception e) {
             throw new RuntimeException("Failed to invoke updateFinalOrderCollection", e);
         }
 
-        // Assert - orderCollection should be created with one order
-        assertTrue(caseDataUpdated.containsKey("orderCollection"),
-            "orderCollection should be created when null");
+        assertTrue(caseDataUpdated.containsKey("orderCollection"));
         @SuppressWarnings("unchecked")
         List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders =
             (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
-        assertNotNull(orders, "orderCollection should not be null");
-        assertEquals(1, orders.size(), "orderCollection should have one order");
-        assertEquals(sealedDoc, orders.get(0).getValue().getOrderDocument(),
-            "Order should have the sealed document");
+        assertEquals(1, orders.size());
+        assertEquals(sealedDoc, orders.get(0).getValue().getOrderDocument());
+        assertEquals("TestOrder", orders.get(0).getValue().getOrderType());
     }
 
     @Test
-    public void testUpdateFinalOrderCollection_createsEntryWhenEmpty() {
-        // Arrange - orderCollection is empty list
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("orderCollection", new ArrayList<>());
-
-        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
-            .thenReturn(new ArrayList<>());
-
-        uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
-            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                .documentFileName("sealed.pdf")
-                .documentBinaryUrl("http://sealed-binary")
+    public void testUpdateDraftOrderCollection_readsFromCaseDataWhenNotInUpdatedMap() {
+        // Arrange - draftOrderCollection exists in caseData but not in caseDataUpdated
+        uk.gov.hmcts.reform.prl.models.DraftOrder existingDraft =
+            uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+                .judgeOrMagistratesLastName("Test Judge")
                 .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> existingDrafts = new ArrayList<>();
+        existingDrafts.add(Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+            .id(UUID.randomUUID()).value(existingDraft).build());
 
-        // Use reflection to call private method
+        CaseData caseData = CaseData.builder().id(123L).draftOrderCollection(existingDrafts).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("combined.docx").documentBinaryUrl("http://combined").build();
+
         try {
             java.lang.reflect.Method method = CustomOrderService.class.getDeclaredMethod(
-                "updateFinalOrderCollection",
-                Map.class,
-                uk.gov.hmcts.reform.prl.models.documents.Document.class
-            );
+                "updateDraftOrderCollection", CaseData.class, Map.class,
+                uk.gov.hmcts.reform.prl.models.documents.Document.class);
             method.setAccessible(true);
-            method.invoke(customOrderService, caseDataUpdated, sealedDoc);
+            method.invoke(customOrderService, caseData, caseDataUpdated, combinedDoc);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to invoke updateFinalOrderCollection", e);
+            throw new RuntimeException("Failed to invoke updateDraftOrderCollection", e);
         }
 
-        // Assert - orderCollection should have an entry
-        assertTrue(caseDataUpdated.containsKey("orderCollection"),
-            "orderCollection should exist");
+        assertTrue(caseDataUpdated.containsKey("draftOrderCollection"));
         @SuppressWarnings("unchecked")
-        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders =
-            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
-        assertNotNull(orders, "orderCollection should not be null");
-        assertEquals(1, orders.size(), "orderCollection should have one order");
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> drafts =
+            (List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
+        assertEquals(1, drafts.size());
+        assertEquals(combinedDoc, drafts.get(0).getValue().getOrderDocument());
+        assertEquals("Test Judge", drafts.get(0).getValue().getJudgeOrMagistratesLastName());
     }
 }
