@@ -370,7 +370,7 @@ class CafcassUploadDocServiceTest {
 
         verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), caseDataCaptor.capture());
         Map<String, Object> savedData = caseDataCaptor.getValue();
-        assertNull(savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
+        assertEquals(YesOrNo.No, savedData.get(CafcassAppConstants.CIR_DOC_UPLOADED));
         assertNull(savedData.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
         assertNull(savedData.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }

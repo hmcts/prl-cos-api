@@ -25,9 +25,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_DUE_DATE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_OVERDUE_TASK_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CIR_OVERDUE_TASK_CREATION;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
@@ -53,6 +55,7 @@ public class CirDeadlineService {
                 StartAllTabsUpdateDataContent startData =
                     allTabService.getStartUpdateForSpecificEvent(caseId, CIR_OVERDUE_TASK_CREATION.getValue());
                 Map<String, Object> caseDataUpdated = new HashMap<>();
+                caseDataUpdated.put(CIR_OVERDUE_TASK_CREATED, Yes);
                 allTabService.submitAllTabsUpdate(
                     startData.authorisation(),
                     caseId,
@@ -119,7 +122,8 @@ public class CirDeadlineService {
             + "    ],"
             + "    \"must_not\":["
             + "      {\"match\":{\"data." + CIR_RECEIVED_BY_DEADLINE + "\":\"" + YES + "\"}},"
-            + "      {\"exists\":{\"field\":\"data." + CIR_UPLOADED_DATE + "\"}}"
+            + "      {\"exists\":{\"field\":\"data." + CIR_UPLOADED_DATE + "\"}},"
+            + "      {\"match\":{\"data." + CIR_OVERDUE_TASK_CREATED + "\":\"" + YES + "\"}}"
             + "    ]"
             + "  }"
             + "},"

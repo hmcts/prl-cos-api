@@ -40,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
@@ -139,6 +140,7 @@ public class CafcassUploadDocService {
     private void setCirReceivedFlagIfApplicable(String typeOfDocument, Map<String, Object> existingCaseDataMap,
                                                 Map<String, Object> caseDataUpdated) {
         if (!CIR_DOCUMENT_TYPES.contains(typeOfDocument)) {
+            caseDataUpdated.put(CIR_DOC_UPLOADED, No);
             return;
         }
         caseDataUpdated.put(CIR_DOC_UPLOADED, Yes);
