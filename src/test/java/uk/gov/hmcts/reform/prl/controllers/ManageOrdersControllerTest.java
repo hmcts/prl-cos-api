@@ -4970,4 +4970,416 @@ public class ManageOrdersControllerTest {
         assertNotNull(response);
     }
 
+    @Test
+    public void testPopulateHeaderTask_shouldSetIsInvokedFromTask() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeaderTask(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        assertNotNull(response);
+        assertEquals(Yes, response.getData().get("isInvokedFromTask"));
+    }
+
+    @Test
+    public void testPopulateHeaderTask_shouldThrowExceptionWhenNotAuthorized() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        assertThrows(RuntimeException.class, () ->
+            manageOrdersController.populateHeaderTask(callbackRequest, authToken, s2sToken)
+        );
+    }
+
+    @Test
+    public void testPopulateFromHearing_forCustomOrder_shouldCopyFieldsWhenApprovedAtHearing() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+        stringObjectMap.put("customOrderWasApprovedAtHearing", "Yes");
+        stringObjectMap.put("customOrderHearingsType", "hearingTypeValue");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        assertNotNull(response);
+        assertEquals("Yes", response.getData().get("wasTheOrderApprovedAtHearing"));
+        assertEquals("hearingTypeValue", response.getData().get("hearingsType"));
+        verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
+    }
+
+    @Test
+    public void testPopulateFromHearing_forCustomOrder_shouldClearHearingsTypeWhenNotApproved() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+        stringObjectMap.put("customOrderWasApprovedAtHearing", "No");
+        stringObjectMap.put("customOrderHearingsType", "hearingTypeValue");
+        stringObjectMap.put("hearingsType", "existingHearingType");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        assertNotNull(response);
+        assertEquals("No", response.getData().get("wasTheOrderApprovedAtHearing"));
+        assertNull(response.getData().get("hearingsType"));
+        verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
+    }
+
+    @Test
+    public void testPopulateFromHearing_forNonCustomOrder_shouldNotCopyCustomFields() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+        stringObjectMap.put("customOrderWasApprovedAtHearing", "Yes");
+        stringObjectMap.put("customOrderHearingsType", "hearingTypeValue");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        assertNotNull(response);
+        assertNull(response.getData().get("wasTheOrderApprovedAtHearing"));
+        verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
+    }
+
+    @Test
+    public void testPopulateFromHearing_shouldThrowExceptionWhenNotAuthorized() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        assertThrows(InvalidClientException.class, () ->
+            manageOrdersController.populateFromHearing(callbackRequest, authToken, s2sToken)
+        );
+    }
+
+    @Test
+    public void testManageOrderMidEvent_forCustomOrder_shouldPopulateHearingsDropdown() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        DynamicList hearingsDropdown = DynamicList.builder()
+            .value(DynamicListElement.builder().code("hearing1").label("Hearing 1").build())
+            .listItems(List.of(DynamicListElement.builder().code("hearing1").label("Hearing 1").build()))
+            .build();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.populateHeader(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(manageOrderService.populateHearingsDropdown(eq(authToken), any(CaseData.class))).thenReturn(hearingsDropdown);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        assertEquals(hearingsDropdown, response.getData().get("customOrderHearingsType"));
+        verify(manageOrderService).populateHearingsDropdown(eq(authToken), any(CaseData.class));
+    }
+
+    @Test
+    public void testValidateAndPopulateHearingData_forCustomOrder_shouldReturnErrorWhenRenderFails() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("id", 12345L);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(customOrderService.resolveCourtName(any(), any())).thenReturn("Test Court");
+        when(customOrderService.renderAndUploadHeaderPreview(any(), any(), any(), any()))
+            .thenThrow(new RuntimeException("Failed to generate document"));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.validateAndPopulateHearingData(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+        assertThat(response.getErrors().get(0)).contains("Failed to render custom order preview");
+    }
+
+    @Test
+    public void testSaveOrderDetails_shouldReturnErrorWhenSetHearingDataFails() throws Exception {
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        // Make setHearingData throw an exception by making hearingService.getHearings fail
+        when(hearingService.getHearings(anyString(), anyString()))
+            .thenThrow(new RuntimeException("Template placeholder error"));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+    }
+
+    @Test
+    public void testSaveOrderDetails_shouldReturnDefaultErrorMessageWhenExceptionMessageIsBlank() throws Exception {
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        // Throw exception with blank message
+        when(hearingService.getHearings(anyString(), anyString()))
+            .thenThrow(new RuntimeException(""));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+        assertThat(response.getErrors().get(0)).contains("An error occurred while processing the order");
+    }
+
+    @Test
+    public void finalizeOrderSubmission_customOrder_withNullAmendCheck_shouldProcessAsDraft() throws Exception {
+        // Test covers the amendCheck = null path when amendOrderSelectCheckOptions is null
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://custom.url")
+            .documentBinaryUrl("http://custom-binary.url")
+            .documentFileName("custom.pdf")
+            .build();
+
+        // CaseData with ManageOrders but null amendOrderSelectCheckOptions
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(ManageOrders.builder()
+                .amendOrderSelectCheckOptions(null)  // null to trigger amendCheck = null path
+                .markedToServeEmailNotification(No)
+                .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        // No amendOrderSelectCheckOptions in map
+
+        Map<String, Object> caseDataUpdatedMap = new HashMap<>();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataUpdatedMap,
+            caseData,
+            null
+        );
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class))).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.isSaveAsDraft(any(CaseData.class))).thenReturn(false);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("manageOrders")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        // Verify combineAndFinalizeCustomOrder was called with isDraftOrder based on null amendCheck
+        // For COURT_ADMIN with null amendCheck, !noCheck.equals(null) is true so isDraftOrder = true
+        verify(customOrderService).combineAndFinalizeCustomOrder(eq(authToken), any(CaseData.class), anyMap(), eq(true));
+    }
+
 }

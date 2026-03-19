@@ -1412,16 +1412,6 @@ public class CustomOrderService {
     }
 
     /**
-     * Gets the custom order header preview document.
-     * @deprecated Use findCustomOrderHeaderPreview() instead to get location info
-     */
-    @Deprecated
-    public uk.gov.hmcts.reform.prl.models.documents.Document getExistingOrderDocument(CaseData caseData) {
-        CustomOrderLocation location = findCustomOrderHeaderPreview(caseData);
-        return location != null ? location.document() : null;
-    }
-
-    /**
      * Updates the custom order at the specified location with the combined document.
      *
      * @param caseData The case data object (modified in place)
@@ -1477,21 +1467,6 @@ public class CustomOrderService {
             caseDataUpdated.put(ORDER_COLLECTION, updatedOrderCollection);
             log.info("Updated orderCollection[{}] with combined doc: {}",
                 location.index(), combinedDoc.getDocumentFileName());
-        }
-    }
-
-    /**
-     * Updates the order document in case data.
-     * @deprecated Use updateOrderDocumentInCaseData with CustomOrderLocation parameter instead
-     */
-    @Deprecated
-    public void updateOrderDocumentInCaseData(CaseData caseData, uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc,
-                                               Map<String, Object> caseDataUpdated) {
-        CustomOrderLocation location = findCustomOrderHeaderPreview(caseData);
-        if (location != null) {
-            updateOrderDocumentInCaseData(caseData, combinedDoc, caseDataUpdated, location);
-        } else {
-            log.warn("Could not find custom order header preview to update in either collection!");
         }
     }
 

@@ -1,13 +1,14 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -42,14 +43,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
+@ExtendWith(MockitoExtension.class)
 public class CustomOrderServiceTest {
     @Mock
     private ObjectMapper objectMapper;
@@ -78,9 +78,9 @@ public class CustomOrderServiceTest {
     @Captor
     private ArgumentCaptor<Map<String, Object>> placeholdersCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        // Mocks initialized by @ExtendWith(MockitoExtension.class)
     }
 
     // ========== Tests for EXISTING FLOW (renderUploadedCustomOrderAndStoreOnManageOrders) ==========
@@ -263,7 +263,7 @@ public class CustomOrderServiceTest {
     }
 
     @Test
-    public void testProcessCustomOrderOnSubmitted_combinesAndUploads() throws IOException {
+    public void testProcessCustomOrderOnSubmitted_downloadsDocuments() throws IOException {
         // Arrange
         final String authorisation = "auth-token";
         final Long caseId = 123L;
@@ -284,34 +284,13 @@ public class CustomOrderServiceTest {
         when(documentGenService.getDocumentBytes(eq(headerDocUrl), any(), any())).thenReturn(headerBytes);
         when(documentGenService.getDocumentBytes(eq(userDocUrl), any(), any())).thenReturn(userContentBytes);
 
-        // Mock upload
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
-            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink =
-            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink =
-            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        selfLink.href = "http://combined-self-url";
-        binaryLink.href = "http://combined-binary-url";
-        links.self = selfLink;
-        links.binary = binaryLink;
-
-        uk.gov.hmcts.reform.ccd.document.am.model.Document uploadedDoc =
-            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
-        uploadedDoc.links = links;
-        uploadedDoc.originalDocumentName = "Test Order_123.docx";
-
-        when(uploadService.uploadDocument(any(), any(), any(), eq(authorisation))).thenReturn(uploadedDoc);
-
-        // Act & Assert - This test requires actual DOCX bytes to work with combineHeaderAndContent
-        // The method calls combineHeaderAndContent which uses Apache POI and needs valid DOCX
-        // For now, we verify the setup is correct and the exception is expected
+        // Act & Assert - combineHeaderAndContent needs real DOCX bytes so will throw
+        // We verify documents are downloaded before the POI error
         try {
             customOrderService.processCustomOrderOnSubmitted(
                 authorisation, caseId, caseData, userDocUrl, headerDocUrl, null, false);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             // Expected - combineHeaderAndContent needs real DOCX bytes
-            // Verify that we got to the point of downloading both documents
             verify(documentGenService).getDocumentBytes(eq(headerDocUrl), any(), any());
             verify(documentGenService).getDocumentBytes(eq(userDocUrl), any(), any());
         }
@@ -1730,9 +1709,6 @@ public class CustomOrderServiceTest {
 
         when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(customDoc);
-        // Return null for previewOrderDoc from map (simulating it's not there)
-        when(objectMapper.convertValue(isNull(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
-            .thenReturn(null);
 
         uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -1913,5 +1889,433 @@ public class CustomOrderServiceTest {
         assertEquals(1, drafts.size());
         assertEquals(combinedDoc, drafts.get(0).getValue().getOrderDocument());
         assertEquals("Test Judge", drafts.get(0).getValue().getJudgeOrMagistratesLastName());
+    }
+
+    // ========== Tests for findRelationshipById ==========
+
+    @Test
+    public void testRespondentRelationship_matchById_whenIdMatches() throws IOException {
+        Long caseId = 1234567890123456L;
+        String respondentId = "resp-uuid-123";
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .build();
+
+        ChildrenAndRespondentRelation relation = ChildrenAndRespondentRelation.builder()
+            .respondentId(respondentId)
+            .respondentFullName("Different Name")
+            .childAndRespondentRelation(RelationshipsEnum.father)
+            .build();
+
+        Relations relations = Relations.builder()
+            .childAndRespondentRelations(List.of(
+                Element.<ChildrenAndRespondentRelation>builder().value(relation).build()
+            ))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .respondents(List.of(Element.<PartyDetails>builder()
+                .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                .value(respondent).build()))
+            .relations(relations)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        // Should find by index since name doesn't match and ID doesn't match element ID
+        assertNotNull(placeholders.get("respondent1RelationshipToChild"));
+    }
+
+    // ========== Tests for findRelationshipByIndex ==========
+
+    @Test
+    public void testRespondentRelationship_fallbackToIndex_whenNoNameOrIdMatch() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("Unknown")
+            .lastName("Person")
+            .build();
+
+        ChildrenAndRespondentRelation relation = ChildrenAndRespondentRelation.builder()
+            .respondentId("different-id")
+            .respondentFullName("Different Name")
+            .childAndRespondentRelation(RelationshipsEnum.grandParent)
+            .build();
+
+        Relations relations = Relations.builder()
+            .childAndRespondentRelations(List.of(
+                Element.<ChildrenAndRespondentRelation>builder().value(relation).build()
+            ))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .relations(relations)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Grandparent", placeholders.get("respondent1RelationshipToChild"));
+    }
+
+    // ========== Tests for populateChildrensGuardian ==========
+
+    @Test
+    public void testPopulateChildrensGuardian_fromCafcassOfficers() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer cafcassOfficer =
+            uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer.builder()
+                .cafcassOfficerName("Sarah Guardian")
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .childAndCafcassOfficers(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.addcafcassofficer.ChildAndCafcassOfficer>builder()
+                    .value(cafcassOfficer).build()
+            ))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Sarah Guardian", placeholders.get("childrensGuardianName"));
+    }
+
+    @Test
+    public void testPopulateChildrensGuardian_emptyWhenNoCafcass() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("childrensGuardianName"));
+    }
+
+    // ========== Tests for reformatDateToUkFormat (via extractOrderDate) ==========
+
+    @Test
+    public void testOrderDate_reformatsIsoDate() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("dateOrderMade", "2026-03-15");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("15/03/2026", placeholders.get("orderDate"));
+    }
+
+    // ========== Tests for getChildrenBySelection ==========
+
+    @Test
+    public void testChildrenSelection_selectedSubset() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        UUID child1Id = UUID.randomUUID();
+        UUID child2Id = UUID.randomUUID();
+        UUID child3Id = UUID.randomUUID();
+
+        ChildDetailsRevised child1 = ChildDetailsRevised.builder()
+            .firstName("Alice").lastName("Smith").gender(Gender.female).build();
+        ChildDetailsRevised child2 = ChildDetailsRevised.builder()
+            .firstName("Bob").lastName("Smith").gender(Gender.male).build();
+        ChildDetailsRevised child3 = ChildDetailsRevised.builder()
+            .firstName("Charlie").lastName("Smith").gender(Gender.male).build();
+
+        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList childOption =
+            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList.builder()
+                .value(List.of(
+                    uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement.builder()
+                        .code(child1Id.toString()).label("Alice Smith").build(),
+                    uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement.builder()
+                        .code(child3Id.toString()).label("Charlie Smith").build()
+                ))
+                .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isTheOrderAboutAllChildren(YesOrNo.No)
+            .isTheOrderAboutChildren(YesOrNo.Yes)
+            .childOption(childOption)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .newChildDetails(List.of(
+                Element.<ChildDetailsRevised>builder().id(child1Id).value(child1).build(),
+                Element.<ChildDetailsRevised>builder().id(child2Id).value(child2).build(),
+                Element.<ChildDetailsRevised>builder().id(child3Id).value(child3).build()
+            ))
+            .manageOrders(manageOrders)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
+
+        assertEquals(2, children.size());
+        assertEquals("Alice Smith", children.get(0).get("fullName"));
+        assertEquals("Charlie Smith", children.get(1).get("fullName"));
+    }
+
+    @Test
+    public void testChildrenSelection_noChildren_whenOrderNotAboutChildren() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Alice").lastName("Smith").build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isTheOrderAboutAllChildren(YesOrNo.No)
+            .isTheOrderAboutChildren(YesOrNo.No)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .newChildDetails(List.of(
+                Element.<ChildDetailsRevised>builder().id(UUID.randomUUID()).value(child).build()
+            ))
+            .manageOrders(manageOrders)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview("test-auth", caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
+
+        assertEquals(0, children.size());
+    }
+
+    // ========== Tests for findCustomOrderHeaderPreview ==========
+
+    @Test
+    public void testFindCustomOrderHeaderPreview_findsInDraftCollection() {
+        uk.gov.hmcts.reform.prl.models.documents.Document headerDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("custom_order_header_preview_123.docx")
+                .documentBinaryUrl("http://binary")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.DraftOrder draftOrder =
+            uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+                .orderDocument(headerDoc)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(draftOrder)
+                    .build()
+            ))
+            .build();
+
+        CustomOrderService.CustomOrderLocation result = customOrderService.findCustomOrderHeaderPreview(caseData);
+
+        assertNotNull(result);
+        assertTrue(result.isInDraftCollection());
+        assertEquals(0, result.index());
+        assertEquals(headerDoc, result.document());
+    }
+
+    @Test
+    public void testFindCustomOrderHeaderPreview_findsInOrderCollection() {
+        uk.gov.hmcts.reform.prl.models.documents.Document headerDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("custom_order_header_preview_456.docx")
+                .documentBinaryUrl("http://binary")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails =
+            uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+                .orderDocument(headerDoc)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .orderCollection(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+                    .id(UUID.randomUUID())
+                    .value(orderDetails)
+                    .build()
+            ))
+            .build();
+
+        CustomOrderService.CustomOrderLocation result = customOrderService.findCustomOrderHeaderPreview(caseData);
+
+        assertNotNull(result);
+        assertFalse(result.isInDraftCollection());
+        assertEquals(0, result.index());
+    }
+
+    @Test
+    public void testFindCustomOrderHeaderPreview_returnsNull_whenNotFound() {
+        uk.gov.hmcts.reform.prl.models.documents.Document otherDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("other_order.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.DraftOrder draftOrder =
+            uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+                .orderDocument(otherDoc)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(draftOrder)
+                    .build()
+            ))
+            .build();
+
+        CustomOrderService.CustomOrderLocation result = customOrderService.findCustomOrderHeaderPreview(caseData);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testFindCustomOrderHeaderPreview_skipsPdfFiles() {
+        uk.gov.hmcts.reform.prl.models.documents.Document pdfDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("custom_order_header_preview_123.pdf")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.DraftOrder draftOrder =
+            uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+                .orderDocument(pdfDoc)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(draftOrder)
+                    .build()
+            ))
+            .build();
+
+        CustomOrderService.CustomOrderLocation result = customOrderService.findCustomOrderHeaderPreview(caseData);
+
+        assertNull(result);
+    }
+
+    // ========== Tests for updateOrderDocumentInCaseData ==========
+
+    @Test
+    public void testUpdateOrderDocumentInCaseData_updatesDraftCollection() {
+        UUID draftId = UUID.randomUUID();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("original.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.DraftOrder draftOrder =
+            uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+                .orderDocument(originalDoc)
+                .judgeOrMagistratesLastName("Judge Name")
+                .build();
+
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> draftCollection = new ArrayList<>();
+        draftCollection.add(Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+            .id(draftId)
+            .value(draftOrder)
+            .build());
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(draftCollection)
+            .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document combinedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("combined.docx")
+                .documentBinaryUrl("http://combined")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CustomOrderService.CustomOrderLocation location =
+            new CustomOrderService.CustomOrderLocation(originalDoc, true, 0);
+
+        customOrderService.updateOrderDocumentInCaseData(caseData, combinedDoc, caseDataUpdated, location);
+
+        assertTrue(caseDataUpdated.containsKey("draftOrderCollection"));
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> updatedDrafts =
+            (List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
+        assertEquals(combinedDoc, updatedDrafts.get(0).getValue().getOrderDocument());
+        assertEquals("Judge Name", updatedDrafts.get(0).getValue().getJudgeOrMagistratesLastName());
+    }
+
+    @Test
+    public void testUpdateOrderDocumentInCaseData_updatesOrderCollection() {
+        UUID orderId = UUID.randomUUID();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("original.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails =
+            uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+                .orderDocument(originalDoc)
+                .orderType("TestOrder")
+                .build();
+
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orderCollection = new ArrayList<>();
+        orderCollection.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build());
+
+        CaseData caseData = CaseData.builder()
+            .orderCollection(orderCollection)
+            .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("sealed.pdf")
+                .documentBinaryUrl("http://sealed")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        CustomOrderService.CustomOrderLocation location =
+            new CustomOrderService.CustomOrderLocation(originalDoc, false, 0);
+
+        customOrderService.updateOrderDocumentInCaseData(caseData, sealedDoc, caseDataUpdated, location);
+
+        assertTrue(caseDataUpdated.containsKey("orderCollection"));
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedOrders =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+        assertEquals(sealedDoc, updatedOrders.get(0).getValue().getOrderDocument());
+        assertEquals(YesOrNo.No, updatedOrders.get(0).getValue().getDoesOrderDocumentNeedSeal());
     }
 }
