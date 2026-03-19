@@ -76,7 +76,7 @@ allprojects {
   group = 'uk.gov.hmcts.reform.prl'
   version = '0.0.1'
 
-  checkstyle.toolVersion = '9.2.1'
+  checkstyle.toolVersion = '10.25.0'
   checkstyle.configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
   checkstyle.maxWarnings(0)
 
