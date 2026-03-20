@@ -532,9 +532,10 @@ public class ManageOrdersController {
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
-            // Custom order flow: add order to collection using CUSTOM_ORDER_DOC
+            // Custom order flow: always add order - mid-event doesn't persist for custom orders
             // The submitted callback will later replace it with the combined header + content (sealed for non-draft)
-            addOrderToCollectionIfNotAlreadyAdded(caseData, caseDataUpdated, authorisation, orderAlreadyAddedInMidEvent);
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation, caseData, PrlAppsConstants.ENGLISH));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
             || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));

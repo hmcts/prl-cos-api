@@ -4223,9 +4223,9 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldNotAddOrderAgain() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldAlwaysAddOrder() throws Exception {
         // Test that when createCustomOrder with doYouWantToServeOrder=Yes,
-        // the order is NOT added again in aboutToSubmit (it was already added in mid-event)
+        // the order IS still added in aboutToSubmit (mid-event doesn't persist for custom orders)
 
         Document customOrderDoc = Document.builder()
             .documentUrl("http://test.url/custom-order.docx")
@@ -4239,8 +4239,11 @@ public class ManageOrdersControllerTest {
             .build();
 
         ServeOrderData serveOrderData = ServeOrderData.builder()
-            .doYouWantToServeOrder(Yes)  // Order already added in mid-event
+            .doYouWantToServeOrder(Yes)
             .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
 
         CaseData caseDataWithServe = CaseData.builder()
             .id(12345L)
@@ -4263,6 +4266,8 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -4278,9 +4283,10 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
 
-        // Verify addOrderDetailsAndReturnReverseSortedList is NOT called when serving (order already added in mid-event)
-        verify(manageOrderService, times(0)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        // Verify addOrderDetailsAndReturnReverseSortedList IS called for custom orders (always add)
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
+        assertEquals(orderDetailsList, response.getData().get("orderCollection"));
     }
 
     @Test
@@ -4410,6 +4416,96 @@ public class ManageOrdersControllerTest {
         // Verify addOrderDetailsAndReturnReverseSortedList IS called when serveOrderData is null
         verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
+    }
+
+    @Test
+    public void saveOrderDetailsTest_createCustomOrder_withNoExistingOrders_shouldCreateOrderCollection() throws Exception {
+        // REGRESSION TEST: Proves orderCollection won't be null after custom order creation
+        // This was the root cause of NullPointerException in ManageOrderEmailService.getServedOrderDocumentsAndAdditionalDocuments
+        // when custom orders were created on cases with no existing orders
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .customOrderDoc(customOrderDoc)
+            .build();
+
+        ServeOrderData serveOrderData = ServeOrderData.builder()
+            .doYouWantToServeOrder(Yes)
+            .build();
+
+        // Case with NO existing orderCollection (simulates first order on a case)
+        CaseData caseDataNoOrders = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .serveOrderData(serveOrderData)
+            .orderCollection(null)  // Explicitly null - no existing orders
+            .previewOrderDoc(Document.builder()
+                .documentUrl("http://test.url/preview.pdf")
+                .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                .documentFileName("preview.pdf")
+                .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataNoOrders.toMap(new ObjectMapper());
+        stringObjectMap.put("customOrderDoc", customOrderDoc);
+        // Ensure orderCollection is not in the input map
+        stringObjectMap.remove("orderCollection");
+
+        // The service will create an orderCollection with the new order
+        List<Element<OrderDetails>> newOrderCollection = List.of(Element.<OrderDetails>builder()
+            .id(UUID.randomUUID())
+            .value(OrderDetails.builder()
+                .orderType("Custom Order")
+                .orderDocument(customOrderDoc)
+                .build())
+            .build());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataNoOrders);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoOrders);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", newOrderCollection));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        // CRITICAL ASSERTIONS: Proves the null pointer exception is fixed
+        // 1. The service method that creates orders must be called
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+
+        // 2. Response must not be null
+        assertNotNull("Response should not be null", response);
+
+        // 3. orderCollection in response must not be null (this was the root cause of the NPE)
+        assertNotNull("orderCollection must not be null - this caused NPE in submitted callback",
+            response.getData().get("orderCollection"));
+
+        // 4. orderCollection should contain the new order
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> resultCollection =
+            (List<Element<OrderDetails>>) response.getData().get("orderCollection");
+        assertEquals("orderCollection should have 1 order", 1, resultCollection.size());
     }
 
     @Test
