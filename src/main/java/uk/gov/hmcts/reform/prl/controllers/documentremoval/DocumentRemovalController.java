@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -29,7 +30,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 public class DocumentRemovalController {
 
     private final AuthorisationService authorisationService;
-    private final DocumentRemovalService documentRedactionService;
+    private final DocumentRemovalService documentRemovalService;
 
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse aboutToStart(
@@ -41,10 +42,30 @@ public class DocumentRemovalController {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
 
-        log.info("Document removal about to start callback received for case id: {}",
-                 callbackRequest.getCaseDetails().getId());
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Document removal about to start callback received for case id: {}", caseDetails.getId());
 
-        Map<String, Object> data = documentRedactionService.getDocumentsToKeepCollection(callbackRequest.getCaseDetails());
+        Map<String, Object> data = documentRemovalService.getCaseDocuments(caseDetails);
+
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(data)
+            .build();
+    }
+
+    @PostMapping("/mid-event")
+    public AboutToStartOrSubmitCallbackResponse midEvent(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw (new InvalidClientException(INVALID_CLIENT));
+        }
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Document removal mid-event callback received for case id: {}", caseDetails.getId());
+
+        Map<String, Object> data = documentRemovalService.getCaseDocumentInstances(caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(data)
@@ -61,10 +82,10 @@ public class DocumentRemovalController {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
 
-        log.info("Document removal about to submit callback received for case id: {}",
-                 callbackRequest.getCaseDetails().getId());
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Document removal about to submit callback received for case id: {}", caseDetails.getId());
 
-        Map<String, Object> updatedCaseData = documentRedactionService.removeDocuments(callbackRequest.getCaseDetails());
+        Map<String, Object> updatedCaseData = documentRemovalService.removeDocumentInstances(caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(updatedCaseData)

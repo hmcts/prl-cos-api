@@ -1150,4 +1150,10 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_FILENAME = "document_filename";
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
+
+    // Document Removal event
+    public static final String DOCUMENT_REMOVAL_CASE_DOCUMENTS = "documentRemovalCaseDocuments";
+    public static final String DOCUMENT_TO_REMOVE = "documentToRemove";
+    public static final String DOCUMENT_TO_REMOVE_INSTANCES = "documentToRemoveInstances";
+
 }

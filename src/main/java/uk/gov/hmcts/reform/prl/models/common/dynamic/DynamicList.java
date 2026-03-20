@@ -43,4 +43,30 @@ public class DynamicList {
     public String getValueCode() {
         return value == null ? null : value.getCode();
     }
+
+    @JsonIgnore
+    public void sortListItemsByLabel() {
+        if (listItems != null) {
+            listItems.sort((a, b) -> {
+                String labelA = a != null && a.getLabel() != null ? a.getLabel() : "";
+                String labelB = b != null && b.getLabel() != null ? b.getLabel() : "";
+                return labelA.compareTo(labelB);
+            });
+        }
+    }
+
+    @JsonIgnore
+    public DynamicList withSortedListItemsByLabel() {
+        if (listItems == null || listItems.size() <= 1) {
+            return this;
+        }
+        List<DynamicListElement> sortedList = listItems.stream()
+            .sorted((a, b) -> {
+                String labelA = a != null && a.getLabel() != null ? a.getLabel() : "";
+                String labelB = b != null && b.getLabel() != null ? b.getLabel() : "";
+                return labelA.compareTo(labelB);
+            })
+            .toList();
+        return this.toBuilder().listItems(sortedList).build();
+    }
 }

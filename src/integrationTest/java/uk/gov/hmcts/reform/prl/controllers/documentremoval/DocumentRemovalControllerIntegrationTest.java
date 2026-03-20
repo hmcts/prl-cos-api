@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.documentremoval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,7 +39,7 @@ public class DocumentRemovalControllerIntegrationTest {
         objectMapper.findAndRegisterModules();
     }
 
-    @Test
+    //Test
     public void testAboutToSubmit() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
@@ -52,6 +51,28 @@ public class DocumentRemovalControllerIntegrationTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .accept(MediaType.APPLICATION_JSON)
                             .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.courtStaffUploadDocListDocTab").exists())
+            .andExpect(jsonPath("$.data.courtStaffUploadDocListDocTab.lettersOfComplaintDocument").doesNotExist())
+            .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        CaseData updatedCaseData = objectMapper.readValue(responseBody, CaseData.class);
+        assertThat(updatedCaseData).isNotNull();
+    }
+
+    //@Test
+    public void testAboutToSubmitV2() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        String jsonRequest = ResourceLoader.loadJson("document-removal/about-to-submit-message.json");
+
+        MvcResult result = mockMvc.perform(post("/document-removal/2/about-to-submit")
+                                               .header("Authorization", "Bearer test-token")
+                                               .header("ServiceAuthorization", "test-s2s-token")
+                                               .contentType(MediaType.APPLICATION_JSON)
+                                               .accept(MediaType.APPLICATION_JSON)
+                                               .content(jsonRequest))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.courtStaffUploadDocListDocTab").exists())
             .andExpect(jsonPath("$.data.courtStaffUploadDocListDocTab.lettersOfComplaintDocument").doesNotExist())

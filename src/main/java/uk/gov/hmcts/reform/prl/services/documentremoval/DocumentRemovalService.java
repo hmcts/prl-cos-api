@@ -1,76 +1,105 @@
 package uk.gov.hmcts.reform.prl.services.documentremoval;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.documentremoval.DocumentToKeep;
-import uk.gov.hmcts.reform.prl.models.documentremoval.DocumentToKeepCollection;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentRemovalWrapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.String.format;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REMOVAL_CASE_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TO_REMOVE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_TO_REMOVE_INSTANCES;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class DocumentRemovalService {
+    private final ObjectMapper objectMapper;
+    private final DocumentIdRetriever documentRetriever;
+    private final DocumentInstanceRetriever documentInstanceRetriever;
+    private final DocumentInstanceRemover documentInstanceRemover;
 
-    private ObjectMapper objectMapper;
-    private final DocumentRetriever documentRetriever;
-    private final DocumentRemover documentRemover;
+    private static final DateTimeFormatter UPLOAD_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
-    public Map<String, Object> getDocumentsToKeepCollection(CaseDetails caseDetails) {
-        List<DocumentToKeepCollection> documents = getDocuments(caseDetails);
-        return Map.of("documentToKeepCollection", documents);
-    }
-
-    public List<DocumentToKeepCollection> getDocuments(CaseDetails caseDetails) {
+    public Map<String, Object> getCaseDocuments(CaseDetails caseDetails) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        return documentRetriever.getDocuments(caseData);
+        List<CaseDocument> caseDocuments = documentRetriever.getCaseDocuments(caseData);
+
+        DynamicList caseDocumentsDynamicList = DynamicList.builder()
+            .listItems(caseDocuments.stream()
+                           .map(doc -> DynamicListElement.builder()
+                               .code(doc.documentId())
+                               .label(formatLabel(doc))
+                               .build())
+                           .toList())
+            .build()
+            .withSortedListItemsByLabel();
+
+        return Map.of(DOCUMENT_REMOVAL_CASE_DOCUMENTS, caseDocumentsDynamicList);
     }
 
-    public Map<String, Object> removeDocuments(CaseDetails caseDetails) throws IOException {
-        List<DocumentToKeep> documentsToDelete = getDocumentsToDelete(caseDetails);
-        if (documentsToDelete.isEmpty()) {
-            log.info(format("No documents to delete for case ID %s", caseDetails.getId()));
-            return caseDetails.getData();
-        }
+    public Map<String, Object> getCaseDocumentInstances(CaseDetails caseDetails) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        JsonNode root = objectMapper.valueToTree(caseDetails.getData());
-        documentsToDelete.forEach(documentToKeep -> documentRemover.removeDocumentFromJson(root, documentToKeep));
+        DocumentRemovalWrapper wrapper = caseData.getDocumentRemovalWrapper();
+        DynamicListElement selectedCaseDocument = wrapper.getDocumentRemovalCaseDocuments().getValue();
 
-        JsonParser jsonParser = objectMapper.treeAsTokens(root);
-        return objectMapper.readValue(jsonParser, Map.class);
+        DocumentInstances documentInstances = documentInstanceRetriever.getDocumentInstance(caseData,
+                                                                                            selectedCaseDocument.getCode());
+
+        DynamicMultiSelectList instances = DynamicMultiSelectList.builder()
+            .listItems(documentInstances.getInstances().stream()
+                           .map(instance -> DynamicMultiselectListElement.builder()
+                               .code(instance)
+                               .label(formatInstanceLabel(instance))
+                               .build())
+                           .toList())
+            .build();
+
+        return Map.of(DOCUMENT_REMOVAL_CASE_DOCUMENTS, caseData.getDocumentRemovalWrapper().getDocumentRemovalCaseDocuments(),
+                      DOCUMENT_TO_REMOVE, documentInstances.getDocument(),
+                      DOCUMENT_TO_REMOVE_INSTANCES, instances);
     }
 
-    private List<DocumentToKeep> getDocumentsToDelete(CaseDetails caseDetails) {
-        Map<String, Object> caseDataMap = caseDetails.getData();
-        List<String> documentsToKeep = ((List<LinkedHashMap>) caseDataMap.get("documentToKeepCollection")).stream()
-            .map(map -> map.get("value"))
-            .map(value -> objectMapper.convertValue(value, DocumentToKeep.class))
-            .map(DocumentToKeep::getDocumentId)
+    public Map<String, Object> removeDocumentInstances(CaseDetails caseDetails) throws IOException {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        DocumentRemovalWrapper wrapper = caseData.getDocumentRemovalWrapper();
+
+        String documentIdToRemove = wrapper.getDocumentRemovalCaseDocuments().getValueCode();
+        List<String> selectedInstancePaths = wrapper.getDocumentToRemoveInstances().getValue().stream()
+            .map(DynamicMultiselectListElement::getCode)
             .toList();
 
-        return getDocuments(caseDetails).stream()
-            .map(DocumentToKeepCollection::getValue)
-            .filter(document -> !documentsToKeep.contains(document.getDocumentId()))
-            .toList();
+        Map<String, Object> updatedCaseData = documentInstanceRemover.removeDocumentInstance(caseDetails.getData(),
+                                                                                             documentIdToRemove,
+                                                                                             selectedInstancePaths);
+        updatedCaseData.remove(DOCUMENT_REMOVAL_CASE_DOCUMENTS);
+        updatedCaseData.remove(DOCUMENT_TO_REMOVE);
+        updatedCaseData.remove(DOCUMENT_TO_REMOVE_INSTANCES);
+
+        return updatedCaseData;
     }
 
-//    private Map<String, Object> deepCopyMap(Map<String, Object> original) {
-//        // Use ObjectMapper for deep copy to avoid mutating input
-//        return objectMapper.convertValue(
-//            objectMapper.valueToTree(original),
-//            Map.class
-//        );
-//    }
+    private String formatLabel(CaseDocument caseDocument) {
+        return caseDocument.uploadTimestamp() != null
+            ? caseDocument.filename() + " (" + UPLOAD_TIMESTAMP_FORMATTER.format(caseDocument.uploadTimestamp()) + ")"
+            : caseDocument.filename();
+    }
+
+    private String formatInstanceLabel(String instance) {
+        return DocumentFieldLabels.getLabelForField(instance);
+    }
 }
