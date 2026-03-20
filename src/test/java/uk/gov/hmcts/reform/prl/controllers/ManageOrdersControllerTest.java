@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -87,6 +89,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -4004,9 +4007,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(errors).build();
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(errors);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
@@ -4031,13 +4032,10 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
-            .data(stringObjectMap).build();
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(emptyList());
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
@@ -4120,8 +4118,120 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertNotNull(aboutToStartOrSubmitCallbackResponse);
 
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void testValidateAdditionalPartiesForServingOrderWhenEmailIsValid() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.validateAdditionalPartiesForServingOrder(Mockito.any(CallbackRequest.class)))
+            .thenReturn(Collections.emptyList());
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController
+            .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertEquals(0, aboutToStartOrSubmitCallbackResponse.getErrors().size());
+    }
+
+    @Test
+    public void testValidateAdditionalPartiesForServingOrderWhenEmailIsInvalid() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        List<String> errors = List.of("Invalid email address. Please check the email address entered. "
+                                          + "To send to multiple recipients please use the add new button.");
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.validateAdditionalPartiesForServingOrder(Mockito.any(CallbackRequest.class)))
+            .thenReturn(errors);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController
+            .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertEquals(1, aboutToStartOrSubmitCallbackResponse.getErrors().size());
+        assertEquals("Invalid email address. Please check the email address entered. "
+                         + "To send to multiple recipients please use the add new button.",
+                     aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
+    }
+
+    @Test
+    public void testExceptionForValidateAdditionalPartiesForServingOrder() {
+        PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .build();
+        Element<PartyDetails> applicants = element(partyDetails);
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .applicants(List.of(applicants))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .doYouWantToEditTheOrder(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+
+        assertExpectedException(() -> manageOrdersController
+            .validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
 }
