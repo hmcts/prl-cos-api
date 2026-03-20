@@ -35,12 +35,10 @@ import java.util.Set;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_DOC_UPLOADED;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
@@ -140,13 +138,11 @@ public class CafcassUploadDocService {
     private void setCirReceivedFlagIfApplicable(String typeOfDocument, Map<String, Object> existingCaseDataMap,
                                                 Map<String, Object> caseDataUpdated) {
         if (!CIR_DOCUMENT_TYPES.contains(typeOfDocument)) {
-            caseDataUpdated.put(CIR_DOC_UPLOADED, No);
             return;
         }
-        caseDataUpdated.put(CIR_DOC_UPLOADED, Yes);
         Object dueDateValue = existingCaseDataMap.get(CIR_DUE_DATE);
         if (dueDateValue == null) {
-            log.info("No CIR due date set on case — skipping cirReceivedByDeadline flag");
+            log.info("No CIR due date set on case — skipping CIR deadline flags");
             return;
         }
         LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
@@ -154,9 +150,9 @@ public class CafcassUploadDocService {
         caseDataUpdated.put(CIR_UPLOADED_DATE, today.format(DateTimeFormatter.ISO_LOCAL_DATE));
         if (!today.isAfter(dueDate)) {
             caseDataUpdated.put(CIR_RECEIVED_BY_DEADLINE, Yes);
-            log.info("CIR document uploaded on or before due date {} — setting cirReceivedByDeadline", dueDate);
+            log.info("CIR document uploaded on or before due date {}", dueDate);
         } else {
-            log.info("CIR document uploaded after due date {} — setting cirUploadedDate only", dueDate);
+            log.info("CIR document uploaded after due date {}", dueDate);
         }
     }
 
