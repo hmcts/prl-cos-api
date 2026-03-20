@@ -1514,9 +1514,9 @@ public class DocumentGenService {
                         .builder().template(DUMMY).values(tempCaseDetails).build()
                 );
             } catch (FeignException fe) {
-                log.error("FeignException while converting document to PDF: {}", fe.getMessage());
+                log.error("FeignException while converting document to PDF: {}", fe.getMessage(), fe);
             } catch (Exception e) {
-                log.error("Exception while converting document to PDF: {}", e.getMessage());
+                log.error("Exception while converting document to PDF: {}", e.getMessage(), e);
             }
             if (nonNull(generatedDocumentInfo)) {
                 return Document.builder()

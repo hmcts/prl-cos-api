@@ -60,7 +60,7 @@ public class BulkPrintService {
                 pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
             }
         } catch (PdfConversionException e) {
-            throw new BulkPrintException("Null Pointer exception at bulk print send : " + e);
+            throw new BulkPrintException("PDF Conversion Exception at bulk print send : " + e);
         } catch (Exception e) {
             log.info("The bulk print service has failed during convertToPdf", e);
         }
