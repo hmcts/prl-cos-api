@@ -249,7 +249,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest);
-        return processMidEvent(authorisation, caseData);
+        return processSendOrReplyMidEvent(authorisation, caseData);
     }
 
 
@@ -262,7 +262,7 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        return processMidEvent(authorisation, caseData);
+        return processSendOrReplyMidEvent(authorisation, caseData);
     }
 
 
@@ -273,7 +273,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
-        return processAboutToSubmit(authorisation, caseData, caseDataMap);
+        return processSendAndReplyAboutToSubmit(authorisation, caseData, caseDataMap);
     }
 
 
@@ -286,7 +286,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
 
-        return processAboutToSubmit(authorisation, caseData, caseDataMap);
+        return processSendAndReplyAboutToSubmit(authorisation, caseData, caseDataMap);
     }
 
 
@@ -324,7 +324,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
 
-    private CallbackResponse processMidEvent(String authorisation, CaseData caseData) {
+    private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData) {
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -346,7 +346,8 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
 
-    private AboutToStartOrSubmitCallbackResponse processAboutToSubmit(String authorisation, CaseData caseData, Map<String, Object> caseDataMap) {
+    private AboutToStartOrSubmitCallbackResponse processSendAndReplyAboutToSubmit(String authorisation,
+                                                                                  CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseData.getChooseSendOrReply().equals(SEND)) {
             sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
         } else {
