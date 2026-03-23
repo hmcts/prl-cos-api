@@ -2544,6 +2544,15 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    void testGetSelectedOrderInfoForUploadNameOfOrderOnly() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .nameOfOrder("Prohibited steps order")
+            .build();
+        assertEquals("Prohibited steps order", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+    }
+
+    @Test
     void testGetSelectedOrderInForUpload() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")

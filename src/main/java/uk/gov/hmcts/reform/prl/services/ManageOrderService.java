@@ -943,6 +943,8 @@ public class ManageOrderService {
             selectedOrder = caseData.getFcOrders().getDisplayedValue();
         } else if (caseData.getOtherOrdersOption() != null && caseData.getNameOfOrder() != null) {
             selectedOrder = caseData.getOtherOrdersOption().getDisplayedValue() + " : " + caseData.getNameOfOrder();
+        } else if (caseData.getNameOfOrder() != null) {
+            selectedOrder = caseData.getNameOfOrder();
         } else {
             selectedOrder = "";
         }
@@ -991,10 +993,9 @@ public class ManageOrderService {
     }
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData, UserDetails userDetails,
-                                                               String language)
-        throws DocumentGenerationException {
+                                                               String language) throws DocumentGenerationException {
 
-        String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+        String flagSelectedOrder = caseData.getManageOrdersOptions() == createAnOrder
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : getSelectedOrderInfoForUpload(caseData);
 
@@ -1204,11 +1205,11 @@ public class ManageOrderService {
         boolean saveAsDraft = isSaveAsDraft(caseData);
 
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
+            return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
+                return setDraftOrderCollection(caseData, loggedInUserType, userDetails);
             } else {
                 return setFinalOrderCollection(authorisation, caseData, userDetails, language);
             }
@@ -1265,7 +1266,7 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,UserDetails userDetails) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
@@ -1421,12 +1422,13 @@ public class ManageOrderService {
 
     public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String flagSelectedOrder = getSelectedOrderInfoForUpload(caseData);
+        String flagSelectedOrderId = getSelectedOrderIdForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
-            .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrder))
+            .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrderId))
             .orderTypeId(flagSelectedOrder)
             .orderDocument(createCustomOrder.equals(caseData.getManageOrdersOptions())
                 ? caseData.getManageOrders().getCustomOrderDoc()
