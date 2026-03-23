@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,7 +20,10 @@ import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -68,5 +72,38 @@ public class TestingSupportCreateCaseDataControllerTest {
             .createCcdTestCase("Bearer:test", "s2s token", callbackRequest);
         assertNotNull(caseDetails);
 
+    }
+
+    @Test
+    public void shouldThrowResponseStatusExceptionWithDetailsWhenSubmitFails() {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
+        Map<String, Object> stringObjectMap = Map.of("id", "1234567891234567");
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(idamClient.getUserInfo(any())).thenReturn(UserInfo.builder().uid("test-user-123").build());
+        when(coreCaseDataService.eventRequest(any(), any())).thenReturn(
+            EventRequestData.builder().eventId("testEvent").build());
+        when(coreCaseDataService.startSubmitCreate(any(), any(), any(), anyBoolean())).thenReturn(
+            StartEventResponse.builder()
+                .token("test")
+                .eventId("testEvent")
+                .caseDetails(CaseDetails.builder().build()).build());
+        when(coreCaseDataService.submitCreate(any(), any(), any(), any(), anyBoolean()))
+            .thenThrow(new RuntimeException("CCD validation failed: field X is required"));
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(1234567891234567L).data(stringObjectMap).build())
+            .build();
+
+        ResponseStatusException exception = assertThrows(
+            ResponseStatusException.class,
+            () -> testingSupportCreateCaseDataController.createCcdTestCase("Bearer:test", "s2s token", callbackRequest)
+        );
+
+        assertEquals(500, exception.getStatusCode().value());
+        assertTrue(exception.getReason().contains("CCD validation failed"));
+        assertTrue(exception.getReason().contains("test-user-123"));
+        assertTrue(exception.getReason().contains("testEvent"));
     }
 }
