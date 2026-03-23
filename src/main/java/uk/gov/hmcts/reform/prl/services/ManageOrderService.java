@@ -3847,7 +3847,8 @@ public class ManageOrderService {
             performingUser = getLoggedInUserType(authorisation);
             performingAction = manageOrdersOption.getDisplayedValue();
 
-            if (manageOrdersOption == ManageOrdersOptionsEnum.createAnOrder) {
+            if (manageOrdersOption == ManageOrdersOptionsEnum.createAnOrder
+                || manageOrdersOption == ManageOrdersOptionsEnum.createCustomOrder) {
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser, null);
             } else {
                 waFieldsMap.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED,

@@ -150,6 +150,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -4094,6 +4097,49 @@ class ManageOrderServiceTest {
         String orderName = (String) response.get(WA_ORDER_NAME_JUDGE_CREATED);
         assertNotNull(orderName);
         assertTrue(orderName.contains("Child Arrangements Order"));
+    }
+
+    @Test
+    void testSetFieldsForWaTaskForCustomOrderWithHearingDetails() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .build();
+        hearingDataList.add(element(hearingData));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .doesOrderClosesCase(Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        when(customOrderService.getEffectiveOrderName(any(CaseData.class), anyMap()))
+            .thenReturn("Child Arrangements Order(Live with order), Prohibited Steps Order");
+
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, Event.MANAGE_ORDERS.getId(), UUID.randomUUID(), caseDataUpdated);
+
+        assertNotNull(response);
+        // Verify hearing WA fields are set for custom order
+        assertEquals("Yes", response.get(WA_IS_HEARING_TASK_NEEDED));
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+            response.get(WA_HEARING_OPTION_SELECTED));
+        assertEquals("No", response.get(WA_IS_MULTIPLE_HEARING_SELECTED));
     }
 
     @Test
