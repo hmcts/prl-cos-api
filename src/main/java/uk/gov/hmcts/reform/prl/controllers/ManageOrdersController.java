@@ -531,27 +531,23 @@ public class ManageOrdersController {
 
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
-        } else if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
-            // Custom order flow: always add order - mid-event doesn't persist for custom orders
-            // The submitted callback will later replace it with the combined header + content (sealed for non-draft)
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                authorisation, caseData, PrlAppsConstants.ENGLISH));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-            || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+            || caseData.getManageOrdersOptions().equals(uploadAnOrder)
+            || caseData.getManageOrdersOptions().equals(createCustomOrder)) {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-            if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                && isHearingPageNeeded(
-                caseData.getCreateSelectOrderOptions(),
-                caseData.getManageOrders().getC21OrderOptions()
-            )) {
+
+            boolean isCreateOrderWithHearingPage = caseData.getManageOrdersOptions().equals(createAnOrder)
+                && isHearingPageNeeded(caseData.getCreateSelectOrderOptions(),
+                    caseData.getManageOrders().getC21OrderOptions());
+            boolean isCustomOrderWithHearingDetails = caseData.getManageOrdersOptions().equals(createCustomOrder)
+                && CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails());
+            boolean isSdo = CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(
+                caseData.getCreateSelectOrderOptions());
+
+            if (isCreateOrderWithHearingPage || isCustomOrderWithHearingDetails) {
                 caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                    .getHearingDataForSelectedHearing(
-                        caseData,
-                        hearings,
-                        authorisation
-                    ));
-            } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                    .getHearingDataForSelectedHearing(caseData, hearings, authorisation));
+            } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
             addOrderToCollectionIfNotAlreadyAdded(caseData, caseDataUpdated, authorisation, orderAlreadyAddedInMidEvent);

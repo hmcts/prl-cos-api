@@ -4223,9 +4223,9 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldAlwaysAddOrder() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldSkipAddingOrder() throws Exception {
         // Test that when createCustomOrder with doYouWantToServeOrder=Yes,
-        // the order IS still added in aboutToSubmit (mid-event doesn't persist for custom orders)
+        // the order is NOT added in aboutToSubmit (it was already added in mid-event whenToServeOrder)
 
         Document customOrderDoc = Document.builder()
             .documentUrl("http://test.url/custom-order.docx")
@@ -4242,7 +4242,8 @@ public class ManageOrdersControllerTest {
             .doYouWantToServeOrder(Yes)
             .build();
 
-        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+        // Order already exists from mid-event
+        List<Element<OrderDetails>> existingOrderCollection = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
 
         CaseData caseDataWithServe = CaseData.builder()
@@ -4252,6 +4253,7 @@ public class ManageOrdersControllerTest {
             .manageOrders(manageOrders)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(serveOrderData)
+            .orderCollection(existingOrderCollection)  // Already added in mid-event
             .previewOrderDoc(Document.builder()
                 .documentUrl("http://test.url/preview.pdf")
                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
@@ -4266,8 +4268,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
-        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -4283,10 +4284,9 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
 
-        // Verify addOrderDetailsAndReturnReverseSortedList IS called for custom orders (always add)
-        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        // Verify addOrderDetailsAndReturnReverseSortedList is NOT called (order already added in mid-event)
+        verify(manageOrderService, never()).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
-        assertEquals(orderDetailsList, response.getData().get("orderCollection"));
     }
 
     @Test
@@ -4333,6 +4333,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithoutServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
 
@@ -4396,6 +4397,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoServeData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
 
@@ -4436,7 +4438,7 @@ public class ManageOrdersControllerTest {
             .build();
 
         ServeOrderData serveOrderData = ServeOrderData.builder()
-            .doYouWantToServeOrder(Yes)
+            .doYouWantToServeOrder(No)  // Order added in aboutToSubmit when not serving immediately
             .build();
 
         // Case with NO existing orderCollection (simulates first order on a case)
@@ -4473,6 +4475,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoOrders);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", newOrderCollection));
 
@@ -4991,6 +4994,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithJudgeReview);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
 
@@ -5010,6 +5014,84 @@ public class ManageOrdersControllerTest {
 
         // Verify addOrderDetailsAndReturnReverseSortedList IS called despite doYouWantToServeOrder=Yes
         // because judge review is selected (stale value should be ignored)
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void saveOrderDetailsTest_createCustomOrder_withHearingDetails_shouldProcessHearingData() throws Exception {
+        // Test that when createCustomOrder has ordersHearingDetails populated,
+        // hearingDataService.getHearingDataForSelectedHearing is called to process future hearing data
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        List<Element<HearingData>> hearingDetailsList = List.of(
+            Element.<HearingData>builder()
+                .value(HearingData.builder()
+                    .hearingDateConfirmOptionEnum(dateConfirmedByListingTeam)
+                    .build())
+                .build()
+        );
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .customOrderDoc(customOrderDoc)
+            .ordersHearingDetails(hearingDetailsList)
+            .build();
+
+        ServeOrderData serveOrderData = ServeOrderData.builder()
+            .doYouWantToServeOrder(No)
+            .build();
+
+        CaseData caseDataWithHearing = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .serveOrderData(serveOrderData)
+            .previewOrderDoc(Document.builder()
+                .documentUrl("http://test.url/preview.pdf")
+                .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                .documentFileName("preview.pdf")
+                .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataWithHearing.toMap(new ObjectMapper());
+        stringObjectMap.put("customOrderDoc", customOrderDoc);
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().build()).build());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithHearing);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithHearing);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.getHearingDataForSelectedHearing(any(), any(), any())).thenReturn(hearingDetailsList);
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        // Verify getHearingDataForSelectedHearing IS called for custom order with hearing details
+        verify(hearingDataService, times(1)).getHearingDataForSelectedHearing(any(), any(), any());
         verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
     }
