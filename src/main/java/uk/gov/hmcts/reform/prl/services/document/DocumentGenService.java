@@ -1525,6 +1525,8 @@ public class DocumentGenService {
                     .documentFileName(generatedDocumentInfo.getDocName())
                     .build();
             } else {
+                log.error("generatedDocumentInfo is null for documentURL {}, binary url{}, file name {}", document.getDocumentUrl(),
+                          document.getDocumentBinaryUrl(), document.getDocumentFileName());
                 throw new PdfConversionException("PDF Conversion error");
             }
 
