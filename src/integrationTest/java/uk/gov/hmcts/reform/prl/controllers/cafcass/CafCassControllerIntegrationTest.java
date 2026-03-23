@@ -69,7 +69,7 @@ public class CafCassControllerIntegrationTest {
     @Test
     public void givenValidDatetimeRangeSearchCasesByCafCassControllerReturnOkStatus() throws Exception {
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(authorisationService.authoriseService(TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(authorisationService.authoriseService("Bearer " + TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
         when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         when(authorisationService.authoriseUser(TEST_AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(cafcassCaseDataService.getCaseData(anyString(), anyString(), anyString()))
