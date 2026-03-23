@@ -145,14 +145,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
