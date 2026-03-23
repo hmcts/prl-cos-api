@@ -1474,7 +1474,9 @@ public class ManageOrderService {
 
     private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
         YesOrNo isUploaded = No;
-        if (UserRoles.SOLICITOR.name().equals(loggedInUserType) || (uploadAnOrder.equals(manageOrdersOptions))) {
+        if (UserRoles.SOLICITOR.name().equals(loggedInUserType)
+            || uploadAnOrder.equals(manageOrdersOptions)
+            || createCustomOrder.equals(manageOrdersOptions)) {
             isUploaded = Yes;
         }
         return isUploaded;

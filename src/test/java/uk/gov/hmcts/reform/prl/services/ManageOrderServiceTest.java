@@ -6805,6 +6805,29 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    void testGetCurrentUploadDraftOrderDetails_customOrder_shouldSetIsOrderUploadedByJudgeOrAdminToYes() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .applicantCaseName("Test Case 45678")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder()
+                .customOrderDoc(Document.builder().documentFileName("custom.docx").build())
+                .build())
+            .build();
+
+        DraftOrder draftOrder = manageOrderService.getCurrentUploadDraftOrderDetails(
+            caseData, "testAuth", UserDetails.builder().build());
+
+        // Custom orders should have isOrderUploadedByJudgeOrAdmin = Yes
+        // to skip template generation in edit/approve flow
+        assertEquals(Yes, draftOrder.getIsOrderUploadedByJudgeOrAdmin());
+    }
+
+    @Test
     void testShouldFinaliseOrderAndPopulateTierOfJudge() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
