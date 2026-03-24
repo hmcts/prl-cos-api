@@ -4287,6 +4287,11 @@ public class ManageOrdersControllerTest {
         // Verify addOrderDetailsAndReturnReverseSortedList is NOT called (order already added in mid-event)
         verify(manageOrderService, never()).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
+        // For custom orders: orderCollection must be preserved so submitted callback can update it with combined doc
+        // (header + user content are stitched together in submitted callback, then order is updated)
+        assertNotNull(response.getData().get("orderCollection"));
+        List<?> orderCollectionInResponse = (List<?>) response.getData().get("orderCollection");
+        assertEquals(1, orderCollectionInResponse.size());
     }
 
     @Test

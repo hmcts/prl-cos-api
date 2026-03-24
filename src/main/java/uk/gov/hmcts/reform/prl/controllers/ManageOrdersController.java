@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -566,6 +567,17 @@ public class ManageOrdersController {
                 authorisation, caseData, PrlAppsConstants.ENGLISH));
         } else {
             log.info("Order already added in mid-event (serve flow), skipping duplicate add");
+            // For custom orders only: preserve orderCollection so submitted callback can update it with combined doc.
+            // Custom orders need this because the submitted callback combines header + user content and updates the order.
+            // Other order types (createAnOrder, uploadAnOrder) work without this as their documents are complete at mid-event.
+            if (ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
+                    caseDataUpdated.put(ORDER_COLLECTION, caseData.getOrderCollection());
+                    log.info("Preserved orderCollection for custom order, size={}", caseData.getOrderCollection().size());
+                } else {
+                    log.warn("Custom order with orderAlreadyAddedInMidEvent=true but orderCollection is null/empty");
+                }
+            }
         }
     }
 
