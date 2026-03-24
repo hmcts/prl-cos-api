@@ -32,4 +32,15 @@ public class ServeOrderData {
     private final YesOrNo doYouWantToServeOrder;
     @JsonProperty("whatDoWithOrder")
     private final WhatToDoWithOrderEnum whatDoWithOrder;
+
+    @JsonProperty("whenReportsMustBeFiledByLocalAuthority")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate whenReportsMustBeFiledByLocalAuthority;
+
+    @JsonProperty("cirReceivedByDeadline")
+    private final YesOrNo cirReceivedByDeadline;
+
+    @JsonProperty("cirUploadedDate")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate cirUploadedDate;
 }

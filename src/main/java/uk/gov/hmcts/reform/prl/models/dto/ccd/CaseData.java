@@ -708,9 +708,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private final ServeOrderData serveOrderData;
 
-    @JsonUnwrapped
-    private final CirDeadlineData cirDeadlineData;
-
     private final List<CaseLinksElement<CaseLink>> caseLinks;
 
     private Flags caseFlags;
