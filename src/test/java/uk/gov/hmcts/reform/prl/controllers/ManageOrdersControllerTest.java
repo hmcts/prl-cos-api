@@ -4756,21 +4756,6 @@ public class ManageOrdersControllerTest {
             .documentFileName("preview.pdf")
             .build();
 
-        ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(No)
-            .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-            .build();
-
-        CaseData caseDataFromDb = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .manageOrders(manageOrders)
-            .build();
-
-        Map<String, Object> databaseMap = new HashMap<>();
-
         // Callback data with all custom order fields
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
@@ -4792,6 +4777,18 @@ public class ManageOrdersControllerTest {
         orderCollectionFromCallback.add(newOrderElement);
         callbackDataMap.put("orderCollection", orderCollectionFromCallback);
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> databaseMap = new HashMap<>();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -5638,25 +5635,6 @@ public class ManageOrdersControllerTest {
         // Test that when database has existing orders and callback has existing + new order,
         // only the new order is added (existing orders preserved)
 
-        Document customOrderDoc = Document.builder()
-            .documentUrl("http://test.url/custom-order.docx")
-            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
-            .documentFileName("custom-order.docx")
-            .build();
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(No)
-            .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-            .build();
-
-        CaseData caseDataFromDb = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .manageOrders(manageOrders)
-            .build();
-
         // Database has one existing order
         String existingOrderId = UUID.randomUUID().toString();
         Map<String, Object> existingOrderElement = new HashMap<>();
@@ -5664,9 +5642,6 @@ public class ManageOrdersControllerTest {
         existingOrderElement.put("value", Map.of("orderType", "Existing Order"));
         List<Map<String, Object>> dbOrderCollection = new ArrayList<>();
         dbOrderCollection.add(existingOrderElement);
-
-        Map<String, Object> databaseMap = new HashMap<>();
-        databaseMap.put("orderCollection", dbOrderCollection);
 
         // Callback has existing order + new order (about-to-submit added new order)
         String newOrderId = UUID.randomUUID().toString();
@@ -5678,11 +5653,29 @@ public class ManageOrdersControllerTest {
         callbackOrderCollection.add(newOrderElement);  // New order first (sorted by date desc)
         callbackOrderCollection.add(existingOrderElement);  // Existing order
 
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("orderCollection", dbOrderCollection);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -5730,25 +5723,6 @@ public class ManageOrdersControllerTest {
     public void finalizeOrderSubmission_customOrder_shouldPreserveExistingOrdersWhenNoNewOrder() throws Exception {
         // Test that when callback has same orders as database (same UUIDs), nothing is modified
 
-        Document customOrderDoc = Document.builder()
-            .documentUrl("http://test.url/custom-order.docx")
-            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
-            .documentFileName("custom-order.docx")
-            .build();
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(No)
-            .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-            .build();
-
-        CaseData caseDataFromDb = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .manageOrders(manageOrders)
-            .build();
-
         // Database has one existing order
         String existingOrderId = UUID.randomUUID().toString();
         Map<String, Object> existingOrderElement = new HashMap<>();
@@ -5757,18 +5731,33 @@ public class ManageOrdersControllerTest {
         List<Map<String, Object>> dbOrderCollection = new ArrayList<>();
         dbOrderCollection.add(existingOrderElement);
 
-        Map<String, Object> databaseMap = new HashMap<>();
-        databaseMap.put("orderCollection", dbOrderCollection);
-
         // Callback has SAME order (same UUID) - no new order
         List<Map<String, Object>> callbackOrderCollection = new ArrayList<>();
         callbackOrderCollection.add(existingOrderElement);
 
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("orderCollection", dbOrderCollection);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -5812,25 +5801,6 @@ public class ManageOrdersControllerTest {
     public void finalizeOrderSubmission_customOrder_shouldNotLoseOrdersWhenCallbackHasFewer() throws Exception {
         // CRITICAL TEST: Ensures we never lose existing orders even if callback somehow has fewer orders
 
-        Document customOrderDoc = Document.builder()
-            .documentUrl("http://test.url/custom-order.docx")
-            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
-            .documentFileName("custom-order.docx")
-            .build();
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .isCaseWithdrawn(No)
-            .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-            .build();
-
-        CaseData caseDataFromDb = CaseData.builder()
-            .id(12345L)
-            .applicantCaseName("TestCaseName")
-            .caseTypeOfApplication("C100")
-            .manageOrders(manageOrders)
-            .build();
-
         // Database has TWO existing orders
         String existingOrderId1 = UUID.randomUUID().toString();
         String existingOrderId2 = UUID.randomUUID().toString();
@@ -5844,9 +5814,6 @@ public class ManageOrdersControllerTest {
         dbOrderCollection.add(existingOrder1);
         dbOrderCollection.add(existingOrder2);
 
-        Map<String, Object> databaseMap = new HashMap<>();
-        databaseMap.put("orderCollection", dbOrderCollection);
-
         // Callback somehow only has ONE order (unexpected/corrupted scenario)
         String newOrderId = UUID.randomUUID().toString();
         Map<String, Object> newOrderElement = new HashMap<>();
@@ -5855,11 +5822,29 @@ public class ManageOrdersControllerTest {
         List<Map<String, Object>> callbackOrderCollection = new ArrayList<>();
         callbackOrderCollection.add(newOrderElement);
 
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("orderCollection", dbOrderCollection);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
