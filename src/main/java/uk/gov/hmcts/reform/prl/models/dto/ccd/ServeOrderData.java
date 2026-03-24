@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 
 import java.time.LocalDate;
@@ -26,6 +27,8 @@ public class ServeOrderData {
     private final LocalDate whenReportsMustBeFiled;
     @JsonProperty("localAuthorityNeedToProvideReport")
     private final YesOrNo localAuthorityNeedToProvideReport;
+    @JsonProperty("localAuthorityMultipleDocuments")
+    private final List<LocalAuthorityDocumentsEnum> localAuthorityMultipleDocuments;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate whenReportsMustBeFiledByLocalAuthority;
     @JsonProperty("orderEndsInvolvementOfCafcassOrCymru")
@@ -34,11 +37,4 @@ public class ServeOrderData {
     private final YesOrNo doYouWantToServeOrder;
     @JsonProperty("whatDoWithOrder")
     private final WhatToDoWithOrderEnum whatDoWithOrder;
-
-    @JsonProperty("cirReceivedByDeadline")
-    private final YesOrNo cirReceivedByDeadline;
-
-    @JsonProperty("cirUploadedDate")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate cirUploadedDate;
 }
