@@ -1346,7 +1346,6 @@ class CaseAssignmentServiceTest {
         );
 
         localCaseAssignmentService.removeAmBarristerIfPresent(localCaseDetails);
-
         Barrister barristerAfterCall = caseDataWithNullRequest.getApplicants().get(0).getValue().getBarrister();
 
         assertThat(barristerAfterCall)
