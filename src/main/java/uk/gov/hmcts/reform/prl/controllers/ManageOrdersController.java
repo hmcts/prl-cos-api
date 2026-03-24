@@ -65,8 +65,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
 import static java.util.Optional.ofNullable;
@@ -562,22 +565,18 @@ public class ManageOrdersController {
 
     private void addOrderToCollectionIfNotAlreadyAdded(CaseData caseData, Map<String, Object> caseDataUpdated,
                                                        String authorisation, boolean orderAlreadyAddedInMidEvent) {
-        if (!orderAlreadyAddedInMidEvent) {
+        // For custom orders: always add in about-to-submit regardless of mid-event.
+        // CCD doesn't persist mid-event data, so the order must be added here for submitted callback to find it.
+        // For other order types: skip if already added in mid-event to avoid duplicates.
+        boolean isCustomOrder = ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions());
+        if (!orderAlreadyAddedInMidEvent || isCustomOrder) {
+            if (isCustomOrder && orderAlreadyAddedInMidEvent) {
+                log.info("Custom order: adding order in about-to-submit (mid-event data not persisted by CCD)");
+            }
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation, caseData, PrlAppsConstants.ENGLISH));
         } else {
             log.info("Order already added in mid-event (serve flow), skipping duplicate add");
-            // For custom orders only: preserve orderCollection so submitted callback can update it with combined doc.
-            // Custom orders need this because the submitted callback combines header + user content and updates the order.
-            // Other order types (createAnOrder, uploadAnOrder) work without this as their documents are complete at mid-event.
-            if (ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
-                if (caseData.getOrderCollection() != null && !caseData.getOrderCollection().isEmpty()) {
-                    caseDataUpdated.put(ORDER_COLLECTION, caseData.getOrderCollection());
-                    log.info("Preserved orderCollection for custom order, size={}", caseData.getOrderCollection().size());
-                } else {
-                    log.warn("Custom order with orderAlreadyAddedInMidEvent=true but orderCollection is null/empty");
-                }
-            }
         }
     }
 
@@ -990,8 +989,63 @@ public class ManageOrdersController {
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
+
+            // Copy order collections from callbackData (aboutToSubmit response) since caseDataUpdated
+            // has old database data. combineAndFinalizeCustomOrder needs these to update the order doc.
+            // Only copy if callback has the collection and either db is empty or callback has more items
+            // (about-to-submit adds to existing, so callback should have existing + new order)
+            copyCollectionIfNeeded(callbackData, caseDataUpdated, ORDER_COLLECTION);
+            copyCollectionIfNeeded(callbackData, caseDataUpdated, DRAFT_ORDER_COLLECTION);
         }
         return isCustomOrder;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void copyCollectionIfNeeded(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated,
+                                        String collectionKey) {
+        Object callbackCollection = callbackData.get(collectionKey);
+        Object dbCollection = caseDataUpdated.get(collectionKey);
+
+        if (callbackCollection == null) {
+            return; // Nothing to copy
+        }
+
+        List<Map<String, Object>> callbackList = (List<Map<String, Object>>) callbackCollection;
+        if (callbackList.isEmpty()) {
+            return; // Empty callback collection, nothing useful to copy
+        }
+
+        if (dbCollection == null || ((List<?>) dbCollection).isEmpty()) {
+            // Database has no collection, safe to use callback's
+            caseDataUpdated.put(collectionKey, callbackCollection);
+            log.info("Copied {} from callback (db was empty), size={}", collectionKey, callbackList.size());
+            return;
+        }
+
+        // Both have items - find and add only NEW entries (by UUID) to preserve existing orders
+        List<Map<String, Object>> dbList = (List<Map<String, Object>>) dbCollection;
+        Set<String> existingIds = dbList.stream()
+            .map(element -> (String) element.get("id"))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        List<Map<String, Object>> newEntries = callbackList.stream()
+            .filter(element -> {
+                String id = (String) element.get("id");
+                return id != null && !existingIds.contains(id);
+            })
+            .toList();
+
+        if (!newEntries.isEmpty()) {
+            // Add new entries to the front (most recent first, matching the sort order)
+            List<Map<String, Object>> combined = new ArrayList<>(newEntries);
+            combined.addAll(dbList);
+            caseDataUpdated.put(collectionKey, combined);
+            log.info("Added {} new entries to {} (total now {})", newEntries.size(), collectionKey, combined.size());
+        } else {
+            log.info("No new entries to add to {} (callback size={}, db size={})",
+                collectionKey, callbackList.size(), dbList.size());
+        }
     }
 
     @SuppressWarnings("unchecked")

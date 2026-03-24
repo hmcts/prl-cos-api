@@ -86,8 +86,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,6 +97,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -4223,9 +4226,10 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldSkipAddingOrder() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldStillAddOrder() throws Exception {
         // Test that when createCustomOrder with doYouWantToServeOrder=Yes,
-        // the order is NOT added in aboutToSubmit (it was already added in mid-event whenToServeOrder)
+        // the order IS still added in aboutToSubmit because CCD doesn't persist mid-event data.
+        // This ensures the order is in orderCollection for the submitted callback to update.
 
         Document customOrderDoc = Document.builder()
             .documentUrl("http://test.url/custom-order.docx")
@@ -4242,10 +4246,6 @@ public class ManageOrdersControllerTest {
             .doYouWantToServeOrder(Yes)
             .build();
 
-        // Order already exists from mid-event
-        List<Element<OrderDetails>> existingOrderCollection = List.of(Element.<OrderDetails>builder().value(
-            OrderDetails.builder().build()).build());
-
         CaseData caseDataWithServe = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -4253,7 +4253,6 @@ public class ManageOrdersControllerTest {
             .manageOrders(manageOrders)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(serveOrderData)
-            .orderCollection(existingOrderCollection)  // Already added in mid-event
             .previewOrderDoc(Document.builder()
                 .documentUrl("http://test.url/preview.pdf")
                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
@@ -4263,6 +4262,58 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> stringObjectMap = caseDataWithServe.toMap(new ObjectMapper());
         stringObjectMap.put("customOrderDoc", customOrderDoc);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithServe);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", List.of()));
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        // For custom orders: always add in about-to-submit (CCD doesn't persist mid-event computed data)
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void saveOrderDetailsTest_createAnOrder_withServeOrder_shouldSkipAddingOrder() throws Exception {
+        // Test that non-custom orders (createAnOrder) with serve immediately still skip adding
+        // to avoid duplicate orders (CCD does pass through orderCollection for regular orders)
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .build();
+
+        ServeOrderData serveOrderData = ServeOrderData.builder()
+            .doYouWantToServeOrder(Yes)
+            .build();
+
+        CaseData caseDataWithServe = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .serveOrderData(serveOrderData)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseDataWithServe.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
@@ -4284,14 +4335,9 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
 
-        // Verify addOrderDetailsAndReturnReverseSortedList is NOT called (order already added in mid-event)
+        // For non-custom orders: skip adding when orderAlreadyAddedInMidEvent=true
         verify(manageOrderService, never()).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
-        // For custom orders: orderCollection must be preserved so submitted callback can update it with combined doc
-        // (header + user content are stitched together in submitted callback, then order is updated)
-        assertNotNull(response.getData().get("orderCollection"));
-        List<?> orderCollectionInResponse = (List<?>) response.getData().get("orderCollection");
-        assertEquals(1, orderCollectionInResponse.size());
     }
 
     @Test
@@ -4736,6 +4782,16 @@ public class ManageOrdersControllerTest {
         callbackDataMap.put("whatDoWithOrder", "finalize");
         callbackDataMap.put("doYouWantToServeOrder", "Yes");
 
+        // orderCollection from aboutToSubmit response (critical for custom order combining)
+        // Using raw map format as CCD sends it
+        String newOrderId = UUID.randomUUID().toString();
+        Map<String, Object> newOrderElement = new HashMap<>();
+        newOrderElement.put("id", newOrderId);
+        newOrderElement.put("value", Map.of("orderType", "Custom Order"));
+        List<Map<String, Object>> orderCollectionFromCallback = new ArrayList<>();
+        orderCollectionFromCallback.add(newOrderElement);
+        callbackDataMap.put("orderCollection", orderCollectionFromCallback);
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -4770,6 +4826,7 @@ public class ManageOrdersControllerTest {
             capturedValues.put("amendOrderSelectCheckOptions", mapArg.get("amendOrderSelectCheckOptions"));
             capturedValues.put("whatDoWithOrder", mapArg.get("whatDoWithOrder"));
             capturedValues.put("doYouWantToServeOrder", mapArg.get("doYouWantToServeOrder"));
+            capturedValues.put("orderCollection", mapArg.get("orderCollection"));
             return null;
         }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
 
@@ -4790,6 +4847,10 @@ public class ManageOrdersControllerTest {
         assertEquals("noCheck", capturedValues.get("amendOrderSelectCheckOptions"));
         assertEquals("finalize", capturedValues.get("whatDoWithOrder"));
         assertEquals("Yes", capturedValues.get("doYouWantToServeOrder"));
+        // Critical: verify orderCollection was copied from callback (db was empty, so full copy)
+        List<?> capturedCollection = (List<?>) capturedValues.get("orderCollection");
+        assertNotNull(capturedCollection);
+        assertEquals(1, capturedCollection.size());
     }
 
     @Test
@@ -5567,6 +5628,281 @@ public class ManageOrdersControllerTest {
         // Verify combineAndFinalizeCustomOrder was called with isDraftOrder based on null amendCheck
         // For COURT_ADMIN with null amendCheck, !noCheck.equals(null) is true so isDraftOrder = true
         verify(customOrderService).combineAndFinalizeCustomOrder(eq(authToken), any(CaseData.class), anyMap(), eq(true));
+    }
+
+    // ========== Tests for copyCollectionIfNeeded (order collection merging) ==========
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void finalizeOrderSubmission_customOrder_shouldAddOnlyNewOrderToExistingCollection() throws Exception {
+        // Test that when database has existing orders and callback has existing + new order,
+        // only the new order is added (existing orders preserved)
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        // Database has one existing order
+        String existingOrderId = UUID.randomUUID().toString();
+        Map<String, Object> existingOrderElement = new HashMap<>();
+        existingOrderElement.put("id", existingOrderId);
+        existingOrderElement.put("value", Map.of("orderType", "Existing Order"));
+        List<Map<String, Object>> dbOrderCollection = new ArrayList<>();
+        dbOrderCollection.add(existingOrderElement);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("orderCollection", dbOrderCollection);
+
+        // Callback has existing order + new order (about-to-submit added new order)
+        String newOrderId = UUID.randomUUID().toString();
+        Map<String, Object> newOrderElement = new HashMap<>();
+        newOrderElement.put("id", newOrderId);
+        newOrderElement.put("value", Map.of("orderType", "New Custom Order"));
+
+        List<Map<String, Object>> callbackOrderCollection = new ArrayList<>();
+        callbackOrderCollection.add(newOrderElement);  // New order first (sorted by date desc)
+        callbackOrderCollection.add(existingOrderElement);  // Existing order
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("orderCollection", callbackOrderCollection);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // Capture the map when combineAndFinalizeCustomOrder is called
+        Map<String, Object> capturedMap = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            Map<String, Object> mapArg = invocation.getArgument(2);
+            capturedMap.put("orderCollection", mapArg.get("orderCollection"));
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        // Verify: should have 2 orders (new one added to existing)
+        List<Map<String, Object>> resultCollection = (List<Map<String, Object>>) capturedMap.get("orderCollection");
+        assertNotNull(resultCollection);
+        assertEquals(2, resultCollection.size());
+
+        // New order should be at front (index 0)
+        assertEquals(newOrderId, resultCollection.get(0).get("id"));
+        // Existing order preserved at index 1
+        assertEquals(existingOrderId, resultCollection.get(1).get("id"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void finalizeOrderSubmission_customOrder_shouldPreserveExistingOrdersWhenNoNewOrder() throws Exception {
+        // Test that when callback has same orders as database (same UUIDs), nothing is modified
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        // Database has one existing order
+        String existingOrderId = UUID.randomUUID().toString();
+        Map<String, Object> existingOrderElement = new HashMap<>();
+        existingOrderElement.put("id", existingOrderId);
+        existingOrderElement.put("value", Map.of("orderType", "Existing Order"));
+        List<Map<String, Object>> dbOrderCollection = new ArrayList<>();
+        dbOrderCollection.add(existingOrderElement);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("orderCollection", dbOrderCollection);
+
+        // Callback has SAME order (same UUID) - no new order
+        List<Map<String, Object>> callbackOrderCollection = new ArrayList<>();
+        callbackOrderCollection.add(existingOrderElement);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("orderCollection", callbackOrderCollection);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // Capture the map when combineAndFinalizeCustomOrder is called
+        Map<String, Object> capturedMap = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            Map<String, Object> mapArg = invocation.getArgument(2);
+            capturedMap.put("orderCollection", mapArg.get("orderCollection"));
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        // Verify: should still have 1 order (existing preserved, no duplicates)
+        List<Map<String, Object>> resultCollection = (List<Map<String, Object>>) capturedMap.get("orderCollection");
+        assertNotNull(resultCollection);
+        assertEquals(1, resultCollection.size());
+        assertEquals(existingOrderId, resultCollection.get(0).get("id"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void finalizeOrderSubmission_customOrder_shouldNotLoseOrdersWhenCallbackHasFewer() throws Exception {
+        // CRITICAL TEST: Ensures we never lose existing orders even if callback somehow has fewer orders
+
+        Document customOrderDoc = Document.builder()
+            .documentUrl("http://test.url/custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/custom-order.docx")
+            .documentFileName("custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        // Database has TWO existing orders
+        String existingOrderId1 = UUID.randomUUID().toString();
+        String existingOrderId2 = UUID.randomUUID().toString();
+        Map<String, Object> existingOrder1 = new HashMap<>();
+        existingOrder1.put("id", existingOrderId1);
+        existingOrder1.put("value", Map.of("orderType", "Existing Order 1"));
+        Map<String, Object> existingOrder2 = new HashMap<>();
+        existingOrder2.put("id", existingOrderId2);
+        existingOrder2.put("value", Map.of("orderType", "Existing Order 2"));
+        List<Map<String, Object>> dbOrderCollection = new ArrayList<>();
+        dbOrderCollection.add(existingOrder1);
+        dbOrderCollection.add(existingOrder2);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("orderCollection", dbOrderCollection);
+
+        // Callback somehow only has ONE order (unexpected/corrupted scenario)
+        String newOrderId = UUID.randomUUID().toString();
+        Map<String, Object> newOrderElement = new HashMap<>();
+        newOrderElement.put("id", newOrderId);
+        newOrderElement.put("value", Map.of("orderType", "New Order"));
+        List<Map<String, Object>> callbackOrderCollection = new ArrayList<>();
+        callbackOrderCollection.add(newOrderElement);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("orderCollection", callbackOrderCollection);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        // Capture the map when combineAndFinalizeCustomOrder is called
+        Map<String, Object> capturedMap = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            Map<String, Object> mapArg = invocation.getArgument(2);
+            capturedMap.put("orderCollection", mapArg.get("orderCollection"));
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        // CRITICAL: Should have 3 orders (2 existing + 1 new) - existing orders NEVER lost
+        List<Map<String, Object>> resultCollection = (List<Map<String, Object>>) capturedMap.get("orderCollection");
+        assertNotNull(resultCollection);
+        assertEquals(3, resultCollection.size());
+
+        // Verify all orders present
+        Set<String> resultIds = resultCollection.stream()
+            .map(e -> (String) e.get("id"))
+            .collect(Collectors.toSet());
+        assertTrue("Existing order 1 must be preserved",resultIds.contains(existingOrderId1));
+        assertTrue("Existing order 2 must be preserved",resultIds.contains(existingOrderId2));
+        assertTrue("New order must be added",resultIds.contains(newOrderId));
     }
 
 }
