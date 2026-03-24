@@ -47,6 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -62,46 +64,46 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class SendAndReplyControllerTest {
 
     @InjectMocks
-    SendAndReplyController sendAndReplyController;
+    private SendAndReplyController sendAndReplyController;
 
     @Mock
-    SendAndReplyService sendAndReplyService;
+    private SendAndReplyService sendAndReplyService;
 
     @Mock
-    SendAndReplyCommonService sendAndReplyCommonService;
+    private SendAndReplyCommonService sendAndReplyCommonService;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Mock
-    ElementUtils elementUtils;
+    private ElementUtils elementUtils;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
-    CaseData replyCaseData;
-    Map<String, Object> caseDataMap;
-    CaseDetails sendCaseDetails;
-    CaseData sendCaseData;
-    CallbackRequest sendCallbackRequest;
-    String auth = "authorisation";
+    private CaseData replyCaseData;
+    private Map<String, Object> caseDataMap;
+    private CaseDetails sendCaseDetails;
+    private CaseData sendCaseData;
+    private CallbackRequest sendCallbackRequest;
+    private String auth = "authorisation";
 
-    Message message1;
+    private Message message1;
 
-    Message message2;
+    private Message message2;
 
-    List<Element<Message>> messages;
+    private List<Element<Message>> messages;
 
-    List<Element<Message>> listOfClosedMessages;
+    private List<Element<Message>> listOfClosedMessages;
 
-    LocalDateTime dateTime = LocalDateTime.of(
+    private LocalDateTime dateTime = LocalDateTime.of(
         LocalDate.of(2000, 1, 10),
         LocalTime.of(10, 22));
-    String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH));
+    private String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH));
 
-    Element<Message> message1Element;
+    private Element<Message> message1Element;
 
-    Element<Message> message2Element;
+    private Element<Message> message2Element;
 
     @Before
     public void setup() {
@@ -176,12 +178,32 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandleSendOrMessageAboutToStart() {
+        // given
         Map<String, Object> aboutToStartMap = new HashMap<>();
         aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
+        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth), eq(null))).thenReturn(aboutToStartMap);
 
-        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCaseData, auth)).thenReturn(aboutToStartMap);
-        sendAndReplyController.handleSendOrMessageAboutToStart(auth, sendCallbackRequest);
-        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCaseData, auth);
+        // when
+        sendAndReplyController.handleSendOrMessageAboutToStart(auth, null,  sendCallbackRequest);
+
+        // then
+        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth), eq(null));
+    }
+
+
+
+    @Test
+    public void testHandleSendOrMessageAboutToStartNextstep() {
+        // given
+        Map<String, Object> aboutToStartMap = new HashMap<>();
+        aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
+        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth))).thenReturn(aboutToStartMap);
+
+        // when
+        sendAndReplyController.handleSendOrMessageAboutToStartNextStep(auth,  sendCallbackRequest);
+
+        // then
+        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth));
     }
 
     @Test
