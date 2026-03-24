@@ -20,22 +20,20 @@ import java.util.List;
 public class ServeOrderData {
     @JsonProperty("cafcassOrCymruNeedToProvideReport")
     private final YesOrNo cafcassOrCymruNeedToProvideReport;
-    @JsonProperty("localAuthorityNeedToProvideReport")
-    private final YesOrNo localAuthorityNeedToProvideReport;
     @JsonProperty("cafcassCymruDocuments")
     private final List<CafcassCymruDocumentsEnum> cafcassCymruDocuments;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate whenReportsMustBeFiled;
+    @JsonProperty("localAuthorityNeedToProvideReport")
+    private final YesOrNo localAuthorityNeedToProvideReport;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private final LocalDate whenReportsMustBeFiledByLocalAuthority;
     @JsonProperty("orderEndsInvolvementOfCafcassOrCymru")
     private final YesOrNo orderEndsInvolvementOfCafcassOrCymru;
     @JsonProperty("doYouWantToServeOrder")
     private final YesOrNo doYouWantToServeOrder;
     @JsonProperty("whatDoWithOrder")
     private final WhatToDoWithOrderEnum whatDoWithOrder;
-
-    @JsonProperty("whenReportsMustBeFiledByLocalAuthority")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private final LocalDate whenReportsMustBeFiledByLocalAuthority;
 
     @JsonProperty("cirReceivedByDeadline")
     private final YesOrNo cirReceivedByDeadline;
