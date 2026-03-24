@@ -20,6 +20,8 @@ import java.util.List;
 public class ServeOrderData {
     @JsonProperty("cafcassOrCymruNeedToProvideReport")
     private final YesOrNo cafcassOrCymruNeedToProvideReport;
+    @JsonProperty("localAuthorityNeedToProvideReport")
+    private final YesOrNo localAuthorityNeedToProvideReport;
     @JsonProperty("cafcassCymruDocuments")
     private final List<CafcassCymruDocumentsEnum> cafcassCymruDocuments;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
