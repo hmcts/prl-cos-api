@@ -26,8 +26,9 @@ There is currently no support for
 The first time cftlib is run it needs to download Docker images from the Azure Registry. You must therefore login
 to Azure as follows:
 ```bash
-az acr login --name hmctspublic --subscription DCD-CNP-Prod
+az acr login --name hmctspublic --subscription DCD-CNP-Prod ----- This will be deprecated from 10/04/2026 ------
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
+az acr login --name hmctsprod --subscription DCD-CNP-Prod ----- This replaces hmctspublic, can be used from now ------
 ```
 
 ## Running
