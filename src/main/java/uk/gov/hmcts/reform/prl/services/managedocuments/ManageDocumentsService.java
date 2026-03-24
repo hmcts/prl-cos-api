@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -58,11 +59,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -215,8 +221,38 @@ public class ManageDocumentsService {
             caseDataUpdated,
             updatedUserDetails
         );
+        setCirReceivedFlagIfApplicable(caseData, caseDataUpdated);
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
+    }
+
+    private static final Set<String> CIR_CATEGORY_IDS = Set.of(CHILD_IMPACT_REPORT1, CHILD_IMPACT_REPORT2);
+
+    private void setCirReceivedFlagIfApplicable(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<ManageDocuments>> manageDocuments =
+            Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
+                .orElse(Collections.emptyList());
+        boolean hasCirDoc = manageDocuments.stream()
+            .map(Element::getValue)
+            .anyMatch(doc -> doc.getDocumentCategories() != null
+                && CIR_CATEGORY_IDS.contains(doc.getDocumentCategories().getValueCode()));
+        if (!hasCirDoc) {
+            return;
+        }
+        LocalDate dueDate = caseData.getServeOrderData() != null
+            ? caseData.getServeOrderData().getWhenReportsMustBeFiledByLocalAuthority() : null;
+        if (dueDate == null) {
+            log.info("No CIR due date set on case — skipping CIR deadline flags");
+            return;
+        }
+        LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
+        caseDataUpdated.put(CIR_UPLOADED_DATE, today);
+        if (!today.isAfter(dueDate)) {
+            caseDataUpdated.put(CIR_RECEIVED_BY_DEADLINE, YesOrNo.Yes);
+            log.info("CIR document uploaded on or before due date {}", dueDate);
+        } else {
+            log.info("CIR document uploaded after due date {}", dueDate);
+        }
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
