@@ -3296,7 +3296,8 @@ public class ManageOrderService {
     private void addC21OrderDetails(CaseData caseData,
                                     Map<String, Object> caseDataUpdated) {
         caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
-            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
+            && (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
+            || caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.uploadAnOrder))
             ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : " ");
 
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
