@@ -1101,7 +1101,6 @@ public class ManageOrderService {
             .orderEndsInvolvementOfCafcassOrCymru(
                 serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru());
 
-        //Do I need to check localAuthorityNeedToProvideReport to yes before building ?
         if (null != serveOrderData.getLocalAuthorityNeedToProvideReport()
             && serveOrderData.getLocalAuthorityNeedToProvideReport().equals(Yes)) {
             serveOrderDetails
