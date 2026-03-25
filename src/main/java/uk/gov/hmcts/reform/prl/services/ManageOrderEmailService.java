@@ -370,8 +370,14 @@ public class ManageOrderEmailService {
         }
 
         //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
-        addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-        caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+        // For custom orders, work on caseDataMap's collection (which has the combined doc and correct orderTypeId)
+        // to avoid overwriting those updates with stale data from caseData
+        if (caseDataMap.get("customOrderDoc") != null) {
+            addBulkPrintIdsInOrderCollectionFromMap(caseDataMap, caseData.getManageOrders(), bulkPrintOrderDetails);
+        } else {
+            addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
+            caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+        }
     }
 
     private void handleFL401ServeOrderNotifications(String authorisation,
@@ -782,6 +788,38 @@ public class ManageOrderEmailService {
                             .setBulkPrintOrderDetails(bulkPrints);
                     }
                 }));
+    }
+
+    /**
+     * Adds bulk print IDs to the order collection stored in caseDataMap.
+     * Used for custom orders where caseDataMap has updates (combined doc, orderTypeId) that
+     * would be lost if we overwrote it with caseData.getOrderCollection().
+     */
+    private void addBulkPrintIdsInOrderCollectionFromMap(Map<String, Object> caseDataMap,
+                                                         ManageOrders manageOrders,
+                                                         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        if (caseDataMap.get(ORDER_COLLECTION) == null || manageOrders.getServeOrderDynamicList() == null) {
+            return;
+        }
+
+        List<Element<OrderDetails>> orderCollection = objectMapper.convertValue(
+            caseDataMap.get(ORDER_COLLECTION),
+            new TypeReference<>() {}
+        );
+
+        manageOrders.getServeOrderDynamicList().getValue()
+            .forEach(element -> nullSafeCollection(orderCollection)
+                .forEach(orderDetailsElement -> {
+                    if (orderDetailsElement.getId().toString().equals(element.getCode())) {
+                        List<Element<BulkPrintOrderDetail>> bulkPrints = CollectionUtils.isNotEmpty(
+                            orderDetailsElement.getValue().getBulkPrintOrderDetails())
+                            ? orderDetailsElement.getValue().getBulkPrintOrderDetails() : new ArrayList<>();
+                        bulkPrints.addAll(bulkPrintOrderDetails);
+                        orderDetailsElement.getValue().setBulkPrintOrderDetails(bulkPrints);
+                    }
+                }));
+
+        caseDataMap.put(ORDER_COLLECTION, orderCollection);
     }
 
     private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,

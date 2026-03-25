@@ -4108,4 +4108,89 @@ public class ManageOrderEmailServiceTest {
         // Verify ObjectMapper was NOT called (fallback to caseData)
         verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
     }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_customOrder_preservesOrderCollection() {
+        // Test that for custom orders (customOrderDoc present), the order collection
+        // from caseDataMap is preserved and not overwritten with caseData's collection
+
+        UUID orderId = UUID.randomUUID();
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("Custom Order Name")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(Document.builder()
+                .documentFileName("combined_custom_order.pdf")
+                .documentUrl("http://test/combined")
+                .documentBinaryUrl("http://test/combined/binary")
+                .build())
+            .build();
+
+        List<Element<OrderDetails>> orderCollectionInMap = new ArrayList<>();
+        orderCollectionInMap.add(Element.<OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build());
+
+        // caseData has a DIFFERENT orderTypeId (simulating stale data)
+        OrderDetails staleOrderDetails = OrderDetails.builder()
+            .orderTypeId("uploaded_file.docx")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(Document.builder()
+                .documentFileName("uploaded_file.docx")
+                .documentUrl("http://test/uploaded")
+                .documentBinaryUrl("http://test/uploaded/binary")
+                .build())
+            .build();
+
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .markedToServeEmailNotification(YesOrNo.No)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                .id(orderId)
+                .value(staleOrderDetails)
+                .build()))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderDoc", Document.builder()
+            .documentFileName("user_upload.docx")
+            .build());
+        caseDataMap.put("orderCollection", orderCollectionInMap);
+
+        // Mock documentLanguageService
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Mock objectMapper for the convertValue call
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(orderCollectionInMap);
+
+        // Call the method
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify that caseDataMap's orderCollection is preserved (not overwritten)
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> resultCollection =
+            (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(resultCollection);
+        assertEquals(1, resultCollection.size());
+        // The orderTypeId should be "Custom Order Name" (from caseDataMap), not "uploaded_file.docx" (from caseData)
+        assertEquals("Custom Order Name", resultCollection.get(0).getValue().getOrderTypeId());
+    }
 }

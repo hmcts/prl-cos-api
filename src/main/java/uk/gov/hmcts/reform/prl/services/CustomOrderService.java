@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -1673,9 +1672,9 @@ public class CustomOrderService {
             // In that case, we need to read from caseData (persisted) and update caseDataUpdated.
             String orderName = getEffectiveOrderName(caseData, caseDataUpdated);
             if (isDraftOrder) {
-                updateDraftOrderCollection(caseDataUpdated, finalDoc, orderName);
+                updateDraftOrderCollection(caseData, caseDataUpdated, finalDoc, orderName);
             } else {
-                updateFinalOrderCollection(caseDataUpdated, finalDoc, orderName);
+                updateFinalOrderCollection(caseData, caseDataUpdated, finalDoc, orderName);
             }
 
             // Clean up previewOrderDoc now that we've used it
@@ -1686,68 +1685,86 @@ public class CustomOrderService {
         }
     }
 
-    private void updateDraftOrderCollection(Map<String, Object> caseDataUpdated,
+    private void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
                                             String orderName) {
-        Object rawDrafts = caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
-        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> drafts = null;
-
-        if (rawDrafts != null) {
-            drafts = objectMapper.convertValue(
-                rawDrafts,
-                new TypeReference<>() {}
-            );
-        }
-        if (drafts == null || drafts.isEmpty()) {
+        // Follow existing pattern: read from caseData (typed), create mutable copy, put into caseDataUpdated
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> originalDrafts = caseData.getDraftOrderCollection();
+        if (originalDrafts == null || originalDrafts.isEmpty()) {
             log.error("draftOrderCollection is null/empty - draft should have been created in about-to-submit callback");
             return;
         }
-        log.info("Using draftOrderCollection, size={}", drafts.size());
 
-        // Update the first draft order with the combined document and order name
-        Element<uk.gov.hmcts.reform.prl.models.DraftOrder> draftElement = drafts.getFirst();
-        uk.gov.hmcts.reform.prl.models.DraftOrder updatedDraft = draftElement.getValue().toBuilder()
+        int originalSize = originalDrafts.size();
+        log.info("Updating draftOrderCollection: original size={}", originalSize);
+
+        // Create mutable copy
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> updatedDrafts = new ArrayList<>(originalDrafts);
+
+        // Update the first draft (newest) with combined doc and orderTypeId
+        Element<uk.gov.hmcts.reform.prl.models.DraftOrder> firstElement = updatedDrafts.get(0);
+        uk.gov.hmcts.reform.prl.models.DraftOrder updatedDraft = firstElement.getValue().toBuilder()
             .orderDocument(docToStore)
             .orderTypeId(orderName)
             .build();
-        drafts.set(0, Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
-            .id(draftElement.getId())
+
+        updatedDrafts.set(0, Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+            .id(firstElement.getId())
             .value(updatedDraft)
             .build());
-        caseDataUpdated.put(DRAFT_ORDER_COLLECTION, drafts);
-        log.info("Updated draftOrderCollection[0] with doc: {}, orderTypeId: {}", docToStore.getDocumentFileName(), orderName);
+
+        // Safety check: ensure we're not overwriting with fewer drafts
+        Object existingInUpdated = caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
+        int existingCount = existingInUpdated != null ? ((List<?>) existingInUpdated).size() : 0;
+        if (updatedDrafts.size() < existingCount) {
+            throw new IllegalStateException(
+                String.format("Cannot update draft: would lose drafts (existing=%d, updated=%d)", existingCount, updatedDrafts.size()));
+        }
+
+        caseDataUpdated.put(DRAFT_ORDER_COLLECTION, updatedDrafts);
+        log.info("Updated draftOrderCollection[0] with doc: {}, orderTypeId: {}. Total drafts: {}",
+            docToStore.getDocumentFileName(), orderName, updatedDrafts.size());
     }
 
-    private void updateFinalOrderCollection(Map<String, Object> caseDataUpdated,
+    private void updateFinalOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
                                             String orderName) {
-        Object rawOrders = caseDataUpdated.get(ORDER_COLLECTION);
-        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orders = null;
-
-        if (rawOrders != null) {
-            orders = objectMapper.convertValue(
-                rawOrders,
-                new TypeReference<>() {}
-            );
-        }
-        if (orders == null || orders.isEmpty()) {
+        // Follow existing pattern: read from caseData (typed), create mutable copy, put into caseDataUpdated
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> originalOrders = caseData.getOrderCollection();
+        if (originalOrders == null || originalOrders.isEmpty()) {
             log.error("orderCollection is null/empty - order should have been created in about-to-submit callback");
             return;
         }
-        log.info("Using orderCollection, size={}", orders.size());
 
-        // Update the first order with the sealed document and order name
-        Element<uk.gov.hmcts.reform.prl.models.OrderDetails> orderElement = orders.getFirst();
-        uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = orderElement.getValue().toBuilder()
+        int originalSize = originalOrders.size();
+        log.info("Updating orderCollection: original size={}", originalSize);
+
+        // Create mutable copy
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedOrders = new ArrayList<>(originalOrders);
+
+        // Update the first order (newest) with combined doc and orderTypeId
+        Element<uk.gov.hmcts.reform.prl.models.OrderDetails> firstElement = updatedOrders.get(0);
+        uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = firstElement.getValue().toBuilder()
             .orderDocument(docToStore)
             .orderTypeId(orderName)
             .doesOrderDocumentNeedSeal(YesOrNo.No)
             .build();
-        orders.set(0, Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
-            .id(orderElement.getId())
+
+        updatedOrders.set(0, Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(firstElement.getId())
             .value(updatedOrder)
             .build());
-        caseDataUpdated.put(ORDER_COLLECTION, orders);
-        log.info("Updated orderCollection[0] with sealed doc: {}, orderTypeId: {}", docToStore.getDocumentFileName(), orderName);
+
+        // Safety check: ensure we're not overwriting with fewer orders
+        Object existingInUpdated = caseDataUpdated.get(ORDER_COLLECTION);
+        int existingCount = existingInUpdated != null ? ((List<?>) existingInUpdated).size() : 0;
+        if (updatedOrders.size() < existingCount) {
+            throw new IllegalStateException(
+                String.format("Cannot update order: would lose orders (existing=%d, updated=%d)", existingCount, updatedOrders.size()));
+        }
+
+        caseDataUpdated.put(ORDER_COLLECTION, updatedOrders);
+        log.info("Updated orderCollection[0] with doc: {}, orderTypeId: {}. Total orders: {}",
+            docToStore.getDocumentFileName(), orderName, updatedOrders.size());
     }
 }

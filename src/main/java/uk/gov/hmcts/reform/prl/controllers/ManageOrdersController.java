@@ -372,9 +372,20 @@ public class ManageOrdersController {
 
             // Custom order flow: combine header preview + user content, update the order
             Map<String, Object> callbackData = callbackRequest.getCaseDetails().getData();
+            log.info("Submitted callback: callbackData has orderCollection={}, draftOrderCollection={}",
+                callbackData.get(ORDER_COLLECTION) != null,
+                callbackData.get(DRAFT_ORDER_COLLECTION) != null);
+            log.info("Submitted callback: caseDataUpdated (from DB) has orderCollection={}, draftOrderCollection={}",
+                caseDataUpdated.get(ORDER_COLLECTION) != null,
+                caseDataUpdated.get(DRAFT_ORDER_COLLECTION) != null);
             boolean isCustomOrder = copyCustomOrderFieldsFromCallback(callbackData, caseDataUpdated);
+            log.info("Submitted callback: isCustomOrder={}", isCustomOrder);
             if (isCustomOrder) {
+                log.info("Submitted callback: calling processCustomOrder");
                 processCustomOrder(authorisation, caseData, caseDataUpdated);
+                log.info("Submitted callback: after processCustomOrder, orderCollection size={}",
+                    caseDataUpdated.get(ORDER_COLLECTION) != null
+                        ? ((List<?>) caseDataUpdated.get(ORDER_COLLECTION)).size() : "null");
             } else {
                 // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
                 // (association happens during submitAllTabsUpdate below). sealing is done inline in combineAndFinalizeCustomOrder.
@@ -396,13 +407,34 @@ public class ManageOrdersController {
                     authorisation,
                     caseData,
                     caseDataUpdated,
-                    manageOrderService
+                    manageOrderService,
+                    objectMapper
                 );
             }
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+
+            // Debug: log orderCollection state before persisting
+            if (isCustomOrder && caseDataUpdated.get(ORDER_COLLECTION) != null) {
+                List<?> orders = (List<?>) caseDataUpdated.get(ORDER_COLLECTION);
+                log.info("Before submitAllTabsUpdate: orderCollection size={}", orders.size());
+                if (!orders.isEmpty()) {
+                    Object firstOrder = orders.get(0);
+                    if (firstOrder instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> orderMap = (Map<String, Object>) firstOrder;
+                        Object value = orderMap.get("value");
+                        if (value instanceof Map) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> valueMap = (Map<String, Object>) value;
+                            log.info("First order orderTypeId: {}", valueMap.get("orderTypeId"));
+                        }
+                    }
+                }
+            }
+
             allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
@@ -569,12 +601,24 @@ public class ManageOrdersController {
         // CCD doesn't persist mid-event data, so the order must be added here for submitted callback to find it.
         // For other order types: skip if already added in mid-event to avoid duplicates.
         boolean isCustomOrder = ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions());
+        log.info("addOrderToCollectionIfNotAlreadyAdded: isCustomOrder={}, orderAlreadyAddedInMidEvent={}",
+            isCustomOrder, orderAlreadyAddedInMidEvent);
         if (!orderAlreadyAddedInMidEvent || isCustomOrder) {
             if (isCustomOrder && orderAlreadyAddedInMidEvent) {
                 log.info("Custom order: adding order in about-to-submit (mid-event data not persisted by CCD)");
             }
-            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                authorisation, caseData, PrlAppsConstants.ENGLISH));
+            Map<String, Object> orderResult = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation, caseData, PrlAppsConstants.ENGLISH);
+            caseDataUpdated.putAll(orderResult);
+            // Log what was added
+            if (orderResult.containsKey(ORDER_COLLECTION)) {
+                List<?> orders = (List<?>) orderResult.get(ORDER_COLLECTION);
+                log.info("About-to-submit: added orderCollection with {} orders", orders != null ? orders.size() : 0);
+            }
+            if (orderResult.containsKey(DRAFT_ORDER_COLLECTION)) {
+                List<?> drafts = (List<?>) orderResult.get(DRAFT_ORDER_COLLECTION);
+                log.info("About-to-submit: added draftOrderCollection with {} drafts", drafts != null ? drafts.size() : 0);
+            }
         } else {
             log.info("Order already added in mid-event (serve flow), skipping duplicate add");
         }
