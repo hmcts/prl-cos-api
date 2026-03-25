@@ -1162,22 +1162,6 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testLoggedInUserIsLocalAuthorityWithSolicitorRole() {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "[LASOLICITOR]");
-        when(authTokenGenerator.generate()).thenReturn(
-            "serviceAuthToken");
-        when(userService.getUserDetails(auth)).thenReturn((userDetailsSolicitorRole));
-        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
-        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-
-        List<String> loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
-        assertNotNull(loggedInUserTypeList);
-        assertTrue(loggedInUserTypeList.contains("LOCAL_AUTHORITY"));
-    }
-
-    @Test
     public void testAppendConfidentialDocumentNameForCourtAdminAndUpdate() {
 
         when(allTabService.getStartAllTabsUpdate(Mockito.anyString()))
@@ -2727,6 +2711,22 @@ public class ManageDocumentsServiceTest {
         when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
         List<String> loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
         assertNotNull(loggedInUserTypeList);
+    }
+
+    @Test
+    public void testLoggedInUserIsLocalAuthorityWithSolicitorRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "[LASOLICITOR]");
+        when(authTokenGenerator.generate()).thenReturn(
+            "serviceAuthToken");
+        when(userService.getUserDetails(auth)).thenReturn((userDetailsSolicitorRole));
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        List<String> loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
+        assertNotNull(loggedInUserTypeList);
+        assertTrue(loggedInUserTypeList.contains("LOCAL_AUTHORITY"));
     }
 
     @Test
