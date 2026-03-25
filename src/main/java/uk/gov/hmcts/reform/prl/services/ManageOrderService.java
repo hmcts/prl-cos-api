@@ -1087,7 +1087,8 @@ public class ManageOrderService {
     }
 
     public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
-        return ServeOrderDetails.builder()
+        final ServeOrderDetails.ServeOrderDetailsBuilder serveOrderDetails = ServeOrderDetails.builder();
+        serveOrderDetails
             .cafcassOrCymruNeedToProvideReport(
                 serveOrderData.getCafcassOrCymruNeedToProvideReport())
             .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
@@ -1098,8 +1099,23 @@ public class ManageOrderService {
                     Locale.ENGLISH
                 )) : null)
             .orderEndsInvolvementOfCafcassOrCymru(
-                serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
-            .build();
+                serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru());
+
+        //Do I need to check localAuthorityNeedToProvideReport to yes before building ?
+        if (null != serveOrderData.getLocalAuthorityNeedToProvideReport()
+            && serveOrderData.getLocalAuthorityNeedToProvideReport().equals(Yes)) {
+            serveOrderDetails
+                .localAuthorityNeedToProvideReport(serveOrderData.getLocalAuthorityNeedToProvideReport())
+                .localAuthorityMultipleDocuments(serveOrderData.getLocalAuthorityMultipleDocuments())
+                .whenReportsMustBeFiledByLocalAuthority(serveOrderData.getWhenReportsMustBeFiledByLocalAuthority() != null
+                                                            ? serveOrderData.getWhenReportsMustBeFiledByLocalAuthority()
+                    .format(DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMM_YYYY,
+                        Locale.ENGLISH
+                    )) : null);
+        }
+
+        return serveOrderDetails.build();
     }
 
     public String getSelectedChildInfoFromMangeOrder(CaseData caseData) {

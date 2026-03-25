@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -46,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -54,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2746,5 +2749,173 @@ public class ManageDocumentsServiceTest {
         manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verifyNoInteractions(caseDocumentClient);
+    }
+
+    @Test
+    public void whenCirDocUploadedOnOrBeforeDueDate_shouldSetCirReceivedByDeadlineFlag() {
+        DynamicList cirDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("childImpactReport1").label("Child Impact Report 1").build())
+            .build();
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY)
+            .documentCategories(cirDynamicList)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        manageDocumentsElement = element(manageDocuments);
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .serveOrderData(ServeOrderData.builder()
+                               .whenReportsMustBeFiledByLocalAuthority(LocalDate.now().plusDays(1))
+                               .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(any(HashMap.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(QuarantineLegalDoc.builder().build());
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .id("456").forename("test").surname("test")
+                                                              .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        Map<String, Object> result = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        assertEquals(YesOrNo.Yes, result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNotNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
+    }
+
+    @Test
+    public void whenCirDocUploadedAfterDueDate_shouldNotSetCirReceivedByDeadlineFlag() {
+        DynamicList cirDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("childImpactReport2").label("Child Impact Report 2").build())
+            .build();
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY)
+            .documentCategories(cirDynamicList)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        manageDocumentsElement = element(manageDocuments);
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .serveOrderData(ServeOrderData.builder()
+                               .whenReportsMustBeFiledByLocalAuthority(LocalDate.now().minusDays(1))
+                               .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(any(HashMap.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(QuarantineLegalDoc.builder().build());
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .id("456").forename("test").surname("test")
+                                                              .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        Map<String, Object> result = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        assertNull(result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNotNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
+    }
+
+    @Test
+    public void whenCirDocUploadedButNoCirDueDateOnCase_shouldNotSetCirFlags() {
+        DynamicList cirDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("childImpactReport1").label("Child Impact Report 1").build())
+            .build();
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY)
+            .documentCategories(cirDynamicList)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        manageDocumentsElement = element(manageDocuments);
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(any(HashMap.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(QuarantineLegalDoc.builder().build());
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .id("456").forename("test").surname("test")
+                                                              .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        Map<String, Object> result = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        assertNull(result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
+    }
+
+    @Test
+    public void whenNonCirDocUploaded_shouldNotSetCirFlags() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY)
+            .documentCategories(DynamicList.builder()
+                                    .value(DynamicListElement.builder().code("MIAMCertificate").label("MIAM Certificate").build())
+                                    .build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        manageDocumentsElement = element(manageDocuments);
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .serveOrderData(ServeOrderData.builder()
+                               .whenReportsMustBeFiledByLocalAuthority(LocalDate.now().plusDays(1))
+                               .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(any(HashMap.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(QuarantineLegalDoc.builder().build());
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .id("456").forename("test").surname("test")
+                                                              .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        Map<String, Object> result = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        assertNull(result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 }
