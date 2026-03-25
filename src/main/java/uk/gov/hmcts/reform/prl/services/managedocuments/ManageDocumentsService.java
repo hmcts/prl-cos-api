@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -61,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -118,6 +120,7 @@ public class ManageDocumentsService {
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+    public static final String MANAGE_DOCUMENTS_UPLOADED_CATEGORY = "manageDocUploadedCategory";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
@@ -244,14 +247,19 @@ public class ManageDocumentsService {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
-
-            if (!userRole.equals(COURT_ADMIN)
-                && (DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
-                || DocumentPartyEnum.CAFCASS_CYMRU.equals(
-                manageDocument.getDocumentParty())) &&  null != quarantineLegalDoc) {
-                quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
-                    quarantineLegalDoc
-                );
+            if (!userRole.equals(COURT_ADMIN)) {
+                if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+                    || DocumentPartyEnum.CAFCASS_CYMRU.equals(
+                    manageDocument.getDocumentParty())) && null != quarantineLegalDoc) {
+                    quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
+                        quarantineLegalDoc
+                    );
+                } else if (isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId())
+                    && null != quarantineLegalDoc) {
+                    quarantineLegalDoc = updateQuarantineLegalDocForLocalAuthority(
+                        quarantineLegalDoc
+                    );
+                }
             }
 
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
@@ -280,6 +288,18 @@ public class ManageDocumentsService {
             .categoryName(quarantineLegalDoc.getCategoryName())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .build();
+    }
+
+    private QuarantineLegalDoc updateQuarantineLegalDocForLocalAuthority(QuarantineLegalDoc quarantineLegalDoc) {
+        if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
+            || ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+            return quarantineLegalDoc.toBuilder()
+                .isConfidential(YesOrNo.Yes)
+                .categoryName(quarantineLegalDoc.getCategoryName())
+                .categoryId(quarantineLegalDoc.getCategoryId())
+                .build();
+        }
+        return quarantineLegalDoc;
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
@@ -418,6 +438,11 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
+
+        if (userRole.equals(LOCAL_AUTHORITY)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+        }
+
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
@@ -426,10 +451,53 @@ public class ManageDocumentsService {
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
-            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+            if (!userRole.equals(LOCAL_AUTHORITY)) {
+                caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+            } else {
+                updateTriggeredByForLocalAuthority(caseData, caseDataUpdated, quarantineLegalDoc);
+            }
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
+    }
+
+    private void updateTriggeredByForLocalAuthority(CaseData caseData, Map<String, Object> caseDataUpdated, QuarantineLegalDoc quarantineLegalDoc) {
+        boolean newTaskRequired = false;
+        if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+            if (isGivenDocumentExists(caseData, getCirExtensionRequestPredicate()).isEmpty()) {
+                newTaskRequired = true;
+            }
+        } else if (ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+            if (isGivenDocumentExists(caseData, getCirTransferRequestPredicate()).isEmpty()) {
+                newTaskRequired = true;
+            }
+        } else {
+            if (isGivenDocumentExists(caseData, getOtherDocumentsPredicate()).isEmpty()) {
+                newTaskRequired = true;
+            }
+        }
+        if (newTaskRequired) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
+        } else {
+            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+        }
+    }
+
+    private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(CaseData caseData, Predicate<Element<QuarantineLegalDoc>> predicate) {
+        return caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList().stream().filter(predicate).findAny();
+    }
+
+    private Predicate<Element<QuarantineLegalDoc>> getCirExtensionRequestPredicate() {
+        return a -> a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA);
+    }
+
+    private Predicate<Element<QuarantineLegalDoc>> getCirTransferRequestPredicate() {
+        return a -> a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA);
+    }
+
+    private Predicate<Element<QuarantineLegalDoc>> getOtherDocumentsPredicate() {
+        return a -> !a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA)
+            && !a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA);
     }
 
     public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
