@@ -741,6 +741,12 @@ public class ManageOrdersController {
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                     caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
+                    // For custom orders, set nameOfOrder so orderTypeId is populated correctly
+                    if (ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                        String effectiveOrderName = customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
+                        caseData.setNameOfOrder(effectiveOrderName);
+                        log.info("whenToServeOrder: set nameOfOrder to '{}' for custom order", effectiveOrderName);
+                    }
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                         authorisation,
                         caseData,

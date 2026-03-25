@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -1914,6 +1915,66 @@ public class ManageOrdersControllerTest {
         assertEquals(Yes.getDisplayedValue(), responseResponseEntity.getBody().getData().get("doYouWantToServeOrder"));
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
+    }
+
+    @Test
+    public void testWhenToServeOrder_customOrder_shouldSetNameOfOrderBeforeAddingToCollection() throws Exception {
+        // Test that when createCustomOrder with serve now, nameOfOrder is set from customOrderNameOption
+        // before calling addOrderDetailsAndReturnReverseSortedList, ensuring correct orderTypeId label
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .build();
+
+        CaseData customOrderCaseData = CaseData.builder()
+            .id(12345L)
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
+            .build();
+
+        List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
+            OrderDetails.builder().orderTypeId("FL404").build()).build());
+
+        Map<String, Object> stringObjectMap = customOrderCaseData.toMap(new ObjectMapper());
+        stringObjectMap.put(IS_INVOKED_FROM_TASK, No);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customOrderCaseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(customOrderCaseData)).thenReturn(customOrderCaseData);
+        when(customOrderService.getEffectiveOrderName(any(), any())).thenReturn("FL404");
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(Map.of("orderCollection", orderDetailsList));
+        when(objectMapper.convertValue(eq(No), ArgumentMatchers.<TypeReference<YesOrNo>>any())).thenReturn(No);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = manageOrdersController.whenToServeOrder(
+            authToken,
+            s2sToken,
+            null,
+            callbackRequest
+        );
+
+        // Verify getEffectiveOrderName was called for custom order
+        verify(customOrderService).getEffectiveOrderName(any(CaseData.class), anyMap());
+
+        // Capture caseData passed to addOrderDetailsAndReturnReverseSortedList and verify nameOfOrder was set
+        ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
+        verify(manageOrderService).addOrderDetailsAndReturnReverseSortedList(any(), caseDataCaptor.capture(), any());
+
+        CaseData capturedCaseData = caseDataCaptor.getValue();
+        assertEquals("FL404", capturedCaseData.getNameOfOrder());
+        assertNotNull(response);
     }
 
     @Test

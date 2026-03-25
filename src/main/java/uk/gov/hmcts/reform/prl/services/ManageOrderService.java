@@ -670,13 +670,22 @@ public class ManageOrderService {
     }
 
     public void populateServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
+        log.info("populateServeOrderDetails: manageOrdersOptions={}, orderCollection size={}",
+            caseData.getManageOrdersOptions(),
+            caseData.getOrderCollection() != null ? caseData.getOrderCollection().size() : 0);
 
         DynamicMultiSelectList orderList = dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData);
+        log.info("populateServeOrderDetails: orderList has {} items", orderList.getListItems().size());
+
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             //this is when we are trying to serve the order, auto selecting the chosen order
             List<DynamicMultiselectListElement> values = new ArrayList<>();
             values.add(orderList.getListItems().get(0));
             orderList = orderList.toBuilder().value(values).build();
+            log.info("populateServeOrderDetails: auto-selected first order (not servedSavedOrders)");
+        } else {
+            log.info("populateServeOrderDetails: servedSavedOrders - showing all {} orders in dropdown",
+                orderList.getListItems().size());
         }
         headerMap.put("serveOrderDynamicList", orderList);
         populateOtherServeOrderDetails(caseData, headerMap);
