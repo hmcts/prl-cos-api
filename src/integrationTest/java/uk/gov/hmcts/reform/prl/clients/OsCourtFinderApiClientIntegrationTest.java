@@ -49,7 +49,8 @@ public class OsCourtFinderApiClientIntegrationTest {
         OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
             .results(List.of(Result.builder()
                                  .dpa(Dpa.builder()
-                                          .localCustodianCode("123").build())
+                                          .localCustodianCode("123")
+                                          .localCustodianCodeDescription("CustodianName").build())
                                  .build()))
             .build();
         Mockito.when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(osPlacesResponse);
