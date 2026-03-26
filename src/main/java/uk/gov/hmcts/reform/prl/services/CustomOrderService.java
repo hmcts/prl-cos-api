@@ -794,7 +794,8 @@ public class CustomOrderService {
         }
 
         data.put("children", childrenRows);
-        log.info("Populated {} children for dynamic table rows", childrenRows.size());
+        data.put("hasChildren", !childrenRows.isEmpty());
+        log.info("Populated {} children for dynamic table rows, hasChildren={}", childrenRows.size(), !childrenRows.isEmpty());
     }
 
     private void populateC100Children(List<Map<String, String>> childrenRows, CaseData caseData) {
