@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -71,6 +72,16 @@ public class CustomOrderService {
     private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+
+    private final ObjectMapper objectMapper;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final HearingDataService hearingDataService;
+    private final PoiTlDocxRenderer poiTlDocxRenderer;
+    private final UploadDocumentService uploadService;
+    private final DocumentGenService documentGenService;
+    private final SystemUserService systemUserService;
+    private final AllTabServiceImpl allTabService;
+    private final DocumentSealingService documentSealingService;
 
     /**
      * Gets the effective order name for a custom order.
@@ -227,16 +238,6 @@ public class CustomOrderService {
         }
         return null;
     }
-
-    private final ObjectMapper objectMapper;
-    private final AuthTokenGenerator authTokenGenerator;
-    private final HearingDataService hearingDataService;
-    private final PoiTlDocxRenderer poiTlDocxRenderer;
-    private final UploadDocumentService uploadService;
-    private final DocumentGenService documentGenService;
-    private final SystemUserService systemUserService;
-    private final AllTabServiceImpl allTabService;
-    private final DocumentSealingService documentSealingService;
 
     /**
      * Renders an uploaded custom order template with case data placeholders and stores it.
@@ -809,7 +810,7 @@ public class CustomOrderService {
 
         for (Element<ApplicantChild> childElement : caseData.getApplicantChildDetails()) {
             ApplicantChild child = childElement.getValue();
-            String fullName = nullToEmpty(child.getFullName());
+            String fullName = StringUtils.defaultString(child.getFullName());
             String dob = child.getDateOfBirth() != null
                 ? child.getDateOfBirth().format(DATE_FORMATTER)
                 : "";
@@ -875,7 +876,7 @@ public class CustomOrderService {
     }
 
     private String getEffectiveRelationship(CaseData caseData, PartyDetails respondent, int index, String respondentId, String name) {
-        String relationship = nullToEmpty(respondent.getRelationshipToChildren());
+        String relationship = StringUtils.defaultString(respondent.getRelationshipToChildren());
         if (relationship.isEmpty()) {
             relationship = getRespondentRelationshipFromRelations(caseData, index, respondentId, name);
         }
@@ -1093,8 +1094,6 @@ public class CustomOrderService {
             }
         }
 
-        log.debug(" Children's guardian name: '{}'", guardianName);
-
         data.put("childrensGuardianName", guardianName);
         // Representative of the children's guardian (their solicitor) - not typically in case data
         data.put("childrensGuardianRepresentativeName", "");
@@ -1129,16 +1128,9 @@ public class CustomOrderService {
      * Gets full name from first and last name, handling nulls.
      */
     private String getFullName(String firstName, String lastName) {
-        String first = nullToEmpty(firstName);
-        String last = nullToEmpty(lastName);
+        String first = StringUtils.defaultString(firstName);
+        String last = StringUtils.defaultString(lastName);
         return (first + " " + last).trim();
-    }
-
-    /**
-     * Converts null to empty string.
-     */
-    private String nullToEmpty(String value) {
-        return value != null ? value : "";
     }
 
     /**

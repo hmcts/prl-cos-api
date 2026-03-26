@@ -2538,7 +2538,7 @@ public class ManageOrderService {
             }
         }
 
-        log.info("getLoggedInUserType returning: '{}' for user: {}", loggedInUserType, userDetails.getEmail());
+        log.info("getLoggedInUserType returning: '{}' for user: {}", loggedInUserType, userDetails.getId());
         return loggedInUserType;
     }
 
