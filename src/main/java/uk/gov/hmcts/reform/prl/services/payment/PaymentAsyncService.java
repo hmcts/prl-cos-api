@@ -67,21 +67,11 @@ public class PaymentAsyncService {
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         log.info("Async processing started for case {}", serviceRequestUpdateDto.getCcdCaseNumber());
 
-        // 1. Fetch latest case data (Heavy Lifting moved here)
         CaseDetails caseDetails = coreCaseDataService.findCaseById(systemAuthorisation, serviceRequestUpdateDto.getCcdCaseNumber());
         CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        // 2. Idempotency Check
-        if (isAlreadyProcessed(currentCaseData, serviceRequestUpdateDto)) {
-            log.info("Payment reference {} already processed for Case {}. Skipping.",
-                     serviceRequestUpdateDto.getServiceRequestReference(), caseDetails.getId());
-            return;
-        }
-
-        // 3. Sync Payment Metadata (Logs 'Payment Confirmation' and updates AWP collections)
         syncPaymentMetadata(serviceRequestUpdateDto, systemAuthorisation, systemUpdateUserId, currentCaseData);
 
-        // 4. Update Case Flags and Refresh All Tabs
         partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
 
         EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId);
@@ -97,6 +87,11 @@ public class PaymentAsyncService {
             allTabsUpdateStartEventResponse, allTabsUpdateEventRequestData, allTabsUpdateCaseData
         );
 
+        log.info(
+            "Updating the Case data with payment information for caseId {}",
+            serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+
         if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
             solicitorEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
             caseWorkerEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
@@ -108,34 +103,26 @@ public class PaymentAsyncService {
             && dto.getServiceRequestReference().equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
 
         CaseEvent event = getCaseEvent(isCasePayment, dto.getServiceRequestStatus());
-        log.info("Triggering event {} for case {}", event.getValue(), dto.getCcdCaseNumber());
+        log.info("Following case event will be triggered {} for case {}", event.getValue(), dto.getCcdCaseNumber());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(event, userId);
         StartEventResponse startEventResponse = coreCaseDataService.startUpdate(auth, eventRequestData, dto.getCcdCaseNumber(), true);
 
         if (isCasePayment) {
-            // Standard Case Payment: Single pass is usually sufficient
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
                 setCaseData(dto)
             );
             coreCaseDataService.submitUpdate(auth, eventRequestData, caseDataContent, dto.getCcdCaseNumber(), true);
 
-            // Original code triggered an All Tabs update here to refresh the UI flags
             triggerAllTabsUpdate(dto, auth, userId);
         } else {
-            // --- AwP FLOW: RESTORING THE ORIGINAL LOGIC ---
-
-            // First, submit the initial update to ensure the case is in the right state
             CaseDataContent initialContent = coreCaseDataService.createCaseDataContent(startEventResponse, new HashMap<>());
             coreCaseDataService.submitUpdate(auth, eventRequestData, initialContent, dto.getCcdCaseNumber(), true);
 
-            // SECOND PASS: Start a new event (Update All Tabs) to fetch the REFRESHED case data
-            // This ensures the additionalApplicationsBundle is no longer null.
             EventRequestData refreshRequestData = coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, userId);
             StartEventResponse refreshedResponse = coreCaseDataService.startUpdate(auth, refreshRequestData, dto.getCcdCaseNumber(), true);
 
-            // Now map the data using the fresh response that actually contains the bundle
             Map<String, Object> awpData = setAwPPaymentCaseData(refreshedResponse, dto);
 
             CaseDataContent finalAwpContent = coreCaseDataService.createCaseDataContent(refreshedResponse, awpData);
@@ -152,11 +139,6 @@ public class PaymentAsyncService {
         } else {
             return isPaid ? CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK : CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK;
         }
-    }
-
-    private boolean isAlreadyProcessed(CaseData caseData, ServiceRequestUpdateDto dto) {
-        return caseData.getPaymentCallbackServiceRequestUpdate() != null
-            && dto.getServiceRequestReference().equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestReference());
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
@@ -203,7 +185,8 @@ public class PaymentAsyncService {
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(bundleElement.get());
                 if (index != -1) {
-                    startEventResponseData.getAdditionalApplicationsBundle().set(index, ElementUtils.element(bundleElement.get().getId(), updatedBundle));
+                    startEventResponseData.getAdditionalApplicationsBundle()
+                        .set(index, ElementUtils.element(bundleElement.get().getId(), updatedBundle));
                 }
                 caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, bundleElement.get().getId());
                 caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
