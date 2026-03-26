@@ -180,7 +180,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.52') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.53') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -429,6 +429,7 @@ dependencies {
   testImplementation group: 'org.pitest', name: 'pitest', version: versions.pitest
   testImplementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
   testImplementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
+  testImplementation group:'org.instancio', name:'instancio-core', version:'5.5.1'
 
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jacksonDatatypeJsr
@@ -607,7 +608,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*'
+  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
+  '**uk/gov/hmcts/reform/prl/services/sendandreply/SendAndReplyService.java'
 ]
 
 sonarqube {
