@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.bundle;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,7 @@ public class BundleCreateRequestMapper {
     public static final String REDACTED_DOCUMENT_URL = "documents/00000000-0000-0000-0000-000000000000";
     public static final String REDACTED_DOCUMENT_URL_BINARY = "documents/00000000-0000-0000-0000-000000000000/binary";
     public static final String REDACTED_DOCUMENT_FILE_NAME = "*redacted*";
+    private static final boolean CFV_FLAG_ENABLED = true;
 
     private final AuthTokenGenerator authTokenGenerator;
     private final BundleCreateRequestByCategoriesMapper bundleCreateRequestByCategoriesMapper;
@@ -108,11 +110,26 @@ public class BundleCreateRequestMapper {
                 .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
         log.info("*** create bundle request mapped for the case id  : {}", caseData.getId());
-        List<Category> parentCategories = bundleCreateRequestByCategoriesMapper.getCategoriesAndDocuments(systemUserService.getSysUserToken(), caseData);
         return bundleCreateRequest;
     }
 
     private BundlingCaseData mapCaseData(CaseData caseData, Hearings hearingDetails, String bundleConfigFileName) {
+        if (CFV_FLAG_ENABLED) {
+            List<Category> parentCategories = bundleCreateRequestByCategoriesMapper.getCategoriesAndDocuments(systemUserService.getSysUserToken(), caseData);
+            List<Category> allCategories = parentCategories.stream()
+                .flatMap(category -> category.getSubCategories().stream())
+                .flatMap(this::flatMapRecursiveCategory)
+                .toList();
+
+            return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
+                    bundleConfigFileName)
+                .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+                          .hearingDetails(mapHearingDetails(hearingDetails))
+                          .applications(mapApplicationsFromCaseData(caseData))
+                          .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
+                          .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
+
+        }
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
@@ -120,6 +137,14 @@ public class BundleCreateRequestMapper {
                 .applications(mapApplicationsFromCaseData(caseData))
                 .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                 .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
+    }
+
+    public Stream<Category> flatMapRecursiveCategory(Category category) {
+        if (category.getSubCategories() == null) {
+            return Stream.empty();
+        }
+        return Stream.concat(Stream.of(category), category.getSubCategories().stream()
+            .flatMap(this::flatMapRecursiveCategory));
     }
 
     private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
