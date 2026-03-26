@@ -473,16 +473,6 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
 }
 
-task fortifyScan(type: JavaExec)  {
-  if (GradleVersion.current() >= GradleVersion.version('9.0')) {
-    mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
-  } else {
-    main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
-  }
-  classpath += sourceSets.test.runtimeClasspath
-  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
-}
-
 processContractTestResources {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
