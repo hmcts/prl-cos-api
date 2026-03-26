@@ -674,5 +674,4 @@ acro:
     session-wait-timeout: 10000
     pool-size: 10
     allow-unknown-keys: true
-    remote-directory: /
-    password: some_password
+    password: ${ACRO_SFTP_USER_PASSWORD:some_password}
