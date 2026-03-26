@@ -1654,6 +1654,13 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
+                .peek(element -> {
+                    if (element == null) {
+                        log.error("Found a NULL element in the emailNotificationDetails list");
+                    } else {
+                        log.info("Processing element with ID: {} and value: {}", element.getId(), element.getValue());
+                    }
+                })
                 .map(Element::getValue)
                 .filter(emailNotification -> {
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
