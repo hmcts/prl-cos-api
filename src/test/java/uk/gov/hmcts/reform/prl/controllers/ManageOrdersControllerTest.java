@@ -4942,6 +4942,7 @@ public class ManageOrdersControllerTest {
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("customOrderNameOption", "nonMolestation");
+        callbackDataMap.put("customOrderDateEndsOptions", "specifiedDateAndTime");
         callbackDataMap.put("customOrderDateEnds", "2025-06-30T14:00:00.000");
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -4985,8 +4986,11 @@ public class ManageOrdersControllerTest {
         assertNotNull(response);
         verify(customOrderService).combineAndFinalizeCustomOrder(eq(authToken), any(), any(), anyBoolean());
 
+        // Verify customOrderDateEndsOptions was copied to fl404CustomFields.orderEndDateAndTimeOptions
+        assertEquals("specifiedDateAndTime", capturedFl404Fields.get("orderEndDateAndTimeOptions"));
         // Verify customOrderDateEnds was copied to fl404CustomFields.fl404bDateOrderEnd
         assertEquals("2025-06-30T14:00:00.000", capturedFl404Fields.get("fl404bDateOrderEnd"));
+        assertEquals("2025-06-30T14:00:00.000", capturedFl404Fields.get("orderSpecifiedDateTime"));
     }
 
     @Test
