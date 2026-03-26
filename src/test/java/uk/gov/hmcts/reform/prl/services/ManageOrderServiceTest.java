@@ -7756,37 +7756,31 @@ class ManageOrderServiceTest {
     @Test
     void testPopulateServeOrderDetails_selectsOrderByNewOrderId() {
         // Given - two orders, with the second one being the "new" order
-        UUID firstOrderId = UUID.randomUUID();
-        UUID secondOrderId = UUID.randomUUID();
+        String firstOrderId = "11111111-1111-1111-1111-111111111111";
+        String secondOrderId = "22222222-2222-2222-2222-222222222222";
 
-        List<Element<OrderDetails>> orders = List.of(
-            Element.<OrderDetails>builder()
-                .id(firstOrderId)
-                .value(OrderDetails.builder()
-                    .orderType("C47A")
-                    .orderTypeId("Appointment of a guardian (C47A)")
-                    .dateCreated(LocalDateTime.now().minusDays(1))
-                    .build())
-                .build(),
-            Element.<OrderDetails>builder()
-                .id(secondOrderId)
-                .value(OrderDetails.builder()
-                    .orderType("C43")
-                    .orderTypeId("Child arrangements order")
-                    .dateCreated(LocalDateTime.now().minusDays(7))
-                    .build())
-                .build()
-        );
+        DynamicMultiselectListElement firstElement = DynamicMultiselectListElement.builder()
+            .code(firstOrderId)
+            .label("C47A Order")
+            .build();
+        DynamicMultiselectListElement secondElement = DynamicMultiselectListElement.builder()
+            .code(secondOrderId)
+            .label("C43 Order")
+            .build();
+        DynamicMultiSelectList mockOrderList = DynamicMultiSelectList.builder()
+            .listItems(List.of(firstElement, secondElement))
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .orderCollection(orders)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
 
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)).thenReturn(mockOrderList);
+
         Map<String, Object> headerMap = new HashMap<>();
-        headerMap.put("newOrderId", secondOrderId.toString());
+        headerMap.put("newOrderId", secondOrderId);
 
         // When
         manageOrderService.populateServeOrderDetails(caseData, headerMap);
@@ -7796,40 +7790,34 @@ class ManageOrderServiceTest {
         assertNotNull(serveOrderList);
         assertNotNull(serveOrderList.getValue());
         assertEquals(1, serveOrderList.getValue().size());
-        assertEquals(secondOrderId.toString(), serveOrderList.getValue().get(0).getCode());
+        assertEquals(secondOrderId, serveOrderList.getValue().get(0).getCode());
     }
 
     @Test
     void testPopulateServeOrderDetails_fallsBackToFirstOrder_whenNewOrderIdNotProvided() {
         // Given - two orders, no newOrderId specified
-        UUID firstOrderId = UUID.randomUUID();
-        UUID secondOrderId = UUID.randomUUID();
+        String firstOrderId = "11111111-1111-1111-1111-111111111111";
+        String secondOrderId = "22222222-2222-2222-2222-222222222222";
 
-        List<Element<OrderDetails>> orders = List.of(
-            Element.<OrderDetails>builder()
-                .id(firstOrderId)
-                .value(OrderDetails.builder()
-                    .orderType("C47A")
-                    .orderTypeId("Appointment of a guardian (C47A)")
-                    .dateCreated(LocalDateTime.now().minusDays(1))
-                    .build())
-                .build(),
-            Element.<OrderDetails>builder()
-                .id(secondOrderId)
-                .value(OrderDetails.builder()
-                    .orderType("C43")
-                    .orderTypeId("Child arrangements order")
-                    .dateCreated(LocalDateTime.now().minusDays(7))
-                    .build())
-                .build()
-        );
+        DynamicMultiselectListElement firstElement = DynamicMultiselectListElement.builder()
+            .code(firstOrderId)
+            .label("C47A Order")
+            .build();
+        DynamicMultiselectListElement secondElement = DynamicMultiselectListElement.builder()
+            .code(secondOrderId)
+            .label("C43 Order")
+            .build();
+        DynamicMultiSelectList mockOrderList = DynamicMultiSelectList.builder()
+            .listItems(List.of(firstElement, secondElement))
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .orderCollection(orders)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .build();
+
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)).thenReturn(mockOrderList);
 
         Map<String, Object> headerMap = new HashMap<>();
         // No newOrderId set
@@ -7842,6 +7830,6 @@ class ManageOrderServiceTest {
         assertNotNull(serveOrderList);
         assertNotNull(serveOrderList.getValue());
         assertEquals(1, serveOrderList.getValue().size());
-        assertEquals(firstOrderId.toString(), serveOrderList.getValue().get(0).getCode());
+        assertEquals(firstOrderId, serveOrderList.getValue().get(0).getCode());
     }
 }
