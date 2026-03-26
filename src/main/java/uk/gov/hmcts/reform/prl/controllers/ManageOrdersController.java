@@ -80,6 +80,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
@@ -1025,7 +1026,7 @@ public class ManageOrdersController {
         String[] customOrderFields = {
             CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, CUSTOM_ORDER_NAME_OPTION,
             NAME_OF_ORDER, AMEND_ORDER_SELECT_CHECK_OPTIONS, WHAT_DO_WITH_ORDER, DO_YOU_WANT_TO_SERVE_ORDER,
-            CUSTOM_ORDER_DATE_ENDS
+            CUSTOM_ORDER_DATE_ENDS, CUSTOM_ORDER_DATE_ENDS_OPTIONS
         };
         for (String field : customOrderFields) {
             Object value = callbackData.get(field);
@@ -1100,9 +1101,10 @@ public class ManageOrdersController {
 
     @SuppressWarnings("unchecked")
     private void copyCustomOrderDateEndsToFl404(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
-        Object customOrderDateEnds = callbackData.get(CUSTOM_ORDER_DATE_ENDS);
         Object customOrderNameOption = callbackData.get(CUSTOM_ORDER_NAME_OPTION);
-        if (customOrderDateEnds != null && customOrderNameOption != null) {
+        Object customOrderDateEndsOptions = callbackData.get(CUSTOM_ORDER_DATE_ENDS_OPTIONS);
+
+        if (customOrderNameOption != null) {
             String orderType = customOrderNameOption.toString();
             // Check if this is an FL404-related order type (nonMolestation, occupation, powerOfArrest)
             if ("nonMolestation".equals(orderType) || "occupation".equals(orderType) || "powerOfArrest".equals(orderType)) {
@@ -1110,9 +1112,24 @@ public class ManageOrdersController {
                 if (fl404CustomFields == null) {
                     fl404CustomFields = new HashMap<>();
                 }
-                fl404CustomFields.put("fl404bDateOrderEnd", customOrderDateEnds);
+
+                // Copy the radio option selection
+                if (customOrderDateEndsOptions != null) {
+                    fl404CustomFields.put("orderEndDateAndTimeOptions", customOrderDateEndsOptions);
+                    log.info("Copied customOrderDateEndsOptions={} to fl404CustomFields.orderEndDateAndTimeOptions", customOrderDateEndsOptions);
+
+                    // Only copy the date if "specifiedDateAndTime" is selected
+                    if ("specifiedDateAndTime".equals(customOrderDateEndsOptions.toString())) {
+                        Object customOrderDateEnds = callbackData.get(CUSTOM_ORDER_DATE_ENDS);
+                        if (customOrderDateEnds != null) {
+                            fl404CustomFields.put("orderSpecifiedDateTime", customOrderDateEnds);
+                            fl404CustomFields.put("fl404bDateOrderEnd", customOrderDateEnds);
+                            log.info("Copied customOrderDateEnds to fl404CustomFields for custom order type: {}", orderType);
+                        }
+                    }
+                }
+
                 caseDataUpdated.put("fl404CustomFields", fl404CustomFields);
-                log.info("Copied customOrderDateEnds to fl404CustomFields.fl404bDateOrderEnd for custom order type: {}", orderType);
             }
         }
     }
@@ -1145,6 +1162,7 @@ public class ManageOrdersController {
         caseDataUpdated.remove(WHAT_DO_WITH_ORDER);
         caseDataUpdated.remove(DO_YOU_WANT_TO_SERVE_ORDER);
         caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS);
+        caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS_OPTIONS);
         log.info("Cleaned up custom order fields after processing");
     }
 }

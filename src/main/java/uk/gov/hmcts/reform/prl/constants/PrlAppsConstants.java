@@ -1100,6 +1100,7 @@ public class PrlAppsConstants {
     public static final String WHAT_DO_WITH_ORDER = "whatDoWithOrder";
     public static final String DO_YOU_WANT_TO_SERVE_ORDER = "doYouWantToServeOrder";
     public static final String CUSTOM_ORDER_DATE_ENDS = "customOrderDateEnds";
+    public static final String CUSTOM_ORDER_DATE_ENDS_OPTIONS = "customOrderDateEndsOptions";
     public static final String DD_MM_YYYY_DATE_FORMAT = "dd/MM/yyyy";
     public static final String LOGGED_IN_USER_TYPE = "loggedInUserType";
 

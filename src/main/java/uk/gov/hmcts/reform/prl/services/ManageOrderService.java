@@ -697,6 +697,7 @@ public class ManageOrderService {
                 orderList.getListItems().size());
         }
         headerMap.put("serveOrderDynamicList", orderList);
+        headerMap.remove("newOrderId");
         populateOtherServeOrderDetails(caseData, headerMap);
     }
 
