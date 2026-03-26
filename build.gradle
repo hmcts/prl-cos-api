@@ -707,4 +707,3 @@ bootWithCCD {
 test {
   useJUnitPlatform()
 }
-
