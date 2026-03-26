@@ -574,7 +574,7 @@ public class ManageOrdersUtils {
         }
         return ordersToIssue.stream()
             .flatMap(orderType -> childArrangementsOrder.equals(orderType) && childArrangementsSubType != null
-                ? Stream.of(orderType.getDisplayedValue() + "(" + childArrangementsSubType.getDisplayedValue() + ")")
+                ? Stream.of(orderType.getDisplayedValue() + " (" + childArrangementsSubType.getDisplayedValue() + ")")
                 : Stream.of(orderType.getDisplayedValue()))
             .collect(Collectors.joining(", "));
     }

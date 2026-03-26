@@ -20,7 +20,7 @@ class ManageOrdersUtilsTest {
 
         String result = ManageOrdersUtils.buildC43OrderName(orders, subType);
 
-        assertEquals("Child Arrangements Order(Live with order)", result);
+        assertEquals("Child Arrangements Order (Live with order)", result);
     }
 
     @Test
@@ -43,7 +43,7 @@ class ManageOrdersUtilsTest {
 
         String result = ManageOrdersUtils.buildC43OrderName(orders, subType);
 
-        assertEquals("Child Arrangements Order(Spend time with order), Prohibited Steps Order, Specific Issue Order", result);
+        assertEquals("Child Arrangements Order (Spend time with order), Prohibited Steps Order, Specific Issue Order", result);
     }
 
     @Test
@@ -65,7 +65,7 @@ class ManageOrdersUtilsTest {
 
         String result = ManageOrdersUtils.buildC43OrderName(orders, subType);
 
-        assertEquals("Child Arrangements Order(Both live with and spend time with order)", result);
+        assertEquals("Child Arrangements Order (Both live with and spend time with order)", result);
     }
 
     @Test

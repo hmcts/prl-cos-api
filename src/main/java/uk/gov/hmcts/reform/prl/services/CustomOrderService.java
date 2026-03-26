@@ -352,7 +352,17 @@ public class CustomOrderService {
         data.put("caseNumber", String.valueOf(caseId));
         log.info("Placeholder 'caseNumber' = '{}'", caseId);
         safePut(data, COURT_NAME, caseData::getCourtName);
-        safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
+
+        // For C43 orders, use special header format with "Order" title and form number on separate lines
+        CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
+        if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
+            String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
+            String formattedOrderName = "Order\nC43 - Section 8 Children Act 1989\n" + orderDescription;
+            data.put("orderName", formattedOrderName);
+            log.info("C43 order - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
+        } else {
+            safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
+        }
         safePut(data, "respondent1Name", () -> {
             var respondent = caseData.getRespondents().getFirst().getValue();
             return (respondent.getFirstName() + " " + respondent.getLastName()).trim();
@@ -719,7 +729,17 @@ public class CustomOrderService {
         data.put("caseNumber", formatCaseNumber(String.valueOf(caseId)));
         populateFamilymanPlaceholders(data, caseData);
         safePut(data, COURT_NAME, caseData::getCourtName);
-        safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
+
+        // For C43 orders, use special header format with "Order" title and form number on separate lines
+        CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
+        if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
+            String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
+            String formattedOrderName = "Order\nC43 - Section 8 Children Act 1989\n" + orderDescription;
+            data.put("orderName", formattedOrderName);
+            log.info("C43 order - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
+        } else {
+            safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
+        }
 
         // Judge details
         String judgeName = extractJudgeName(caseData, caseDataMap);

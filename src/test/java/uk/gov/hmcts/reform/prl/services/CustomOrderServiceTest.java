@@ -2734,4 +2734,63 @@ class CustomOrderServiceTest {
 
         assertEquals("custom_order", result);
     }
+
+    // ========== Tests for C43 header formatting ==========
+
+    @Test
+    void testRenderHeaderPreview_c43OrderHasFormattedHeader() throws IOException {
+        // Arrange - C43 order with child arrangements sub-type
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        // C43 sub-details with child arrangements order
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        c43Details.put("childArrangementsOrdersToIssue", "liveWithOrder");
+        caseDataMap.put("customC43OrderDetails", c43Details);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - orderName should have the C43 formatted header
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        assertTrue(orderName.startsWith("Order\n"), "C43 orderName should start with 'Order'");
+        assertTrue(orderName.contains("C43 - Section 8 Children Act 1989"), "C43 orderName should contain form number");
+        assertTrue(orderName.contains("Child Arrangements Order"), "C43 orderName should contain order description");
+    }
+
+    @Test
+    void testRenderHeaderPreview_nonC43OrderHasSimpleHeader() throws IOException {
+        // Arrange - Non-C43 order (standard directions order)
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "standardDirectionsOrder");
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - orderName should be simple, without C43 prefix
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        assertEquals("Standard directions order", orderName);
+        assertFalse(orderName.contains("C43"), "Non-C43 orderName should not contain C43 reference");
+    }
 }
