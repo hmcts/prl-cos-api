@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ class AutomatedHearingUtilsTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new ParameterNamesModule());
         caseData = CaseData.builder().build();
     }
 

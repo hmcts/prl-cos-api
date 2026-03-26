@@ -90,6 +90,7 @@ public class EditAndApproveDraftOrderController {
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = """
         ### What happens next \nYour message has been sent to the legal representative.
         """;
+    public static final String ERROR_RETRIEVE_DRAFT_ORDER = "Unable to retrieve the draft order";
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -228,6 +229,11 @@ public class EditAndApproveDraftOrderController {
                 cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
+                String draftOrderId = getDraftOrderIdFromContext(clientContext);
+                if (draftOrderId == null) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(List.of(ERROR_RETRIEVE_DRAFT_ORDER)).build();
+                }
                 editAndApproveOrder(
                     authorisation,
                     callbackRequest,
@@ -251,6 +257,15 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private String getDraftOrderIdFromContext(String clientContext) {
+        String draftOrderId = null;
+        if (clientContext != null) {
+            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
+            draftOrderId = CaseUtils.getDraftOrderId(waMapper);
+        }
+        return draftOrderId;
     }
 
     private void editAndReturnOrder(String authorisation, CallbackRequest callbackRequest,
@@ -291,11 +306,7 @@ public class EditAndApproveDraftOrderController {
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
                                      CaseData caseData, String loggedInUserType, String clientContext) {
-        String draftOrderId = null;
-        if (clientContext != null) {
-            WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            draftOrderId = CaseUtils.getDraftOrderId(waMapper);
-        }
+        String draftOrderId = getDraftOrderIdFromContext(clientContext);
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
