@@ -50,9 +50,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
@@ -269,6 +269,8 @@ public class DocumentGenService {
     protected String privacyNoticeFilename;
     @Value("${document.templates.citizen.prl_citizen_upload_template}")
     protected String prlCitizenUploadTemplate;
+    @Value("${document.templates.citizen.prl_citizen_witness_statement_template}")
+    protected String prlCitizenWitnessStatementTemplate;
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
@@ -689,15 +691,15 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest, DocumentCategory documentCategory) {
         StringBuilder fileNameBuilder = new StringBuilder();
 
         if (null != documentRequest.getPartyName()) {
             fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
             fileNameBuilder.append(UNDERSCORE);
         }
-        if (null != documentRequest.getCategoryId()) {
-            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
+        if (nonNull(documentCategory)) {
+            fileNameBuilder.append(documentCategory.getFileNamePrefix());
             fileNameBuilder.append(UNDERSCORE);
         }
         fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
@@ -1184,7 +1186,7 @@ public class DocumentGenService {
 
         if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
             FL401OrderTypeEnum.occupationOrder)
-            && Objects.nonNull(caseData.getHome())
+            && nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
                 caseData.getHome().getChildren().stream().map(Element::getValue).toList();
@@ -1530,15 +1532,23 @@ public class DocumentGenService {
 
     public DocumentResponse generateAndUploadDocument(String authorisation,
                                                       DocumentRequest documentRequest) throws DocumentGenerationException {
+        String categoryId = documentRequest.getCategoryId();
+        DocumentCategory documentCategory = nonNull(categoryId) ? DocumentCategory.getValue(categoryId) : null;
+
         //generate file name
-        String fileName = getCitizenUploadedStatementFileName(documentRequest);
+        String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory);
         log.info("fileName {}", fileName);
+
+        String citizenUploadTemplate = nonNull(documentCategory) && documentCategory.isWitnessStatement()
+            ? prlCitizenWitnessStatementTemplate : prlCitizenUploadTemplate;
+
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            prlCitizenUploadTemplate
+            citizenUploadTemplate
         );
+
         log.info("generatedDocumentInfo {}", generatedDocumentInfo);
         if (null != generatedDocumentInfo) {
             return DocumentResponse.builder()

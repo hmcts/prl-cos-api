@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,11 +37,16 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DgsServiceTest {
 
-    @InjectMocks
     private DgsService dgsService;
 
     @Mock
     private DgsApiClient dgsApiClient;
+
+    @Mock
+    private CaseService caseService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Mock
     private UserRoleService userRoleService;
 
@@ -63,7 +69,8 @@ public class DgsServiceTest {
 
     @Before
     public void setUp() {
-
+        dgsService = new DgsService(dgsApiClient, allegationOfHarmRevisedService, hearingDataService,
+                                    userRoleService, caseService, objectMapper);
         caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(

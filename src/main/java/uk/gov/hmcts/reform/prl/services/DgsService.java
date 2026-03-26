@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Slf4j
@@ -34,6 +39,8 @@ public class DgsService {
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
     private final UserRoleService userRoleService;
+    private final CaseService caseService;
+    private final ObjectMapper objectMapper;
 
     private static final String CASE_DETAILS_STRING = "caseDetails";
     private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
@@ -193,12 +200,18 @@ public class DgsService {
                                                          String prlCitizenUploadTemplate) throws DocumentGenerationException {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         String caseId = documentRequest.getCaseId();
-
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = caseService.getCase(authorisation, caseId);
+        CaseData caseDataFromCcd = nonNull(caseDetailsFromCcd) ? CaseUtils.getCaseData(caseDetailsFromCcd, objectMapper) : null;
         CaseDetails caseDetails = CaseDetails.builder()
             .caseId(caseId)
             .caseData(CaseData.builder()
                           .id(Long.parseLong(caseId))
                           .citizenUploadedStatement(documentRequest.getFreeTextStatements())
+                          .applicantName(documentRequest.getPartyName())
+                          .applicantCaseName(nonNull(caseDataFromCcd) ? caseDataFromCcd.getApplicantCaseName() : null)
+                          .issueDate(nonNull(caseDataFromCcd) ? caseDataFromCcd.getIssueDate() : null)
+                          .familymanCaseNumber(nonNull(caseDataFromCcd) ? caseDataFromCcd.getFamilymanCaseNumber() : null)
+                          .lastModifiedDate(LocalDateTime.now())
                           .build())
             .build();
         tempCaseDetails.put(
