@@ -193,7 +193,13 @@ apply plugin: 'net.serenity-bdd.aggregator'
 group = 'uk.gov.hmcts.reform.prl'
 version = '0.0.1'
 
-mainClassName = 'uk.gov.hmcts.reform.prl.Application'
+if (GradleVersion.current() >= GradleVersion.version('9.0')) {
+  springBoot {
+    mainClass.set('uk.gov.hmcts.reform.prl.Application')
+  }
+} else {
+  mainClassName = 'uk.gov.hmcts.reform.prl.Application'
+}
 
 bootJar {
   getArchiveFileName().set(provider {
@@ -487,7 +493,11 @@ dependencies {
 }
 
 task fortifyScan(type: JavaExec)  {
-  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  if (GradleVersion.current() >= GradleVersion.version('9.0')) {
+    mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
+  } else {
+    main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  }
   classpath += sourceSets.test.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }

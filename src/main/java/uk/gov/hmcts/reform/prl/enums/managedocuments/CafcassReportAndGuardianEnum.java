@@ -18,6 +18,10 @@ public enum CafcassReportAndGuardianEnum {
 
     riskAssessment("16aRiskAssessment", "16a risk assessment"),
 
+    cirTransferRequest("cirTransferRequest", "CIR Transfer Request"),
+
+    cirExtensionRequest("cirExtensionRequest", "CIR Extension Request"),
+
     guardianReport("guardianReport", "Guardian report"),
 
     specialGuardianshipReport("specialGuardianshipReport", "Special guardianship report"),
