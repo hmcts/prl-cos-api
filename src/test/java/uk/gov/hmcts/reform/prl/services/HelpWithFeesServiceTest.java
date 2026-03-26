@@ -95,6 +95,21 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
+    public void testAboutToStartAwaitingInformation() {
+        CaseDetails awaitingInfoCaseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.AWAITING_INFORMATION.getValue())
+            .build();
+
+        when(objectMapper.convertValue(awaitingInfoCaseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService.handleAboutToStart(awaitingInfoCaseDetails);
+        assertNotNull(response);
+        DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
+        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
+        assertEquals("C100", response.get("caseTypeOfApplication"));
+    }
+
+    @Test
     public void testAboutToSubmitWithoutDateSubmitted() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
