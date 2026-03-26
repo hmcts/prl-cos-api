@@ -219,7 +219,7 @@ class CustomOrderServiceTest {
     void testRenderAndUploadHeaderPreview_uploadsRenderedHeader() throws IOException {
         // Arrange
         final String authorisation = "auth-token";
-        final Long caseId = 123L;
+        final long caseId = 123L;
         final CaseData caseData = CaseData.builder()
             .courtName("Test Court")
             .build();
@@ -275,7 +275,7 @@ class CustomOrderServiceTest {
     void testProcessCustomOrderOnSubmitted_downloadsDocuments() throws IOException {
         // Arrange
         final String authorisation = "auth-token";
-        final Long caseId = 123L;
+        final long caseId = 123L;
         String userDocUrl = "http://user-doc-binary-url";
         String headerDocUrl = "http://header-doc-binary-url";
 
@@ -654,6 +654,7 @@ class CustomOrderServiceTest {
         List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
         assertNotNull(children);
         assertEquals(2, children.size());
+        assertEquals(true, placeholders.get("hasChildren"));
 
         // First child
         assertEquals("Alice Smith", children.getFirst().get("fullName"));
@@ -2205,6 +2206,7 @@ class CustomOrderServiceTest {
         List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
 
         assertEquals(0, children.size());
+        assertEquals(false, placeholders.get("hasChildren"));
     }
 
     // ========== Tests for findCustomOrderHeaderPreview ==========

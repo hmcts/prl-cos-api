@@ -335,6 +335,7 @@ class PoiTlDocxRendererTest {
         childrenList.add(child2);
 
         data.put("children", childrenList);
+        data.put("hasChildren", true);
 
         PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
         final Runtime runtime = Runtime.getRuntime();
@@ -456,6 +457,7 @@ class PoiTlDocxRendererTest {
         List<Map<String, String>> childrenList = new ArrayList<>();
         childrenList.add(child);
         data.put("children", childrenList);
+        data.put("hasChildren", true);
 
         PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
         byte[] outBytes = renderer.render(templateBytes, data);
@@ -522,6 +524,7 @@ class PoiTlDocxRendererTest {
         childrenList.add(child2);
 
         data.put("children", childrenList);
+        data.put("hasChildren", true);
 
         PoiTlDocxRenderer renderer = new PoiTlDocxRenderer();
         byte[] outBytes = renderer.render(templateBytes, data);

@@ -43,6 +43,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C21_ORDER_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C43_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -153,7 +155,7 @@ public class CustomOrderService {
             return null;
         }
 
-        Object customC21Details = caseDataMap.get("customC21OrderDetails");
+        Object customC21Details = caseDataMap.get(CUSTOM_C21_ORDER_DETAILS);
         if (customC21Details instanceof Map<?, ?> c21Map) {
             Object orderOptions = c21Map.get("orderOptions");
             if (orderOptions != null) {
@@ -181,7 +183,7 @@ public class CustomOrderService {
             return null;
         }
 
-        Object customC43Details = caseDataMap.get("customC43OrderDetails");
+        Object customC43Details = caseDataMap.get(CUSTOM_C43_ORDER_DETAILS);
         if (!(customC43Details instanceof Map<?, ?> c43Map)) {
             return null;
         }
@@ -1236,7 +1238,7 @@ public class CustomOrderService {
     private List<ChildDetailsRevised> getAllChildren(CaseData caseData) {
         List<ChildDetailsRevised> result = caseData.getNewChildDetails().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         log.info("isTheOrderAboutAllChildren=Yes, returning all {} children", result.size());
         return result;
     }
@@ -1256,7 +1258,7 @@ public class CustomOrderService {
         List<ChildDetailsRevised> result = caseData.getNewChildDetails().stream()
             .filter(childElement -> selectedIds.contains(childElement.getId().toString()))
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         log.info("Returning {} selected children", result.size());
         return result;

@@ -129,6 +129,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C21_ORDER_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C43_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_ORDER_FOR_CA_CASE;
@@ -2647,8 +2649,8 @@ public class ManageOrderService {
 
         // Clear all custom sub-selections first, then populate only the relevant ones
         // Extract data from currently selected order type BEFORE clearing
-        Object c43Details = caseDataUpdated.get("customC43OrderDetails");
-        Object c21Details = caseDataUpdated.get("customC21OrderDetails");
+        Object c43Details = caseDataUpdated.get(CUSTOM_C43_ORDER_DETAILS);
+        Object c21Details = caseDataUpdated.get(CUSTOM_C21_ORDER_DETAILS);
 
         // Clear all custom order fields (source and synced)
         clearAllCustomOrderFields(caseDataUpdated);
@@ -2674,10 +2676,10 @@ public class ManageOrderService {
         // Clear C43 fields
         caseDataUpdated.remove("childArrangementsOrdersToIssue");
         caseDataUpdated.remove("selectChildArrangementsOrder");
-        caseDataUpdated.remove("customC43OrderDetails");
+        caseDataUpdated.remove(CUSTOM_C43_ORDER_DETAILS);
         // Clear C21 fields
         caseDataUpdated.remove("c21OrderOptions");
-        caseDataUpdated.remove("customC21OrderDetails");
+        caseDataUpdated.remove(CUSTOM_C21_ORDER_DETAILS);
     }
 
     @SuppressWarnings("unchecked")
@@ -2688,7 +2690,7 @@ public class ManageOrderService {
             Object childArrangementsOrderType = c43Map.get("childArrangementsOrderType");
 
             // Restore the source field
-            caseDataUpdated.put("customC43OrderDetails", customC43Details);
+            caseDataUpdated.put(CUSTOM_C43_ORDER_DETAILS, customC43Details);
 
             if (ordersToIssue != null) {
                 caseDataUpdated.put("childArrangementsOrdersToIssue", ordersToIssue);
@@ -2706,7 +2708,7 @@ public class ManageOrderService {
             Object orderOptions = c21Map.get("orderOptions");
 
             // Restore the source field
-            caseDataUpdated.put("customC21OrderDetails", customC21Details);
+            caseDataUpdated.put(CUSTOM_C21_ORDER_DETAILS, customC21Details);
 
             if (orderOptions != null) {
                 caseDataUpdated.put("c21OrderOptions", orderOptions);

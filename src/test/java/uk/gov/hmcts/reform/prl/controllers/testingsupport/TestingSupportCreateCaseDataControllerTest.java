@@ -102,6 +102,7 @@ public class TestingSupportCreateCaseDataControllerTest {
         );
 
         assertEquals(500, exception.getStatusCode().value());
+        assertNotNull(exception.getReason());
         assertTrue(exception.getReason().contains("CCD validation failed"));
         assertTrue(exception.getReason().contains("test-user-123"));
         assertTrue(exception.getReason().contains("testEvent"));

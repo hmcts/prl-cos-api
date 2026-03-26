@@ -1140,8 +1140,7 @@ public class ManageOrdersControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
-            = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest

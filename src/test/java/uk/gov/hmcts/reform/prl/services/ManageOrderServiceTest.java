@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -124,6 +126,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7569,31 +7572,17 @@ class ManageOrderServiceTest {
         assertEquals(JudgeOrMagistrateTitleEnum.deputyCircuitJudge, result);
     }
 
-    @Test
-    void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForMaleHighCourtJudge() {
-        // Given
-        String idamUserId = "test-idam-id";
-        Appointment appointment = Appointment.builder()
-            .appointment("High Court Judge")
-            .build();
-        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
-            .sidamId(idamUserId)
-            .postNominals("Mr")
-            .appointments(List.of(appointment))
-            .build();
-
-        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
-
-        // When
-        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
-
-        // Then
-        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrJustice, result);
+    private static Stream<Arguments> highCourtJudgePostNominalsProvider() {
+        return Stream.of(
+            Arguments.of("Mr", JudgeOrMagistrateTitleEnum.theHonourableMrJustice),
+            Arguments.of("Mrs", JudgeOrMagistrateTitleEnum.theHonourableMrsJustice),
+            Arguments.of(null, null)
+        );
     }
 
-    @Test
-    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForFemaleHighCourtJudge() {
+    @ParameterizedTest
+    @MethodSource("highCourtJudgePostNominalsProvider")
+    void testGetLoggedInJudgeTitleForHighCourtJudge(String postNominals, JudgeOrMagistrateTitleEnum expectedTitle) {
         // Given
         String idamUserId = "test-idam-id";
         Appointment appointment = Appointment.builder()
@@ -7601,7 +7590,7 @@ class ManageOrderServiceTest {
             .build();
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
-            .postNominals("Mrs")
+            .postNominals(postNominals)
             .appointments(List.of(appointment))
             .build();
 
@@ -7612,30 +7601,7 @@ class ManageOrderServiceTest {
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
 
         // Then
-        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
-    }
-
-    @Test
-    void testGetLoggedInJudgeTitleReturnsNullForHighCourtJudgeWithNoPostNominals() {
-        // Given
-        String idamUserId = "test-idam-id";
-        Appointment appointment = Appointment.builder()
-            .appointment("High Court Judge")
-            .build();
-        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
-            .sidamId(idamUserId)
-            .postNominals(null)
-            .appointments(List.of(appointment))
-            .build();
-
-        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
-
-        // When
-        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
-
-        // Then
-        assertNull(result);
+        assertEquals(expectedTitle, result);
     }
 
     @Test
