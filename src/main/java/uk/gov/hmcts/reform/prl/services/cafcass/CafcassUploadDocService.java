@@ -44,8 +44,14 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 public class CafcassUploadDocService {
 
     public static final List<String> ALLOWED_FILE_TYPES = List.of("pdf", "docx");
+    public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
+        "CIR_Transfer", "CIR_Extension", "S_16A_Risk_Assessment"
+    );
+    public static final String MANAGE_DOCUMENTS_URGENT_DOC_TYPE = "manageDocumentsUrgentDocType";
+
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
-        "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
+        "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review", "CIR_Transfer", "CIR_Extension",
+        "CMO_report",
         "Contact_Centre_Recordings", "Correspondence", "Direct_work", "Enforcement_report",
         "FAO_Report", "FAO_Workplan", "Letter_from_Child", "Other_Non_Section_7_Report",
         "Position_Statement", "Positive_Parenting_Programme_Report", "Re_W_Report",
@@ -106,6 +112,12 @@ public class CafcassUploadDocService {
         );
 
         caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+
+        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_URGENT_DOC_TYPE, typeOfDocument);
+        } else {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_URGENT_DOC_TYPE, null);
+        }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
             quarantineLegalDoc,
@@ -190,6 +202,8 @@ public class CafcassUploadDocService {
         map.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);
+        map.put("CIR_Transfer", CafcassReportAndGuardianEnum.cirTransferRequest);
+        map.put("CIR_Extension", CafcassReportAndGuardianEnum.cirExtensionRequest);
         map.put("CMO_report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Contact_Centre_Recordings", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Correspondence", CafcassReportAndGuardianEnum.otherDocs);
