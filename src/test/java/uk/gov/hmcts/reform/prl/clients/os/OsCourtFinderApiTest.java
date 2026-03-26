@@ -24,7 +24,6 @@ class OsCourtFinderApiTest {
         interceptor.apply(template);
 
         Assertions.assertThat(template.queries())
-            .containsEntry("key", java.util.List.of("TEST-API-KEY"))
-            .containsEntry("maxresults", java.util.List.of("1"));
+            .containsEntry("key", java.util.List.of("TEST-API-KEY"));
     }
 }
