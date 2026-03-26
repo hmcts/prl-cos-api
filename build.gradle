@@ -180,7 +180,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.52') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.53') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
