@@ -7752,4 +7752,96 @@ class ManageOrderServiceTest {
         // Then
         assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
     }
+
+    @Test
+    void testPopulateServeOrderDetails_selectsOrderByNewOrderId() {
+        // Given - two orders, with the second one being the "new" order
+        UUID firstOrderId = UUID.randomUUID();
+        UUID secondOrderId = UUID.randomUUID();
+
+        List<Element<OrderDetails>> orders = List.of(
+            Element.<OrderDetails>builder()
+                .id(firstOrderId)
+                .value(OrderDetails.builder()
+                    .orderType("C47A")
+                    .orderTypeId("Appointment of a guardian (C47A)")
+                    .dateCreated(LocalDateTime.now().minusDays(1))
+                    .build())
+                .build(),
+            Element.<OrderDetails>builder()
+                .id(secondOrderId)
+                .value(OrderDetails.builder()
+                    .orderType("C43")
+                    .orderTypeId("Child arrangements order")
+                    .dateCreated(LocalDateTime.now().minusDays(7))
+                    .build())
+                .build()
+        );
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .orderCollection(orders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put("newOrderId", secondOrderId.toString());
+
+        // When
+        manageOrderService.populateServeOrderDetails(caseData, headerMap);
+
+        // Then - the second order should be selected, not the first
+        DynamicMultiSelectList serveOrderList = (DynamicMultiSelectList) headerMap.get("serveOrderDynamicList");
+        assertNotNull(serveOrderList);
+        assertNotNull(serveOrderList.getValue());
+        assertEquals(1, serveOrderList.getValue().size());
+        assertEquals(secondOrderId.toString(), serveOrderList.getValue().get(0).getCode());
+    }
+
+    @Test
+    void testPopulateServeOrderDetails_fallsBackToFirstOrder_whenNewOrderIdNotProvided() {
+        // Given - two orders, no newOrderId specified
+        UUID firstOrderId = UUID.randomUUID();
+        UUID secondOrderId = UUID.randomUUID();
+
+        List<Element<OrderDetails>> orders = List.of(
+            Element.<OrderDetails>builder()
+                .id(firstOrderId)
+                .value(OrderDetails.builder()
+                    .orderType("C47A")
+                    .orderTypeId("Appointment of a guardian (C47A)")
+                    .dateCreated(LocalDateTime.now().minusDays(1))
+                    .build())
+                .build(),
+            Element.<OrderDetails>builder()
+                .id(secondOrderId)
+                .value(OrderDetails.builder()
+                    .orderType("C43")
+                    .orderTypeId("Child arrangements order")
+                    .dateCreated(LocalDateTime.now().minusDays(7))
+                    .build())
+                .build()
+        );
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .orderCollection(orders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        Map<String, Object> headerMap = new HashMap<>();
+        // No newOrderId set
+
+        // When
+        manageOrderService.populateServeOrderDetails(caseData, headerMap);
+
+        // Then - should fall back to first order (index 0)
+        DynamicMultiSelectList serveOrderList = (DynamicMultiSelectList) headerMap.get("serveOrderDynamicList");
+        assertNotNull(serveOrderList);
+        assertNotNull(serveOrderList.getValue());
+        assertEquals(1, serveOrderList.getValue().size());
+        assertEquals(firstOrderId.toString(), serveOrderList.getValue().get(0).getCode());
+    }
 }

@@ -680,9 +680,18 @@ public class ManageOrderService {
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             //this is when we are trying to serve the order, auto selecting the chosen order
             List<DynamicMultiselectListElement> values = new ArrayList<>();
-            values.add(orderList.getListItems().get(0));
+            String newOrderId = (String) headerMap.get("newOrderId");
+            DynamicMultiselectListElement selectedOrder = null;
+            if (newOrderId != null) {
+                selectedOrder = orderList.getListItems().stream()
+                    .filter(item -> newOrderId.equals(item.getCode()))
+                    .findFirst()
+                    .orElse(null);
+            }
+            values.add(selectedOrder != null ? selectedOrder : orderList.getListItems().get(0));
             orderList = orderList.toBuilder().value(values).build();
-            log.info("populateServeOrderDetails: auto-selected first order (not servedSavedOrders)");
+            log.info("populateServeOrderDetails: auto-selected order with id={}",
+                selectedOrder != null ? newOrderId : "fallback to index 0");
         } else {
             log.info("populateServeOrderDetails: servedSavedOrders - showing all {} orders in dropdown",
                 orderList.getListItems().size());
