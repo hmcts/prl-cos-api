@@ -22,11 +22,13 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +40,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 
 @Slf4j
@@ -69,6 +72,9 @@ public class CaseControllerIntegrationTest {
     @MockBean
     AuthTokenGenerator authTokenGenerator;
 
+    @MockBean
+    CitizenCoreCaseDataService citizenCoreCaseDataService;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -76,6 +82,9 @@ public class CaseControllerIntegrationTest {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
         objectMapper.registerModule(new ParameterNamesModule());
+
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(CITIZEN_ROLE));
     }
 
     @Test
@@ -214,6 +223,7 @@ public class CaseControllerIntegrationTest {
         String caseId = "12345";
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(citizenCoreCaseDataService.hasAccess("testAuthToken", caseId)).thenReturn(true);
 
         mockMvc.perform(
                 post(url, caseId)
