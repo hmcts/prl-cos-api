@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,6 +37,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOCUMENTS_URGENT_DOC_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -170,6 +172,138 @@ class CafcassUploadDocServiceTest {
         assertThrows(ResponseStatusException.class, () ->
             cafcassUploadDocService.uploadDocument(authToken, fileWithNoName, "16_4_Report", TEST_CASE_ID)
         );
+    }
+
+    @Test
+    void shouldAcceptCirTransferDocumentType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper()),
+            caseData,
+            null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Transfer", TEST_CASE_ID);
+
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldAcceptCirExtensionDocumentType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper()),
+            caseData,
+            null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Extension", TEST_CASE_ID);
+
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeForCirTransfer() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Transfer", TEST_CASE_ID);
+
+        assertEquals("CIR_Transfer", caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeForCirExtension() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Extension", TEST_CASE_ID);
+
+        assertEquals("CIR_Extension", caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeFor16aRiskAssessment() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "S_16A_Risk_Assessment", TEST_CASE_ID);
+
+        assertEquals("S_16A_Risk_Assessment", caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeToNullForNonUrgentDocumentType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "16_4_Report", TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
     }
 
     @Test
