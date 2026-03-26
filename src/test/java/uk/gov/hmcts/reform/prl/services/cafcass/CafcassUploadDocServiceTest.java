@@ -37,6 +37,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_S16A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOCUMENTS_URGENT_DOC_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
@@ -193,7 +196,7 @@ class CafcassUploadDocServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
 
-        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Transfer", TEST_CASE_ID);
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
         verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
     }
@@ -217,7 +220,7 @@ class CafcassUploadDocServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
 
-        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Extension", TEST_CASE_ID);
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
 
         verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
     }
@@ -238,9 +241,9 @@ class CafcassUploadDocServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
 
-        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Transfer", TEST_CASE_ID);
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
-        assertEquals("CIR_Transfer", caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertEquals(DOC_TYPE_CIR_TRANSFER, caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
     }
 
     @Test
@@ -259,9 +262,9 @@ class CafcassUploadDocServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
 
-        cafcassUploadDocService.uploadDocument(authToken, file, "CIR_Extension", TEST_CASE_ID);
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
 
-        assertEquals("CIR_Extension", caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertEquals(DOC_TYPE_CIR_EXTENSION, caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
     }
 
     @Test
@@ -280,9 +283,9 @@ class CafcassUploadDocServiceTest {
         when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
         when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
 
-        cafcassUploadDocService.uploadDocument(authToken, file, "S_16A_Risk_Assessment", TEST_CASE_ID);
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
 
-        assertEquals("S_16A_Risk_Assessment", caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertEquals(DOC_TYPE_S16A_RISK_ASSESSMENT, caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
     }
 
     @Test
