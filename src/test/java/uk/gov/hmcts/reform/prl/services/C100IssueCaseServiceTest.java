@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -617,6 +618,59 @@ public class C100IssueCaseServiceTest {
     }
 
     @Test
+    public void issueAndSendLocalCourtEventShouldNotifyRpaAndLocalCourtAndAddHistoryTabWhenPathfinderCase() {
+        CaseData caseData = CaseData.builder()
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .consentOrder(No)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .applicantsConfidentialDetails(Collections.emptyList())
+            .childrenConfidentialDetails(Collections.emptyList())
+            .id(123L)
+            .courtList(dynamicList)
+            .isPathfinderCase(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        String systemAuthToken = "systemToken";
+        String systemUpdateUserId = "systemUserId";
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        uk.gov.hmcts.reform.ccd.client.model.StartEventResponse startEventResponse = uk.gov.hmcts.reform.ccd.client.model.StartEventResponse.builder()
+            .eventId("eventId")
+            .token("token")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(systemAuthToken);
+        when(systemUserService.getUserId(systemAuthToken)).thenReturn(systemUpdateUserId);
+        when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
+        when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
+
+        c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
+
+        verify(eventPublisher, times(2)).publishEvent(Mockito.any());
+        verify(systemUserService).getSysUserToken();
+        verify(systemUserService).getUserId(systemAuthToken);
+        verify(ccdCoreCaseDataService).eventRequest(any(), eq(systemUpdateUserId));
+        verify(ccdCoreCaseDataService).startUpdate(systemAuthToken, eventRequestData, "123", true);
+        verify(ccdCoreCaseDataService).submitUpdate(eq(systemAuthToken), eq(eventRequestData), any(CaseDataContent.class), eq("123"), eq(true));
+    }
+
+    @Test
     public void checkStateIsOfflineWhenUserSelectsNonWorkAllocatedCourt() throws Exception {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
@@ -679,12 +733,15 @@ public class C100IssueCaseServiceTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(pathFinderLookupService.getPathFinderMappingByCourtField("234946")).thenReturn(Optional.of(
+            PathFinderMapping.builder().pathFinderEnabled(true).build()));
 
         Map<String, Object> updates = c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
         Assertions.assertNull(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
         assertThat(updates).extracting("dfjArea").isEqualTo("SWANSEA");
         assertThat(updates).extracting("swanseaDFJCourt").isEqualTo("234946");
+        assertThat(updates).extracting("isPathfinderCase").isEqualTo(YesOrNo.Yes);
     }
 
     @Test

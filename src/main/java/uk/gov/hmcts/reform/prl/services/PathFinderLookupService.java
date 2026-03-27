@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class PathFinderLookupService {
 
     private final ObjectMapper objectMapper;
     private List<PathFinderMapping> pathFinderMapping;
+    @Getter
     private Set<String> courtFields;
 
     public PathFinderLookupService(@Autowired ObjectMapper objectMapper) {
@@ -51,7 +53,4 @@ public class PathFinderLookupService {
             .findFirst();
     }
 
-    public Set<String> getCourtFields() {
-        return courtFields;
-    }
 }

@@ -85,7 +85,7 @@ public class C100IssueCaseService {
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
                 Optional<PathFinderMapping> pathFinderMapping = pathFinderLookupService.getPathFinderMappingByCourtField(baseLocationId);
-                if (pathFinderMapping.isPresent() && pathFinderMapping.get().getPathFinderEnabled()) {
+                if (pathFinderMapping.isPresent() && pathFinderMapping.get().isPathFinderEnabled()) {
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
                 } else {
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.No);

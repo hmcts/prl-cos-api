@@ -14,5 +14,5 @@ public class PathFinderMapping {
     private String courtName;
     private String courtField;
     private String dfjArea;
-    private Boolean pathFinderEnabled;
+    private boolean pathFinderEnabled;
 }
