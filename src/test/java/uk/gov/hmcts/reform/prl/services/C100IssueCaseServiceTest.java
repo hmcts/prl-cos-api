@@ -660,9 +660,6 @@ public class C100IssueCaseServiceTest {
         when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
         when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
 
-        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
 
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
