@@ -2625,6 +2625,8 @@ public class ManageOrderService {
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
             caseDataUpdated.remove(field.getValue());
         }
+        // Remove temporary field used for auto-selecting newly created order
+        caseDataUpdated.remove("newOrderId");
     }
 
     /**

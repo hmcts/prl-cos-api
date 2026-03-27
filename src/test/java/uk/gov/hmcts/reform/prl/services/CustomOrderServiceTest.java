@@ -2814,8 +2814,7 @@ class CustomOrderServiceTest {
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
         assertNotNull(orderName);
-        assertTrue(orderName.startsWith("Order\n"), "C43 orderName should start with 'Order'");
-        assertTrue(orderName.contains("C43 - Section 8 Children Act 1989"), "C43 orderName should contain form number");
+        assertTrue(orderName.startsWith("C43 - Section 8 Children Act 1989"), "C43 orderName should start with form number");
         assertTrue(orderName.contains("Child Arrangements Order"), "C43 orderName should contain order description");
     }
 

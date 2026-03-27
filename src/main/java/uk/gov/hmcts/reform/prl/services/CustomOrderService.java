@@ -360,7 +360,7 @@ public class CustomOrderService {
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
             String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
-            String formattedOrderName = "Order\nC43 - Section 8 Children Act 1989\n" + orderDescription;
+            String formattedOrderName = "C43 - Section 8 Children Act 1989\n" + orderDescription;
             data.put("orderName", formattedOrderName);
             log.info("C43 order - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
         } else {
@@ -737,7 +737,7 @@ public class CustomOrderService {
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
             String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
-            String formattedOrderName = "Order\nC43 - Section 8 Children Act 1989\n" + orderDescription;
+            String formattedOrderName = "C43 - Section 8 Children Act 1989\n" + orderDescription;
             data.put("orderName", formattedOrderName);
             log.info("C43 order - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
         } else {
