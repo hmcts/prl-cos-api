@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -38,8 +39,9 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DgsServiceTest {
 
-    public static final String AUTHORISATION = " ";
-    public static final String TEMPLATE = "template";
+    private static final String AUTHORISATION = " ";
+    private static final String TEMPLATE = "template";
+    public static final String TEST_URL = "TestUrl";
     private DgsService dgsService;
 
     @Mock
@@ -91,7 +93,7 @@ public class DgsServiceTest {
             .caseData(caseData)
             .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -119,7 +121,7 @@ public class DgsServiceTest {
     @Test
     public void testToGenerateDocument() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -134,7 +136,7 @@ public class DgsServiceTest {
     public void testToGenerateDocumentWithCaseData()  {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -147,7 +149,7 @@ public class DgsServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("coverLetter", "test.pdf");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -178,7 +180,7 @@ public class DgsServiceTest {
     @Test
     public void testToGenerateWelshDocument()  {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -192,7 +194,7 @@ public class DgsServiceTest {
         Map<String, Object> respondentDetails = new HashMap<>();
         respondentDetails.put("fullName", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -202,9 +204,24 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testgenerateCitizenDocument() throws Exception {
-        dgsService.generateCitizenDocument(AUTHORISATION, generateAndUploadDocumentRequest, AUTHORISATION);
-        assertEquals("test", generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements"));
+    public void testgenerateCitizenDocument() {
+        Map<String, String> values = new HashMap<>();
+        values.put("caseId","123");
+        GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest
+            .builder()
+            .values(values)
+            .build();
+
+        // when
+        GeneratedDocumentInfo result = dgsService.generateCitizenDocument(
+            AUTHORISATION,
+            generateAndUploadDocumentRequest,
+            AUTHORISATION
+        );
+
+        // then
+        assertNotNull(result);
+        assertEquals(TEST_URL, result.getUrl());
     }
 
     @Test
@@ -226,7 +243,7 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, null
+            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_APPLICANT
         );
 
         // Then
@@ -253,7 +270,7 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, null
+            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
         );
 
         //Then
@@ -265,7 +282,7 @@ public class DgsServiceTest {
     @Test
     public void testGenerateCitizenDocumentThrowsFeignException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -278,7 +295,7 @@ public class DgsServiceTest {
     @Test
     public void testGenerateCitizenDocumentCitizenUploadThrowsException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -294,7 +311,7 @@ public class DgsServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("coverLetter", "test.pdf");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -308,7 +325,7 @@ public class DgsServiceTest {
     @Test
     public void testToGenerateWelshDocumentThrowsException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -321,7 +338,7 @@ public class DgsServiceTest {
     @Test
     public void testToGenerateDocumentThrowsException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -337,7 +354,7 @@ public class DgsServiceTest {
     public void testToGenerateDocumentWithCaseDataThrowsRuntimeExcetion() {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -352,7 +369,7 @@ public class DgsServiceTest {
     public void testToGenerateDocumentWithCaseDataThrowsExcetion() {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
@@ -371,7 +388,7 @@ public class DgsServiceTest {
 
     private void setUpGenerateCitizenDocument() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
+            .url(TEST_URL)
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();

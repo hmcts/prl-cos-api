@@ -55,9 +55,6 @@ public class DgsService {
                     .builder().template(templateName).values(dataMap).build()
                 );
 
-        } catch (FeignException ex) {
-            log.error(ERROR_MESSAGE, caseId);
-            throw new DocumentGenerationException(ex.getMessage(), ex);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -101,8 +98,7 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, String caseId, String caseTypeOfApplication, String templateName,
                                                        Map<String, Object> dataMap) {
 
-        Map<String, Object> welshDataMap = new HashMap<>();
-        welshDataMap.putAll(dataMap);
+        Map<String, Object> welshDataMap = new HashMap<>(dataMap);
         welshDataMap.forEach((k, v) -> {
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
@@ -164,7 +160,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
                                                          GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                         String templateName) throws Exception {
+                                                         String templateName) {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         String freeTextUploadStatements = null;
@@ -174,7 +170,7 @@ public class DgsService {
         }
         String caseId = generateAndUploadDocumentRequest.getValues().get("caseId");
         CaseDetails caseDetails = CaseDetails.builder().caseId(caseId).state("ISSUE")
-            .caseData(CaseData.builder().id(Long.valueOf(caseId))
+            .caseData(CaseData.builder().id(Long.parseLong(caseId))
                           .citizenUploadedStatement(freeTextUploadStatements).build()).build();
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
@@ -182,7 +178,7 @@ public class DgsService {
         );
 
 
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -224,7 +220,7 @@ public class DgsService {
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
 
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(
