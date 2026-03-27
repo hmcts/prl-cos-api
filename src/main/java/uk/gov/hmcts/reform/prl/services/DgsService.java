@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentReque
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -200,21 +201,41 @@ public class DgsService {
         String caseId = documentRequest.getCaseId();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = caseService.getCase(authorisation, caseId);
         CaseData caseDataFromCcd = nonNull(caseDetailsFromCcd) ? CaseUtils.getCaseData(caseDetailsFromCcd, objectMapper) : null;
+        boolean applicantWitnessStatement = false;
+        boolean respondentWitnessStatement = false;
+        String applicantCaseName = null;
+        LocalDate issueDate = null;
+        String familymanCaseNumber = null;
+        String courtName = null;
+
+        if (nonNull(documentCategory)) {
+            applicantWitnessStatement = documentCategory.isApplicantWitnessStatement();
+            respondentWitnessStatement = documentCategory.isRespondentWitnessStatement();
+        }
+
+        if (nonNull(caseDataFromCcd)) {
+            applicantCaseName = caseDataFromCcd.getApplicantCaseName();
+            issueDate = caseDataFromCcd.getIssueDate();
+            familymanCaseNumber = caseDataFromCcd.getFamilymanCaseNumber();
+            courtName = caseDataFromCcd.getCourtName();
+        }
+
         CaseDetails caseDetails = CaseDetails.builder()
             .caseId(caseId)
             .caseData(CaseData.builder()
                           .id(Long.parseLong(caseId))
                           .citizenUploadedStatement(documentRequest.getFreeTextStatements())
-                          .applicantName(nonNull(documentCategory) && documentCategory.isApplicantWitnessStatement()
-                                             ? documentRequest.getPartyName() : "")
-                          .respondentName(nonNull(documentCategory) && documentCategory.isRespondentWitnessStatement()
-                                              ? documentRequest.getPartyName() : "")
-                          .applicantCaseName(nonNull(caseDataFromCcd) ? caseDataFromCcd.getApplicantCaseName() : null)
-                          .issueDate(nonNull(caseDataFromCcd) ? caseDataFromCcd.getIssueDate() : null)
-                          .familymanCaseNumber(nonNull(caseDataFromCcd) ? caseDataFromCcd.getFamilymanCaseNumber() : null)
+                          .applicantName(applicantWitnessStatement ? documentRequest.getPartyName() : "")
+                          .respondentName(respondentWitnessStatement ? documentRequest.getPartyName() : "")
+                          .applicantCaseName(applicantCaseName)
+                          .issueDate(issueDate)
+                          .familymanCaseNumber(familymanCaseNumber)
+                          .courtName(courtName)
+                          .giveDetails(documentRequest.getPartyName())
                           .lastModifiedDate(LocalDateTime.now())
                           .build())
             .build();
+
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
