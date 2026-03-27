@@ -1654,17 +1654,12 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
-                .peek(element -> {
-                    if (element == null) {
-                        log.error("Found a NULL element in the emailNotificationDetails list");
-                    } else {
-                        log.info("Processing element with ID: {} and value: {}", element.getId(), element.getValue());
-                    }
-                })
+                .filter(Objects::nonNull)
                 .map(Element::getValue)
+                .filter(Objects::nonNull)
                 .filter(emailNotification -> {
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
-                    return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
+                    return Objects.equals(partyId, emailNotification.getPartyIds());
                 })
                 .map(emailNotification ->
                     getSodDocuments(
