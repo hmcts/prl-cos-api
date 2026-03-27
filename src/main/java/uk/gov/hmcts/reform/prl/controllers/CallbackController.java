@@ -126,6 +126,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TAS
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.TASK_LIST_V3_FLAG;
 import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
@@ -697,17 +698,25 @@ public class CallbackController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
 
-            Optional<String> previousState = eventsForCase.stream()
+            Optional<String> previousStateOpt = eventsForCase.stream()
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
-            previousState.ifPresent(s -> caseDataUpdated.put(
-                VERIFY_CASE_NUMBER_ADDED,
-                (SUBMITTED_PAID.getValue().equalsIgnoreCase(s)
-                    || AWAITING_INFORMATION.getValue().equalsIgnoreCase(s))
-                    ? Yes.getDisplayedValue() : null
-            ));
+
+            if (previousStateOpt.isPresent()) {
+                String previousState = previousStateOpt.get();
+                if (AWAITING_INFORMATION.getValue().equalsIgnoreCase(previousState)) {
+                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
+                    caseData = caseData.toBuilder().state(CASE_ISSUED).build();
+                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                    caseDataUpdated.put(STATE_FIELD, CASE_ISSUED.getValue());
+                } else if (SUBMITTED_PAID.getValue().equalsIgnoreCase(previousState)) {
+                    caseDataUpdated.put(VERIFY_CASE_NUMBER_ADDED, Yes.getDisplayedValue());
+                }
+            }
+
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -943,4 +952,3 @@ public class CallbackController {
         }
     }
 }
-

@@ -150,6 +150,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -166,6 +167,8 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1194,22 +1197,25 @@ public class CallbackControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
-
+        stringObjectMap.put(STATE_FIELD, AWAITING_INFORMATION);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseEventService.findEventsForCase("1"))
             .thenReturn(List.of(CaseEventDetail.builder().stateId(
-                uk.gov.hmcts.reform.prl.enums.State.AWAITING_INFORMATION.getValue()).build()));
+                AWAITING_INFORMATION.getValue()).build()));
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(1L)
                              .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(caseSummaryTab.updateTab(caseData.toBuilder().state(CASE_ISSUED).build())).thenReturn(Map.of());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .addCaseNumberSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
         assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
+        assertEquals(CASE_ISSUED.getValue(), aboutToStartOrSubmitCallbackResponse.getData().get(STATE_FIELD));
+        verify(caseSummaryTab).updateTab(caseData.toBuilder().state(CASE_ISSUED).build());
     }
 
     @Test
