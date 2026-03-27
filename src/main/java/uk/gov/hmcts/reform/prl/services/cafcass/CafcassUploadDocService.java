@@ -52,7 +52,7 @@ public class CafcassUploadDocService {
     public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
         DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
     );
-    public static final String MANAGE_DOCUMENTS_URGENT_DOC_TYPE = "manageDocumentsUrgentDocType";
+    public static final String MANAGE_DOC_UPLOADED_CATEGORY = "manageDocUploadedCategory";
 
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
         "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review",
@@ -120,9 +120,9 @@ public class CafcassUploadDocService {
         caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
 
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_URGENT_DOC_TYPE, typeOfDocument);
+            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, typeOfDocument);
         } else {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_URGENT_DOC_TYPE, null);
+            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);
         }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
