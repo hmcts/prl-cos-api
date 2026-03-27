@@ -105,6 +105,9 @@ public class C100IssueCaseServiceTest {
     private SolicitorEmailService solicitorEmailService;
 
     @Mock
+    private PathFinderLookupService pathFinderLookupService;
+
+    @Mock
     private UserDetails userDetails;
 
     @Mock
