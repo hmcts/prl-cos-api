@@ -292,7 +292,7 @@ public class C100IssueCaseServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -337,7 +337,7 @@ public class C100IssueCaseServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -426,7 +426,7 @@ public class C100IssueCaseServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -523,7 +523,7 @@ public class C100IssueCaseServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
@@ -660,6 +660,10 @@ public class C100IssueCaseServiceTest {
         when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
         when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
 
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
         c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
 
         verify(eventPublisher, times(2)).publishEvent(Mockito.any());
@@ -765,12 +769,9 @@ public class C100IssueCaseServiceTest {
         when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
         when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
 
         c100IssueCaseService.addPathFinderDecisonTotHistoryTab(callbackRequest);
 
