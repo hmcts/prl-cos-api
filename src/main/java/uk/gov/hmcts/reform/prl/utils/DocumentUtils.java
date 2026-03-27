@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 
 @Data
 @AllArgsConstructor
@@ -131,6 +132,8 @@ public class DocumentUtils {
             loggedInUserType = BULK_SCAN;
         } else if (roles.contains(Roles.COURTNAV.getValue())) {
             loggedInUserType = COURTNAV;
+        } else if (roles.contains("LOCAL_AUTHORITY")) {
+            loggedInUserType = LOCAL_AUTHORITY;
         } else {
             loggedInUserType = CAFCASS;
         }
