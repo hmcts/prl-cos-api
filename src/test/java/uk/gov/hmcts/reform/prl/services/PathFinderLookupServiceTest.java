@@ -30,8 +30,8 @@ public class PathFinderLookupServiceTest {
 
     private PathFinderLookupService pathFinderLookupService;
 
-    private final String jsonContent = "[{\"courtCode\":\"code1\",\"courtName\":\"name1\",\"courtField\":\"field1\"," +
-        "\"dfjArea\":\"area1\",\"pathFinderEnabled\":true}]";
+    private final String jsonContent = "[{\"courtCode\":\"code1\",\"courtName\":\"name1\",\"courtField\":\"field1\","
+        + "\"dfjArea\":\"area1\",\"pathFinderEnabled\":true}]";
 
     @Before
     public void setUp() throws JsonProcessingException {
