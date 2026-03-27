@@ -661,7 +661,11 @@ public class C100IssueCaseServiceTest {
         when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
 
 
-        c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest);
+        final CallbackRequest callbackRequest1 = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
+        c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest1);
 
         verify(eventPublisher, times(2)).publishEvent(Mockito.any());
         verify(systemUserService).getSysUserToken();
