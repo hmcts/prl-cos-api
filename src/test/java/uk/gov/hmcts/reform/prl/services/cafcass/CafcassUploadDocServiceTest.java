@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_S16A_RISK_ASSESSMENT;
-import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOCUMENTS_URGENT_DOC_TYPE;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOC_UPLOADED_CATEGORY;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -243,7 +243,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_TRANSFER, caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertEquals(DOC_TYPE_CIR_TRANSFER, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
     }
 
     @Test
@@ -264,7 +264,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_EXTENSION, caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertEquals(DOC_TYPE_CIR_EXTENSION, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
     }
 
     @Test
@@ -285,7 +285,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_S16A_RISK_ASSESSMENT, caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertEquals(DOC_TYPE_S16A_RISK_ASSESSMENT, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
     }
 
     @Test
@@ -306,7 +306,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, "16_4_Report", TEST_CASE_ID);
 
-        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_URGENT_DOC_TYPE));
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
     }
 
     @Test
