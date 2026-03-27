@@ -61,6 +61,14 @@ public enum DocumentCategory {
         return WITNESS_STATEMENTS_APPLICANT.equals(this) || WITNESS_STATEMENTS_RESPONDENT.equals(this);
     }
 
+    public boolean isApplicantWitnessStatement() {
+        return WITNESS_STATEMENTS_APPLICANT.equals(this);
+    }
+
+    public boolean isRespondentWitnessStatement() {
+        return WITNESS_STATEMENTS_RESPONDENT.equals(this);
+    }
+
     private static class Constants {
         public static final String ANY_OTHER_DOC = "anyOtherDoc";
         public static final String ANY_OTHER_DOCUMENTS = "Any Other Documents";

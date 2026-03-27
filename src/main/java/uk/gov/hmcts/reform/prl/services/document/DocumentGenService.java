@@ -1546,7 +1546,8 @@ public class DocumentGenService {
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            citizenUploadTemplate
+            citizenUploadTemplate,
+            documentCategory
         );
 
         log.info("generatedDocumentInfo {}", generatedDocumentInfo);

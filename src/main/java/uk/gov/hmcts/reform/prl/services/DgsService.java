@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -197,7 +198,8 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
                                                          DocumentRequest documentRequest,
-                                                         String prlCitizenUploadTemplate) throws DocumentGenerationException {
+                                                         String prlCitizenUploadTemplate,
+                                                         DocumentCategory documentCategory) throws DocumentGenerationException {
         Map<String, Object> tempCaseDetails = new HashMap<>();
         String caseId = documentRequest.getCaseId();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = caseService.getCase(authorisation, caseId);
@@ -207,7 +209,10 @@ public class DgsService {
             .caseData(CaseData.builder()
                           .id(Long.parseLong(caseId))
                           .citizenUploadedStatement(documentRequest.getFreeTextStatements())
-                          .applicantName(documentRequest.getPartyName())
+                          .applicantName(nonNull(documentCategory) && documentCategory.isApplicantWitnessStatement()
+                                             ? documentRequest.getPartyName() : "")
+                          .respondentName(nonNull(documentCategory) && documentCategory.isRespondentWitnessStatement()
+                                              ? documentRequest.getPartyName() : "")
                           .applicantCaseName(nonNull(caseDataFromCcd) ? caseDataFromCcd.getApplicantCaseName() : null)
                           .issueDate(nonNull(caseDataFromCcd) ? caseDataFromCcd.getIssueDate() : null)
                           .familymanCaseNumber(nonNull(caseDataFromCcd) ? caseDataFromCcd.getFamilymanCaseNumber() : null)

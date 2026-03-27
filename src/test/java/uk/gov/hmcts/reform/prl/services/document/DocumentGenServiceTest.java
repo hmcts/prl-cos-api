@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -2700,7 +2701,8 @@ public class DocumentGenServiceTest {
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(DocumentRequest.class),
-            Mockito.any()
+            Mockito.any(),
+            any(DocumentCategory.class)
         );
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
