@@ -204,10 +204,10 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testgenerateCitizenDocument() {
+    public void testGenerateCitizenDocumentWithFreeTextUploadStatements() {
         Map<String, String> values = new HashMap<>();
         values.put("caseId","123");
-        GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest
+        GenerateAndUploadDocumentRequest request = GenerateAndUploadDocumentRequest
             .builder()
             .values(values)
             .build();
@@ -215,8 +215,8 @@ public class DgsServiceTest {
         // when
         GeneratedDocumentInfo result = dgsService.generateCitizenDocument(
             AUTHORISATION,
-            generateAndUploadDocumentRequest,
-            AUTHORISATION
+            request,
+            TEMPLATE
         );
 
         // then
@@ -288,7 +288,7 @@ public class DgsServiceTest {
             .build();
 
         when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
-        assertExpectedException(() -> dgsService.generateCitizenDocument(AUTHORISATION, generateAndUploadDocumentRequest, AUTHORISATION),
+        assertExpectedException(() -> dgsService.generateCitizenDocument(AUTHORISATION, generateAndUploadDocumentRequest, TEMPLATE),
                                 DocumentGenerationException.class, null);
     }
 
