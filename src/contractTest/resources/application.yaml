@@ -544,6 +544,7 @@ document:
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
     citizen:
+      prl_citizen_witness_statement_template: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
     fl401listonnotice:
