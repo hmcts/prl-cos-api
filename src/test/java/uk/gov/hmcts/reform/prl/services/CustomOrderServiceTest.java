@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -49,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -258,21 +261,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineHeaderAndContent_mergesDocuments() {
-        // Create minimal valid DOCX bytes (this is a simplified test)
-        // In reality, these would be actual DOCX files
-        // For unit testing, we mock the behavior
-
-        // Since combineHeaderAndContent uses Apache POI directly on byte arrays,
-        // we need actual DOCX bytes. For this test, we'll verify the method exists
-        // and can be called. Integration tests would verify actual merging.
-
-        // This test verifies the method signature and basic flow
-        assertNotNull(customOrderService);
-    }
-
-    @Test
-    void testProcessCustomOrderOnSubmitted_downloadsDocuments() throws IOException {
+    void testProcessCustomOrderOnSubmitted_downloadsDocuments() {
         // Arrange
         final String authorisation = "auth-token";
         final long caseId = 123L;
@@ -285,7 +274,7 @@ class CustomOrderServiceTest {
             .nameOfOrder("Test Order")
             .build();
 
-        // Mock header and user doc downloads
+        // Mock header and user doc downloads - fake bytes will cause POI to fail
         byte[] headerBytes = new byte[]{1, 2, 3};
         byte[] userContentBytes = new byte[]{4, 5, 6};
         when(systemUserService.getSysUserToken()).thenReturn("system-token");
@@ -294,15 +283,13 @@ class CustomOrderServiceTest {
         when(documentGenService.getDocumentBytes(eq(userDocUrl), any(), any())).thenReturn(userContentBytes);
 
         // Act & Assert - combineHeaderAndContent needs real DOCX bytes so will throw
-        // We verify documents are downloaded before the POI error
-        try {
+        assertThrows(Exception.class, () ->
             customOrderService.processCustomOrderOnSubmitted(
-                authorisation, caseId, caseData, userDocUrl, headerDocUrl, null, false);
-        } catch (Exception e) {
-            // Expected - combineHeaderAndContent needs real DOCX bytes
-            verify(documentGenService).getDocumentBytes(eq(headerDocUrl), any(), any());
-            verify(documentGenService).getDocumentBytes(eq(userDocUrl), any(), any());
-        }
+                authorisation, caseId, caseData, userDocUrl, headerDocUrl, null, false));
+
+        // Verify documents were downloaded before the POI error
+        verify(documentGenService).getDocumentBytes(eq(headerDocUrl), any(), any());
+        verify(documentGenService).getDocumentBytes(eq(userDocUrl), any(), any());
     }
 
     @Test
@@ -514,6 +501,67 @@ class CustomOrderServiceTest {
         assertNotNull(children);
         assertFalse(children.isEmpty());
         assertEquals("Tommy Test", children.getFirst().get("fullName"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testBuildHeaderPlaceholders_fl401ChildrenFilteredBySelection() throws IOException {
+        Long caseId = 1234567890123456L;
+
+        UUID child1Id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID child2Id = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID child3Id = UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+        ApplicantChild child1 = ApplicantChild.builder()
+            .fullName("Alice Test")
+            .dateOfBirth(LocalDate.of(2015, 5, 10))
+            .build();
+        ApplicantChild child2 = ApplicantChild.builder()
+            .fullName("Bob Test")
+            .dateOfBirth(LocalDate.of(2017, 3, 20))
+            .build();
+        ApplicantChild child3 = ApplicantChild.builder()
+            .fullName("Charlie Test")
+            .dateOfBirth(LocalDate.of(2019, 8, 15))
+            .build();
+
+        // Select only child1 and child3
+        DynamicMultiSelectList childOption = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder().code(child1Id.toString()).label("Alice Test").build(),
+                DynamicMultiselectListElement.builder().code(child3Id.toString()).label("Charlie Test").build()
+            ))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isTheOrderAboutChildren(YesOrNo.Yes)
+            .childOption(childOption)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(PartyDetails.builder().firstName("Jane").lastName("Doe").build())
+            .applicantChildDetails(List.of(
+                Element.<ApplicantChild>builder().id(child1Id).value(child1).build(),
+                Element.<ApplicantChild>builder().id(child2Id).value(child2).build(),
+                Element.<ApplicantChild>builder().id(child3Id).value(child3).build()
+            ))
+            .manageOrders(manageOrders)
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        List<Map<String, String>> children = (List<Map<String, String>>) placeholders.get("children");
+
+        // Should only contain selected children (Alice and Charlie), not Bob
+        assertNotNull(children);
+        assertEquals(2, children.size());
+        assertEquals("Alice Test", children.get(0).get("fullName"));
+        assertEquals("Charlie Test", children.get(1).get("fullName"));
     }
 
     @Test

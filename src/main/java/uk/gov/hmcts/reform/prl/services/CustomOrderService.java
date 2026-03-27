@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -831,7 +832,15 @@ public class CustomOrderService {
             return;
         }
 
+        // Get selected child IDs if specific children were selected
+        Set<String> selectedIds = getSelectedChildIds(caseData);
+
         for (Element<ApplicantChild> childElement : caseData.getApplicantChildDetails()) {
+            // Filter by selection if specific children were chosen, otherwise include all
+            if (!selectedIds.isEmpty() && !selectedIds.contains(childElement.getId().toString())) {
+                continue;
+            }
+
             ApplicantChild child = childElement.getValue();
             String fullName = StringUtils.defaultString(child.getFullName());
             String dob = child.getDateOfBirth() != null
@@ -845,6 +854,19 @@ public class CustomOrderService {
             childrenRows.add(childRow);
         }
         log.info("Populated {} FL401 children from applicantChildDetails", childrenRows.size());
+    }
+
+    private Set<String> getSelectedChildIds(CaseData caseData) {
+        if (caseData.getManageOrders() == null) {
+            return Collections.emptySet();
+        }
+        DynamicMultiSelectList childOption = caseData.getManageOrders().getChildOption();
+        if (childOption == null || childOption.getValue() == null || childOption.getValue().isEmpty()) {
+            return Collections.emptySet();
+        }
+        return childOption.getValue().stream()
+            .map(DynamicMultiselectListElement::getCode)
+            .collect(Collectors.toSet());
     }
 
     /**
