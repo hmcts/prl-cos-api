@@ -553,15 +553,25 @@ public class BundleCreateRequestMapperTest {
             .documentParty("Cafcass Cymru").categoryName(SAFEGUARDING_LETTER).categoryId("safeguardingLetter").build();
         cafcassDoc.add(element(safeGuardingLetter));
 
+        QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
+            .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
+            .documentParty("Cafcass").categoryName(SIXTEENA_RISK_ASSESSMENT).categoryId("16aRiskAssessment").build();
+        cafcassDoc.add(element(sixteenARiskAssessment));
+
+        QuarantineLegalDoc cirTransferRequest = QuarantineLegalDoc.builder()
+            .cirTransferRequestDocument(Document.builder().documentFileName("cirTransferRequest").build())
+            .documentParty("Cafcass").categoryId("cirTransferRequest").build();
+        cafcassDoc.add(element(cirTransferRequest));
+
+        QuarantineLegalDoc cirExtensionRequest = QuarantineLegalDoc.builder()
+            .cirExtensionRequestDocument(Document.builder().documentFileName("cirExtensionRequest").build())
+            .documentParty("Cafcass").categoryId("cirExtensionRequest").build();
+        cafcassDoc.add(element(cirExtensionRequest));
+
         QuarantineLegalDoc section7Report = QuarantineLegalDoc.builder()
             .section7ReportDocument(Document.builder().documentFileName("section7Report").build())
             .documentParty("Cafcass Cymru").categoryName(SECTION_7_REPORT).categoryId("section7Report").build();
         courtStaffDoc.add(element(section7Report));
-
-        QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
-            .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
-            .documentParty("Cafcass Cymru").categoryName(SIXTEENA_RISK_ASSESSMENT).categoryId("16aRiskAssessment").build();
-        courtStaffDoc.add(element(sixteenARiskAssessment));
 
         QuarantineLegalDoc guardianReport = QuarantineLegalDoc.builder()
             .guardianReportDocument(Document.builder().documentFileName("guardianReport").build())
@@ -678,11 +688,13 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().build(),"sample.yaml");
         assertNotNull(bundleCreateRequest);
-        // Should not contain police disclosures or medical records
+        // Should not contain police disclosures, medical records, anyOtherDocuments, 16A risk assessments,
+        // CIR Transfer Requests, or CIR Extension Requests (AC6)
         assertThat(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
                        .map(Element::getValue)
                        .map(BundlingRequestDocument::getDocumentFileName)
-                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
+                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments",
+                                                   "16ARiskAssessment", "cirTransferRequest", "cirExtensionRequest")
                            .contains(fileName)).toList())
             .asInstanceOf(LIST).isEmpty();
     }

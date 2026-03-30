@@ -70,7 +70,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SEC37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_37_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
@@ -604,13 +603,6 @@ public class BundleCreateRequestMapper {
                 .documentLink(doc.getSection7ReportDocument())
                 .documentFileName(doc.getSection7ReportDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.section7Report).build() : null
-        );
-        bundleMap.put(
-            SIXTEEN_A_RISK_ASSESSMENT,
-            Objects.nonNull(doc.getSixteenARiskAssessmentDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getSixteenARiskAssessmentDocument())
-                .documentFileName(doc.getSixteenARiskAssessmentDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.sixteenARiskAssessment).build() : null
         );
         bundleMap.put(
             GUARDIAN_REPORT,
