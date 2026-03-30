@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -35,6 +36,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DgsServiceTest {
@@ -236,9 +239,160 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testGenerateCitizenDocument() {
+    public void testGenerateRespondentWitnessStatementForC100() {
         // Given
         setUpGenerateCitizenDocument();
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("WITNESS_STATEMENTS_RESPONDENT")
+            .partyName("appf appl")
+            .partyType("respondent")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
+
+        PartyDetails partyDetail = PartyDetails.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .firstName("firstNameValue")
+            .lastName("lastName")
+            .build();
+        Element<PartyDetails> element = Element.<PartyDetails>builder().id(UUID.randomUUID())
+            .value(partyDetail).build();
+        CaseData data = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element))
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(Long.parseLong(documentRequest.getCaseId()))
+            .data(objectMapper.convertValue(data, Map.class))
+            .build();
+        when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
+
+        // When
+        GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
+            AUTHORISATION, documentRequest,
+            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
+        );
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.getBinaryUrl());
+        assertNotNull(response.getHashToken());
+    }
+
+    @Test
+    public void testGenerateRespondentWitnessStatementForFl401() {
+        // Given
+        setUpGenerateCitizenDocument();
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("WITNESS_STATEMENTS_RESPONDENT")
+            .partyName("appf appl")
+            .partyType("respondent")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
+
+        PartyDetails partyDetail = PartyDetails.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .firstName("firstNameValue")
+            .lastName("lastName")
+            .build();
+        CaseData data = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetail)
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(Long.parseLong(documentRequest.getCaseId()))
+            .data(objectMapper.convertValue(data, Map.class))
+            .build();
+        when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
+
+        // When
+        GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
+            AUTHORISATION, documentRequest,
+            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
+        );
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.getBinaryUrl());
+        assertNotNull(response.getHashToken());
+    }
+
+
+
+
+    @Test
+    public void testGenerateApplicantWitnessStatementForC100() {
+        // Given
+        setUpGenerateCitizenDocument();
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("WITNESS_STATEMENTS_APPLICANT")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
+
+        PartyDetails partyDetail = PartyDetails.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .firstName("firstNameValue")
+            .lastName("lastName")
+            .build();
+        Element<PartyDetails> element = Element.<PartyDetails>builder().id(UUID.randomUUID())
+            .value(partyDetail).build();
+        CaseData data = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(element))
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(Long.parseLong(documentRequest.getCaseId()))
+            .data(objectMapper.convertValue(data, Map.class))
+            .build();
+        when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
+
+        // When
+        GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
+            AUTHORISATION, documentRequest,
+            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_APPLICANT
+        );
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.getBinaryUrl());
+        assertNotNull(response.getHashToken());
+    }
+
+    @Test
+    public void testGenerateApplicantWitnessStatementForFl401() {
+        // Given
+        setUpGenerateCitizenDocument();
+        documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("WITNESS_STATEMENTS_APPLICANT")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
+            .build();
+
+        PartyDetails partyDetail = PartyDetails.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .firstName("firstNameValue")
+            .lastName("lastName")
+            .build();
+
+        CaseData data = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(partyDetail)
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(Long.parseLong(documentRequest.getCaseId()))
+            .data(objectMapper.convertValue(data, Map.class))
+            .build();
+        when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
 
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(

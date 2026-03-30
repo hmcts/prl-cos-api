@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
 import uk.gov.hmcts.reform.prl.mapper.welshlang.WelshLangMapper;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,10 +28,13 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
 @Service
@@ -37,6 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DgsService {
 
+    public static final String SPACE = " ";
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
@@ -203,7 +209,6 @@ public class DgsService {
         CaseData caseDataFromCcd = nonNull(caseDetailsFromCcd) ? CaseUtils.getCaseData(caseDetailsFromCcd, objectMapper) : null;
         boolean applicantWitnessStatement = false;
         boolean respondentWitnessStatement = false;
-        String applicantCaseName = null;
         LocalDate issueDate = null;
         String familymanCaseNumber = null;
         String courtName = null;
@@ -214,7 +219,6 @@ public class DgsService {
         }
 
         if (nonNull(caseDataFromCcd)) {
-            applicantCaseName = caseDataFromCcd.getApplicantCaseName();
             issueDate = caseDataFromCcd.getIssueDate();
             familymanCaseNumber = caseDataFromCcd.getFamilymanCaseNumber();
             courtName = caseDataFromCcd.getCourtName();
@@ -227,8 +231,8 @@ public class DgsService {
                           .id(Long.parseLong(caseId))
                           .issueDate(issueDate)
                           .familymanCaseNumber(familymanCaseNumber)
-                          .applicantName(applicantWitnessStatement ? documentRequest.getPartyName() : "")
-                          .respondentName(respondentWitnessStatement ? documentRequest.getPartyName() : "")
+                          .applicantName(getApplicantName(applicantWitnessStatement, respondentWitnessStatement, documentRequest, caseDataFromCcd))
+                          .respondentName(getRespondentName(respondentWitnessStatement, applicantWitnessStatement, documentRequest, caseDataFromCcd))
                           .citizenUploadedStatement(documentRequest.getFreeTextStatements())
                           .giveDetails(documentRequest.getPartyName())
                           .lastModifiedDate(LocalDateTime.now())
@@ -271,5 +275,57 @@ public class DgsService {
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
+    }
+
+    private String getApplicantName(boolean applicantWitnessStatement, boolean respondentWitnessStatement,
+                                    DocumentRequest documentRequest,CaseData caseDataFromCcd) {
+        String applicantName = null;
+        if (applicantWitnessStatement) {
+            applicantName = documentRequest.getPartyName();
+        } else {
+            if (respondentWitnessStatement) {
+                String caseTypeOfApplication = caseDataFromCcd.getCaseTypeOfApplication();
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                    List<Element<PartyDetails>> applicantElements = emptyIfNull(caseDataFromCcd.getApplicants());
+                    List<PartyDetails> applicants = emptyIfNull(applicantElements.stream().map(Element::getValue).toList());
+                    applicantName = String.join(
+                        ",", applicants.stream()
+                            .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
+                    );
+                } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                    PartyDetails applicantsFL401 = caseDataFromCcd.getApplicantsFL401();
+                    applicantName = nonNull(applicantsFL401) ? applicantsFL401.getFirstName() + SPACE + applicantsFL401.getLastName() : "";
+                }
+            } else {
+                applicantName = "";
+            }
+        }
+        return applicantName;
+    }
+
+    private String getRespondentName(boolean respondentWitnessStatement, boolean applicantWitnessStatement,
+                                     DocumentRequest documentRequest,CaseData caseDataFromCcd) {
+        String respondentName = null;
+        if (respondentWitnessStatement) {
+            respondentName = documentRequest.getPartyName();
+        } else {
+            if (applicantWitnessStatement) {
+                String caseTypeOfApplication = caseDataFromCcd.getCaseTypeOfApplication();
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                    List<Element<PartyDetails>> respondentElements = emptyIfNull(caseDataFromCcd.getRespondents());
+                    List<PartyDetails> respondents = emptyIfNull(respondentElements.stream().map(Element::getValue).toList());
+                    respondentName = String.join(
+                        ",", respondents.stream()
+                            .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
+                    );
+                } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                    PartyDetails respondentFL401 = caseDataFromCcd.getRespondentsFL401();
+                    respondentName = nonNull(respondentFL401) ? respondentFL401.getFirstName() + SPACE + respondentFL401.getLastName() : "";
+                }
+            } else {
+                respondentName = "";
+            }
+        }
+        return respondentName;
     }
 }
