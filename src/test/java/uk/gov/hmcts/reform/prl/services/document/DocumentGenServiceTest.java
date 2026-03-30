@@ -2686,6 +2686,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateAndUploadDocument() {
         //Given
+        ReflectionTestUtils.setField(documentGenService, "prlCitizenUploadTemplate", "FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")

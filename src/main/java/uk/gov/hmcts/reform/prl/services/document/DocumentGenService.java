@@ -271,6 +271,8 @@ public class DocumentGenService {
     protected String prlCitizenUploadTemplate;
     @Value("${document.templates.citizen.prl_citizen_witness_statement_template}")
     protected String prlCitizenWitnessStatementTemplate;
+    @Value("${document.templates.citizen.prl_citizen_witness_statement_welsh_template}")
+    protected String prlCitizenWitnessStatementWelshTemplate;
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
@@ -1539,14 +1541,15 @@ public class DocumentGenService {
         String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory);
         log.info("fileName {}", fileName);
 
-        String citizenUploadTemplate = nonNull(documentCategory) && documentCategory.isWitnessStatement()
-            ? prlCitizenWitnessStatementTemplate : prlCitizenUploadTemplate;
+        List<String> citizenUploadTemplates = nonNull(documentCategory) && documentCategory.isWitnessStatement()
+            ? List.of(prlCitizenWitnessStatementTemplate, prlCitizenWitnessStatementWelshTemplate)
+            : List.of(prlCitizenUploadTemplate);
 
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            citizenUploadTemplate,
+            citizenUploadTemplates.get(0),
             documentCategory
         );
 
