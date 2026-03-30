@@ -3581,8 +3581,9 @@ public class ManageOrderService {
             && YesNoNotApplicable.No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
             List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
-
+            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+                checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
+            }
         }
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
             || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
