@@ -95,6 +95,21 @@ public class HelpWithFeesServiceTest {
     }
 
     @Test
+    public void testAboutToStartAwaitingInformation() {
+        CaseDetails awaitingInfoCaseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.AWAITING_INFORMATION.getValue())
+            .build();
+
+        when(objectMapper.convertValue(awaitingInfoCaseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService.handleAboutToStart(awaitingInfoCaseDetails);
+        assertNotNull(response);
+        DynamicList dynamicList = (DynamicList) response.get("hwfAppList");
+        assertEquals("Child arrangements application C100 - 24/06/2024 10:46:55", dynamicList.getListItems().get(0).getLabel());
+        assertEquals("C100", response.get("caseTypeOfApplication"));
+    }
+
+    @Test
     public void testAboutToSubmitWithoutDateSubmitted() {
         casedata = casedata.toBuilder()
             .state(State.SUBMITTED_PAID)
@@ -136,6 +151,48 @@ public class HelpWithFeesServiceTest {
         assertNull(response.get("dateSubmitted"));
     }
 
+    @Test
+    public void testAboutToSubmitAwaitingInformationWithoutDateSubmitted() {
+        casedata = casedata.toBuilder()
+            .state(State.AWAITING_INFORMATION)
+            .build();
+
+        CaseDetails awaitingInfoCaseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.AWAITING_INFORMATION.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(awaitingInfoCaseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(awaitingInfoCaseDetails).build(), "testAuth");
+        assertNotNull(response);
+        CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
+        assertEquals("Submitted", caseStatus.getState());
+        assertNotNull(response.get("dateSubmitted"));
+    }
+
+    @Test
+    public void testAboutToSubmitAwaitingInformationWithDateSubmitted() {
+        casedata = casedata.toBuilder()
+            .state(State.AWAITING_INFORMATION)
+            .dateSubmitted("01 01 2024")
+            .build();
+
+        CaseDetails awaitingInfoCaseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.AWAITING_INFORMATION.getValue())
+            .data(new HashMap<>())
+            .build();
+
+        when(objectMapper.convertValue(awaitingInfoCaseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService
+            .setCaseStatus(CallbackRequest.builder().caseDetails(awaitingInfoCaseDetails).build(), "testAuth");
+        assertNotNull(response);
+        CaseStatus caseStatus = (CaseStatus) response.get("caseStatus");
+        assertEquals("Submitted", caseStatus.getState());
+        assertNull(response.get("dateSubmitted"));
+    }
 
     @Test
     public void testAboutToSubmitApplicationsWithinProceedingsProcessUrgentFeesIsNull() {
@@ -274,6 +331,20 @@ public class HelpWithFeesServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(casedata);
         Map<String, Object> response = helpWithFeesService.populateHwfDynamicData(caseDetails);
+        assertNotNull(response);
+        String hwfApplicationDynamicData = (String) response.get(HWF_APPLICATION_DYNAMIC_DATA_LABEL);
+        assertNotNull(hwfApplicationDynamicData);
+    }
+
+    @Test
+    public void testPopulateHwfDynamicDataAwaitingInformation() {
+        CaseDetails awaitingInfoCaseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.AWAITING_INFORMATION.getValue())
+            .data(casedata.toMap(new ObjectMapper()))
+            .build();
+        when(objectMapper.convertValue(awaitingInfoCaseDetails.getData(), CaseData.class)).thenReturn(casedata);
+        Map<String, Object> response = helpWithFeesService.populateHwfDynamicData(awaitingInfoCaseDetails);
         assertNotNull(response);
         String hwfApplicationDynamicData = (String) response.get(HWF_APPLICATION_DYNAMIC_DATA_LABEL);
         assertNotNull(hwfApplicationDynamicData);

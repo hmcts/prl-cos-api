@@ -15,8 +15,6 @@ import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 @Slf4j
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private static final String ERROR_MESSAGE = "An error occurred while processing your request: ";
-
     @ExceptionHandler(ManageOrderRuntimeException.class)
     public ResponseEntity<ErrorResponse> handleManageOrderRuntimeException(ManageOrderRuntimeException ex) {
         log.error("Exception occurred while Manage Orders due to: {}", ex.getMessage());
@@ -25,9 +23,25 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(HearingException.class)
+    public ResponseEntity<ErrorResponse> handleHearingException(HearingException ex) {
+        log.error("Exception occurred in the hearing: {}", ex.getMessage(), ex);
+        ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
+                                                                                         ex.getMessage())).build();
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(DocumentGenerationException.class)
     public ResponseEntity<ErrorResponse> handleDocumentGenerationException(DocumentGenerationException ex) {
         log.error("Exception occurred while document generation due to: {}", ex.getMessage());
+        ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
+                                                                                         ex.getMessage())).build();
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ReviewDocumentException.class)
+    public ResponseEntity<ErrorResponse> handleDocumentGenerationException(ReviewDocumentException ex) {
+        log.error("Exception occurred while reviewing document {}", ex.getMessage());
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
