@@ -47,9 +47,9 @@ public class PathFinderLookupService {
             .collect(toSet());
     }
 
-    public Optional<PathFinderMapping> getPathFinderMappingByCourtField(String courtField) {
+    public Optional<PathFinderMapping> getPathFinderMappingByCourtField(String baseLocationId) {
         return pathFinderMapping.stream()
-            .filter(mapping -> mapping.getCourtField().equals(courtField))
+            .filter(mapping -> mapping.getCourtCode().equals(baseLocationId))
             .findFirst();
     }
 
