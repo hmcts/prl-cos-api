@@ -451,7 +451,7 @@ public class CaseServiceTest {
     @Test
      void shouldCreateCase() {
 
-         userDetails = UserDetails
+        userDetails = UserDetails
             .builder()
             .roles(List.of(COURT_ADMIN_ROLE))
             .email("test@gmail.com")
