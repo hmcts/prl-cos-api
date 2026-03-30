@@ -121,8 +121,6 @@ public class CafcassUploadDocService {
 
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
             caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, typeOfDocument);
-        } else {
-            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);
         }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
