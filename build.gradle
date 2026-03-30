@@ -180,7 +180,7 @@ allprojects {
       dependency group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto
 
       //CVE-2023-42795, CVE-2023-45648
-      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.52') {
+      dependencySet(group: 'org.apache.tomcat.embed', version: '10.1.53') {
         entry 'tomcat-embed-core'
         entry 'tomcat-embed-websocket'
       }
@@ -223,52 +223,32 @@ distributions {
   }
 }
 
-sourceSets {
-  integrationTest {
-    java {
-      compileClasspath += main.output + test.output
-      runtimeClasspath += main.output + test.output
-      srcDir('src/integrationTest/java')
+def configureSourceSet(String name) {
+  sourceSets.create(name) { sourceSet ->
+    sourceSet.java {
+      compileClasspath += sourceSets.main.output + sourceSets.test.output
+      runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+      srcDir "src/${name}/java"
     }
-    resources {
-      srcDir('src/integrationTest/resources')
-    }
-  }
-  contractTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/contractTest/java')
-    }
-    resources.srcDir file('src/contractTest/resources')
-  }
-  functionalTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/functionalTest/java')
-    }
-    resources.srcDir file('src/functionalTest/resources')
-  }
-  smokeTest {
-    java {
-      compileClasspath += main.output + test.output
-      runtimeClasspath += main.output + test.output
-      srcDir file('src/smokeTest/java')
-    }
-    resources.srcDir file('src/smokeTest/resources')
+    sourceSet.resources.srcDir "src/${name}/resources"
   }
 }
 
+['smokeTest', 'integrationTest', 'functionalTest', 'contractTest'].each { configureSourceSet(it) }
+
+
 configurations {
   functionalTestImplementation.extendsFrom testImplementation
-  functionalTestRuntime.extendsFrom testRuntime
+  functionalTestRuntimeOnly.extendsFrom testRuntimeOnly
+
   integrationTestImplementation.extendsFrom testImplementation
-  integrationTestRuntime.extendsFrom testRuntime
-  contractTestImplementation.extendsFrom testImplementation
-  smokeTest.extendsFrom testImplementation
+  integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+
   smokeTestImplementation.extendsFrom testImplementation
-  smokeTestRuntimeOnly.extendsFrom runtimeOnly
+  smokeTestRuntimeOnly.extendsFrom runtimeOnlyOnly
+
+  contractTestImplementation.extendsFrom testImplementation
+  contractTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
@@ -423,6 +403,7 @@ dependencies {
   testImplementation group: 'org.pitest', name: 'pitest', version: versions.pitest
   testImplementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
   testImplementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
+  testImplementation group:'org.instancio', name:'instancio-core', version:'5.5.1'
 
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jacksonDatatypeJsr
@@ -486,11 +467,6 @@ dependencies {
   integrationTestImplementation(sourceSets.test.output)
 }
 
-task fortifyScan(type: JavaExec)  {
-  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
-  classpath += sourceSets.test.runtimeClasspath
-  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
-}
 
 processContractTestResources {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -505,41 +481,67 @@ processSmokeTestResources {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-  useJUnitPlatform()
-
-  setTestClassesDirs(sourceSets.smokeTest.output.classesDirs)
-  setClasspath(sourceSets.smokeTest.runtimeClasspath)
-
+tasks.register('fortifyScan', JavaExec) {
+  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  classpath += sourceSets.test.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
-task integration(type: Test, description: 'Runs integration tests.', group: 'Verification') {
+tasks.withType(Test).configureEach {
   useJUnitPlatform()
+  failFast = true
 
-  setTestClassesDirs(sourceSets.integrationTest.output.classesDirs)
-  setClasspath(sourceSets.integrationTest.runtimeClasspath)
-}
-
-task functional(type: Test, description: 'Runs functional tests.', group: 'Verification') {
-  useJUnitPlatform()
-
-  setTestClassesDirs(sourceSets.functionalTest.output.classesDirs)
-  setClasspath(sourceSets.functionalTest.runtimeClasspath)
-}
-
-task nightlyFunctional(type: Test, description: 'Runs the Nightly Only Functional tests.', group: 'Verification') {
-  doFirst(){
-    printf("::::::::::  Running  nightlyFunctional ::::::::::")
+  testLogging {
+    exceptionFormat = 'full'
   }
-
-  maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
-  forkEvery = 10
-
-  setTestClassesDirs(sourceSets.integrationTest.output.classesDirs)
-  setClasspath(sourceSets.integrationTest.runtimeClasspath)
-
-  finalizedBy aggregate
 }
+
+tasks.register('integration', Test) {
+  description = 'Runs the integration tests.'
+  group = 'Verification'
+
+  testClassesDirs = sourceSets.integrationTest.output.classesDirs
+  classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+tasks.register('smoke', Test) {
+  description = 'Runs the smoke tests.'
+  group = 'Verification'
+
+  testClassesDirs = sourceSets.smokeTest.output.classesDirs
+  classpath = sourceSets.smokeTest.runtimeClasspath
+}
+
+tasks.register('functional', Test) {
+  description = 'Runs the functional tests.'
+  group = 'Verification'
+
+  testClassesDirs = sourceSets.functionalTest.output.classesDirs
+  classpath = sourceSets.functionalTest.runtimeClasspath
+}
+
+tasks.register('contract', Test) {
+  description = 'Runs the consumer Pact tests.'
+  group = 'Verification'
+
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
+
+  include "uk/gov/hmcts/reform/prl/clients/**"
+  systemProperty 'pact.rootDir', "pacts"
+  environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
+}
+
+tasks.register('runAndPublishConsumerPactTests', Test) {
+  description = 'Runs the consumer Pact tests and publishes the results to the Pact Broker.'
+  group = 'Verification'
+
+  testClassesDirs = sourceSets.contractTest.output.classesDirs
+  classpath = sourceSets.contractTest.runtimeClasspath
+}
+
+runAndPublishConsumerPactTests.dependsOn contract
+runAndPublishConsumerPactTests.finalizedBy pactPublish
 
 pitest {
   targetClasses = ['uk.gov.hmcts.reform.prl.*']
@@ -603,7 +605,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/localauthority/SocialWorkerRemoveService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*'
+  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
+  '**uk/gov/hmcts/reform/prl/services/sendandreply/SendAndReplyService.java'
 ]
 
 sonarqube {
@@ -628,27 +631,6 @@ run {
   }
 }
 
-task contract(type: Test, description: 'Runs the consumer Pact tests.', group: 'Delivery pipeline') {
-  useJUnitPlatform()
-
-  testClassesDirs = sourceSets.contractTest.output.classesDirs
-  classpath = sourceSets.contractTest.runtimeClasspath
-
-  include "uk/gov/hmcts/reform/prl/clients/**"
-  systemProperty 'pact.rootDir', "pacts"
-  environment("APPINSIGHTS_INSTRUMENTATIONKEY", "test-key")
-}
-
-task runAndPublishConsumerPactTests(type: Test){
-  logger.lifecycle("Runs pact Tests")
-  testClassesDirs = sourceSets.contractTest.output.classesDirs
-  classpath = sourceSets.contractTest.runtimeClasspath
-}
-
-runAndPublishConsumerPactTests.dependsOn contract
-
-runAndPublishConsumerPactTests.finalizedBy pactPublish
-
 project.ext {
   pactVersion = getCheckedOutGitCommitHash()
 }
@@ -666,27 +648,24 @@ pact {
   }
 }
 
-task loadEnvSecrets() {
-  doLast {
-    if (!project.file('./.aat-env').exists()) {
-      new ByteArrayOutputStream().withStream { os ->
-        exec {
-          commandLine 'az', 'keyvault', 'secret', 'show', '--vault-name', 'prl-aat', '-o', 'tsv', '--query', 'value', '--name', 'prl-cos-cft-lib-local-config'
-          standardOutput = os
-        }
-        project.file('./.aat-env').write(os.toString())
-      }
-    }
-  }
+tasks.register('loadEnvSecrets', Exec) {
+    group = 'cftlib'
+    description = 'Fetches secret from Azure Key Vault and writes to .aat-env if not present.'
+    commandLine 'bash', './bin/cftlib/load-env-secrets.sh'
 }
 
-task buildCCDXlsx(type: Exec) {
+tasks.register('buildCCDXlsx', Exec) {
+  group = 'cftlib'
+  description = 'Builds the local development version of the CCD definitions xlsx file.'
   commandLine './bin/cftlib/build-ccd-xlsx-definitions.sh'
 }
 
 bootWithCCD {
+  group = 'cftlib'
+  description = 'Boots the local dev environment with CCD definitions loaded from the generated xlsx file.'
   dependsOn(loadEnvSecrets)
   dependsOn(buildCCDXlsx)
+
   doFirst() {
     project.file('./.aat-env').readLines().each() {
       def index = it.indexOf("=")
@@ -711,4 +690,3 @@ bootWithCCD {
 test {
   useJUnitPlatform()
 }
-
