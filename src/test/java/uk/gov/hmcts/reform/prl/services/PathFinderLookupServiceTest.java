@@ -30,12 +30,11 @@ public class PathFinderLookupServiceTest {
 
     private PathFinderLookupService pathFinderLookupService;
 
-    private final String jsonContent = "[{\"courtCode\":\"code1\",\"courtName\":\"name1\",\"courtField\":\"field1\","
-        + "\"dfjArea\":\"area1\",\"pathFinderEnabled\":true}]";
-
     @Before
     public void setUp() throws JsonProcessingException {
         try (MockedStatic<ResourceReader> mockedStatic = mockStatic(ResourceReader.class)) {
+            String jsonContent = "[{\"courtCode\":\"code1\",\"courtName\":\"name1\",\"courtField\":\"field1\","
+                + "\"dfjArea\":\"area1\",\"pathFinderEnabled\":true}]";
             mockedStatic.when(() -> ResourceReader.readString("pathFinderMapping.json")).thenReturn(jsonContent);
             when(objectMapper.readValue(anyString(), any(TypeReference.class))).thenReturn(List.of(
                 PathFinderMapping.builder()
@@ -52,7 +51,7 @@ public class PathFinderLookupServiceTest {
 
     @Test
     public void shouldReturnMappingWhenCourtFieldExists() {
-        Optional<PathFinderMapping> result = pathFinderLookupService.getPathFinderMappingByCourtField("field1");
+        Optional<PathFinderMapping> result = pathFinderLookupService.getPathFinderMappingByCourtField("code1");
 
         assertThat(result.isPresent(), is(true));
         assertThat(result.get().getCourtField(), is("field1"));
