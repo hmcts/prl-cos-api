@@ -1,7 +1,12 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import feign.FeignException;
+import org.jspecify.annotations.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -9,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -241,6 +247,7 @@ public class DgsServiceTest {
     @Test
     public void testGenerateRespondentWitnessStatementForC100() {
         // Given
+        ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -280,9 +287,12 @@ public class DgsServiceTest {
         assertNotNull(response.getHashToken());
     }
 
+
+
     @Test
     public void testGenerateRespondentWitnessStatementForFl401() {
         // Given
+        ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -326,6 +336,7 @@ public class DgsServiceTest {
     @Test
     public void testGenerateApplicantWitnessStatementForC100() {
         // Given
+        ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -368,6 +379,7 @@ public class DgsServiceTest {
     @Test
     public void testGenerateApplicantWitnessStatementForFl401() {
         // Given
+        ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -505,7 +517,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocumentWithCaseDataThrowsRuntimeExcetion() {
+    public void testToGenerateDocumentWithCaseDataThrowsRuntimeException() {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url(TEST_URL)
@@ -555,4 +567,15 @@ public class DgsServiceTest {
     }
 
 
+    private @NonNull ObjectMapper getObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new ParameterNamesModule());
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        ReflectionTestUtils.setField(dgsService, "objectMapper", objectMapper);
+        return objectMapper;
+    }
 }
