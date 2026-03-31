@@ -50,7 +50,17 @@ public class DgsServiceTest {
 
     private static final String AUTHORISATION = " ";
     private static final String TEMPLATE = "template";
-    public static final String TEST_URL = "TestUrl";
+    private static final String TEST_URL = "TestUrl";
+    private static final String CASE_ID = "123";
+    private static final String WITNESS_STATEMENTS_RESPONDENT = "WITNESS_STATEMENTS_RESPONDENT";
+    private static final String RESPONDENT = "respondent";
+    private static final String DOCUMENT_DETAILS = "test details";
+    private static final String FREE_TEXT_STATEMENTS = "free text to generate document";
+    private static final String PARTY_NAME = "appf appl";
+    private static final String FIRST_NAME = "firstNameValue";
+    private static final String LAST_NAME = "lastName";
+    private static final String WITNESS_STATEMENTS_APPLICANT = "WITNESS_STATEMENTS_APPLICANT";
+    private static final String PARTY_TYPE = "applicant";
     private DgsService dgsService;
 
     @Mock
@@ -98,7 +108,7 @@ public class DgsServiceTest {
             .build();
 
         caseDetails = CaseDetails.builder()
-            .caseId("123")
+            .caseId(CASE_ID)
             .caseData(caseData)
             .build();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -107,7 +117,7 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
         Map<String, String> values = new HashMap<>();
-        values.put("caseId","123");
+        values.put("caseId", CASE_ID);
         values.put("freeTextUploadStatements","test");
         generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest
             .builder()
@@ -117,12 +127,12 @@ public class DgsServiceTest {
             .thenReturn(generatedDocumentInfo);
 
         documentRequest = DocumentRequest.builder()
-            .caseId("123")
+            .caseId(CASE_ID)
             .categoryId("POSITION_STATEMENTS")
-            .partyName("appf appl")
-            .partyType("applicant")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
+            .partyName(PARTY_NAME)
+            .partyType(PARTY_TYPE)
+            .restrictDocumentDetails(DOCUMENT_DETAILS)
+            .freeTextStatements(FREE_TEXT_STATEMENTS)
             .build();
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
     }
@@ -163,7 +173,8 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
         assertNotNull(dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
-                                                "123"));
+                                                             CASE_ID
+        ));
     }
 
     @Test
@@ -215,7 +226,7 @@ public class DgsServiceTest {
     @Test
     public void testGenerateCitizenDocumentWithFreeTextUploadStatements() {
         Map<String, String> values = new HashMap<>();
-        values.put("caseId","123");
+        values.put("caseId", CASE_ID);
         GenerateAndUploadDocumentRequest request = GenerateAndUploadDocumentRequest
             .builder()
             .values(values)
@@ -237,7 +248,7 @@ public class DgsServiceTest {
     public void testToGenerateDocumentWithEmptyHearingsData()  {
         CaseData caseData1 = CaseData.builder().manageOrders(ManageOrders.builder().build()).build();
         CaseDetails caseDetails1 = CaseDetails.builder()
-            .caseId("123")
+            .caseId(CASE_ID)
             .caseData(caseData1)
             .build();
 
@@ -250,18 +261,18 @@ public class DgsServiceTest {
         ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
-            .caseId("123")
-            .categoryId("WITNESS_STATEMENTS_RESPONDENT")
-            .partyName("appf appl")
-            .partyType("respondent")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
+            .caseId(CASE_ID)
+            .categoryId(WITNESS_STATEMENTS_RESPONDENT)
+            .partyName(PARTY_NAME)
+            .partyType(RESPONDENT)
+            .restrictDocumentDetails(DOCUMENT_DETAILS)
+            .freeTextStatements(FREE_TEXT_STATEMENTS)
             .build();
 
         PartyDetails partyDetail = PartyDetails.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .firstName("firstNameValue")
-            .lastName("lastName")
+            .firstName(FIRST_NAME)
+            .lastName(LAST_NAME)
             .build();
         Element<PartyDetails> element = Element.<PartyDetails>builder().id(UUID.randomUUID())
             .value(partyDetail).build();
@@ -295,18 +306,18 @@ public class DgsServiceTest {
         ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
-            .caseId("123")
-            .categoryId("WITNESS_STATEMENTS_RESPONDENT")
-            .partyName("appf appl")
-            .partyType("respondent")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
+            .caseId(CASE_ID)
+            .categoryId(WITNESS_STATEMENTS_RESPONDENT)
+            .partyName(PARTY_NAME)
+            .partyType(RESPONDENT)
+            .restrictDocumentDetails(DOCUMENT_DETAILS)
+            .freeTextStatements(FREE_TEXT_STATEMENTS)
             .build();
 
         PartyDetails partyDetail = PartyDetails.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .firstName("firstNameValue")
-            .lastName("lastName")
+            .firstName(FIRST_NAME)
+            .lastName(LAST_NAME)
             .build();
         CaseData data = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -339,18 +350,18 @@ public class DgsServiceTest {
         ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
-            .caseId("123")
-            .categoryId("WITNESS_STATEMENTS_APPLICANT")
-            .partyName("appf appl")
-            .partyType("applicant")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
+            .caseId(CASE_ID)
+            .categoryId(WITNESS_STATEMENTS_APPLICANT)
+            .partyName(PARTY_NAME)
+            .partyType(PARTY_TYPE)
+            .restrictDocumentDetails(DOCUMENT_DETAILS)
+            .freeTextStatements(FREE_TEXT_STATEMENTS)
             .build();
 
         PartyDetails partyDetail = PartyDetails.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .firstName("firstNameValue")
-            .lastName("lastName")
+            .firstName(FIRST_NAME)
+            .lastName(LAST_NAME)
             .build();
         Element<PartyDetails> element = Element.<PartyDetails>builder().id(UUID.randomUUID())
             .value(partyDetail).build();
@@ -382,18 +393,18 @@ public class DgsServiceTest {
         ObjectMapper objectMapper = getObjectMapper();
         setUpGenerateCitizenDocument();
         documentRequest = DocumentRequest.builder()
-            .caseId("123")
-            .categoryId("WITNESS_STATEMENTS_APPLICANT")
-            .partyName("appf appl")
-            .partyType("applicant")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
+            .caseId(CASE_ID)
+            .categoryId(WITNESS_STATEMENTS_APPLICANT)
+            .partyName(PARTY_NAME)
+            .partyType(PARTY_TYPE)
+            .restrictDocumentDetails(DOCUMENT_DETAILS)
+            .freeTextStatements(FREE_TEXT_STATEMENTS)
             .build();
 
         PartyDetails partyDetail = PartyDetails.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
-            .firstName("firstNameValue")
-            .lastName("lastName")
+            .firstName(FIRST_NAME)
+            .lastName(LAST_NAME)
             .build();
 
         CaseData data = CaseData.builder()
@@ -484,7 +495,8 @@ public class DgsServiceTest {
 
         when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
-                                                                         "123"), DocumentGenerationException.class, null);
+                                                                             CASE_ID
+        ), DocumentGenerationException.class, null);
 
     }
 
