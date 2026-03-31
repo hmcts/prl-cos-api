@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
+import org.jspecify.annotations.NonNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -62,46 +65,46 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class SendAndReplyControllerTest {
 
     @InjectMocks
-    SendAndReplyController sendAndReplyController;
+    private SendAndReplyController sendAndReplyController;
 
     @Mock
-    SendAndReplyService sendAndReplyService;
+    private SendAndReplyService sendAndReplyService;
 
     @Mock
-    SendAndReplyCommonService sendAndReplyCommonService;
+    private SendAndReplyCommonService sendAndReplyCommonService;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Mock
-    ElementUtils elementUtils;
+    private ElementUtils elementUtils;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
-    CaseData replyCaseData;
-    Map<String, Object> caseDataMap;
-    CaseDetails sendCaseDetails;
-    CaseData sendCaseData;
-    CallbackRequest sendCallbackRequest;
-    String auth = "authorisation";
+    private CaseData replyCaseData;
+    private Map<String, Object> caseDataMap;
+    private CaseDetails sendCaseDetails;
+    private CaseData sendCaseData;
+    private CallbackRequest sendCallbackRequest;
+    private String auth = "authorisation";
 
-    Message message1;
+    private Message message1;
 
-    Message message2;
+    private Message message2;
 
-    List<Element<Message>> messages;
+    private List<Element<Message>> messages;
 
-    List<Element<Message>> listOfClosedMessages;
+    private List<Element<Message>> listOfClosedMessages;
 
-    LocalDateTime dateTime = LocalDateTime.of(
+    private LocalDateTime dateTime = LocalDateTime.of(
         LocalDate.of(2000, 1, 10),
         LocalTime.of(10, 22));
-    String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH));
+    private String dateSent = dateTime.format(DateTimeFormatter.ofPattern("d MMMM yyyy 'at' h:mma", Locale.ENGLISH));
 
-    Element<Message> message1Element;
+    private Element<Message> message1Element;
 
-    Element<Message> message2Element;
+    private Element<Message> message2Element;
 
     @Before
     public void setup() {
@@ -165,8 +168,7 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandleAboutToStart() {
-        Map<String, Object> aboutToStartMap = new HashMap<>();
-        aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
+        Map<String, Object> aboutToStartMap = setUpAboutTostart();
 
         when(sendAndReplyService.setSenderAndGenerateMessageList(sendCaseData, auth)).thenReturn(aboutToStartMap);
         sendAndReplyController.handleAboutToStart(auth, sendCallbackRequest);
@@ -176,12 +178,31 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandleSendOrMessageAboutToStart() {
-        Map<String, Object> aboutToStartMap = new HashMap<>();
-        aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
+        // given
+        Map<String, Object> aboutToStartMap = setUpAboutTostart();
+        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth), eq(null))).thenReturn(aboutToStartMap);
 
-        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(sendCaseData, auth)).thenReturn(aboutToStartMap);
-        sendAndReplyController.handleSendOrMessageAboutToStart(auth, sendCallbackRequest);
-        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(sendCaseData, auth);
+        // when
+        sendAndReplyController.handleSendOrMessageAboutToStart(auth, null,  sendCallbackRequest);
+
+        // then
+        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth), eq(null));
+    }
+
+
+
+
+    @Test
+    public void testHandleSendOrMessageAboutToStartNextstep() {
+        // given
+        Map<String, Object> aboutToStartMap = setUpAboutTostart();
+        when(sendAndReplyService.setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth))).thenReturn(aboutToStartMap);
+
+        // when
+        sendAndReplyController.handleSendOrMessageAboutToStartNextStep(auth,  sendCallbackRequest);
+
+        // then
+        verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth));
     }
 
     @Test
@@ -333,7 +354,7 @@ public class SendAndReplyControllerTest {
             .replyMessageDynamicList(DynamicList.builder().build())
             .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
             .build();
-        UUID selectedValue = UUID.randomUUID();
+
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
@@ -345,26 +366,35 @@ public class SendAndReplyControllerTest {
     @Test
     public void testSendOrReplyToMessagesMidEventForReply() {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
-        Message message = Message.builder().isReplying(YesOrNo.No).build();
-        CaseData caseData = CaseData.builder().id(12345L)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .respondToMessage(YesOrNo.No)
-                    .messages(messages)
-                    .build())
-            .chooseSendOrReply(REPLY)
-            .messageReply(message)
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
+        CaseData caseData = setUpMidEventForReply(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        // when
         sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
+        // then
         verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
 
     }
+
+
+    @Test
+    public void testSendOrReplyToMessagesMidEventForReplyTask() {
+        // given
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseData caseData = setUpMidEventForReply(caseDetails);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        // when
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, callbackRequest);
+
+        // then
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
+
+    }
+
+
+
 
     @Test
     public void testHandleAboutToSubmitReplyPathReplyWithoutClosedMessages() {
@@ -483,40 +513,74 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testSendOrReplyToMessagesSubmitForReply() {
-
-        caseDataMap = new HashMap<>();
-        caseDataMap.put("caseTypeOfApplication", "C100");
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(12345L)
-            .state(State.SUBMITTED_PAID.getValue())
-            .data(caseDataMap)
-            .build();
-        UUID selectedValue = messages.get(0).getId();
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .chooseSendOrReply(REPLY)
-            .caseTypeOfApplication("C100")
-            .build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        // given
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
-            .sendOrReplyToMessagesSubmit(auth, callbackRequest);
+
+        // when
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+
+        // then
         verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
-    @Test
-    public void testHandSubmittedSendAndReply() {
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
 
+    @Test
+    public void testSendOrReplyToMessagesSubmitForReplyTask() {
+        // given
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
+        // when
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
+            .sendOrReplyToMessagesSubmitTask(auth, callbackRequest);
+
+        // verify
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDetails.getData());
+        Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
+    }
+
+
+
+    @Test
+    public void testHandSubmittedSendAndReply() {
+        // given
+        CallbackRequest callbackRequest = setUpHandleSubmitted();
+
         when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest);
+
+        // when
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest, null);
+
+        // then
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
         verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest, auth);
     }
+
+
+    @Test
+    public void testHandSubmittedSendAndReplyTask() {
+        // given
+        CallbackRequest callbackRequest = setUpHandleSubmitted();
+        CaseData caseData = setUpHandleSubmittedCaseData();
+        when(sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+
+        // when
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReplyTask(auth, callbackRequest, null);
+
+        // then
+        Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyService).sendAndReplySubmittedTask(callbackRequest, auth);
+    }
+
+
+
+
 
     @Test
     public void testClearDynamicLists() {
@@ -555,5 +619,68 @@ public class SendAndReplyControllerTest {
         Assert.assertTrue(!response.getErrors().isEmpty());
         Assert.assertEquals("There are no messages to respond to.",
             response.getErrors().get(0));
+    }
+
+
+    private static @NonNull Map<String, Object> setUpAboutTostart() {
+        Map<String, Object> aboutToStartMap = new HashMap<>();
+        aboutToStartMap.put("messageObject", MessageMetaData.builder().build());
+        return aboutToStartMap;
+    }
+
+
+    private CaseData setUpMidEventForReply(CaseDetails caseDetails) {
+        Message message = Message.builder().isReplying(YesOrNo.No).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .chooseSendOrReply(REPLY)
+            .messageReply(message)
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .sendOrReplyDto(SendOrReplyDto.builder().closedMessages(Collections.singletonList(element(message))).build())
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        return caseData;
+    }
+
+
+    private CaseDetails getCaseDetailsForSubmitted() {
+        caseDataMap = new HashMap<>();
+        caseDataMap.put("caseTypeOfApplication", "C100");
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .state(State.SUBMITTED_PAID.getValue())
+            .data(caseDataMap)
+            .build();
+        return caseDetails;
+    }
+
+
+    private CaseData getCaseDataForSubmitted(CaseDetails caseDetails) {
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(REPLY)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        return caseData;
+    }
+
+    private CallbackRequest setUpHandleSubmitted() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(new HashMap<>()).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        return callbackRequest;
+    }
+
+    private  CaseData setUpHandleSubmittedCaseData() {
+        CaseData caseData = CaseData.builder().build();
+        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class))).thenReturn(caseData);
+        return caseData;
     }
 }
