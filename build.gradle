@@ -314,7 +314,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.12'
-  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.7.1'
+  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.7.2'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.25.3'
