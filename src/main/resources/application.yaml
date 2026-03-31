@@ -23,7 +23,7 @@ prl:
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
   document:
     generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
+      uri: http://prl-dgs-pr-471.preview.platform.hmcts.net/health/liveness
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
