@@ -170,4 +170,7 @@ public class BaseCaseData {
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
     private LocalAuthority localAuthority;
+    private YesOrNo orderInPlacePermissionRequired;
+    private String orderDetailsForPermissions;
+    private Document uploadOrderDocForPermission;
 }

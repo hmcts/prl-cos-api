@@ -1149,6 +1149,7 @@ public class PrlAppsConstants {
     public static final String LOCAL_AUTHORITY_DATA = "localAuthority";
     public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
+    public static final String PERMISSION_REQUIRED_DOCUMENT = "uploadOrderDocForPermission";
     public static final String MESSAGE_REPLY_DYNAMIC_LIST = "messageReplyDynamicList";
     public static final String MESSAGE_IDENTIFIER = "messageIdentifier";
     public static final String TASK_ASSOCIATED_WITH_MESSAGE = "taskAssociatedWithMessage";
