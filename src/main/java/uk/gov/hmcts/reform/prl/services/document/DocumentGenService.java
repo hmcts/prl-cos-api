@@ -1541,15 +1541,15 @@ public class DocumentGenService {
         String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory);
         log.info("fileName {}", fileName);
 
-        List<String> citizenUploadTemplates = nonNull(documentCategory) && documentCategory.isWitnessStatement()
-            ? List.of(prlCitizenWitnessStatementTemplate, prlCitizenWitnessStatementWelshTemplate)
-            : List.of(prlCitizenUploadTemplate);
+        // use prlCitizenWitnessStatementWelshTemplate for welsh
+        String citizenUploadTemplate = nonNull(documentCategory) && documentCategory.isWitnessStatement()
+            ? prlCitizenWitnessStatementTemplate : prlCitizenUploadTemplate;
 
 
         GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            citizenUploadTemplates.get(0),
+            citizenUploadTemplate,
             documentCategory
         );
 
