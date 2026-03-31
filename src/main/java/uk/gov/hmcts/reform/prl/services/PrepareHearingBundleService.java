@@ -13,8 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -27,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,10 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
+import static uk.gov.hmcts.reform.prl.utils.PartyRepresentationUtils.areNoPartiesRepresented;
 
 @Slf4j
 @Service
@@ -85,7 +80,7 @@ public class PrepareHearingBundleService {
     private List<CaseDetails> filterCasesWithNoRepresentation(List<CaseDetails> caseDetails) {
         List<CaseDetails> filteredCases = new ArrayList<>();
         caseDetails.stream().forEach(caseDetail -> {
-            if (areNoPartiesRepresented(caseDetail)) {
+            if (areNoPartiesRepresented(caseDetail, objectMapper)) {
                 filteredCases.add(caseDetail);
             } else {
                 log.info("Case {} has representation, skipping creation of 'Prepare Hearing Bundle' task",
@@ -93,32 +88,6 @@ public class PrepareHearingBundleService {
             }
         });
         return filteredCases;
-    }
-
-    private boolean areNoPartiesRepresented(CaseDetails caseDetail) {
-        CaseData caseData = CaseUtils.getCaseData(caseDetail, objectMapper);
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return nullSafeList(caseData.getApplicants()).stream().noneMatch(
-                    el -> hasLegalRepresentation(el.getValue()))
-                && nullSafeList(caseData.getRespondents()).stream().noneMatch(
-                    el -> hasLegalRepresentation(el.getValue()));
-        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return !hasLegalRepresentation(caseData.getApplicantsFL401()) && !hasLegalRepresentation(caseData.getRespondentsFL401());
-        } else {
-            throw new IllegalArgumentException("Case " + caseDetail.getId() +  " has no case type");
-        }
-    }
-
-    private boolean hasLegalRepresentation(PartyDetails partyDetails) {
-        if (isNotEmpty(partyDetails)) {
-            return (isNotEmpty(partyDetails.getSolicitorOrg())
-                && isNotEmpty(partyDetails.getSolicitorOrg().getOrganisationID()))
-                || isNotEmpty(partyDetails.getRepresentativeFirstName())
-                || isNotEmpty(partyDetails.getRepresentativeLastName())
-                || isNotEmpty(partyDetails.getSolicitorEmail())
-                || isNotEmpty(partyDetails.getSolicitorTelephone());
-        }
-        return false;
     }
 
     private void createPrepareBundleWaTask(List<CaseDetails> cases) {

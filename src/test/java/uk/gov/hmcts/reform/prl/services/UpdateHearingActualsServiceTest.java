@@ -21,9 +21,11 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -64,6 +67,8 @@ public class UpdateHearingActualsServiceTest {
     private CaseDetails caseDetails;
     private CaseData caseData;
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
+    private static final Organisation SOLICITOR_ORG = Organisation.builder().organisationID("orgId").build();
+
     @InjectMocks
     private UpdateHearingActualsService updateHearingActualsService;
 
@@ -116,6 +121,8 @@ public class UpdateHearingActualsServiceTest {
 
         caseData = caseData.toBuilder()
             .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element(PartyDetails.builder().solicitorOrg(SOLICITOR_ORG).build())))
             .draftOrderCollection(List.of(element(DraftOrder.builder()
                                                       .manageOrderHearingDetails(
                                                           List.of(element(HearingData.builder()
@@ -213,6 +220,8 @@ public class UpdateHearingActualsServiceTest {
 
         caseData = caseData.toBuilder()
             .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element(PartyDetails.builder().solicitorOrg(SOLICITOR_ORG).build())))
             .draftOrderCollection(List.of(element(DraftOrder.builder()
                                                       .manageOrderHearingDetails(
                                                           List.of(element(HearingData.builder()
@@ -258,6 +267,8 @@ public class UpdateHearingActualsServiceTest {
 
         caseData = caseData.toBuilder()
             .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(element(PartyDetails.builder().solicitorOrg(SOLICITOR_ORG).build())))
             .draftOrderCollection(List.of(element(DraftOrder.builder()
                                                       .manageOrderHearingDetails(
                                                           List.of(element(HearingData.builder()

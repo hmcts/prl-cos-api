@@ -41,6 +41,7 @@ import java.util.Map;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import static uk.gov.hmcts.reform.prl.utils.PartyRepresentationUtils.areAnyPartiesRepresented;
 
 @Slf4j
 @Service
@@ -95,8 +96,9 @@ public class UpdateHearingActualsService {
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 log.info("Hearing id {}", hearingId);
                 triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
-                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
-                    log.info("Hearing id is not mapped in orders");
+                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)
+                    && areAnyPartiesRepresented(caseData)) {
+                    log.info("Hearing id is not mapped in orders and case has represented parties");
                     triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
                 }
             }
@@ -207,8 +209,13 @@ public class UpdateHearingActualsService {
     private List<String> fetchFieldsRequiredForHearingActualTask() {
         return List.of(
             "data.nextHearingDate",
+            "data.caseTypeOfApplication",
             "data.draftOrderCollection",
-            "data.orderCollection"
+            "data.orderCollection",
+            "data.applicants",
+            "data.respondents",
+            "data.applicantsFL401",
+            "data.respondentsFL401"
         );
     }
 }
