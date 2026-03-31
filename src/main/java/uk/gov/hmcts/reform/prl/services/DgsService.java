@@ -255,7 +255,7 @@ public class DgsService {
                 );
 
         } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseId);
+            log.error(ERROR_MESSAGE, caseId, ex);
             throw new DocumentGenerationException(ex.getMessage(), ex);
         }
         return generatedDocumentInfo;
