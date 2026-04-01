@@ -172,6 +172,12 @@ public class WelshLangMapper {
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
         /**
+         *  Live in Refuge - Yes,No
+         */
+        welshMap.put("liveInRefuge_Yes", "Ydy");
+        welshMap.put("liveInRefuge_No", WELSH_NO);
+
+        /**
          *  Type of Application - What order(s) are you applying for?.
          */
         welshMap.put(OrderTypeEnum.childArrangementsOrder.getDisplayedValue(), "Trefniadau Plant");
