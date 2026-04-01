@@ -564,7 +564,7 @@ class CaseDocumentControllerTest {
         when(documentGenService.generateAndUploadDocument(
             AUTH_TOKEN,
             documentRequest
-        )).thenReturn(mockDocumentResponse);
+        )).thenReturn(List.of(mockDocumentResponse));
 
         //Action
         ResponseEntity<?> response = caseDocumentController.citizenGenerateDocument(
@@ -575,7 +575,6 @@ class CaseDocumentControllerTest {
 
         //Then
         assertEquals(OK, response.getStatusCode());
-        assertEquals(DocumentResponse.class, response.getBody().getClass());
         assertNotNull(response.getBody());
     }
 

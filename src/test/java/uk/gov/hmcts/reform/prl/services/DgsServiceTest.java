@@ -289,8 +289,8 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
-        );
+            List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
+        ).get(0);
 
         // Then
         assertNotNull(response);
@@ -332,8 +332,8 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
-        );
+            List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
+        ).get(0);
 
         // Then
         assertNotNull(response);
@@ -378,8 +378,8 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_APPLICANT
-        );
+            List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_APPLICANT
+        ).get(0);
 
         // Then
         assertNotNull(response);
@@ -420,8 +420,8 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_APPLICANT
-        );
+            List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_APPLICANT
+        ).get(0);
 
         // Then
         assertNotNull(response);
@@ -447,8 +447,8 @@ public class DgsServiceTest {
         // When
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
-            TEMPLATE, DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
-        );
+            List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
+        ).get(0);
 
         //Then
         assertNotNull(response);
@@ -478,7 +478,7 @@ public class DgsServiceTest {
             .build();
 
         when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
-        assertExpectedException(() -> dgsService.generateCitizenDocument(AUTHORISATION, documentRequest, TEMPLATE, null),
+        assertExpectedException(() -> dgsService.generateCitizenDocument(AUTHORISATION, documentRequest, List.of(TEMPLATE), null),
                                 DocumentGenerationException.class, null);
     }
 

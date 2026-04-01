@@ -419,16 +419,16 @@ public class CaseDocumentController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
 
-        DocumentResponse documentResponse = null;
+        List<DocumentResponse> documentResponses;
         try {
-            documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
+            documentResponses = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
         } catch (DocumentGenerationException dge) {
             log.error("Exception in generating a document {}", dge.getMessage());
             return ResponseEntity.internalServerError().body("Error in generating a document");
         }
 
-        if (isNotEmpty(documentResponse)) {
-            return ResponseEntity.ok(documentResponse);
+        if (isNotEmpty(documentResponses)) {
+            return ResponseEntity.ok(documentResponses);
         } else {
             return ResponseEntity.internalServerError().body("Error in generating citizen document");
         }

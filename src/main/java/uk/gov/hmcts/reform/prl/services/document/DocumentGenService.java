@@ -54,6 +54,7 @@ import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
@@ -1532,7 +1533,7 @@ public class DocumentGenService {
         return document;
     }
 
-    public DocumentResponse generateAndUploadDocument(String authorisation,
+    public List<DocumentResponse> generateAndUploadDocument(String authorisation,
                                                       DocumentRequest documentRequest) throws DocumentGenerationException {
         String categoryId = documentRequest.getCategoryId();
         DocumentCategory documentCategory = nonNull(categoryId) ? DocumentCategory.getValue(categoryId) : null;
@@ -1541,27 +1542,27 @@ public class DocumentGenService {
         String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory);
         log.info("fileName {}", fileName);
 
-        // use prlCitizenWitnessStatementWelshTemplate for welsh
-        String citizenUploadTemplate = nonNull(documentCategory) && documentCategory.isWitnessStatement()
-            ? prlCitizenWitnessStatementTemplate : prlCitizenUploadTemplate;
+
+        List<String> citizenUploadTemplates = nonNull(documentCategory) && documentCategory.isWitnessStatement()
+            ? List.of(prlCitizenWitnessStatementTemplate, prlCitizenWitnessStatementWelshTemplate) : List.of(prlCitizenUploadTemplate);
 
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
+        List<GeneratedDocumentInfo> generatedDocumentInfos = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            citizenUploadTemplate,
+            citizenUploadTemplates,
             documentCategory
         );
 
-        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
-        if (null != generatedDocumentInfo) {
-            return DocumentResponse.builder()
+        log.info("generatedDocumentInfo {}", generatedDocumentInfos);
+
+        return emptyIfNull(generatedDocumentInfos)
+            .stream()
+            .map(generatedDocumentInfo -> DocumentResponse.builder()
                 .status(SUCCESS)
                 .document(generateDocumentField(fileName, generatedDocumentInfo))
-                .build();
-        }
-
-        return null;
+                .build())
+            .toList();
     }
 
 }

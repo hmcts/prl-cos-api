@@ -30,11 +30,16 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 
 @Slf4j
 @Service
@@ -42,7 +47,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DgsService {
 
-    public static final String SPACE = " ";
+    private static final String SPACE = " ";
+    private static final String FAMILYMAN_CASE_NUMBER = "familymanCaseNumber";
+    private static final String APPLICANT_NAME = "applicantName";
+    private static final String RESPONDENT_NAME = "respondentName";
+    private static final String CITIZEN_UPLOADED_STATEMENT = "citizenUploadedStatement";
+    private static final String SIGNED_BY = "signedBy";
+    private static final String SIGNED_DATE = "signedDate";
     private final DgsApiClient dgsApiClient;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
@@ -199,11 +210,11 @@ public class DgsService {
         return generatedDocumentInfo;
     }
 
-    public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
+    public List<GeneratedDocumentInfo> generateCitizenDocument(String authorisation,
                                                          DocumentRequest documentRequest,
-                                                         String prlCitizenUploadTemplate,
+                                                         List<String> prlCitizenUploadTemplates,
                                                          DocumentCategory documentCategory) throws DocumentGenerationException {
-        Map<String, Object> tempCaseDetails = new HashMap<>();
+
         String caseId = documentRequest.getCaseId();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = caseService.getCase(authorisation, caseId);
         CaseData caseDataFromCcd = nonNull(caseDetailsFromCcd) ? CaseUtils.getCaseData(caseDetailsFromCcd, objectMapper) : null;
@@ -224,46 +235,52 @@ public class DgsService {
             courtName = caseDataFromCcd.getCourtName();
         }
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .caseId(caseId)
-            .caseData(CaseData.builder()
-                          .courtName(courtName)
-                          .id(Long.parseLong(caseId))
-                          .issueDate(issueDate)
-                          .familymanCaseNumber(familymanCaseNumber)
-                          .applicantName(getApplicantName(applicantWitnessStatement, respondentWitnessStatement, documentRequest, caseDataFromCcd))
-                          .respondentName(getRespondentName(respondentWitnessStatement, applicantWitnessStatement, documentRequest, caseDataFromCcd))
-                          .citizenUploadedStatement(documentRequest.getFreeTextStatements())
-                          .giveDetails(documentRequest.getPartyName())
-                          .lastModifiedDate(LocalDateTime.now())
-                          .build())
-            .build();
+        Map<String,Object> caseDetails = new HashMap<>();
+        caseDetails.put(CASE_ID, caseId);
+        caseDetails.put(COURT_NAME_FIELD, courtName);
+        caseDetails.put(CASE_DATA_ID, Long.parseLong(caseId));
+        caseDetails.put(ISSUE_DATE_FIELD, issueDate);
+        caseDetails.put(FAMILYMAN_CASE_NUMBER, familymanCaseNumber);
+        caseDetails.put(
+            APPLICANT_NAME,
+            getApplicantName(applicantWitnessStatement, respondentWitnessStatement, documentRequest, caseDataFromCcd));
+        caseDetails.put(
+            RESPONDENT_NAME,
+            getRespondentName(respondentWitnessStatement, applicantWitnessStatement, documentRequest, caseDataFromCcd));
+        caseDetails.put(CITIZEN_UPLOADED_STATEMENT, documentRequest.getFreeTextStatements());
+        caseDetails.put(SIGNED_BY, documentRequest.getPartyName());
+        caseDetails.put(SIGNED_DATE, LocalDateTime.now());
 
-        tempCaseDetails.put(
-            CASE_DETAILS_STRING,
-            AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
-        );
 
-        GeneratedDocumentInfo generatedDocumentInfo;
-        try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(
-                    authorisation,
-                    GenerateDocumentRequest.builder()
-                        .template(prlCitizenUploadTemplate)
-                        .values(tempCaseDetails).build()
-                );
+        return emptyIfNull(prlCitizenUploadTemplates)
+            .stream()
+            .map(getGeneratedDocumentInfo(authorisation, caseDetails, caseId))
+            .toList();
+    }
 
-        } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseId, ex);
-            throw new DocumentGenerationException(ex.getMessage(), ex);
-        }
-        return generatedDocumentInfo;
+    private Function<String, GeneratedDocumentInfo> getGeneratedDocumentInfo(String authorisation, Map<String, Object> caseDetails, String caseId) {
+        return prlCitizenUploadTemplate -> {
+            GeneratedDocumentInfo generatedDocumentInfo;
+            try {
+                generatedDocumentInfo =
+                    dgsApiClient.generateDocument(
+                        authorisation,
+                        GenerateDocumentRequest.builder()
+                            .template(prlCitizenUploadTemplate)
+                            .values(caseDetails).build()
+                    );
+
+            } catch (Exception ex) {
+                log.error(ERROR_MESSAGE, caseId, ex);
+                throw new DocumentGenerationException(ex.getMessage(), ex);
+            }
+            return generatedDocumentInfo;
+        };
     }
 
     public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
                                                              String templateName, String caseId) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -289,7 +306,7 @@ public class DgsService {
                     List<Element<PartyDetails>> applicantElements = emptyIfNull(caseDataFromCcd.getApplicants());
                     List<PartyDetails> applicants = emptyIfNull(applicantElements.stream().map(Element::getValue).toList());
                     applicantName = String.join(
-                        ",", applicants.stream()
+                        ", ", applicants.stream()
                             .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
                     );
                 } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
@@ -315,7 +332,7 @@ public class DgsService {
                     List<Element<PartyDetails>> respondentElements = emptyIfNull(caseDataFromCcd.getRespondents());
                     List<PartyDetails> respondents = emptyIfNull(respondentElements.stream().map(Element::getValue).toList());
                     respondentName = String.join(
-                        ",", respondents.stream()
+                        ", ", respondents.stream()
                             .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
                     );
                 } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {

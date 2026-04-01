@@ -363,7 +363,7 @@ public class CaseDocumentControllerIntegrationTest {
             .document(Document.builder().documentFileName("test.pdf").build())
             .build();
 
-        when(documentGenService.generateAndUploadDocument(anyString(), any())).thenReturn(documentResponse);
+        when(documentGenService.generateAndUploadDocument(anyString(), any())).thenReturn(List.of(documentResponse));
 
         String url = "/citizen-generate-document";
         String jsonRequest = "{"

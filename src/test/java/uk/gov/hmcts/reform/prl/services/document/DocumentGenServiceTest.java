@@ -2704,7 +2704,7 @@ public class DocumentGenServiceTest {
             .build();
 
         //When
-        doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
+        doReturn(List.of(generatedDocumentInfo)).when(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(DocumentRequest.class),
             Mockito.any(),
@@ -2713,12 +2713,12 @@ public class DocumentGenServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         //Action
-        DocumentResponse documentResponse = documentGenService.generateAndUploadDocument(AUTH_TOKEN, documentRequest);
+        List<DocumentResponse> documentResponses = documentGenService.generateAndUploadDocument(AUTH_TOKEN, documentRequest);
 
         //Then
-        assertNotNull(documentResponse);
-        assertNotNull(documentResponse.getDocument());
-        assertEquals(SUCCESS, documentResponse.getStatus());
+        assertNotNull(documentResponses);
+        assertNotNull(documentResponses.get(0).getDocument());
+        assertEquals(SUCCESS, documentResponses.get(0).getStatus());
     }
 
     @Test
