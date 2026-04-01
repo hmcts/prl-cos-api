@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVED_IN_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 
 @Slf4j
@@ -92,10 +93,12 @@ class LocalAuthorityControllerTest {
         assertNotNull(response.getData(), "Response data map should not be null");
 
         assertTrue(
-                response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
-                "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
+                response.getData().containsKey(LOCAL_AUTHORITY_DATA),
+                "Expected LOCAL_AUTHORITY_DATA FLAG to be set in response map"
         );
-        assertEquals(YesOrNo.Yes, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
+        assertEquals(LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.Yes)
+                .localAuthoritySolicitorOrganisationName("Some Org").build(),
+                response.getData().get(LOCAL_AUTHORITY_DATA));
         assertTrue(
                 response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
                 "Expected policy to be set in response map"
@@ -239,10 +242,12 @@ class LocalAuthorityControllerTest {
         assertNotNull(response, "Response should not be null");
         assertNotNull(response.getData(), "Response data should not be null");
         assertTrue(
-                response.getData().containsKey(LOCAL_AUTHORITY_INVOLVED_IN_CASE),
+                response.getData().containsKey(LOCAL_AUTHORITY_DATA),
                 "Expected LOCAL_AUTHORITY_INVOLVED_IN_CASE FLAG to be set in response map"
         );
-        assertEquals(YesOrNo.No, response.getData().get(LOCAL_AUTHORITY_INVOLVED_IN_CASE));
+        assertEquals(LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                .localAuthoritySolicitorOrganisationName(null).build(),
+                response.getData().get(LOCAL_AUTHORITY_DATA));
         assertFalse(
                 response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
                 "Policy key should be removed from map"

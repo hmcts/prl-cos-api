@@ -806,7 +806,6 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
-    public  static final String LOCAL_AUTHORITY = "LOCAL_AUTHORITY";//TODO review the value later
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
@@ -1146,15 +1145,7 @@ public class PrlAppsConstants {
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
     public static final String LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY = "localAuthoritySolicitorOrganisationPolicy";
-    public static final String LOCAL_AUTHORITY_INVOLVED_IN_CASE = "isLocalAuthorityInvolvedInCase";
-    public static final String LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_NAME = "localAuthoritySolicitorOrganisationName";
+    public static final String LOCAL_AUTHORITY_DATA = "localAuthority";
     public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
-    public static final String MESSAGE_REPLY_DYNAMIC_LIST = "messageReplyDynamicList";
-    public static final String MESSAGE_IDENTIFIER = "messageIdentifier";
-    public static final String TASK_ASSOCIATED_WITH_MESSAGE = "taskAssociatedWithMessage";
-    public static final String CHOOSE_SEND_OR_REPLY = "chooseSendOrReply";
-    public static final String OPTION_SEND_OR_REPLY = "optionSendOrReply";
-    public static final String EMPTY_VALUE = "EMPTY_VALUE";
-
 }
