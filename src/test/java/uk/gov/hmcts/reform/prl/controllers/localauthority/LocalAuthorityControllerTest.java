@@ -25,9 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -248,12 +248,10 @@ class LocalAuthorityControllerTest {
         assertEquals(LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
                 .localAuthoritySolicitorOrganisationName(null).build(),
                 response.getData().get(LOCAL_AUTHORITY_DATA));
-        assertTrue(
+        assertFalse(
                 response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
-                "Policy key should be present in map"
+                "Policy key should not be present in map"
         );
-
-        assertNull(response.getData().get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
 
         ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
         verify(removeLocalAuthoritySolicitorService, times(1))

@@ -135,7 +135,7 @@ public class LocalAuthorityController extends AbstractCallbackController {
             if (null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                     && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolver.removeLocalAuthoritySolicitor(caseData);
-                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, null);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
 
                 LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
                     .localAuthoritySolicitorOrganisationName(null)

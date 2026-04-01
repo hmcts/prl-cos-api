@@ -3718,7 +3718,7 @@ public class ManageOrderService {
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                 removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
-                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, null);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
                 LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
                     .localAuthoritySolicitorOrganisationName(null)
                     .build();
