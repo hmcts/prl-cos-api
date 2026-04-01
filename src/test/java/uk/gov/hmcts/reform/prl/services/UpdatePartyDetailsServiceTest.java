@@ -1166,8 +1166,9 @@ class UpdatePartyDetailsServiceTest {
                              .build())
             .caseDetailsBefore(CaseDetails.builder().id(123L).data(stringObjectMap).build())
             .build();
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
-        assertNotNull("respondents");
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest, BEARER_TOKEN);
+        assertNotNull(updatedCaseData.get("respondents"));
     }
 
     @Test
@@ -1246,8 +1247,9 @@ class UpdatePartyDetailsServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
-        assertNotNull("respondents");
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest, BEARER_TOKEN);
+        assertNotNull(updatedCaseData.get("respondents"));
     }
 
     @Test
@@ -1445,8 +1447,9 @@ class UpdatePartyDetailsServiceTest {
             .build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
-        assertNotNull("respondents");
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest, BEARER_TOKEN);
+        assertNotNull(updatedCaseData.get("respondents"));
     }
 
     @Test
