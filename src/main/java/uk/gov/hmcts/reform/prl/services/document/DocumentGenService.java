@@ -426,6 +426,7 @@ public class DocumentGenService {
     }
 
     private void addWelshC1ADocumentToUpdatedCaseData(DocumentUpdateContext documentUpdateContext) {
+        List<State> updateFinalDocumentStates = List.of(CASE_ISSUED, SUBMITTED_PAID, JUDICIAL_REVIEW);
         CaseData caseData = documentUpdateContext.caseData;
         Map<String, Object> updatedCaseData = documentUpdateContext.updatedCaseData;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
@@ -433,7 +434,7 @@ public class DocumentGenService {
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
-            if (CASE_ISSUED.equals(caseData.getState()) || JUDICIAL_REVIEW.equals(caseData.getState())) {
+            if (updateFinalDocumentStates.contains(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C1A_WELSH, getDocument(documentUpdateContext.authorisation, caseData, C1A_HINT, true));
             } else {
                 updatedCaseData.put(
@@ -507,13 +508,14 @@ public class DocumentGenService {
     }
 
     private void addEnglishC1ADocumentToUpdatedCaseData(DocumentUpdateContext documentUpdateContext) {
+        List<State> updateFinalDocumentStates = List.of(CASE_ISSUED, SUBMITTED_PAID, JUDICIAL_REVIEW);
         CaseData caseData = documentUpdateContext.caseData;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && (caseData.getAllegationOfHarm() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo()))
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()))) {
-            if (CASE_ISSUED.equals(caseData.getState()) || JUDICIAL_REVIEW.equals(caseData.getState())) {
+            if (updateFinalDocumentStates.contains(caseData.getState())) {
                 Document document = getDocument(documentUpdateContext.authorisation, caseData, C1A_HINT, false);
                 documentUpdateContext.updatedCaseData.put(DOCUMENT_FIELD_C1A, document);
             } else {
