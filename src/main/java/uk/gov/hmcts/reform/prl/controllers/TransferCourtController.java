@@ -109,7 +109,10 @@ public class TransferCourtController {
         String selectedCourtId = String.valueOf(caseDataUpdated.get(COURT_ID_FIELD));
         DynamicListElement selectedCourtElement = locationRefDataService
             .getDisplayEntryFromEpimmsId(selectedCourtId, authorisation);
-        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourtElement).listItems(courtList)
+        DynamicListElement selectedCourt = courtList.stream()
+            .anyMatch(c -> c.equals(selectedCourtElement))
+            ? selectedCourtElement : DynamicListElement.EMPTY;
+        caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(selectedCourt).listItems(courtList)
             .build());
     }
 

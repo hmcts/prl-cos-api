@@ -141,7 +141,7 @@ public class TransferCourtControllerTest {
     }
 
     @Test
-    public void testPrePopulateCourtDetailsWhenOsCourtLookupIsEnabled() throws NotFoundException {
+    public void testPrePopulateCourtDetailsSelectedWhenOsCourtLookupIsEnabled() throws NotFoundException {
         String courtId = "1234";
         CaseData caseData = CaseData.builder().courtId(courtId).build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -168,6 +168,39 @@ public class TransferCourtControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
         Assertions.assertEquals("1234", ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData().get("courtList"))
             .getValue().getCode());
+        assertEquals(courtId, stringObjectMap.get(COURT_ID_FIELD));
+    }
+
+    @Test
+    public void testPrePopulateCourtDetailsNotSelectedWhenOsCourtLookupIsEnabled() throws NotFoundException {
+        String courtId = "1234";
+        CaseData caseData = CaseData.builder().courtId(courtId).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
+            CourtVenue.builder().courtEpimmsId(courtId).build(),
+            Court.builder().build()
+        );
+        when(featureToggleService.isOsCourtLookupFeatureEnabled()).thenReturn(true);
+        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(Mockito.any(CaseData.class))).thenReturn(courtCourtVenueMap);
+        when(courtLocatorService.getEmailAddress(Mockito.any(Court.class))).thenReturn(
+            Optional.of(CourtEmailAddress.builder().address("123@gamil.com").build()));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        DynamicListElement dle = DynamicListElement.builder()
+            .code(courtId).label("courtLabel").build();
+        DynamicListElement dle2 = DynamicListElement.builder()
+            .code("2345").label("courtLabel2").build();
+        List<DynamicListElement> allCourts = List.of(dle);
+        when(locationRefDataService.getCourtLocations(anyString())).thenReturn(allCourts);
+        when(locationRefDataService.getDisplayEntryFromEpimmsId(courtId, AUTH_TOKEN)).thenReturn(dle2);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =  transferCourtController
+            .prePopulateCourtDetails(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+        Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("localCourtAdmin"));
+        Assertions.assertEquals(DynamicListElement.EMPTY, ((DynamicList)aboutToStartOrSubmitCallbackResponse.getData()
+            .get("courtList")).getValue());
         assertEquals(courtId, stringObjectMap.get(COURT_ID_FIELD));
     }
 
