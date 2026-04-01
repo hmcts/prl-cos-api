@@ -167,7 +167,6 @@ public class C100IssueCaseService {
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
         if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
-            log.info("Adding the event for history tab");
             addPathFinderDecisonTotHistoryTab(callbackRequest);
         }
     }
