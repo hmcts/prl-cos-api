@@ -250,7 +250,7 @@ class LocalAuthorityControllerTest {
                 response.getData().get(LOCAL_AUTHORITY_DATA));
         assertFalse(
                 response.getData().containsKey(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY),
-                "Policy key should be removed from map"
+                "Policy key should not be present in map"
         );
 
         ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);

@@ -74,6 +74,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -89,6 +90,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -145,6 +147,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -200,7 +204,7 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@SuppressWarnings({"java:S3776","java:S6204"})
+@SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
@@ -635,6 +639,7 @@ public class ManageOrderService {
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
     private final FinalisationDetailsService finalisationDetailsService;
+    private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -2123,7 +2128,7 @@ public class ManageOrderService {
         return caseData;
     }
 
-    public  CaseData filterEmptyHearingDetails(CaseData caseData) {
+    public CaseData filterEmptyHearingDetails(CaseData caseData) {
         List<Element<HearingData>> filteredHearingDataList = caseData.getManageOrders().getOrdersHearingDetails()
             .stream()
             .filter(element -> ((element.getValue().getHearingTypes() != null && element.getValue().getHearingTypes().getValue() != null)
@@ -3144,7 +3149,7 @@ public class ManageOrderService {
         return isOrderApproved;
     }
 
-    public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
+    public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder, CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = caseData.toBuilder()
                 .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
@@ -3305,8 +3310,6 @@ public class ManageOrderService {
                                                            hearings);
         return hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
     }
-
-
 
     private void addC21OrderDetails(CaseData caseData,
                                     Map<String, Object> caseDataUpdated) {
@@ -3716,5 +3719,32 @@ public class ManageOrderService {
             .anyMatch(element ->
                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(element.getValue().getHearingDateConfirmOptionEnum())
                               || HearingDateConfirmOptionEnum.dateToBeFixed.equals(element.getValue().getHearingDateConfirmOptionEnum()));
+    }
+
+    public void removeLocalAuthorityFromCase(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("inside removeLocalAuthorityFromCase");
+        try {
+
+            Optional<OrderDetails> orderDetails
+                = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
+
+            if (orderDetails.isPresent() && Yes.equals(orderDetails.get().getOrderClosesCase())
+                && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(orderDetails.get().getTypeOfOrder())
+                && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
+                && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
+                removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
+                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+                LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                    .localAuthoritySolicitorOrganisationName(null)
+                    .build();
+                caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+            }
+        } catch (Exception exp) {
+            log.info(
+                "Error occurred while removing LocalAuthority From Case {} exception {}",
+                caseData.getId(),
+                exp.getMessage()
+            );
+        }
     }
 }
