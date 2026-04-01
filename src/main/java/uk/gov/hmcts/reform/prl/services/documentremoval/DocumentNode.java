@@ -13,6 +13,7 @@ class DocumentNode {
     private String documentBinaryUrl;
     private String documentId;
     private JsonNode parent;
+    private String documentKey;
     private JsonNode document;
     private List<String> parentKeys;
 

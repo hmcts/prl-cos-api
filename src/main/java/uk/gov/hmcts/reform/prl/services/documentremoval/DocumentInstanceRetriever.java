@@ -21,25 +21,40 @@ public class DocumentInstanceRetriever {
 
     private final ObjectMapper objectMapper;
 
-    public DocumentInstances getDocumentInstance(CaseData caseData, String documentId) {
+    public Document getCaseDocument(CaseData caseData, String documentId) {
+        // TODO refactor
         List<DocumentNode> documentNodes = getDocumentNodes(caseData, documentId);
+        if (documentNodes.isEmpty()) {
+            return null;
+        }
 
         DocumentNode documentNode = documentNodes.getFirst();
-        Document document = Document.builder()
+        return Document.builder()
             .documentBinaryUrl(documentNode.getDocumentBinaryUrl())
             .documentFileName(documentNode.getDocumentFilename())
             .documentUrl(documentNode.getDocumentUrl())
             .build();
-
-        List<String> instances = documentNodes.stream()
-            .map(DocumentNode::getParentPath)
-            .toList();
-
-        return DocumentInstances.builder()
-            .document(document)
-            .instances(instances)
-            .build();
     }
+
+//    public DocumentInstances getDocumentInstance(CaseData caseData, String documentId) {
+//        List<DocumentNode> documentNodes = getDocumentNodes(caseData, documentId);
+//
+//        DocumentNode documentNode = documentNodes.getFirst();
+//        Document document = Document.builder()
+//            .documentBinaryUrl(documentNode.getDocumentBinaryUrl())
+//            .documentFileName(documentNode.getDocumentFilename())
+//            .documentUrl(documentNode.getDocumentUrl())
+//            .build();
+//
+//        List<String> instances = documentNodes.stream()
+//            .map(DocumentNode::getParentPath)
+//            .toList();
+//
+//        return DocumentInstances.builder()
+//            .document(document)
+//            .instances(instances)
+//            .build();
+//    }
 
     private List<DocumentNode> getDocumentNodes(CaseData caseData, String documentId) {
         List<DocumentNode> documentNodes = new ArrayList<>();

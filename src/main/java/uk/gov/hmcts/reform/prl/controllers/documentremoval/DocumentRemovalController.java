@@ -65,7 +65,7 @@ public class DocumentRemovalController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Document removal mid-event callback received for case id: {}", caseDetails.getId());
 
-        Map<String, Object> data = documentRemovalService.getCaseDocumentInstances(caseDetails);
+        Map<String, Object> data = documentRemovalService.getCaseDocumentSelectedForRemoval(caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(data)
@@ -85,10 +85,12 @@ public class DocumentRemovalController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Document removal about to submit callback received for case id: {}", caseDetails.getId());
 
-        Map<String, Object> updatedCaseData = documentRemovalService.removeDocumentInstances(caseDetails);
+        Map<String, Object> updatedCaseData = documentRemovalService.removeDocument(caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(updatedCaseData)
             .build();
     }
+
+    // TODO: Add in code to remove document from doc store
 }

@@ -7,8 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.documentremoval.DocumentRemovalConfirmOption;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -18,6 +20,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DocumentRemovalWrapper {
     private DynamicList documentRemovalCaseDocuments;
-    private Document documentToRemove;
-    private DynamicMultiSelectList documentToRemoveInstances;
+    private Document documentRemovalDocumentToRemove;
+    private List<DocumentRemovalConfirmOption> documentRemovalConfirmOptions;
 }

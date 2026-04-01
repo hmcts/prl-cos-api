@@ -1159,7 +1159,7 @@ public class PrlAppsConstants {
 
     // Document Removal event
     public static final String DOCUMENT_REMOVAL_CASE_DOCUMENTS = "documentRemovalCaseDocuments";
-    public static final String DOCUMENT_TO_REMOVE = "documentToRemove";
-    public static final String DOCUMENT_TO_REMOVE_INSTANCES = "documentToRemoveInstances";
+    public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
+    public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
 }
