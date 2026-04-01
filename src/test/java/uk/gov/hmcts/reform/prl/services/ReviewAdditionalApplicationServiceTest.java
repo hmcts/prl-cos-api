@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.OtherApplicationType;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -31,17 +31,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.REVIEW_ADDITIONAL_APPLICATION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class ReviewAdditionalApplicationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ReviewAdditionalApplicationServiceTest {
 
     @InjectMocks
     private ReviewAdditionalApplicationService reviewAdditionalApplicationService;
@@ -53,7 +53,7 @@ public class ReviewAdditionalApplicationServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testPopulateReviewAdditionalApplication() {
+    void testPopulateReviewAdditionalApplication() {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicantName("test")
@@ -78,29 +78,20 @@ public class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .respondents(List.of(respondents))
             .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), null, REVIEW_ADDITIONAL_APPLICATION.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 
     @Test
-    public void testPopulateReviewAdditionalApplicationWhenClientContextIsNotNull() throws Exception {
+    void testPopulateReviewAdditionalApplicationWhenClientContextIsNotNull() throws Exception {
         UUID applicationUId = UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b");
         WaMapper waMapper = WaMapper.builder()
             .clientContext(ClientContext.builder()
                 .userLanguage(UserLanguage.builder().language("en").build())
                 .userTask(UserTask.builder()
                     .completeTask(true)
-                    .taskData(TaskData.builder()
-                        .id("test")
-                        .name("test")
-                        .additionalProperties(AdditionalProperties.builder()
-                            .orderId(UUID.randomUUID().toString())
-                            .additionalApplicationId(applicationUId.toString())
-                            .build())
-                        .build())
+                    .taskData(buildTaskData(applicationUId.toString()))
                     .build())
                 .build())
             .build();
@@ -130,8 +121,6 @@ public class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .respondents(List.of(respondents))
             .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), clientContextCoded,
             REVIEW_ADDITIONAL_APPLICATION.getId());
@@ -140,7 +129,33 @@ public class ReviewAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testPopulateReviewAdditionalApplicationWhenEventIsNotReviewAdditionalApplication() {
+    void testShouldReturnErrorWhenAdditionalApplicationIdCannotBeFoundFromContext() throws Exception {
+        String applicationId = null;
+        WaMapper waMapper = WaMapper.builder()
+            .clientContext(ClientContext.builder()
+                               .userLanguage(UserLanguage.builder().language("en").build())
+                               .userTask(UserTask.builder()
+                                             .completeTask(true)
+                                             .taskData(buildTaskData(applicationId))
+                                             .build())
+                               .build())
+            .build();
+        String json = new ObjectMapper().writeValueAsString(waMapper);
+        String clientContextCoded = Base64.getEncoder().encodeToString(json.getBytes());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .build();
+
+        assertThrows(IllegalStateException.class,
+                     () -> reviewAdditionalApplicationService.populateReviewAdditionalApplication(
+                         caseData, new HashMap<>(), clientContextCoded, REVIEW_ADDITIONAL_APPLICATION.getId())
+        );
+    }
+
+    @Test
+    void testPopulateReviewAdditionalApplicationWhenEventIsNotReviewAdditionalApplication() {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicantName("test")
@@ -165,15 +180,13 @@ public class ReviewAdditionalApplicationServiceTest {
             .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
             .respondents(List.of(respondents))
             .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getAdditionalApplicationsBundle(), objectMapper)).thenReturn(additionalApplicationsBundleElement.getId());
         Map<String, Object> caseDataMap = reviewAdditionalApplicationService.populateReviewAdditionalApplication(
             caseData, new HashMap<>(), null, EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(caseDataMap.get("selectedAdditionalApplicationsBundle"));
     }
 
     @Test
-    public void testGetOtherApplicationBundleDynamicCode() {
+    void testGetOtherApplicationBundleDynamicCode() {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicantName("test")
@@ -190,7 +203,7 @@ public class ReviewAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testGetC2ApplicationBundleDynamicCode() {
+    void testGetC2ApplicationBundleDynamicCode() {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .c2DocumentBundle(C2DocumentBundle.builder()
                                          .applicantName("test")
@@ -204,7 +217,7 @@ public class ReviewAdditionalApplicationServiceTest {
     }
 
     @Test
-    public void testGetC2OrOtherApplicationBundleDynamicCodeShouldReturnNull() {
+    void testGetC2OrOtherApplicationBundleDynamicCodeShouldReturnNull() {
         AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
             .c2DocumentBundle(C2DocumentBundle.builder()
                                   .applicantName("test")
@@ -221,6 +234,17 @@ public class ReviewAdditionalApplicationServiceTest {
         return Element.<T>builder()
             .id(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
             .value(element)
+            .build();
+    }
+
+    private TaskData buildTaskData(String applicationId) {
+        return TaskData.builder()
+            .id("test")
+            .name("test")
+            .additionalProperties(AdditionalProperties.builder()
+                                      .orderId(UUID.randomUUID().toString())
+                                      .additionalApplicationId(applicationId)
+                                      .build())
             .build();
     }
 }
