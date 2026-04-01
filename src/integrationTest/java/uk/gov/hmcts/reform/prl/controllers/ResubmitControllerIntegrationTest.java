@@ -88,7 +88,7 @@ public class ResubmitControllerIntegrationTest {
     @Test
     public void testFl401ResubmitApplication() throws Exception {
         String url = "/fl401/resubmit-application";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        String jsonRequest = ResourceLoader.loadJson("requests/fl401-resubmit-application.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
