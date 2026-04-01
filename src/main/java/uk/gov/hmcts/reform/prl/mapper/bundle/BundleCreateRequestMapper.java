@@ -2,11 +2,17 @@ package uk.gov.hmcts.reform.prl.mapper.bundle;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
@@ -85,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
+import static uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum.applicantWitnessStatements;
 
 @Slf4j
 @Component
@@ -121,13 +128,17 @@ public class BundleCreateRequestMapper {
                 .flatMap(this::flatMapRecursiveCategory)
                 .toList();
 
+            Map<String, List<Document>> allCategoriesToMap = allCategories.stream().collect(
+                Collectors.toMap(Category::getCategoryId, category -> category.getDocuments().stream()
+                    .map(this::mapCategoryDocumentToPrlDocument).toList()));
+
             return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                     bundleConfigFileName)
                 .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
                           .hearingDetails(mapHearingDetails(hearingDetails))
-                          .applications(mapApplicationsFromCaseData(caseData))
-                          .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
-                          .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
+                          .applications(mapApplicationsFromCategory(allCategoriesToMap))
+                          .orders(mapOrdersFromCategory(allCategoriesToMap))
+                          .allOtherDocuments(mapAllOtherDocumentsFromCategory(allCategoriesToMap)).build()).build();
 
         }
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
@@ -179,6 +190,65 @@ public class BundleCreateRequestMapper {
         return null != hearingDaySchedule.getHearingVenueName()
             ? hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress()
             : hearingDaySchedule.getHearingVenueAddress();
+    }
+
+    private String getCategory
+
+    List<Element<BundlingRequestDocument>> mapAllOtherDocumentsFromCategory(Map<String, List<Document>> allCategoriesToMap) {
+
+        List<BundlingRequestDocument> allOtherDocumentsUnWrap = new ArrayList<>();
+
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantStatementSupportingEvidence.getDisplayedValue()), BundlingDocGroupEnum.applicantStatementSupportingEvidence));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantWitnessStatements.getDisplayedValue()), BundlingDocGroupEnum.applicantWitnessStatements));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication.getDisplayedValue()), BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.positionStatements.getDisplayedValue()), BundlingDocGroupEnum.positionStatements));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.caseSummary.getDisplayedValue()), BundlingDocGroupEnum.caseSummary));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.fm5Statements.getDisplayedValue()), BundlingDocGroupEnum.fm5Statements));
+
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantC1AResponse.getDisplayedValue()), BundlingDocGroupEnum.applicantC1AResponse));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.respondentApplication.getDisplayedValue()), BundlingDocGroupEnum.respondentApplication));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.respondentC1AApplication.getDisplayedValue()), BundlingDocGroupEnum.respondentC1AApplication));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.respondentC1AResponse.getDisplayedValue()), BundlingDocGroupEnum.respondentC1AResponse));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.transcriptsOfJudgements.getDisplayedValue()), BundlingDocGroupEnum.transcriptsOfJudgements));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.magistrateFactAndReasons.getDisplayedValue()), BundlingDocGroupEnum.magistrateFactAndReasons));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantMiamCertificate.getDisplayedValue()), BundlingDocGroupEnum.applicantMiamCertificate));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication.getDisplayedValue()), BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.respondentPreviousOrdersSubmittedWithApplication.getDisplayedValue()), BundlingDocGroupEnum.respondentPreviousOrdersSubmittedWithApplication));
+
+        // witness satements
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantWitnessStatements.getDisplayedValue()), BundlingDocGroupEnum.applicantWitnessStatements));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.respondentWitnessStatements.getDisplayedValue()), BundlingDocGroupEnum.respondentWitnessStatements));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.otherWitnessStatements.getDisplayedValue()), BundlingDocGroupEnum.otherWitnessStatements));
+
+        // CafcassLaReports
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.safeguardingLetter.getDisplayedValue()), BundlingDocGroupEnum.safeguardingLetter));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.childImpactReport1.getDisplayedValue()), BundlingDocGroupEnum.childImpactReport1));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.childImpactReport2.getDisplayedValue()), BundlingDocGroupEnum.childImpactReport2));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.section7Report.getDisplayedValue()), BundlingDocGroupEnum.section7Report));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.sixteenARiskAssessment.getDisplayedValue()), BundlingDocGroupEnum.sixteenARiskAssessment));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.guardianReport.getDisplayedValue()), BundlingDocGroupEnum.guardianReport));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.specialGuardianshipReport.getDisplayedValue()), BundlingDocGroupEnum.specialGuardianshipReport));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.cafcassSection37Report.getDisplayedValue()), BundlingDocGroupEnum.cafcassSection37Report));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.cafcassOtherDocuments.getDisplayedValue()), BundlingDocGroupEnum.cafcassOtherDocuments));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.laSection37Report.getDisplayedValue()), BundlingDocGroupEnum.laSection37Report));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.laOtherDocuments.getDisplayedValue()), BundlingDocGroupEnum.laOtherDocuments));
+
+        //OtherDocuments
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.medicalReports.getDisplayedValue()), BundlingDocGroupEnum.medicalReports));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.reportsForDrugAndAlcoholTest.getDisplayedValue()), BundlingDocGroupEnum.reportsForDrugAndAlcoholTest));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.policeReport.getDisplayedValue()), BundlingDocGroupEnum.policeReport));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.dnaReports.getDisplayedValue()), BundlingDocGroupEnum.dnaReports));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.resultsOfHairStrandBloodTests.getDisplayedValue()), BundlingDocGroupEnum.resultsOfHairStrandBloodTests));
+
+        //ApplicationsFromFurtherEvidences
+        // TODO: add condition to check restrictToGroup
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantMiamCertificate.getDisplayedValue()), BundlingDocGroupEnum.applicantMiamCertificate));
+        allOtherDocumentsUnWrap.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication.getDisplayedValue()), BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
+
+        // MiamDetails
+
+        return ElementUtils.wrapElements(allOtherDocumentsUnWrap);
+
     }
 
     List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
@@ -280,7 +350,7 @@ public class BundleCreateRequestMapper {
         }
         ElementUtils.unwrapElements(fl401UploadWitnessDocuments).forEach(witnessDocs ->
             fl401WitnessDocs.add(ElementUtils.element(mapBundlingRequestDocument(witnessDocs,
-                BundlingDocGroupEnum.applicantWitnessStatements))));
+                applicantWitnessStatements))));
         return fl401WitnessDocs;
     }
 
@@ -318,6 +388,28 @@ public class BundleCreateRequestMapper {
             fl401SupportingDocs.add(ElementUtils.element(mapBundlingRequestDocument(supportDocs,
                 BundlingDocGroupEnum.applicantStatementSupportingEvidence))));
         return fl401SupportingDocs;
+    }
+
+    private List<Element<BundlingRequestDocument>> mapApplicationsFromCategory(Map<String, List<Document>> allCategoriesToMap) {
+        List<BundlingRequestDocument> applications = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(allCategoriesToMap)) {
+            applications.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantApplication.getDisplayedValue()), BundlingDocGroupEnum.applicantApplication));
+            applications.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantC1AApplication.getDisplayedValue()), BundlingDocGroupEnum.applicantC1AApplication));
+            applications.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.applicantC1AApplication.getDisplayedValue()), BundlingDocGroupEnum.applicantC1AApplication));
+            //applications.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.c7Documents.getDisplayedValue()), BundlingDocGroupEnum.c7Documents));
+
+        }
+        return ElementUtils.wrapElements(applications);
+    }
+
+    private Document mapCategoryDocumentToPrlDocument(uk.gov.hmcts.reform.ccd.client.model.Document categoryDocument) {
+        return Document.builder()
+            .documentUrl(categoryDocument.getDocumentURL())
+            .documentBinaryUrl(categoryDocument.getDocumentBinaryURL())
+            .documentFileName(categoryDocument.getDocumentFilename())
+            .documentCreatedOn(Date.from(categoryDocument.getUploadTimestamp().toInstant(ZoneOffset.UTC)))
+            .build();
     }
 
     private List<Element<BundlingRequestDocument>> mapApplicationsFromCaseData(CaseData caseData) {
@@ -376,6 +468,13 @@ public class BundleCreateRequestMapper {
             .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
     }
 
+    private List<BundlingRequestDocument> mapBundlingRequestDocument(List<Document> documents, BundlingDocGroupEnum applicationsDocGroup) {
+        if (null != documents) {
+            return documents.stream().map(d -> mapBundlingRequestDocument(d,applicationsDocGroup)).toList();
+        }
+        return Collections.emptyList();
+    }
+
     List<Element<BundlingRequestDocument>> mapApplicationsFromFurtherEvidences(List<Element<FurtherEvidence>> furtherEvidencesFromCaseData) {
         List<BundlingRequestDocument> applications = new ArrayList<>();
         Optional<List<Element<FurtherEvidence>>> existingFurtherEvidences = ofNullable(furtherEvidencesFromCaseData);
@@ -394,6 +493,13 @@ public class BundleCreateRequestMapper {
             }
         });
         return ElementUtils.wrapElements(applications);
+    }
+
+    List<Element<BundlingRequestDocument>> mapOrdersFromCategory(Map<String, List<Document>> allCategoriesToMap) {
+        List<BundlingRequestDocument> orders = new ArrayList<>();
+        orders.addAll(mapBundlingRequestDocument(allCategoriesToMap.get(BundlingDocGroupEnum.ordersSubmittedWithApplication.getDisplayedValue()), BundlingDocGroupEnum.ordersSubmittedWithApplication));
+        reverse(orders);
+        return ElementUtils.wrapElements(orders);
     }
 
     List<Element<BundlingRequestDocument>> mapOrdersFromCaseData(List<Element<OrderDetails>> ordersFromCaseData) {
@@ -527,7 +633,7 @@ public class BundleCreateRequestMapper {
             Objects.nonNull(doc.getApplicantStatementsDocument()) ? BundlingRequestDocument.builder()
                 .documentLink(doc.getApplicantStatementsDocument())
                 .documentFileName(doc.getApplicantStatementsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.applicantWitnessStatements).build() : null
+                .documentGroup(applicantWitnessStatements).build() : null
         );
         bundleMap.put(
             RESPONDENT_STATEMENTS,

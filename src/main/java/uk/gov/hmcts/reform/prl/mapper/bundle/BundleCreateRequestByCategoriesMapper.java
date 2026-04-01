@@ -27,7 +27,7 @@ public class BundleCreateRequestByCategoriesMapper {
     private final CoreCaseDataApi coreCaseDataApi;
     // TODO: read from yaml file
     @Getter
-    private final Map<String, BundlingDocGroupEnum> categoryBundlingMap = new HashMap<>();
+    private final Map<BundlingDocGroupEnum, String> categoryBundlingMap = new HashMap<>();
     public List<Category> getCategoriesAndDocuments(String authorisation, CaseData caseData) {
 
         populateCategoryBundlingMap();
@@ -47,19 +47,20 @@ public class BundleCreateRequestByCategoriesMapper {
 
     private void populateCategoryBundlingMap() {
         this.categoryBundlingMap.clear();
-        categoryBundlingMap.put("MIAMCertificate", BundlingDocGroupEnum.applicantMiamCertificate);
-        categoryBundlingMap.put("previousOrdersSubmittedWithApplication", BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication);
-        categoryBundlingMap.put("magistratesFactsAndReasons", BundlingDocGroupEnum.magistrateFactAndReasons);
-        categoryBundlingMap.put("applicantStatements", BundlingDocGroupEnum.applicantWitnessStatements);
-        categoryBundlingMap.put("respondentStatements", BundlingDocGroupEnum.respondentWitnessStatements);
-        categoryBundlingMap.put("section37Report", BundlingDocGroupEnum.cafcassSection37Report);
-        categoryBundlingMap.put("16aRiskAssessment", BundlingDocGroupEnum.sixteenARiskAssessment);
-        categoryBundlingMap.put("otherDocs", BundlingDocGroupEnum.cafcassOtherDocuments);
-        categoryBundlingMap.put("sec37Report", BundlingDocGroupEnum.laSection37Report);
-        categoryBundlingMap.put("localAuthorityOtherDoc", BundlingDocGroupEnum.laOtherDocuments);
-        categoryBundlingMap.put("DNAReports_expertReport", BundlingDocGroupEnum.dnaReports);
-        categoryBundlingMap.put("drugAndAlcoholTest(toxicology)", BundlingDocGroupEnum.reportsForDrugAndAlcoholTest);
-        categoryBundlingMap.put("anyOtherDoc", BundlingDocGroupEnum.anyOtherDocuments);
+
+        categoryBundlingMap.put(BundlingDocGroupEnum.applicantMiamCertificate, "MIAMCertificate");
+        categoryBundlingMap.put(BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication, "previousOrdersSubmittedWithApplication");
+        categoryBundlingMap.put(BundlingDocGroupEnum.magistrateFactAndReasons, "magistratesFactsAndReasons");
+        categoryBundlingMap.put(BundlingDocGroupEnum.applicantWitnessStatements, "applicantStatements");
+        categoryBundlingMap.put(BundlingDocGroupEnum.respondentWitnessStatements, "respondentStatements");
+        categoryBundlingMap.put(BundlingDocGroupEnum.cafcassSection37Report, "section37Report");
+        categoryBundlingMap.put(BundlingDocGroupEnum.sixteenARiskAssessment, "16aRiskAssessment");
+        categoryBundlingMap.put(BundlingDocGroupEnum.cafcassOtherDocuments, "otherDocs");
+        categoryBundlingMap.put(BundlingDocGroupEnum.laSection37Report, "sec37Report");
+        categoryBundlingMap.put(BundlingDocGroupEnum.laOtherDocuments, "localAuthorityOtherDoc");
+        categoryBundlingMap.put(BundlingDocGroupEnum.dnaReports, "DNAReports_expertReport");
+        categoryBundlingMap.put(BundlingDocGroupEnum.reportsForDrugAndAlcoholTest, "drugAndAlcoholTest(toxicology)");
+        categoryBundlingMap.put(BundlingDocGroupEnum.anyOtherDocuments, "anyOtherDoc");
     }
 
     private void createDocumentListFromSubCategories(List<Category> categoryList,
