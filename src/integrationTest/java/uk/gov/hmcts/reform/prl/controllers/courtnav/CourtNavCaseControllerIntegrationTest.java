@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.SERVICE_AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.TEST_AUTH_TOKEN;
@@ -135,8 +136,9 @@ public class CourtNavCaseControllerIntegrationTest {
     public void testCreateCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
 
-        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
+        when(authorisationService.authoriseUser(TEST_AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
         when(fl401ApplicationMapper.mapCourtNavData(any())).thenReturn(CaseData.builder().build());
         when(courtLocationService.populateCourtLocation(any(), any())).thenReturn(CaseData.builder().build());
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(12345L).build());

@@ -34,6 +34,9 @@ import static java.util.Optional.ofNullable;
 @AllArgsConstructor
 public class Message extends MessageMetaData {
 
+    public static final int MAX_SUBJECT_LENGTH = 100;
+    public static final String DOTS = "...";
+
     private String dateSent;
     private String messageContent;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
@@ -114,9 +117,14 @@ public class Message extends MessageMetaData {
 
     @JsonIgnore
     public String getLabelForReplyDynamicList() {
+        String messageSubject = super.getMessageSubject();
+        String subject = "Subject: " + (messageSubject.length() > MAX_SUBJECT_LENGTH ? messageSubject.substring(
+            0, MAX_SUBJECT_LENGTH - DOTS.length()) + DOTS : messageSubject);
+        String sender = "From: " + senderName;
         return String.format(
-            "%s, %s, %s",
-            super.getMessageSubject(),
+            "%s, %s, %s %s",
+            sender,
+            subject,
             this.dateSent,
             YesOrNo.Yes.equals(this.internalMessageUrgent) ? "Urgent" : "Not Urgent"
         );
