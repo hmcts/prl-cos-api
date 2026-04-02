@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY
 @ExtendWith(MockitoExtension.class)
 class LocalAuthorityControllerTest {
 
-    public static final String authToken = "Bearer TestAuthToken";
     private static final String AUTH = "Bearer testAuth";
     private static final String S2S = "testS2S";
     private static final long CASE_ID = 1234567890123456L;
