@@ -19,8 +19,10 @@ public class FeignRetryConfig extends FeignClientProperties.FeignClientConfigura
     @Bean
     public feign.codec.ErrorDecoder feignErrorDecoder() {
         return (methodKey, response) -> {
-            System.out.println("Exception occured");
-            log.info("Exception occured");
+            log.error("Feign error in {} status={} method={}",
+                      methodKey,
+                      response.status(),
+                      response.request().httpMethod());
 
             Collection<String> retryAfterHeader = response.headers().get("Retry-After");
 
@@ -33,11 +35,9 @@ public class FeignRetryConfig extends FeignClientProperties.FeignClientConfigura
             // Only retry GET methods and 5xx responses
             boolean isGet = response.request().httpMethod() == feign.Request.HttpMethod.GET;
             int status = response.status();
-            log.info("http method {} and status {}",  response.request().httpMethod(), status);
-            System.out.println("http method " + response.request().httpMethod() + " and status  "  + status);
 
             if (isGet && status >= 500 && status < 600) {
-                log.info("retrying now for status {}",  status);
+                log.warn("retrying now for status {}",  status);
                 return new feign.RetryableException(
                     status,
                     "Retryable 5xx for GET",
