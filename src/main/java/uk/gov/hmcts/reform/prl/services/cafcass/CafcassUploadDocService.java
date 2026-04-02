@@ -77,7 +77,7 @@ public class CafcassUploadDocService {
 
     public void uploadDocument(String authorisation, MultipartFile document,
                                String typeOfDocument, String caseId) {
-        log.info("Cafcass document upload request received for caseId: {}, typeOfDocument: {}", caseId, typeOfDocument);
+        log.info("Cafcass document upload request received for caseId: {}, typeOfDocument: {}, filename{}", caseId, typeOfDocument,document.getOriginalFilename());
         if (isValidDocument(document, typeOfDocument)) {
             CaseDetails caseDetails = checkIfCasePresent(caseId, authorisation);
             if (caseDetails == null) {
