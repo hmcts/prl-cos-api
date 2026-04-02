@@ -114,6 +114,7 @@ public class ManageDocumentsService {
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+    public static final String MANAGE_DOCUMENTS_UPLOADED_CATEGORY = "manageDocUploadedCategory";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
@@ -406,6 +407,11 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
+
+        if (userRole.equals(CAFCASS)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+        }
+
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
