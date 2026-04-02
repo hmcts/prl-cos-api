@@ -134,9 +134,6 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("cafcassSection37Report")
     cafcassSection37Report("cafcassSection37Report", "cafcassSection37Report"),
 
-    @JsonProperty("sixteenARiskAssessment")
-    sixteenARiskAssessment("sixteenARiskAssessment", "sixteenARiskAssessment"),
-
     @JsonProperty("guardianReport")
     guardianReport("guardianReport", "guardianReport"),
 

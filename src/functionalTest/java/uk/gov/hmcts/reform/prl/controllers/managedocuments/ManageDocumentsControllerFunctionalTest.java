@@ -49,7 +49,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SAFEGUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_37_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPIP_REFERRAL_REQUESTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
@@ -141,7 +140,7 @@ public class ManageDocumentsControllerFunctionalTest {
                            PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION, RESPONDENT_APPLICATION,
                            RESPONDENT_C1A_APPLICATION, RESPONDENT_C1A_RESPONSE, ORDERS_FROM_OTHER_PROCEEDINGS,
                            NOTICE_OF_HEARING, COURT_BUNDLE, CASE_SUMMARY, CHILD_IMPACT_REPORT1, CHILD_IMPACT_REPORT2,
-                           SAFEGUARDING_LETTER, SECTION7_REPORT, SECTION_37_REPORT, SIXTEEN_A_RISK_ASSESSMENT, GUARDIAN_REPORT,
+                           SAFEGUARDING_LETTER, SECTION7_REPORT, SECTION_37_REPORT, GUARDIAN_REPORT,
                            SPECIAL_GUARDIANSHIP_REPORT, OTHER_DOCS, EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED,
                            PUBLIC_FUNDING_CERTIFICATES, NOTICES_OF_ACTING_DISCHARGE, REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED,
                            WITNESS_AVAILABILITY, LETTERS_OF_COMPLAINTS, SPIP_REFERRAL_REQUESTS,
