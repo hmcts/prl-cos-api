@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,8 +12,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ExitAwaitingInformationService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
@@ -19,7 +22,11 @@ import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,24 +34,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 
-@SpringBootTest(properties = {
-    "feature.toggle.exitAwaitingInformationEnabled=true"
-})
+@SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class ExitAwaitingInformationControllerIntegrationTest {
 
     private static final String AUTHORISATION_HEADER = "Authorization";
-    private static final String SERVICE_AUTHORISATION_HEADER = "Service-Authorization";
     private static final String TEST_AUTH_TOKEN = "Bearer testAuthToken";
     private static final String TEST_SERVICE_AUTH_TOKEN = "testServiceAuthToken";
+    private static final String URL = "/submit-exit-awaiting-information";
+    private static final long TEST_CASE_ID = 12345678L;
 
     private MockMvc mockMvc;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private AuthorisationService authorisationService;
@@ -57,69 +67,94 @@ public class ExitAwaitingInformationControllerIntegrationTest {
 
     @Before
     public void setUp() {
-        this.mockMvc = webAppContextSetup(webApplicationContext).build();
+        mockMvc = webAppContextSetup(webApplicationContext).build();
         when(featureToggleService.isExitAwaitingInformationEnabled()).thenReturn(true);
-    }
-
-    private Map<String, Object> createMockCaseData() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("id", 12345678L);
-        caseData.put(STATE_FIELD, "CASE_ISSUED");
-        caseData.put(CASE_STATUS, CaseStatus.builder().state("Case Issued").build());
-        return caseData;
     }
 
     @Test
     public void shouldSubmitExitAwaitingInformationSuccessfully() throws Exception {
-        String url = "/submit-exit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(exitAwaitingInformationService.updateCase(any())).thenReturn(createMockCaseData());
+        when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(exitAwaitingInformationService.updateCase(any())).thenReturn(updatedCaseData());
 
         mockMvc.perform(
-                post(url)
+                post(URL)
                     .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                    .header(SERVICE_AUTHORIZATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
+                    .content(validCallbackRequestJson()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.id").value(12345678))
-            .andExpect(jsonPath("$.data.state").value("CASE_ISSUED"))
-            .andReturn();
+            .andExpect(jsonPath("$.data.state").value(State.CASE_ISSUED.getValue()))
+            .andExpect(jsonPath("$.data.caseStatus.state").value(State.CASE_ISSUED.getLabel()))
+            .andExpect(jsonPath("$.data.existingField").value("existingValue"));
+
+        verify(exitAwaitingInformationService).updateCase(any());
     }
 
     @Test
     public void shouldRejectSubmitExitAwaitingInformationWithoutAuthorizationHeader() throws Exception {
-        String url = "/submit-exit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
-
         mockMvc.perform(
-                post(url)
-                    .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                post(URL)
+                    .header(SERVICE_AUTHORIZATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isBadRequest())
-            .andReturn();
+                    .content(validCallbackRequestJson()))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldRejectSubmitExitAwaitingInformationWithoutServiceAuthorizationHeader() throws Exception {
+        mockMvc.perform(
+                post(URL)
+                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(validCallbackRequestJson()))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     public void shouldRejectSubmitExitAwaitingInformationWithUnauthorizedTokens() throws Exception {
-        String url = "/submit-exit-awaiting-information";
-        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+        when(authorisationService.isAuthorized(TEST_AUTH_TOKEN, TEST_SERVICE_AUTH_TOKEN)).thenReturn(false);
 
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(false);
-
-        mockMvc.perform(
-                post(url)
-                    .header(AUTHORISATION_HEADER, "invalidToken")
-                    .header(SERVICE_AUTHORISATION_HEADER, "invalidServiceToken")
+        ServletException exception = assertThrows(ServletException.class, () -> mockMvc.perform(
+                post(URL)
+                    .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                    .header(SERVICE_AUTHORIZATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
                     .accept(APPLICATION_JSON)
                     .contentType(APPLICATION_JSON)
-                    .content(jsonRequest))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
+                    .content(validCallbackRequestJson())));
+
+        assertNotNull(exception.getCause());
+        assertEquals("Invalid Client", exception.getCause().getMessage());
+    }
+
+    private String validCallbackRequestJson() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("existingField", "existingValue");
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("submit-exit-awaiting-information")
+            .caseDetails(CaseDetails.builder()
+                             .id(TEST_CASE_ID)
+                             .state(State.AWAITING_INFORMATION.getValue())
+                             .data(caseData)
+                             .build())
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(TEST_CASE_ID)
+                                   .state(State.AWAITING_INFORMATION.getValue())
+                                   .data(new HashMap<>(caseData))
+                                   .build())
+            .build();
+
+        return objectMapper.writeValueAsString(callbackRequest);
+    }
+
+    private Map<String, Object> updatedCaseData() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("existingField", "existingValue");
+        caseData.put(STATE_FIELD, State.CASE_ISSUED.getValue());
+        caseData.put(CASE_STATUS, Map.of("state", State.CASE_ISSUED.getLabel()));
+        return caseData;
     }
 }
