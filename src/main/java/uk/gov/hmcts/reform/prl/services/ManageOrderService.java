@@ -4080,6 +4080,9 @@ public class ManageOrderService {
     private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
                                                  List<String> selectedPartyIds, List<String> errorList,
                                                  Boolean isRespondent) {
+        if (CollectionUtils.isEmpty(partyDetails)) {
+            return;
+        }
         List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .toList();
