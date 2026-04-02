@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -518,20 +519,32 @@ public class ManageDocumentsServiceTest {
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
         List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(element);
         caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
+
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
 
         List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
 
         manageDocumentsElement = element(manageDocuments);
 
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).build();
         quarantineLegalDocElement = element(quarantineLegalDoc);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-
         List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
         listQuarantine.add(quarantineLegalDocElement);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
@@ -2746,5 +2759,312 @@ public class ManageDocumentsServiceTest {
         manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verifyNoInteractions(caseDocumentClient);
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenCafcassCymruUploadsSixTeenRiskDocumentsButNoTriggeredBySet() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(element);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsNewWaTaskWhenCafcassCymruUploadsNonSixTeenRiskDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> otherElement = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.ANY_OTHER_DOC).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(otherElement);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenCafcassCymruUploadsSixTeenRiskDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirTransferDocumentsButNoTriggeredBySet() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(element);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsNewWaTaskWhenCafcassCymruUploadsNonCirTransferDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> otherElement = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.ANY_OTHER_DOC).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(otherElement);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirTransferDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsNewWaTaskWhenCafcassCymruUploadsNonCirExtensionDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> otherElement = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.ANY_OTHER_DOC).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(otherElement);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirRequestDocumentsButNoTriggeredBySet() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(element);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirRequestDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testOtherDocumentsExistIfNotCirTransferOfCafcassCymuru() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(element);
+        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
+
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+
+        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
+        listQuarantine.add(quarantineLegalDocElement);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .cafcassQuarantineDocsList(listQuarantine)
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
+        assertNotNull(cafcassQuarantineDocsList);
+        assertEquals(2,cafcassQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
+
+    @Test
+    public void testOtherDocumentsExistIfNotCirExtensionOfCafcassCymuru() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
+        cafcassQuarantineDocsListInitial.add(element);
+        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
+
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "Cafcass",
+            element.getValue()
+        );
+
+        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
+        listQuarantine.add(quarantineLegalDocElement);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .cafcassQuarantineDocsList(listQuarantine)
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
+        assertNotNull(cafcassQuarantineDocsList);
+        assertEquals(2,cafcassQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 }
