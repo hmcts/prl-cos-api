@@ -290,7 +290,7 @@ public class DgsServiceTest {
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
             List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
-        ).get(0);
+        ).getFirst();
 
         // Then
         assertNotNull(response);
@@ -379,7 +379,7 @@ public class DgsServiceTest {
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
             List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_APPLICANT
-        ).get(0);
+        ).getFirst();
 
         // Then
         assertNotNull(response);
@@ -421,7 +421,7 @@ public class DgsServiceTest {
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
             List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_APPLICANT
-        ).get(0);
+        ).getFirst();
 
         // Then
         assertNotNull(response);
@@ -448,7 +448,7 @@ public class DgsServiceTest {
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
             List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
-        ).get(0);
+        ).getFirst();
 
         //Then
         assertNotNull(response);

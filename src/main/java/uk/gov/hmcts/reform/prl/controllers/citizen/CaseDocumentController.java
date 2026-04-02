@@ -206,12 +206,12 @@ public class CaseDocumentController {
         emailService.send(
             email,
             EmailTemplateNames.DOCUMENT_UPLOADED,
-            buildUploadDocuemntEmail(tempCaseData, name, dashboardUrl),
+            buildUploadDocumentEmail(tempCaseData, name, dashboardUrl),
             LanguagePreference.english
         );
     }
 
-    private EmailTemplateVars buildUploadDocuemntEmail(CaseData caseData, String name, String link) {
+    private EmailTemplateVars buildUploadDocumentEmail(CaseData caseData, String name, String link) {
         return UploadDocumentEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -225,7 +225,7 @@ public class CaseDocumentController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
-        @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
+        @ApiResponse(responseCode = "401", description = "Provided authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<Object> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -317,9 +317,9 @@ public class CaseDocumentController {
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (deleteDocumentRequest.getValues() != null
             && deleteDocumentRequest.getValues().containsKey("documentId")) {
-            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
+            final String documentIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documentIdToBeDeleted.equalsIgnoreCase(
                 element.getId().toString()))
                 .toList();
         }
@@ -344,7 +344,7 @@ public class CaseDocumentController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
-        @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<Object> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.document;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,16 +46,18 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
@@ -565,7 +568,6 @@ public class DocumentGenService {
     }
 
     public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) throws Exception {
-        Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         boolean isConfidentialInformationPresentForC100 = isConfidentialInformationPresentForC100(caseData);
         boolean isC1aPresentForC100 = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
@@ -574,7 +576,7 @@ public class DocumentGenService {
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()));
 
-        updatedCaseData.putAll(generateC100DraftDocuments(authorisation, caseData));
+        Map<String, Object> updatedCaseData = new HashMap<>(generateC100DraftDocuments(authorisation, caseData));
         generateDraftEngC1aAndC8DocumentsForResubmission(
             authorisation,
             caseData,
@@ -694,7 +696,7 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest, DocumentCategory documentCategory) {
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest, DocumentCategory documentCategory, String language) {
         StringBuilder fileNameBuilder = new StringBuilder();
 
         if (null != documentRequest.getPartyName()) {
@@ -705,6 +707,8 @@ public class DocumentGenService {
             fileNameBuilder.append(documentCategory.getFileNamePrefix());
             fileNameBuilder.append(UNDERSCORE);
         }
+        fileNameBuilder.append(language);
+        fileNameBuilder.append(UNDERSCORE);
         fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
         fileNameBuilder.append(UNDERSCORE);
         fileNameBuilder.append(SUBMITTED_PDF);
@@ -1538,10 +1542,6 @@ public class DocumentGenService {
         String categoryId = documentRequest.getCategoryId();
         DocumentCategory documentCategory = nonNull(categoryId) ? DocumentCategory.getValue(categoryId) : null;
 
-        //generate file name
-        String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory);
-        log.info("fileName {}", fileName);
-
 
         List<String> citizenUploadTemplates = nonNull(documentCategory) && documentCategory.isWitnessStatement()
             ? List.of(prlCitizenWitnessStatementTemplate, prlCitizenWitnessStatementWelshTemplate) : List.of(prlCitizenUploadTemplate);
@@ -1556,13 +1556,26 @@ public class DocumentGenService {
 
         log.info("generatedDocumentInfo {}", generatedDocumentInfos);
 
-        return emptyIfNull(generatedDocumentInfos)
-            .stream()
-            .map(generatedDocumentInfo -> DocumentResponse.builder()
+        List<String> languages = List.of("ENG", "WELSH");
+        List<DocumentResponse> documentResponses = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(generatedDocumentInfos)) {
+            documentResponses = IntStream.range(0, generatedDocumentInfos.size())
+                .mapToObj(buildDocumentResponse(documentRequest, documentCategory, languages, generatedDocumentInfos))
+                .toList();
+        }
+        return documentResponses;
+    }
+
+    private IntFunction<DocumentResponse> buildDocumentResponse(DocumentRequest documentRequest, DocumentCategory documentCategory,
+                                                                List<String> languages, List<GeneratedDocumentInfo> generatedDocumentInfos) {
+        return i -> {
+            String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory, languages.get(i));
+            log.info("fileName {}", fileName);
+            return DocumentResponse.builder()
                 .status(SUCCESS)
-                .document(generateDocumentField(fileName, generatedDocumentInfo))
-                .build())
-            .toList();
+                .document(generateDocumentField(fileName, generatedDocumentInfos.get(i)))
+                .build();
+        };
     }
 
 }
