@@ -195,7 +195,8 @@ public class CafcassUploadDocService {
         }
 
         log.error("Unacceptable format/type of document: {}", typeOfDocument);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_TYPE.formatted(typeOfDocument));
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_TYPE.formatted(typeOfDocument) + " "
+            + document.getOriginalFilename());
     }
 
     private static Map<String, CafcassReportAndGuardianEnum> createDocumentTypeMap() {
