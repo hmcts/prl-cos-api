@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -273,6 +272,9 @@ public class ManageDocumentsService {
                     userRole
                 );
             } else {
+                if (userRole.equals(LOCAL_AUTHORITY) && isNewTaskRequired(caseData, quarantineLegalDoc)) {
+                    isWaTaskSetForFirstDocumentIteration = false;
+                }
                 if (!isWaTaskSetForFirstDocumentIteration) {
                     isWaTaskSetForFirstDocumentIteration = true;
                     setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
@@ -451,53 +453,30 @@ public class ManageDocumentsService {
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
-            if (!userRole.equals(LOCAL_AUTHORITY)) {
-                caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+            if (userRole.equals(LOCAL_AUTHORITY)) {
+                if (isNewTaskRequired(caseData, quarantineLegalDoc)) {
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
+                } else {
+                    caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+                }
             } else {
-                updateTriggeredByForLocalAuthority(caseData, caseDataUpdated, quarantineLegalDoc);
+                caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
     }
 
-    private void updateTriggeredByForLocalAuthority(CaseData caseData, Map<String, Object> caseDataUpdated, QuarantineLegalDoc quarantineLegalDoc) {
-        boolean newTaskRequired = false;
-        if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
-            if (isGivenDocumentExists(caseData, getCirExtensionRequestPredicate()).isEmpty()) {
-                newTaskRequired = true;
-            }
-        } else if (ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
-            if (isGivenDocumentExists(caseData, getCirTransferRequestPredicate()).isEmpty()) {
-                newTaskRequired = true;
-            }
-        } else {
-            if (isGivenDocumentExists(caseData, getOtherDocumentsPredicate()).isEmpty()) {
-                newTaskRequired = true;
-            }
-        }
-        if (newTaskRequired) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
-        } else {
-            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
-        }
+    private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc) {
+        boolean newTaskRequired = isGivenDocumentExists(caseData, quarantineLegalDoc.getCategoryId()).isEmpty();
+        log.info("newTaskRequired --> " + newTaskRequired);
+        return newTaskRequired;
     }
 
-    private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(CaseData caseData, Predicate<Element<QuarantineLegalDoc>> predicate) {
-        return caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList().stream().filter(predicate).findAny();
-    }
-
-    private Predicate<Element<QuarantineLegalDoc>> getCirExtensionRequestPredicate() {
-        return a -> a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA);
-    }
-
-    private Predicate<Element<QuarantineLegalDoc>> getCirTransferRequestPredicate() {
-        return a -> a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA);
-    }
-
-    private Predicate<Element<QuarantineLegalDoc>> getOtherDocumentsPredicate() {
-        return a -> !a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA)
-            && !a.getValue().getCategoryId().equals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA);
+    private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(CaseData caseData, String categoryId) {
+        return caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList().stream()
+            .filter(each -> each.getValue().getCategoryId()
+                .equals(categoryId)).findAny();
     }
 
     public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
