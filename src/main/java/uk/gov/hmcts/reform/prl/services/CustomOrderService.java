@@ -640,9 +640,9 @@ public class CustomOrderService {
             return null;
         }
 
-        // Check if approved at hearing
-        Object approvedValue = caseDataMap.get("wasTheOrderApprovedAtHearing");
-        Object hearingsTypeObj = caseDataMap.get("hearingsType");
+        // Check if approved at hearing - for custom orders, use the custom field names
+        Object approvedValue = caseDataMap.get("customOrderWasApprovedAtHearing");
+        Object hearingsTypeObj = caseDataMap.get("customOrderHearingsType");
 
         log.info("extractHearingDateFromSelection - approved: {}, hearingsType: {}, type: {}",
             approvedValue, hearingsTypeObj, hearingsTypeObj != null ? hearingsTypeObj.getClass().getName() : "null");
