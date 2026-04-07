@@ -642,28 +642,33 @@ public class CustomOrderService {
 
         // Check if approved at hearing
         Object approvedValue = caseDataMap.get("wasTheOrderApprovedAtHearing");
+        Object hearingsTypeObj = caseDataMap.get("hearingsType");
+
+        log.info("extractHearingDateFromSelection - approved: {}, hearingsType: {}, type: {}",
+            approvedValue, hearingsTypeObj, hearingsTypeObj != null ? hearingsTypeObj.getClass().getName() : "null");
+
         if (!"Yes".equals(String.valueOf(approvedValue))) {
             return null;
         }
 
-        // Get hearingsType from root level in map
-        Object hearingsTypeObj = caseDataMap.get("hearingsType");
-        if (!(hearingsTypeObj instanceof Map)) {
-            return null;
+        // hearingsType may be DynamicList or Map
+        String hearingLabel = null;
+
+        if (hearingsTypeObj instanceof uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList dynamicList) {
+            if (dynamicList.getValue() != null) {
+                hearingLabel = dynamicList.getValue().getLabel();
+            }
+        } else if (hearingsTypeObj instanceof Map) {
+            Object valueObj = ((Map<String, Object>) hearingsTypeObj).get("value");
+            if (valueObj instanceof Map) {
+                Object label = ((Map<String, Object>) valueObj).get("label");
+                if (label != null) {
+                    hearingLabel = label.toString();
+                }
+            }
         }
 
-        Object valueObj = ((Map<String, Object>) hearingsTypeObj).get("value");
-        if (!(valueObj instanceof Map)) {
-            return null;
-        }
-
-        Object label = ((Map<String, Object>) valueObj).get("label");
-        if (label == null) {
-            return null;
-        }
-
-        String hearingLabel = label.toString();
-        if (hearingLabel.contains(" - ")) {
+        if (hearingLabel != null && hearingLabel.contains(" - ")) {
             // Label format: "hearingType - dd/MM/yyyy hh:mm:ss"
             String[] parts = hearingLabel.split(" - ");
             if (parts.length >= 2) {

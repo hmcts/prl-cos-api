@@ -298,8 +298,8 @@ public class ManageOrdersController {
             if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
                 Object customWasApproved = caseDataUpdated.get("customOrderWasApprovedAtHearing");
                 Object customHearingsType = caseDataUpdated.get("customOrderHearingsType");
-                log.info("Custom order - customWasApproved: {}, customHearingsType: {}, manageOrders exists: {}",
-                    customWasApproved, customHearingsType, caseDataUpdated.get("manageOrders") != null);
+                log.info("Custom order - customWasApproved: {}, customHearingsType: {}",
+                    customWasApproved, customHearingsType);
                 if (customWasApproved != null) {
                     caseDataUpdated.put("wasTheOrderApprovedAtHearing", customWasApproved);
                 }

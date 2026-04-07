@@ -2927,7 +2927,12 @@ public class ManageOrderService {
             }
         }
 
-        if (hearingsTypeObj instanceof Map) {
+        if (hearingsTypeObj instanceof uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList dynamicList) {
+            if (dynamicList.getValue() != null && StringUtils.isNotEmpty(dynamicList.getValue().getLabel())) {
+                log.info("Got hearingsType label from DynamicList: {}", dynamicList.getValue().getLabel());
+                return dynamicList.getValue().getLabel();
+            }
+        } else if (hearingsTypeObj instanceof Map) {
             Map<String, Object> hearingsTypeMap = (Map<String, Object>) hearingsTypeObj;
             Object valueObj = hearingsTypeMap.get("value");
             if (valueObj instanceof Map) {
@@ -2939,7 +2944,8 @@ public class ManageOrderService {
             }
         }
 
-        log.info("No hearing selected in callback data");
+        log.info("No hearing selected in callback data, hearingsType type: {}",
+            hearingsTypeObj != null ? hearingsTypeObj.getClass().getName() : "null");
         return null;
     }
 
