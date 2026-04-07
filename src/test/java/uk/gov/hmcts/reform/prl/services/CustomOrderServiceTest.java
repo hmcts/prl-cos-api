@@ -1222,21 +1222,17 @@ class CustomOrderServiceTest {
     void testBuildHeaderPlaceholders_orderDateFromHearing_whenHearingSelected() throws IOException {
         // Arrange - hearing is selected, should use hearing date
         Long caseId = 1234567890123456L;
-        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement hearingElement =
-            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement.builder()
-                .code("hearing-123")
-                .label("Final Hearing - 15/03/2026 10:00:00")
-                .build();
-        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList hearingsType =
-            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList.builder()
-                .value(hearingElement)
-                .build();
-        CaseData caseData = CaseData.builder()
-            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
-            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
-            .build();
+        CaseData caseData = CaseData.builder().build();
 
+        // For custom orders, hearing data comes from the map at root level
         Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("wasTheOrderApprovedAtHearing", "Yes");
+        Map<String, Object> hearingValue = new HashMap<>();
+        hearingValue.put("code", "hearing-123");
+        hearingValue.put("label", "Final Hearing - 15/03/2026 10:00:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingValue);
+        caseDataMap.put("hearingsType", hearingsType);
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1339,23 +1335,20 @@ class CustomOrderServiceTest {
     void testBuildHeaderPlaceholders_judgeFromMapAndDateFromHearing() throws IOException {
         // Arrange - judge name from map, date from selected hearing
         final Long caseId = 1234567890123456L;
-        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement hearingElement =
-            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement.builder()
-                .code("hearing-456")
-                .label("Case Management - 02/02/2025 14:30:00")
-                .build();
-        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList hearingsType =
-            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList.builder()
-                .value(hearingElement)
-                .build();
         final CaseData caseData = CaseData.builder()
             .courtName("Central Family Court")
-            .wasTheOrderApprovedAtHearing(YesOrNo.Yes)
-            .manageOrders(ManageOrders.builder().hearingsType(hearingsType).build())
             .build();
 
+        // For custom orders, hearing data comes from the map at root level
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistratesLastName", "District Judge Taylor");
+        caseDataMap.put("wasTheOrderApprovedAtHearing", "Yes");
+        Map<String, Object> hearingValue = new HashMap<>();
+        hearingValue.put("code", "hearing-456");
+        hearingValue.put("label", "Case Management - 02/02/2025 14:30:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingValue);
+        caseDataMap.put("hearingsType", hearingsType);
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);

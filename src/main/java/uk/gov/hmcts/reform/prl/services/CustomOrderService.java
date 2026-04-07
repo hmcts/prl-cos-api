@@ -598,7 +598,7 @@ public class CustomOrderService {
      */
     private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
         // If approved at a hearing with a hearing selected, use the hearing date
-        String hearingDate = extractHearingDateFromSelection(caseData);
+        String hearingDate = extractHearingDateFromSelection(caseDataMap);
         if (hearingDate != null) {
             log.info("Order date from selected hearing: {}", hearingDate);
             return hearingDate;
@@ -632,23 +632,45 @@ public class CustomOrderService {
      * Extracts the hearing date if a hearing is selected AND wasTheOrderApprovedAtHearing is Yes.
      * The hearingsType label format is "hearingType - dd/MM/yyyy hh:mm:ss"
      * Returns null if no hearing is selected or wasTheOrderApprovedAtHearing is not Yes.
+     * For custom orders, hearingsType is at root level in the map (not in CaseData object).
      */
-    private String extractHearingDateFromSelection(CaseData caseData) {
-        if (YesOrNo.Yes.equals(caseData.getWasTheOrderApprovedAtHearing())
-            && caseData.getManageOrders() != null
-            && caseData.getManageOrders().getHearingsType() != null
-            && caseData.getManageOrders().getHearingsType().getValue() != null) {
+    @SuppressWarnings("unchecked")
+    private String extractHearingDateFromSelection(Map<String, Object> caseDataMap) {
+        if (caseDataMap == null) {
+            return null;
+        }
 
-            String hearingLabel = caseData.getManageOrders().getHearingsType().getValue().getLabel();
-            if (hearingLabel != null && hearingLabel.contains(" - ")) {
-                // Label format: "hearingType - dd/MM/yyyy hh:mm:ss"
-                String[] parts = hearingLabel.split(" - ");
-                if (parts.length >= 2) {
-                    String dateTimePart = parts[1].trim();
-                    // Extract just the date part (dd/MM/yyyy) from "dd/MM/yyyy hh:mm:ss"
-                    if (dateTimePart.length() >= 10) {
-                        return dateTimePart.substring(0, 10);
-                    }
+        // Check if approved at hearing
+        Object approvedValue = caseDataMap.get("wasTheOrderApprovedAtHearing");
+        if (!"Yes".equals(String.valueOf(approvedValue))) {
+            return null;
+        }
+
+        // Get hearingsType from root level in map
+        Object hearingsTypeObj = caseDataMap.get("hearingsType");
+        if (!(hearingsTypeObj instanceof Map)) {
+            return null;
+        }
+
+        Object valueObj = ((Map<String, Object>) hearingsTypeObj).get("value");
+        if (!(valueObj instanceof Map)) {
+            return null;
+        }
+
+        Object label = ((Map<String, Object>) valueObj).get("label");
+        if (label == null) {
+            return null;
+        }
+
+        String hearingLabel = label.toString();
+        if (hearingLabel.contains(" - ")) {
+            // Label format: "hearingType - dd/MM/yyyy hh:mm:ss"
+            String[] parts = hearingLabel.split(" - ");
+            if (parts.length >= 2) {
+                String dateTimePart = parts[1].trim();
+                // Extract just the date part (dd/MM/yyyy) from "dd/MM/yyyy hh:mm:ss"
+                if (dateTimePart.length() >= 10) {
+                    return dateTimePart.substring(0, 10);
                 }
             }
         }
@@ -755,7 +777,7 @@ public class CustomOrderService {
         }
 
         // Order date and hearing/papers text
-        String hearingDate = extractHearingDateFromSelection(caseData);
+        String hearingDate = extractHearingDateFromSelection(caseDataMap);
         boolean hasHearing = hearingDate != null;
         String orderDate = extractOrderDate(caseData, caseDataMap);
         if (orderDate != null && !orderDate.isEmpty()) {

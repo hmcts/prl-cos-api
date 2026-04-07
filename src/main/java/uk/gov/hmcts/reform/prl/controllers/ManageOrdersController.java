@@ -304,15 +304,10 @@ public class ManageOrdersController {
                     caseDataUpdated.put("wasTheOrderApprovedAtHearing", customWasApproved);
                 }
                 // Only copy hearingsType if approved at hearing, clear it otherwise
-                // Must go inside manageOrders so caseData.getManageOrders().getHearingsType() can find it
-                @SuppressWarnings("unchecked")
-                Map<String, Object> manageOrders = (Map<String, Object>) caseDataUpdated.get("manageOrders");
-                if (manageOrders != null) {
-                    if ("Yes".equals(String.valueOf(customWasApproved)) && customHearingsType != null) {
-                        manageOrders.put("hearingsType", customHearingsType);
-                    } else {
-                        manageOrders.remove("hearingsType");
-                    }
+                if ("Yes".equals(String.valueOf(customWasApproved)) && customHearingsType != null) {
+                    caseDataUpdated.put("hearingsType", customHearingsType);
+                } else {
+                    caseDataUpdated.remove("hearingsType");
                 }
             }
 
