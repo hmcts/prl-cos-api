@@ -1224,15 +1224,15 @@ class CustomOrderServiceTest {
         Long caseId = 1234567890123456L;
         CaseData caseData = CaseData.builder().build();
 
-        // For custom orders, hearing data comes from the map at root level
+        // For custom orders, use the custom order field names
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("wasTheOrderApprovedAtHearing", "Yes");
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
         Map<String, Object> hearingValue = new HashMap<>();
         hearingValue.put("code", "hearing-123");
         hearingValue.put("label", "Final Hearing - 15/03/2026 10:00:00");
         Map<String, Object> hearingsType = new HashMap<>();
         hearingsType.put("value", hearingValue);
-        caseDataMap.put("hearingsType", hearingsType);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
@@ -1339,16 +1339,16 @@ class CustomOrderServiceTest {
             .courtName("Central Family Court")
             .build();
 
-        // For custom orders, hearing data comes from the map at root level
+        // For custom orders, use the custom order field names
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("judgeOrMagistratesLastName", "District Judge Taylor");
-        caseDataMap.put("wasTheOrderApprovedAtHearing", "Yes");
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
         Map<String, Object> hearingValue = new HashMap<>();
         hearingValue.put("code", "hearing-456");
         hearingValue.put("label", "Case Management - 02/02/2025 14:30:00");
         Map<String, Object> hearingsType = new HashMap<>();
         hearingsType.put("value", hearingValue);
-        caseDataMap.put("hearingsType", hearingsType);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
 
         byte[] renderedBytes = new byte[]{1, 2, 3};
         when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
