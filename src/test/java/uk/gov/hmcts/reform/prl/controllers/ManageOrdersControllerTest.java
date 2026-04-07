@@ -5337,6 +5337,8 @@ public class ManageOrdersControllerTest {
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("customOrderWasApprovedAtHearing", "Yes");
         stringObjectMap.put("customOrderHearingsType", "hearingTypeValue");
+        // manageOrders must exist for hearingsType to be copied into it
+        stringObjectMap.put("manageOrders", new HashMap<>());
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5363,7 +5365,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(response);
         assertEquals("Yes", response.getData().get("wasTheOrderApprovedAtHearing"));
-        assertEquals("hearingTypeValue", response.getData().get("hearingsType"));
+        // hearingsType should be inside manageOrders so caseData.getManageOrders().getHearingsType() can find it
+        @SuppressWarnings("unchecked")
+        Map<String, Object> manageOrders = (Map<String, Object>) response.getData().get("manageOrders");
+        assertNotNull(manageOrders);
+        assertEquals("hearingTypeValue", manageOrders.get("hearingsType"));
         verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
     }
 
@@ -5373,7 +5379,10 @@ public class ManageOrdersControllerTest {
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("customOrderWasApprovedAtHearing", "No");
         stringObjectMap.put("customOrderHearingsType", "hearingTypeValue");
-        stringObjectMap.put("hearingsType", "existingHearingType");
+        // Put existing hearingsType inside manageOrders (where it should be)
+        Map<String, Object> existingManageOrders = new HashMap<>();
+        existingManageOrders.put("hearingsType", "existingHearingType");
+        stringObjectMap.put("manageOrders", existingManageOrders);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5400,7 +5409,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(response);
         assertEquals("No", response.getData().get("wasTheOrderApprovedAtHearing"));
-        assertNull(response.getData().get("hearingsType"));
+        // hearingsType should be removed from manageOrders when not approved at hearing
+        @SuppressWarnings("unchecked")
+        Map<String, Object> manageOrders = (Map<String, Object>) response.getData().get("manageOrders");
+        assertNotNull(manageOrders);
+        assertNull(manageOrders.get("hearingsType"));
         verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
     }
 
