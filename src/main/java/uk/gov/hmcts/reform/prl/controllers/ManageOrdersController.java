@@ -824,6 +824,10 @@ public class ManageOrdersController {
                 log.info("Custom order selected on Page 1, populating hearings dropdown");
                 caseDataUpdated.put("customOrderHearingsType",
                     manageOrderService.populateHearingsDropdown(authorisation, caseData));
+            } else {
+                // Clear custom order fields when a different option is selected
+                // This prevents stale data from a cancelled custom order flow affecting other flows
+                caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
