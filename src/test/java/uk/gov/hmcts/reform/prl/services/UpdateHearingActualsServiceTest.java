@@ -64,6 +64,8 @@ public class UpdateHearingActualsServiceTest {
     AllTabServiceImpl allTabService;
     @Mock
     HearingApiClient hearingApiClient;
+    @Mock
+    PartyRepresentationService partyRepresentationService;
     private CaseDetails caseDetails;
     private CaseData caseData;
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
@@ -161,6 +163,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(partyRepresentationService.areAnyPartiesRepresented(any(CaseData.class))).thenReturn(true);
 
         updateHearingActualsService.updateHearingActuals();
         verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
@@ -257,6 +260,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(partyRepresentationService.areAnyPartiesRepresented(any(CaseData.class))).thenReturn(true);
 
         updateHearingActualsService.updateHearingActuals();
         verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
@@ -304,6 +308,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(searchResult1, SearchResultResponse.class)).thenReturn(response);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(partyRepresentationService.areAnyPartiesRepresented(any(CaseData.class))).thenReturn(true);
 
         updateHearingActualsService.updateHearingActuals();
         verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());

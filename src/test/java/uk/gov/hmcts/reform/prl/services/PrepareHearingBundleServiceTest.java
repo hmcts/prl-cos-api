@@ -17,10 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -39,16 +35,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
 class PrepareHearingBundleServiceTest {
 
     private static final String USER_TOKEN = "userToken";
     private static final String S2S_TOKEN = "s2sToken";
-    private static final Organisation SOLICITOR_ORG = Organisation.builder().organisationID("orgId").build();
 
     @Mock
     private EsQueryService esQueryService;
@@ -69,7 +61,7 @@ class PrepareHearingBundleServiceTest {
     private AllTabServiceImpl allTabService;
 
     @Mock
-    private ObjectMapper objectMapper;
+    private PartyRepresentationService partyRepresentationService;
 
     @InjectMocks
     private PrepareHearingBundleService prepareHearingBundleService;
@@ -119,19 +111,11 @@ class PrepareHearingBundleServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
 
         CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
-        CaseData caseData = CaseData.builder()
-            .id(111L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .applicants(List.of(element(PartyDetails.builder()
-                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                            .solicitorOrg(SOLICITOR_ORG)
-                                            .build())))
-            .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
 
-        when(objectMapper.convertValue(case1.getData(), CaseData.class))
-            .thenReturn(caseData);
+        when(partyRepresentationService.areNoPartiesRepresented(case1))
+            .thenReturn(false);
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
@@ -149,19 +133,11 @@ class PrepareHearingBundleServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
 
         CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
-        CaseData caseData = CaseData.builder()
-            .id(111L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .respondents(List.of(element(PartyDetails.builder()
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .solicitorOrg(SOLICITOR_ORG)
-                                             .build())))
-            .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
 
-        when(objectMapper.convertValue(case1.getData(), CaseData.class))
-            .thenReturn(caseData);
+        when(partyRepresentationService.areNoPartiesRepresented(case1))
+            .thenReturn(false);
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
@@ -179,19 +155,11 @@ class PrepareHearingBundleServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
 
         CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
-        CaseData caseData = CaseData.builder()
-            .id(111L)
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(PartyDetails.builder()
-                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                 .solicitorOrg(SOLICITOR_ORG)
-                                 .build())
-            .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
 
-        when(objectMapper.convertValue(case1.getData(), CaseData.class))
-            .thenReturn(caseData);
+        when(partyRepresentationService.areNoPartiesRepresented(case1))
+            .thenReturn(false);
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
@@ -209,19 +177,11 @@ class PrepareHearingBundleServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
 
         CaseDetails case1 = CaseDetails.builder().data(Map.of()).id(111L).build();
-        CaseData caseData = CaseData.builder()
-            .id(111L)
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .respondentsFL401(PartyDetails.builder()
-                                  .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                  .solicitorOrg(SOLICITOR_ORG)
-                                  .build())
-            .build();
 
         SearchResult searchResult = SearchResult.builder().cases(List.of(case1)).total(1).build();
 
-        when(objectMapper.convertValue(case1.getData(), CaseData.class))
-            .thenReturn(caseData);
+        when(partyRepresentationService.areNoPartiesRepresented(case1))
+            .thenReturn(false);
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
@@ -246,14 +206,10 @@ class PrepareHearingBundleServiceTest {
             .total(2)
             .build();
 
-        when(objectMapper.convertValue(case1.getData(), CaseData.class))
-            .thenReturn(CaseData.builder()
-                            .id(111L)
-                            .caseTypeOfApplication(C100_CASE_TYPE)
-                            .applicants(List.of(element(PartyDetails.builder().build())))
-                            .build());
-        when(objectMapper.convertValue(case2.getData(), CaseData.class))
-            .thenReturn(CaseData.builder().id(222L).caseTypeOfApplication(FL401_CASE_TYPE).build());
+        when(partyRepresentationService.areNoPartiesRepresented(case1))
+            .thenReturn(true);
+        when(partyRepresentationService.areNoPartiesRepresented(case2))
+            .thenReturn(true);
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 

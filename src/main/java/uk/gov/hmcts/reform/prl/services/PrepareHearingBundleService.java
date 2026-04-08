@@ -34,7 +34,6 @@ import java.util.List;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.PartyRepresentationUtils.areNoPartiesRepresented;
 
 @Slf4j
 @Service
@@ -47,7 +46,7 @@ public class PrepareHearingBundleService {
     private final AllTabServiceImpl allTabService;
     private final EsQueryService esQueryService;
     private final HearingService hearingService;
-    private final ObjectMapper objectMapper;
+    private final PartyRepresentationService partyRepresentationService;
 
     @Value("${prepare-hearing-bundle.calendar-days-before-hearing:7}")
     private int calendarDaysBeforeHearing;
@@ -80,7 +79,7 @@ public class PrepareHearingBundleService {
     private List<CaseDetails> filterCasesWithNoRepresentation(List<CaseDetails> caseDetails) {
         List<CaseDetails> filteredCases = new ArrayList<>();
         caseDetails.stream().forEach(caseDetail -> {
-            if (areNoPartiesRepresented(caseDetail, objectMapper)) {
+            if (partyRepresentationService.areNoPartiesRepresented(caseDetail)) {
                 filteredCases.add(caseDetail);
             } else {
                 log.info("Case {} has representation, skipping creation of 'Prepare Hearing Bundle' task",

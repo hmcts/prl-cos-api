@@ -41,7 +41,6 @@ import java.util.Map;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
-import static uk.gov.hmcts.reform.prl.utils.PartyRepresentationUtils.areAnyPartiesRepresented;
 
 @Slf4j
 @Service
@@ -56,6 +55,7 @@ public class UpdateHearingActualsService {
     private final AllTabServiceImpl allTabService;
 
     private final ObjectMapper objectMapper;
+    private final PartyRepresentationService partyRepresentationService;
 
     @Value("${ccd.elastic-search-api.result-size}")
     private String ccdElasticSearchApiResultSize;
@@ -97,7 +97,7 @@ public class UpdateHearingActualsService {
                 log.info("Hearing id {}", hearingId);
                 triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
                 if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)
-                    && areAnyPartiesRepresented(caseData)) {
+                    && partyRepresentationService.areAnyPartiesRepresented(caseData)) {
                     log.info("Hearing id is not mapped in orders and case has represented parties");
                     triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
                 }
