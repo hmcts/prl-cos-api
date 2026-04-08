@@ -47,7 +47,7 @@ public class CafcassUploadDocService {
 
     static final String DOC_TYPE_CIR_TRANSFER = "cirTransferRequest";
     static final String DOC_TYPE_CIR_EXTENSION = "cirExtensionRequest";
-    static final String DOC_TYPE_S16A_RISK_ASSESSMENT = "16aRiskAssessment";
+    static final String DOC_TYPE_S16A_RISK_ASSESSMENT = "S_16A_Risk_Assessment";
 
     public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
         DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
@@ -77,6 +77,8 @@ public class CafcassUploadDocService {
 
     public void uploadDocument(String authorisation, MultipartFile document,
                                String typeOfDocument, String caseId) {
+        log.info("Cafcass document upload request received for caseId: {}, typeOfDocument: {}", caseId,
+                 typeOfDocument);
         if (isValidDocument(document, typeOfDocument)) {
             CaseDetails caseDetails = checkIfCasePresent(caseId, authorisation);
             if (caseDetails == null) {
@@ -117,10 +119,11 @@ public class CafcassUploadDocService {
             quarantineLegalDoc
         );
 
-        caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
-
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
-            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, typeOfDocument);
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+        } else {
+            caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
         }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
@@ -195,7 +198,8 @@ public class CafcassUploadDocService {
         }
 
         log.error("Unacceptable format/type of document: {}", typeOfDocument);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_TYPE.formatted(typeOfDocument));
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_DOCUMENT_TYPE.formatted(typeOfDocument) + " "
+            + document.getOriginalFilename());
     }
 
     private static Map<String, CafcassReportAndGuardianEnum> createDocumentTypeMap() {
