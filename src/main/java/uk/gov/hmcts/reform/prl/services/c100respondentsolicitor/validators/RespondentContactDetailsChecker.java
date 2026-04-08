@@ -74,9 +74,6 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
             Optional<YesOrNo> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
             fields.add(isLivingInRefuge);
-            if (isLivingInRefuge.isPresent() && Yes.equals(isLivingInRefuge.get())) {
-                fields.add(ofNullable(citizenDetails.get().getRefugeConfidentialityC8Form()));
-            }
             Optional<Address> address = ofNullable(citizenDetails.get().getAddress());
             fields.add(address);
             if (address.isPresent() && !verifyAddressCompleted(address.get())) {
