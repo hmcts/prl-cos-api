@@ -468,6 +468,7 @@ public class ManageDocumentsService {
     }
 
     private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc) {
+        log.info("caseData.getDocumentManagementDetails() --> " + caseData.getDocumentManagementDetails());
         boolean newTaskRequired = isGivenDocumentExists(caseData, quarantineLegalDoc.getCategoryId()).isEmpty();
         log.info("newTaskRequired --> " + newTaskRequired);
         return newTaskRequired;
