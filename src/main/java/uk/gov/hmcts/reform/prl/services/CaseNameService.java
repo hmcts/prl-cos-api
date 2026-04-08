@@ -10,6 +10,7 @@ import java.util.Map;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Service
@@ -41,7 +42,7 @@ public class CaseNameService {
             PartyDetails applicant = caseData.getApplicants().stream().findFirst().orElseThrow().getValue();
             PartyDetails respondent = caseData.getRespondents().stream().findFirst().orElseThrow().getValue();
             String caseName = getCaseNameForCA(applicant.getLastName(), respondent.getLastName());
-            updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
+            updateCaseName(updatedCaseData, caseName);
         }
     }
 
@@ -51,7 +52,12 @@ public class CaseNameService {
         if (applicant != null && respondent != null) {
             String caseName = getCaseNameForDA(applicant.getFirstName(), applicant.getLastName(),
                                             respondent.getFirstName(), respondent.getLastName());
-            updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
+            updateCaseName(updatedCaseData, caseName);
         }
+    }
+
+    private void updateCaseName(Map<String, Object> updatedCaseData, String caseName) {
+        updatedCaseData.put(APPLICANT_CASE_NAME, caseName);
+        updatedCaseData.put(CASE_NAME_HMCTS_INTERNAL, caseName);
     }
 }

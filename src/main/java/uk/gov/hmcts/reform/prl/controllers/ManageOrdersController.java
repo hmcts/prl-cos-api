@@ -706,10 +706,37 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             if (C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
-                return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+                List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .data(callbackRequest.getCaseDetails().getData())
+                    .build();
+            } else {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData()).build();
             }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/manage-orders/validate-additional-parties",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mid event callback to validate additional parties "
+        + "email addresses and others addresses for serving an order")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateAdditionalPartiesForServingOrder(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<String> errorList = new ArrayList<>();
+            errorList.addAll(manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest));
+            errorList.addAll(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest));
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(callbackRequest.getCaseDetails().getData()).build();
+                .errors(errorList)
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -59,11 +59,6 @@ public class RefDataUserService {
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
-    private List<DynamicListElement> listOfCategoryValues;
-    private CommonDataResponse commonDataResponse;
-
-    private CaseFlag caseFlag;
-
     /**
      * Gets all staff filtered by the provided filter and returns them as a dynamic list.
      *
@@ -176,6 +171,7 @@ public class RefDataUserService {
 
     public CommonDataResponse retrieveCategoryValues(String authorization, String categoryId,String isHearingChildRequired) {
         log.info("retrieveCategoryValues {}", categoryId);
+        CommonDataResponse commonDataResponse = null;
         try {
             commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
                 authorization,
@@ -194,6 +190,7 @@ public class RefDataUserService {
 
     public CaseFlag retrieveCaseFlags(String authorization, String flagType) {
         log.info("retrieve case flags for flag type{} ", flagType);
+        CaseFlag caseFlag = null;
         try {
             caseFlag = commonDataRefApi.retrieveCaseFlagsByServiceId(
                 authorization,
@@ -209,7 +206,7 @@ public class RefDataUserService {
 
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         if (null != commonDataResponse) {
-            listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
+            List<DynamicListElement> listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
                 .map(this::getDisplayCategoryEntry).collect(Collectors.toList());
             Collections.sort(listOfCategoryValues, (a, b) -> a.getCode().compareToIgnoreCase(b.getCode()));

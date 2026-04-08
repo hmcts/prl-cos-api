@@ -110,6 +110,14 @@ public class ApplicantsCheckerTest {
     }
 
     @Test
+    public void testIsStartedNullPointerException() {
+        caseData = caseData.toBuilder().build();
+
+        assertFalse(applicantsChecker.isStarted(caseData));
+    }
+
+
+    @Test
     public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
         PartyDetails applicant = PartyDetails.builder().firstName("TestName").liveInRefuge(YesOrNo.Yes).build();

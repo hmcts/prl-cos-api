@@ -41,7 +41,8 @@ public class CsvWriter {
     private final LaunchDarklyClient launchDarklyClient;
 
     public enum CsvColumn {
-        CASE_NUMBER("Case No.", "id"),
+        FAMILY_CASE_NUMBER("Case No. FamilyMan", "familymanCaseNumber"),
+        CASE_NUMBER("Case No. Manage Cases", "id"),
         COURT_NAME("Court Name/Location", "courtName"),
         COURT_ID("Court Code", "courtEpimsId"),
         ORDER_NAME("Order Name", "caseTypeOfApplication"),

@@ -62,6 +62,12 @@ java:
           alias: JUDGE_PASSWORD
         - name: acro-zip-password
           alias: ACRO_ZIP_PASSWORD
+        - name: acro-sftp-host
+          alias: ACRO_SFTP_HOST
+        - name: acro-sftp-user
+          alias: ACRO_SFTP_USER
+        - name: acro-sftp-user-password
+          alias: ACRO_SFTP_USER_PASSWORD
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal

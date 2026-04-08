@@ -1473,6 +1473,32 @@ public class UpdatePartyDetailsServiceTest {
         assertNotNull("respondents");
     }
 
+
+    @Test
+    void testCheckIfConfidentialityDetailsChangedRespondentWhenRespondentsDoNotExist() {
+        // given
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        PartyDetails respondent = PartyDetails.builder()
+            .email("test1")
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .phoneNumber("012345")
+            .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+
+        // when
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
+            caseDataBefore,
+            wrappedRespondent
+        );
+
+        // then
+        assertEquals(false, bool);
+    }
+
     @Test
     void checkIfDetailsChangedFl401All() {
         PartyDetails respondentBefore = PartyDetails.builder()

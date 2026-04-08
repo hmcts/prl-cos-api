@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Bool;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.acro.Query;
@@ -147,9 +146,7 @@ public class AcroCaseDataService {
             .build();
 
 
-        Range range = Range.builder().lastModified(lastModified).build();
         Bool bool = Bool.builder()
-            .filter(Filter.builder().range(range).build())
             .must(List.of(
                 Must.builder().term(Term.builder().orderTypeId(NON_MOLESTATION_ORDER_FL_404_A).build()).build(),
                 Must.builder().range(Range.builder().dateCreated(lastModified).build()).build()
@@ -176,7 +173,8 @@ public class AcroCaseDataService {
             "data.orderCollection",
             "data.caseManagementLocation",
             "data.stmtOfServiceForOrder",
-            "data.daApplicantContactInstructions"
+            "data.daApplicantContactInstructions",
+            "data.familymanCaseNumber"
         );
     }
 

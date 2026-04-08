@@ -8,7 +8,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 public enum InternalCaseworkerAmRolesEnum {
-    JUDGE("JUDGE", List.of("allocated-magistrate","judge")),
+    JUDGE("JUDGE", List.of("fee-paid-judge", "allocated-magistrate", "judge")),
     LEGAL_ADVISER("LEGAL_ADVISER", List.of("tribunal-caseworker", "senior-tribunal-caseworker")),
     COURT_ADMIN("COURT_ADMIN", List.of("hearing-centre-admin", "ctsc")),
     COURT_ADMIN_TEAM_LEADER("COURT_ADMIN_TEAM_LEADER", List.of("hearing-centre-admin", "ctsc", "team-leader")),

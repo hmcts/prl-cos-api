@@ -135,4 +135,14 @@ public class CitizenCoreCaseDataService {
         String cosApis2sToken = authTokenGenerator.generate();
         return coreCaseDataApi.getCase(authorisation, cosApis2sToken, caseId);
     }
+
+    public boolean hasAccess(String authorisation, String caseId) {
+        try {
+            getCase(authorisation, caseId);
+            return true;
+        } catch (Exception exception) {
+            log.error("User does not have access to case id {}", caseId, exception);
+            return false;
+        }
+    }
 }

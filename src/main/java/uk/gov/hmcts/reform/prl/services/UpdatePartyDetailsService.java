@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -252,7 +253,7 @@ public class UpdatePartyDetailsService {
                     generateC8.accept(latest);
                 } catch (Exception e) {
                     log.error("Failed to generate C8 document for C100 case {}. Error: {}",
-                              callbackRequest.getCaseDetails().getId(), e.getMessage());
+                              callbackRequest.getCaseDetails().getId(), e.getMessage(), e);
                 }
             } else {
                 log.info("No respondents available for C8 generation for case: {}; skipping.",
@@ -621,7 +622,8 @@ public class UpdatePartyDetailsService {
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            respondentList = caseDataBefore.getRespondents().stream()
+            List<Element<PartyDetails>> respondents = caseDataBefore.getRespondents();
+            respondentList = emptyIfNull(respondents).stream()
                 .filter(resp1 -> resp1.getId().equals(respondent.getId())
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())

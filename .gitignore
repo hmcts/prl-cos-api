@@ -4,6 +4,7 @@
 *.class
 bin/main/application.yaml
 src/main/resources/application.yaml
+.github
 
 ### STS ###
 .apt_generated
