@@ -409,6 +409,37 @@ class CustomOrderServiceTest {
     }
 
     @Test
+    void testBuildHeaderPlaceholders_legalAdviserClausePopulated() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .justiceLegalAdviserFullName("Jane Advisor")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals(" sitting with Justices' Legal Adviser Jane Advisor", placeholders.get("sittingWithLegalAdviser"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_legalAdviserClauseEmptyWhenNoLegalAdviser() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("sittingWithLegalAdviser"));
+    }
+
+    @Test
     void testBuildHeaderPlaceholders_applicantNamePopulated() throws IOException {
         Long caseId = 1234567890123456L;
         PartyDetails applicant = PartyDetails.builder()
