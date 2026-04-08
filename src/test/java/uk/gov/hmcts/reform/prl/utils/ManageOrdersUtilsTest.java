@@ -2,7 +2,12 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +15,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 class ManageOrdersUtilsTest {
 
@@ -91,5 +98,104 @@ class ManageOrdersUtilsTest {
         String result = ManageOrdersUtils.buildC43OrderName(null, null);
 
         assertNull(result);
+    }
+
+    // ========== Tests for validateCustomOrderHearingDetails ==========
+
+    @Test
+    void testValidateCustomOrderHearingDetails_dateToBeFixed_noHearingType_returnsError() {
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(null)
+            .build();
+
+        List<Element<HearingData>> ordersHearingDetails = List.of(element(hearingData));
+
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(ordersHearingDetails);
+
+        assertEquals(1, errors.size());
+        assertEquals("You must select a hearing type", errors.get(0));
+    }
+
+    @Test
+    void testValidateCustomOrderHearingDetails_dateConfirmedByListingTeam_noHearingType_returnsError() {
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .hearingTypes(null)
+            .build();
+
+        List<Element<HearingData>> ordersHearingDetails = List.of(element(hearingData));
+
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(ordersHearingDetails);
+
+        assertEquals(1, errors.size());
+        assertEquals("You must select a hearing type", errors.get(0));
+    }
+
+    @Test
+    void testValidateCustomOrderHearingDetails_dateToBeFixed_withHearingType_noError() {
+        DynamicList hearingTypes = DynamicList.builder()
+            .value(DynamicListElement.builder().code("ABA5-FOF").label("Finding of Fact").build())
+            .build();
+
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(hearingTypes)
+            .build();
+
+        List<Element<HearingData>> ordersHearingDetails = List.of(element(hearingData));
+
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(ordersHearingDetails);
+
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void testValidateCustomOrderHearingDetails_dateConfirmedInHearingsTab_noHearingType_noError() {
+        // dateConfirmedInHearingsTab is NOT AHR-eligible, so no validation needed
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingTypes(null)
+            .build();
+
+        List<Element<HearingData>> ordersHearingDetails = List.of(element(hearingData));
+
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(ordersHearingDetails);
+
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void testValidateCustomOrderHearingDetails_nullList_noError() {
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(null);
+
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void testValidateCustomOrderHearingDetails_emptyList_noError() {
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(Collections.emptyList());
+
+        assertTrue(errors.isEmpty());
+    }
+
+    @Test
+    void testValidateCustomOrderHearingDetails_hearingTypesWithNullValue_returnsError() {
+        // hearingTypes exists but getValue() is null
+        DynamicList hearingTypes = DynamicList.builder()
+            .value(null)
+            .build();
+
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(hearingTypes)
+            .build();
+
+        List<Element<HearingData>> ordersHearingDetails = List.of(element(hearingData));
+
+        List<String> errors = ManageOrdersUtils.validateCustomOrderHearingDetails(ordersHearingDetails);
+
+        assertEquals(1, errors.size());
+        assertEquals("You must select a hearing type", errors.get(0));
     }
 }

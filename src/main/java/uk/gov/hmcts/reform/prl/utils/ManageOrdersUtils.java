@@ -641,5 +641,30 @@ public class ManageOrdersUtils {
                            .servedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
                            .build());
     }
+
+    /**
+     * Validates custom order hearing details - ensures hearingTypes is selected
+     * when AHR-eligible options (dateConfirmedByListingTeam or dateToBeFixed) are chosen.
+     */
+    public static List<String> validateCustomOrderHearingDetails(List<Element<HearingData>> ordersHearingDetails) {
+        List<String> errorList = new ArrayList<>();
+        if (isNotEmpty(ordersHearingDetails)) {
+            ordersHearingDetails.stream()
+                .map(Element::getValue)
+                .forEach(hearingData -> {
+                    if (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                            .equals(hearingData.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed
+                            .equals(hearingData.getHearingDateConfirmOptionEnum())) {
+                        // Hearing type validation for AHR
+                        if (ObjectUtils.isEmpty(hearingData.getHearingTypes())
+                            || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue())) {
+                            errorList.add("You must select a hearing type");
+                        }
+                    }
+                });
+        }
+        return errorList;
+    }
 }
 

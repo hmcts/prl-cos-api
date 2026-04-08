@@ -108,6 +108,7 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupat
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.validateCustomOrderHearingDetails;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Slf4j
@@ -925,6 +926,9 @@ public class ManageOrdersController {
                                                         PrlAppsConstants.ENGLISH,
                                                         loggedInUserType
                 );
+            } else if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                // Custom order hearing validations - ensure hearingTypes is selected for AHR-eligible options
+                errorList = validateCustomOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails());
             }
 
             if (isNotEmpty(errorList)) {
