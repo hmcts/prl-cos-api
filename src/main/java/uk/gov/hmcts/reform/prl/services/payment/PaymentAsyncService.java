@@ -64,12 +64,6 @@ public class PaymentAsyncService {
     @Async("taskExecutor")
     public void handlePaymentCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
 
-        if (!PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
-            log.info("Payment status is '{}' for Case {}. Skipping processing.",
-                     serviceRequestUpdateDto.getServiceRequestStatus(), serviceRequestUpdateDto.getCcdCaseNumber());
-            return;
-        }
-
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
 
@@ -88,9 +82,43 @@ public class PaymentAsyncService {
         }
 
         syncPaymentMetadata(serviceRequestUpdateDto, systemAuthorisation, systemUpdateUserId, caseDetails);
+        updateAllTabs(systemUpdateUserId, systemAuthorisation, serviceRequestUpdateDto);
+    }
 
-        partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
+    private void syncPaymentMetadata(ServiceRequestUpdateDto dto, String auth, String userId, CaseDetails caseDetails) {
+        boolean isCasePayment = verifyCaseCreationPaymentReference(caseDetails, dto.getServiceRequestReference());
 
+        CaseEvent event = getCaseEvent(isCasePayment, dto.getServiceRequestStatus());
+        log.info("Following case event will be triggered {} for case {}", event.getValue(), dto.getCcdCaseNumber());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(event, userId);
+        StartEventResponse startEventResponse = coreCaseDataService.startUpdate(auth, eventRequestData, dto.getCcdCaseNumber(), true);
+
+        if (isCasePayment) {
+            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                setCaseData(dto)
+            );
+            coreCaseDataService.submitUpdate(auth, eventRequestData, caseDataContent, dto.getCcdCaseNumber(), true);
+            partyLevelCaseFlagsService.generateAndStoreCaseFlags(dto.getCcdCaseNumber());
+            log.info("Payment metadata synced successfully for case {}", dto.getCcdCaseNumber());
+        } else {
+            CaseDataContent initialContent = coreCaseDataService.createCaseDataContent(startEventResponse, new HashMap<>());
+            coreCaseDataService.submitUpdate(auth, eventRequestData, initialContent, dto.getCcdCaseNumber(), true);
+
+            EventRequestData refreshRequestData = coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, userId);
+            StartEventResponse refreshedResponse = coreCaseDataService.startUpdate(auth, refreshRequestData, dto.getCcdCaseNumber(), true);
+
+            Map<String, Object> awpData = setAwPPaymentCaseData(refreshedResponse, dto);
+
+            CaseDataContent finalAwpContent = coreCaseDataService.createCaseDataContent(refreshedResponse, awpData);
+            coreCaseDataService.submitUpdate(auth, refreshRequestData, finalAwpContent, dto.getCcdCaseNumber(), true);
+
+            log.info("AwP Payment metadata synced successfully for case {}", dto.getCcdCaseNumber());
+        }
+    }
+
+    private void updateAllTabs(String systemUpdateUserId, String systemAuthorisation, ServiceRequestUpdateDto serviceRequestUpdateDto) {
         EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, systemUpdateUserId);
         StartEventResponse allTabsUpdateStartEventResponse = coreCaseDataService.startUpdate(
             systemAuthorisation, allTabsUpdateEventRequestData, serviceRequestUpdateDto.getCcdCaseNumber(), true);
@@ -112,38 +140,6 @@ public class PaymentAsyncService {
         if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
             solicitorEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
             caseWorkerEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
-        }
-    }
-
-    private void syncPaymentMetadata(ServiceRequestUpdateDto dto, String auth, String userId, CaseDetails caseDetails) {
-        boolean isCasePayment = verifyCaseCreationPaymentReference(caseDetails, dto.getServiceRequestReference());
-
-        CaseEvent event = getCaseEvent(isCasePayment, dto.getServiceRequestStatus());
-        log.info("Following case event will be triggered {} for case {}", event.getValue(), dto.getCcdCaseNumber());
-
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(event, userId);
-        StartEventResponse startEventResponse = coreCaseDataService.startUpdate(auth, eventRequestData, dto.getCcdCaseNumber(), true);
-
-        if (isCasePayment) {
-            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                setCaseData(dto)
-            );
-            coreCaseDataService.submitUpdate(auth, eventRequestData, caseDataContent, dto.getCcdCaseNumber(), true);
-            log.info("Payment metadata synced successfully for case {}", dto.getCcdCaseNumber());
-        } else {
-            CaseDataContent initialContent = coreCaseDataService.createCaseDataContent(startEventResponse, new HashMap<>());
-            coreCaseDataService.submitUpdate(auth, eventRequestData, initialContent, dto.getCcdCaseNumber(), true);
-
-            EventRequestData refreshRequestData = coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, userId);
-            StartEventResponse refreshedResponse = coreCaseDataService.startUpdate(auth, refreshRequestData, dto.getCcdCaseNumber(), true);
-
-            Map<String, Object> awpData = setAwPPaymentCaseData(refreshedResponse, dto);
-
-            CaseDataContent finalAwpContent = coreCaseDataService.createCaseDataContent(refreshedResponse, awpData);
-            coreCaseDataService.submitUpdate(auth, refreshRequestData, finalAwpContent, dto.getCcdCaseNumber(), true);
-
-            log.info("AwP Payment metadata synced successfully for case {}", dto.getCcdCaseNumber());
         }
     }
 

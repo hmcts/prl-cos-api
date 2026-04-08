@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,12 +13,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -63,6 +67,8 @@ class PaymentAsyncServiceTest {
     private static final String AUTH = "Bearer TestAuthToken";
     private static final String CASE_ID_STR = "1234567887654321";
     private static final Long CASE_ID = 1234567887654321L;
+    private static final String SERVICE_REQUEST_REF = "2026-1750003223075";
+    private static final String PAID_STATUS = "Paid";
 
     @BeforeEach
     void setUp() {
@@ -72,70 +78,79 @@ class PaymentAsyncServiceTest {
             .thenReturn(EventRequestData.builder().build());
     }
 
-    @Test
-    void shouldUpdateCaseStateToSubmittedWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder().state(State.SUBMITTED_NOT_PAID).build();
-        ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref");
+    @ParameterizedTest(name = "Run {index}: Transitioning from {0} should result in {1}")
+    @CsvSource({
+        "SUBMITTED_NOT_PAID, SUBMITTED_PAID",
+        "CASE_WITHDRAWN,      SUBMITTED_PAID",
+        "CASE_ISSUED,         CASE_ISSUED",
+        "JUDICIAL_REVIEW,     JUDICIAL_REVIEW"
+    })
+    void shouldVerifyStateTransitionDuringPayment(State initialState, State expectedState) {
+        CaseData caseData = CaseData.builder().id(1L).state(initialState).build();
+        ServiceRequestUpdateDto dto = createSimplePaidDto(SERVICE_REQUEST_REF, "Paid");
 
         CaseData updatedCaseData = paymentAsyncService.getCaseDataWithStateAndDateSubmitted(dto, caseData);
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
+        assertEquals(expectedState, updatedCaseData.getState(),
+                     String.format("Failed to transition from %s to %s", initialState, expectedState));
     }
 
     @Test
-    void shouldNotUpdateCaseStateToSubmittedWhenCurrentCaseStateIsCaseIssuedWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder().id(1L).state(State.CASE_ISSUED).build();
-        ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref");
+    void shouldNotUpdateIfPaymentIsAlreadyProcessed() {
+        ServiceRequestUpdateDto dto = createSimplePaidDto(SERVICE_REQUEST_REF, PAID_STATUS);
 
-        CaseData updatedCaseData = paymentAsyncService.getCaseDataWithStateAndDateSubmitted(dto, caseData);
-
-        assertEquals(State.CASE_ISSUED, updatedCaseData.getState());
-    }
-
-    @Test
-    void shouldNotProcessWhenPaymentStatusIsNotPaid() {
-        ServiceRequestUpdateDto dto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(CASE_ID_STR)
-            .serviceRequestStatus("Not Paid")
+        CaseData existingCaseData = CaseData.builder()
+            .id(CASE_ID)
+            .paymentServiceRequestReferenceNumber(SERVICE_REQUEST_REF)
+            .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
+                                                     .serviceRequestStatus("Paid")
+                                                     .build())
             .build();
+
+        CaseDetails details = createMockDetails();
+
+        when(coreCaseDataService.findCaseById(AUTH, CASE_ID_STR)).thenReturn(details);
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(existingCaseData);
 
         paymentAsyncService.handlePaymentCallback(dto);
 
-        verify(systemUserService, never()).getSysUserToken();
-        verify(coreCaseDataService, never()).findCaseById(any(), any());
-
-        verifyNoInteractions(
-            coreCaseDataService,
-            systemUserService,
-            solicitorEmailService,
-            caseWorkerEmailService,
-            partyLevelCaseFlagsService
-        );
+        verify(coreCaseDataService).findCaseById(AUTH, CASE_ID_STR);
+        verifyNoInteractions(allTabService, solicitorEmailService, caseWorkerEmailService);
+        verify(coreCaseDataService, never()).startUpdate(any(), any(), any(), anyBoolean());
     }
 
-    @Test
-    void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder().id(1L).state(State.SUBMITTED_NOT_PAID).build();
-        ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref");
+    @ParameterizedTest(name = "Run {index}: Status={0}, IsCasePayment={1} -> ExpectedEvent={2}")
+    @CsvSource({
+        "Paid,     true,  PAYMENT_SUCCESS_CALLBACK",
+        "Not Paid, true,  PAYMENT_FAILURE_CALLBACK",
+        "Paid,     false, AWP_PAYMENT_SUCCESS_CALLBACK",
+        "Not Paid, false, AWP_PAYMENT_FAILURE_CALLBACK"
+    })
+    void shouldVerifyCorrectCcdEventIsTriggered(String status, boolean isCasePayment, CaseEvent expectedEvent) {
+        ServiceRequestUpdateDto dto = createSimplePaidDto(SERVICE_REQUEST_REF, status);
 
-        CaseData updatedCaseData = paymentAsyncService.getCaseDataWithStateAndDateSubmitted(dto, caseData);
+        String caseDataRef = isCasePayment ? SERVICE_REQUEST_REF : "different-ref";
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
-    }
+        CaseData mockCaseData = CaseData.builder()
+            .id(CASE_ID)
+            .paymentServiceRequestReferenceNumber(caseDataRef)
+            .additionalApplicationsBundle(createAwpBundle("Pending"))
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
 
-    @Test
-    void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsWithdrawnWhenPaymentIsSuccessful() {
-        CaseData caseData = CaseData.builder().id(1L).state(State.CASE_WITHDRAWN).build();
-        ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref");
+        stubCcdInteractions(mockCaseData, createMockDetails());
 
-        CaseData updatedCaseData = paymentAsyncService.getCaseDataWithStateAndDateSubmitted(dto, caseData);
+        lenient().when(uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(any()))
+            .thenReturn("AWP Task");
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
+        paymentAsyncService.handlePaymentCallback(dto);
+
+        verify(coreCaseDataService).eventRequest(eq(expectedEvent), any());
     }
 
     @Test
     void shouldExecuteFullFlowForCasePayment() {
-        ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref");
+        ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref", PAID_STATUS);
         CaseData mockCaseData = CaseData.builder()
             .id(CASE_ID)
             .paymentServiceRequestReferenceNumber("test-ref")
@@ -153,13 +168,12 @@ class PaymentAsyncServiceTest {
 
     @Test
     void shouldProcessAdditionalApplicationsBundlePayment() {
-        String ref = "PAY-AWP-123";
         CaseData mockCaseData = CaseData.builder()
             .id(CASE_ID)
-            .additionalApplicationsBundle(createAwpBundle(ref, "Pending"))
+            .additionalApplicationsBundle(createAwpBundle("Pending"))
             .build();
 
-        ServiceRequestUpdateDto dto = createSimplePaidDto(ref);
+        ServiceRequestUpdateDto dto = createSimplePaidDto(SERVICE_REQUEST_REF, PAID_STATUS);
 
         stubCcdInteractions(mockCaseData, createMockDetails());
         when(uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(any())).thenReturn("AWP Task");
@@ -173,13 +187,12 @@ class PaymentAsyncServiceTest {
 
     @Test
     void shouldUpdateExistingFailedPaymentToSuccessInAwpBundle() {
-        String ref = "REF-2026-XYZ";
         CaseData mockCaseData = CaseData.builder()
             .id(CASE_ID)
-            .additionalApplicationsBundle(createAwpBundle(ref, "Failed"))
+            .additionalApplicationsBundle(createAwpBundle("Failed"))
             .build();
 
-        ServiceRequestUpdateDto dto = createSimplePaidDto(ref);
+        ServiceRequestUpdateDto dto = createSimplePaidDto(SERVICE_REQUEST_REF, PAID_STATUS);
 
         stubCcdInteractions(mockCaseData, createMockDetails());
         when(uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(any())).thenReturn("AWP Task");
@@ -202,11 +215,11 @@ class PaymentAsyncServiceTest {
         return CaseDetails.builder().id(CASE_ID).data(new HashMap<>()).build();
     }
 
-    private ServiceRequestUpdateDto createSimplePaidDto(String reference) {
+    private ServiceRequestUpdateDto createSimplePaidDto(String reference, String status) {
         return ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(CASE_ID_STR)
             .serviceRequestReference(reference)
-            .serviceRequestStatus("Paid")
+            .serviceRequestStatus(status)
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
                          .paymentReference("RC-REF")
@@ -215,10 +228,10 @@ class PaymentAsyncServiceTest {
             .build();
     }
 
-    private List<Element<AdditionalApplicationsBundle>> createAwpBundle(String ref, String status) {
+    private List<Element<AdditionalApplicationsBundle>> createAwpBundle(String status) {
         List<Element<AdditionalApplicationsBundle>> bundles = new ArrayList<>();
         bundles.add(element(AdditionalApplicationsBundle.builder()
-                                .payment(Payment.builder().paymentServiceRequestReferenceNumber(ref).build())
+                                .payment(Payment.builder().paymentServiceRequestReferenceNumber(SERVICE_REQUEST_REF).build())
                                 .otherApplicationsBundle(OtherApplicationsBundle.builder().applicationStatus(status).build())
                                 .build()));
         return bundles;
