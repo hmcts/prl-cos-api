@@ -701,14 +701,49 @@ public class CustomOrderService {
 
     /**
      * Checks if the hearing channel is "on the papers" from ordersHearingDetails.
-     * Returns true if hearingChannelsEnum is ONPPRS, false otherwise.
+     * Returns true if hearingChannelsEnum is ONPPRS or hearingChannels contains ONPPRS.
      */
     private boolean isHearingOnThePapers(CaseData caseData) {
-        if (caseData.getManageOrders() != null
-            && caseData.getManageOrders().getOrdersHearingDetails() != null
-            && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
-            var hearingData = caseData.getManageOrders().getOrdersHearingDetails().getFirst().getValue();
-            return HearingChannelsEnum.ONPPRS.equals(hearingData.getHearingChannelsEnum());
+        try {
+            if (caseData.getManageOrders() != null
+                && caseData.getManageOrders().getOrdersHearingDetails() != null
+                && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+                var hearingDataElement = caseData.getManageOrders().getOrdersHearingDetails().getFirst();
+                if (hearingDataElement == null || hearingDataElement.getValue() == null) {
+                    log.info("isHearingOnThePapers - hearingDataElement or value is null");
+                    return false;
+                }
+                var hearingData = hearingDataElement.getValue();
+
+                // Get selected value from hearingChannels DynamicList if present
+                String hearingChannelsValue = null;
+                if (hearingData.getHearingChannels() != null
+                    && hearingData.getHearingChannels().getValue() != null
+                    && hearingData.getHearingChannels().getValue().getCode() != null) {
+                    hearingChannelsValue = hearingData.getHearingChannels().getValue().getCode();
+                }
+
+                log.info("isHearingOnThePapers - HearingData fields: "
+                        + "hearingChannelsEnum={}, "
+                        + "hearingChannelsValue={}, "
+                        + "allPartiesAttendSameWay={}, "
+                        + "hearingDateConfirmOptionEnum={}, "
+                        + "confirmedHearingDates={}",
+                    hearingData.getHearingChannelsEnum(),
+                    hearingChannelsValue,
+                    hearingData.getAllPartiesAttendHearingSameWayYesOrNo(),
+                    hearingData.getHearingDateConfirmOptionEnum(),
+                    hearingData.getConfirmedHearingDates());
+
+                // Check both the enum and the DynamicList for "on the papers"
+                boolean isOnPapersEnum = HearingChannelsEnum.ONPPRS.equals(hearingData.getHearingChannelsEnum());
+                boolean isOnPapersList = "ONPPRS".equalsIgnoreCase(hearingChannelsValue);
+
+                return isOnPapersEnum || isOnPapersList;
+            }
+            log.info("isHearingOnThePapers - no ordersHearingDetails found");
+        } catch (Exception e) {
+            log.warn("isHearingOnThePapers - error checking hearing channel, defaulting to false", e);
         }
         return false;
     }
