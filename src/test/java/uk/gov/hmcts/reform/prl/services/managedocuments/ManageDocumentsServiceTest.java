@@ -3048,8 +3048,7 @@ public class ManageDocumentsServiceTest {
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "[LASOLICITOR]");
+        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments", manageDocuments);
@@ -3119,8 +3118,7 @@ public class ManageDocumentsServiceTest {
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "[LASOLICITOR]");
+        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments", manageDocuments);
@@ -3172,8 +3170,7 @@ public class ManageDocumentsServiceTest {
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
-            "[LASOLICITOR]");
+        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments", manageDocuments);
