@@ -65,9 +65,6 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             if (launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")) {
                 serviceAuthToken = serviceAuthToken.startsWith(BEARER) ? serviceAuthToken : BEARER.concat(
                     serviceAuthToken);
-                log.info("S2S Token length: {}, Starts with Bearer: {}",
-                         serviceAuthToken.length(),
-                         serviceAuthToken.startsWith("Bearer"));
                 if (Boolean.FALSE.equals(authorisationService.authoriseService(serviceAuthToken))) {
                     log.info("s2s token from payment service validation is unsuccessful");
                     throw (new RuntimeException(INVALID_CLIENT));

@@ -63,14 +63,31 @@ public class PaymentAsyncService {
 
     @Async("taskExecutor")
     public void handlePaymentCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+
+        if (!PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
+            log.info("Payment status is '{}' for Case {}. Skipping processing.",
+                     serviceRequestUpdateDto.getServiceRequestStatus(), serviceRequestUpdateDto.getCcdCaseNumber());
+            return;
+        }
+
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+
         log.info("Async processing started for case {}", serviceRequestUpdateDto.getCcdCaseNumber());
 
         CaseDetails caseDetails = coreCaseDataService.findCaseById(systemAuthorisation, serviceRequestUpdateDto.getCcdCaseNumber());
         CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        syncPaymentMetadata(serviceRequestUpdateDto, systemAuthorisation, systemUpdateUserId, currentCaseData);
+        if (verifyCaseCreationPaymentReference(caseDetails, serviceRequestUpdateDto.getServiceRequestReference())
+            && isDuplicatePayment(currentCaseData)) {
+            log.info("Payment already processed for case {} with service request reference {}, and payment reference {}, skipping update.",
+                     serviceRequestUpdateDto.getCcdCaseNumber(),
+                     currentCaseData.getPaymentServiceRequestReferenceNumber(),
+                     serviceRequestUpdateDto.getPayment().getPaymentReference());
+            return;
+        }
+
+        syncPaymentMetadata(serviceRequestUpdateDto, systemAuthorisation, systemUpdateUserId, caseDetails);
 
         partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
 
@@ -98,9 +115,8 @@ public class PaymentAsyncService {
         }
     }
 
-    private void syncPaymentMetadata(ServiceRequestUpdateDto dto, String auth, String userId, CaseData caseData) {
-        boolean isCasePayment = !StringUtils.isEmpty(dto.getServiceRequestReference())
-            && dto.getServiceRequestReference().equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+    private void syncPaymentMetadata(ServiceRequestUpdateDto dto, String auth, String userId, CaseDetails caseDetails) {
+        boolean isCasePayment = verifyCaseCreationPaymentReference(caseDetails, dto.getServiceRequestReference());
 
         CaseEvent event = getCaseEvent(isCasePayment, dto.getServiceRequestStatus());
         log.info("Following case event will be triggered {} for case {}", event.getValue(), dto.getCcdCaseNumber());
@@ -114,8 +130,7 @@ public class PaymentAsyncService {
                 setCaseData(dto)
             );
             coreCaseDataService.submitUpdate(auth, eventRequestData, caseDataContent, dto.getCcdCaseNumber(), true);
-
-            triggerAllTabsUpdate(dto, auth, userId);
+            log.info("Payment metadata synced successfully for case {}", dto.getCcdCaseNumber());
         } else {
             CaseDataContent initialContent = coreCaseDataService.createCaseDataContent(startEventResponse, new HashMap<>());
             coreCaseDataService.submitUpdate(auth, eventRequestData, initialContent, dto.getCcdCaseNumber(), true);
@@ -132,6 +147,12 @@ public class PaymentAsyncService {
         }
     }
 
+    private boolean verifyCaseCreationPaymentReference(CaseDetails caseDetails, String serviceRequestReference) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        return !StringUtils.isEmpty(serviceRequestReference)
+            && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+    }
+
     private CaseEvent getCaseEvent(boolean isCasePayment, String status) {
         boolean isPaid = PAID.equalsIgnoreCase(status);
         if (isCasePayment) {
@@ -139,6 +160,12 @@ public class PaymentAsyncService {
         } else {
             return isPaid ? CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK : CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK;
         }
+    }
+
+    private boolean isDuplicatePayment(CaseData caseData) {
+        return Optional.ofNullable(caseData.getPaymentCallbackServiceRequestUpdate())
+            .map(paymentStatus -> PAID.equalsIgnoreCase(paymentStatus.getServiceRequestStatus()))
+            .orElse(false);
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
@@ -222,13 +249,6 @@ public class PaymentAsyncService {
             log.error("Error populating case date for case {}", caseData.getId(), e);
         }
         return caseData;
-    }
-
-    private void triggerAllTabsUpdate(ServiceRequestUpdateDto dto, String auth, String userId) {
-        EventRequestData allTabsRequest = coreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, userId);
-        StartEventResponse allTabsResponse = coreCaseDataService.startUpdate(auth, allTabsRequest, dto.getCcdCaseNumber(), true);
-        CaseDataContent content = coreCaseDataService.createCaseDataContent(allTabsResponse, new HashMap<>());
-        coreCaseDataService.submitUpdate(auth, allTabsRequest, content, dto.getCcdCaseNumber(), true);
     }
 
     private boolean shouldUpdateCaseState(CaseData caseData) {

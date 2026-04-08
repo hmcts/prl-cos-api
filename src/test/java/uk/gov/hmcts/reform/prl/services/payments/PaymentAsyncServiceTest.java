@@ -39,7 +39,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -91,6 +93,27 @@ class PaymentAsyncServiceTest {
     }
 
     @Test
+    void shouldNotProcessWhenPaymentStatusIsNotPaid() {
+        ServiceRequestUpdateDto dto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(CASE_ID_STR)
+            .serviceRequestStatus("Not Paid")
+            .build();
+
+        paymentAsyncService.handlePaymentCallback(dto);
+
+        verify(systemUserService, never()).getSysUserToken();
+        verify(coreCaseDataService, never()).findCaseById(any(), any());
+
+        verifyNoInteractions(
+            coreCaseDataService,
+            systemUserService,
+            solicitorEmailService,
+            caseWorkerEmailService,
+            partyLevelCaseFlagsService
+        );
+    }
+
+    @Test
     void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() {
         CaseData caseData = CaseData.builder().id(1L).state(State.SUBMITTED_NOT_PAID).build();
         ServiceRequestUpdateDto dto = createSimplePaidDto("test-ref");
@@ -123,7 +146,7 @@ class PaymentAsyncServiceTest {
 
         paymentAsyncService.handlePaymentCallback(dto);
 
-        verify(coreCaseDataService, atLeast(2)).submitUpdate(eq(AUTH), any(), any(), eq(CASE_ID_STR), anyBoolean());
+        verify(coreCaseDataService, atLeast(1)).submitUpdate(eq(AUTH), any(), any(), eq(CASE_ID_STR), anyBoolean());
         verify(solicitorEmailService).sendEmail(any());
         verify(partyLevelCaseFlagsService).generateAndStoreCaseFlags(CASE_ID_STR);
     }
