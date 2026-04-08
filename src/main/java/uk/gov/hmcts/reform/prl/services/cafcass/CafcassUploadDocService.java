@@ -119,10 +119,11 @@ public class CafcassUploadDocService {
             quarantineLegalDoc
         );
 
-        caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
-
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
-            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, typeOfDocument);
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+        } else {
+            caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
         }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
