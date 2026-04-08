@@ -131,6 +131,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -146,6 +147,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
@@ -7940,5 +7942,102 @@ class ManageOrderServiceTest {
         assertFalse(draftOrders.isEmpty());
         // Only COURT_ADMIN should trigger AHR
         assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetFinalOrderCollection_courtAdmin_noCheck_eligibleForAhr_setsAutoHearingPending() throws Exception {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .roles(List.of(Roles.COURT_ADMIN.getValue()))
+            .build());
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            "test token", caseData, ENGLISH);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+        assertNotNull(orderCollection);
+        assertFalse(orderCollection.isEmpty());
+        assertEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetFinalOrderCollection_courtAdmin_noCheck_notEligibleForAhr_doesNotSetAutoHearingPending() throws Exception {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .roles(List.of(Roles.COURT_ADMIN.getValue()))
+            .build());
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        // No hearing details - not eligible for AHR
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .manageOrders(ManageOrders.builder()
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            "test token", caseData, ENGLISH);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+        assertNotNull(orderCollection);
+        assertFalse(orderCollection.isEmpty());
+        // When not eligible for AHR, flag should not be Yes (can be null or No)
+        assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
     }
 }

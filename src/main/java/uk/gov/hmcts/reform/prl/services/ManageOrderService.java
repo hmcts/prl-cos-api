@@ -1243,6 +1243,13 @@ public class ManageOrderService {
         List<Element<OrderDetails>> orderCollection;
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
         List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, userDetails, language);
+        //AHR - Admin creating a final order (applies to createAnOrder and createCustomOrder with noCheck)
+        if (!newOrderDetails.isEmpty()
+            && isEligibleForAutomatedHearing(caseData.getManageOrders().getOrdersHearingDetails())) {
+            Element<OrderDetails> firstOrder = newOrderDetails.get(0);
+            newOrderDetails.set(0, element(firstOrder.getId(), firstOrder.getValue().toBuilder()
+                .isAutoHearingReqPending(Yes).build()));
+        }
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
