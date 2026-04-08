@@ -5076,6 +5076,103 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void testPopulateHeaderPreFillsLegalAdviserNameWhenLegalAdviserLoggedIn() throws Exception {
+        // Given - a legal adviser is logged in
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id("legal-adviser-idam-id")
+                .email("adviser@test.com")
+                .forename("Jane")
+                .surname("Wilson")
+                .roles(List.of(Roles.LEGAL_ADVISER.getValue()))
+                .build()
+        );
+        when(manageOrderService.getLoggedInJudgeTitle("legal-adviser-idam-id"))
+            .thenReturn(JudgeOrMagistrateTitleEnum.justicesLegalAdviser);
+
+        // When
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        // Then
+        assertNotNull(response);
+        assertEquals("Jane Wilson", response.getData().get("justiceLegalAdviserFullName"));
+        assertNull(response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
+    }
+
+    @Test
+    public void testPopulateHeaderPreFillsMagistrateNameWhenMagistrateLoggedIn() throws Exception {
+        // Given - a magistrate is logged in
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id("magistrate-idam-id")
+                .email("magistrate@test.com")
+                .forename("John")
+                .surname("Smith")
+                .roles(List.of(Roles.JUDGE.getValue()))
+                .build()
+        );
+        when(manageOrderService.getLoggedInJudgeTitle("magistrate-idam-id"))
+            .thenReturn(JudgeOrMagistrateTitleEnum.magistrate);
+
+        // When
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        // Then
+        assertNotNull(response);
+        assertNull(response.getData().get("judgeOrMagistratesLastName"));
+        assertNull(response.getData().get("justiceLegalAdviserFullName"));
+        assertNotNull(response.getData().get("magistrateLastName"));
+        assertEquals(JudgeOrMagistrateTitleEnum.magistrate, response.getData().get("judgeOrMagistrateTitle"));
+    }
+
+    @Test
     public void saveOrderDetailsTest_createCustomOrder_withJudgeReview_shouldAddOrderDespiteStaleDoYouWantToServe() throws Exception {
         // Test that when createCustomOrder with judgeOrLegalAdvisorCheck,
         // the order IS added even if doYouWantToServeOrder=Yes (stale value from previous order)

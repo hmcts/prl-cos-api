@@ -564,6 +564,15 @@ public class CustomOrderService {
         return judgeName;
     }
 
+    private String extractLegalAdviserName(CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseDataMap != null && caseDataMap.get("justiceLegalAdviserFullName") != null) {
+            String name = caseDataMap.get("justiceLegalAdviserFullName").toString();
+            return name;
+        }
+        String name = caseData.getJusticeLegalAdviserFullName();
+        return name;
+    }
+
     private String extractJudgeTitle(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get("judgeOrMagistrateTitle") != null) {
             Object titleObj = caseDataMap.get("judgeOrMagistrateTitle");
@@ -829,6 +838,14 @@ public class CustomOrderService {
         String judgeTitle = extractJudgeTitle(caseData, caseDataMap);
         if (judgeTitle != null && !judgeTitle.isEmpty()) {
             data.put("judgeTitle", judgeTitle);
+        }
+
+        // Legal adviser clause (e.g. "sitting with Justices' Legal Adviser Jane Smith")
+        String legalAdviserName = extractLegalAdviserName(caseData, caseDataMap);
+        if (StringUtils.isNotEmpty(legalAdviserName)) {
+            data.put("sittingWithLegalAdviser", " sitting with Justices' Legal Adviser " + legalAdviserName);
+        } else {
+            data.put("sittingWithLegalAdviser", "");
         }
 
         // Order date and hearing/papers text

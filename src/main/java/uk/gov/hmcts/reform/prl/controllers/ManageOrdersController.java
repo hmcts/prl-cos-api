@@ -249,14 +249,24 @@ public class ManageOrdersController {
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
-                caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
-                log.info("Pre-populated judge name for manage orders: {}", userDetails.getFullName());
-
-                // Look up judge title from Judicial Reference Data
                 JudgeOrMagistrateTitleEnum judgeTitle = manageOrderService.getLoggedInJudgeTitle(userDetails.getId());
                 if (judgeTitle != null) {
                     caseData.put("judgeOrMagistrateTitle", judgeTitle);
                     log.info("Pre-populated judge title for manage orders: {}", judgeTitle);
+                }
+
+                if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser == judgeTitle
+                    || JudgeOrMagistrateTitleEnum.justicesClerk == judgeTitle) {
+                    caseData.put("justiceLegalAdviserFullName", userDetails.getFullName());
+                    log.info("Pre-populated justiceLegalAdviserFullName for manage orders: {}", userDetails.getFullName());
+                } else if (JudgeOrMagistrateTitleEnum.magistrate == judgeTitle) {
+                    caseData.put("magistrateLastName", List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
+                        uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                            .lastName(userDetails.getFullName()).build())));
+                    log.info("Pre-populated magistrateLastName for manage orders: {}", userDetails.getFullName());
+                } else {
+                    caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
+                    log.info("Pre-populated judgeOrMagistratesLastName for manage orders: {}", userDetails.getFullName());
                 }
             }
         }
