@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -2834,5 +2836,165 @@ class CustomOrderServiceTest {
         assertNotNull(orderName);
         assertEquals("Standard directions order", orderName);
         assertFalse(orderName.contains("C43"), "Non-C43 orderName should not contain C43 reference");
+    }
+
+    // ========== Tests for HEARING OR PAPERS logic ==========
+
+    @Test
+    void testHearingOrPapers_withHearingSelected_notOnPapers_showsAtAHearing() throws IOException {
+        // Arrange - hearing selected with channel NOT "on the papers"
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        // Simulate a hearing selection with a date
+        Map<String, Object> hearingsTypeValue = new HashMap<>();
+        hearingsTypeValue.put("label", "Fact Finding Hearing - 15/01/2026 10:00:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingsTypeValue);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        HearingData hearingData = HearingData.builder()
+            .hearingChannelsEnum(HearingChannelsEnum.INTER) // In person, not on papers
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(List.of(Element.<HearingData>builder().value(hearingData).build()))
+                .build())
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("at a hearing", placeholders.get("hearingOrPapers"));
+    }
+
+    @Test
+    void testHearingOrPapers_withHearingSelected_onPapers_showsOnThePapers() throws IOException {
+        // Arrange - hearing selected with channel "on the papers" (ONPPRS)
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        // Simulate a hearing selection with a date
+        Map<String, Object> hearingsTypeValue = new HashMap<>();
+        hearingsTypeValue.put("label", "On the Papers - 15/01/2026 10:00:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingsTypeValue);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        HearingData hearingData = HearingData.builder()
+            .hearingChannelsEnum(HearingChannelsEnum.ONPPRS) // On the papers
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(List.of(Element.<HearingData>builder().value(hearingData).build()))
+                .build())
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("on the papers", placeholders.get("hearingOrPapers"));
+    }
+
+    @Test
+    void testHearingOrPapers_noHearingSelected_showsOnThePapers() throws IOException {
+        // Arrange - no hearing selected
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderWasApprovedAtHearing", "No");
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("on the papers", placeholders.get("hearingOrPapers"));
+    }
+
+    @Test
+    void testHearingOrPapers_hearingSelectedButChannelNull_defaultsToAtAHearing() throws IOException {
+        // Arrange - hearing selected but hearingChannelsEnum is null (check fails)
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        // Simulate a hearing selection with a date
+        Map<String, Object> hearingsTypeValue = new HashMap<>();
+        hearingsTypeValue.put("label", "Hearing - 15/01/2026 10:00:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingsTypeValue);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        HearingData hearingData = HearingData.builder()
+            .hearingChannelsEnum(null) // Channel not set - should default to "at a hearing"
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(List.of(Element.<HearingData>builder().value(hearingData).build()))
+                .build())
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should default to "at a hearing" when channel check fails
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("at a hearing", placeholders.get("hearingOrPapers"));
+    }
+
+    @Test
+    void testHearingOrPapers_hearingSelectedButNoOrdersHearingDetails_defaultsToAtAHearing() throws IOException {
+        // Arrange - hearing selected but ordersHearingDetails is null
+        Long caseId = 123L;
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        // Simulate a hearing selection with a date
+        Map<String, Object> hearingsTypeValue = new HashMap<>();
+        hearingsTypeValue.put("label", "Hearing - 15/01/2026 10:00:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingsTypeValue);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(null) // No hearing details - should default to "at a hearing"
+                .build())
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should default to "at a hearing" when check fails
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("at a hearing", placeholders.get("hearingOrPapers"));
     }
 }

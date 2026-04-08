@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -699,6 +700,20 @@ public class CustomOrderService {
     }
 
     /**
+     * Checks if the hearing channel is "on the papers" from ordersHearingDetails.
+     * Returns true if hearingChannelsEnum is ONPPRS, false otherwise.
+     */
+    private boolean isHearingOnThePapers(CaseData caseData) {
+        if (caseData.getManageOrders() != null
+            && caseData.getManageOrders().getOrdersHearingDetails() != null
+            && !caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+            var hearingData = caseData.getManageOrders().getOrdersHearingDetails().getFirst().getValue();
+            return HearingChannelsEnum.ONPPRS.equals(hearingData.getHearingChannelsEnum());
+        }
+        return false;
+    }
+
+    /**
      * Populates FamilyMan case number placeholders for the header template.
      * Only includes the label and value if familymanCaseNumber exists.
      */
@@ -788,7 +803,10 @@ public class CustomOrderService {
         if (orderDate != null && !orderDate.isEmpty()) {
             data.put("orderDate", orderDate);
         }
-        data.put("hearingOrPapers", hasHearing ? "at a hearing" : "on the papers");
+        // "at a hearing" if a hearing was selected, unless explicitly marked as "on the papers"
+        // Defaults to "at a hearing" if hearing channel check fails or is inconclusive
+        boolean isOnThePapers = !hasHearing || isHearingOnThePapers(caseData);
+        data.put("hearingOrPapers", isOnThePapers ? "on the papers" : "at a hearing");
 
         // Hearing date with fallback to order date
         safePut(data, "hearingDate", () -> {

@@ -1115,6 +1115,7 @@ public class ManageOrderService {
                                    .childOption(getChildOption(caseData))
                                    .isOrderUploaded(Yes)
                                    .doesOrderDocumentNeedSeal(Yes)
+                                   .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                    .build()));
         return newOrderDetails;
     }
@@ -4146,7 +4147,7 @@ public class ManageOrderService {
     public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
                                                                        List<Element<HearingData>> hearingsList) {
         try {
-            if (!hearingsList.isEmpty()) {
+            if (hearingsList != null && !hearingsList.isEmpty()) {
                 hearingsList.stream()
                     .map(Element::getValue)
                     .forEach(hearingData -> {
