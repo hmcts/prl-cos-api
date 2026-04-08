@@ -1290,12 +1290,15 @@ public class ManageOrderService {
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement;
-        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)
-            || caseData.getManageOrdersOptions().equals(createCustomOrder)) {
+        if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
             draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
-            //AHR - Admin creating an order
+            if (caseData.getManageOrdersOptions().equals(createCustomOrder)) {
+                draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            } else {
+                draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
+            }
+            //AHR - Admin creating an order (applies to createAnOrder and createCustomOrder)
             if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && isEligibleForAutomatedHearing(caseData.getManageOrders().getOrdersHearingDetails())) {
                 draftOrderElement = element(draftOrderElement.getId(), draftOrderElement.getValue().toBuilder()

@@ -7800,4 +7800,145 @@ class ManageOrderServiceTest {
         assertEquals(1, serveOrderList.getValue().size());
         assertEquals(firstOrderId, serveOrderList.getValue().get(0).getCode());
     }
+
+    @Test
+    void testSetDraftOrderCollection_customOrder_courtAdmin_eligibleForAhr_setsAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        assertEquals(Yes, draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_createAnOrder_courtAdmin_eligibleForAhr_setsAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        assertEquals(Yes, draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_uploadAnOrder_courtAdmin_doesNotSetAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        // Even with eligible hearing data, uploadAnOrder should NOT trigger AHR
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        // uploadAnOrder does not have Page 19, so AHR should not be triggered
+        assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_customOrder_judge_doesNotSetAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Judge")
+            .email("test@judge.com")
+            .build();
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.JUDGE.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        // Only COURT_ADMIN should trigger AHR
+        assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
 }
