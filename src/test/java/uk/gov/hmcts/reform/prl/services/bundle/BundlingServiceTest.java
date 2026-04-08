@@ -213,7 +213,7 @@ public class BundlingServiceTest {
             .bundleInformation(BundlingInformation.builder().build())
             //.home(homefull)
             .build();
-        bundleCreateRequestMapper = new BundleCreateRequestMapper(authTokenGenerator);
+        bundleCreateRequestMapper = new BundleCreateRequestMapper();
 
         c100CaseDataOther = CaseData.builder()
             .id(123456789123L)
