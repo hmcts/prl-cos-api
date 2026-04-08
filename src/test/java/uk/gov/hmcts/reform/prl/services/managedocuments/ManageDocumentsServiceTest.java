@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -48,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -94,8 +96,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
+import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_STAFF;
+import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_UPLOADED_CATEGORY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -151,6 +157,9 @@ public class ManageDocumentsServiceTest {
     private UserService userService;
 
     @Mock
+    private RoleAssignmentService roleAssignmentService;
+
+    @Mock
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
 
     private final String auth = "auth-token";
@@ -182,6 +191,8 @@ public class ManageDocumentsServiceTest {
     List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
 
     List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+
+    List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsList;
 
     List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
 
@@ -353,12 +364,13 @@ public class ManageDocumentsServiceTest {
     @Test
     public void testPopulateDocumentCategories() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(false);
         when(coreCaseDataApi.getCategoriesAndDocuments(
             any(),
             any(),
             any()
         )).thenReturn(categoriesAndDocuments);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         CaseData caseData = CaseData.builder().build();
 
@@ -368,6 +380,123 @@ public class ManageDocumentsServiceTest {
             .get(0).getCode();
         assertEquals(subCategory2.getCategoryId(), docCode);
 
+    }
+
+    @Test
+    public void testPopulateDocumentCategoriesForLaParty() {
+
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments",
+                                           2, List.of(document), List.of(subCategory1, subCategory2));
+        CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(laCategoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertEquals(LOCAL_AUTHORITY, laParty);
+    }
+
+    @Test
+    public void testLaPartyWithRoleSocialWorker() {
+
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2,
+                                           List.of(document), List.of(subCategory1, subCategory2));
+        CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), eq(LOCAL_AUTHORITY_STAFF.getValue()))).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(laCategoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertEquals(LOCAL_AUTHORITY, laParty);
+    }
+
+    @Test
+    public void testLaPartyWithRoleSolicitor() {
+
+        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2,
+                                           List.of(document), List.of(subCategory1, subCategory2));
+        CategoriesAndDocuments laCategoriesAndDocuments = new CategoriesAndDocuments(1, List.of(laCategory), List.of(document));
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), eq(LOCAL_AUTHORITY_SOLICITOR.getValue()))).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(laCategoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertEquals(LOCAL_AUTHORITY, laParty);
+    }
+
+
+    @Test
+    public void testDefaultDocumentPartyForNonLaParty() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(false);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            any(),
+            any(),
+            any()
+        )).thenReturn(categoriesAndDocuments);
+
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentParty();
+        assertEquals(subCategory2.getCategoryId(), docCode);
+        assertNull(laParty);
     }
 
     @Test
@@ -387,6 +516,8 @@ public class ManageDocumentsServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         CaseData caseData = CaseData.builder().build();
 
@@ -399,7 +530,10 @@ public class ManageDocumentsServiceTest {
     @Test
     @DisplayName("test case for populateDocumentCategories Exception.")
     public void testPopulateDocumentCategoriesException() {
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
         CaseData caseData = CaseData.builder().build();
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
         List<DynamicListElement> listItems = updatedCaseData.getDocumentManagementDetails().getManageDocuments()
@@ -2580,6 +2714,22 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void testLoggedInUserIsLocalAuthorityWithSolicitorRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "[LASOLICITOR]");
+        when(authTokenGenerator.generate()).thenReturn(
+            "serviceAuthToken");
+        when(userService.getUserDetails(auth)).thenReturn((userDetailsSolicitorRole));
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        List<String> loggedInUserTypeList = manageDocumentsService.getLoggedInUserType(auth);
+        assertNotNull(loggedInUserTypeList);
+        assertTrue(loggedInUserTypeList.contains("LOCAL_AUTHORITY"));
+    }
+
+    @Test
     public void testAppendConfidentialDocumentNameForCourtAdmin() {
         Map<String, Object> caseDataUpdated1 = new HashMap<>();
         when(userService.getUserDetails(auth)).thenReturn(userDetailsJudgeRole);
@@ -2747,4 +2897,378 @@ public class ManageDocumentsServiceTest {
 
         verifyNoInteractions(caseDocumentClient);
     }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirRequestDocumentsButNoTriggeredBySet() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
+        localAuthorityQuarantineDocsListInitial.add(element);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirRequestDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
+
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("LOCAL_AUTHORITY", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirTransferDocumentsButNoTriggeredBySet() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
+        localAuthorityQuarantineDocsListInitial.add(element);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirTransferDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("LOCAL_AUTHORITY", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsNonCirDocumentsButNoTriggeredBySet() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
+        localAuthorityQuarantineDocsListInitial.add(element);
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsNonCirDocumentsAndSetTriggeredBy() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals("LOCAL_AUTHORITY", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsAnyDocumentsAndSetInCategoryMap() {
+        Map<String, Object> caseDataUpdated1 = new HashMap<>();
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA).isRestricted(YesOrNo.Yes).build());
+
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
+
+        manageDocumentsService.setFlagsForWaTask(
+            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
+            caseDataUpdated1, "LOCAL_AUTHORITY",
+            element.getValue()
+        );
+        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals(
+            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA,
+            caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY)
+        );
+    }
+
+    @Test
+    public void testIsGivenDocumentsExistsShouldSetTriggeredByIfNoMatch() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(LOCAL_AUTHORITY)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        caseDataMapInitial.put("localAuthorityQuarantineDocsList", new ArrayList<>());
+
+        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", localAuthorityUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "localAuthorityQuarantineDocsList");
+        assertNotNull(localAuthorityQuarantineDocsList);
+        assertEquals(1, localAuthorityQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals("LOCAL_AUTHORITY", caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testIsGivenDocumentsExistsShouldNotSetTriggeredByIfMatchFound() {
+
+        subCategory1 = new Category(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA, "confidentialName", 1, List.of(document), null);
+        category = new Category("MIAMCertificate", "MIAM Certificate", 2, List.of(document), List.of(subCategory1));
+        categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+
+        parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
+            .stream()
+            .sorted(Comparator.comparing(Category::getCategoryName))
+            .toList();
+
+        dynamicListElementList = new ArrayList<>();
+        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
+
+        dynamicList = DynamicList.builder().value(DynamicListElement.builder()
+                      .code(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA)
+                      .label(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).build())
+                      .listItems(dynamicListElementList).build();
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(LOCAL_AUTHORITY)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
+        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
+            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
+        localAuthorityUploadDocListDocTabInitial.add(element);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .localAuthorityQuarantineDocsList(localAuthorityUploadDocListDocTabInitial)
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "localAuthorityQuarantineDocsList");
+        assertNotNull(localAuthorityQuarantineDocsList);
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNull(caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testIsGivenDocumentsExistsShouldSetTriggeredByIfQuarantineDocsIsNull() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(LOCAL_AUTHORITY)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", null);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "localAuthorityQuarantineDocsList");
+        assertNotNull(localAuthorityQuarantineDocsList);
+        assertEquals(1, localAuthorityQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals("LOCAL_AUTHORITY", caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testCopyDocumentForNonCirDocumentsIfRestrictedWithLocalAuthorityRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(LOCAL_AUTHORITY)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
+        localAuthorityQuarantineDocsListInitial.add(element(QuarantineLegalDoc.builder().build()));
+        caseDataMapInitial.put("localAuthorityQuarantineDocsList", localAuthorityQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", localAuthorityUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "localAuthorityQuarantineDocsList");
+        assertNotNull(localAuthorityQuarantineDocsList);
+        assertEquals(1, localAuthorityQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
+
+    @Test
+    public void testGetQuarantineDocumentForUploaderLocalAuthority() {
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .localAuthorityQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
+                                                  .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build()).build();
+        uk.gov.hmcts.reform.prl.models.documents.Document document1 = manageDocumentsService
+            .getQuarantineDocumentForUploader("LOCAL_AUTHORITY", quarantineLegalDoc
+            );
+
+        assertNotNull(document1);
+        assertEquals(quarantineLegalDoc.getLocalAuthorityQuarantineDocument().getDocumentUrl(),document1.getDocumentUrl());
+    }
+
 }

@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.closingcase.CaseClosingReasonForChildren;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryAttributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.deleteroleassignment.RoleAs
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabServiceHelper;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
@@ -56,7 +58,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_CASE_CLOSED_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CHILD_DETAILS_TABLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.services.reopenclosedcases.ReopenClosedCasesService.REOPEN_STATE_TO;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -82,6 +88,7 @@ public class ClosingCaseService {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
+    private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     public static final String SPECIFIC_ACCESS_GRANT = "SPECIFIC";
 
@@ -103,8 +110,8 @@ public class ClosingCaseService {
 
     private List<DynamicMultiselectListElement> getChildrenMultiSelectListForFinalDecisions(CaseData caseData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
-            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
+        if ((TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             IncrementalInteger i = new IncrementalInteger(1);
             caseData.getNewChildDetails().forEach(child -> {
                 if (StringUtils.isEmpty(child.getValue().getFinalDecisionResolutionReason())) {
@@ -194,6 +201,7 @@ public class ClosingCaseService {
         if (YesOrNo.Yes.equals(caseData.getClosingCaseOptions().getIsTheDecisionAboutAllChildren())
             || getChildrenMultiSelectListForFinalDecisions(caseData).isEmpty()) {
             unAllocateCourtStaffs(caseData, caseDataUpdated);
+            removeLocalAuthorityFromCase(caseData, caseDataUpdated);
             markTheCaseAsClosed(caseDataUpdated, finalDecisionResolutionDate, caseData);
         }
         updateChildDetailsInTab(caseDataUpdated, caseData);
@@ -234,6 +242,7 @@ public class ClosingCaseService {
                     ? caseData.getLegalAdviserList().toBuilder()
                     .value(null)
                     .build() : caseData.getLegalAdviserList());
+
             }
         } catch (Exception exp) {
             log.info(
@@ -244,11 +253,34 @@ public class ClosingCaseService {
         }
     }
 
+    public void removeLocalAuthorityFromCase(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("inside removeLocalAuthorityFromCase");
+
+        try {
+            if (null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
+                && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
+                removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
+                caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, null);
+                LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                    .localAuthoritySolicitorOrganisationName(null)
+                    .build();
+                caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+            }
+        } catch (Exception exp) {
+            log.info(
+                "Error occurred while removing LocalAuthority From closed Case {} exception {}",
+                caseData.getId(),
+                exp.getMessage()
+            );
+        }
+
+    }
+
     private static void updateChildDetails(Map<String, Object> caseDataUpdated,
                                            CaseData caseData, String finalDecisionResolutionDate,
                                            Element<CaseClosingReasonForChildren> finalOutcomeForChildrenElement) {
         if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
-            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
+            || TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
             caseData.getNewChildDetails().forEach(child -> {
                 if (finalOutcomeForChildrenElement.getId().equals(child.getId())) {
@@ -307,7 +339,7 @@ public class ClosingCaseService {
     public void updateChildDetailsInTab(Map<String, Object> caseDataUpdated, CaseData caseData) {
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
-                || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
+                || TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
                 caseDataUpdated.put(
                     CHILD_DETAILS_REVISED_TABLE,
                     applicationsTabServiceHelper.getChildRevisedDetails(caseData)
@@ -328,7 +360,7 @@ public class ClosingCaseService {
                                                  List<Element<CaseClosingReasonForChildren>> finalOutcomeForChildren,
                                                  DynamicMultiselectListElement dynamicMultiselectListElement) {
         if ((PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
-            || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
+            || TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) && caseData.getNewChildDetails() != null) {
             caseData.getNewChildDetails().forEach(child -> getChildList(
                 finalOutcomeForChildren,
                 dynamicMultiselectListElement,
