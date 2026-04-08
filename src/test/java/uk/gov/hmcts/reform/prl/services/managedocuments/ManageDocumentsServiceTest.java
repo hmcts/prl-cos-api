@@ -3163,6 +3163,56 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void testIsGivenDocumentsExistsShouldSetTriggeredByIfQuarantineDocsIsNull() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(LOCAL_AUTHORITY)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "[LASOLICITOR]");
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", null);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
+        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "localAuthorityQuarantineDocsList");
+        assertNotNull(localAuthorityQuarantineDocsList);
+        assertEquals(1, localAuthorityQuarantineDocsList.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals("LOCAL_AUTHORITY", caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
     public void testCopyDocumentForNonCirDocumentsIfRestrictedWithLocalAuthorityRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
