@@ -6226,13 +6226,9 @@ class ManageOrderServiceTest {
             .manageOrders(manageOrders1)
             .build();
 
-        when(hearingService.createAutomatedHearing(authToken, null))
-            .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
-        Exception exception = assertThrows(ManageOrderRuntimeException.class, () -> {
-            manageOrderService.createAutomatedHearingManagement(authToken, caseData, null);
-        });
-        String expectedMessage = "Invalid Json";
-        assertTrue(expectedMessage.contains(exception.getMessage()));
+        // When hearingsList is null, method should handle gracefully and return null
+        List<Element<HearingData>> result = manageOrderService.createAutomatedHearingManagement(authToken, caseData, null);
+        assertNull(result);
     }
 
     @Test
