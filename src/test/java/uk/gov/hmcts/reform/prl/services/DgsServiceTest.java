@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -56,7 +57,7 @@ public class DgsServiceTest {
     private static final String RESPONDENT = "respondent";
     private static final String DOCUMENT_DETAILS = "test details";
     private static final String FREE_TEXT_STATEMENTS = "free text to generate document";
-    private static final String PARTY_NAME = "appf appl";
+    private static final String PARTY_NAME = "applicant";
     private static final String FIRST_NAME = "firstNameValue";
     private static final String LAST_NAME = "lastName";
     private static final String WITNESS_STATEMENTS_APPLICANT = "WITNESS_STATEMENTS_APPLICANT";
@@ -282,7 +283,7 @@ public class DgsServiceTest {
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
             .id(Long.parseLong(documentRequest.getCaseId()))
-            .data(objectMapper.convertValue(data, Map.class))
+            .data(objectMapper.convertValue(data, new TypeReference<>() {}))
             .build();
         when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
 
@@ -325,7 +326,7 @@ public class DgsServiceTest {
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
             .id(Long.parseLong(documentRequest.getCaseId()))
-            .data(objectMapper.convertValue(data, Map.class))
+            .data(objectMapper.convertValue(data, new TypeReference<>() {}))
             .build();
         when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
 
@@ -333,7 +334,7 @@ public class DgsServiceTest {
         GeneratedDocumentInfo response = dgsService.generateCitizenDocument(
             AUTHORISATION, documentRequest,
             List.of(TEMPLATE), DocumentCategory.WITNESS_STATEMENTS_RESPONDENT
-        ).get(0);
+        ).getFirst();
 
         // Then
         assertNotNull(response);
@@ -371,7 +372,7 @@ public class DgsServiceTest {
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
             .id(Long.parseLong(documentRequest.getCaseId()))
-            .data(objectMapper.convertValue(data, Map.class))
+            .data(objectMapper.convertValue(data, new TypeReference<>() {}))
             .build();
         when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
 
@@ -413,7 +414,7 @@ public class DgsServiceTest {
             .build();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
             .id(Long.parseLong(documentRequest.getCaseId()))
-            .data(objectMapper.convertValue(data, Map.class))
+            .data(objectMapper.convertValue(data, new TypeReference<>() {}))
             .build();
         when(caseService.getCase(AUTHORISATION, documentRequest.getCaseId())).thenReturn(caseDetailsFromCcd);
 
@@ -544,7 +545,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocumentWithCaseDataThrowsExcetion() {
+    public void testToGenerateDocumentWithCaseDataThrowsException() {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url(TEST_URL)

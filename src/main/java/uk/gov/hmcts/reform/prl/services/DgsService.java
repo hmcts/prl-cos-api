@@ -216,6 +216,17 @@ public class DgsService {
                                                          DocumentCategory documentCategory) throws DocumentGenerationException {
 
         String caseId = documentRequest.getCaseId();
+        Map<String, Object> caseDetails = getCaseDetails(authorisation, documentRequest, documentCategory, caseId);
+
+        return emptyIfNull(prlCitizenUploadTemplates)
+            .stream()
+            .map(getGeneratedDocumentInfo(authorisation, caseDetails, caseId))
+            .toList();
+    }
+
+
+    private Map<String, Object> getCaseDetails(String authorisation, DocumentRequest documentRequest,
+                                               DocumentCategory documentCategory, String caseId) {
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetailsFromCcd = caseService.getCase(authorisation, caseId);
         CaseData caseDataFromCcd = nonNull(caseDetailsFromCcd) ? CaseUtils.getCaseData(caseDetailsFromCcd, objectMapper) : null;
         boolean applicantWitnessStatement = false;
@@ -250,12 +261,7 @@ public class DgsService {
         caseDetails.put(CITIZEN_UPLOADED_STATEMENT, documentRequest.getFreeTextStatements());
         caseDetails.put(SIGNED_BY, documentRequest.getPartyName());
         caseDetails.put(SIGNED_DATE, LocalDateTime.now());
-
-
-        return emptyIfNull(prlCitizenUploadTemplates)
-            .stream()
-            .map(getGeneratedDocumentInfo(authorisation, caseDetails, caseId))
-            .toList();
+        return caseDetails;
     }
 
     private Function<String, GeneratedDocumentInfo> getGeneratedDocumentInfo(String authorisation, Map<String, Object> caseDetails, String caseId) {
