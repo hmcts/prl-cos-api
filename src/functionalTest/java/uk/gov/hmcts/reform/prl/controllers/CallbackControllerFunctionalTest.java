@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import io.restassured.RestAssured;
-import io.restassured.config.HttpClientConfig;
-import io.restassured.config.RestAssuredConfig;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.params.CoreConnectionPNames;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -59,13 +56,7 @@ public class CallbackControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given()
-        .config(RestAssuredConfig.config()
-            .httpClient(HttpClientConfig.httpClientConfig()
-                .setParam(CoreConnectionPNames.STALE_CONNECTION_CHECK, true)))
-        .relaxedHTTPSValidation()
-        .baseUri(targetInstance)
-        .header("Connection", "close");
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenNoMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndMiamError() throws Exception {
