@@ -148,9 +148,6 @@ public class ApplicantsChecker implements EventChecker {
         }
         Optional<YesOrNo> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
         fields.add(liveInRefuge);
-        if (liveInRefuge.isPresent() && Yes.equals(liveInRefuge.get())) {
-            fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
-        }
         Optional<Address> address = ofNullable(applicant.getAddress());
         fields.add(address);
         if (address.isPresent() && !verifyAddressCompleted(address.get())) {
