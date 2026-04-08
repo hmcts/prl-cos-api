@@ -176,7 +176,10 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (null != caseData) {
-            if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState()) && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
+            if ((State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState())
+                || State.AWAITING_INFORMATION.getValue().equalsIgnoreCase(caseDetails.getState()))
+                && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
+
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
                                                       CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
                                                                                       DATE_TIME_OF_SUBMISSION_FORMAT));
