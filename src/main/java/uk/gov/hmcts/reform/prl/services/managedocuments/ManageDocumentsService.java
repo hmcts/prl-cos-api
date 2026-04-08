@@ -474,6 +474,10 @@ public class ManageDocumentsService {
     }
 
     private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(CaseData caseData, String categoryId) {
+        if (caseData.getDocumentManagementDetails() == null
+            || caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList() == null) {
+            return Optional.empty();
+        }
         return caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList().stream()
             .filter(each -> each.getValue().getCategoryId()
                 .equals(categoryId)).findAny();
