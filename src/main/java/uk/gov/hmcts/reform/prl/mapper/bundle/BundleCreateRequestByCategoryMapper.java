@@ -26,11 +26,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -166,7 +164,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             .documentUrl(categoryDocument.getDocumentURL())
             .documentBinaryUrl(categoryDocument.getDocumentBinaryURL())
             .documentFileName(categoryDocument.getDocumentFilename())
-            .documentCreatedOn(Date.from(categoryDocument.getUploadTimestamp().toInstant(ZoneOffset.UTC)))
+            .documentCreatedOn(java.sql.Timestamp.valueOf(categoryDocument.getUploadTimestamp()))
             .build();
     }
 
