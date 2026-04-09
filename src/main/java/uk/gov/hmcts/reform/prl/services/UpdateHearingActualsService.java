@@ -38,7 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -64,14 +66,29 @@ public class UpdateHearingActualsService {
 
         //Fetch all cases in Hearing state pending fm5 reminder notifications
         log.info("Running Hearing actual task cron job...");
-        List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
+        List<CaseDetails> caseDetailsList = emptyIfNull(retrieveCasesInHearingState());
+        caseDetailsList.stream()
+            .forEach(caseDetail -> {
+                log.info("caseDetail.getId() ==> {}", caseDetail.getId());
+                log.info("caseDetail.getState() ==> {}", caseDetail.getState());
+                Map<String, Object> data = caseDetail.getData();
+                if (nonNull(data)) {
+                    log.info("data.id ==> {}", data.get("id"));
+                    log.info("data.refernce ==> {}", data.get("reference"));
+                }
+            });
         try {
             if (isNotEmpty(caseDetailsList)) {
                 log.info("Cases exist with current hearing");
+                List<String> listOfCaseidsForHearings = emptyIfNull(getListOfCaseidsForHearings(
+                    caseDetailsList));
+                log.info("listOfCaseidsForHearings==>{}", listOfCaseidsForHearings);
+                listOfCaseidsForHearings.forEach(caseId -> log.info("caseId ==>{}", caseId));
+                Map<String, List<String>> caseIds = fetchAndFilterHearingsForTodaysDate(listOfCaseidsForHearings);
+                log.info("fetchAndFilterHearingsForTodaysDate caseIds {}", caseIds);
                 createUpdateHearingActualWaTask(
                     caseDetailsList,
-                    fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
-                        caseDetailsList))
+                    caseIds
                 );
             }
         } catch (Exception e) {
@@ -92,6 +109,7 @@ public class UpdateHearingActualsService {
         log.info("Case Id's {}", caseIds);
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).forEach(caseDetails -> {
+                log.info("caseId {}", caseId);
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 log.info("Hearing id {}", hearingId);
                 triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
