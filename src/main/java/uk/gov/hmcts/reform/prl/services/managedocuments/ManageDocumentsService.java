@@ -891,6 +891,7 @@ public class ManageDocumentsService {
     public List<String> getLoggedInUserType(String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
+        List<String> loggedInUserType = new ArrayList<>();
         if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
             //This would check for roles from AM for Judge/Legal advisor/Court admin
             //if it doesn't find then it will check for idam roles for rest of the users
@@ -909,42 +910,45 @@ public class ManageDocumentsService {
 
             boolean isSolicitor = roles.contains(Roles.SOLICITOR.getValue());
             if (isSolicitor && hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY)) {
-                return List.of(LOCAL_AUTHORITY);
+                loggedInUserType.add(LOCAL_AUTHORITY);
+                return loggedInUserType;
             }
-
             if (isSolicitor) {
-                return List.of(LEGAL_PROFESSIONAL, SOLICITOR_ROLE);
+                loggedInUserType.add(LEGAL_PROFESSIONAL);
+                loggedInUserType.add(SOLICITOR_ROLE);
+                return loggedInUserType;
             }
-
             if (roles.contains(Roles.CITIZEN.getValue())) {
-                return List.of(CITIZEN_ROLE);
+                loggedInUserType.add(CITIZEN_ROLE);
+                return loggedInUserType;
             }
 
             if (!amRoles.isEmpty()) {
-                if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.JUDGE)) {
-                    return List.of(COURT_STAFF, JUDGE_ROLE);
-                }
-                if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.LEGAL_ADVISER)) {
-                    return List.of(COURT_STAFF, LEGAL_ADVISER_ROLE);
-                }
-                if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.COURT_ADMIN)) {
-
-                    return List.of(COURT_STAFF, COURT_ADMIN_ROLE);
-                }
-                if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU)) {
-                    return List.of(UserRoles.CAFCASS.name());
-                }
+                checkCourtStaffRoles(amRoles, loggedInUserType);
+                return loggedInUserType;
             }
-
             if (roles.contains(Roles.BULK_SCAN.getValue())) {
-                return List.of(BULK_SCAN);
+                loggedInUserType.add(BULK_SCAN);
             }
         } else {
-            List<String> loggedInUserType = new ArrayList<>();
             checkExistingIdamRoleConfig(roles, loggedInUserType);
-            return loggedInUserType;
         }
-        return List.of();
+        return loggedInUserType;
+    }
+
+    private static void checkCourtStaffRoles(List<String> amRoles, List<String> loggedInUserType) {
+        if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.JUDGE)) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(JUDGE_ROLE);
+        } else if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.LEGAL_ADVISER)) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(LEGAL_ADVISER_ROLE);
+        } else if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.COURT_ADMIN)) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(COURT_ADMIN_ROLE);
+        } else if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU)) {
+            loggedInUserType.add(UserRoles.CAFCASS.name());
+        }
     }
 
     private static boolean hasAmRole(List<String> amRoles, InternalCaseworkerAmRolesEnum amRole) {
