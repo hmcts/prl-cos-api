@@ -519,19 +519,7 @@ public class ManageDocumentsServiceTest {
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
         List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(element);
         caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
-
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
 
         List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
@@ -540,11 +528,13 @@ public class ManageDocumentsServiceTest {
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .categoryId(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).build();
+
         quarantineLegalDocElement = element(quarantineLegalDoc);
-        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
-        listQuarantine.add(quarantineLegalDocElement);
 
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
+        listQuarantine.add(quarantineLegalDocElement);
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
@@ -927,11 +917,13 @@ public class ManageDocumentsServiceTest {
         cafcassUploadDocListDocTabInitial.add(quarantineLegalDocElement);
         caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
 
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().cafcassUploadDocListDocTab(cafcassUploadDocListDocTabInitial).build();
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .cafcassUploadDocListDocTab(cafcassUploadDocListDocTabInitial).build();
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .cafcassQuarantineDocsList(cafcassQuarantineDocsListInitial)
                                            .manageDocuments(List.of(manageDocumentsElement))
                                            .build())
             .build();

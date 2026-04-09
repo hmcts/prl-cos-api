@@ -22,7 +22,10 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -42,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.D
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_S16A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOC_UPLOADED_CATEGORY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -290,6 +294,38 @@ class CafcassUploadDocServiceTest {
 
         assertEquals("16aRiskAssessment", caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
         assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldNotCreateDuplicateTaskWhenSameUrgentDocTypeAlreadyInQuarantine() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("cirTransferRequest")
+            .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithExistingQuarantineDoc.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
     }
 
     @Test
