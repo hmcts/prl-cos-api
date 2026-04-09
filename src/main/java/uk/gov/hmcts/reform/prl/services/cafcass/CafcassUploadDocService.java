@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnu
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document.DocumentBuilder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -119,7 +120,8 @@ public class CafcassUploadDocService {
             quarantineLegalDoc
         );
 
-        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
+        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)
+            && !hasCafcassQuarantineDocOfSameCategory(startAllTabsUpdateDataContent.caseData(), quarantineLegalDoc.getCategoryId())) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
             caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
         } else {
@@ -142,6 +144,15 @@ public class CafcassUploadDocService {
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
+    }
+
+    private boolean hasCafcassQuarantineDocOfSameCategory(CaseData caseData, String categoryId) {
+        if (caseData.getDocumentManagementDetails() == null) {
+            return false;
+        }
+        var quarantineDocs = caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList();
+        return quarantineDocs != null
+            && quarantineDocs.stream().anyMatch(doc -> categoryId.equals(doc.getValue().getCategoryId()));
     }
 
     private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument,
