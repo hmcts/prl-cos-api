@@ -433,7 +433,7 @@ public class ManageDocumentsService {
             }
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
-            }
+        }
     }
 
     private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc) {
