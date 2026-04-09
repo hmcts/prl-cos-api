@@ -382,6 +382,107 @@ class CafcassUploadDocServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void shouldNotCreateDuplicateTaskWhenSame16aRiskAssessmentAlreadyInQuarantine() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("16aRiskAssessment")
+            .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithExistingQuarantineDoc.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldCreateTaskWhenDifferentUrgentDocTypeAlreadyInQuarantine() {
+        // cirExtensionRequest is in quarantine but we upload cirTransferRequest — different category, task must fire
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("cirExtensionRequest")
+            .build());
+        CaseData caseDataWithOtherCategory = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithOtherCategory.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithOtherCategory, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
+
+        assertEquals(DOC_TYPE_CIR_TRANSFER, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSuppressDuplicateTaskViaRawMapWhenCaseDataDeserializationReturnsEmptyList() {
+        // Simulates @JsonUnwrapped deserialization failure: CaseData has empty quarantine list,
+        // but the raw CCD map has the existing doc. The raw map fallback must detect the duplicate.
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        // Raw map has an existing cirExtensionRequest doc (simulates CCD's actual stored state)
+        Map<String, Object> existingDocValue = new java.util.HashMap<>();
+        existingDocValue.put("categoryId", "cirExtensionRequest");
+        Map<String, Object> existingElement = new java.util.HashMap<>();
+        existingElement.put("id", java.util.UUID.randomUUID().toString());
+        existingElement.put("value", existingDocValue);
+        // CaseData intentionally has NO quarantine docs (simulates @JsonUnwrapped failure)
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDataMap.put("cafcassQuarantineDocsList", List.of(existingElement));
+
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY),
+            "Category must be null when duplicate detected via raw map fallback");
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
+            "TriggeredBy must be null when duplicate detected via raw map fallback");
+    }
+
+    @Test
     void shouldReturnNullIfCasePresentThrowsException() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(coreCaseDataApi.getCase(any(), any(), any())).thenThrow(new RuntimeException("CCD down"));

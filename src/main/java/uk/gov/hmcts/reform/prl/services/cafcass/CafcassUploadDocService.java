@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -18,8 +19,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document.DocumentBuilder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -120,7 +123,14 @@ public class CafcassUploadDocService {
         );
 
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
-            if (!hasCafcassQuarantineDocOfSameCategory(caseDataUpdated, quarantineLegalDoc.getCategoryId())) {
+            boolean isDuplicate = hasCafcassQuarantineDocOfSameCategory(
+                startAllTabsUpdateDataContent.caseData(),
+                caseDataUpdated,
+                quarantineLegalDoc.getCategoryId()
+            );
+            log.info("Cafcass urgent doc upload caseId={} type={} categoryId={} isDuplicate={}",
+                     caseId, typeOfDocument, quarantineLegalDoc.getCategoryId(), isDuplicate);
+            if (!isDuplicate) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
                 caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
             } else {
@@ -149,9 +159,28 @@ public class CafcassUploadDocService {
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
-    private boolean hasCafcassQuarantineDocOfSameCategory(Map<String, Object> caseDataMap, String categoryId) {
+    private boolean hasCafcassQuarantineDocOfSameCategory(CaseData caseData,
+                                                          Map<String, Object> caseDataMap,
+                                                          String categoryId) {
+        // Primary check: deserialized CaseData (reliable when @JsonUnwrapped works correctly)
+        List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
+            ? caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
+            : null;
+        if (CollectionUtils.isEmpty(quarantineDocs)) {
+            log.info("Cafcass quarantine list empty via CaseData deserialization — falling back to raw map");
+        } else {
+            boolean found = quarantineDocs.stream()
+                .map(Element::getValue)
+                .anyMatch(doc -> categoryId.equals(doc.getCategoryId()));
+            if (found) {
+                return true;
+            }
+        }
+
+        // Fallback: raw CCD map (guards against @JsonUnwrapped deserialization failures)
         Object rawList = caseDataMap.get("cafcassQuarantineDocsList");
         if (!(rawList instanceof List<?>)) {
+            log.info("cafcassQuarantineDocsList not found in raw CCD map for categoryId={}", categoryId);
             return false;
         }
         for (Object item : (List<?>) rawList) {
