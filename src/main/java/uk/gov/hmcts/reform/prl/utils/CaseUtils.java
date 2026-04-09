@@ -1180,4 +1180,14 @@ public class CaseUtils {
     public static String getContactInstructions(PartyDetails applicantsFL401) {
         return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
     }
+
+    /**
+     * Checks if the case is a C100 case and has been issued by verifying the presence of an issue date.
+     *
+     * @param caseData the case data to check
+     * @return true if the case is a C100 case and has been issued, false otherwise
+     */
+    public static boolean isC100CaseIssued(CaseData caseData) {
+        return C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getIssueDate() != null;
+    }
 }

@@ -27,4 +27,6 @@ public class AdditionalProperties {
     private String additionalApplicationId;
     @JsonProperty("hearingId")
     private String hearingId;
+    @JsonProperty("messageIdentifier")
+    private String messageIdentifier;
 }

@@ -4740,6 +4740,7 @@ class ManageOrderServiceTest {
                                  .label("Sam Nolan")
                                  .build());
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesNoNotApplicable.No)
                               .recipientsOptions(DynamicMultiSelectList.builder()
                                                      .value(elementList)
