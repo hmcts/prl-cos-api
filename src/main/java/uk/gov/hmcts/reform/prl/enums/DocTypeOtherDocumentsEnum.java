@@ -86,7 +86,19 @@ public enum DocTypeOtherDocumentsEnum {
     @JsonProperty("otherDocs")
     otherDocs("otherDocs", "Cafcass/Cafcass Cymru other documents"),
     @JsonProperty("sec37Report")
-    sec37Report("sec37Report","Section 37 report"),
+    sec37Report("sec37Report","Section 37 (S37) report"),
+    @JsonProperty("childImpactReport1La")
+    childImpactReport1La("childImpactReport1La","Child Impact Report 1"),
+    @JsonProperty("childImpactReport2La")
+    childImpactReport2La("childImpactReport2La","Child Impact Report 2"),
+    @JsonProperty("section7ReportLa")
+    section7ReportLa("section7ReportLa","Section 7 report"),
+    @JsonProperty("section7AddendumReportLa")
+    section7AddendumReportLa("section7AddendumReportLa","Section 7 addendum report"),
+    @JsonProperty("localAuthorityInvolvementLa")
+    localAuthorityInvolvementLa("localAuthorityInvolvementLa","Local Authority involvement letter"),
+    @JsonProperty("section47La")
+    section47La("section47La","Section 47 enquiry"),
     @JsonProperty("localAuthorityOtherDoc")
     localAuthorityOtherDoc("localAuthorityOtherDoc","Local Authority other documents"),
     @JsonProperty("medicalReports")
