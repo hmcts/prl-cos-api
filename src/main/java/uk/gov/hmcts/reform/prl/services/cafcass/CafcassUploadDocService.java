@@ -120,10 +120,14 @@ public class CafcassUploadDocService {
             quarantineLegalDoc
         );
 
-        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)
-            && !hasCafcassQuarantineDocOfSameCategory(startAllTabsUpdateDataContent.caseData(), quarantineLegalDoc.getCategoryId())) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-            caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
+            if (!hasCafcassQuarantineDocOfSameCategory(startAllTabsUpdateDataContent.caseData(), quarantineLegalDoc.getCategoryId())) {
+                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+            } else {
+                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);
+            }
         } else {
             caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
         }

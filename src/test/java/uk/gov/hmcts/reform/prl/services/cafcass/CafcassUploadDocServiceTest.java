@@ -330,6 +330,38 @@ class CafcassUploadDocServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void shouldNotCreateDuplicateTaskWhenSameCirExtensionTypeAlreadyInQuarantine() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("cirExtensionRequest")
+            .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithExistingQuarantineDoc.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void shouldSetUrgentDocTypeToNullForNonUrgentDocumentType() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
