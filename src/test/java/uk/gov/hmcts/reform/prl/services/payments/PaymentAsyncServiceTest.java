@@ -182,7 +182,6 @@ class PaymentAsyncServiceTest {
 
         verify(uploadAdditionalApplicationUtils).getAwPTaskNameWhenPaymentCompleted(any());
         verify(coreCaseDataService, atLeastOnce()).submitUpdate(eq(AUTH), any(), any(), eq(CASE_ID_STR), eq(true));
-        verify(solicitorEmailService).sendEmail(any());
     }
 
     @Test
@@ -201,7 +200,6 @@ class PaymentAsyncServiceTest {
 
         verify(uploadAdditionalApplicationUtils).getAwPTaskNameWhenPaymentCompleted(any());
         verify(coreCaseDataService, atLeastOnce()).submitUpdate(eq(AUTH), any(), any(), eq(CASE_ID_STR), eq(true));
-        verify(solicitorEmailService).sendEmail(any());
     }
 
     private void stubCcdInteractions(CaseData caseData, CaseDetails details) {

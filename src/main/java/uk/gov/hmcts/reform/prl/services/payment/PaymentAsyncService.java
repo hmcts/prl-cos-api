@@ -82,7 +82,6 @@ public class PaymentAsyncService {
         }
 
         syncPaymentMetadata(serviceRequestUpdateDto, systemAuthorisation, systemUpdateUserId, caseDetails);
-        updateAllTabs(systemUpdateUserId, systemAuthorisation, serviceRequestUpdateDto);
     }
 
     private void syncPaymentMetadata(ServiceRequestUpdateDto dto, String auth, String userId, CaseDetails caseDetails) {
@@ -101,6 +100,7 @@ public class PaymentAsyncService {
             );
             coreCaseDataService.submitUpdate(auth, eventRequestData, caseDataContent, dto.getCcdCaseNumber(), true);
             partyLevelCaseFlagsService.generateAndStoreCaseFlags(dto.getCcdCaseNumber());
+            updateAllTabs(userId, auth, dto);
             log.info("Payment metadata synced successfully for case {}", dto.getCcdCaseNumber());
         } else {
             CaseDataContent initialContent = coreCaseDataService.createCaseDataContent(startEventResponse, new HashMap<>());
