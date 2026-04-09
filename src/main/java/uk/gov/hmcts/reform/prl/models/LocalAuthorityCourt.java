@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,7 @@ public class LocalAuthorityCourt {
     String address;
     String emailAddress;
     String status;
+    boolean pathFinderEnabled;
 
     @JsonIgnore
     public static LocalAuthorityCourt map(Map<String, String> row) {
@@ -38,6 +40,7 @@ public class LocalAuthorityCourt {
             .address(row.getOrDefault("Address", ""))
             .emailAddress(row.getOrDefault("emailAddress", ""))
             .status(row.getOrDefault("Status", ""))
+            .pathFinderEnabled(YesOrNo.Yes.name().equalsIgnoreCase(row.getOrDefault("Path finder enabled", YesOrNo.No.name())))
             .build();
     }
 }

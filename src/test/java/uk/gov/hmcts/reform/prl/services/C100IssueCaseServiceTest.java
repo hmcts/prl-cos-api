@@ -131,6 +131,9 @@ public class C100IssueCaseServiceTest {
     CourtSealFinderService courtSealFinderService;
 
     @Mock
+    LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
+
+    @Mock
     CourtFinderService courtFinderService;
 
     @Mock
