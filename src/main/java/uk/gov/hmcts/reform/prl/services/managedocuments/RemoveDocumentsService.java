@@ -128,6 +128,10 @@ public class RemoveDocumentsService {
             removeById(reviewDocs.getCafcassUploadDocListDocTab(), documentsToRemove)
         );
         updatedCaseData.put(
+            "localAuthorityUploadDocListDocTab",
+            removeById(reviewDocs.getLocalAuthorityUploadDocListDocTab(), documentsToRemove)
+        );
+        updatedCaseData.put(
             "courtStaffUploadDocListDocTab",
             removeById(reviewDocs.getCourtStaffUploadDocListDocTab(), documentsToRemove)
         );
