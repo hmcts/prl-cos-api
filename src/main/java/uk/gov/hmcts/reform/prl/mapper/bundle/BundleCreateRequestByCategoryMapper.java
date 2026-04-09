@@ -87,8 +87,8 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         List<Element<BundlingRequestDocument>> ordersFromCategory = new ArrayList<>();
 
         bundleCategoryConfig.getFolders().stream().forEach(folder -> {
-            folder.getDocumentProperties().stream().forEach(document -> {
-                FilterProperties filterProperties = document.getFilterProperties().getFirst();
+            folder.getDocuments().stream().forEach(document -> {
+                FilterProperties filterProperties = document.getFilters().getFirst();
                 if (filterProperties != null && filterProperties.getCategory() != null) {
                     if ("/data/orders".equals(document.getProperty())) {
                         ordersFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(

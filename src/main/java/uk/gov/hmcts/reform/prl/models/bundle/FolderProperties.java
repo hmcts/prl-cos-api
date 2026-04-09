@@ -23,5 +23,5 @@ public class FolderProperties {
     private String name;
 
     @JsonProperty("documents")
-    private List<DocumentProperties> documentProperties;
+    private List<DocumentProperties> documents;
 }

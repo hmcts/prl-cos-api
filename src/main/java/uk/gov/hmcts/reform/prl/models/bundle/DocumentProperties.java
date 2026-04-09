@@ -24,6 +24,6 @@ public class DocumentProperties {
     @JsonProperty("property")
     private String property;
 
-    @JsonProperty("filterProperties")
-    private List<FilterProperties> filterProperties;
+    @JsonProperty("filters")
+    private List<FilterProperties> filters;
 }
