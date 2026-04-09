@@ -27,11 +27,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfidentialityC8RefugeServiceTest {
@@ -55,7 +57,7 @@ public class ConfidentialityC8RefugeServiceTest {
         refugePartyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -73,7 +75,7 @@ public class ConfidentialityC8RefugeServiceTest {
         refugePartyDetails2 = PartyDetails.builder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -103,7 +105,6 @@ public class ConfidentialityC8RefugeServiceTest {
         );
 
         assertTrue(updatedCaseData.containsKey("applicants"));
-
     }
 
     @Test
@@ -141,7 +142,6 @@ public class ConfidentialityC8RefugeServiceTest {
         );
 
         assertTrue(updatedCaseData.containsKey(" "));
-
     }
 
     @Test
@@ -163,7 +163,6 @@ public class ConfidentialityC8RefugeServiceTest {
         );
 
         assertTrue(updatedCaseData.containsKey(" "));
-
     }
 
     @Test
@@ -185,7 +184,6 @@ public class ConfidentialityC8RefugeServiceTest {
         );
 
         assertTrue(updatedCaseData.containsKey(" "));
-
     }
 
     @Test
@@ -845,5 +843,67 @@ public class ConfidentialityC8RefugeServiceTest {
         list.add(element);
         confidentialityC8RefugeService.processRefugeDocumentsC7ResponseSubmission(map, applicant, list, list, 0);
         assertTrue(true);
+    }
+
+    @Test
+    public void givenOtherPeopleAddressKnownAndLivingInRefuge_whenProcess_thenAllDetailsConfidential() {
+        refugePartyDetails1 = refugePartyDetails1.toBuilder()
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .liveInRefuge(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
+        List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedOtherPeople);
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            Optional.of(partyDetailsWrappedList),
+            updatedCaseData,
+            OTHER_PARTY,
+            false
+        );
+
+        var updatedOtherPartyInTheCase = ((Optional<List<Element<PartyDetails>>>) updatedCaseData.get("otherPartyInTheCaseRevised"))
+            .get();
+
+        assertEquals(1, updatedOtherPartyInTheCase.size());
+        PartyDetails partyDetails = updatedOtherPartyInTheCase.getFirst().getValue();
+
+        assertEquals(YesOrNo.Yes, partyDetails.getIsAddressConfidential());
+        assertEquals(YesOrNo.Yes, partyDetails.getIsEmailAddressConfidential());
+        assertEquals(YesOrNo.Yes, partyDetails.getIsPhoneNumberConfidential());
+    }
+
+    @Test
+    public void givenOtherPeopleAddressUnknownAndLivingInRefuge_whenProcess_thenDetailsConfidential() {
+        refugePartyDetails1 = refugePartyDetails1.toBuilder()
+            .isCurrentAddressKnown(YesOrNo.No)
+            .liveInRefuge(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
+        List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedOtherPeople);
+
+        HashMap<String, Object> updatedCaseData = new HashMap<>();
+        confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
+            Optional.of(partyDetailsWrappedList),
+            updatedCaseData,
+            OTHER_PARTY,
+            false
+        );
+
+        var updatedOtherPartyInTheCase = ((Optional<List<Element<PartyDetails>>>) updatedCaseData.get("otherPartyInTheCaseRevised"))
+            .get();
+
+        assertEquals(1, updatedOtherPartyInTheCase.size());
+        PartyDetails partyDetails = updatedOtherPartyInTheCase.getFirst().getValue();
+
+        assertEquals(YesOrNo.No, partyDetails.getIsAddressConfidential());
+        assertEquals(YesOrNo.Yes, partyDetails.getIsEmailAddressConfidential());
+        assertEquals(YesOrNo.Yes, partyDetails.getIsPhoneNumberConfidential());
     }
 }

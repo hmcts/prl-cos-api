@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_CONF
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CHILDREN_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CHILDREN_CONFIDENTIAL_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
@@ -56,13 +57,13 @@ public class ConfidentialityTabService {
         List<Element<ChildConfidentialityDetails>> elementList = new ArrayList<>();
         if (PrlAppsConstants.TASK_LIST_VERSION_V2.equals(caseData.getTaskListVersion())
             || PrlAppsConstants.TASK_LIST_VERSION_V3.equals(caseData.getTaskListVersion())) {
-            Optional<List<Element<ChildDetailsRevised>>> chiildList = ofNullable(caseData.getNewChildDetails());
-            if (chiildList.isPresent()) {
+            Optional<List<Element<ChildDetailsRevised>>> childList = ofNullable(caseData.getNewChildDetails());
+            if (childList.isPresent()) {
                 elementList = getChildrenConfidentialDetailsV2(caseData);
             }
         } else {
-            Optional<List<Element<Child>>> chiildList = ofNullable(caseData.getChildren());
-            if (chiildList.isPresent()) {
+            Optional<List<Element<Child>>> childList = ofNullable(caseData.getChildren());
+            if (childList.isPresent()) {
                 List<Child> children = caseData.getChildren().stream()
                     .map(Element::getValue)
                     .toList();
@@ -325,11 +326,13 @@ public class ConfidentialityTabService {
         List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getApplicantConfidentialDetails(caseData);
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = getRespondentConfidentialDetails(caseData);
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
+        List<Element<ApplicantConfidentialityDetails>> otherPeopleConfidentialDetails = getOtherPeopleConfidentialDetails(caseData);
 
         return Map.of(
             APPLICANTS_CONFIDENTIAL_DETAILS, applicantsConfidentialDetails,
             C100_CHILDREN_CONFIDENTIAL_DETAILS, childrenConfidentialDetails,
-            RESPONDENT_CONFIDENTIAL_DETAILS, respondentsConfidentialDetails
+            RESPONDENT_CONFIDENTIAL_DETAILS, respondentsConfidentialDetails,
+            OTHER_PEOPLE_CONFIDENTIAL_DETAILS, otherPeopleConfidentialDetails
         );
     }
 
@@ -376,6 +379,19 @@ public class ConfidentialityTabService {
                 .map(Element::getValue)
                 .toList();
             return getConfidentialApplicantDetails(respondents);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private List<Element<ApplicantConfidentialityDetails>> getOtherPeopleConfidentialDetails(CaseData caseData) {
+        Optional<List<Element<PartyDetails>>> otherPeopleList = ofNullable(caseData.getOtherPartyInTheCaseRevised());
+
+        if (otherPeopleList.isPresent()) {
+            List<PartyDetails> otherPeople = caseData.getOtherPartyInTheCaseRevised().stream()
+                .map(Element::getValue)
+                .toList();
+            return getConfidentialApplicantDetails(otherPeople);
         } else {
             return Collections.emptyList();
         }

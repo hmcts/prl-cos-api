@@ -52,8 +52,7 @@ public class ConfidentialityC8RefugeService {
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             for (PartyDetails partyDetails : partyDetailsList) {
-                if (partyDetails.getIsCurrentAddressKnown() == null
-                    || YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
+                if (partyDetails.getIsCurrentAddressKnown() != null) {
                     if (eligibleForRefuge(partyDetails)) {
                         forceConfidentialityChangeForRefuge(party, partyDetails);
                     } else if (cleanUpNeeded) {
