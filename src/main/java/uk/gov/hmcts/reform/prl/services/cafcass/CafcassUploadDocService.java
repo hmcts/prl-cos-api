@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnu
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document.DocumentBuilder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -121,7 +120,7 @@ public class CafcassUploadDocService {
         );
 
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
-            if (!hasCafcassQuarantineDocOfSameCategory(startAllTabsUpdateDataContent.caseData(), quarantineLegalDoc.getCategoryId())) {
+            if (!hasCafcassQuarantineDocOfSameCategory(caseDataUpdated, quarantineLegalDoc.getCategoryId())) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
                 caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
             } else {
@@ -150,13 +149,20 @@ public class CafcassUploadDocService {
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
-    private boolean hasCafcassQuarantineDocOfSameCategory(CaseData caseData, String categoryId) {
-        if (caseData.getDocumentManagementDetails() == null) {
+    private boolean hasCafcassQuarantineDocOfSameCategory(Map<String, Object> caseDataMap, String categoryId) {
+        Object rawList = caseDataMap.get("cafcassQuarantineDocsList");
+        if (!(rawList instanceof List<?>)) {
             return false;
         }
-        var quarantineDocs = caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList();
-        return quarantineDocs != null
-            && quarantineDocs.stream().anyMatch(doc -> categoryId.equals(doc.getValue().getCategoryId()));
+        for (Object item : (List<?>) rawList) {
+            if (item instanceof Map<?, ?> elementMap) {
+                Object value = elementMap.get("value");
+                if (value instanceof Map<?, ?> docMap && categoryId.equals(docMap.get("categoryId"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument,
