@@ -196,7 +196,7 @@
             },
             "c21OrderOptions": "c21WithdrawApplication",
             "isOrderUploaded": "No",
-            "orderClosesCase": "No",
+            "orderClosesCase": "Yes",
             "serveOrderDetails": {
               "otherParties": "",
               "cafcassServed": "No",

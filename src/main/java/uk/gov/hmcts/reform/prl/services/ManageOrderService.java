@@ -3725,19 +3725,29 @@ public class ManageOrderService {
         log.info("inside removeLocalAuthorityFromCase");
         try {
 
+
             Optional<OrderDetails> orderDetails
                 = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
 
-            if (orderDetails.isPresent() && Yes.equals(orderDetails.get().getOrderClosesCase())
-                && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(orderDetails.get().getTypeOfOrder())
-                && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
-                && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
-                removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
-                caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
-                LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
-                    .localAuthoritySolicitorOrganisationName(null)
-                    .build();
-                caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+            if (orderDetails.isPresent()) {
+                OrderDetails details = orderDetails.get();
+                log.info(
+                    "inside removeLocalAuthorityFromCase, order details order close case {}, {}, {}",
+                    details.getOrderClosesCase(), details.getTypeOfOrder(),
+                    caseData.getLocalAuthoritySolicitorOrganisationPolicy()
+                );
+
+                if (Yes.equals(details.getOrderClosesCase())
+                    && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(details.getTypeOfOrder())
+                    && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
+                    && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
+                    removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
+                    caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+                    LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
+                        .localAuthoritySolicitorOrganisationName(null)
+                        .build();
+                    caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+                }
             }
         } catch (Exception exp) {
             log.info(

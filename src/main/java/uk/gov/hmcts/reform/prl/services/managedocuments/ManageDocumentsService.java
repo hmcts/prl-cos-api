@@ -662,49 +662,39 @@ public class ManageDocumentsService {
     private static void updateQuarantineDocsBasedOnRole(Map<String, Object> caseDataUpdated,
                                                         List<Element<QuarantineLegalDoc>> quarantineDocs,
                                                         String userRole, boolean isDocumentTab) {
-        switch (userRole) {
-            case SOLICITOR ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "legalProfUploadDocListDocTab" : "legalProfQuarantineDocsList",
-                    quarantineDocs
-                );
-            case CAFCASS ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "cafcassUploadDocListDocTab" : "cafcassQuarantineDocsList",
-                    quarantineDocs
-                );
-            case COURT_STAFF ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "courtStaffUploadDocListDocTab" : "courtStaffQuarantineDocsList",
-                    quarantineDocs
-                );
-            case LOCAL_AUTHORITY ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "localAuthorityUploadDocListDocTab" : "localAuthorityQuarantineDocsList",
-                    quarantineDocs
-                );
-            case COURT_ADMIN -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
-                }
-            }
-            case BULK_SCAN -> {
-                if (isDocumentTab) {
-                    caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
-                }
-            }
-            case COURTNAV ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "courtNavUploadedDocListDocTab" : "courtNavQuarantineDocumentList",
-                    quarantineDocs
-                );
-            case CITIZEN ->
-                caseDataUpdated.put(
-                    isDocumentTab ? "citizenUploadedDocListDocTab" : "citizenQuarantineDocsList",
-                    quarantineDocs
-                );
-            default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
+
+        var uploadDocListDocTabKeys = Map.of(
+            SOLICITOR, "legalProfUploadDocListDocTab",
+            CAFCASS, "cafcassUploadDocListDocTab",
+            COURT_STAFF, "courtStaffUploadDocListDocTab",
+            LOCAL_AUTHORITY, "localAuthorityUploadDocListDocTab",
+            COURTNAV, "courtNavUploadedDocListDocTab",
+            CITIZEN, "citizenUploadedDocListDocTab",
+            BULK_SCAN, "bulkScannedDocListDocTab",
+            COURT_ADMIN, "courtStaffUploadDocListDocTab"
+        );
+
+        Map<String, String> quarantineKeys = Map.of(
+            SOLICITOR, "legalProfQuarantineDocsList",
+            CAFCASS, "cafcassQuarantineDocsList",
+            COURT_STAFF, "courtStaffQuarantineDocsList",
+            LOCAL_AUTHORITY, "localAuthorityQuarantineDocsList",
+            COURTNAV, "courtNavQuarantineDocumentList",
+            CITIZEN, "citizenQuarantineDocsList"
+        );
+
+        if (!uploadDocListDocTabKeys.containsKey(userRole)) {
+            throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
+
+        String documentKey = isDocumentTab
+            ? uploadDocListDocTabKeys.get(userRole)
+            : quarantineKeys.get(userRole);
+
+        if (null != documentKey) {
+            caseDataUpdated.put(documentKey, quarantineDocs);
+        }
+
     }
 
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
@@ -918,34 +908,51 @@ public class ManageDocumentsService {
                 .map(RoleAssignmentResponse::getRoleName).toList()
                 : List.of();
 
-            if (roles.contains(Roles.SOLICITOR.getValue()) && !amRoles.isEmpty()
-                && amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY.getRoles()::contains)) {
+            boolean isSolicitor = roles.contains(Roles.SOLICITOR.getValue());
+            if (isSolicitor && hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.LOCAL_AUTHORITY)) {
                 loggedInUserType.add(LOCAL_AUTHORITY);
-            } else if (roles.contains(Roles.SOLICITOR.getValue())) {
+                return loggedInUserType;
+            }
+            if (isSolicitor) {
                 loggedInUserType.add(LEGAL_PROFESSIONAL);
                 loggedInUserType.add(SOLICITOR_ROLE);
-            } else if (roles.contains(Roles.CITIZEN.getValue())) {
+                return loggedInUserType;
+            }
+            if (roles.contains(Roles.CITIZEN.getValue())) {
                 loggedInUserType.add(CITIZEN_ROLE);
-            } else if (!amRoles.isEmpty()) {
-                if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
-                    loggedInUserType.add(COURT_STAFF);
-                    loggedInUserType.add(JUDGE_ROLE);
-                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                    loggedInUserType.add(COURT_STAFF);
-                    loggedInUserType.add(LEGAL_ADVISER_ROLE);
-                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                    loggedInUserType.add(COURT_STAFF);
-                    loggedInUserType.add(COURT_ADMIN_ROLE);
-                } else if (amRoles.stream().anyMatch(InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU.getRoles()::contains)) {
-                    loggedInUserType.add(UserRoles.CAFCASS.name());
-                }
-            } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+                return loggedInUserType;
+            }
+
+            if (!amRoles.isEmpty()) {
+                checkCourtStaffRoles(amRoles, loggedInUserType);
+                return loggedInUserType;
+            }
+            if (roles.contains(Roles.BULK_SCAN.getValue())) {
                 loggedInUserType.add(BULK_SCAN);
             }
         } else {
             checkExistingIdamRoleConfig(roles, loggedInUserType);
         }
         return loggedInUserType;
+    }
+
+    private static void checkCourtStaffRoles(List<String> amRoles, List<String> loggedInUserType) {
+        if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.JUDGE)) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(JUDGE_ROLE);
+        } else if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.LEGAL_ADVISER)) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(LEGAL_ADVISER_ROLE);
+        } else if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.COURT_ADMIN)) {
+            loggedInUserType.add(COURT_STAFF);
+            loggedInUserType.add(COURT_ADMIN_ROLE);
+        } else if (hasAmRole(amRoles, InternalCaseworkerAmRolesEnum.CAFCASS_CYMRU)) {
+            loggedInUserType.add(UserRoles.CAFCASS.name());
+        }
+    }
+
+    private static boolean hasAmRole(List<String> amRoles, InternalCaseworkerAmRolesEnum amRole) {
+        return amRoles.stream().anyMatch(amRole.getRoles()::contains);
     }
 
     private static void checkExistingIdamRoleConfig(List<String> roles, List<String> loggedInUserType) {
