@@ -243,9 +243,12 @@ public class ManageDocumentsService {
                 .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
+            log.info("inside for transformAndMoveDocument 1 {} ", caseDataUpdated);
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+            log.info("inside for transformAndMoveDocument 2 {} ", updatedCaseData);
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
+            log.info("inside for transformAndMoveDocument 3 {} ", quarantineLegalDoc);
             if (!userRole.equals(COURT_ADMIN)) {
                 if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
                     || DocumentPartyEnum.CAFCASS_CYMRU.equals(
