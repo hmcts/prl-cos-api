@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.BaisDocumentUploadRuntimeException;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.acro.AcroResponse;
 import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
@@ -26,6 +28,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -136,11 +140,23 @@ public class BaisDocumentUploadService {
 
     private CsvData prepareDataForCsv(AcroCaseData caseData, OrderDetails order) {
 
+        PartyDetails respondent = caseData.getRespondent();
+        PartyDetails applicant = caseData.getApplicant();
         return CsvData.builder()
             .id(caseData.getId())
             .caseTypeOfApplication(caseData.getCaseTypeOfApplication())
-            .applicant(caseData.getApplicant())
-            .respondent(caseData.getRespondent())
+            .applicant(applicant.toBuilder()
+                           .isPhoneNumberConfidential(ofNullable(respondent.getIsPhoneNumberConfidential())
+                                                          .orElse(YesOrNo.No))
+                           .isEmailAddressConfidential(ofNullable(respondent.getIsEmailAddressConfidential())
+                                                           .orElse(YesOrNo.No))
+                           .build())
+            .respondent(respondent.toBuilder()
+                            .isPhoneNumberConfidential(ofNullable(respondent.getIsPhoneNumberConfidential())
+                                                           .orElse(YesOrNo.No))
+                            .isEmailAddressConfidential(ofNullable(respondent.getIsEmailAddressConfidential())
+                                                            .orElse(YesOrNo.No))
+                            .build())
             .courtName(caseData.getCourtName())
             .courtEpimsId(caseData.getCourtEpimsId())
             .courtTypeId(caseData.getCourtTypeId())
