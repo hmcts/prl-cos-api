@@ -132,7 +132,7 @@ public class QuarantineLegalDoc {
         return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
             "applicationsWithinProceedings", "applicationsWithinProceedingsRes", "applicationsFromOtherProceedings",
-            "courtnavQuarantine", "c8ArchivedDocuments", "bulkScanQuarantine", "draftOrders"
+            "courtnavQuarantine", "c8ArchivedDocuments", "bulkScanQuarantine", "draftOrders", "localAuthorityQuarantine"
         };
     }
 }
