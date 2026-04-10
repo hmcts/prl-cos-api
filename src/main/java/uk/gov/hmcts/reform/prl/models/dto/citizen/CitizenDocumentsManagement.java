@@ -47,7 +47,6 @@ public class CitizenDocumentsManagement {
             "16aRiskAssessment",
             "cirTransferRequest",
             "cirExtensionRequest",
-            "sec37Report",
             "publicFundingCertificates",
             "noticesOfActingDischarge",
             "requestForFASFormsToBeChanged",
