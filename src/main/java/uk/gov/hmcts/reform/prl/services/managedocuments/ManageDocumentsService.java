@@ -118,6 +118,7 @@ public class ManageDocumentsService {
     public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+    public static final String MANAGE_DOCUMENTS_UPLOADED_CATEGORY = "manageDocUploadedCategory";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
@@ -265,6 +266,9 @@ public class ManageDocumentsService {
                     userRole
                 );
             } else {
+                if (userRole.equals(CAFCASS) && isNewTaskRequired(caseData, quarantineLegalDoc)) {
+                    isWaTaskSetForFirstDocumentIteration = false;
+                }
                 if (!isWaTaskSetForFirstDocumentIteration) {
                     isWaTaskSetForFirstDocumentIteration = true;
                     setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
@@ -418,6 +422,11 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
+
+        if (userRole.equals(CAFCASS)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+        }
+
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
@@ -426,10 +435,35 @@ public class ManageDocumentsService {
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
-            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+            if (userRole.equals(CAFCASS)) {
+                if (isNewTaskRequired(caseData, quarantineLegalDoc)) {
+                    updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
+                } else {
+                    caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+                }
+            } else {
+                caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+            }
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
+    }
+
+    private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc) {
+        log.info("caseData.getDocumentManagementDetails() --> " + caseData.getDocumentManagementDetails());
+        boolean newTaskRequired = isGivenDocumentExists(caseData, quarantineLegalDoc.getCategoryId()).isEmpty();
+        log.info("newTaskRequired --> " + newTaskRequired);
+        return newTaskRequired;
+    }
+
+    private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(CaseData caseData, String categoryId) {
+        if (caseData.getDocumentManagementDetails() == null
+            || caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList() == null) {
+            return Optional.empty();
+        }
+        return caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList().stream()
+            .filter(each -> each.getValue().getCategoryId()
+                .equals(categoryId)).findAny();
     }
 
     public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
