@@ -180,7 +180,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private BundlingRequestDocument mapBundlingRequestDocument(Document document,
                                                                BundlingDocGroupEnum applicationsDocGroup,
                                                                FilterProperties filterProperties) {
-        // don't include redacted documents
+        // don't include redacted documents and draft documents
         if (isRedactedDocument(document) || isDraftDocument(document, filterProperties)) {
             return null;
         }
@@ -214,8 +214,8 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             && document.getDocumentFileName() != null
             && filterProperties.getHasdraft() != null
             && filterProperties.getHasdraft()) {
-            return !document.getDocumentFileName().contains("Draft");
+            return document.getDocumentFileName().contains("Draft");
         }
-        return true;
+        return false;
     }
 }
