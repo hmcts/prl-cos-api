@@ -276,7 +276,11 @@ public class ManageDocumentsService {
                 );
             } else {
                 if (userRole.equals(LOCAL_AUTHORITY) && isNewTaskRequired(caseData, quarantineLegalDoc)) {
+                    log.info("isWaTaskSetForFirstDocumentIteration 1 {} ", isWaTaskSetForFirstDocumentIteration);
                     isWaTaskSetForFirstDocumentIteration = false;
+                    log.info("isWaTaskSetForFirstDocumentIteration 2 {} ", isWaTaskSetForFirstDocumentIteration);
+                    //If the documents are uploaded all at same time
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
                 }
                 if (!isWaTaskSetForFirstDocumentIteration) {
                     isWaTaskSetForFirstDocumentIteration = true;
@@ -298,12 +302,14 @@ public class ManageDocumentsService {
     private QuarantineLegalDoc updateQuarantineLegalDocForLocalAuthority(QuarantineLegalDoc quarantineLegalDoc) {
         if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
             || ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+            log.info("inside updateQuarantineLegalDocForLocalAuthority 1");
             return quarantineLegalDoc.toBuilder()
                 .isConfidential(YesOrNo.Yes)
                 .categoryName(quarantineLegalDoc.getCategoryName())
                 .categoryId(quarantineLegalDoc.getCategoryId())
                 .build();
         }
+        log.info("inside updateQuarantineLegalDocForLocalAuthority 2");
         return quarantineLegalDoc;
     }
 
@@ -435,6 +441,7 @@ public class ManageDocumentsService {
     }
 
     public void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
+        log.info("Entering setFlagsForWaTask {} ", userRole);
         //Setting this flag for WA task
         if (userRole.equals(CITIZEN)
             || quarantineLegalDoc.getIsConfidential() != null
@@ -447,7 +454,7 @@ public class ManageDocumentsService {
         if (userRole.equals(LOCAL_AUTHORITY)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
         }
-
+        log.info("inside setFlagsForWaTask {} ", caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList());
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
@@ -458,11 +465,14 @@ public class ManageDocumentsService {
             && caseData.getScannedDocuments().size() > 1)) {
             if (userRole.equals(LOCAL_AUTHORITY)) {
                 if (isNewTaskRequired(caseData, quarantineLegalDoc)) {
+                    log.info("inside setFlagsForWaTask isNewTaskRequired");
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
                 } else {
+                    log.info("inside setFlagsForWaTask isNewTaskRequired NO");
                     caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
                 }
             } else {
+                log.info("inside setFlagsForWaTask isNewTaskRequired no LA");
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
         } else {
@@ -471,9 +481,9 @@ public class ManageDocumentsService {
     }
 
     private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc) {
-        log.info("caseData.getDocumentManagementDetails() --> " + caseData.getDocumentManagementDetails());
+        log.info("caseData.getDocumentManagementDetails {}", caseData.getDocumentManagementDetails());
         boolean newTaskRequired = isGivenDocumentExists(caseData, quarantineLegalDoc.getCategoryId()).isEmpty();
-        log.info("newTaskRequired --> " + newTaskRequired);
+        log.info("newTaskRequired {} ", newTaskRequired);
         return newTaskRequired;
     }
 
