@@ -14,6 +14,8 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class LocalAuthorityCourt {
+    public static final String TRUE = "TRUE";
+    public static final String FALSE = "FALSE";
     String localAuthority;
     String familyCourtName;
     String refDataCourtName;
@@ -40,7 +42,7 @@ public class LocalAuthorityCourt {
             .address(row.getOrDefault("Address", ""))
             .emailAddress(row.getOrDefault("emailAddress", ""))
             .status(row.getOrDefault("Status", ""))
-            .pathFinderEnabled(YesOrNo.Yes.name().equalsIgnoreCase(row.getOrDefault("Path finder enabled", YesOrNo.No.name())))
+            .pathFinderEnabled(TRUE.equalsIgnoreCase(row.getOrDefault("Path finder enabled", FALSE)))
             .build();
     }
 }
