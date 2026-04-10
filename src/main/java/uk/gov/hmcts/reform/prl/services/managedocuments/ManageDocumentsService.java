@@ -285,6 +285,9 @@ public class ManageDocumentsService {
                     log.info("isWaTaskSetForFirstDocumentIteration 2 {} ", isWaTaskSetForFirstDocumentIteration);
                     //If the documents are uploaded all at same time
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+
                 }
                 if (!isWaTaskSetForFirstDocumentIteration) {
                     isWaTaskSetForFirstDocumentIteration = true;
