@@ -125,7 +125,6 @@ public class CafcassUploadDocService {
         if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
             boolean isDuplicate = hasCafcassQuarantineDocOfSameCategory(
                 startAllTabsUpdateDataContent.caseData(),
-                caseDataUpdated,
                 quarantineLegalDoc.getCategoryId()
             );
             log.info("Cafcass urgent doc upload caseId={} type={} categoryId={} isDuplicate={}",
@@ -159,39 +158,13 @@ public class CafcassUploadDocService {
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
-    private boolean hasCafcassQuarantineDocOfSameCategory(CaseData caseData,
-                                                          Map<String, Object> caseDataMap,
-                                                          String categoryId) {
-        // Primary check: deserialized CaseData (reliable when @JsonUnwrapped works correctly)
+    private boolean hasCafcassQuarantineDocOfSameCategory(CaseData caseData, String categoryId) {
         List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
             ? caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
             : null;
-        if (CollectionUtils.isEmpty(quarantineDocs)) {
-            log.info("Cafcass quarantine list empty via CaseData deserialization — falling back to raw map");
-        } else {
-            boolean found = quarantineDocs.stream()
-                .map(Element::getValue)
-                .anyMatch(doc -> categoryId.equals(doc.getCategoryId()));
-            if (found) {
-                return true;
-            }
-        }
-
-        // Fallback: raw CCD map (guards against @JsonUnwrapped deserialization failures)
-        Object rawList = caseDataMap.get("cafcassQuarantineDocsList");
-        if (!(rawList instanceof List<?>)) {
-            log.info("cafcassQuarantineDocsList not found in raw CCD map for categoryId={}", categoryId);
-            return false;
-        }
-        for (Object item : (List<?>) rawList) {
-            if (item instanceof Map<?, ?> elementMap) {
-                Object value = elementMap.get("value");
-                if (value instanceof Map<?, ?> docMap && categoryId.equals(docMap.get("categoryId"))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return !CollectionUtils.isEmpty(quarantineDocs) && quarantineDocs.stream()
+            .map(Element::getValue)
+            .anyMatch(doc -> categoryId.equals(doc.getCategoryId()));
     }
 
     private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument,
