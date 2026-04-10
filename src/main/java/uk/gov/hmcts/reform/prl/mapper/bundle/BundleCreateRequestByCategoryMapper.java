@@ -93,17 +93,20 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                     if ("/data/orders".equals(document.getProperty())) {
                         ordersFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue())
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
                         )));
                     } else if ("/data/applications".equals(document.getProperty())) {
                         applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue())
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
                         )));
                     } else if ("/data/allOtherDocuments".equals(document.getProperty())) {
                         allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue())
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
                         )));
                     }
                 }
@@ -174,18 +177,24 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             .build();
     }
 
-    private BundlingRequestDocument mapBundlingRequestDocument(Document document, BundlingDocGroupEnum applicationsDocGroup) {
+    private BundlingRequestDocument mapBundlingRequestDocument(Document document,
+                                                               BundlingDocGroupEnum applicationsDocGroup,
+                                                               FilterProperties filterProperties) {
         // don't include redacted documents
-        if (isRedactedDocument(document)) {
+        if (isRedactedDocument(document) || isDraftDocument(document, filterProperties)) {
             return null;
         }
-        return (null != document) ? BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
-            .documentGroup(applicationsDocGroup).build() : BundlingRequestDocument.builder().build();
+
+        return BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
+                    .documentGroup(applicationsDocGroup).build();
     }
 
-    private List<BundlingRequestDocument> mapBundlingRequestDocument(List<Document> documents, BundlingDocGroupEnum applicationsDocGroup) {
+    private List<BundlingRequestDocument> mapBundlingRequestDocument(List<Document> documents,
+                                                                     BundlingDocGroupEnum applicationsDocGroup,
+                                                                     FilterProperties filterProperties) {
         if (null != documents) {
-            return documents.stream().map(d -> mapBundlingRequestDocument(d,applicationsDocGroup)).filter(Objects::nonNull).toList();
+            return documents.stream().map(d -> mapBundlingRequestDocument(d, applicationsDocGroup, filterProperties))
+                .filter(Objects::nonNull).toList();
         }
         return Collections.emptyList();
     }
@@ -200,11 +209,13 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             && (document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME));
     }
 
-    private boolean isDraftDocument(Document document, BundlingDocGroupEnum applicationsDocGroup) {
-        if (BundlingDocGroupEnum.applicantApplication.equals(applicationsDocGroup)) {
-            // TODO: add logic to ignore draft
-            return false;
+    private boolean isDraftDocument(Document document, FilterProperties filterProperties) {
+        if (document != null
+            && document.getDocumentFileName() != null
+            && filterProperties.getHasdraft() != null
+            && filterProperties.getHasdraft()) {
+            return !document.getDocumentFileName().contains("Draft");
         }
-        return (document != null && document.getCategoryId() != null);
+        return true;
     }
 }

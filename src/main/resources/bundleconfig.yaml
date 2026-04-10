@@ -28,12 +28,14 @@ bundle:
             - property: /documentGroup
               value: applicantApplication
               category: applicantApplication
+              hasdraft: true
         - type: documentSet
           property: /data/applications
           filters:
             - property: /documentGroup
               value: applicantC1AApplication
               category: applicantC1AApplication
+              hasdraft: true
         - type: documentSet
           property: /data/allOtherDocuments
           filters:
