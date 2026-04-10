@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ProcessUrgentHelpWithFees;
+import uk.gov.hmcts.reform.prl.services.managecasenotes.AddCaseNoteService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

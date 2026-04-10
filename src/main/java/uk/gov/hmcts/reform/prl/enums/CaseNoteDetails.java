@@ -17,4 +17,5 @@ public class CaseNoteDetails {
     private final String user;
     private final String dateAdded;
     private final LocalDateTime dateCreated;
+
 }

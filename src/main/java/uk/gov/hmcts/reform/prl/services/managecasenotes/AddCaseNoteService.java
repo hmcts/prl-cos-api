@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.services;
+package uk.gov.hmcts.reform.prl.services.managecasenotes;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
