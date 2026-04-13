@@ -250,6 +250,13 @@ public class ManageOrdersController {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
                 JudgeOrMagistrateTitleEnum judgeTitle = manageOrderService.getLoggedInJudgeTitle(userDetails.getId());
+
+                // If JRD didn't return a title, check if user is a legal adviser via IDAM roles
+                // (legal advisers are in staff ref data, not JRD)
+                if (judgeTitle == null && manageOrderService.isLoggedInUserLegalAdviser(authorisation)) {
+                    judgeTitle = JudgeOrMagistrateTitleEnum.justicesLegalAdviser;
+                }
+
                 if (judgeTitle != null) {
                     caseData.put("judgeOrMagistrateTitle", judgeTitle);
                     log.info("Pre-populated judge title for manage orders: {}", judgeTitle);
@@ -258,15 +265,12 @@ public class ManageOrdersController {
                 if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser == judgeTitle
                     || JudgeOrMagistrateTitleEnum.justicesClerk == judgeTitle) {
                     caseData.put("justiceLegalAdviserFullName", userDetails.getFullName());
-                    log.info("Pre-populated justiceLegalAdviserFullName for manage orders: {}", userDetails.getFullName());
                 } else if (JudgeOrMagistrateTitleEnum.magistrate == judgeTitle) {
                     caseData.put("magistrateLastName", List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
                         uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
                             .lastName(userDetails.getFullName()).build())));
-                    log.info("Pre-populated magistrateLastName for manage orders: {}", userDetails.getFullName());
                 } else {
                     caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
-                    log.info("Pre-populated judgeOrMagistratesLastName for manage orders: {}", userDetails.getFullName());
                 }
             }
         }
@@ -611,30 +615,20 @@ public class ManageOrdersController {
 
     private void addOrderToCollectionIfNotAlreadyAdded(CaseData caseData, Map<String, Object> caseDataUpdated,
                                                        String authorisation, boolean orderAlreadyAddedInMidEvent) {
-        // For custom orders: always add in about-to-submit regardless of mid-event.
-        // CCD doesn't persist mid-event data, so the order must be added here for submitted callback to find it.
-        // For other order types: skip if already added in mid-event to avoid duplicates.
-        boolean isCustomOrder = ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions());
-        log.info("addOrderToCollectionIfNotAlreadyAdded: isCustomOrder={}, orderAlreadyAddedInMidEvent={}",
-            isCustomOrder, orderAlreadyAddedInMidEvent);
-        if (!orderAlreadyAddedInMidEvent || isCustomOrder) {
-            if (isCustomOrder && orderAlreadyAddedInMidEvent) {
-                log.info("Custom order: adding order in about-to-submit (mid-event data not persisted by CCD)");
-            }
+        // For custom orders: always add in about-to-submit (they don't go through mid-event serve flow)
+        // For create/upload orders: respect the mid-event flag to avoid duplicates
+        boolean isCustomOrder = createCustomOrder.equals(caseData.getManageOrdersOptions());
+        boolean shouldAdd = isCustomOrder || !orderAlreadyAddedInMidEvent;
+
+        if (shouldAdd) {
+            log.info("Adding order to collection: isCustomOrder={}, orderAlreadyAddedInMidEvent={}",
+                isCustomOrder, orderAlreadyAddedInMidEvent);
             Map<String, Object> orderResult = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation, caseData, PrlAppsConstants.ENGLISH);
             caseDataUpdated.putAll(orderResult);
-            // Log what was added
-            if (orderResult.containsKey(ORDER_COLLECTION)) {
-                List<?> orders = (List<?>) orderResult.get(ORDER_COLLECTION);
-                log.info("About-to-submit: added orderCollection with {} orders", orders != null ? orders.size() : 0);
-            }
-            if (orderResult.containsKey(DRAFT_ORDER_COLLECTION)) {
-                List<?> drafts = (List<?>) orderResult.get(DRAFT_ORDER_COLLECTION);
-                log.info("About-to-submit: added draftOrderCollection with {} drafts", drafts != null ? drafts.size() : 0);
-            }
         } else {
-            log.info("Order already added in mid-event (serve flow), skipping duplicate add");
+            log.info("Skipping order add: already added in mid-event (orderAlreadyAddedInMidEvent={})",
+                orderAlreadyAddedInMidEvent);
         }
     }
 

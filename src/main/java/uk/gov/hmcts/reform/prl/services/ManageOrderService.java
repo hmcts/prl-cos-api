@@ -2573,31 +2573,20 @@ public class ManageOrderService {
      */
     public JudgeOrMagistrateTitleEnum getLoggedInJudgeTitle(String idamUserId) {
         if (idamUserId == null || idamUserId.isEmpty()) {
-            log.info("getLoggedInJudgeTitle: no idamUserId provided");
             return null;
         }
         try {
             List<JudicialUsersApiResponse> judicialUsers = refDataUserService.getJudicialUserBySidamId(idamUserId);
             if (judicialUsers == null || judicialUsers.isEmpty()) {
-                log.info("getLoggedInJudgeTitle: no judicial users found for idamUserId={}", idamUserId);
                 return null;
             }
             JudicialUsersApiResponse judgeDetails = judicialUsers.get(0);
-            log.info("getLoggedInJudgeTitle: postNominals={}, appointmentsCount={}",
-                judgeDetails.getPostNominals(),
-                judgeDetails.getAppointments() != null ? judgeDetails.getAppointments().size() : 0);
             if (judgeDetails.getAppointments() == null || judgeDetails.getAppointments().isEmpty()) {
-                log.info("getLoggedInJudgeTitle: no appointments found for user");
                 return null;
             }
-            String appointmentName = judgeDetails.getAppointments().get(0).getAppointment();
-            String postNominals = judgeDetails.getPostNominals();
-            log.info("getLoggedInJudgeTitle: appointmentName={}, postNominals={}", appointmentName, postNominals);
-            JudgeOrMagistrateTitleEnum result = mapAppointmentToJudgeTitle(appointmentName, postNominals);
-            log.info("getLoggedInJudgeTitle: mapped to {}", result);
-            return result;
+            return mapJudgeTitleFromAppointments(judgeDetails);
         } catch (Exception e) {
-            log.warn("Failed to get judge title for user {}: {}", idamUserId, e.getMessage());
+            log.warn("Failed to get judge title: {}", e.getMessage());
             return null;
         }
     }
@@ -2630,6 +2619,18 @@ public class ManageOrderService {
             return JudgeOrMagistrateTitleEnum.theHonourableMrJustice;
         }
         return null;
+    }
+
+    /**
+     * Checks if the logged-in user is a legal adviser based on IDAM roles.
+     * Legal advisers are not in Judicial Reference Data, so this provides
+     * a way to identify them when JRD returns null.
+     */
+    public boolean isLoggedInUserLegalAdviser(String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        return userDetails != null
+            && userDetails.getRoles() != null
+            && userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue());
     }
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
@@ -3084,7 +3085,6 @@ public class ManageOrderService {
             return null;
         }
 
-        log.info("No title mapping found for appointment: {}", appointment);
         return null;
     }
 

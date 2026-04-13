@@ -440,6 +440,78 @@ class CustomOrderServiceTest {
     }
 
     @Test
+    void testBuildHeaderPlaceholders_singleMagistrateNamePopulated() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .magistrateLastName(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("John Smith").build())
+                    .build()))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("John Smith", placeholders.get("judgeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_multipleMagistrateNamesJoined() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .magistrateLastName(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("Suki Smith").build())
+                    .build(),
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("Frenchie Smith").build())
+                    .build()))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Suki Smith and Frenchie Smith", placeholders.get("judgeName"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_threeMagistrateNamesJoinedWithCommaAndAnd() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .magistrateLastName(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("Alice Brown").build())
+                    .build(),
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("Bob Jones").build())
+                    .build(),
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("Carol White").build())
+                    .build()))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Alice Brown, Bob Jones and Carol White", placeholders.get("judgeName"));
+    }
+
+    @Test
     void testBuildHeaderPlaceholders_applicantNamePopulated() throws IOException {
         Long caseId = 1234567890123456L;
         PartyDetails applicant = PartyDetails.builder()

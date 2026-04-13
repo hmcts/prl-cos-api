@@ -4351,16 +4351,15 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createAnOrder_withServeOrder_shouldSkipAddingOrder() throws Exception {
-        // Test that non-custom orders (createAnOrder) with serve immediately still skip adding
-        // to avoid duplicate orders (CCD does pass through orderCollection for regular orders)
+    public void saveOrderDetailsTest_createAnOrder_withoutServeOrder_shouldAddOrder() throws Exception {
+        // Test that createAnOrder without serving adds order in about-to-submit
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .build();
 
         ServeOrderData serveOrderData = ServeOrderData.builder()
-            .doYouWantToServeOrder(Yes)
+            .doYouWantToServeOrder(No)  // Not serving - order not added in mid-event
             .build();
 
         CaseData caseDataWithServe = CaseData.builder()
@@ -4380,6 +4379,8 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(new java.util.HashMap<>());
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -4395,8 +4396,8 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
 
-        // For non-custom orders: skip adding when orderAlreadyAddedInMidEvent=true
-        verify(manageOrderService, never()).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        // When not serving, order must be added in about-to-submit
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
     }
 
@@ -4651,6 +4652,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -4668,6 +4670,55 @@ public class ManageOrdersControllerTest {
 
         // Verify addOrderDetailsAndReturnReverseSortedList is NOT called when serving (order already added in mid-event)
         verify(manageOrderService, times(0)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void saveOrderDetailsTest_createCustomOrder_alwaysAddsOrder() throws Exception {
+        // Custom orders don't go through mid-event serve flow, so always add in about-to-submit
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .build();
+
+        ServeOrderData serveOrderData = ServeOrderData.builder()
+            .doYouWantToServeOrder(Yes)  // Even with this flag, custom orders should still be added
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .serveOrderData(serveOrderData)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
+        when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
+            .thenReturn(new HashMap<>());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        // Custom orders are always added in about-to-submit (don't go through mid-event serve flow)
+        verify(manageOrderService, times(1)).addOrderDetailsAndReturnReverseSortedList(any(), any(), any());
         assertNotNull(response);
     }
 
@@ -5119,6 +5170,58 @@ public class ManageOrdersControllerTest {
         // Then
         assertNotNull(response);
         assertEquals("Jane Wilson", response.getData().get("justiceLegalAdviserFullName"));
+        assertNull(response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
+    }
+
+    @Test
+    public void testPopulateHeaderDetectsLegalAdviserViaIdamRoleWhenJrdReturnsNull() throws Exception {
+        // Given - a legal adviser is logged in but not in JRD (they're in staff ref data)
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(userService.getUserDetails(authToken)).thenReturn(
+            UserDetails.builder()
+                .id("legal-adviser-idam-id")
+                .email("adviser@test.com")
+                .forename("Sarah")
+                .surname("Adams")
+                .roles(List.of(Roles.LEGAL_ADVISER.getValue()))
+                .build()
+        );
+        // JRD returns null because legal advisers aren't in JRD
+        when(manageOrderService.getLoggedInJudgeTitle("legal-adviser-idam-id"))
+            .thenReturn(null);
+        // But we detect them via IDAM roles
+        when(manageOrderService.isLoggedInUserLegalAdviser(authToken))
+            .thenReturn(true);
+
+        // When
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        // Then
+        assertNotNull(response);
+        assertEquals("Sarah Adams", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }

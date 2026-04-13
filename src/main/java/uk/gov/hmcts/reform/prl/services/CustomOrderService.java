@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -552,16 +553,99 @@ public class CustomOrderService {
 
     /**
      * Extracts judge name from case data map or CaseData object.
+     * For magistrates, extracts from magistrateLastName list and joins with "and".
      */
     private String extractJudgeName(CaseData caseData, Map<String, Object> caseDataMap) {
+        // Try judgeOrMagistratesLastName first
         if (caseDataMap != null && caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME) != null) {
             String judgeName = caseDataMap.get(JUDGE_OR_MAGISTRATES_LAST_NAME).toString();
-            log.info("Judge name from caseDataMap: {}", judgeName);
-            return judgeName;
+            if (StringUtils.isNotEmpty(judgeName)) {
+                return judgeName;
+            }
         }
         String judgeName = caseData.getJudgeOrMagistratesLastName();
-        log.info("Judge name from caseData: {}", judgeName);
-        return judgeName;
+        if (StringUtils.isNotEmpty(judgeName)) {
+            return judgeName;
+        }
+
+        // Try magistrateLastName list (for multiple magistrates)
+        String magistrateNames = extractMagistrateNames(caseData, caseDataMap);
+        if (StringUtils.isNotEmpty(magistrateNames)) {
+            return magistrateNames;
+        }
+
+        return null;
+    }
+
+    /**
+     * Extracts magistrate names from the magistrateLastName list.
+     * Note: Despite the field name "lastName", users enter full names in the UI
+     * (CCD label is "Magistrate's full name").
+     */
+    @SuppressWarnings("unchecked")
+    private String extractMagistrateNames(CaseData caseData, Map<String, Object> caseDataMap) {
+        List<Element<MagistrateLastName>> magistrateList = null;
+
+        // Try from caseDataMap first
+        if (caseDataMap != null && caseDataMap.get("magistrateLastName") != null) {
+            Object magistrateObj = caseDataMap.get("magistrateLastName");
+            if (magistrateObj instanceof List) {
+                try {
+                    magistrateList = (List<Element<MagistrateLastName>>) magistrateObj;
+                } catch (ClassCastException e) {
+                    // Try converting via objectMapper if it's a list of maps
+                    List<?> rawList = (List<?>) magistrateObj;
+                    magistrateList = rawList.stream()
+                        .filter(item -> item instanceof Element || item instanceof Map)
+                        .map(item -> {
+                            if (item instanceof Element) {
+                                return (Element<MagistrateLastName>) item;
+                            } else if (item instanceof Map) {
+                                Map<String, Object> map = (Map<String, Object>) item;
+                                Object value = map.get("value");
+                                if (value instanceof Map) {
+                                    Map<String, Object> valueMap = (Map<String, Object>) value;
+                                    String lastName = valueMap.get("lastName") != null
+                                        ? valueMap.get("lastName").toString() : null;
+                                    return Element.<MagistrateLastName>builder()
+                                        .value(MagistrateLastName.builder().lastName(lastName).build())
+                                        .build();
+                                }
+                            }
+                            return null;
+                        })
+                        .filter(java.util.Objects::nonNull)
+                        .collect(java.util.stream.Collectors.toList());
+                }
+            }
+        }
+
+        // Fall back to caseData
+        if ((magistrateList == null || magistrateList.isEmpty()) && caseData.getMagistrateLastName() != null) {
+            magistrateList = caseData.getMagistrateLastName();
+        }
+
+        if (magistrateList == null || magistrateList.isEmpty()) {
+            return null;
+        }
+
+        // Extract and join names
+        List<String> names = magistrateList.stream()
+            .map(Element::getValue)
+            .filter(java.util.Objects::nonNull)
+            .map(MagistrateLastName::getLastName)
+            .filter(StringUtils::isNotEmpty)
+            .collect(java.util.stream.Collectors.toList());
+
+        if (names.isEmpty()) {
+            return null;
+        } else if (names.size() == 1) {
+            return names.get(0);
+        } else {
+            // Join with "and" for multiple names: "Smith, Jones and Brown"
+            String allButLast = String.join(", ", names.subList(0, names.size() - 1));
+            return allButLast + " and " + names.get(names.size() - 1);
+        }
     }
 
     private String extractLegalAdviserName(CaseData caseData, Map<String, Object> caseDataMap) {
