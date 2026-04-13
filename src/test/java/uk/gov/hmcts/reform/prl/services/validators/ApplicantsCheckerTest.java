@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,6 +84,42 @@ public class ApplicantsCheckerTest {
             .build();
 
         assertFalse(applicantsChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenApplicantFilledInRefugeWithoutDocThenIsFinishedReturnsTrue() {
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestName")
+            .lastName("TestLastName")
+            .dateOfBirth(LocalDate.of(2026, 1, 1))
+            .gender(Gender.male)
+            .placeOfBirth("Test")
+            .liveInRefuge(YesOrNo.Yes)
+            .address(Address.builder()
+                        .addressLine1("Test")
+                        .postCode("AB1 CD2").build())
+            .isAddressConfidential(YesOrNo.No)
+            .isAtAddressLessThan5Years(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("test@test.com")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .phoneNumber("1234567890")
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .representativeFirstName("TestSol")
+            .representativeLastName("TestLastName")
+            .solicitorEmail("test@test.com")
+            .solicitorOrg(Organisation.builder().organisationID("test").organisationName("test").build())
+            .dxNumber("1234")
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicantList)
+            .build();
+
+        assertTrue(applicantsChecker.isFinished(caseData));
     }
 
     @Test

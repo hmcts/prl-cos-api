@@ -628,11 +628,13 @@ public class UpdatePartyDetailsService {
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
+                    || !Objects.equals(respondent.getValue().getLiveInRefuge(), resp1.getValue().getLiveInRefuge())
                     || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
                     .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
+                || !Objects.equals(respondent.getValue().getLiveInRefuge(), respondentDetailsFL401.getLiveInRefuge())
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
                 || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401

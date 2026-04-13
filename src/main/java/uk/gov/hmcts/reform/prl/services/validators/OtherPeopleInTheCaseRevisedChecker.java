@@ -120,9 +120,6 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
         if (isCurrentAddressKnown.isPresent() && Yes.equals(isCurrentAddressKnown.get())) {
             Optional<YesOrNo> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
             fields.add(liveInRefuge);
-            if (liveInRefuge.isPresent() && Yes.equals(liveInRefuge.get())) {
-                fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
-            }
             fields.add(ofNullable(applicant.getAddress()));
         }
 

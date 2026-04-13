@@ -16,7 +16,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONFIRM_EDIT_CONTACT_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -74,9 +73,6 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
             Optional<YesOrNo> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
             fields.add(isLivingInRefuge);
-            if (isLivingInRefuge.isPresent() && Yes.equals(isLivingInRefuge.get())) {
-                fields.add(ofNullable(citizenDetails.get().getRefugeConfidentialityC8Form()));
-            }
             Optional<Address> address = ofNullable(citizenDetails.get().getAddress());
             fields.add(address);
             if (address.isPresent() && !verifyAddressCompleted(address.get())) {
