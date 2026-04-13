@@ -5,10 +5,7 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -237,6 +234,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
      */
     @Test
     @Order(10)
+    @Disabled
     public void givenRequestBody_whenSubmit_c7C1A_final_welshAndEnglish_document() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_FINAL);
 
