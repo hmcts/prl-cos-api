@@ -1157,4 +1157,8 @@ public class PrlAppsConstants {
     public static final String OPTION_SEND_OR_REPLY = "optionSendOrReply";
     public static final String EMPTY_VALUE = "EMPTY_VALUE";
 
+    public static final String APPLICANTS_CONFIDENTIAL_DETAILS = "applicantsConfidentialDetails";
+    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
+    public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
 }
