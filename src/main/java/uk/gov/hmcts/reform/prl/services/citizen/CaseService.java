@@ -722,6 +722,8 @@ public class CaseService {
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
             //add cafacss uploaded docs
             otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            //add local authority uploaded docs
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()));
             //add court staff uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
             //add citizen uploaded docs

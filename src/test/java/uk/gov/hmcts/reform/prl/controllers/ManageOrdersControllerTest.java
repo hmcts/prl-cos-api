@@ -55,6 +55,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -1147,6 +1148,8 @@ public class ManageOrdersControllerTest {
         );
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
+        verify(manageOrderService, times(1))
+            .removeLocalAuthorityFromCase(any(CaseData.class), anyMap());
     }
 
     @Test
@@ -1196,7 +1199,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -1311,7 +1314,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -1328,7 +1331,7 @@ public class ManageOrdersControllerTest {
         caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-                              .nameOfJudgeToReviewOrder(JudicialUser.builder().idamId("123").build()).build())
+                .nameOfJudgeToReviewOrder(JudicialUser.builder().idamId("123").build()).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1336,11 +1339,11 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .courtName("testcourt")
             .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                                 .build())
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                .build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
@@ -1361,9 +1364,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
@@ -1421,7 +1424,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -1438,7 +1441,7 @@ public class ManageOrdersControllerTest {
         caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
-                              .amendOrderSelectJudgeOrLa(JudgeOrLegalAdvisorCheckEnum.judge).build())
+                .amendOrderSelectJudgeOrLa(JudgeOrLegalAdvisorCheckEnum.judge).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1446,11 +1449,11 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .courtName("testcourt")
             .previewOrderDoc(Document.builder()
-                                 .documentUrl(generatedDocumentInfo.getUrl())
-                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                 .documentHash(generatedDocumentInfo.getHashToken())
-                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                                 .build())
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                .build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
@@ -1471,9 +1474,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
+                .id(12345L)
+                .data(stringObjectMap)
+                .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
@@ -1594,6 +1597,118 @@ public class ManageOrdersControllerTest {
         List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
         verify(manageOrderService, times(1))
             .updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
+    }
+
+
+    @Test
+    @Ignore
+    public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
+
+        applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .email("applicant@tests.com")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .canYouProvideEmailAddress(Yes)
+            .email("respondent@tests.com")
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .solicitorEmail("test@test.com")
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .state(State.CASE_ISSUED.getValue())
+            .build();
+
+        Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> listOfRespondents = Collections.singletonList(wrappedRespondents);
+
+        List<LiveWithEnum> childLiveWithList = new ArrayList<>();
+        childLiveWithList.add(LiveWithEnum.applicant);
+
+        Child child = Child.builder()
+            .childLiveWith(childLiveWithList)
+            .build();
+
+        String childNames = "child1 child2";
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        String cafcassEmail = "testing@cafcass.com";
+
+        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
+        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassEmailAddress(listOfCafcassEmail)
+            .build();
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+
+        caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().markedToServeEmailNotification(Yes)
+                              .checkForAutomatedHearing(No).build())
+            .applicantCaseName("TestCaseName")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .applicants(listOfApplicants)
+            .respondents(listOfRespondents)
+            .children(listOfChildren)
+            .courtName("testcourt")
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
+            .build();
+
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .state(State.CASE_ISSUED.getValue())
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
+        verify(manageOrderEmailService, times(1))
+            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
+        verify(manageOrderService, times(1))
+            .removeLocalAuthorityFromCase(caseData, stringObjectMap);
     }
 
     @Test
@@ -1741,7 +1856,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -2360,7 +2475,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class), any())).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class),
-                                                          any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
+            any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -2429,7 +2544,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class), any())).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class),
-                                                          any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
+            any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -2614,7 +2729,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForSendEmailNotificationOnClosingOrder() throws Exception {
+    public void testExceptionForFinalizeOrderSubmissionAndSendNotifications() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3147,7 +3262,7 @@ public class ManageOrdersControllerTest {
         hearingElementList.add(element(HearingData.builder().build()));
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -3266,7 +3381,7 @@ public class ManageOrdersControllerTest {
         hearingElementList.add(element(HearingData.builder().build()));
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -3728,7 +3843,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -3839,7 +3954,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+            .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -4108,15 +4223,12 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
 
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
-        assertExpectedException(
-            () -> {
-                manageOrdersController
-                    .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
-            },
-            RuntimeException.class, "Invalid Client"
-        );
+        assertExpectedException(() -> {
+            manageOrdersController
+                .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
+                                RuntimeException.class, "Invalid Client");
 
     }
 
@@ -4132,9 +4244,9 @@ public class ManageOrdersControllerTest {
                               .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
                                          .id(UUID.randomUUID()).value(OrderDetails
-                                                                          .builder()
-                                                                          .isAutoHearingReqPending(Yes)
-                                                                          .build())
+                                                             .builder()
+                                                             .isAutoHearingReqPending(Yes)
+                                                             .build())
                                          .build()))
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)

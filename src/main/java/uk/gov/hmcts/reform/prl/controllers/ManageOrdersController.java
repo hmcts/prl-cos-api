@@ -109,7 +109,6 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrders
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
-import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.validateCustomOrderHearingDetails;
 
 @Slf4j
 @RestController
@@ -434,6 +433,8 @@ public class ManageOrdersController {
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
 
+            manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
+
             // Debug: log orderCollection state before persisting
             if (isCustomOrder && caseDataUpdated.get(ORDER_COLLECTION) != null) {
                 List<?> orders = (List<?>) caseDataUpdated.get(ORDER_COLLECTION);
@@ -485,6 +486,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("Inside about-to-submit callback --------->>>>>>");
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -903,9 +905,6 @@ public class ManageOrdersController {
                                                         PrlAppsConstants.ENGLISH,
                                                         loggedInUserType
                 );
-            } else if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
-                // Custom order hearing validations - ensure hearingTypes is selected for AHR-eligible options
-                errorList = validateCustomOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails());
             }
 
             if (isNotEmpty(errorList)) {

@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
@@ -68,6 +69,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -93,6 +95,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -111,6 +114,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -137,22 +141,23 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
@@ -244,6 +249,8 @@ class ManageOrderServiceTest {
 
     @Mock
     private FinalisationDetailsService finalisationDetailsService;
+    @Mock
+    private RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     @Mock
     private CustomOrderService customOrderService;
@@ -2552,15 +2559,6 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    void testGetSelectedOrderInfoForUploadNameOfOrderOnly() {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication("C100")
-            .nameOfOrder("Prohibited steps order")
-            .build();
-        assertEquals("Prohibited steps order", manageOrderService.getSelectedOrderInfoForUpload(caseData));
-    }
-
-    @Test
     void testGetSelectedOrderInForUpload() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
@@ -2708,18 +2706,6 @@ class ManageOrderServiceTest {
     void testOrderStatusCreatedBySolicitor() {
         String status = manageOrderService.getOrderStatus("draftAnOrder", "SOLICITOR", null, "");
         assertEquals(OrderStatusEnum.draftedByLR.getDisplayedValue(), status);
-    }
-
-    @Test
-    void testOrderStatusCreatedByJudgeForCustomOrder() {
-        String status = manageOrderService.getOrderStatus("createCustomOrder", "JUDGE", null, null);
-        assertEquals(OrderStatusEnum.createdByJudge.getDisplayedValue(), status);
-    }
-
-    @Test
-    void testOrderStatusCreatedByAdminForCustomOrder() {
-        String status = manageOrderService.getOrderStatus("createCustomOrder", "COURT_ADMIN", null, null);
-        assertEquals(OrderStatusEnum.createdByCA.getDisplayedValue(), status);
     }
 
     @Test
@@ -3852,11 +3838,10 @@ class ManageOrderServiceTest {
     @Test
     void testCleanUpSelectedManageOrderOptions() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("manageOrdersOptions", "manageOrdersOptions");
-        caseDataUpdated.put("newOrderId", "test-order-id");
+        caseDataUpdated.put("manageOrdersOptions","manageOrdersOptions");
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         assertNull(caseDataUpdated.get("manageOrdersOptions"));
-        assertNull(caseDataUpdated.get("newOrderId"));
+
     }
 
     @Test
@@ -4018,7 +4003,9 @@ class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID(), null);
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, "eventId", UUID.randomUUID(), caseDataMap);
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -4042,7 +4029,9 @@ class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID(), null);
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, "eventId", UUID.randomUUID(), caseDataMap);
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
@@ -4067,85 +4056,12 @@ class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID(), null);
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, "eventId", UUID.randomUUID(), caseDataMap);
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
-    }
-
-    @Test
-    void testSetFieldsForWaTaskForCustomOrder() {
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .doesOrderClosesCase(Yes)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
-            .manageOrders(ManageOrders.builder().build())
-            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
-            .build();
-        // Custom order name is stored in the map, not in CaseData
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
-
-        // Mock customOrderService to return the expected order name
-        when(customOrderService.getEffectiveOrderName(any(CaseData.class), anyMap()))
-            .thenReturn("Child Arrangements Order(Live with order), Prohibited Steps Order");
-
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID(), caseDataUpdated);
-        assertNotNull(response);
-        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
-        String orderName = (String) response.get(WA_ORDER_NAME_JUDGE_CREATED);
-        assertNotNull(orderName);
-        assertTrue(orderName.contains("Child Arrangements Order"));
-    }
-
-    @Test
-    void testSetFieldsForWaTaskForCustomOrderWithHearingDetails() {
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
-        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
-
-        List<Element<HearingData>> hearingDataList = new ArrayList<>();
-        HearingData hearingData = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .build();
-        hearingDataList.add(element(hearingData));
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .doesOrderClosesCase(Yes)
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
-            .manageOrders(ManageOrders.builder()
-                .ordersHearingDetails(hearingDataList)
-                .build())
-            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
-            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
-            .build();
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
-
-        when(customOrderService.getEffectiveOrderName(any(CaseData.class), anyMap()))
-            .thenReturn("Child Arrangements Order(Live with order), Prohibited Steps Order");
-
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
-            "test token", caseData, Event.MANAGE_ORDERS.getId(), UUID.randomUUID(), caseDataUpdated);
-
-        assertNotNull(response);
-        // Verify hearing WA fields are set for custom order
-        assertEquals("Yes", response.get(WA_IS_HEARING_TASK_NEEDED));
-        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
-            response.get(WA_HEARING_OPTION_SELECTED));
-        assertEquals("No", response.get(WA_IS_MULTIPLE_HEARING_SELECTED));
     }
 
     @Test
@@ -5116,11 +5032,6 @@ class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
-            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingDates(DynamicList.builder().build())
-                .build());
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6226,9 +6137,14 @@ class ManageOrderServiceTest {
             .manageOrders(manageOrders1)
             .build();
 
-        // When hearingsList is null, method should handle gracefully and return null
-        List<Element<HearingData>> result = manageOrderService.createAutomatedHearingManagement(authToken, caseData, null);
-        assertNull(result);
+        List<Element<HearingData>> hearingsList = manageOrders1.getOrdersHearingDetails();
+        when(hearingService.createAutomatedHearing(eq(authToken), any()))
+            .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
+        Exception exception = assertThrows(ManageOrderRuntimeException.class, () -> {
+            manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingsList);
+        });
+        String expectedMessage = "Invalid Json";
+        assertTrue(expectedMessage.contains(exception.getMessage()));
     }
 
     @Test
@@ -6470,11 +6386,6 @@ class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
-            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingDates(DynamicList.builder().build())
-                .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
 
@@ -6507,12 +6418,6 @@ class ManageOrderServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
-            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingDates(DynamicList.builder().build())
-                .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
 
@@ -6547,11 +6452,6 @@ class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
-            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingDates(DynamicList.builder().build())
-                .build());
 
         Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
             "testAuth", callbackRequest, ENGLISH, null);
@@ -6581,12 +6481,6 @@ class ManageOrderServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings("testAuth", "12345")).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.populateHearingDynamicLists(any(), any(), any(), any()))
-            .thenReturn(HearingDataPrePopulatedDynamicLists.builder()
-                .retrievedHearingDates(DynamicList.builder().build())
-                .build());
         when(hearingDataService.generateHearingData(any(), any()))
             .thenReturn(HearingData.builder().build());
 
@@ -6808,29 +6702,6 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    void testGetCurrentUploadDraftOrderDetails_customOrder_shouldSetIsOrderUploadedByJudgeOrAdminToYes() {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
-            .dateOrderMade(LocalDate.now())
-            .approvalDate(LocalDate.now())
-            .applicantCaseName("Test Case 45678")
-            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
-            .manageOrders(ManageOrders.builder()
-                .customOrderDoc(Document.builder().documentFileName("custom.docx").build())
-                .build())
-            .build();
-
-        DraftOrder draftOrder = manageOrderService.getCurrentUploadDraftOrderDetails(
-            caseData, "testAuth", UserDetails.builder().build());
-
-        // Custom orders should have isOrderUploadedByJudgeOrAdmin = Yes
-        // to skip template generation in edit/approve flow
-        assertEquals(Yes, draftOrder.getIsOrderUploadedByJudgeOrAdmin());
-    }
-
-    @Test
     void testShouldFinaliseOrderAndPopulateTierOfJudge() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -6956,6 +6827,87 @@ class ManageOrderServiceTest {
         assertNotNull(errors);
         assertEquals(1, errors.size());
         assertEquals(INVALID_EMAIL_ADDRESS_ERROR, errors.getFirst());
+    }
+
+    @Test
+    public void shouldRemoveLocalAuthorityFromCase() {
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder().organisationName("OrgName").build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("id", 12345L);
+        caseDataUpdated.put("caseTypeOfApplication", "C100");
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes)
+                                                     .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+                                                     .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .orderCollection(newOrderDetails)
+            .localAuthoritySolicitorOrganisationPolicy(organisationPolicy)
+            .localAuthority(localAuthority)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .build();
+
+        manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
+
+        verify(removeLocalAuthoritySolicitorService, atLeast(1)).removeLocalAuthoritySolicitor(eq(caseData));
+        assertNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        assertEquals(No, updated.getIsLocalAuthorityInvolvedInCase());
+
+    }
+
+    @Test
+    public void shouldNotRemoveLocalAuthorityWhenOrgPolicyIsNotSet() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("id", 12345L);
+        caseDataUpdated.put("caseTypeOfApplication", "C100");
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder().organisationName("OrgName").build())
+            .build();
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
+
+
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes)
+                                                     .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+                                                     .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .orderCollection(newOrderDetails)
+            .localAuthority(localAuthority)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .build();
+
+        manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
+
+        verify(removeLocalAuthoritySolicitorService, never()).removeLocalAuthoritySolicitor(eq(caseData));
+        assertNotNull(caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNotNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        assertEquals(YesOrNo.Yes, updated.getIsLocalAuthorityInvolvedInCase());
+
     }
 
     @Test
