@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.FM5ReminderNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -2036,6 +2037,47 @@ public class CaseServiceTest {
 
         //Assert
         assertEquals("party flags updated", response.getBody());
+    }
+
+    @Test
+    public void testCirAndRiskAssessmentDocsAreNotReturnedToLipDashboard() {
+        // Given - CIR Transfer Request and CIR Extension Request docs in cafcassUploadDocListDocTab
+        // (simulates admin marking the docs as non-restricted during review — they must still be hidden)
+        QuarantineLegalDoc cirTransferDoc = QuarantineLegalDoc.builder()
+            .categoryId("cirTransferRequest")
+            .documentParty("Cafcass")
+            .uploadedBy("Cafcass")
+            .uploaderRole("CAFCASS")
+            .documentUploadedDate(LocalDateTime.now())
+            .citizenQuarantineDocument(Document.builder().documentUrl("http://url/cir-transfer").build())
+            .build();
+        QuarantineLegalDoc cirExtensionDoc = QuarantineLegalDoc.builder()
+            .categoryId("cirExtensionRequest")
+            .documentParty("Cafcass")
+            .uploadedBy("Cafcass")
+            .uploaderRole("CAFCASS")
+            .documentUploadedDate(LocalDateTime.now())
+            .citizenQuarantineDocument(Document.builder().documentUrl("http://url/cir-extension").build())
+            .build();
+
+        CaseData caseDataWithCirDocs = citizenCaseData.toBuilder()
+            .reviewDocuments(citizenCaseData.getReviewDocuments().toBuilder()
+                                 .cafcassUploadDocListDocTab(List.of(element(cirTransferDoc), element(cirExtensionDoc)))
+                                 .build())
+            .build();
+
+        // Action
+        CitizenDocumentsManagement result = caseService.getAllCitizenDocumentsOrders(authToken, caseDataWithCirDocs);
+
+        // Assert - CIR docs must NOT appear in any section of the LIP dashboard (AC6)
+        assertNotNull(result);
+        List<String> otherDocCategoryIds = result.getCitizenOtherDocuments() != null
+            ? result.getCitizenOtherDocuments().stream().map(CitizenDocuments::getCategoryId).toList()
+            : List.of();
+        assertFalse("CIR Transfer Request must not appear on LIP dashboard",
+                    otherDocCategoryIds.contains("cirTransferRequest"));
+        assertFalse("CIR Extension Request must not appear on LIP dashboard",
+                    otherDocCategoryIds.contains("cirExtensionRequest"));
     }
 
     @Test
