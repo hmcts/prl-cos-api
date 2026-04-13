@@ -594,28 +594,25 @@ public class CustomOrderService {
         // Try from caseDataMap first
         if (caseDataMap != null && caseDataMap.get("magistrateLastName") != null) {
             Object magistrateObj = caseDataMap.get("magistrateLastName");
-            if (magistrateObj instanceof List) {
-                try {
+            if (magistrateObj instanceof List<?> rawList && !rawList.isEmpty()) {
+                Object firstItem = rawList.getFirst();
+                if (firstItem instanceof Element) {
+                    // Already Element objects
                     magistrateList = (List<Element<MagistrateLastName>>) magistrateObj;
-                } catch (ClassCastException e) {
-                    // Try converting via objectMapper if it's a list of maps
-                    List<?> rawList = (List<?>) magistrateObj;
+                } else if (firstItem instanceof Map) {
+                    // Convert from list of maps (CCD format)
                     magistrateList = rawList.stream()
-                        .filter(item -> item instanceof Element || item instanceof Map)
+                        .filter(item -> item instanceof Map)
                         .map(item -> {
-                            if (item instanceof Element) {
-                                return (Element<MagistrateLastName>) item;
-                            } else if (item instanceof Map) {
-                                Map<String, Object> map = (Map<String, Object>) item;
-                                Object value = map.get("value");
-                                if (value instanceof Map) {
-                                    Map<String, Object> valueMap = (Map<String, Object>) value;
-                                    String lastName = valueMap.get("lastName") != null
-                                        ? valueMap.get("lastName").toString() : null;
-                                    return Element.<MagistrateLastName>builder()
-                                        .value(MagistrateLastName.builder().lastName(lastName).build())
-                                        .build();
-                                }
+                            Map<String, Object> map = (Map<String, Object>) item;
+                            Object value = map.get("value");
+                            if (value instanceof Map) {
+                                Map<String, Object> valueMap = (Map<String, Object>) value;
+                                String lastName = valueMap.get("lastName") != null
+                                    ? valueMap.get("lastName").toString() : null;
+                                return Element.<MagistrateLastName>builder()
+                                    .value(MagistrateLastName.builder().lastName(lastName).build())
+                                    .build();
                             }
                             return null;
                         })

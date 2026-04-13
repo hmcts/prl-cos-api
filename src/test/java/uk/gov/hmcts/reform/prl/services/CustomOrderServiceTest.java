@@ -62,6 +62,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 
 @ExtendWith(MockitoExtension.class)
 class CustomOrderServiceTest {
@@ -3236,5 +3237,170 @@ class CustomOrderServiceTest {
             doc.write(out);
             return out.toByteArray();
         }
+    }
+
+    // ========== Tests for C43 order handling ==========
+
+    @Test
+    void testBuildPlaceholders_c43Order_usesFormattedOrderName() throws IOException {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CUSTOM_ORDER_NAME_OPTION, CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder.name());
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("c43OrderType", "childArrangementsOrder");
+        caseDataMap.put("customC43OrderDetails", c43Details);
+        CaseData caseData = CaseData.builder().courtName("Family Court").build();
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        // Act
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        assertTrue(orderName.contains("C43"), "Should contain C43 reference");
+        assertTrue(orderName.contains("Section 8"), "Should contain Section 8 reference");
+    }
+
+    // ========== Tests for respondent1Name extraction ==========
+
+    @Test
+    void testBuildPlaceholders_respondent1Name_extracted() throws IOException {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CUSTOM_ORDER_NAME_OPTION, CustomOrderNameOptionsEnum.blankOrderOrDirections.name());
+        PartyDetails respondent = PartyDetails.builder().firstName("John").lastName("Smith").build();
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .respondents(List.of(Element.<PartyDetails>builder().value(respondent).build()))
+            .build();
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        // Act
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("John Smith", placeholders.get("respondent1Name"));
+    }
+
+    // ========== Tests for hearingDate extraction ==========
+
+    @Test
+    void testBuildPlaceholders_hearingDate_extracted() throws IOException {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CUSTOM_ORDER_NAME_OPTION, CustomOrderNameOptionsEnum.blankOrderOrDirections.name());
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(List.of(Element.<HearingData>builder().value(hearingData).build()))
+                .build())
+            .build();
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        // Act
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders.get("hearingDate"));
+    }
+
+    // ========== Tests for magistrate names extraction ==========
+
+    @Test
+    void testBuildPlaceholders_magistrateNames_singleMagistrate() throws IOException {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CUSTOM_ORDER_NAME_OPTION, CustomOrderNameOptionsEnum.blankOrderOrDirections.name());
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+        List<Map<String, Object>> magistrateList = new ArrayList<>();
+        Map<String, Object> magistrate1 = new HashMap<>();
+        Map<String, Object> value1 = new HashMap<>();
+        value1.put("lastName", "Jane Doe");
+        magistrate1.put("value", value1);
+        magistrateList.add(magistrate1);
+        caseDataMap.put("magistrateLastName", magistrateList);
+        CaseData caseData = CaseData.builder().courtName("Family Court").build();
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        // Act
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Jane Doe", placeholders.get("judgeName"));
+    }
+
+    @Test
+    void testBuildPlaceholders_magistrateNames_multipleMagistrates() throws IOException {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CUSTOM_ORDER_NAME_OPTION, CustomOrderNameOptionsEnum.blankOrderOrDirections.name());
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+        caseDataMap.put("magistrateLastName", createMagistrateList("Jane Doe", "John Smith", "Bob Jones"));
+        CaseData caseData = CaseData.builder().courtName("Family Court").build();
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        // Act
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String judgeName = (String) placeholders.get("judgeName");
+        assertNotNull(judgeName);
+        assertTrue(judgeName.contains("Jane Doe"), "Should contain first magistrate");
+        assertTrue(judgeName.contains("John Smith"), "Should contain second magistrate");
+        assertTrue(judgeName.contains("Bob Jones"), "Should contain third magistrate");
+        assertTrue(judgeName.contains(" and "), "Should join names with 'and'");
+    }
+
+    @Test
+    void testBuildPlaceholders_magistrateNames_fromCaseData() throws IOException {
+        // Arrange
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(CUSTOM_ORDER_NAME_OPTION, CustomOrderNameOptionsEnum.blankOrderOrDirections.name());
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>> magistrateList = List.of(
+            Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                    .lastName("Alice Brown").build()).build(),
+            Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                    .lastName("Charlie Green").build()).build()
+        );
+        CaseData caseData = CaseData.builder()
+            .courtName("Family Court")
+            .magistrateLastName(magistrateList)
+            .build();
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        // Act
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String judgeName = (String) placeholders.get("judgeName");
+        assertNotNull(judgeName);
+        assertTrue(judgeName.contains("Alice Brown"), "Should contain first magistrate");
+        assertTrue(judgeName.contains("Charlie Green"), "Should contain second magistrate");
+    }
+
+    // Helper method for creating magistrate list in CCD format
+    private List<Map<String, Object>> createMagistrateList(String... names) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (String name : names) {
+            Map<String, Object> magistrate = new HashMap<>();
+            Map<String, Object> value = new HashMap<>();
+            value.put("lastName", name);
+            magistrate.put("value", value);
+            list.add(magistrate);
+        }
+        return list;
     }
 }
