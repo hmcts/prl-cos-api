@@ -168,11 +168,11 @@ public class C100IssueCaseService {
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
         if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
-            addPathFinderDecisonTotHistoryTab(callbackRequest);
+            addPathFinderDecisionTotHistoryTab(callbackRequest);
         }
     }
 
-    public void addPathFinderDecisonTotHistoryTab(CallbackRequest callbackRequest) {
+    public void addPathFinderDecisionTotHistoryTab(CallbackRequest callbackRequest) {
 
         String systemAuthToken = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);

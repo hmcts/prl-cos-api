@@ -41,7 +41,7 @@ public class LocalAuthorityCourt {
             .address(row.getOrDefault("Address", ""))
             .emailAddress(row.getOrDefault("emailAddress", ""))
             .status(row.getOrDefault("Status", ""))
-            .pathFinderEnabled(TRUE.equalsIgnoreCase(row.getOrDefault("Path finder enabled", FALSE)))
+            .pathFinderEnabled(TRUE.equalsIgnoreCase(row.getOrDefault("Path Finder Enabled", FALSE)))
             .build();
     }
 }

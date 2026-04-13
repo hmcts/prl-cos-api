@@ -718,7 +718,7 @@ public class C100IssueCaseServiceTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
 
-        c100IssueCaseService.addPathFinderDecisonTotHistoryTab(callbackRequest);
+        c100IssueCaseService.addPathFinderDecisionTotHistoryTab(callbackRequest);
 
         verify(systemUserService).getSysUserToken();
         verify(systemUserService).getUserId(systemAuthToken);
