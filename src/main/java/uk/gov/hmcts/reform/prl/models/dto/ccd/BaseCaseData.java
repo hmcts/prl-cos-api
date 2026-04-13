@@ -192,4 +192,7 @@ public class BaseCaseData {
         }
         return documentRemovalWrapper;
     }
+
+    private List<Element<RequestOrderHearingTracking>> requestOrderTaskTrackingByHearing;
+
 }
