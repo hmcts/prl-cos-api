@@ -571,18 +571,6 @@ public class ManageOrdersController {
     }
 
     private void doSetHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
-        // Check if order was already added in mid-event whenToServeOrder (when serving immediately)
-        // If doYouWantToServeOrder=Yes, order was already added - don't duplicate
-        // BUT if order needs judge/manager review, ignore stale doYouWantToServeOrder value (serve page was skipped)
-        AmendOrderCheckEnum amendCheck = caseData.getManageOrders() != null
-            ? caseData.getManageOrders().getAmendOrderSelectCheckOptions()
-            : null;
-        boolean needsReview = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendCheck)
-            || AmendOrderCheckEnum.managerCheck.equals(amendCheck);
-        boolean orderAlreadyAddedInMidEvent = !needsReview
-            && caseData.getServeOrderData() != null
-            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder());
-
         if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
             caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
         } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -604,31 +592,16 @@ public class ManageOrdersController {
             } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
-            addOrderToCollectionIfNotAlreadyAdded(caseData, caseDataUpdated, authorisation, orderAlreadyAddedInMidEvent);
+            caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+                authorisation,
+                caseData,
+                PrlAppsConstants.ENGLISH
+            ));
         } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
             caseDataUpdated.put(
                 ORDER_COLLECTION,
                 manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
             );
-        }
-    }
-
-    private void addOrderToCollectionIfNotAlreadyAdded(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                                       String authorisation, boolean orderAlreadyAddedInMidEvent) {
-        // For custom orders: always add in about-to-submit (they don't go through mid-event serve flow)
-        // For create/upload orders: respect the mid-event flag to avoid duplicates
-        boolean isCustomOrder = createCustomOrder.equals(caseData.getManageOrdersOptions());
-        boolean shouldAdd = isCustomOrder || !orderAlreadyAddedInMidEvent;
-
-        if (shouldAdd) {
-            log.info("Adding order to collection: isCustomOrder={}, orderAlreadyAddedInMidEvent={}",
-                isCustomOrder, orderAlreadyAddedInMidEvent);
-            Map<String, Object> orderResult = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
-                authorisation, caseData, PrlAppsConstants.ENGLISH);
-            caseDataUpdated.putAll(orderResult);
-        } else {
-            log.info("Skipping order add: already added in mid-event (orderAlreadyAddedInMidEvent={})",
-                orderAlreadyAddedInMidEvent);
         }
     }
 
