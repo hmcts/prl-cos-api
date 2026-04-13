@@ -5,8 +5,8 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,10 +42,8 @@ public class BundlingControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Test
-    @Order(1)
-    void createCcdTestCase() throws Exception {
-
+    @Before
+    public void setUp() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         caseDetails = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -64,8 +62,7 @@ public class BundlingControllerFunctionalTest {
     }
 
     @Test
-    @Order(2)
-    void createBundle_then200Response() throws Exception {
+    public void createBundle_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         String requestBodyRevised = requestBody
             .replace("1648728532100635", caseDetails.getId().toString());
