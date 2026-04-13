@@ -16,13 +16,13 @@ import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNo
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -58,9 +58,9 @@ public class C100IssueCaseService {
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
     private final DfjLookupService dfjLookupService;
-    private final PathFinderLookupService pathFinderLookupService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
+    private final LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -84,8 +84,10 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
-                Optional<PathFinderMapping> pathFinderMapping = pathFinderLookupService.getPathFinderMappingByCourtField(baseLocationId);
-                if (pathFinderMapping.isPresent() && pathFinderMapping.get().isPathFinderEnabled()) {
+                List<LocalAuthorityCourt> localAuthorityCourtList = localAuthorityCourtDataLoader.getLocalAuthorityCourtList();
+                boolean isPathfinderCourt = localAuthorityCourtList.stream()
+                    .anyMatch(court -> court.getEpimmsId().equalsIgnoreCase(baseLocationId) && court.isPathFinderEnabled());
+                if (isPathfinderCourt) {
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
                 } else {
                     caseDataUpdated.put("isPathfinderCase", YesOrNo.No);

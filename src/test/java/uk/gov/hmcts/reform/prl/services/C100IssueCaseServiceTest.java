@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConf
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
-import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -56,6 +55,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -105,9 +105,6 @@ public class C100IssueCaseServiceTest {
     private SolicitorEmailService solicitorEmailService;
 
     @Mock
-    private PathFinderLookupService pathFinderLookupService;
-
-    @Mock
     private UserDetails userDetails;
 
     @Mock
@@ -153,6 +150,9 @@ public class C100IssueCaseServiceTest {
     private CcdCoreCaseDataService ccdCoreCaseDataService;
 
     @Mock
+    private LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
+
+    @Mock
     private SystemUserService systemUserService;
 
     public static final String authToken = "Bearer TestAuthToken";
@@ -196,7 +196,7 @@ public class C100IssueCaseServiceTest {
         fl401DocsMap.put(DOCUMENT_FIELD_FINAL_WELSH, "test");
         dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                       .build()).build();
-        when(locationRefDataService.getCourtDetailsFromEpimmsId(Mockito.anyString(), Mockito.anyString()))
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(anyString(), anyString()))
             .thenReturn(Optional.of(CourtVenue.builder()
                                         .courtName("test")
                                         .regionId("1")
@@ -738,15 +738,14 @@ public class C100IssueCaseServiceTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(pathFinderLookupService.getPathFinderMappingByCourtField("234946")).thenReturn(Optional.of(
-            PathFinderMapping.builder().pathFinderEnabled(true).build()));
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of());
 
         Map<String, Object> updates = c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
         Assertions.assertNull(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
         assertThat(updates).extracting("dfjArea").isEqualTo("SWANSEA");
         assertThat(updates).extracting("swanseaDFJCourt").isEqualTo("234946");
-        assertThat(updates).extracting("isPathfinderCase").isEqualTo(YesOrNo.Yes);
+        assertThat(updates).extracting("isPathfinderCase").isEqualTo(YesOrNo.No);
     }
 
     @Test
