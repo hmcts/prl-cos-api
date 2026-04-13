@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +62,8 @@ public class UpdateHearingActualsServiceTest {
     AllTabServiceImpl allTabService;
     @Mock
     HearingApiClient hearingApiClient;
+    @Mock
+    WorkingDayIndicator workingDayIndicator;
     private CaseDetails caseDetails;
     private CaseData caseData;
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
@@ -156,7 +159,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -250,7 +253,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -295,7 +298,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test

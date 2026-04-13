@@ -38,14 +38,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
-import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.getOpenMessages;
 
 
@@ -272,8 +270,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-
-        return processSendAndReplyAboutToSubmit(authorisation, caseData, caseDataMap);
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap);
     }
 
 
@@ -285,8 +282,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-
-        return processSendAndReplyAboutToSubmit(authorisation, caseData, caseDataMap);
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap);
     }
 
 
@@ -346,18 +342,4 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
 
-    private AboutToStartOrSubmitCallbackResponse processSendAndReplyAboutToSubmit(String authorisation,
-                                                                                  CaseData caseData, Map<String, Object> caseDataMap) {
-        if (caseData.getChooseSendOrReply().equals(SEND)) {
-            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
-        } else {
-            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
-        }
-
-        //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
-    }
 }

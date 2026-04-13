@@ -68,7 +68,8 @@ import static uk.gov.hmcts.reform.prl.clients.util.TestConstants.CCD_STORE_SEARC
         "staffDetails.api.url=",
         "amRoleAssignment.api.url=",
         "core_case_data.api.url=",
-        "postcodelookup.api.url="
+        "postcodelookup.api.url=",
+        "bankHolidays.api.url="
     }
 )
 
