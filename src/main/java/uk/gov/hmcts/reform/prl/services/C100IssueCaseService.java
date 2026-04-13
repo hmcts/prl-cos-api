@@ -5,6 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
@@ -12,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNo
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
@@ -29,11 +34,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.valueOf;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 
 @Service
@@ -41,6 +48,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 @RequiredArgsConstructor
 public class C100IssueCaseService {
 
+    public static final String PATHFINDER_DECISION_YES = "Pathfinder Decision Yes";
     private final AllTabServiceImpl allTabsService;
     private final DocumentGenService documentGenService;
     private final LocationRefDataService locationRefDataService;
@@ -49,6 +57,9 @@ public class C100IssueCaseService {
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
     private final DfjLookupService dfjLookupService;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final SystemUserService systemUserService;
+    private final LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -72,6 +83,14 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
+                List<LocalAuthorityCourt> localAuthorityCourtList = localAuthorityCourtDataLoader.getLocalAuthorityCourtList();
+                boolean isPathfinderCourt = localAuthorityCourtList.stream()
+                    .anyMatch(court -> court.getEpimmsId().equalsIgnoreCase(baseLocationId) && court.isPathFinderEnabled());
+                if (isPathfinderCourt) {
+                    caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
+                } else {
+                    caseDataUpdated.put("isPathfinderCase", YesOrNo.No);
+                }
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
@@ -148,5 +167,34 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
+        if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+            addPathFinderDecisonTotHistoryTab(callbackRequest);
+        }
+    }
+
+    public void addPathFinderDecisonTotHistoryTab(CallbackRequest callbackRequest) {
+
+        String systemAuthToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);
+
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
+            PATH_FINDER_DECISION, systemUpdateUserId);
+
+        String caseId = valueOf(callbackRequest.getCaseDetails().getId());
+        var startEventResponse =
+            ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
+        Event event =  Event.builder()
+                .id(startEventResponse.getEventId())
+                .summary(PATHFINDER_DECISION_YES)
+                .build();
+
+        var caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(event)
+            .data(startEventResponse.getCaseDetails().getData())
+            .build();
+        ccdCoreCaseDataService.submitUpdate(
+            systemAuthToken, eventRequestData, caseDataContent, caseId, true);
+        log.info("PATH_FINDER_DECISION : History tab event is updated for case id: {}", caseId);
     }
 }

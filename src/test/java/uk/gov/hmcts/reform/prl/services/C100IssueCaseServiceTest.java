@@ -9,7 +9,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -140,6 +145,15 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     private CaseSummaryTabService caseSummaryTab;
+
+    @Mock
+    private CcdCoreCaseDataService ccdCoreCaseDataService;
+
+    @Mock
+    private LocalAuthorityCourtDataLoader localAuthorityCourtDataLoader;
+
+    @Mock
+    private SystemUserService systemUserService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -608,6 +622,64 @@ public class C100IssueCaseServiceTest {
     }
 
     @Test
+    public void issueAndSendLocalCourtEventShouldNotifyRpaAndLocalCourtAndAddHistoryTabWhenPathfinderCase() {
+        CaseData caseData = CaseData.builder()
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .consentOrder(No)
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes)
+                                  .build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .applicantsConfidentialDetails(Collections.emptyList())
+            .childrenConfidentialDetails(Collections.emptyList())
+            .id(123L)
+            .courtList(dynamicList)
+            .isPathfinderCase(Yes)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        String systemAuthToken = "systemToken";
+        String systemUpdateUserId = "systemUserId";
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        uk.gov.hmcts.reform.ccd.client.model.StartEventResponse startEventResponse = uk.gov.hmcts.reform.ccd.client.model.StartEventResponse.builder()
+            .eventId("eventId")
+            .token("token")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(systemAuthToken);
+        when(systemUserService.getUserId(systemAuthToken)).thenReturn(systemUpdateUserId);
+        when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
+        when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
+
+
+        final CallbackRequest callbackRequest1 = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
+        c100IssueCaseService.issueAndSendToLocalCourNotification(callbackRequest1);
+
+        verify(eventPublisher, times(2)).publishEvent(Mockito.any());
+        verify(systemUserService).getSysUserToken();
+        verify(systemUserService).getUserId(systemAuthToken);
+        verify(ccdCoreCaseDataService).eventRequest(any(), eq(systemUpdateUserId));
+        verify(ccdCoreCaseDataService).startUpdate(systemAuthToken, eventRequestData, "123", true);
+        verify(ccdCoreCaseDataService).submitUpdate(eq(systemAuthToken), eq(eventRequestData), any(CaseDataContent.class), eq("123"), eq(true));
+    }
+
+    @Test
     public void checkStateIsOfflineWhenUserSelectsNonWorkAllocatedCourt() throws Exception {
         CaseData caseData = CaseData.builder()
             .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
@@ -637,7 +709,7 @@ public class C100IssueCaseServiceTest {
 
         c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
-        Assertions.assertEquals("Yes", stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
+        Assertions.assertEquals(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"), "Yes");
     }
 
     @Test
@@ -670,11 +742,47 @@ public class C100IssueCaseServiceTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(localAuthorityCourtDataLoader.getLocalAuthorityCourtList()).thenReturn(List.of());
 
         Map<String, Object> updates = c100IssueCaseService.issueAndSendToLocalCourt(authToken, callbackRequest);
 
         Assertions.assertNull(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
         assertThat(updates).extracting("dfjArea").isEqualTo("SWANSEA");
         assertThat(updates).extracting("swanseaDFJCourt").isEqualTo("234946");
+        assertThat(updates).extracting("isPathfinderCase").isEqualTo(YesOrNo.No);
+    }
+
+    @Test
+    public void testUpdateHistoryTab() {
+        CaseData caseData = CaseData.builder().id(123L).build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        String systemAuthToken = "systemToken";
+        String systemUpdateUserId = "systemUserId";
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .eventId("eventId")
+            .token("token")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(systemAuthToken);
+        when(systemUserService.getUserId(systemAuthToken)).thenReturn(systemUpdateUserId);
+        when(ccdCoreCaseDataService.eventRequest(any(), eq(systemUpdateUserId))).thenReturn(eventRequestData);
+        when(ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, "123", true)).thenReturn(startEventResponse);
+
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                                                       .data(stringObjectMap).build()).build();
+
+        c100IssueCaseService.addPathFinderDecisonTotHistoryTab(callbackRequest);
+
+        verify(systemUserService).getSysUserToken();
+        verify(systemUserService).getUserId(systemAuthToken);
+        verify(ccdCoreCaseDataService).eventRequest(any(), eq(systemUpdateUserId));
+        verify(ccdCoreCaseDataService).startUpdate(systemAuthToken, eventRequestData, "123", true);
+        verify(ccdCoreCaseDataService).submitUpdate(eq(systemAuthToken), eq(eventRequestData), any(CaseDataContent.class), eq("123"), eq(true));
     }
 }
