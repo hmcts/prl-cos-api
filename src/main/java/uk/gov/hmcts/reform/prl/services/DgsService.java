@@ -303,24 +303,21 @@ public class DgsService {
     private String getApplicantName(boolean applicantWitnessStatement, boolean respondentWitnessStatement,
                                     DocumentRequest documentRequest,CaseData caseDataFromCcd) {
         String applicantName = null;
-        if (applicantWitnessStatement) {
-            applicantName = documentRequest.getPartyName();
+
+        if (!applicantWitnessStatement && !respondentWitnessStatement) {
+            applicantName = "";
         } else {
-            if (respondentWitnessStatement) {
-                String caseTypeOfApplication = caseDataFromCcd.getCaseTypeOfApplication();
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-                    List<Element<PartyDetails>> applicantElements = emptyIfNull(caseDataFromCcd.getApplicants());
-                    List<PartyDetails> applicants = emptyIfNull(applicantElements.stream().map(Element::getValue).toList());
-                    applicantName = String.join(
-                        ", ", applicants.stream()
-                            .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
-                    );
-                } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-                    PartyDetails applicantsFL401 = caseDataFromCcd.getApplicantsFL401();
-                    applicantName = nonNull(applicantsFL401) ? applicantsFL401.getFirstName() + SPACE + applicantsFL401.getLastName() : "";
-                }
-            } else {
-                applicantName = "";
+            String caseTypeOfApplication = caseDataFromCcd.getCaseTypeOfApplication();
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                List<Element<PartyDetails>> applicantElements = emptyIfNull(caseDataFromCcd.getApplicants());
+                List<PartyDetails> applicants = emptyIfNull(applicantElements.stream().map(Element::getValue).toList());
+                applicantName = String.join(
+                    ", ", applicants.stream()
+                        .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
+                );
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                PartyDetails applicantsFL401 = caseDataFromCcd.getApplicantsFL401();
+                applicantName = nonNull(applicantsFL401) ? applicantsFL401.getFirstName() + SPACE + applicantsFL401.getLastName() : "";
             }
         }
         return applicantName;
@@ -329,24 +326,20 @@ public class DgsService {
     private String getRespondentName(boolean respondentWitnessStatement, boolean applicantWitnessStatement,
                                      DocumentRequest documentRequest,CaseData caseDataFromCcd) {
         String respondentName = null;
-        if (respondentWitnessStatement) {
-            respondentName = documentRequest.getPartyName();
+        if (!applicantWitnessStatement && !respondentWitnessStatement) {
+            respondentName = "";
         } else {
-            if (applicantWitnessStatement) {
-                String caseTypeOfApplication = caseDataFromCcd.getCaseTypeOfApplication();
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-                    List<Element<PartyDetails>> respondentElements = emptyIfNull(caseDataFromCcd.getRespondents());
-                    List<PartyDetails> respondents = emptyIfNull(respondentElements.stream().map(Element::getValue).toList());
-                    respondentName = String.join(
-                        ", ", respondents.stream()
-                            .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
-                    );
-                } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-                    PartyDetails respondentFL401 = caseDataFromCcd.getRespondentsFL401();
-                    respondentName = nonNull(respondentFL401) ? respondentFL401.getFirstName() + SPACE + respondentFL401.getLastName() : "";
-                }
-            } else {
-                respondentName = "";
+            String caseTypeOfApplication = caseDataFromCcd.getCaseTypeOfApplication();
+            if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                List<Element<PartyDetails>> respondentElements = emptyIfNull(caseDataFromCcd.getRespondents());
+                List<PartyDetails> respondents = emptyIfNull(respondentElements.stream().map(Element::getValue).toList());
+                respondentName = String.join(
+                    ", ", respondents.stream()
+                        .map(partyDetails -> partyDetails.getFirstName() + SPACE + partyDetails.getLastName()).toList()
+                );
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
+                PartyDetails respondentFL401 = caseDataFromCcd.getRespondentsFL401();
+                respondentName = nonNull(respondentFL401) ? respondentFL401.getFirstName() + SPACE + respondentFL401.getLastName() : "";
             }
         }
         return respondentName;
