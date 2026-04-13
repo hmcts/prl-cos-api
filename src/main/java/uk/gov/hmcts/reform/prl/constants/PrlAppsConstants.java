@@ -807,6 +807,7 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+    public  static final String LOCAL_AUTHORITY = "LOCAL_AUTHORITY";
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
@@ -1145,5 +1146,20 @@ public class PrlAppsConstants {
 
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
+    public static final String LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY = "localAuthoritySolicitorOrganisationPolicy";
+    public static final String LOCAL_AUTHORITY_DATA = "localAuthority";
+    public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
+    public static final String PERMISSION_REQUIRED_DOCUMENT = "uploadOrderDocForPermission";
+    public static final String MESSAGE_REPLY_DYNAMIC_LIST = "messageReplyDynamicList";
+    public static final String MESSAGE_IDENTIFIER = "messageIdentifier";
+    public static final String TASK_ASSOCIATED_WITH_MESSAGE = "taskAssociatedWithMessage";
+    public static final String CHOOSE_SEND_OR_REPLY = "chooseSendOrReply";
+    public static final String OPTION_SEND_OR_REPLY = "optionSendOrReply";
+    public static final String EMPTY_VALUE = "EMPTY_VALUE";
+
+    public static final String APPLICANTS_CONFIDENTIAL_DETAILS = "applicantsConfidentialDetails";
+    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
+    public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
 }

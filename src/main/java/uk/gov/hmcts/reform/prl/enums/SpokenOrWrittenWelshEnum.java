@@ -11,9 +11,9 @@ import lombok.RequiredArgsConstructor;
 public enum SpokenOrWrittenWelshEnum {
 
     @JsonProperty("spoken")
-    spoken("Will need to speak Welsh"),
+    spoken("Will want to speak Welsh"),
     @JsonProperty("written")
-    written("Will need to read and write in Welsh"),
+    written("Will want to read and write in Welsh"),
     @JsonProperty("both")
     both("Both");
 
