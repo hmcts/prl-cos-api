@@ -3081,8 +3081,8 @@ public class ManageOrderService {
             return JudgeOrMagistrateTitleEnum.justicesClerk;
         }
         if (appointmentLower.contains("high court") || appointmentLower.contains("justice")) {
-            // Can't determine gender from appointment, leave for manual selection
-            return null;
+            // Use postNominals to determine gender for high court judges
+            return mapHighCourtJudgeByGender(judgeDetails.getPostNominals());
         }
 
         return null;
