@@ -31,6 +31,7 @@ public class BundlingControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     private static final String VALID_REQUEST_BODY = "requests/bundle/C100-case-data.json";
+    private static final String VALID_CAFCASS_REQUEST_JSON = "requests/cafcass-cymru-send-email-request.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -43,7 +44,7 @@ public class BundlingControllerFunctionalTest {
     @Test
     public void createCcdTestCase() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         caseDetails = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
