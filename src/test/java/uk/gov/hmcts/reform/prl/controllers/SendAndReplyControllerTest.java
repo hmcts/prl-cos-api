@@ -508,7 +508,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyCommonService).sendMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap);
     }
 
     @Test
@@ -517,12 +517,16 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
 
         // then
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
@@ -533,6 +537,10 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
@@ -540,7 +548,7 @@ public class SendAndReplyControllerTest {
 
         // verify
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDetails.getData());
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData());
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
