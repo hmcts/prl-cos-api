@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
@@ -42,6 +41,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 @Slf4j
@@ -87,9 +88,9 @@ public class C100IssueCaseService {
                 boolean isPathfinderCourt = localAuthorityCourtList.stream()
                     .anyMatch(court -> court.getEpimmsId().equalsIgnoreCase(baseLocationId) && court.isPathFinderEnabled());
                 if (isPathfinderCourt) {
-                    caseDataUpdated.put("isPathfinderCase", YesOrNo.Yes);
+                    caseDataUpdated.put("isPathfinderCase", Yes);
                 } else {
-                    caseDataUpdated.put("isPathfinderCase", YesOrNo.No);
+                    caseDataUpdated.put("isPathfinderCase", No);
                 }
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
@@ -155,7 +156,7 @@ public class C100IssueCaseService {
 
     public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+        if (No.equals(caseData.getConsentOrder())) {
             SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
                 .typeOfEvent(SolicitorEmailNotificationEventEnum.notifyRpa.getDisplayedValue())
                 .caseDetailsModel(callbackRequest.getCaseDetails())
@@ -167,7 +168,7 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
-        if (YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
+        if (Yes.equals(caseData.getIsPathfinderCase())) {
             addPathFinderDecisionTotHistoryTab(callbackRequest);
         }
     }

@@ -690,7 +690,7 @@ public class C100IssueCaseServiceTest {
         Assertions.assertNull(stringObjectMap.get("isNonWorkAllocationEnabledCourtSelected"));
         assertThat(updates).extracting("dfjArea").isEqualTo("SWANSEA");
         assertThat(updates).extracting("swanseaDFJCourt").isEqualTo("234946");
-        assertThat(updates).extracting("isPathfinderCase").isEqualTo(YesOrNo.No);
+        assertThat(updates).extracting("isPathfinderCase").isEqualTo(No);
     }
 
     @Test
