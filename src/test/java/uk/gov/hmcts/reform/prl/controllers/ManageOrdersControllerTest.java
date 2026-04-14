@@ -1515,6 +1515,8 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
             callbackRequest, authToken, s2sToken
         );
@@ -2680,6 +2682,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
@@ -2719,6 +2723,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
