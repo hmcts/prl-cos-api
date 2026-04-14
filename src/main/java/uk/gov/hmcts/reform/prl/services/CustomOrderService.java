@@ -199,7 +199,7 @@ public class CustomOrderService {
      * Strips the form number in parentheses from an order description.
      * E.g., "Parental responsibility order (C45A)" -> "Parental responsibility order"
      */
-    String stripFormNumberFromDescription(String description) {
+    private String stripFormNumberFromDescription(String description) {
         if (description == null) {
             return null;
         }
@@ -209,7 +209,7 @@ public class CustomOrderService {
     /**
      * Extracts C21 sub-option display value from customC21OrderDetails ComplexType.
      */
-    String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
+    private String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
         if (caseDataMap == null) {
             return null;
         }
@@ -237,7 +237,7 @@ public class CustomOrderService {
      * Extracts C43 order types display value from customC43OrderDetails ComplexType.
      * Uses the same format as existing create order journey for consistency.
      */
-    String getC43OrdersDisplayValue(Map<String, Object> caseDataMap) {
+    private String getC43OrdersDisplayValue(Map<String, Object> caseDataMap) {
         if (caseDataMap == null) {
             return null;
         }
@@ -704,7 +704,7 @@ public class CustomOrderService {
         }
     }
 
-    String extractLegalAdviserName(CaseData caseData, Map<String, Object> caseDataMap) {
+    private String extractLegalAdviserName(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get("justiceLegalAdviserFullName") != null) {
             String name = caseDataMap.get("justiceLegalAdviserFullName").toString();
             return name;
@@ -713,7 +713,7 @@ public class CustomOrderService {
         return name;
     }
 
-    String extractJudgeTitle(CaseData caseData, Map<String, Object> caseDataMap) {
+    private String extractJudgeTitle(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get("judgeOrMagistrateTitle") != null) {
             Object titleObj = caseDataMap.get("judgeOrMagistrateTitle");
             String title = extractEnumDisplayValue(titleObj);
@@ -746,7 +746,7 @@ public class CustomOrderService {
      * Extracts and formats order date.
      * Priority: hearing date (if approved at hearing) > dateOrderMade > current date.
      */
-    String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
+    private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
         // If approved at a hearing with a hearing selected, use the hearing date
         String hearingDate = extractHearingDateFromSelection(caseDataMap);
         if (hearingDate != null) {
@@ -1940,9 +1940,9 @@ public class CustomOrderService {
         }
     }
 
-    void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                    uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
-                                    String orderName) {
+    private void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                            uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
+                                            String orderName) {
         // Follow existing pattern: read from caseData (typed), create mutable copy, put into caseDataUpdated
         List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> originalDrafts = caseData.getDraftOrderCollection();
         if (originalDrafts == null || originalDrafts.isEmpty()) {
@@ -1981,7 +1981,7 @@ public class CustomOrderService {
             docToStore.getDocumentFileName(), orderName, updatedDrafts.size());
     }
 
-    void updateFinalOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
+    private void updateFinalOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
                                             String orderName) {
         // Follow existing pattern: read from caseData (typed), create mutable copy, put into caseDataUpdated

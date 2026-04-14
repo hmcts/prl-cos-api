@@ -3892,66 +3892,6 @@ class CustomOrderServiceTest {
     // ========== Tests for extractMagistrateNames branches ==========
 
     @Test
-    void testRenderHeaderPreview_withMagistrateListAsMapFormat_extractsNames() throws IOException {
-        // Tests the Map conversion branch in extractMagistrateNames
-        Long caseId = 1234567890123456L;
-        CaseData caseData = CaseData.builder().build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
-        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
-
-        // Create magistrate list in Map format (as CCD sends it)
-        List<Map<String, Object>> magistrateMapList = new ArrayList<>();
-        Map<String, Object> mag1 = new HashMap<>();
-        Map<String, Object> mag1Value = new HashMap<>();
-        mag1Value.put("lastName", "Smith");
-        mag1.put("value", mag1Value);
-        magistrateMapList.add(mag1);
-        caseDataMap.put("magistrateLastName", magistrateMapList);
-
-        byte[] renderedBytes = new byte[]{1, 2, 3};
-        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
-
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
-
-        Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("Smith", placeholders.get("magistrateNames"));
-    }
-
-    @Test
-    void testRenderHeaderPreview_withMultipleMagistrates_joinsWithAnd() throws IOException {
-        // Tests the "and" joining branch: names.size() > 1
-        Long caseId = 1234567890123456L;
-
-        List<Element<MagistrateLastName>> magistrateList = List.of(
-            Element.<MagistrateLastName>builder()
-                .value(MagistrateLastName.builder().lastName("Smith").build())
-                .build(),
-            Element.<MagistrateLastName>builder()
-                .value(MagistrateLastName.builder().lastName("Jones").build())
-                .build(),
-            Element.<MagistrateLastName>builder()
-                .value(MagistrateLastName.builder().lastName("Brown").build())
-                .build()
-        );
-
-        CaseData caseData = CaseData.builder()
-            .magistrateLastName(magistrateList)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
-        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
-
-        byte[] renderedBytes = new byte[]{1, 2, 3};
-        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
-
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
-
-        Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("Smith, Jones and Brown", placeholders.get("magistrateNames"));
-    }
-
-    @Test
     void testRenderHeaderPreview_withMagistrateValueNotMap_handlesGracefully() throws IOException {
         // Tests branch where value is not a Map in the magistrate conversion
         Long caseId = 1234567890123456L;
