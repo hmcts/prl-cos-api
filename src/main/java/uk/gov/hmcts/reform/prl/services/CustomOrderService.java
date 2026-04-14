@@ -157,8 +157,9 @@ public class CustomOrderService {
             return null;
         }
         return switch (selectedOption) {
-            case appointmentOfGuardian, parentalResponsibility, blankOrderOrDirections,
-                 standardDirectionsOrder, specialGuardianShip -> "Children Act 1989";  // C47A, C45A, C21, SDO, C43A
+            case appointmentOfGuardian -> "Family Procedure Rules 2010";  // C47A
+            case parentalResponsibility, blankOrderOrDirections,
+                 standardDirectionsOrder, specialGuardianShip -> "Children Act 1989";  // C45A, C21, SDO, C43A
             case childArrangementsSpecificProhibitedOrder -> "Section 8 Children Act 1989";  // C43
             case nonMolestation -> "Section 42 Family Law Act 1996";  // FL404A
             case occupation -> "Section 33 to 38 Family Law Act 1996";  // FL404

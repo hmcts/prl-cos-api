@@ -3283,7 +3283,7 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Children Act 1989"), "C47A should have Children Act 1989 reference");
+        assertTrue(orderName.contains("Family Procedure Rules 2010"), "C47A should have Family Procedure Rules 2010 reference");
     }
 
     @Test
