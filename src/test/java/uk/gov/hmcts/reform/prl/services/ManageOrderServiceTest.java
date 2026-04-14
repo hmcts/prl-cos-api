@@ -3015,6 +3015,70 @@ class ManageOrderServiceTest {
         assertTrue(result.isLegalAdviser());
     }
 
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForCourtAdminRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.COURT_ADMIN.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForSolicitorRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.SOLICITOR.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.SOLICITOR.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForCitizenRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.CITIZEN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.CITIZEN.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsReturnsEmptyWhenNoRoleMatches() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of("unknown-role")).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals("", result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();

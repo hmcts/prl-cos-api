@@ -3574,4 +3574,110 @@ class CustomOrderServiceTest {
         assertTrue(orderName.contains("\n"), "SDO should have newline separator");
         assertTrue(orderName.endsWith("Children Act 1989"), "SDO should end with Children Act 1989");
     }
+
+    // ========== Tests for combineAndFinalizeCustomOrder - updateDraftOrderCollection coverage ==========
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_draftOrder_withNullDraftCollection() {
+        // Arrange - null draft collection should return early
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .draftOrderCollection(null)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        // Act - should not throw, just return early
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+
+        // Assert - no draft collection update should happen
+        assertNull(caseDataUpdated.get("draftOrderCollection"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_draftOrder_withEmptyDraftCollection() {
+        // Arrange - empty draft collection should return early
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .draftOrderCollection(new ArrayList<>())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        // Act - should not throw, just return early
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+
+        // Assert - no draft collection update should happen
+        assertNull(caseDataUpdated.get("draftOrderCollection"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_finalOrder_withNullOrderCollection() {
+        // Arrange - null order collection should return early
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .orderCollection(null)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        // Act - should not throw, just return early
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        // Assert - no order collection update should happen
+        assertNull(caseDataUpdated.get("orderCollection"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_finalOrder_withEmptyOrderCollection() {
+        // Arrange - empty order collection should return early
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .orderCollection(new ArrayList<>())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        // Act - should not throw, just return early
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        // Assert - no order collection update should happen
+        assertNull(caseDataUpdated.get("orderCollection"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_skipsWhenCustomOrderDocNull() {
+        // Arrange - no customOrderDoc means early return
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        // No customOrderDoc in map
+
+        // Act
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+
+        // Assert - nothing should be updated
+        assertNull(caseDataUpdated.get("draftOrderCollection"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_skipsWhenHeaderPreviewNull() {
+        // Arrange - customOrderDoc exists but no headerPreview
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://binary")
+                .build();
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .previewOrderDoc(null)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(customDoc);
+
+        // Act
+        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+
+        // Assert - nothing should be updated due to missing header
+        assertNull(caseDataUpdated.get("draftOrderCollection"));
+    }
 }
