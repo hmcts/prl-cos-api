@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class BundleCreateRequestByCategoriesMapper {
+public class CategoriesAndDocumentsHelper {
 
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
@@ -33,6 +34,19 @@ public class BundleCreateRequestByCategoriesMapper {
             .sorted(Comparator.comparing(Category::getCategoryName))
             .toList();
 
-        return parentCategories;
+        List<Category> allCategories = parentCategories.stream()
+            .flatMap(category -> category.getSubCategories().stream())
+            .flatMap(this::flatMapRecursiveCategory)
+            .toList();
+
+        return allCategories;
+    }
+
+    private Stream<Category> flatMapRecursiveCategory(Category category) {
+        if (category.getSubCategories() == null) {
+            return Stream.empty();
+        }
+        return Stream.concat(Stream.of(category), category.getSubCategories().stream()
+            .flatMap(this::flatMapRecursiveCategory));
     }
 }

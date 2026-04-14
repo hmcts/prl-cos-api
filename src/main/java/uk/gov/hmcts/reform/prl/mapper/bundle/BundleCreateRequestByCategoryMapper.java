@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -48,10 +47,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@ConditionalOnProperty(name = "feature.toggle.bundleByCategoryEnabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(prefix = "feature.toggle", name = "bundleByCategoryEnabled", havingValue = "true", matchIfMissing = true)
 public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequestMapper {
 
-    private final BundleCreateRequestByCategoriesMapper bundleCreateRequestByCategoriesMapper;
+    private final CategoriesAndDocumentsHelper categoriesAndDocumentsHelper;
     private final SystemUserService systemUserService;
     private final BundleCategoryConfig bundleCategoryConfig;
 
@@ -71,12 +70,8 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
 
     private BundlingCaseData mapCaseData(CaseData caseData, Hearings hearingDetails, String bundleConfigFileName) {
 
-        List<Category> parentCategories = bundleCreateRequestByCategoriesMapper
+        List<Category> allCategories = categoriesAndDocumentsHelper
             .getCategoriesAndDocuments(systemUserService.getSysUserToken(), caseData);
-        List<Category> allCategories = parentCategories.stream()
-            .flatMap(category -> category.getSubCategories().stream())
-            .flatMap(this::flatMapRecursiveCategory)
-            .toList();
 
         Map<String, List<Document>> allCategoriesToMap = allCategories.stream().collect(
             Collectors.toMap(Category::getCategoryId, category -> category.getDocuments().stream()
@@ -121,14 +116,6 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                       .orders(ordersFromCategory)
                       .allOtherDocuments(allOtherDocumentsFromCategory).build()).build();
 
-    }
-
-    private Stream<Category> flatMapRecursiveCategory(Category category) {
-        if (category.getSubCategories() == null) {
-            return Stream.empty();
-        }
-        return Stream.concat(Stream.of(category), category.getSubCategories().stream()
-            .flatMap(this::flatMapRecursiveCategory));
     }
 
     private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
