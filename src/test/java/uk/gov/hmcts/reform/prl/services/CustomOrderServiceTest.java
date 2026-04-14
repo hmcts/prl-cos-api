@@ -3575,109 +3575,384 @@ class CustomOrderServiceTest {
         assertTrue(orderName.endsWith("Children Act 1989"), "SDO should end with Children Act 1989");
     }
 
-    // ========== Tests for combineAndFinalizeCustomOrder - updateDraftOrderCollection coverage ==========
+    // ========== Tests for updateDraftOrderCollection ==========
 
     @Test
-    void testCombineAndFinalizeCustomOrder_draftOrder_withNullDraftCollection() {
-        // Arrange - null draft collection should return early
+    void testUpdateDraftOrderCollection_withNullCollection_returnsEarly() {
         CaseData caseData = CaseData.builder()
-            .id(123L)
             .draftOrderCollection(null)
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("test.docx")
+            .build();
 
-        // Act - should not throw, just return early
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        customOrderService.updateDraftOrderCollection(caseData, caseDataUpdated, doc, "Test Order");
 
-        // Assert - no draft collection update should happen
         assertNull(caseDataUpdated.get("draftOrderCollection"));
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_draftOrder_withEmptyDraftCollection() {
-        // Arrange - empty draft collection should return early
+    void testUpdateDraftOrderCollection_withEmptyCollection_returnsEarly() {
         CaseData caseData = CaseData.builder()
-            .id(123L)
             .draftOrderCollection(new ArrayList<>())
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("test.docx")
+            .build();
 
-        // Act - should not throw, just return early
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        customOrderService.updateDraftOrderCollection(caseData, caseDataUpdated, doc, "Test Order");
 
-        // Assert - no draft collection update should happen
         assertNull(caseDataUpdated.get("draftOrderCollection"));
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_finalOrder_withNullOrderCollection() {
-        // Arrange - null order collection should return early
+    void testUpdateDraftOrderCollection_withValidCollection_updatesDraft() {
+        uk.gov.hmcts.reform.prl.models.DraftOrder existingDraft = uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+            .otherDetails(uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails.builder()
+                .dateCreated(java.time.LocalDateTime.now())
+                .build())
+            .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> draftList = new ArrayList<>();
+        draftList.add(Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+            .id(UUID.randomUUID())
+            .value(existingDraft)
+            .build());
+
         CaseData caseData = CaseData.builder()
-            .id(123L)
+            .draftOrderCollection(draftList)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("updated.docx")
+            .documentUrl("http://url")
+            .build();
+
+        customOrderService.updateDraftOrderCollection(caseData, caseDataUpdated, doc, "Custom Order");
+
+        assertNotNull(caseDataUpdated.get("draftOrderCollection"));
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> updatedList =
+            (List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
+        assertEquals(1, updatedList.size());
+        assertEquals("updated.docx", updatedList.get(0).getValue().getOrderDocument().getDocumentFileName());
+        assertEquals("Custom Order", updatedList.get(0).getValue().getOrderTypeId());
+    }
+
+    // ========== Tests for updateFinalOrderCollection ==========
+
+    @Test
+    void testUpdateFinalOrderCollection_withNullCollection_returnsEarly() {
+        CaseData caseData = CaseData.builder()
             .orderCollection(null)
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("test.docx")
+            .build();
 
-        // Act - should not throw, just return early
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Test Order");
 
-        // Assert - no order collection update should happen
         assertNull(caseDataUpdated.get("orderCollection"));
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_finalOrder_withEmptyOrderCollection() {
-        // Arrange - empty order collection should return early
+    void testUpdateFinalOrderCollection_withEmptyCollection_returnsEarly() {
         CaseData caseData = CaseData.builder()
-            .id(123L)
             .orderCollection(new ArrayList<>())
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("test.docx")
+            .build();
 
-        // Act - should not throw, just return early
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Test Order");
 
-        // Assert - no order collection update should happen
         assertNull(caseDataUpdated.get("orderCollection"));
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_skipsWhenCustomOrderDocNull() {
-        // Arrange - no customOrderDoc means early return
+    void testUpdateFinalOrderCollection_withValidCollection_updatesOrder() {
+        uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+            .orderTypeId("Old Order")
+            .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(UUID.randomUUID())
+            .value(existingOrder)
+            .build());
+
         CaseData caseData = CaseData.builder()
-            .id(123L)
+            .orderCollection(orderList)
             .build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        // No customOrderDoc in map
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("final.docx")
+            .documentUrl("http://url")
+            .build();
 
-        // Act
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Final Custom Order");
 
-        // Assert - nothing should be updated
-        assertNull(caseDataUpdated.get("draftOrderCollection"));
+        assertNotNull(caseDataUpdated.get("orderCollection"));
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+        assertEquals(1, updatedList.size());
+        assertEquals("final.docx", updatedList.get(0).getValue().getOrderDocument().getDocumentFileName());
+        assertEquals("Final Custom Order", updatedList.get(0).getValue().getOrderTypeId());
+    }
+
+    // ========== Tests for processCustomOrderOnSubmitted - sealing branch ==========
+
+    @Test
+    void testProcessCustomOrderOnSubmitted_finalOrder_sealsDocument() throws Exception {
+        // Arrange
+        String authorisation = "auth-token";
+        Long caseId = 123L;
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+
+        byte[] headerBytes = new byte[]{1, 2, 3};
+        byte[] userBytes = new byte[]{4, 5, 6};
+
+        when(documentGenService.getDocumentBytes(eq("http://header-url"), eq(authorisation), any()))
+            .thenReturn(headerBytes);
+        when(documentGenService.getDocumentBytes(eq("http://user-url"), eq(authorisation), any()))
+            .thenReturn(userBytes);
+
+        // Mock upload service
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = "http://binary-url";
+        links.binary = binaryLink;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = "http://self-url";
+        links.self = selfLink;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document uploadedAmDoc =
+            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder()
+                .links(links)
+                .originalDocumentName("combined.docx")
+                .build();
+        when(uploadService.uploadDocument(any(byte[].class), any(), any(), any()))
+            .thenReturn(uploadedAmDoc);
+
+        // Mock sealing service for final orders
+        uk.gov.hmcts.reform.prl.models.documents.Document sealedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("sealed.pdf")
+                .documentUrl("http://sealed-url")
+                .build();
+        when(documentSealingService.sealDocument(any(), any(), any()))
+            .thenReturn(sealedDoc);
+
+        // Act - isDraftOrder = false should trigger sealing
+        uk.gov.hmcts.reform.prl.models.documents.Document result = customOrderService.processCustomOrderOnSubmitted(
+            authorisation, caseId, caseData, "http://user-url", "http://header-url", caseDataMap, false
+        );
+
+        // Assert - should return sealed document
+        verify(documentSealingService).sealDocument(any(), eq(caseData), eq(authorisation));
+        assertEquals("sealed.pdf", result.getDocumentFileName());
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_skipsWhenHeaderPreviewNull() {
-        // Arrange - customOrderDoc exists but no headerPreview
-        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
-            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                .documentBinaryUrl("http://binary")
-                .build();
+    void testProcessCustomOrderOnSubmitted_draftOrder_doesNotSeal() throws Exception {
+        // Arrange
+        String authorisation = "auth-token";
+        Long caseId = 123L;
         CaseData caseData = CaseData.builder()
-            .id(123L)
-            .previewOrderDoc(null)
+            .id(caseId)
             .build();
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("customOrderDoc", customDoc);
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
 
-        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
-            .thenReturn(customDoc);
+        byte[] headerBytes = new byte[]{1, 2, 3};
+        byte[] userBytes = new byte[]{4, 5, 6};
 
-        // Act
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        when(documentGenService.getDocumentBytes(eq("http://header-url"), eq(authorisation), any()))
+            .thenReturn(headerBytes);
+        when(documentGenService.getDocumentBytes(eq("http://user-url"), eq(authorisation), any()))
+            .thenReturn(userBytes);
 
-        // Assert - nothing should be updated due to missing header
-        assertNull(caseDataUpdated.get("draftOrderCollection"));
+        // Mock upload service
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = "http://binary-url";
+        links.binary = binaryLink;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = "http://self-url";
+        links.self = selfLink;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document uploadedAmDoc =
+            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder()
+                .links(links)
+                .originalDocumentName("combined.docx")
+                .build();
+        when(uploadService.uploadDocument(any(byte[].class), any(), any(), any()))
+            .thenReturn(uploadedAmDoc);
+
+        // Act - isDraftOrder = true should NOT trigger sealing
+        uk.gov.hmcts.reform.prl.models.documents.Document result = customOrderService.processCustomOrderOnSubmitted(
+            authorisation, caseId, caseData, "http://user-url", "http://header-url", caseDataMap, true
+        );
+
+        // Assert - should return uploaded document without sealing
+        verify(documentSealingService, never()).sealDocument(any(), any(), any());
+        assertEquals("combined.docx", result.getDocumentFileName());
+    }
+
+    // ========== Additional condition coverage tests ==========
+
+    @Test
+    void testRenderHeaderPreview_withNullCustomOrderNameOption_usesPlainDescription() throws IOException {
+        // Test the else branch when formNumber/actReference is null
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("My Custom Order")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No customOrderNameOption - should use nameOfOrder field
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertEquals("My Custom Order", orderName);
+        assertFalse(orderName.contains("\n"), "Should not have newline when no act reference");
+    }
+
+    @Test
+    void testRenderHeaderPreview_withInvalidCustomOrderNameOption_fallsBackToDefault() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "invalidEnumValue");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders.get("orderName"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withJudgeTitleAsInteger_handlesGracefully() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("judgeOrMagistrateTitle", 12345); // Invalid type
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Should not throw, placeholders should still be populated
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders);
+    }
+
+    @Test
+    void testRenderHeaderPreview_withEmptyMagistrateList_usesEmptyString() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .magistrateLastName(new ArrayList<>())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders);
+    }
+
+    @Test
+    void testRenderHeaderPreview_withHearingNotApproved_noHearingDate() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("customOrderWasApprovedAtHearing", "No"); // Not approved at hearing
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders);
+    }
+
+    @Test
+    void testRenderHeaderPreview_withDateOrderMadeAsString_parsesCorrectly() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("dateOrderMade", "2026-04-14"); // String format
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders.get("orderDate"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withDateOrderMadeAsLocalDate_formatsCorrectly() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("dateOrderMade", LocalDate.of(2026, 4, 14));
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("14/04/2026", placeholders.get("orderDate"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withNullCaseDataMap_handlesGracefully() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("Fallback Order Name")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders);
+        assertEquals("Fallback Order Name", placeholders.get("orderName"));
     }
 }

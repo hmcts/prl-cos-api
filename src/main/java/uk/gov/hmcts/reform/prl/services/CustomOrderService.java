@@ -1940,9 +1940,9 @@ public class CustomOrderService {
         }
     }
 
-    private void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                            uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
-                                            String orderName) {
+    void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                    uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
+                                    String orderName) {
         // Follow existing pattern: read from caseData (typed), create mutable copy, put into caseDataUpdated
         List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> originalDrafts = caseData.getDraftOrderCollection();
         if (originalDrafts == null || originalDrafts.isEmpty()) {
@@ -1981,7 +1981,7 @@ public class CustomOrderService {
             docToStore.getDocumentFileName(), orderName, updatedDrafts.size());
     }
 
-    private void updateFinalOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
+    void updateFinalOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,
                                             uk.gov.hmcts.reform.prl.models.documents.Document docToStore,
                                             String orderName) {
         // Follow existing pattern: read from caseData (typed), create mutable copy, put into caseDataUpdated
