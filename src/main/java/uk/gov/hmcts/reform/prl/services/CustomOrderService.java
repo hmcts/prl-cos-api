@@ -149,6 +149,27 @@ public class CustomOrderService {
     }
 
     /**
+     * Returns the act reference to display above the order name in the header.
+     * Returns null/empty for orders that don't require an act reference.
+     */
+    private String getActReferenceForOrder(CustomOrderNameOptionsEnum selectedOption) {
+        if (selectedOption == null) {
+            return null;
+        }
+        return switch (selectedOption) {
+            case appointmentOfGuardian, parentalResponsibility, blankOrderOrDirections,
+                 standardDirectionsOrder, specialGuardianShip -> "Children Act 1989";  // C47A, C45A, C21, SDO, C43A
+            case childArrangementsSpecificProhibitedOrder -> "Section 8 Children Act 1989";  // C43
+            case nonMolestation -> "Section 42 Family Law Act 1996";  // FL404A
+            case occupation -> "Section 33 to 38 Family Law Act 1996";  // FL404
+            case powerOfArrest, amendDischargedVaried, blank -> "Family Law Act 1996";  // FL406, FL404B
+            case noticeOfProceedingsParties, noticeOfProceedingsNonParties, noticeOfProceedings,
+                 generalForm, directionOnIssue -> null;  // C6, N117, FL402 - no act
+            default -> null;
+        };
+    }
+
+    /**
      * Extracts C21 sub-option display value from customC21OrderDetails ComplexType.
      */
     private String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
@@ -356,15 +377,16 @@ public class CustomOrderService {
         log.info("Placeholder 'caseNumber' = '{}'", caseId);
         safePut(data, COURT_NAME, caseData::getCourtName);
 
-        // For C43 orders, use special header format with "Order" title and form number on separate lines
+        // Format order name with act reference where applicable
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
-        if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
-            String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
-            String formattedOrderName = "C43 - Section 8 Children Act 1989\n" + orderDescription;
+        String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
+        String actReference = getActReferenceForOrder(selectedOption);
+        if (actReference != null && !actReference.isEmpty()) {
+            String formattedOrderName = actReference + "\n" + orderDescription;
             data.put("orderName", formattedOrderName);
-            log.info("C43 order - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
+            log.info("Order with act reference - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
         } else {
-            safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
+            data.put("orderName", orderDescription);
         }
         safePut(data, "respondent1Name", () -> {
             var respondent = caseData.getRespondents().getFirst().getValue();
@@ -898,15 +920,16 @@ public class CustomOrderService {
         populateFamilymanPlaceholders(data, caseData);
         safePut(data, COURT_NAME, caseData::getCourtName);
 
-        // For C43 orders, use special header format with "Order" title and form number on separate lines
+        // Format order name with act reference where applicable
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
-        if (CustomOrderNameOptionsEnum.childArrangementsSpecificProhibitedOrder == selectedOption) {
-            String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
-            String formattedOrderName = "C43 - Section 8 Children Act 1989\n" + orderDescription;
+        String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
+        String actReference = getActReferenceForOrder(selectedOption);
+        if (actReference != null && !actReference.isEmpty()) {
+            String formattedOrderName = actReference + "\n" + orderDescription;
             data.put("orderName", formattedOrderName);
-            log.info("C43 order - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
+            log.info("Order with act reference - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
         } else {
-            safePut(data, "orderName", () -> getEffectiveOrderName(caseData, caseDataMap));
+            data.put("orderName", orderDescription);
         }
 
         // Judge details

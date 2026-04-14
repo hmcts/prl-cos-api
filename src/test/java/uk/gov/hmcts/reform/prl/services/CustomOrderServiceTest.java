@@ -3266,4 +3266,210 @@ class CustomOrderServiceTest {
         }
         return list;
     }
+
+    // Tests for act reference in order header
+
+    @Test
+    void testOrderHeaderContainsActReferenceForC47A() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "appointmentOfGuardian");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Children Act 1989"), "C47A should have Children Act 1989 reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForC45A() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Children Act 1989"), "C45A should have Children Act 1989 reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForC21() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Children Act 1989"), "C21 should have Children Act 1989 reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForSDO() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "standardDirectionsOrder");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Children Act 1989"), "SDO should have Children Act 1989 reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForC43A() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "specialGuardianShip");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Children Act 1989"), "C43A should have Children Act 1989 reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForC43() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Section 8 Children Act 1989"), "C43 should have Section 8 act reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForFL404A() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "nonMolestation");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Section 42 Family Law Act 1996"), "FL404A should have Section 42 act reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForFL404() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "occupation");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Section 33 to 38 Family Law Act 1996"), "FL404 should have Section 33 to 38 act reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForFL406() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "powerOfArrest");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Family Law Act 1996"), "FL406 should have Family Law Act 1996 reference");
+    }
+
+    @Test
+    void testOrderHeaderContainsActReferenceForFL404B() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "blank");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("Family Law Act 1996"), "FL404B should have Family Law Act 1996 reference");
+    }
+
+    @Test
+    void testOrderHeaderHasNoActReferenceForC6() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "noticeOfProceedingsParties");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertFalse(orderName.contains("Act 1989") || orderName.contains("Act 1996"), "C6 should have no act reference");
+    }
+
+    @Test
+    void testOrderHeaderHasNoActReferenceForN117() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "generalForm");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertFalse(orderName.contains("Act 1989") || orderName.contains("Act 1996"), "N117 should have no act reference");
+    }
 }
