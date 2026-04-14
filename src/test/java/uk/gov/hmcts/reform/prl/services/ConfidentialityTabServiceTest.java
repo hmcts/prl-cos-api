@@ -1,13 +1,10 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
@@ -39,9 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -49,14 +46,10 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConfidentialityTabServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ConfidentialityTabServiceTest {
 
-    @InjectMocks
     ConfidentialityTabService confidentialityTabService;
-
-    @Mock
-    ObjectMapper objectMapper;
 
     Address address;
     PartyDetails partyDetails1;
@@ -65,8 +58,9 @@ public class ConfidentialityTabServiceTest {
     PartyDetails refugePartyDetails1;
     PartyDetails refugePartyDetails2;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+        confidentialityTabService = new ConfidentialityTabService();
 
         address = Address.builder()
             .addressLine1("AddressLine1")
@@ -77,7 +71,7 @@ public class ConfidentialityTabServiceTest {
         refugePartyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -95,7 +89,7 @@ public class ConfidentialityTabServiceTest {
         refugePartyDetails2 = PartyDetails.builder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -112,12 +106,12 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetails() {
+    void testApplicantConfidentialDetails() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -131,7 +125,7 @@ public class ConfidentialityTabServiceTest {
         partyDetails2 = PartyDetails.builder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -158,12 +152,12 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNull() {
+    void testApplicantConfidentialDetailsWhenNull() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -186,12 +180,10 @@ public class ConfidentialityTabServiceTest {
             expectedOutput,
             confidentialityTabService.getConfidentialApplicantDetails(List.of(partyDetails1))
         );
-
     }
 
-
     @Test
-    public void testChildConfidentialDetailsV2() {
+    void testChildConfidentialDetailsV2() {
 
         ChildrenAndApplicantRelation childrenAndApplicantRelation = ChildrenAndApplicantRelation.builder()
             .applicantFullName("Test")
@@ -262,8 +254,6 @@ public class ConfidentialityTabServiceTest {
         List<Element<ChildrenAndRespondentRelation>> childrenAndRespondentRelationList =
             Collections.singletonList(childrenAndRespondentRelationElement);
 
-
-
         CaseData caseData = CaseData.builder()
             .taskListVersion("v2")
             .newChildDetails(listOfChildren)
@@ -278,15 +268,13 @@ public class ConfidentialityTabServiceTest {
                 .otherPartyInTheCaseRevised(List.of(partyWrapped))
             .build();
 
-
         assertNotNull(
             confidentialityTabService.getChildrenConfidentialDetails(caseData)
         );
     }
 
-
     @Test
-    public void testChildConfidentialDetails() {
+    void testChildConfidentialDetails() {
         OtherPersonWhoLivesWithChild personWhoLivesWithChild1 = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
             .firstName("Confidential First Name").lastName("Confidential Last Name").address(address).build();
@@ -309,7 +297,6 @@ public class ConfidentialityTabServiceTest {
             .lastName("Name")
             .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
             .build();
-
 
         List<Child> listOfChildren = Collections.singletonList(child);
         List<Element<ChildConfidentialityDetails>> expectedOutput = List.of(
@@ -335,12 +322,12 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testChildAndPartyConfidentialDetails() {
+    void testChildAndPartyConfidentialDetails() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -354,7 +341,7 @@ public class ConfidentialityTabServiceTest {
         partyDetails2 = PartyDetails.builder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -364,8 +351,6 @@ public class ConfidentialityTabServiceTest {
             .phoneNumber("12345678900")
             .email("abc2@xyz.com")
             .build();
-
-
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChild1 = OtherPersonWhoLivesWithChild.builder()
             .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
@@ -417,11 +402,10 @@ public class ConfidentialityTabServiceTest {
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
-
     }
 
     @Test
-    public void testFl401ChildConfidentialDetails() {
+    void testFl401ChildConfidentialDetails() {
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
             .keepChildrenInfoConfidential(YesOrNo.Yes)
@@ -446,7 +430,6 @@ public class ConfidentialityTabServiceTest {
                       .build())
             .build();
 
-
         assertEquals(
             expectedOutput,
             confidentialityTabService.getFl401ChildrenConfidentialDetails(caseData)
@@ -454,7 +437,7 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void shouldAllowFl401KeepChildrenInfoConfidentialToBeNull() {
+    void shouldAllowFl401KeepChildrenInfoConfidentialToBeNull() {
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
             .keepChildrenInfoConfidential(null)
@@ -482,12 +465,12 @@ public class ConfidentialityTabServiceTest {
     }
 
     @Test
-    public void testChildAndPartyConfidentialDetailsFl401() {
+    void testChildAndPartyConfidentialDetailsFl401() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -497,7 +480,6 @@ public class ConfidentialityTabServiceTest {
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .build();
-
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
@@ -527,11 +509,10 @@ public class ConfidentialityTabServiceTest {
 
         assertTrue(stringObjectMap.containsKey("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
-
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNoApplicantsPresent() {
+    void testApplicantConfidentialDetailsWhenNoApplicantsPresent() {
 
         CaseData caseData = CaseData.builder()
             .applicants(null)
@@ -543,11 +524,10 @@ public class ConfidentialityTabServiceTest {
         assertTrue(stringObjectMap.containsKey("childrenConfidentialDetails"));
         assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
         assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("childrenConfidentialDetails"));
-
     }
 
     @Test
-    public void testApplicantConfidentialDetailsWhenNoFL401ApplicantsPresent() {
+    void testApplicantConfidentialDetailsWhenNoFL401ApplicantsPresent() {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
@@ -576,16 +556,15 @@ public class ConfidentialityTabServiceTest {
 
         assertEquals(Collections.EMPTY_LIST,stringObjectMap.get("applicantsConfidentialDetails"));
         assertTrue(stringObjectMap.containsKey("fl401ChildrenConfidentialDetails"));
-
     }
 
     @Test
-    public void testRefugeApplicantConfidentialDetails() {
+    void testRefugeApplicantConfidentialDetails() {
 
         refugePartyDetails1 = refugePartyDetails1.toBuilder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -599,7 +578,7 @@ public class ConfidentialityTabServiceTest {
         refugePartyDetails2 = refugePartyDetails2.toBuilder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -632,16 +611,15 @@ public class ConfidentialityTabServiceTest {
             expectedOutput,
             confidentialityTabService.getConfidentialApplicantDetails(List.of(refugePartyDetails1, refugePartyDetails2))
         );
-
     }
 
     @Test
-    public void testGetChildrenConfidentialDetailsV2() {
+    void testGetChildrenConfidentialDetailsV2() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -655,8 +633,6 @@ public class ConfidentialityTabServiceTest {
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
             partyDetails1).build();
         List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
-
-
 
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
@@ -678,20 +654,20 @@ public class ConfidentialityTabServiceTest {
         List<Element<ChildConfidentialityDetails>> result = confidentialityTabService.getChildrenConfidentialDetailsV2(caseData);
 
         // Assertions
-        Assertions.assertEquals(1, result.size());
-        ChildConfidentialityDetails details = result.get(0).getValue();
+        assertEquals(1, result.size());
+        ChildConfidentialityDetails details = result.getFirst().getValue();
         assertEquals("ChildFirstName", details.getFirstName());
         assertEquals("ChildLastName", details.getLastName());
         assertEquals(1, details.getOtherPerson().size());
     }
 
     @Test
-    public void testGetChildrenConfidentialDetailsV2_scenario2() {
+    void testGetChildrenConfidentialDetailsV2_scenario2() {
 
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -705,8 +681,6 @@ public class ConfidentialityTabServiceTest {
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
             partyDetails1).build();
         List<Element<PartyDetails>> otherPartyList =  List.of(partyDetailsFirstRec);
-
-
 
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
@@ -728,11 +702,11 @@ public class ConfidentialityTabServiceTest {
         List<Element<ChildConfidentialityDetails>> result = confidentialityTabService.getChildrenConfidentialDetailsV2(caseData);
 
         // Assertions
-        Assertions.assertEquals(0, result.size());
+        assertEquals(0, result.size());
     }
 
     @Test
-    public void testUpdateOtherPeopleConfidentiality_withConfidentialRelations() {
+    void testUpdateOtherPeopleConfidentiality_withConfidentialRelations() {
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
@@ -744,7 +718,7 @@ public class ConfidentialityTabServiceTest {
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -766,15 +740,15 @@ public class ConfidentialityTabServiceTest {
         List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, otherPartyList);
 
         // Assertions
-        Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
-        Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsAddressConfidential());
-        Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
-        Assertions.assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsEmailAddressConfidential());
+        assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
+        assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsAddressConfidential());
+        assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
+        assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsEmailAddressConfidential());
     }
 
     @Test
-    public void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations() {
+    void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations() {
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
@@ -786,7 +760,7 @@ public class ConfidentialityTabServiceTest {
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -808,20 +782,20 @@ public class ConfidentialityTabServiceTest {
         List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, otherPartyList);
 
         // Assertions
-        Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+        assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
     }
 
     @Test
-    public void testUpdateOtherPeopleConfidentiality_withEmptyRelations() {
+    void testUpdateOtherPeopleConfidentiality_withEmptyRelations() {
         // Mock data
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -842,20 +816,20 @@ public class ConfidentialityTabServiceTest {
         List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(relations, otherPartyList);
 
         // Assertions
-        Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+        assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
     }
 
     @Test
-    public void testUpdateOtherPeopleConfidentiality_withNullRelations() {
+    void testUpdateOtherPeopleConfidentiality_withNullRelations() {
         // Mock data
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -874,15 +848,15 @@ public class ConfidentialityTabServiceTest {
         List<Element<PartyDetails>> result = confidentialityTabService.updateOtherPeopleConfidentiality(null, otherPartyList);
 
         // Assertions
-        Assertions.assertEquals(1, result.size());
-        PartyDetails updatedPartyDetails = result.get(0).getValue();
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        Assertions.assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+        assertEquals(1, result.size());
+        PartyDetails updatedPartyDetails = result.getFirst().getValue();
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
+        assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
     }
 
     @Test
-    public void testUpdateOtherPeopleConfidentiality_withNullOtherPartyList() {
+    void testUpdateOtherPeopleConfidentiality_withNullOtherPartyList() {
         // Mock data
         ChildrenAndOtherPeopleRelation relation = mock(ChildrenAndOtherPeopleRelation.class);
 
@@ -894,6 +868,4 @@ public class ConfidentialityTabServiceTest {
         // Assertions
         Assertions.assertNull(result);
     }
-
-
 }
