@@ -71,10 +71,11 @@ public class BundlingControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         String requestBodyRevised = requestBody
             .replace("1648728532100635", caseDetails.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/bundle/createBundle")
