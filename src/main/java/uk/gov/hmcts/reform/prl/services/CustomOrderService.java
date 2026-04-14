@@ -152,22 +152,58 @@ public class CustomOrderService {
      * Returns the act reference to display above the order name in the header.
      * Returns null/empty for orders that don't require an act reference.
      */
+    /**
+     * Returns the form number prefix for an order (e.g., "C45A", "FL404A").
+     */
+    private String getFormNumberForOrder(CustomOrderNameOptionsEnum selectedOption) {
+        if (selectedOption == null) {
+            return null;
+        }
+        return switch (selectedOption) {
+            case appointmentOfGuardian -> "C47A";
+            case parentalResponsibility -> "C45A";
+            case blankOrderOrDirections -> "C21";
+            case standardDirectionsOrder -> "SDO";
+            case specialGuardianShip -> "C43A";
+            case childArrangementsSpecificProhibitedOrder -> "C43";
+            case nonMolestation -> "FL404A";
+            case occupation -> "FL404";
+            case powerOfArrest -> "FL406";
+            case amendDischargedVaried, blank -> "FL404B";
+            default -> null;
+        };
+    }
+
+    /**
+     * Returns the act reference for an order (e.g., "Children Act 1989").
+     */
     private String getActReferenceForOrder(CustomOrderNameOptionsEnum selectedOption) {
         if (selectedOption == null) {
             return null;
         }
         return switch (selectedOption) {
-            case appointmentOfGuardian -> "Family Procedure Rules 2010";  // C47A
+            case appointmentOfGuardian -> "Family Procedure Rules 2010";
             case parentalResponsibility, blankOrderOrDirections,
-                 standardDirectionsOrder, specialGuardianShip -> "Children Act 1989";  // C45A, C21, SDO, C43A
-            case childArrangementsSpecificProhibitedOrder -> "Section 8 Children Act 1989";  // C43
-            case nonMolestation -> "Section 42 Family Law Act 1996";  // FL404A
-            case occupation -> "Section 33 to 38 Family Law Act 1996";  // FL404
-            case powerOfArrest, amendDischargedVaried, blank -> "Family Law Act 1996";  // FL406, FL404B
+                 standardDirectionsOrder, specialGuardianShip -> "Children Act 1989";
+            case childArrangementsSpecificProhibitedOrder -> "Section 8 Children Act 1989";
+            case nonMolestation -> "Section 42 Family Law Act 1996";
+            case occupation -> "Section 33 to 38 Family Law Act 1996";
+            case powerOfArrest, amendDischargedVaried, blank -> "Family Law Act 1996";
             case noticeOfProceedingsParties, noticeOfProceedingsNonParties, noticeOfProceedings,
                  generalForm, directionOnIssue -> null;  // C6, N117, FL402 - no act
             default -> null;
         };
+    }
+
+    /**
+     * Strips the form number in parentheses from an order description.
+     * E.g., "Parental responsibility order (C45A)" -> "Parental responsibility order"
+     */
+    private String stripFormNumberFromDescription(String description) {
+        if (description == null) {
+            return null;
+        }
+        return description.replaceAll("\\s*\\([A-Za-z0-9]+\\)\\s*$", "").trim();
     }
 
     /**
@@ -378,12 +414,14 @@ public class CustomOrderService {
         log.info("Placeholder 'caseNumber' = '{}'", caseId);
         safePut(data, COURT_NAME, caseData::getCourtName);
 
-        // Format order name with act reference where applicable
+        // Format order name with form number, description and act reference
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
+        String formNumber = getFormNumberForOrder(selectedOption);
         String actReference = getActReferenceForOrder(selectedOption);
-        if (actReference != null && !actReference.isEmpty()) {
-            String formattedOrderName = actReference + "\n" + orderDescription;
+        if (formNumber != null && actReference != null) {
+            String strippedDescription = stripFormNumberFromDescription(orderDescription);
+            String formattedOrderName = formNumber + " - " + strippedDescription + "\n" + actReference;
             data.put("orderName", formattedOrderName);
             log.info("Order with act reference - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
         } else {
@@ -921,12 +959,14 @@ public class CustomOrderService {
         populateFamilymanPlaceholders(data, caseData);
         safePut(data, COURT_NAME, caseData::getCourtName);
 
-        // Format order name with act reference where applicable
+        // Format order name with form number, description and act reference
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
+        String formNumber = getFormNumberForOrder(selectedOption);
         String actReference = getActReferenceForOrder(selectedOption);
-        if (actReference != null && !actReference.isEmpty()) {
-            String formattedOrderName = actReference + "\n" + orderDescription;
+        if (formNumber != null && actReference != null) {
+            String strippedDescription = stripFormNumberFromDescription(orderDescription);
+            String formattedOrderName = formNumber + " - " + strippedDescription + "\n" + actReference;
             data.put("orderName", formattedOrderName);
             log.info("Order with act reference - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
         } else {

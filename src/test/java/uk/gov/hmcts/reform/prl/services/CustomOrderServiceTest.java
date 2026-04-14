@@ -2909,12 +2909,13 @@ class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
-        // Assert - orderName should have the C43 formatted header
+        // Assert - orderName should have the C43 formatted header: "C43 - description\nact reference"
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
         assertNotNull(orderName);
-        assertTrue(orderName.startsWith("C43 - Section 8 Children Act 1989"), "C43 orderName should start with form number");
+        assertTrue(orderName.startsWith("C43 - "), "C43 orderName should start with form number");
         assertTrue(orderName.contains("Child Arrangements Order"), "C43 orderName should contain order description");
+        assertTrue(orderName.contains("Section 8 Children Act 1989"), "C43 orderName should contain act reference");
     }
 
     // ========== Tests for HEARING OR PAPERS logic ==========
