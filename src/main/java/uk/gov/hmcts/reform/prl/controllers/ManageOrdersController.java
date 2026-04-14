@@ -297,7 +297,10 @@ public class ManageOrdersController {
         return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
                                                        authorisation,
                                                        s2sToken,
-                                                       updateCaseData -> updateCaseData.put(IS_INVOKED_FROM_TASK, Yes)
+                                                       caseData -> {
+                                                           caseData.put(IS_INVOKED_FROM_TASK, Yes);
+                                                           prepopulateHeaderFields(caseData, authorisation);
+                                                       }
         );
     }
 

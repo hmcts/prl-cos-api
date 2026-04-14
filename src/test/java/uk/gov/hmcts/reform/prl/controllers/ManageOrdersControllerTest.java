@@ -5510,6 +5510,8 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
