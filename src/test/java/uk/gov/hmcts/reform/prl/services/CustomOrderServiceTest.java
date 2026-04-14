@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
-import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -41,7 +40,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -4181,5 +4178,105 @@ class CustomOrderServiceTest {
         // Falls back to current date
         String expectedDate = LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         assertEquals(expectedDate, result);
+    }
+
+    @Test
+    void testUpdateFinalOrderCollection_throwsWhenWouldLoseOrders() {
+        uk.gov.hmcts.reform.prl.models.OrderDetails order = uk.gov.hmcts.reform.prl.models.OrderDetails.builder().build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> originalOrders = List.of(
+            Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+                .id(UUID.randomUUID())
+                .value(order)
+                .build()
+        );
+
+        CaseData caseData = CaseData.builder()
+            .orderCollection(originalOrders)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("orderCollection", List.of("a", "b")); // existingCount = 2
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder().documentFileName("x.docx").build();
+
+        assertThrows(IllegalStateException.class, () ->
+            customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Order Name"));
+    }
+
+    @Test
+    void testUpdateDraftOrderCollection_throwsWhenWouldLoseDrafts() {
+        uk.gov.hmcts.reform.prl.models.DraftOrder draft = uk.gov.hmcts.reform.prl.models.DraftOrder.builder().build();
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> originalDrafts = List.of(
+            Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+                .id(UUID.randomUUID())
+                .value(draft)
+                .build()
+        );
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(originalDrafts)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("draftOrderCollection", List.of("a", "b")); // existingCount = 2
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder().documentFileName("x.docx").build();
+
+        assertThrows(IllegalStateException.class, () ->
+            customOrderService.updateDraftOrderCollection(caseData, caseDataUpdated, doc, "Order Name"));
+    }
+
+    @Test
+    void testPopulateChildrensGuardian_fromNewChildDetailsFallback() throws IOException {
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Amy")
+            .lastName("Test")
+            .cafcassOfficerName("Guardian Fallback")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .newChildDetails(List.of(Element.<ChildDetailsRevised>builder().value(child).build()))
+            .build();
+
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1});
+
+        customOrderService.renderHeaderPreview(123L, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Guardian Fallback", placeholders.get("childrensGuardianName"));
+        assertTrue(((String) placeholders.get("childrenAsRespondentsClause")).contains("Guardian Fallback"));
+    }
+
+    @Test
+    void testHearingOnThePapers_whenDynamicListCodeIsOnpprs() throws IOException {
+        var dynamicList = uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList.builder()
+            .value(uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement.builder()
+                       .code("ONPPRS")
+                       .label("On the papers")
+                       .build())
+            .build();
+
+        HearingData hearingData = HearingData.builder()
+            .hearingChannelsEnum(null)
+            .hearingChannels(dynamicList)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(Element.<HearingData>builder().value(hearingData).build()))
+                              .build())
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        caseDataMap.put("customOrderHearingsType", Map.of("value", Map.of("label", "Hearing - 15/01/2026 10:00:00")));
+
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1});
+
+        customOrderService.renderHeaderPreview(123L, caseData, caseDataMap);
+
+        assertEquals("on the papers", placeholdersCaptor.getValue().get("hearingOrPapers"));
     }
 }
