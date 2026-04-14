@@ -3719,9 +3719,13 @@ class CustomOrderServiceTest {
         byte[] headerBytes = new byte[]{1, 2, 3};
         byte[] userBytes = new byte[]{4, 5, 6};
 
-        when(documentGenService.getDocumentBytes(eq("http://header-url"), eq(authorisation), any()))
+        // Mock system services used for document download
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(documentGenService.getDocumentBytes(eq("http://header-url"), any(), any()))
             .thenReturn(headerBytes);
-        when(documentGenService.getDocumentBytes(eq("http://user-url"), eq(authorisation), any()))
+        when(documentGenService.getDocumentBytes(eq("http://user-url"), any(), any()))
             .thenReturn(userBytes);
 
         // Mock upload service
@@ -3777,9 +3781,13 @@ class CustomOrderServiceTest {
         byte[] headerBytes = new byte[]{1, 2, 3};
         byte[] userBytes = new byte[]{4, 5, 6};
 
-        when(documentGenService.getDocumentBytes(eq("http://header-url"), eq(authorisation), any()))
+        // Mock system services used for document download
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(documentGenService.getDocumentBytes(eq("http://header-url"), any(), any()))
             .thenReturn(headerBytes);
-        when(documentGenService.getDocumentBytes(eq("http://user-url"), eq(authorisation), any()))
+        when(documentGenService.getDocumentBytes(eq("http://user-url"), any(), any()))
             .thenReturn(userBytes);
 
         // Mock upload service
