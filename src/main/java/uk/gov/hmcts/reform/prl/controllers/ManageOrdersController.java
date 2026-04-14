@@ -298,8 +298,8 @@ public class ManageOrdersController {
                                                        authorisation,
                                                        s2sToken,
                                                        caseData -> {
-                                                           caseData.put(IS_INVOKED_FROM_TASK, Yes);
                                                            prepopulateHeaderFields(caseData, authorisation);
+                                                           caseData.put(IS_INVOKED_FROM_TASK, Yes);
                                                        }
         );
     }
