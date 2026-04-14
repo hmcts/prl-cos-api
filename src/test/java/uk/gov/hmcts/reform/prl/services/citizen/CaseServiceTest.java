@@ -2026,22 +2026,21 @@ public class CaseServiceTest {
             .build();
 
         // Action
-        CitizenDocumentsManagement result = caseService.getAllCitizenDocumentsOrders(authToken, caseDataWithCirDocs);
+        CitizenDocumentsManagement result = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseDataWithCirDocs);
 
         // Assert - CIR docs must NOT appear in any section of the LIP dashboard (AC6)
         assertNotNull(result);
         List<String> otherDocCategoryIds = result.getCitizenOtherDocuments() != null
             ? result.getCitizenOtherDocuments().stream().map(CitizenDocuments::getCategoryId).toList()
             : List.of();
-        assertFalse("CIR Transfer Request must not appear on LIP dashboard",
-                    otherDocCategoryIds.contains("cirTransferRequest"));
-        assertFalse("CIR Extension Request must not appear on LIP dashboard",
-                    otherDocCategoryIds.contains("cirExtensionRequest"));
+        assertFalse(otherDocCategoryIds.contains("cirTransferRequest"),
+                    "CIR Transfer Request must not appear on LIP dashboard");
+        assertFalse(otherDocCategoryIds.contains("cirExtensionRequest"),
+                    "CIR Extension Request must not appear on LIP dashboard");
     }
 
     @Test
     public void testFetchIdamRoles() {
-     void testFetchIdamRoles() {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
         Map<String, String> roles = caseService.fetchIdamAmRoles(AUTH_TOKEN, "test");
         assertEquals("role", roles.get("test"));
