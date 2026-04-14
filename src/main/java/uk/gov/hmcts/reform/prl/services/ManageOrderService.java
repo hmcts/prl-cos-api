@@ -2627,18 +2627,6 @@ public class ManageOrderService {
     }
 
     /**
-     * Checks if the logged-in user is a legal adviser based on IDAM roles.
-     * Legal advisers are not in Judicial Reference Data, so this provides
-     * a way to identify them when JRD returns null.
-     */
-    public boolean isLoggedInUserLegalAdviser(String authorisation) {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        return userDetails != null
-            && userDetails.getRoles() != null
-            && userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue());
-    }
-
-    /**
      * Result object for detailed user type information.
      */
     public record LoggedInUserTypeDetails(String userType, boolean isLegalAdviser) {}
