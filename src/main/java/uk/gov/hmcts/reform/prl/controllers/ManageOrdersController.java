@@ -155,6 +155,12 @@ public class ManageOrdersController {
                 // Populate hearings dropdown for "was order approved at hearing" question
                 caseDataUpdated.put(PrlAppsConstants.HEARINGS_TYPE,
                     manageOrderService.populateHearingsDropdown(authorisation, caseData));
+                // Initialize magistrateLastName list for "Add new" functionality (same as create order)
+                caseDataUpdated.put("magistrateLastName", org.apache.commons.collections.CollectionUtils.isNotEmpty(
+                    caseData.getMagistrateLastName())
+                    ? caseData.getMagistrateLastName()
+                    : List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
+                        uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder().build())));
                 // Populate hearing data for Page 19 (uses same data as create order)
                 HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
@@ -328,6 +334,13 @@ public class ManageOrdersController {
             // Populate fields from selected hearing (date, judge name, judge title)
             // Silently handles HMC API failures - preserves existing values on error
             manageOrderService.populateFieldsFromSelectedHearing(authorisation, caseData, caseDataUpdated);
+
+            // Initialize magistrateLastName collection with one empty element so the form field
+            // appears immediately on Page 5 without requiring user to click "Add new"
+            if (org.apache.commons.collections.CollectionUtils.isEmpty(caseData.getMagistrateLastName())) {
+                caseDataUpdated.put("magistrateLastName", List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
+                    uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder().build())));
+            }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -1012,7 +1025,8 @@ public class ManageOrdersController {
         String[] customOrderFields = {
             CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, CUSTOM_ORDER_NAME_OPTION,
             NAME_OF_ORDER, AMEND_ORDER_SELECT_CHECK_OPTIONS, WHAT_DO_WITH_ORDER, DO_YOU_WANT_TO_SERVE_ORDER,
-            CUSTOM_ORDER_DATE_ENDS, CUSTOM_ORDER_DATE_ENDS_OPTIONS
+            CUSTOM_ORDER_DATE_ENDS, CUSTOM_ORDER_DATE_ENDS_OPTIONS,
+            "magistrateLastName", "judgeOrMagistratesLastName", "judgeOrMagistrateTitle", "justiceLegalAdviserFullName"
         };
         for (String field : customOrderFields) {
             Object value = callbackData.get(field);
