@@ -250,16 +250,18 @@ public class ManageOrdersController {
         caseData.put(IS_INVOKED_FROM_TASK, No);
         caseData.put("dateOrderMade", java.time.LocalDate.now());
 
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+        ManageOrderService.LoggedInUserTypeDetails userTypeDetails = manageOrderService.getLoggedInUserTypeDetails(authorisation);
+        if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
-                JudgeOrMagistrateTitleEnum judgeTitle = manageOrderService.getLoggedInJudgeTitle(userDetails.getId());
+                JudgeOrMagistrateTitleEnum judgeTitle = null;
 
-                // If JRD didn't return a title, check if user is a legal adviser via IDAM roles
-                // (legal advisers are in staff ref data, not JRD)
-                if (judgeTitle == null && manageOrderService.isLoggedInUserLegalAdviser(authorisation)) {
+                // Legal advisers are not in JRD, so set title directly
+                if (userTypeDetails.isLegalAdviser()) {
                     judgeTitle = JudgeOrMagistrateTitleEnum.justicesLegalAdviser;
+                } else {
+                    // For judges, try to get title from JRD
+                    judgeTitle = manageOrderService.getLoggedInJudgeTitle(userDetails.getId());
                 }
 
                 if (judgeTitle != null) {

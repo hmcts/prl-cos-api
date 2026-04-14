@@ -2638,6 +2638,71 @@ public class ManageOrderService {
             && userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue());
     }
 
+    /**
+     * Result object for detailed user type information.
+     */
+    public record LoggedInUserTypeDetails(String userType, boolean isLegalAdviser) {}
+
+    /**
+     * Gets detailed user type information including whether they're specifically a legal adviser.
+     * Use this for custom orders where we need to distinguish legal advisers from judges.
+     */
+    public LoggedInUserTypeDetails getLoggedInUserTypeDetails(String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String loggedInUserType = "";
+        boolean isLegalAdviser = false;
+
+        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
+            try {
+                RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+                    authorisation,
+                    authTokenGenerator.generate(),
+                    null,
+                    userDetails.getId()
+                );
+                List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
+                    .map(role -> role.getRoleName())
+                    .collect(Collectors.toList());
+
+                if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+                    loggedInUserType = UserRoles.JUDGE.name();
+                } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+                    loggedInUserType = UserRoles.JUDGE.name();
+                    isLegalAdviser = true;
+                } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+                    loggedInUserType = UserRoles.COURT_ADMIN.name();
+                } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+                    loggedInUserType = UserRoles.SOLICITOR.name();
+                } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+                    loggedInUserType = UserRoles.CITIZEN.name();
+                } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+                    loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+                }
+            } catch (FeignException e) {
+                log.error("Error fetching role assignments: {}", e.getMessage());
+                throw e;
+            }
+        } else {
+            if (userDetails.getRoles().contains(Roles.JUDGE.getValue())) {
+                loggedInUserType = UserRoles.JUDGE.name();
+            } else if (userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
+                loggedInUserType = UserRoles.JUDGE.name();
+                isLegalAdviser = true;
+            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
+                loggedInUserType = UserRoles.COURT_ADMIN.name();
+            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+                loggedInUserType = UserRoles.SOLICITOR.name();
+            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+                loggedInUserType = UserRoles.CITIZEN.name();
+            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
+                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
+            }
+        }
+
+        log.info("getLoggedInUserTypeDetails returning: userType='{}', isLegalAdviser={}", loggedInUserType, isLegalAdviser);
+        return new LoggedInUserTypeDetails(loggedInUserType, isLegalAdviser);
+    }
+
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
             caseDataUpdated.remove(field.getValue());

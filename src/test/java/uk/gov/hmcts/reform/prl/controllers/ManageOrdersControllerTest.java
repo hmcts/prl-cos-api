@@ -5077,7 +5077,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.JUDGE.name(), false));
         when(userService.getUserDetails(authToken)).thenReturn(
             UserDetails.builder()
                 .id("judge-idam-id")
@@ -5124,7 +5125,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
 
         // When
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
@@ -5160,7 +5162,9 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        // Legal adviser detected via AM/IDAM roles - isLegalAdviser=true means we skip JRD lookup
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.JUDGE.name(), true));
         when(userService.getUserDetails(authToken)).thenReturn(
             UserDetails.builder()
                 .id("legal-adviser-idam-id")
@@ -5170,8 +5174,6 @@ public class ManageOrdersControllerTest {
                 .roles(List.of(Roles.LEGAL_ADVISER.getValue()))
                 .build()
         );
-        when(manageOrderService.getLoggedInJudgeTitle("legal-adviser-idam-id"))
-            .thenReturn(JudgeOrMagistrateTitleEnum.justicesLegalAdviser);
 
         // When
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
@@ -5188,8 +5190,8 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderDetectsLegalAdviserViaIdamRoleWhenJrdReturnsNull() throws Exception {
-        // Given - a legal adviser is logged in but not in JRD (they're in staff ref data)
+    public void testPopulateHeaderDetectsLegalAdviserViaAmRoles() throws Exception {
+        // Given - a legal adviser is logged in and detected via AM roles
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("TestCaseName")
@@ -5208,7 +5210,9 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        // getLoggedInUserTypeDetails now detects legal advisers via AM roles
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.JUDGE.name(), true));
         when(userService.getUserDetails(authToken)).thenReturn(
             UserDetails.builder()
                 .id("legal-adviser-idam-id")
@@ -5218,12 +5222,6 @@ public class ManageOrdersControllerTest {
                 .roles(List.of(Roles.LEGAL_ADVISER.getValue()))
                 .build()
         );
-        // JRD returns null because legal advisers aren't in JRD
-        when(manageOrderService.getLoggedInJudgeTitle("legal-adviser-idam-id"))
-            .thenReturn(null);
-        // But we detect them via IDAM roles
-        when(manageOrderService.isLoggedInUserLegalAdviser(authToken))
-            .thenReturn(true);
 
         // When
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
@@ -5260,7 +5258,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.JUDGE.name(), false));
         when(userService.getUserDetails(authToken)).thenReturn(
             UserDetails.builder()
                 .id("magistrate-idam-id")
