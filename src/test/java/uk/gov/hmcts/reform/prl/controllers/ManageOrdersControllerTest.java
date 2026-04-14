@@ -5734,6 +5734,7 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.JUDGE.name());
         when(customOrderService.resolveCourtName(any(), any())).thenReturn("Test Court");
         when(customOrderService.renderAndUploadHeaderPreview(any(), any(), any(), any()))
             .thenThrow(new RuntimeException("Failed to generate document"));
