@@ -77,7 +77,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
@@ -553,21 +552,6 @@ public class BundleCreateRequestMapperTest {
             .safeguardingLetterDocument(Document.builder().documentFileName("safeGuardingLetter").build())
             .documentParty("Cafcass Cymru").categoryName(SAFEGUARDING_LETTER).categoryId("safeguardingLetter").build();
         cafcassDoc.add(element(safeGuardingLetter));
-
-        QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
-            .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
-            .documentParty("Cafcass").categoryName(SIXTEENA_RISK_ASSESSMENT).categoryId("16aRiskAssessment").build();
-        cafcassDoc.add(element(sixteenARiskAssessment));
-
-        QuarantineLegalDoc cirTransferRequest = QuarantineLegalDoc.builder()
-            .cirTransferRequestDocument(Document.builder().documentFileName("cirTransferRequest").build())
-            .documentParty("Cafcass").categoryId("cirTransferRequest").build();
-        cafcassDoc.add(element(cirTransferRequest));
-
-        QuarantineLegalDoc cirExtensionRequest = QuarantineLegalDoc.builder()
-            .cirExtensionRequestDocument(Document.builder().documentFileName("cirExtensionRequest").build())
-            .documentParty("Cafcass").categoryId("cirExtensionRequest").build();
-        cafcassDoc.add(element(cirExtensionRequest));
 
         QuarantineLegalDoc section7Report = QuarantineLegalDoc.builder()
             .section7ReportDocument(Document.builder().documentFileName("section7Report").build())

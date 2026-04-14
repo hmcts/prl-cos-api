@@ -59,12 +59,12 @@ public class CafcassUploadDocService {
 
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
         "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review",
-        DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION,
+        "cirTransferRequest", "cirExtensionRequest",
         "CMO_report",
         "Contact_Centre_Recordings", "Correspondence", "Direct_work", "Enforcement_report",
         "FAO_Report", "FAO_Workplan", "Letter_from_Child", "Other_Non_Section_7_Report",
         "Position_Statement", "Positive_Parenting_Programme_Report", "Re_W_Report",
-        "S_11H_Monitoring", DOC_TYPE_S16A_RISK_ASSESSMENT, "Safeguarding_Letter",
+        "S_11H_Monitoring", "S_16A_Risk_Assessment", "Safeguarding_Letter",
         "Safeguarding_Letter_Returner", "Safeguarding_Letter_Shorter_Template",
         "Safeguarding_Letter_Update", "Second_Gatekeeping_Safeguarding_Letter",
         "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report"
@@ -259,8 +259,8 @@ public class CafcassUploadDocService {
         map.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);
-        map.put(DOC_TYPE_CIR_TRANSFER, CafcassReportAndGuardianEnum.cirTransferRequest);
-        map.put(DOC_TYPE_CIR_EXTENSION, CafcassReportAndGuardianEnum.cirExtensionRequest);
+        map.put("cirTransferRequest", CafcassReportAndGuardianEnum.cirTransferRequest);
+        map.put("cirExtensionRequest", CafcassReportAndGuardianEnum.cirExtensionRequest);
         map.put("CMO_report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Contact_Centre_Recordings", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Correspondence", CafcassReportAndGuardianEnum.otherDocs);
@@ -274,7 +274,7 @@ public class CafcassUploadDocService {
         map.put("Positive_Parenting_Programme_Report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Re_W_Report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("S_11H_Monitoring", CafcassReportAndGuardianEnum.otherDocs);
-        map.put(DOC_TYPE_S16A_RISK_ASSESSMENT, CafcassReportAndGuardianEnum.riskAssessment);
+        map.put("S_16A_Risk_Assessment", CafcassReportAndGuardianEnum.riskAssessment);
         map.put("Safeguarding_Letter", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Returner", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Shorter_Template", CafcassReportAndGuardianEnum.safeguardingLetter);
