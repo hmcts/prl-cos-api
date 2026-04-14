@@ -2940,7 +2940,6 @@ class ManageOrderServiceTest {
             .id("123")
             .roles(List.of(Roles.JUDGE.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
 
@@ -2957,7 +2956,6 @@ class ManageOrderServiceTest {
             .id("123")
             .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
 
@@ -2968,11 +2966,31 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    void testGetLoggedInUserTypeDetailsReturnsJudgeNotLegalAdviserForJudgeIdamRole() {
+    void testGetLoggedInUserTypeDetailsReturnsCourtAdminForCourtAdminAmRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("hearing-centre-admin");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.COURT_ADMIN.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForJudgeRole() {
+        // Empty AM roles - should fall back to IDAM
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
             .roles(List.of(Roles.JUDGE.getValue())).build());
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
 
         ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
 
@@ -2981,11 +2999,15 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    void testGetLoggedInUserTypeDetailsReturnsJudgeAndIsLegalAdviserForLegalAdviserIdamRole() {
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForLegalAdviserRole() {
+        // Empty AM roles - should fall back to IDAM
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
             .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
-        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
 
         ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
 

@@ -2652,50 +2652,40 @@ public class ManageOrderService {
         String loggedInUserType = "";
         boolean isLegalAdviser = false;
 
-        if (launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)) {
-            try {
-                RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
-                    authorisation,
-                    authTokenGenerator.generate(),
-                    null,
-                    userDetails.getId()
-                );
-                List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
-                    .map(role -> role.getRoleName())
-                    .collect(Collectors.toList());
+        // Check AM roles for judge/legal adviser/court admin
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+            authorisation,
+            authTokenGenerator.generate(),
+            null,
+            userDetails.getId()
+        );
+        List<String> roles = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
+            .map(role -> role.getRoleName())
+            .collect(Collectors.toList());
 
-                if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
-                    loggedInUserType = UserRoles.JUDGE.name();
-                } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
-                    loggedInUserType = UserRoles.JUDGE.name();
-                    isLegalAdviser = true;
-                } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
-                    loggedInUserType = UserRoles.COURT_ADMIN.name();
-                } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
-                    loggedInUserType = UserRoles.SOLICITOR.name();
-                } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
-                    loggedInUserType = UserRoles.CITIZEN.name();
-                } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                    loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
-                }
-            } catch (FeignException e) {
-                log.error("Error fetching role assignments: {}", e.getMessage());
-                throw e;
-            }
-        } else {
-            if (userDetails.getRoles().contains(Roles.JUDGE.getValue())) {
+        if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.JUDGE.getRoles()::contains)) {
+            loggedInUserType = UserRoles.JUDGE.name();
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.LEGAL_ADVISER.getRoles()::contains)) {
+            loggedInUserType = UserRoles.JUDGE.name();
+            isLegalAdviser = true;
+        } else if (roles.stream().anyMatch(InternalCaseworkerAmRolesEnum.COURT_ADMIN.getRoles()::contains)) {
+            loggedInUserType = UserRoles.COURT_ADMIN.name();
+        }
+
+        // Fallback to IDAM roles if no AM role matched
+        if (loggedInUserType.isEmpty()) {
+            List<String> idamRoles = userDetails.getRoles();
+            if (idamRoles.contains(Roles.JUDGE.getValue())) {
                 loggedInUserType = UserRoles.JUDGE.name();
-            } else if (userDetails.getRoles().contains(Roles.LEGAL_ADVISER.getValue())) {
+            } else if (idamRoles.contains(Roles.LEGAL_ADVISER.getValue())) {
                 loggedInUserType = UserRoles.JUDGE.name();
                 isLegalAdviser = true;
-            } else if (userDetails.getRoles().contains(Roles.COURT_ADMIN.getValue())) {
+            } else if (idamRoles.contains(Roles.COURT_ADMIN.getValue())) {
                 loggedInUserType = UserRoles.COURT_ADMIN.name();
-            } else if (userDetails.getRoles().contains(Roles.SOLICITOR.getValue())) {
+            } else if (idamRoles.contains(Roles.SOLICITOR.getValue())) {
                 loggedInUserType = UserRoles.SOLICITOR.name();
-            } else if (userDetails.getRoles().contains(Roles.CITIZEN.getValue())) {
+            } else if (idamRoles.contains(Roles.CITIZEN.getValue())) {
                 loggedInUserType = UserRoles.CITIZEN.name();
-            } else if (userDetails.getRoles().contains(Roles.SYSTEM_UPDATE.getValue())) {
-                loggedInUserType = UserRoles.SYSTEM_UPDATE.name();
             }
         }
 

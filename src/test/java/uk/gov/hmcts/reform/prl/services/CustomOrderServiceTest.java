@@ -3448,4 +3448,130 @@ class CustomOrderServiceTest {
         String orderName = (String) placeholders.get("orderName");
         assertFalse(orderName.contains("Act 1989") || orderName.contains("Act 1996"), "N117 should have no act reference");
     }
+
+    // ========== Tests for exact order name format ==========
+
+    @Test
+    void testOrderNameFormatWithFormNumberAndActReference() throws IOException {
+        // Arrange - C45A (parental responsibility) which has formNumber and actReference
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - verify exact format: "FormNumber - Description\nActReference"
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        assertTrue(orderName.startsWith("C45A - "), "Order name should start with form number 'C45A - '");
+        assertTrue(orderName.contains("\n"), "Order name should contain newline separator");
+        assertTrue(orderName.endsWith("Children Act 1989"), "Order name should end with act reference");
+
+        // Verify the structure: FormNumber - Description\nActReference
+        String[] parts = orderName.split("\n");
+        assertEquals(2, parts.length, "Order name should have exactly two lines");
+        assertTrue(parts[0].startsWith("C45A - "), "First line should start with form number");
+        assertEquals("Children Act 1989", parts[1], "Second line should be the act reference");
+    }
+
+    @Test
+    void testOrderNameStripsParentheticalFormNumberFromDescription() throws IOException {
+        // Arrange - C43 which may have description like "Child Arrangements Order (C43)"
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - verify parenthetical form number is stripped from description
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        // Should not have duplicate form number in description like "(C43)"
+        assertFalse(orderName.contains("(C43)"), "Description should not contain parenthetical form number");
+        // But should have form number at the start
+        assertTrue(orderName.startsWith("C43 - "), "Order name should start with form number");
+    }
+
+    @Test
+    void testOrderNameFallbackWhenNoActReference() throws IOException {
+        // Arrange - C6 has no act reference (returns null)
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "noticeOfProceedings");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert - should use plain description without formatting
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        // No newline for orders without act reference
+        assertFalse(orderName.contains("\n"), "Order name should not contain newline when no act reference");
+        // Should not start with form number pattern when there's no act reference
+        assertFalse(orderName.matches("^[A-Z0-9]+ - .*"), "Should use plain description when no act reference");
+    }
+
+    @Test
+    void testOrderNameFormatForC21BlankOrder() throws IOException {
+        // Arrange - C21 blank order
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        assertTrue(orderName.startsWith("C21 - "), "C21 order should start with 'C21 - '");
+        String[] parts = orderName.split("\n");
+        assertEquals(2, parts.length, "C21 order should have form number line and act reference line");
+        assertEquals("Children Act 1989", parts[1], "C21 should have Children Act 1989 as act reference");
+    }
+
+    @Test
+    void testOrderNameFormatForSdo() throws IOException {
+        // Arrange - Standard directions order
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "standardDirectionsOrder");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        // Act
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Assert
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertNotNull(orderName);
+        assertTrue(orderName.startsWith("SDO - "), "SDO should start with 'SDO - '");
+        assertTrue(orderName.contains("\n"), "SDO should have newline separator");
+        assertTrue(orderName.endsWith("Children Act 1989"), "SDO should end with Children Act 1989");
+    }
 }
