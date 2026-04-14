@@ -78,6 +78,7 @@ pba:
 feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
+    bundleByCategoryEnabled: false
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
