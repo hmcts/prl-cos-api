@@ -92,7 +92,7 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@ConditionalOnProperty(name = "feature.toggle.bundleByCategoryEnabled", havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(name = "feature.toggle.bundleByCategoryEnabled", havingValue = "false", matchIfMissing = false)
 public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
 
     @Override

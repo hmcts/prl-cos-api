@@ -48,7 +48,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@ConditionalOnProperty(name = "feature.toggle.bundleByCategoryEnabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "feature.toggle.bundleByCategoryEnabled", havingValue = "true", matchIfMissing = false)
 public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequestMapper {
 
     private final BundleCreateRequestByCategoriesMapper bundleCreateRequestByCategoriesMapper;
