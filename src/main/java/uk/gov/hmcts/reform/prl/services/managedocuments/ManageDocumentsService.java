@@ -280,18 +280,16 @@ public class ManageDocumentsService {
                 );
             } else {
 
-                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
-
                 if (userRole.equals(LOCAL_AUTHORITY)) {
-                    log.info("isWaTaskSetForFirstDocumentIteration 1 {} ", isWaTaskSetForFirstDocumentIteration);
+                    log.info("Local Authority has multiple tasks possibility {} ", isWaTaskSetForFirstDocumentIteration);
                     isWaTaskSetForFirstDocumentIteration = false;
-                    log.info("isWaTaskSetForFirstDocumentIteration 2 {} ", isWaTaskSetForFirstDocumentIteration);
                 }
 
                 if (!isWaTaskSetForFirstDocumentIteration) {
                     isWaTaskSetForFirstDocumentIteration = true;
                     setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
                 }
+                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
     }
@@ -456,13 +454,10 @@ public class ManageDocumentsService {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
 
-        if (userRole.equals(LOCAL_AUTHORITY)) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
-        }
         log.info("inside setFlagsForWaTask {} ", caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList());
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
+            || userRole.equals(LOCAL_AUTHORITY) //LA - need multiple tasks, so opening up the possibilities
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
@@ -471,15 +466,16 @@ public class ManageDocumentsService {
             if (userRole.equals(LOCAL_AUTHORITY)) {
                 if (isNewTaskRequired(caseData, quarantineLegalDoc)) {
                     log.info("inside setFlagsForWaTask isNewTaskRequired");
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
-                } else {
-                    log.info("inside setFlagsForWaTask isNewTaskRequired NO");
-                    caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
                 }
             } else {
                 log.info("inside setFlagsForWaTask isNewTaskRequired no LA");
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
+            log.info("caseDataUpdated.category for LA {} ",caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
+            log.info("caseDataUpdated.triggered  for LA {} ",caseDataUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+            log.info("caseDataUpdated.restricted for LA {} ",caseDataUpdated.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
