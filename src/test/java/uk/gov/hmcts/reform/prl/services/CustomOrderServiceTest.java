@@ -3296,7 +3296,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testOrderHeaderContainsActReferenceForSDO() throws IOException {
+    void testOrderHeaderContainsActReferenceForSdo() throws IOException {
         Long caseId = 1234567890123456L;
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataMap = new HashMap<>();
