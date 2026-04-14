@@ -65,7 +65,7 @@ public class UpdateHearingActualsService {
     public void updateHearingActuals() {
 
         //Fetch all cases in Hearing state pending fm5 reminder notifications
-        log.info("Running Hearing actual task cron job...");
+        log.info("Running Hearing actual task cron job==>123...");
         List<CaseDetails> caseDetailsList = emptyIfNull(retrieveCasesInHearingState());
         caseDetailsList.stream()
             .forEach(caseDetail -> {
@@ -175,7 +175,7 @@ public class UpdateHearingActualsService {
         SearchResultResponse response = SearchResultResponse.builder().cases(new ArrayList<>()).build();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
-
+        log.info("QueryParam ==>{}", ccdQueryParam);
         try {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -185,6 +185,7 @@ public class UpdateHearingActualsService {
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
             response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
+            log.info("SearchResultResponse==>{}", response);
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
         }
