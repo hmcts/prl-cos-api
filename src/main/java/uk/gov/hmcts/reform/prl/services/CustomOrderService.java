@@ -199,7 +199,7 @@ public class CustomOrderService {
      * Strips the form number in parentheses from an order description.
      * E.g., "Parental responsibility order (C45A)" -> "Parental responsibility order"
      */
-    private String stripFormNumberFromDescription(String description) {
+    String stripFormNumberFromDescription(String description) {
         if (description == null) {
             return null;
         }
@@ -209,7 +209,7 @@ public class CustomOrderService {
     /**
      * Extracts C21 sub-option display value from customC21OrderDetails ComplexType.
      */
-    private String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
+    String getC21SubOptionDisplayValue(Map<String, Object> caseDataMap) {
         if (caseDataMap == null) {
             return null;
         }
@@ -237,7 +237,7 @@ public class CustomOrderService {
      * Extracts C43 order types display value from customC43OrderDetails ComplexType.
      * Uses the same format as existing create order journey for consistency.
      */
-    private String getC43OrdersDisplayValue(Map<String, Object> caseDataMap) {
+    String getC43OrdersDisplayValue(Map<String, Object> caseDataMap) {
         if (caseDataMap == null) {
             return null;
         }
@@ -704,7 +704,7 @@ public class CustomOrderService {
         }
     }
 
-    private String extractLegalAdviserName(CaseData caseData, Map<String, Object> caseDataMap) {
+    String extractLegalAdviserName(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get("justiceLegalAdviserFullName") != null) {
             String name = caseDataMap.get("justiceLegalAdviserFullName").toString();
             return name;
@@ -713,7 +713,7 @@ public class CustomOrderService {
         return name;
     }
 
-    private String extractJudgeTitle(CaseData caseData, Map<String, Object> caseDataMap) {
+    String extractJudgeTitle(CaseData caseData, Map<String, Object> caseDataMap) {
         if (caseDataMap != null && caseDataMap.get("judgeOrMagistrateTitle") != null) {
             Object titleObj = caseDataMap.get("judgeOrMagistrateTitle");
             String title = extractEnumDisplayValue(titleObj);
@@ -746,7 +746,7 @@ public class CustomOrderService {
      * Extracts and formats order date.
      * Priority: hearing date (if approved at hearing) > dateOrderMade > current date.
      */
-    private String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
+    String extractOrderDate(CaseData caseData, Map<String, Object> caseDataMap) {
         // If approved at a hearing with a hearing selected, use the hearing date
         String hearingDate = extractHearingDateFromSelection(caseDataMap);
         if (hearingDate != null) {

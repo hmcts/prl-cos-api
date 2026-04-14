@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -3846,5 +3847,399 @@ class CustomOrderServiceTest {
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertNotNull(placeholders);
         assertEquals("Fallback Order Name", placeholders.get("orderName"));
+    }
+
+    // ========== Tests for safePut edge cases ==========
+
+    @Test
+    void testRenderHeaderPreview_withCourtNameAsNullString_usesEmptyString() throws IOException {
+        // Tests safePut condition: !"null".equals(String.valueOf(value))
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .courtName("null") // Literal string "null"
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("courtName"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withCourtNameAsZeroString_usesEmptyString() throws IOException {
+        // Tests safePut condition: !"0".equals(String.valueOf(value))
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .courtName("0") // String "0"
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("", placeholders.get("courtName"));
+    }
+
+    // ========== Tests for extractMagistrateNames branches ==========
+
+    @Test
+    void testRenderHeaderPreview_withMagistrateListAsMapFormat_extractsNames() throws IOException {
+        // Tests the Map conversion branch in extractMagistrateNames
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+
+        // Create magistrate list in Map format (as CCD sends it)
+        List<Map<String, Object>> magistrateMapList = new ArrayList<>();
+        Map<String, Object> mag1 = new HashMap<>();
+        Map<String, Object> mag1Value = new HashMap<>();
+        mag1Value.put("lastName", "Smith");
+        mag1.put("value", mag1Value);
+        magistrateMapList.add(mag1);
+        caseDataMap.put("magistrateLastName", magistrateMapList);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Smith", placeholders.get("magistrateNames"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withMultipleMagistrates_joinsWithAnd() throws IOException {
+        // Tests the "and" joining branch: names.size() > 1
+        Long caseId = 1234567890123456L;
+
+        List<Element<MagistrateLastName>> magistrateList = List.of(
+            Element.<MagistrateLastName>builder()
+                .value(MagistrateLastName.builder().lastName("Smith").build())
+                .build(),
+            Element.<MagistrateLastName>builder()
+                .value(MagistrateLastName.builder().lastName("Jones").build())
+                .build(),
+            Element.<MagistrateLastName>builder()
+                .value(MagistrateLastName.builder().lastName("Brown").build())
+                .build()
+        );
+
+        CaseData caseData = CaseData.builder()
+            .magistrateLastName(magistrateList)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Smith, Jones and Brown", placeholders.get("magistrateNames"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withMagistrateValueNotMap_handlesGracefully() throws IOException {
+        // Tests branch where value is not a Map in the magistrate conversion
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.magistrate.name());
+
+        // Create magistrate list where value is NOT a Map
+        List<Map<String, Object>> magistrateMapList = new ArrayList<>();
+        Map<String, Object> mag1 = new HashMap<>();
+        mag1.put("value", "not a map"); // value is a String, not Map
+        magistrateMapList.add(mag1);
+        caseDataMap.put("magistrateLastName", magistrateMapList);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Should not throw, placeholders should still be populated
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders);
+    }
+
+    // ========== Tests for parseCustomOrderNameOption branches ==========
+
+    @Test
+    void testGetEffectiveOrderName_withEnumObjectDirectly() {
+        // Tests branch where rawOption is already CustomOrderNameOptionsEnum
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", CustomOrderNameOptionsEnum.parentalResponsibility);
+
+        String result = customOrderService.getEffectiveOrderName(caseData, caseDataMap);
+
+        assertEquals("Parental responsibility order (C45A)", result);
+    }
+
+    // ========== Tests for extractHearingDateFromSelection branches ==========
+
+    @Test
+    void testRenderHeaderPreview_withHearingAsDynamicList_extractsDate() throws IOException {
+        // Tests DynamicList branch in extractHearingDateFromSelection
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+
+        // Create hearing as Map (simulating DynamicList)
+        Map<String, Object> hearingValue = new HashMap<>();
+        hearingValue.put("label", "FHDRA - 15/04/2026 10:00:00");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingValue);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders.get("hearingDate"));
+    }
+
+    @Test
+    void testRenderHeaderPreview_withHearingLabelNoDatePart_handlesGracefully() throws IOException {
+        // Tests branch where hearing label doesn't have expected format
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+
+        // Create hearing with label that has no " - " separator
+        Map<String, Object> hearingValue = new HashMap<>();
+        hearingValue.put("label", "FHDRA without date");
+        Map<String, Object> hearingsType = new HashMap<>();
+        hearingsType.put("value", hearingValue);
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        // Should not throw
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertNotNull(placeholders);
+    }
+
+    // ========== Tests for extractJudgeTitle branches ==========
+
+    @Test
+    void testRenderHeaderPreview_withJudgeTitleFromCaseData_whenNotInMap() throws IOException {
+        // Tests fallback to caseData.getManageOrders().getJudgeOrMagistrateTitle()
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.hisHonourJudge)
+                .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        // No judgeOrMagistrateTitle in map - should fall back to caseData
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("His Honour Judge", placeholders.get("judgeTitle"));
+    }
+
+    // ========== Direct tests for private helper methods (now package-private) ==========
+
+    @Test
+    void testStripFormNumberFromDescription_withNull_returnsNull() {
+        assertNull(customOrderService.stripFormNumberFromDescription(null));
+    }
+
+    @Test
+    void testStripFormNumberFromDescription_withParenthetical_stripsIt() {
+        String result = customOrderService.stripFormNumberFromDescription("Parental responsibility order (C45A)");
+        assertEquals("Parental responsibility order", result);
+    }
+
+    @Test
+    void testStripFormNumberFromDescription_withoutParenthetical_returnsAsIs() {
+        String result = customOrderService.stripFormNumberFromDescription("Some order name");
+        assertEquals("Some order name", result);
+    }
+
+    @Test
+    void testGetC21SubOptionDisplayValue_withNull_returnsNull() {
+        assertNull(customOrderService.getC21SubOptionDisplayValue(null));
+    }
+
+    @Test
+    void testGetC21SubOptionDisplayValue_withEmptyMap_returnsNull() {
+        assertNull(customOrderService.getC21SubOptionDisplayValue(new HashMap<>()));
+    }
+
+    @Test
+    void testGetC43OrdersDisplayValue_withNull_returnsNull() {
+        assertNull(customOrderService.getC43OrdersDisplayValue(null));
+    }
+
+    @Test
+    void testGetC43OrdersDisplayValue_withEmptyMap_returnsNull() {
+        assertNull(customOrderService.getC43OrdersDisplayValue(new HashMap<>()));
+    }
+
+    @Test
+    void testExtractLegalAdviserName_fromMap_returnsName() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("justiceLegalAdviserFullName", "Jane Advisor");
+
+        String result = customOrderService.extractLegalAdviserName(caseData, caseDataMap);
+
+        assertEquals("Jane Advisor", result);
+    }
+
+    @Test
+    void testExtractLegalAdviserName_withNullMap_fallsToCaseData() {
+        CaseData caseData = CaseData.builder()
+            .justiceLegalAdviserFullName("John Legal")
+            .build();
+
+        String result = customOrderService.extractLegalAdviserName(caseData, null);
+
+        assertEquals("John Legal", result);
+    }
+
+    @Test
+    void testExtractLegalAdviserName_withMapMissingKey_fallsToCaseData() {
+        CaseData caseData = CaseData.builder()
+            .justiceLegalAdviserFullName("Fallback Name")
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No justiceLegalAdviserFullName in map
+
+        String result = customOrderService.extractLegalAdviserName(caseData, caseDataMap);
+
+        assertEquals("Fallback Name", result);
+    }
+
+    @Test
+    void testExtractJudgeTitle_fromMap_returnsTitle() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("judgeOrMagistrateTitle", JudgeOrMagistrateTitleEnum.hisHonourJudge.name());
+
+        String result = customOrderService.extractJudgeTitle(caseData, caseDataMap);
+
+        assertEquals("His Honour Judge", result);
+    }
+
+    @Test
+    void testExtractJudgeTitle_fromCaseDataManageOrders_whenNotInMap() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
+                .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No judgeOrMagistrateTitle in map
+
+        String result = customOrderService.extractJudgeTitle(caseData, caseDataMap);
+
+        assertEquals("District Judge", result);
+    }
+
+    @Test
+    void testExtractJudgeTitle_withNullManageOrders_returnsNull() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(null)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        String result = customOrderService.extractJudgeTitle(caseData, caseDataMap);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testExtractJudgeTitle_withNullJudgeTitle_returnsNull() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                .judgeOrMagistrateTitle(null)
+                .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        String result = customOrderService.extractJudgeTitle(caseData, caseDataMap);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testExtractOrderDate_fromCaseDataDateOrderMade_whenNotInMap() {
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(LocalDate.of(2026, 4, 14))
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        // No dateOrderMade in map
+
+        String result = customOrderService.extractOrderDate(caseData, caseDataMap);
+
+        assertEquals("14/04/2026", result);
+    }
+
+    @Test
+    void testExtractOrderDate_fromMapAsLocalDate() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("dateOrderMade", LocalDate.of(2026, 5, 20));
+
+        String result = customOrderService.extractOrderDate(caseData, caseDataMap);
+
+        assertEquals("20/05/2026", result);
+    }
+
+    @Test
+    void testExtractOrderDate_fromMapAsString() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("dateOrderMade", "2026-06-15");
+
+        String result = customOrderService.extractOrderDate(caseData, caseDataMap);
+
+        assertEquals("15/06/2026", result);
+    }
+
+    @Test
+    void testExtractOrderDate_withNullEverywhere_returnsCurrentDate() {
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(null)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        String result = customOrderService.extractOrderDate(caseData, caseDataMap);
+
+        // Falls back to current date
+        String expectedDate = LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        assertEquals(expectedDate, result);
     }
 }
