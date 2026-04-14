@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -410,31 +411,28 @@ public class BundleCreateRequestMapper {
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         CaseData caseData) {
         List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
-        if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> courtStaffUploadDocList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
-            allDocuments.addAll(courtStaffUploadDocList);
-        }
-        if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getCafcassUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> cafcassUploadDocList = caseData.getReviewDocuments().getCafcassUploadDocListDocTab();
-            allDocuments.addAll(cafcassUploadDocList);
-        }
-        if (null != caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> localAuthorityUploadDocList = caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab();
-            allDocuments.addAll(localAuthorityUploadDocList);
-        }
-        if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            allDocuments.addAll(legalProfUploadDocList);
-        }
-
-        if (null != caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()
-            && !caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> citizenUploadedDocuments = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab();
-            allDocuments.addAll(citizenUploadedDocuments);
+        ReviewDocuments reviewDocuments = caseData.getReviewDocuments();
+        if (null != reviewDocuments) {
+            if (null != reviewDocuments.getCourtStaffUploadDocListDocTab()
+                && !reviewDocuments.getCourtStaffUploadDocListDocTab().isEmpty()) {
+                allDocuments.addAll(reviewDocuments.getCourtStaffUploadDocListDocTab());
+            }
+            if (null != reviewDocuments.getCafcassUploadDocListDocTab()
+                && !reviewDocuments.getCafcassUploadDocListDocTab().isEmpty()) {
+                allDocuments.addAll(reviewDocuments.getCafcassUploadDocListDocTab());
+            }
+            if (null != reviewDocuments.getLocalAuthorityUploadDocListDocTab()
+                && !reviewDocuments.getLocalAuthorityUploadDocListDocTab().isEmpty()) {
+                allDocuments.addAll(reviewDocuments.getLocalAuthorityUploadDocListDocTab());
+            }
+            if (null != reviewDocuments.getLegalProfUploadDocListDocTab()
+                && !reviewDocuments.getLegalProfUploadDocListDocTab().isEmpty()) {
+                allDocuments.addAll(reviewDocuments.getLegalProfUploadDocListDocTab());
+            }
+            if (null != reviewDocuments.getCitizenUploadedDocListDocTab()
+                && !reviewDocuments.getCitizenUploadedDocListDocTab().isEmpty()) {
+                allDocuments.addAll(reviewDocuments.getCitizenUploadedDocListDocTab());
+            }
         }
 
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();

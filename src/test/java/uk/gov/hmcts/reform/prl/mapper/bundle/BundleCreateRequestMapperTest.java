@@ -731,6 +731,22 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
+    public void testBundleCreateRequestMapperWhenReviewDocumentsIsNull() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .bundleInformation(BundlingInformation.builder().build())
+            .reviewDocuments(null)
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
+            c100CaseData, "createBundle", null, "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+        assertNotNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments());
+    }
+
+    @Test
     public void testBundleCreateRequestMapperForHearingDateAndTime() {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
