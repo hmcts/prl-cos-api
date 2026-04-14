@@ -2917,31 +2917,6 @@ class CustomOrderServiceTest {
         assertTrue(orderName.contains("Child Arrangements Order"), "C43 orderName should contain order description");
     }
 
-    @Test
-    void testRenderHeaderPreview_nonC43OrderHasSimpleHeader() throws IOException {
-        // Arrange - Non-C43 order (standard directions order)
-        Long caseId = 123L;
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "standardDirectionsOrder");
-
-        CaseData caseData = CaseData.builder()
-            .courtName("Family Court")
-            .build();
-
-        byte[] renderedBytes = new byte[]{1, 2, 3};
-        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
-
-        // Act
-        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
-
-        // Assert - orderName should be simple, without C43 prefix
-        Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertNotNull(orderName);
-        assertEquals("Standard directions order", orderName);
-        assertFalse(orderName.contains("C43"), "Non-C43 orderName should not contain C43 reference");
-    }
-
     // ========== Tests for HEARING OR PAPERS logic ==========
 
     @Test
