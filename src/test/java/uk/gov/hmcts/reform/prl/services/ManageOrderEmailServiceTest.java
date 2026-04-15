@@ -4229,4 +4229,58 @@ public class ManageOrderEmailServiceTest {
         verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
             any(), any(), any());
     }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_customOrder_returnsEarlyWhenMappedOrderCollectionIsNull() {
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(DynamicMultiSelectList.builder()
+                                       .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID).build()))
+                                       .build())
+            .markedToServeEmailNotification(YesOrNo.No)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderDoc", Document.builder().documentFileName("upload.docx").build());
+        caseDataMap.put("orderCollection", null);
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("auth", cd, caseDataMap);
+
+        verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_customOrder_returnsEarlyWhenServeOrderDynamicListIsNull() {
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(null)
+            .markedToServeEmailNotification(YesOrNo.No)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderDoc", Document.builder().documentFileName("upload.docx").build());
+        caseDataMap.put("orderCollection", List.of(Map.of("id", TEST_UUID)));
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("auth", cd, caseDataMap);
+
+        verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
 }

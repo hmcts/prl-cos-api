@@ -659,5 +659,10 @@ public class RefDataUserServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    public void testEvictJudicialUserCache() {
+        refDataUserService.evictJudicialUserCache();
+    }
 }
 

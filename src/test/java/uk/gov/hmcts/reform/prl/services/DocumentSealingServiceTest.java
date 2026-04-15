@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -224,5 +225,46 @@ public class DocumentSealingServiceTest {
 
         mockPdDocument.close();
         mockResourceReader.close();
+    }
+
+    @Test
+    public void sealDocumentShouldHandleNullCaseManagementLocation() {
+        final byte[] inputDocumentBinaries = readBytes("documents/document.pdf");
+        final byte[] sealBinaries = readBytes("familycourtseal.png");
+
+        Document inputDocument = Document.builder()
+            .documentUrl("/test")
+            .documentBinaryUrl("/test/binary")
+            .documentFileName("test.pdf")
+            .build();
+
+        GeneratedDocumentInfo documentInfo = GeneratedDocumentInfo.builder()
+            .url("/test")
+            .docName("test.pdf")
+            .binaryUrl("/test/binary")
+            .build();
+
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(documentGenService.getDocumentBytes(
+            inputDocument.getDocumentUrl(),
+            "testAuth",
+            "s2s token"
+        )).thenReturn(inputDocumentBinaries);
+        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
+
+        try (MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class)) {
+            mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal.png"))
+                .thenReturn(sealBinaries);
+
+            CaseData caseData = CaseData.builder()
+                .courtSeal("[userImage:familycourtseal.png]")
+                .caseManagementLocation(null)
+                .build();
+
+            Document result = documentSealingService.sealDocument(inputDocument, caseData, "testAuth");
+
+            assertNotNull(result);
+            verify(dgsApiClient).convertDocToPdf(eq("test.pdf"), eq("testAuth"), actualDocumentRequest.capture());
+        }
     }
 }
