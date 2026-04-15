@@ -1654,10 +1654,12 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
+                .filter(Objects::nonNull)
                 .map(Element::getValue)
+                .filter(Objects::nonNull)
                 .filter(emailNotification -> {
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
-                    return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
+                    return Objects.equals(partyId, emailNotification.getPartyIds());
                 })
                 .map(emailNotification ->
                     getSodDocuments(
