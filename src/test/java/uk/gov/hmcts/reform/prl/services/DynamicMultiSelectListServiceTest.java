@@ -616,4 +616,28 @@ public class DynamicMultiSelectListServiceTest {
 
         assertNotNull(dynamicMultiSelectList);
     }
+
+    @Test
+    public void testOrderDetailsWhenOrderCollectionIsEmpty() throws Exception {
+        caseData = caseData.toBuilder()
+            .orderCollection(List.of())
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList =
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData);
+
+        assertNotNull(dynamicMultiSelectList);
+    }
+
+    @Test
+    public void testOrderDetailsWhenOrderCollectionIsNull() throws Exception {
+        caseData = caseData.toBuilder()
+            .orderCollection(null)
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList =
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData);
+
+        assertNotNull(dynamicMultiSelectList);
+    }
 }
