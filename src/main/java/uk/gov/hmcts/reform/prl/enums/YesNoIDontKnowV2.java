@@ -17,12 +17,7 @@ public enum YesNoIDontKnowV2 {
 
     @JsonCreator
     public static YesNoIDontKnowV2 getValue(String key) {
-        return switch (key) {
-            case "Yes" -> Yes;
-            case "No" -> No;
-            case "I don't know" -> IDontKnow;
-            default -> null;
-        };
+        return YesNoIDontKnowV2.valueOf(key);
     }
 
     @JsonValue
