@@ -155,7 +155,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOrderDetailsAsNull() throws Exception {
+    public void testOrderDetailsWhenOtherDetailsIsEmpty() throws Exception {
         caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                             .otherDetails(OtherOrderDetails.builder().build())
                                                             .build()).build())).build();
@@ -165,7 +165,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOrderDetailsOtherDetailsAsNull() throws Exception {
+    public void testOrderDetailsWhenOrderServedDateIsEmpty() throws Exception {
         caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder()
                                                                     .value(OrderDetails.builder()
                                                                                .otherDetails(OtherOrderDetails.builder()
@@ -595,5 +595,25 @@ public class DynamicMultiSelectListServiceTest {
     @Test
     public void testGetDynamicMultiSellectEMptyList() {
         assertEquals(1, dynamicMultiSelectListService.getEmptyDynMultiSelectList().getListItems().size());
+    }
+
+    @Test
+    public void testOrderDetailsWhenOtherDetailsIsNull() throws Exception {
+        caseData = caseData.toBuilder()
+            .orderCollection(List.of(
+                Element.<OrderDetails>builder()
+                    .id(UUID.fromString(TEST_UUID))
+                    .value(OrderDetails.builder()
+                               .orderTypeId("test")
+                               .otherDetails(null)
+                               .build())
+                    .build()
+            ))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
+            .getOrdersAsDynamicMultiSelectList(caseData);
+
+        assertNotNull(dynamicMultiSelectList);
     }
 }

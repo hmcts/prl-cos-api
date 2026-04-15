@@ -184,13 +184,13 @@ public class CustomOrderService {
         return switch (selectedOption) {
             case appointmentOfGuardian -> "Family Procedure Rules 2010";
             case parentalResponsibility, blankOrderOrDirections,
-                 standardDirectionsOrder, specialGuardianShip -> "Children Act 1989";
+                 standardDirectionsOrder, specialGuardianShip, directionOnIssue -> "Children Act 1989";
             case childArrangementsSpecificProhibitedOrder -> "Section 8 Children Act 1989";
             case nonMolestation -> "Section 42 Family Law Act 1996";
             case occupation -> "Section 33 to 38 Family Law Act 1996";
             case powerOfArrest, amendDischargedVaried, blank -> "Family Law Act 1996";
             case noticeOfProceedingsParties, noticeOfProceedingsNonParties, noticeOfProceedings,
-                 generalForm, directionOnIssue -> null;  // C6, N117, FL402 - no act
+                 generalForm -> null;  // C6, N117, FL402 - no act
             default -> null;
         };
     }

@@ -664,5 +664,23 @@ public class RefDataUserServiceTest {
     public void testEvictJudicialUserCache() {
         refDataUserService.evictJudicialUserCache();
     }
+
+    @Test
+    public void testGetJudicialUserBySidamIdReturnsNullWhenApiReturnsNull() {
+        String sidamId = "null-sidam-id";
+
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+
+        when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
+            anyMap()
+        )).thenReturn(null);
+
+        List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
+
+        assertNull(result);
+    }
 }
 
