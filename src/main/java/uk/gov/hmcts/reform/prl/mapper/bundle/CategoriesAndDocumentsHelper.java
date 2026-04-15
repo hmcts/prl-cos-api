@@ -34,12 +34,10 @@ public class CategoriesAndDocumentsHelper {
             .sorted(Comparator.comparing(Category::getCategoryName))
             .toList();
 
-        List<Category> allCategories = parentCategories.stream()
+        return parentCategories.stream()
             .flatMap(category -> category.getSubCategories().stream())
             .flatMap(this::flatMapRecursiveCategory)
             .toList();
-
-        return allCategories;
     }
 
     private Stream<Category> flatMapRecursiveCategory(Category category) {
