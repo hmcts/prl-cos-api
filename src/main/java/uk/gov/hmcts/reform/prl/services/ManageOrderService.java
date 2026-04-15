@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -65,7 +66,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -74,7 +74,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.LocalAuthority;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -90,7 +89,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -119,7 +117,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -147,8 +144,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -198,13 +193,12 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum.fact
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getDynamicMultiSelectedValueLabels;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.EmailUtils.isValidEmailAddress;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@SuppressWarnings({"java:S3776", "java:S6204"})
+@SuppressWarnings({"java:S3776","java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
@@ -234,8 +228,6 @@ public class ManageOrderService {
         + "address is given.";
     public static final String VALIDATION_ADDRESS_ERROR_OTHER_PARTY = "This order cannot be served by post until the other"
         + " people's address is given.";
-    public static final String INVALID_EMAIL_ADDRESS_ERROR = "Invalid email address. Please check the email address entered. "
-        + "To send to multiple recipients please use the add new button.";
 
     public static final String EMAIL = "email";
     public static final String POST = "post";
@@ -639,7 +631,6 @@ public class ManageOrderService {
     private final LaunchDarklyClient launchDarklyClient;
     private final DocumentSealingService documentSealingService;
     private final FinalisationDetailsService finalisationDetailsService;
-    private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -2113,7 +2104,7 @@ public class ManageOrderService {
         return caseData;
     }
 
-    public CaseData filterEmptyHearingDetails(CaseData caseData) {
+    public  CaseData filterEmptyHearingDetails(CaseData caseData) {
         List<Element<HearingData>> filteredHearingDataList = caseData.getManageOrders().getOrdersHearingDetails()
             .stream()
             .filter(element -> ((element.getValue().getHearingTypes() != null && element.getValue().getHearingTypes().getValue() != null)
@@ -3134,7 +3125,7 @@ public class ManageOrderService {
         return isOrderApproved;
     }
 
-    public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder, CaseData caseData) {
+    public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = caseData.toBuilder()
                 .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
@@ -3295,6 +3286,8 @@ public class ManageOrderService {
                                                            hearings);
         return hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
     }
+
+
 
     private void addC21OrderDetails(CaseData caseData,
                                     Map<String, Object> caseDataUpdated) {
@@ -3574,16 +3567,15 @@ public class ManageOrderService {
         }
     }
 
-    public List<String> validateRespondentLipAndOtherPersonAddress(CallbackRequest callbackRequest) {
+    public AboutToStartOrSubmitCallbackResponse validateRespondentLipAndOtherPersonAddress(CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (null != caseData.getManageOrders().getRecipientsOptions()
             && YesNoNotApplicable.No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
             List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-                checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
-            }
+            checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
+
         }
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
             || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion())
@@ -3595,7 +3587,15 @@ public class ManageOrderService {
             checkPartyAddressAndReturnError(otherPeopleInCase, selectedOtherPartyIds, errorList, false);
         }
 
-        return errorList;
+        if (isNotEmpty(errorList)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
+
     }
 
     private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
@@ -3627,22 +3627,6 @@ public class ManageOrderService {
     private boolean checkIfAddressIsPresent(Address address) {
         return null != address
             && null != address.getAddressLine1();
-    }
-
-    public List<String> validateAdditionalPartiesForServingOrder(CallbackRequest callbackRequest) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrgDetailsList())) {
-            for (Element<ServeOrgDetails> addParty : caseData.getManageOrders()
-                .getServeOrgDetailsList()) {
-                if (addParty.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
-                    && !isValidEmailAddress(addParty.getValue().getEmailInformation().getEmailAddress())) {
-                    return List.of(INVALID_EMAIL_ADDRESS_ERROR);
-                }
-            }
-        }
-
-        return emptyList();
     }
 
     public List<Element<HearingData>> createAutomatedHearingManagement(String authorisation, CaseData caseData,
@@ -3704,42 +3688,5 @@ public class ManageOrderService {
             .anyMatch(element ->
                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(element.getValue().getHearingDateConfirmOptionEnum())
                               || HearingDateConfirmOptionEnum.dateToBeFixed.equals(element.getValue().getHearingDateConfirmOptionEnum()));
-    }
-
-    public void removeLocalAuthorityFromCase(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("inside removeLocalAuthorityFromCase");
-        try {
-
-
-            Optional<OrderDetails> orderDetails
-                = caseData.getOrderCollection().stream().map(Element::getValue).findFirst();
-
-            if (orderDetails.isPresent()) {
-                OrderDetails details = orderDetails.get();
-                log.info(
-                    "inside removeLocalAuthorityFromCase, order details order close case {}, {}, {}",
-                    details.getOrderClosesCase(), details.getTypeOfOrder(),
-                    caseData.getLocalAuthoritySolicitorOrganisationPolicy()
-                );
-
-                if (Yes.equals(details.getOrderClosesCase())
-                    && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(details.getTypeOfOrder())
-                    && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
-                    && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
-                    removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
-                    caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
-                    LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
-                        .localAuthoritySolicitorOrganisationName(null)
-                        .build();
-                    caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
-                }
-            }
-        } catch (Exception exp) {
-            log.info(
-                "Error occurred while removing LocalAuthority From Case {} exception {}",
-                caseData.getId(),
-                exp.getMessage()
-            );
-        }
     }
 }

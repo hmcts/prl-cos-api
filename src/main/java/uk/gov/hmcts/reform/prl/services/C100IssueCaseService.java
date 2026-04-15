@@ -113,10 +113,10 @@ public class C100IssueCaseService {
         }
 
         // Generate All Docs and set to casedataupdated.
-        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
+        caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
 
         // Refreshing the page in the same event. Hence no external event call needed.
-        // Getting the tab fields and add it to the casedetails.
+        // Getting the tab fields and add it to the casedetails..
         Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
         caseDataUpdated.putAll(allTabsFields);
         // Check if the selected court is Work Allocation enabled.

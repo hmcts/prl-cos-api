@@ -3,16 +3,15 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -88,9 +87,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -107,10 +106,9 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
-class EditAndApproveDraftOrderControllerTest {
+public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     private  ObjectMapper objectMapper;
@@ -156,8 +154,8 @@ class EditAndApproveDraftOrderControllerTest {
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-    public static final String S2S_TOKEN = "s2s AuthToken";
+    public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
     public static Map<String, Object> clientContext = new HashMap<>();
     private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     private static final String ENCODEDSTRING = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
@@ -193,10 +191,25 @@ class EditAndApproveDraftOrderControllerTest {
         }
         """;
 
+    private static final String CLIENT_CONTEXT_FALSE = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : false
+            }
+          }
+        }
+        """;
+
     private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         clientContext.put("test", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -216,7 +229,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    void shouldGenerateDraftOrderDropdown() {
+    public void shouldGenerateDraftOrderDropdown() {
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
@@ -267,15 +280,14 @@ class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderDynamicList(caseData,
                                                           Event.EDIT_AND_APPROVE_ORDER.getId(),
                                                           "clientContext",
-                                                          AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .generateDraftOrderDropDown(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .generateDraftOrderDropDown(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldGenerateDraftOrderDropdownNoDraftOrders() {
+    public void shouldGenerateDraftOrderDropdownNoDraftOrders() {
 
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
@@ -312,15 +324,14 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .generateDraftOrderDropDown(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .generateDraftOrderDropDown(authToken,s2sToken,"clcx",callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldPopulateJudgeOrAdminDraftOrder() {
+    public void shouldPopulateJudgeOrAdminDraftOrder() {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -364,15 +375,14 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrder(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldPrepareDraftOrderCollectionWithAdminEditAndApprove() {
+    public void shouldPrepareDraftOrderCollectionWithAdminEditAndApprove() {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -420,15 +430,14 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         when(dynamicMultiSelectListService
                  .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = editAndApproveDraftOrderController
-            .prepareDraftOrderCollection(AUTH_TOKEN, S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest);
-        assertNotNull(responseResponseEntity.getBody().getData());
+            .prepareDraftOrderCollection(authToken,s2sToken,PrlAppsConstants.ENGLISH,callbackRequest);
+        Assert.assertNotNull(responseResponseEntity.getBody().getData());
         assertThat(responseResponseEntity.getHeaders())
             .doesNotContainKey(CLIENT_CONTEXT_HEADER_PARAMETER);
         verifyNoInteractions(manageOrderService);
@@ -436,7 +445,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    void shouldPrepareDraftOrderCollectionWithOutAdminEditAndApprove() {
+    public void shouldPrepareDraftOrderCollectionWithOutAdminEditAndApprove() {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -483,18 +492,17 @@ class EditAndApproveDraftOrderControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = editAndApproveDraftOrderController
-            .prepareDraftOrderCollection(AUTH_TOKEN, S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest);
-        assertNotNull(responseResponseEntity.getBody().getData());
+            .prepareDraftOrderCollection(authToken,s2sToken,PrlAppsConstants.ENGLISH,callbackRequest);
+        Assert.assertNotNull(responseResponseEntity.getBody().getData());
         verifyNoInteractions(manageOrderService);
         verifyNoInteractions(taskUtils);
     }
 
     @Test
-    void shouldPrepareDraftOrderCollectionWithHearingAdminEditAndApprove() throws JsonProcessingException {
+    public void shouldPrepareDraftOrderCollectionWithHearingAdminEditAndApprove() throws JsonProcessingException {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -542,8 +550,7 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.HEARING_EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         when(dynamicMultiSelectListService
                  .getOrdersAsDynamicMultiSelectList(caseData))
             .thenReturn(DynamicMultiSelectList.builder().build());
@@ -555,13 +562,13 @@ class EditAndApproveDraftOrderControllerTest {
         when(taskUtils.setTaskCompletion(any(), any(), any())).thenReturn(CLIENT_CONTEXT);
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseResponseEntity = editAndApproveDraftOrderController
-            .prepareDraftOrderCollection(AUTH_TOKEN, S2S_TOKEN, ENCRYPTED_CLIENT_CONTEXT, callbackRequest);
-        assertNotNull(responseResponseEntity.getBody().getData());
+            .prepareDraftOrderCollection(authToken,s2sToken,ENCRYPTED_CLIENT_CONTEXT,callbackRequest);
+        Assert.assertNotNull(responseResponseEntity.getBody().getData());
         verify(taskUtils).setTaskCompletion(anyString(), isA(CaseData.class), any(Predicate.class));
     }
 
     @Test
-    void shouldPopulateJudgeOrAdminDraftOrderCustomFields() throws Exception {
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFields() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -606,8 +613,7 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                  .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
@@ -618,12 +624,12 @@ class EditAndApproveDraftOrderControllerTest {
                 CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsForEditAndReturnedOrder() throws Exception {
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsForEditAndReturnedOrder() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -669,8 +675,7 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_RETURNED_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                  .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(),
@@ -681,12 +686,12 @@ class EditAndApproveDraftOrderControllerTest {
                 CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsThrowsError() throws Exception {
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsThrowsError() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -731,9 +736,8 @@ class EditAndApproveDraftOrderControllerTest {
                 .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyString()))
@@ -741,12 +745,12 @@ class EditAndApproveDraftOrderControllerTest {
                         CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-                .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsThrowsErrorBlank() throws Exception {
+    public void shouldPopulateJudgeOrAdminDraftOrderCustomFieldsThrowsErrorBlank() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -792,9 +796,8 @@ class EditAndApproveDraftOrderControllerTest {
                 .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
-                                                          "clientContext", AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          "clientContext", authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyString()))
@@ -802,12 +805,12 @@ class EditAndApproveDraftOrderControllerTest {
                         CreateSelectOrderOptionsEnum.blankOrderOrDirections).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-                .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testNoOrderPopulateJudgeFields() throws Exception {
+    public void testNoOrderPopulateJudgeFields() throws Exception {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -849,18 +852,17 @@ class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.getDraftOrderDynamicList(caseData,
                                                           Event.EDIT_AND_APPROVE_ORDER.getId(),
                                                           "clientContext",
-                                                          AUTH_TOKEN
-        )).thenReturn(caseDataMap);
+                                                          authToken)).thenReturn(caseDataMap);
         when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
 
     @Test
-    void  shouldPopulateCommonFields() {
+    public void  shouldPopulateCommonFields() {
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
@@ -919,12 +921,12 @@ class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any(), any())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void  shouldPopulateCommonFieldsWithDoYouWantToEditField() {
+    public void  shouldPopulateCommonFieldsWithDoYouWantToEditField() {
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
@@ -984,12 +986,12 @@ class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any(), any())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-                .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+                .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void  shouldPopulateCommonFieldsWhereJusticesLegalAdvisorIsChosen() {
+    public void  shouldPopulateCommonFieldsWhereJusticesLegalAdvisorIsChosen() {
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
@@ -1048,12 +1050,12 @@ class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(any(), any(), any(), any(), any())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testSaveServeOrderDetails() {
+    public void testSaveServeOrderDetails() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1112,12 +1114,12 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testSaveServeOrderDetailsForEditAndApprove() {
+    public void testSaveServeOrderDetailsForEditAndApprove() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString("048a6b7e-e2c5-4e6f-8f81-f4926c59bb74"))
             .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build()).build())
@@ -1196,13 +1198,12 @@ class EditAndApproveDraftOrderControllerTest {
             DraftOrder::getLabelForOrdersDynamicList
         ));
 
-        when(manageOrderService.getLoggedInUserType(AUTH_TOKEN)).thenReturn(UserRoles.JUDGE.name());
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.JUDGE.name());
         caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
         when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(caseDataMap);
         AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder().build();
-        when(hearingService.createAutomatedHearing(
-            AUTH_TOKEN, AutomatedHearingTransactionRequestMapper
+        when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build()))).thenReturn(automatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1213,42 +1214,12 @@ class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, ENCODEDSTRING, callbackRequest);
-        assertNotNull(response);
+            .saveServeOrderDetails(authToken, s2sToken, ENCODEDSTRING, callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void shouldReturnErrorResponseWhenDraftOrderNotFoundDuringEditAndApprove() {
-
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-
-        CaseData caseData = CaseData.builder().build();
-
-        objectMapper.registerModule(new JavaTimeModule());
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
-
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .eventId("editAndApproveAnOrder")
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(new HashMap<>())
-                             .build())
-            .build();
-
-        String clientContext = null;
-
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, clientContext, callbackRequest);
-        assertNotNull(response);
-        assertEquals(1, response.getErrors().size());
-    }
-
-
-    @Test
-    void testSaveServeOrderDetailsForEditAndApproveCaseManager() {
+    public void testSaveServeOrderDetailsForEditAndApproveCaseManager() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString("048a6b7e-e2c5-4e6f-8f81-f4926c59bb74"))
             .value(DraftOrder.builder().orderTypeId("test")
@@ -1319,11 +1290,10 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(AUTH_TOKEN)).thenReturn(UserRoles.CASEMANAGER.name());
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.CASEMANAGER.name());
         stringObjectMap.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         AutomatedHearingResponse automatedHearingResponse = AutomatedHearingResponse.builder().build();
-        when(hearingService.createAutomatedHearing(
-            AUTH_TOKEN, AutomatedHearingTransactionRequestMapper
+        when(hearingService.createAutomatedHearing(authToken, AutomatedHearingTransactionRequestMapper
             .mappingAutomatedHearingTransactionRequest(caseData, HearingData.builder().build()))).thenReturn(automatedHearingResponse);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1334,12 +1304,12 @@ class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, ENCODEDSTRING, callbackRequest);
-        assertNotNull(response);
+            .saveServeOrderDetails(authToken, s2sToken, ENCODEDSTRING, callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testSaveServeOrderDetailsForEditAndReturnedOrder() {
+    public void testSaveServeOrderDetailsForEditAndReturnedOrder() {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString("048a6b7e-e2c5-4e6f-8f81-f4926c59bb74"))
             .value(DraftOrder.builder().orderTypeId("test")
                        .otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build()).build()).build();
@@ -1403,12 +1373,12 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testSaveServeOrderDetailsUpdateDraftOrders() {
+    public void testSaveServeOrderDetailsUpdateDraftOrders() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1467,13 +1437,13 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest);
+        Assert.assertNotNull(response);
 
     }
 
     @Test
-    void testPopulateSdoOtherFields() {
+    public void testPopulateSdoOtherFields() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1531,14 +1501,14 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateSdoOtherFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
 
     }
 
 
     @Test
-    void testPopulateSdoOtherFields_scenario2() {
+    public void testPopulateSdoOtherFields_scenario2() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1598,13 +1568,13 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateSdoOtherFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
 
     }
 
     @Test
-    void testPopulateSdoOtherFieldsStandingOrderSelecFalse() {
+    public void testPopulateSdoOtherFieldsStandingOrderSelecFalse() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1672,13 +1642,13 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateSdoOtherFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
-        assertNotNull(response);
+            .populateSdoOtherFields(authToken, s2sToken,"clcx", callbackRequest);
+        Assert.assertNotNull(response);
 
     }
 
     @Test
-    void testSendEmailNotificationToRecipientsServeOrder() {
+    public void testSendEmailNotificationToRecipientsServeOrder() {
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -1698,8 +1668,7 @@ class EditAndApproveDraftOrderControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            AUTH_TOKEN,
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.submitAllTabsUpdate(anyString(), anyString(), any(), any(), any())).thenReturn(CaseDetails.builder().build());
@@ -1712,14 +1681,13 @@ class EditAndApproveDraftOrderControllerTest {
                 .build())
             .build();
 
-        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(AUTH_TOKEN,
-                                                                                       S2S_TOKEN, callbackRequest);
+        editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
     }
 
     @Test
-    void testEditAndServeOrderMidEvent() {
+    public void testEditAndServeOrderMidEvent() {
         final String authorisation = "Bearer someAuthorisationToken";
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
@@ -1790,12 +1758,12 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .editAndServeOrderMidEvent(authorisation, S2S_TOKEN, callbackRequest);
-        assertNotNull(response);
+            .editAndServeOrderMidEvent(authorisation, s2sToken, callbackRequest);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testExceptionForGenerateDraftOrderDropDown() {
+    public void testExceptionForGenerateDraftOrderDropDown() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1819,13 +1787,13 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .generateDraftOrderDropDown(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
+            .generateDraftOrderDropDown(authToken, s2sToken,"clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testExceptionForPopulateJudgeOrAdminDraftOrder() {
+    public void testExceptionForPopulateJudgeOrAdminDraftOrder() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1849,13 +1817,13 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrder(AUTH_TOKEN, S2S_TOKEN, "clientContext", callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateJudgeOrAdminDraftOrder(authToken,s2sToken,"clientContext", callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testExceptionForPrepareDraftOrderCollection() {
+    public void testExceptionForPrepareDraftOrderCollection() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1879,13 +1847,13 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .prepareDraftOrderCollection(AUTH_TOKEN, S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
+            .prepareDraftOrderCollection(authToken, s2sToken, PrlAppsConstants.ENGLISH,callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testExceptionForSaveServeOrderDetails() {
+    public void testExceptionForSaveServeOrderDetails() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1909,17 +1877,17 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(
             () -> editAndApproveDraftOrderController
-                .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest),
+                .saveServeOrderDetails(authToken, s2sToken, "clcx", callbackRequest),
             RuntimeException.class,
             "Invalid Client"
         );
     }
 
     @Test
-    void testExceptionForSendEmailNotificationToRecipientsServeOrder() {
+    public void testExceptionForSendEmailNotificationToRecipientsServeOrder() {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -1943,13 +1911,13 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .sendEmailNotificationToRecipientsServeOrder(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
+            .sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testHandleEditAndApproveSubmitted() {
+    public void testHandleEditAndApproveSubmitted() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("whatToDoWithOrderSolicitor", OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1968,18 +1936,17 @@ class EditAndApproveDraftOrderControllerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            AUTH_TOKEN,
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
-            .handleEditAndApproveSubmitted(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+            .handleEditAndApproveSubmitted(authToken,s2sToken,"clcx",callbackRequest);
         assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
     }
 
     @Test
-    void testHandleEditAndApproveSubmittedByCourtAdmin() {
+    public void testHandleEditAndApproveSubmittedByCourtAdmin() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1990,11 +1957,11 @@ class EditAndApproveDraftOrderControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .handleEditAndApproveSubmitted(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
+            .handleEditAndApproveSubmitted(authToken, s2sToken, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testHandleEditAndApproveSubmittedWhenAskLegalRepChosen() {
+    public void testHandleEditAndApproveSubmittedWhenAskLegalRepChosen() {
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         stringObjectMap.put("whatToDoWithOrderSolicitor", OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString());
@@ -2025,76 +1992,75 @@ class EditAndApproveDraftOrderControllerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
-            AUTH_TOKEN,
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
-            .handleEditAndApproveSubmitted(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+            .handleEditAndApproveSubmitted(authToken,s2sToken,"clcx", callbackRequest);
         assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
     }
 
-    protected <T extends Throwable> void assertExpectedException(Executable executable, Class<T> expectedException,
-        String expectedMessage) {
-        T exception = assertThrows(expectedException, executable);
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
-    void testExceptionForPopulateJudgeOrAdminDraftOrderCustomFields() {
+    public void testExceptionForPopulateJudgeOrAdminDraftOrderCustomFields() {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken,"clcx",  callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testExceptionForPopulateCommonFields() {
+    public void testExceptionForPopulateCommonFields() {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
+            .populateCommonFields(authToken, s2sToken,"clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testExceptionForEditAndServeOrderMidEvent() {
+    public void testExceptionForEditAndServeOrderMidEvent() {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .editAndServeOrderMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
+            .editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testExceptionForPopulateSdoOtherFields() {
+    public void testExceptionForPopulateSdoOtherFields() {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
-            .editAndServeOrderMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
+            .editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    void testNoFieldsPopulateUploadOrder() throws Exception {
+    public void testNoFieldsPopulateUploadOrder() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .isOrderUploadedByJudgeOrAdmin(Yes)
             .build();
@@ -2121,16 +2087,16 @@ class EditAndApproveDraftOrderControllerTest {
         )).thenReturn(draftOrder);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
 
-        assertNotNull(response);
+        Assert.assertNotNull(response);
         Map<String, Object> updatedCaseDataMap = response.getData();
-        assertNotNull(updatedCaseDataMap.get("draftOrderCollection"));
-        assertEquals("C100", updatedCaseDataMap.get("caseTypeOfApplication"));
+        Assert.assertNotNull(updatedCaseDataMap.get("draftOrderCollection"));
+        Assert.assertEquals("C100", updatedCaseDataMap.get("caseTypeOfApplication"));
     }
 
     @Test
-    void testSkipUploadConditionWhenDraftOrderIsNull() throws Exception {
+    public void testSkipUploadConditionWhenDraftOrderIsNull() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .isOrderUploadedByJudgeOrAdmin(Yes)
             .build();
@@ -2157,13 +2123,13 @@ class EditAndApproveDraftOrderControllerTest {
         )).thenReturn(null);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,"clcx", callbackRequest);
 
-        assertNotNull(response);
+        Assert.assertNotNull(response);
     }
 
     @Test
-    void testPopulateCommonFieldsEditedOrder() {
+    public void testPopulateCommonFieldsEditedOrder() {
         PartyDetails partyDetails = PartyDetails.builder().firstName("xyz")
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
@@ -2199,11 +2165,11 @@ class EditAndApproveDraftOrderControllerTest {
         when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.any(), Mockito.any(), Mockito.any(), any(), any())).thenReturn(caseDataMap);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+            .populateCommonFields(authToken,s2sToken,"clcx",callbackRequest);
 
-        assertNotNull(response);
+        Assert.assertNotNull(response);
         Map<String, Object> updatedCaseDataMap = response.getData();
-        assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
-        assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
+        Assert.assertNotNull(updatedCaseDataMap.get("doYouWantToEditTheOrder"));
+        Assert.assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
     }
 }

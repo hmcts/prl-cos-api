@@ -12,8 +12,5 @@ public class TypeOfApplication {
     private final String natureOfOrder;
     private final String applicationPermissionRequiredReason;
     private final String applicationPermissionRequired;
-    private final String orderInPlacePermissionRequired;
-    private final String orderDetailsForPermissions;
-    private final String uploadOrderDocForPermission;
 
 }

@@ -13,8 +13,7 @@ public enum InternalCaseworkerAmRolesEnum {
     COURT_ADMIN("COURT_ADMIN", List.of("hearing-centre-admin", "ctsc")),
     COURT_ADMIN_TEAM_LEADER("COURT_ADMIN_TEAM_LEADER", List.of("hearing-centre-admin", "ctsc", "team-leader")),
     CTSC("CTSC", List.of("ctsc")),
-    CAFCASS_CYMRU("CAFCASS_CYMRU", List.of("caseworker-privatelaw-externaluser-viewonly")),
-    LOCAL_AUTHORITY("LOCAL_AUTHORITY", List.of("[LASOCIALWORKER]", "[LASOLICITOR]"));
+    CAFCASS_CYMRU("CAFCASS_CYMRU", List.of("caseworker-privatelaw-externaluser-viewonly"));
 
     private final String user;
     private final List<String> roles;
