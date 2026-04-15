@@ -725,7 +725,7 @@ public class C100RespondentSolicitorService {
                     .previousName(isNotEmpty(citizenDetails) ? citizenDetails.getPreviousName() : null)
                     .placeOfBirth(isNotEmpty(citizenDetails) ? citizenDetails.getPlaceOfBirth() : null)
                     .liveInRefuge(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
-                    .refugeConfidentialityC8Form(YesOrNo.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
+                    .refugeConfidentialityC8Form(YesNoIDontKnowV2.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
                                                      ? citizenDetails.getRefugeConfidentialityC8Form() : null)
                     .address(isNotEmpty(citizenDetails) ? citizenDetails.getAddress() : null)
                     .addressHistory(isNotEmpty(citizenDetails) ? citizenDetails.getAddressHistory() : null)
@@ -733,7 +733,7 @@ public class C100RespondentSolicitorService {
                     .build())
             .build();
 
-        if (YesOrNo.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)) {
+        if (YesNoIDontKnowV2.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)) {
             buildResponseForRespondent = buildResponseForRespondent
                 .toBuilder().keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
                                                     .confidentiality(Yes)
@@ -808,7 +808,7 @@ public class C100RespondentSolicitorService {
     private static void setRespondentConfidentiality(CaseData caseData,
                                                                       Element<PartyDetails> respondent) {
         if (isNotEmpty(caseData.getRespondentSolicitorData()) && null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
-            && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
+            && YesNoIDontKnowV2.Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
             respondent.getValue().setIsAddressConfidential(Yes);
             respondent.getValue().setIsEmailAddressConfidential(Yes);
             respondent.getValue().setIsPhoneNumberConfidential(Yes);
@@ -1070,7 +1070,7 @@ public class C100RespondentSolicitorService {
 
     private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
 
-        if (YesOrNo.Yes.equals(respondent.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(respondent.getLiveInRefuge())
             && respondent.getRefugeConfidentialityC8Form() != null) {
             log.info("Respondent lives in refuge");
             List<Element<RefugeConfidentialDocuments>> refugeDocuments = caseData.getRefugeDocuments();
@@ -1103,7 +1103,7 @@ public class C100RespondentSolicitorService {
     private PartyDetails updatedRefugeData(PartyDetails respondent) {
         if (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()
-            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+            && YesNoIDontKnowV2.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
             respondent = respondent.toBuilder()
                 .liveInRefuge(YesNoIDontKnowV2.Yes)
                 .refugeConfidentialityC8Form(respondent
