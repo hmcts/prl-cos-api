@@ -14,4 +14,6 @@ public class FurtherEvidence {
     private final FurtherEvidenceDocumentType typeOfDocumentFurtherEvidence;
     private final Document documentFurtherEvidence;
     private final List<RestrictToCafcassHmcts> restrictCheckboxFurtherEvidence;
+    private final boolean renameDocument;
+    private final String documentName;
 }

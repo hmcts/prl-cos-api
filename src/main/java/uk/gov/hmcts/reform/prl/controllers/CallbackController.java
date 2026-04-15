@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
@@ -735,7 +736,7 @@ public class CallbackController {
                     : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
             if (furtherEvidencesList != null) {
                 quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                                .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
+                                .value(QuarantineLegalDoc.builder().document(getRenamedDocumentFurtherEvidence(element))
                                         .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
                                         .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxFurtherEvidence())
                                         .notes(caseData.getGiveDetails())
@@ -785,6 +786,19 @@ public class CallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private Document getRenamedDocumentFurtherEvidence(Element<FurtherEvidence> element) {
+        Document elementDoc = element.getValue().getDocumentFurtherEvidence();
+        return Document.builder()
+            .documentCreatedOn(elementDoc.getDocumentCreatedOn())
+            .documentHash(elementDoc.getDocumentHash())
+            .documentUrl(elementDoc.getDocumentHash())
+            .categoryId(elementDoc.getDocumentHash())
+            .documentBinaryUrl(elementDoc.getDocumentBinaryUrl())
+            .uploadTimeStamp(elementDoc.getUploadTimeStamp())
+            .documentFileName(element.getValue().isRenameDocument() ? element.getValue().getDocumentName() : elementDoc.getDocumentFileName())
+            .build();
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
