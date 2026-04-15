@@ -6,13 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WaMapper implements Serializable {
+public class WaMapper {
 
     @JsonProperty("client_context")
     private ClientContext clientContext;

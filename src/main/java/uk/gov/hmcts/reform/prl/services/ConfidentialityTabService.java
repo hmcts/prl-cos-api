@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonCo
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +31,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CHILDREN_CONFIDENTIAL_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CHILDREN_CONFIDENTIAL_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum.occupationOrder;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 
@@ -44,12 +40,69 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
 
+    private final ObjectMapper objectMapper;
+
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
+
+        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
+        List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
+
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            return getC100ConfidentialityDetails(caseData);
+            Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
+            if (applicantList.isPresent()) {
+                List<PartyDetails> applicants = caseData.getApplicants().stream()
+                    .map(Element::getValue)
+                    .toList();
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    applicants);
+            }
+
+            List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
+
+            Optional<List<Element<PartyDetails>>> respondentList = ofNullable(caseData.getRespondents());
+            if (respondentList.isPresent()) {
+                List<PartyDetails> respondents = caseData.getRespondents().stream()
+                    .map(Element::getValue)
+                    .toList();
+                respondentsConfidentialDetails = getConfidentialApplicantDetails(
+                    respondents);
+            }
+
+            return Map.of(
+                "applicantsConfidentialDetails",
+                applicantsConfidentialDetails,
+                "childrenConfidentialDetails",
+                childrenConfidentialDetails,
+                "respondentConfidentialDetails",
+                respondentsConfidentialDetails
+            );
+
         } else {
-            return getFL401ConfidentialityDetails(caseData);
+            if (null != caseData.getApplicantsFL401()) {
+                List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
+                applicantsConfidentialDetails = getConfidentialApplicantDetails(
+                    fl401Applicant);
+            }
+
+            if (null != caseData.getRespondentsFL401()) {
+                List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
+                respondentsConfidentialDetails = getConfidentialApplicantDetails(
+                    fl401Respondent);
+            }
+
+            List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
+
+            return Map.of(
+                "applicantsConfidentialDetails",
+                applicantsConfidentialDetails,
+                "fl401ChildrenConfidentialDetails",
+                childrenConfidentialDetails,
+                "respondentConfidentialDetails",
+                respondentsConfidentialDetails
+            );
+
         }
+
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(CaseData caseData) {
@@ -71,6 +124,7 @@ public class ConfidentialityTabService {
         }
         return elementList;
     }
+
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetails(List<Child> children) {
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
@@ -320,64 +374,5 @@ public class ConfidentialityTabService {
             })
             .orElseGet(() -> null);
     }
-
-    private Map<String, Object> getC100ConfidentialityDetails(CaseData caseData) {
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = getApplicantConfidentialDetails(caseData);
-        List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = getRespondentConfidentialDetails(caseData);
-        List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = getChildrenConfidentialDetails(caseData);
-
-        return Map.of(
-            APPLICANTS_CONFIDENTIAL_DETAILS, applicantsConfidentialDetails,
-            C100_CHILDREN_CONFIDENTIAL_DETAILS, childrenConfidentialDetails,
-            RESPONDENT_CONFIDENTIAL_DETAILS, respondentsConfidentialDetails
-        );
-    }
-
-    private Map<String, Object> getFL401ConfidentialityDetails(CaseData caseData) {
-        List<Element<ApplicantConfidentialityDetails>> applicantsConfidentialDetails = new ArrayList<>();
-        List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
-
-        if (null != caseData.getApplicantsFL401()) {
-            List<PartyDetails> fl401Applicant = List.of(caseData.getApplicantsFL401());
-            applicantsConfidentialDetails = getConfidentialApplicantDetails(fl401Applicant);
-        }
-
-        if (null != caseData.getRespondentsFL401()) {
-            List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
-            respondentsConfidentialDetails = getConfidentialApplicantDetails(
-                fl401Respondent);
-        }
-
-        List<Element<Fl401ChildConfidentialityDetails>> childrenConfidentialDetails = getFl401ChildrenConfidentialDetails(caseData);
-
-        return Map.of(
-            APPLICANTS_CONFIDENTIAL_DETAILS, applicantsConfidentialDetails,
-            FL401_CHILDREN_CONFIDENTIAL_DETAILS, childrenConfidentialDetails,
-            RESPONDENT_CONFIDENTIAL_DETAILS, respondentsConfidentialDetails
-        );
-    }
-
-    private List<Element<ApplicantConfidentialityDetails>> getApplicantConfidentialDetails(CaseData caseData) {
-        Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
-        if (applicantList.isPresent()) {
-            List<PartyDetails> applicants = caseData.getApplicants().stream()
-                .map(Element::getValue)
-                .toList();
-            return getConfidentialApplicantDetails(applicants);
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    private List<Element<ApplicantConfidentialityDetails>> getRespondentConfidentialDetails(CaseData caseData) {
-        Optional<List<Element<PartyDetails>>> respondentList = ofNullable(caseData.getRespondents());
-        if (respondentList.isPresent()) {
-            List<PartyDetails> respondents = caseData.getRespondents().stream()
-                .map(Element::getValue)
-                .toList();
-            return getConfidentialApplicantDetails(respondents);
-        } else {
-            return Collections.emptyList();
-        }
-    }
 }
+

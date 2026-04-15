@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -35,7 +36,6 @@ import static org.springframework.http.MediaType.APPLICATION_PDF;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.SERVICE_AUTHORISATION_HEADER;
@@ -78,12 +78,15 @@ public class CafcassDocumentManagementControllerIntegrationTest {
 
         final ResponseEntity<Resource> response = ResponseEntity.status(OK).contentType(APPLICATION_PDF).build();
 
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(cafcassCdamService.getDocument(anyString(), anyString(), any())).thenReturn(response);
-        when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
+
+        //create new userInfo object using its constructor with 6 arguments
+        UserInfo userInfo = new UserInfo("userId", "email", "forename", "surname",
+                                         "roles", List.of("caseworker-privatelaw-cafcass"));
+        Mockito.when(cafcassCdamService.getDocument(anyString(), anyString(), any())).thenReturn(response);
+        Mockito.when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
 
         mockMvc.perform(
                 get(CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT, documentId)
@@ -100,12 +103,14 @@ public class CafcassDocumentManagementControllerIntegrationTest {
 
         final ResponseEntity<Resource> response = ResponseEntity.status(BAD_REQUEST).contentType(APPLICATION_PDF).build();
 
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(cafcassCdamService.getDocument(anyString(), anyString(), any())).thenReturn(response);
-        when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
+        //create new userInfo object using its constructor with 6 arguments
+        UserInfo userInfo = new UserInfo("userId", "email", "forename", "surname",
+                                         "roles", List.of("caseworker-privatelaw-cafcass"));
+        Mockito.when(cafcassCdamService.getDocument(anyString(), anyString(), any())).thenReturn(response);
+        Mockito.when(systemUserService.getSysUserToken()).thenReturn("sysUserToken");
 
         mockMvc.perform(
                         get(CAFCASS_DOCUMENT_DOWNLOAD_ENDPOINT, documentId)

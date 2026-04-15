@@ -31,8 +31,6 @@ public class DocumentManagementDetails {
     private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
     @JsonProperty("cafcassQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
-    @JsonProperty("localAuthorityQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsList;
     @JsonProperty("citizenQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
     @JsonProperty("tempQuarantineDocumentList")
@@ -57,7 +55,6 @@ public class DocumentManagementDetails {
             legalProfQuarantineDocsList,
             courtStaffQuarantineDocsList,
             cafcassQuarantineDocsList,
-            localAuthorityQuarantineDocsList,
             citizenQuarantineDocsList,
             courtNavQuarantineDocumentList
         )

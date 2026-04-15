@@ -19,8 +19,6 @@ import uk.gov.hmcts.reform.prl.exception.InvalidPartyException;
 import uk.gov.hmcts.reform.prl.exception.InvalidSolicitorRoleException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Barrister;
@@ -518,18 +516,7 @@ public class CaseAssignmentService {
                                          ChangeOrganisationRequest changeOrganisationRequest,
                                          Consumer<Element<PartyDetails>> caPartyDetailsElement,
                                          Consumer<PartyDetails> daPartyDetails) {
-
-        String solicitorRole = Optional.ofNullable(changeOrganisationRequest)
-            .map(ChangeOrganisationRequest::getCaseRoleId)
-            .map(DynamicList::getValue)
-            .map(DynamicListElement::getCode)
-            .orElse(null);
-
-        if (solicitorRole == null) {
-            log.info(" Attempting to remove Barrister but the solicitor role is null for case id {} ", caseData.getId());
-            return;
-        }
-
+        String solicitorRole = changeOrganisationRequest.getCaseRoleId().getValue().getCode();
         String barristerRole = getMatchingBarristerRole(solicitorRole);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             getC100SelectedParty(caseData, barristerRole)
