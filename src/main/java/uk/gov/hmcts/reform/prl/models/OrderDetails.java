@@ -84,11 +84,11 @@ public class OrderDetails {
 
     @JsonIgnore
     public String getLabelForDynamicList() {
-
+        String date = this.getOtherDetails() != null ? this.getOtherDetails().getOrderCreatedDate() : "";
         return String.format(
             "%s - %s",
             this.orderTypeId,
-            this.getOtherDetails().getOrderCreatedDate()
+            date
         );
     }
 }
