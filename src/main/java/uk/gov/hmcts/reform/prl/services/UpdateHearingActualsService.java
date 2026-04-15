@@ -201,8 +201,9 @@ public class UpdateHearingActualsService {
     private QueryParam buildCcdQueryParam() {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(
-                Should.builder().match(Match.builder().caseTypeOfApplication("C100").nextHearingDate(LocalDate.now()).build()).build(),
-                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").nextHearingDate(LocalDate.now()).build()).build()
+                Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
+                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
+                Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build()
         );
 
         //Hearing state
