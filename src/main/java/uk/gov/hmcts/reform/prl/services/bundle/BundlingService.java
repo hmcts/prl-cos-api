@@ -49,8 +49,10 @@ public class BundlingService {
         BundleCreateResponse bundleCreateResponse = null;
         try {
             bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
+        } catch (feign.FeignException e) {
+            log.error("Error in creating bundle service request — status: {}, body: {}", e.status(), e.contentUTF8(), e);
         } catch (Exception e) {
-            log.error("Error in creating bundle service request",e);
+            log.error("Error in creating bundle service request", e);
         }
         return bundleCreateResponse;
     }
