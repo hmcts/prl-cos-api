@@ -1247,12 +1247,10 @@ public class CallbackControllerTest {
                              .id(1L)
                              .data(caseData).build()).build();
 
-        Document dfe = Document.builder().build();
         CaseData caseData1 = CaseData.builder()
             .documentCategoryChecklist(DocumentCategoryEnum.documentCategoryChecklistEnumValue2)
             .furtherEvidences(List.of(Element.<FurtherEvidence>builder()
                                           .value(FurtherEvidence.builder()
-                                                     .documentFurtherEvidence(dfe)
                                                      .typeOfDocumentFurtherEvidence(FurtherEvidenceDocumentType.consentOrder)
                                                      .restrictCheckboxFurtherEvidence(List.of(RestrictToCafcassHmcts.restrictToGroup))
                                                      .build())

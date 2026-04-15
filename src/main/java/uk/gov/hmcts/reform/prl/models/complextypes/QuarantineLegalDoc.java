@@ -125,6 +125,9 @@ public class QuarantineLegalDoc {
     private final String solicitorRepresentedPartyId;
     private final String documentLanguage;
 
+    private final boolean renameDocument;
+    private final String documentNameOverride;
+
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
