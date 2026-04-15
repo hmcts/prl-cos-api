@@ -203,7 +203,22 @@ public class CustomOrderService {
         if (description == null) {
             return null;
         }
-        return description.replaceAll("\\s*\\([A-Za-z0-9]+\\)\\s*$", "").trim();
+
+        String trimmed = description.trim();
+        int openBracket = trimmed.lastIndexOf('(');
+        int closeBracket = trimmed.lastIndexOf(')');
+
+        if (openBracket >= 0 && closeBracket == trimmed.length() - 1 && openBracket < closeBracket) {
+            String formNumber = trimmed.substring(openBracket + 1, closeBracket);
+            boolean isAlphaNumeric = !formNumber.isEmpty()
+                && formNumber.chars().allMatch(Character::isLetterOrDigit);
+
+            if (isAlphaNumeric) {
+                return trimmed.substring(0, openBracket).trim();
+            }
+        }
+
+        return trimmed;
     }
 
     /**
