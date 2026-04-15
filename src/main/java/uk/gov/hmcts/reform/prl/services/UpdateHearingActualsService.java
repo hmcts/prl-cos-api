@@ -64,7 +64,7 @@ public class UpdateHearingActualsService {
     public void updateHearingActuals() {
 
         //Fetch all cases in Hearing state pending fm5 reminder notifications
-        log.info("Running Hearing actual task cron job==>123...");
+        log.info("Running Hearing actual task cron job==>12345...");
         List<CaseDetails> caseDetailsList = emptyIfNull(retrieveCasesInHearingState());
         caseDetailsList.stream()
             .forEach(caseDetail -> {
