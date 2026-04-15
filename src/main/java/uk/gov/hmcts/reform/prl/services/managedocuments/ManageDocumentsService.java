@@ -611,7 +611,9 @@ public class ManageDocumentsService {
             String originalName = document.getDocumentFileName();
             String enteredNewName = quarantineLegalDoc.getDocumentNameOverride();
             String originalExtension = originalName.substring(originalName.indexOf(".") + 1);
-            return enteredNewName + "." + originalExtension;
+            String newName = enteredNewName + "." + originalExtension;;
+            log.info("Renaming document name {} with new name {}", originalName, newName);
+            return newName;
         } else {
             return document.getDocumentFileName();
         }
