@@ -277,6 +277,26 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testGetStringFromDynMulSelectList_returnsJoinedLabelsWhenPresent() {
+        DynamicMultiSelectList list = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code("1")
+                    .label("Alice Smith (Applicant 1)")
+                    .build(),
+                DynamicMultiselectListElement.builder()
+                    .code("2")
+                    .label("Bob Jones (Applicant 2)")
+                    .build()
+            ))
+            .build();
+
+        String result = dynamicMultiSelectListService.getStringFromDynamicMultiSelectList(list);
+
+        assertEquals("Alice Smith, Bob Jones", result);
+    }
+
+    @Test
     public void testGetServedPartiesFromDynMulSelectList() {
         DynamicMultiselectListElement listElement = DynamicMultiselectListElement.builder()
             .code("2323WDWDw2322")

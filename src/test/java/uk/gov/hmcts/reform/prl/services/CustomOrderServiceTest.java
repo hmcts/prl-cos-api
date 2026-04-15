@@ -4381,4 +4381,30 @@ class CustomOrderServiceTest {
 
         assertEquals("on the papers", placeholdersCaptor.getValue().get("hearingOrPapers"));
     }
+
+    @Test
+    void testRenderHeaderPreview_withRealDynamicList_extractsDate() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder().build();
+
+        uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList hearingsType =
+            uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList.builder()
+                .value(uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement.builder()
+                           .code("hearing-1")
+                           .label("FHDRA - 15/04/2026 10:00:00")
+                           .build())
+                .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderNameOption", "parentalResponsibility");
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        caseDataMap.put("customOrderHearingsType", hearingsType);
+
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(new byte[]{1, 2, 3});
+
+        customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("15/04/2026", placeholders.get("orderDate"));
+    }
 }
