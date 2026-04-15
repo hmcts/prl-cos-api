@@ -2248,6 +2248,25 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void testGetQuarantineDocumentForUploaderCafcassWithRename() {
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .cafcassQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
+                                           .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba")
+                                           .documentFileName("originalName.pdf")
+                                           .build())
+            .renameDocument(true)
+            .documentNameOverride("newName")
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document document1 = manageDocumentsService
+            .getQuarantineDocumentForUploader("Cafcass", quarantineLegalDoc
+            );
+
+        assertNotNull(document1);
+        assertEquals(quarantineLegalDoc.getCafcassQuarantineDocument().getDocumentUrl(), document1.getDocumentUrl());
+        assertEquals("newName.pdf", document1.getDocumentFileName());
+    }
+
+    @Test
     public void testGetQuarantineDocumentForUploaderCitizen() {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
