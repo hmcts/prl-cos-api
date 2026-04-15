@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -1565,15 +1566,21 @@ public class DocumentGenService {
                         .builder().template(DUMMY).values(tempCaseDetails).build()
                 );
             } catch (FeignException fe) {
-                log.error("FeignException while converting document to PDF: {}", fe.getMessage());
+                log.error("FeignException while converting document to PDF: {}", fe.getMessage(), fe);
             } catch (Exception e) {
-                log.error("Exception while converting document to PDF: {}", e.getMessage());
+                log.error("Exception while converting document to PDF: {}", e.getMessage(), e);
             }
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName(generatedDocumentInfo.getDocName())
-                .build();
+            if (nonNull(generatedDocumentInfo)) {
+                return Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentFileName(generatedDocumentInfo.getDocName())
+                    .build();
+            } else {
+                log.error("generatedDocumentInfo is null for documentURL {}, binary url{}, file name {}", document.getDocumentUrl(),
+                          document.getDocumentBinaryUrl(), document.getDocumentFileName());
+                throw new PdfConversionException("PDF Conversion error");
+            }
 
 
         }

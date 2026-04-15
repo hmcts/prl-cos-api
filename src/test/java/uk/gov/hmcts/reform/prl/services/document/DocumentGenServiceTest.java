@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -2610,9 +2611,8 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenThrow(FeignException.class);
 
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), NullPointerException.class,
-                                "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
-            + "because \"generatedDocumentInfo\" is null");
+        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
+                                "PDF Conversion error");
     }
 
     @Test
@@ -2640,9 +2640,8 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenThrow(RuntimeException.class);
 
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), NullPointerException.class,
-                                "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
-                                    + "because \"generatedDocumentInfo\" is null");
+        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
+                                "PDF Conversion error");
     }
 
     @Test
