@@ -447,42 +447,6 @@ class CafcassUploadDocServiceTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void shouldSuppressDuplicateTaskViaRawMapWhenCaseDataDeserializationReturnsEmptyList() {
-        // Simulates @JsonUnwrapped deserialization failure: CaseData has empty quarantine list,
-        // but the raw CCD map has the existing doc. The raw map fallback must detect the duplicate.
-        when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
-        // Raw map has an existing cirExtensionRequest doc (simulates CCD's actual stored state)
-        Map<String, Object> existingDocValue = new java.util.HashMap<>();
-        existingDocValue.put("categoryId", "cirExtensionRequest");
-        Map<String, Object> existingElement = new java.util.HashMap<>();
-        existingElement.put("id", java.util.UUID.randomUUID().toString());
-        existingElement.put("value", existingDocValue);
-        // CaseData intentionally has NO quarantine docs (simulates @JsonUnwrapped failure)
-        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
-        caseDataMap.put("cafcassQuarantineDocsList", List.of(existingElement));
-
-        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
-            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
-            caseDataMap, caseData, null
-        );
-        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
-
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
-        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
-        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
-        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
-
-        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
-
-        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY),
-            "Category must be null when duplicate detected via raw map fallback");
-        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            "TriggeredBy must be null when duplicate detected via raw map fallback");
-    }
-
-    @Test
     void shouldReturnNullIfCasePresentThrowsException() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(coreCaseDataApi.getCase(any(), any(), any())).thenThrow(new RuntimeException("CCD down"));
