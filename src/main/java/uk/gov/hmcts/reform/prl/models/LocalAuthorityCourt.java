@@ -13,8 +13,6 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class LocalAuthorityCourt {
-    private static final String TRUE = "TRUE";
-    private static final String FALSE = "FALSE";
     String localAuthority;
     String familyCourtName;
     String refDataCourtName;
@@ -25,7 +23,6 @@ public class LocalAuthorityCourt {
     String address;
     String emailAddress;
     String status;
-    boolean pathFinderEnabled;
 
     @JsonIgnore
     public static LocalAuthorityCourt map(Map<String, String> row) {
@@ -41,7 +38,6 @@ public class LocalAuthorityCourt {
             .address(row.getOrDefault("Address", ""))
             .emailAddress(row.getOrDefault("emailAddress", ""))
             .status(row.getOrDefault("Status", ""))
-            .pathFinderEnabled(TRUE.equalsIgnoreCase(row.getOrDefault("Path Finder Enabled", FALSE)))
             .build();
     }
 }
