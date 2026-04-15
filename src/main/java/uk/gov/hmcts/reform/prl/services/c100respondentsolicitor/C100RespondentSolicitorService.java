@@ -63,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToA
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
@@ -715,6 +716,7 @@ public class C100RespondentSolicitorService {
                                                  Response buildResponseForRespondent,
                                                  Element<PartyDetails> respondent) {
         CitizenDetails citizenDetails = caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails();
+        YesNoIDontKnowV2 liveInRefuge = isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null;
         buildResponseForRespondent = buildResponseForRespondent
             .toBuilder().citizenDetails(
                 buildResponseForRespondent.getCitizenDetails()
@@ -725,7 +727,7 @@ public class C100RespondentSolicitorService {
                     .previousName(isNotEmpty(citizenDetails) ? citizenDetails.getPreviousName() : null)
                     .placeOfBirth(isNotEmpty(citizenDetails) ? citizenDetails.getPlaceOfBirth() : null)
                     .liveInRefuge(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
-                    .refugeConfidentialityC8Form(YesNoIDontKnowV2.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
+                    .refugeConfidentialityC8Form(YesNoIDontKnowV2.Yes.equals(liveInRefuge)
                                                      ? citizenDetails.getRefugeConfidentialityC8Form() : null)
                     .address(isNotEmpty(citizenDetails) ? citizenDetails.getAddress() : null)
                     .addressHistory(isNotEmpty(citizenDetails) ? citizenDetails.getAddressHistory() : null)
@@ -751,8 +753,9 @@ public class C100RespondentSolicitorService {
 
     private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent,
                                                          Element<PartyDetails> respondent) {
-        if (null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
-            && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
+        RespondentSolicitorData  respondentSolicitorData = caseData.getRespondentSolicitorData();
+        if (null != respondentSolicitorData.getResSolConfirmEditContactDetails()
+            && YesNoIDontKnowV2.Yes.equals(respondentSolicitorData.getResSolConfirmEditContactDetails().getLiveInRefuge())) {
             buildResponseForRespondent = buildKeepDetailsPrivateForRefuge(caseData, buildResponseForRespondent, respondent);
         } else {
             buildResponseForRespondent = buildKeepDetailsPrivateForNonRefuge(caseData, buildResponseForRespondent, respondent);
