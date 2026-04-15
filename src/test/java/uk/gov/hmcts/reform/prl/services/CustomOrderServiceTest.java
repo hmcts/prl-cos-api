@@ -173,6 +173,106 @@ class CustomOrderServiceTest {
         assertEquals("filled.docx", transformed.getDocumentFileName());
     }
 
+    @Test
+    void testRenderUploadedCustomOrder_throwsWhenCustomOrderDocIsNull() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        // customOrderDoc not set - will be null
+
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(null);
+
+        CaseData caseData = CaseData.builder().build();
+
+        assertThrows(IllegalArgumentException.class, () ->
+            customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
+                "auth", 123L, caseData, caseDataUpdated, c -> c, c -> c
+            ));
+    }
+
+    @Test
+    void testRenderUploadedCustomOrder_throwsWhenDocumentBinaryUrlIsNull() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document docWithoutBinaryUrl =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentUrl("http://doc-url")
+                .documentFileName("template.docx")
+                // documentBinaryUrl intentionally not set
+                .build();
+        caseDataUpdated.put("customOrderDoc", docWithoutBinaryUrl);
+
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(docWithoutBinaryUrl);
+
+        CaseData caseData = CaseData.builder().build();
+
+        assertThrows(IllegalArgumentException.class, () ->
+            customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
+                "auth", 123L, caseData, caseDataUpdated, c -> c, c -> c
+            ));
+    }
+
+    @Test
+    void testRenderUploadedCustomOrder_formatsOrderNameWithActReference() throws Exception {
+        // Tests buildCustomOrderPlaceholders branch where formNumber and actReference are both non-null
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://binary-url")
+                .documentUrl("http://doc-url")
+                .documentFileName("template.docx")
+                .build();
+        caseDataUpdated.put("customOrderDoc", customOrderDoc);
+        caseDataUpdated.put("customOrderNameOption", "parentalResponsibility");
+
+        byte[] templateBytes = new byte[]{1, 2, 3};
+        byte[] filledBytes = new byte[]{4, 5, 6};
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(customOrderDoc);
+        doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(any(), any());
+        when(poiTlDocxRenderer.render(eq(templateBytes), placeholdersCaptor.capture())).thenReturn(filledBytes);
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        StartAllTabsUpdateDataContent mockStartContent = new StartAllTabsUpdateDataContent(
+            "system-auth",
+            mock(EventRequestData.class),
+            mock(StartEventResponse.class),
+            new HashMap<>(),
+            CaseData.builder().build(),
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(mockStartContent);
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any())).thenReturn(null);
+        when(documentGenService.getDocumentBytes(any(), any(), any())).thenReturn(templateBytes);
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = "http://self";
+        binaryLink.href = "http://binary";
+        links.self = selfLink;
+        links.binary = binaryLink;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document uploadedDoc =
+            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        uploadedDoc.links = links;
+        uploadedDoc.originalDocumentName = "filled.docx";
+        when(uploadService.uploadDocument(eq(filledBytes), any(), any(), any())).thenReturn(uploadedDoc);
+
+        CaseData caseData = CaseData.builder().build();
+
+        customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(
+            "auth", 123L, caseData, caseDataUpdated, c -> c, c -> c
+        );
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        String orderName = (String) placeholders.get("orderName");
+        assertTrue(orderName.contains("C45A"), "Should contain form number");
+        assertTrue(orderName.contains("Children Act 1989"), "Should contain act reference");
+    }
+
     // ========== Tests for CDAM workaround methods ==========
 
     @Test

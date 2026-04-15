@@ -206,6 +206,31 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
+    public void testOtherPeopleDetailsWithTaskListVersionV2() {
+        List<Element<PartyDetails>> otherPartyRevised = List.of(
+            Element.<PartyDetails>builder()
+                .id(UUID.fromString(TEST_UUID))
+                .value(PartyDetails.builder()
+                    .firstName("OtherFirst")
+                    .lastName("OtherLast")
+                    .build())
+                .build()
+        );
+
+        CaseData caseDataV2 = caseData.toBuilder()
+            .taskListVersion("v2")
+            .otherPartyInTheCaseRevised(otherPartyRevised)
+            .build();
+
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getOtherPeopleMultiSelectList(caseDataV2);
+
+        assertNotNull(listItems);
+        assertEquals(1, listItems.size());
+        assertEquals("OtherFirst OtherLast", listItems.get(0).getLabel());
+    }
+
+    @Test
     public void testApplicantDetailsFl401() throws Exception {
         caseData = caseData.toBuilder()
             .applicantsFL401(partyDetails.get(0).getValue())
@@ -311,6 +336,44 @@ public class DynamicMultiSelectListServiceTest {
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseDataC100);
         assertNotNull(str);
+    }
+
+    @Test
+    public void testGetChildrenForDocmosisC100WithTaskListVersionV2() {
+        UUID childId = UUID.fromString(TEST_UUID);
+
+        List<Element<ChildDetailsRevised>> newChildDetails = List.of(
+            Element.<ChildDetailsRevised>builder()
+                .id(childId)
+                .value(ChildDetailsRevised.builder()
+                    .firstName("ChildFirst")
+                    .lastName("ChildLast")
+                    .build())
+                .build()
+        );
+
+        CaseData caseDataV2 = caseDataC100.toBuilder()
+            .taskListVersion("v2")
+            .newChildDetails(newChildDetails)
+            .manageOrders(ManageOrders.builder()
+                .isTheOrderAboutAllChildren(YesOrNo.No)
+                .isTheOrderAboutChildren(Yes)
+                .childOption(DynamicMultiSelectList.builder()
+                    .value(List.of(DynamicMultiselectListElement.builder()
+                        .code(childId.toString())
+                        .label("ChildFirst ChildLast")
+                        .build()))
+                    .build())
+                .build())
+            .build();
+
+        List<Element<Child>> children = dynamicMultiSelectListService
+            .getChildrenForDocmosis(caseDataV2);
+
+        assertNotNull(children);
+        assertEquals(1, children.size());
+        assertEquals("ChildFirst", children.get(0).getValue().getFirstName());
+        assertEquals("ChildLast", children.get(0).getValue().getLastName());
     }
 
 

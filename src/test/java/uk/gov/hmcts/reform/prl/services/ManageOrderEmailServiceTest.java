@@ -4193,4 +4193,40 @@ public class ManageOrderEmailServiceTest {
         // The orderTypeId should be "Custom Order Name" (from caseDataMap), not "uploaded_file.docx" (from caseData)
         assertEquals("Custom Order Name", resultCollection.get(0).getValue().getOrderTypeId());
     }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_returnsEarlyWhenOrderCollectionIsNull() {
+        UUID orderId = UUID.randomUUID();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(null)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Should not throw - early return when orderCollection is null
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify no email sending was attempted since we returned early
+        verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
+            any(), any(), any());
+    }
 }

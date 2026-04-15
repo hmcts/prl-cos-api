@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -187,6 +188,41 @@ public class DocumentSealingServiceTest {
             documentSealingService
                 .sealDocument(inputDocument, caseData, "testAuth");
         }, UncheckedIOException.class, "java.io.IOException: Missing root object specification in trailer.");
+        mockResourceReader.close();
+    }
+
+    @Test
+    public void sealDocumentShouldRethrowIllegalStateException() {
+        final byte[] sealBinaries = readBytes("familycourtseal.png");
+
+        Document inputDocument = Document.builder()
+            .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
+
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(documentGenService.getDocumentBytes(
+            inputDocument.getDocumentUrl(),
+            "testAuth",
+            "s2s token"
+        )).thenReturn(new byte[]{1, 2, 3}); // Invalid PDF bytes
+
+        MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
+        mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal.png")).thenReturn(sealBinaries);
+
+        MockedStatic<PDDocument> mockPdDocument = mockStatic(PDDocument.class);
+        mockPdDocument.when(() -> PDDocument.load(any(byte[].class)))
+            .thenThrow(new IllegalStateException("Test illegal state"));
+
+        CaseData caseData = CaseData.builder()
+            .caseManagementLocation(CaseManagementLocation.builder()
+                .region("2")
+                .build())
+            .build();
+
+        assertExpectedException(() -> {
+            documentSealingService.sealDocument(inputDocument, caseData, "testAuth");
+        }, IllegalStateException.class, "Test illegal state");
+
+        mockPdDocument.close();
         mockResourceReader.close();
     }
 }
