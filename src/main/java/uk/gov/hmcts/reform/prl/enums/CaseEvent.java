@@ -75,6 +75,8 @@ public enum CaseEvent {
     AMEND_RESPONDENTS_DETAILS("amendRespondentsDetails"),
     AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED("amendOtherPeopleInTheCaseRevised"),
     APPLICANT_DETAILS("applicantsDetails"),
+    ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK("issueAndSendToLocalCourtCallback"),
+    PATH_FINDER_DECISION("pathfinderDecision"),
     REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
     CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask");
 
