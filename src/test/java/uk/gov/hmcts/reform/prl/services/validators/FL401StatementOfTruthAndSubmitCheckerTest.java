@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -142,7 +143,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
             .lastName("fl401applicantlast")
             .dateOfBirth(localDate)
             .gender(Gender.female)
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .address(Address.builder()
                          .addressLine1("Test")

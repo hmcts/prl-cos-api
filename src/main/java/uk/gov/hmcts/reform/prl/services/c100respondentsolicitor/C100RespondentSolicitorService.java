@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
@@ -1104,7 +1105,7 @@ public class C100RespondentSolicitorService {
             && null != respondent.getResponse().getCitizenDetails()
             && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
             respondent = respondent.toBuilder()
-                .liveInRefuge(Yes)
+                .liveInRefuge(YesNoIDontKnowV2.Yes)
                 .refugeConfidentialityC8Form(respondent
                                                  .getResponse()
                                                  .getCitizenDetails()

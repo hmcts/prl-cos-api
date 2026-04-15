@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -55,7 +56,7 @@ public class ConfidentialityC8RefugeServiceTest {
         refugePartyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -67,13 +68,13 @@ public class ConfidentialityC8RefugeServiceTest {
             .isCurrentAddressKnown(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .build();
 
         refugePartyDetails2 = PartyDetails.builder()
             .firstName("ABC 2")
             .lastName("XYZ 2")
-            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
@@ -84,7 +85,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .isCurrentAddressKnown(YesOrNo.Yes)
             .canYouProvidePhoneNumber(YesOrNo.Yes)
             .phoneNumber("12345678900")
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .email("abc2@xyz.com")
             .build();
     }
@@ -127,7 +128,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void testRefugeCleanup() {
 
         refugePartyDetails1 = refugePartyDetails1.toBuilder()
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .build();
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
         List<Element<PartyDetails>> partyDetailsWrappedList = Collections.singletonList(wrappedApplicants);
@@ -148,7 +149,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void testRefugeCleanupWithoutAddress() {
 
         refugePartyDetails1 = refugePartyDetails1.toBuilder()
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .isCurrentAddressKnown(YesOrNo.No)
             .build();
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
@@ -170,7 +171,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void testRefugeCleanupFalseWithoutAddress() {
 
         refugePartyDetails1 = refugePartyDetails1.toBuilder()
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .isCurrentAddressKnown(YesOrNo.No)
             .build();
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(refugePartyDetails1).build();
@@ -215,7 +216,7 @@ public class ConfidentialityC8RefugeServiceTest {
 
     @Test
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401() {
-        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build());
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder().liveInRefuge(YesNoIDontKnowV2.Yes).build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             partyDetails,
@@ -230,7 +231,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithKnownAddress() {
         Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails
                                                                       .builder()
-                                                                      .liveInRefuge(YesOrNo.Yes)
+                                                                      .liveInRefuge(YesNoIDontKnowV2.Yes)
                                                                       .isCurrentAddressKnown(YesOrNo.Yes)
                                                                       .build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
@@ -247,7 +248,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithKnownAddressCleanUpFalse() {
         Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails
                                                                       .builder()
-                                                                      .liveInRefuge(YesOrNo.Yes)
+                                                                      .liveInRefuge(YesNoIDontKnowV2.Yes)
                                                                       .isCurrentAddressKnown(YesOrNo.No)
                                                                       .build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
@@ -263,7 +264,7 @@ public class ConfidentialityC8RefugeServiceTest {
     @Test
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithResponse() {
         Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder()
-                                                                      .liveInRefuge(YesOrNo.No)
+                                                                      .liveInRefuge(YesNoIDontKnowV2.No)
                                                                       .response(Response.builder().build())
                                                                       .build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
@@ -279,7 +280,7 @@ public class ConfidentialityC8RefugeServiceTest {
     @Test
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401WithCitizenDetails() {
         Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder()
-                                                                      .liveInRefuge(YesOrNo.No)
+                                                                      .liveInRefuge(YesNoIDontKnowV2.No)
                                                                       .response(Response.builder().citizenDetails(
                                                                           CitizenDetails.builder().build()).build())
                                                                       .build());
@@ -297,7 +298,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void testListRefugeDocumentsForConfidentialTabC100() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -340,7 +341,7 @@ public class ConfidentialityC8RefugeServiceTest {
             .builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(PartyDetails.builder()
-                                 .liveInRefuge(YesOrNo.Yes)
+                                 .liveInRefuge(YesNoIDontKnowV2.Yes)
                                  .refugeConfidentialityC8Form(Document
                                                                   .builder()
                                                                   .build())
@@ -392,11 +393,15 @@ public class ConfidentialityC8RefugeServiceTest {
 
     @Test
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401InResponse() {
-        Optional<PartyDetails> partyDetails = Optional.ofNullable(PartyDetails.builder()
-                                                                      .liveInRefuge(YesOrNo.No)
-                                                                      .response(Response.builder().citizenDetails(
-                                                                          CitizenDetails.builder().liveInRefuge(YesOrNo.Yes).build()).build())
-                                                                      .build());
+        Optional<PartyDetails> partyDetails = Optional.ofNullable(
+            PartyDetails.builder()
+                .liveInRefuge(YesNoIDontKnowV2.No)
+                .response(Response.builder()
+                              .citizenDetails(CitizenDetails.builder()
+                                                  .liveInRefuge(YesNoIDontKnowV2.Yes)
+                                                  .build())
+                              .build())
+                .build());
         HashMap<String, Object> updatedCaseData = new HashMap<>();
         confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForFL401(
             partyDetails,
@@ -411,7 +416,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithEmptyData() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -436,7 +441,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForApplicant() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -462,7 +467,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForFL401ForApplicant() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         CaseData caseDataBefore = CaseData
@@ -485,7 +490,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForFL401ForRespondent() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         CaseData caseDataBefore = CaseData
@@ -508,7 +513,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForRespondent() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -534,7 +539,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForOtherPeople() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
@@ -560,7 +565,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForApplicantAddressIsKnown() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -587,7 +592,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForApplicantAddressIsKnownBefore() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.No)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -596,7 +601,7 @@ public class ConfidentialityC8RefugeServiceTest {
         applicantList.add(wrappedApplicant);
         PartyDetails applicantBefore = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -623,7 +628,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForApplicantRefugeHasChangedFromNoToYes() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -632,7 +637,7 @@ public class ConfidentialityC8RefugeServiceTest {
         applicantList.add(wrappedApplicant);
         PartyDetails applicantBefore = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -659,7 +664,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processC8RefugeDocumentsOnAmendForC100WithForApplicantRefugeHasChangedFromYesToNo() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -668,7 +673,7 @@ public class ConfidentialityC8RefugeServiceTest {
         applicantList.add(wrappedApplicant);
         PartyDetails applicantBefore = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -696,7 +701,7 @@ public class ConfidentialityC8RefugeServiceTest {
         Document document = Document.builder().documentFileName("test").build();
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(document)
             .build();
@@ -705,7 +710,7 @@ public class ConfidentialityC8RefugeServiceTest {
         applicantList.add(wrappedApplicant);
         PartyDetails applicantBefore = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(document)
             .build();
@@ -732,7 +737,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processRefugeDocumentsOnSubmitC100() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -754,7 +759,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processRefugeDocumentsOnSubmitFL401() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -782,7 +787,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processRefugeDocumentsOnReSubmitC100() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -804,7 +809,7 @@ public class ConfidentialityC8RefugeServiceTest {
     public void processRefugeDocumentsOnReSubmitFL401() {
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();
@@ -833,7 +838,7 @@ public class ConfidentialityC8RefugeServiceTest {
         Map<String, Object> map = new HashMap<>();
         PartyDetails applicant = PartyDetails
             .builder()
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isCurrentAddressKnown(YesOrNo.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .build();

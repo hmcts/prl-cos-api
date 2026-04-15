@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -32,8 +33,6 @@ public class OtherPersonDetail {
     @JsonProperty("isOtherPersonAddressConfidential")
     private YesOrNo isOtherPersonAddressConfidential;
     private YesOrNo addressUnknown;
-    private YesOrNo liveInRefuge;
+    private YesNoIDontKnowV2 liveInRefuge;
     private Document refugeConfidentialityC8Form;
-
-
 }

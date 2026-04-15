@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -107,7 +108,7 @@ public class PartyDetails {
     @JsonIgnore
     private CitizenSos citizenSosObject;
 
-    private YesOrNo liveInRefuge;
+    private YesNoIDontKnowV2 liveInRefuge;
     private Document refugeConfidentialityC8Form;
 
     public boolean hasConfidentialInfo() {

@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -34,10 +35,12 @@ public class RefugeCaseGenerator implements FieldGenerator {
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (caseData.getApplicantsFL401() != null) {
-                isRefugeCase = caseData.getApplicantsFL401().getLiveInRefuge();
+                isRefugeCase = YesNoIDontKnowV2.Yes.equals(caseData.getApplicantsFL401().getLiveInRefuge())
+                    ? YesOrNo.Yes : YesOrNo.No;
             }
             if (YesOrNo.No.equals(isRefugeCase) && (caseData.getRespondentsFL401() != null)) {
-                isRefugeCase = caseData.getRespondentsFL401().getLiveInRefuge();
+                isRefugeCase = YesNoIDontKnowV2.Yes.equals(caseData.getRespondentsFL401().getLiveInRefuge())
+                    ? YesOrNo.Yes : YesOrNo.No;
             }
         }
         return CaseSummary.builder().refugeCase(RefugeCase.builder().isRefugeCase(isRefugeCase).build()).build();
@@ -49,7 +52,7 @@ public class RefugeCaseGenerator implements FieldGenerator {
             refugeParty
                 = partyDetailsList
                 .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getLiveInRefuge()))
+                .filter(x -> YesNoIDontKnowV2.Yes.equals(x.getValue().getLiveInRefuge()))
                 .findFirst();
         }
         return refugeParty.isPresent() ? YesOrNo.Yes : YesOrNo.No;
