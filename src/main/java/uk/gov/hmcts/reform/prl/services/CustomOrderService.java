@@ -975,8 +975,10 @@ public class CustomOrderService {
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
         String actReference = getActReferenceForOrder(selectedOption);
-        String formattedOrderName = getDisplayOrderName(caseData, caseDataMap, selectedOption, orderDescription)
-            + "\n" + actReference;
+        String displayOrderName = getDisplayOrderName(caseData, caseDataMap, selectedOption, orderDescription);
+        String formattedOrderName = StringUtils.isNotBlank(actReference)
+            ? displayOrderName + "\n" + actReference
+            : displayOrderName;
 
         data.put("orderName", formattedOrderName);
 
