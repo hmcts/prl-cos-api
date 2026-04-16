@@ -432,16 +432,12 @@ public class CustomOrderService {
         // Format order name with form number, description and act reference
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
-        String formNumber = getFormNumberForOrder(selectedOption);
         String actReference = getActReferenceForOrder(selectedOption);
-        if (formNumber != null && actReference != null) {
-            String strippedDescription = stripFormNumberFromDescription(orderDescription);
-            String formattedOrderName = formNumber + " - " + strippedDescription + "\n" + actReference;
-            data.put("orderName", formattedOrderName);
-            log.info("Order with act reference - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
-        } else {
-            data.put("orderName", orderDescription);
-        }
+        String formattedOrderName = getDisplayOrderName(caseData, caseDataMap, selectedOption, orderDescription)
+            + "\n" + actReference;
+
+        data.put("orderName", formattedOrderName);
+
         safePut(data, "respondent1Name", () -> {
             var respondent = caseData.getRespondents().getFirst().getValue();
             return (respondent.getFirstName() + " " + respondent.getLastName()).trim();
@@ -974,19 +970,13 @@ public class CustomOrderService {
         populateFamilymanPlaceholders(data, caseData);
         safePut(data, COURT_NAME, caseData::getCourtName);
 
-        // Format order name with form number, description and act reference
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
-        String formNumber = getFormNumberForOrder(selectedOption);
         String actReference = getActReferenceForOrder(selectedOption);
-        if (formNumber != null && actReference != null) {
-            String strippedDescription = stripFormNumberFromDescription(orderDescription);
-            String formattedOrderName = formNumber + " - " + strippedDescription + "\n" + actReference;
-            data.put("orderName", formattedOrderName);
-            log.info("Order with act reference - using formatted orderName: {}", formattedOrderName.replace("\n", " | "));
-        } else {
-            data.put("orderName", orderDescription);
-        }
+        String formattedOrderName = getDisplayOrderName(caseData, caseDataMap, selectedOption, orderDescription)
+            + "\n" + actReference;
+
+        data.put("orderName", formattedOrderName);
 
         // Judge details
         String judgeName = extractJudgeName(caseData, caseDataMap);
@@ -2036,5 +2026,56 @@ public class CustomOrderService {
         caseDataUpdated.put(ORDER_COLLECTION, updatedOrders);
         log.info("Updated orderCollection[0] with doc: {}, orderTypeId: {}. Total orders: {}",
             docToStore.getDocumentFileName(), orderName, updatedOrders.size());
+    }
+
+    C21OrderOptionsEnum getC21OrderOption(Map<String, Object> caseDataMap) {
+        if (caseDataMap == null) {
+            return null;
+        }
+
+        Object customC21Details = caseDataMap.get(CUSTOM_C21_ORDER_DETAILS);
+        if (!(customC21Details instanceof Map<?, ?> c21Map)) {
+            return null;
+        }
+
+        Object orderOptions = c21Map.get("orderOptions");
+        if (orderOptions == null) {
+            return null;
+        }
+
+        try {
+            return switch (orderOptions) {
+                case String orderOptionsStr -> C21OrderOptionsEnum.getValue(orderOptionsStr);
+                case C21OrderOptionsEnum c21OrderOptionsEnum -> c21OrderOptionsEnum;
+                default -> null;
+            };
+        } catch (IllegalArgumentException e) {
+            log.warn("Could not parse C21 order option: {}", orderOptions);
+            return null;
+        }
+    }
+
+    String getDisplayOrderName(CaseData caseData, Map<String, Object> caseDataMap,
+                               CustomOrderNameOptionsEnum selectedOption, String orderDescription) {
+        if (CustomOrderNameOptionsEnum.blankOrderOrDirections == selectedOption) {
+            C21OrderOptionsEnum c21Option = getC21OrderOption(caseDataMap);
+
+            if (c21Option == null || C21OrderOptionsEnum.c21other == c21Option) {
+                return StringUtils.isNotBlank(caseData.getNameOfOrder())
+                    ? caseData.getNameOfOrder()
+                    : "C21 - General order or directions";
+            }
+
+            return c21Option.getHeaderValue();
+        }
+
+        String formNumber = getFormNumberForOrder(selectedOption);
+        String strippedDescription = stripFormNumberFromDescription(orderDescription);
+
+        if (formNumber != null && StringUtils.isNotBlank(strippedDescription)) {
+            return formNumber + " - " + strippedDescription;
+        }
+
+        return StringUtils.defaultString(strippedDescription);
     }
 }

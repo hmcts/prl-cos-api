@@ -4407,4 +4407,64 @@ class CustomOrderServiceTest {
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals("15/04/2026", placeholders.get("orderDate"));
     }
+
+    @Test
+    public void testGetDisplayOrderNameForC21ApplicationRefused() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customC21OrderDetails", Map.of("orderOptions", "c21ApplicationRefused"));
+
+        String result = customOrderService.getDisplayOrderName(
+            caseData,
+            caseDataMap,
+            CustomOrderNameOptionsEnum.blankOrderOrDirections,
+            "Blank order or directions (C21): application refused"
+        );
+
+        assertEquals("C21 - General order or directions: application refused", result);
+    }
+
+    @Test
+    public void testGetDisplayOrderNameForC21OtherFallsBackToGeneralOrder() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customC21OrderDetails", Map.of("orderOptions", "c21other"));
+
+        String result = customOrderService.getDisplayOrderName(
+            caseData,
+            caseDataMap,
+            CustomOrderNameOptionsEnum.blankOrderOrDirections,
+            "Blank order or directions (C21): Other"
+        );
+
+        assertEquals("C21 - General order or directions", result);
+    }
+
+    @Test
+    public void testGetDisplayOrderNameForOccupation() {
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getDisplayOrderName(
+            caseData,
+            new HashMap<>(),
+            CustomOrderNameOptionsEnum.occupation,
+            "Occupation order"
+        );
+
+        assertEquals("FL404 - Occupation order", result);
+    }
+
+    @Test
+    public void testGetDisplayOrderNameForNoticeOfProceedingsReturnsDescription() {
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.getDisplayOrderName(
+            caseData,
+            new HashMap<>(),
+            CustomOrderNameOptionsEnum.noticeOfProceedings,
+            "Notice of proceedings"
+        );
+
+        assertEquals("Notice of proceedings", result);
+    }
 }
