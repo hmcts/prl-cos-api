@@ -215,7 +215,7 @@ public class UpdateHearingActualsService {
         )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
+        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(1).must(mustFilter).build();
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
