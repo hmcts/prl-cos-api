@@ -64,7 +64,7 @@ public class CourtFinderService {
 
             }
         } catch (Exception e) {
-            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
+            log.error("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {} for caseId {} ",e, caseData.getId());
         }
         return null;
     }

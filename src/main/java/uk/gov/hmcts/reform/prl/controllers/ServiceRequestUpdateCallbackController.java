@@ -70,6 +70,10 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
                     throw (new RuntimeException(INVALID_CLIENT));
                 }
             }
+            log.info("Processing service-request-update for caseId: {} with service request reference: {} ",
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                serviceRequestUpdateDto.getServiceRequestReference()
+            );
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         } catch (Exception ex) {
             log.error(
