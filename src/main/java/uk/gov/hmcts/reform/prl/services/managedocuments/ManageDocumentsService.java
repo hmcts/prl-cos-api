@@ -383,6 +383,8 @@ public class ManageDocumentsService {
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
+            .renameDocument(quarantineLegalDoc.isRenameDocument())
+            .documentNameOverride(quarantineLegalDoc.getDocumentNameOverride())
             .build();
 
     }
