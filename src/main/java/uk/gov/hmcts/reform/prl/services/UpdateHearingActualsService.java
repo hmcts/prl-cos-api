@@ -204,6 +204,7 @@ public class UpdateHearingActualsService {
         List<Should> shoulds = List.of(
                 Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
                 Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
+                Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build(),
                 Should.builder().match(Match.builder().currentHearingStatus(LISTED).build()).build()
 
         );
