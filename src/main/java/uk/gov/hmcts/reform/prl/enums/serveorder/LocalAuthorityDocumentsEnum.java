@@ -22,8 +22,8 @@ public enum LocalAuthorityDocumentsEnum {
     section7Addendum("section7Addendum", "Section 7 Addendum"),
     @JsonProperty("localAuthorityInvolvementLetter")
     localAuthorityInvolvementLetter("localAuthorityInvolvementLetter", "Local Authority Involvement Letter"),
-    @JsonProperty("section47Inquiry")
-    section47Inquiry("section47Inquiry", "Section 47 Inquiry"),
+    @JsonProperty("section47Enquiry")
+    section47Enquiry("section47Enquiry", "Section 47 Enquiry"),
     @JsonProperty("other")
     other("other", "Other");
 
