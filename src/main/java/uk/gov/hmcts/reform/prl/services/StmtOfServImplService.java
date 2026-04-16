@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -34,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -62,7 +64,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -99,6 +100,7 @@ public class StmtOfServImplService {
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final LaunchDarklyClient launchDarklyClient;
     private final ManageDocumentsService manageDocumentsService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -115,27 +117,47 @@ public class StmtOfServImplService {
                                                                                         .code(UUID.randomUUID())
                                                                                         .label(ALL_RESPONDENTS).build())
                                                                              .build())
+                                                  .orderList(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData))
                                                   .build()));
         caseDataUpdated.put("stmtOfServiceAddRecipient", stmtOfServiceAddRecipient);
         return caseDataUpdated;
     }
 
+
     public Map<String, Object> handleSosAboutToSubmit(CaseDetails caseDetails, String authorisation) {
         Map<String, Object> caseDataUpdateMap = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*** Statement of service, about-to-submit callback ***");
-        if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
-            .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
-            //Application packs
-            handleSosForApplicationPacks(authorisation, caseData, caseDataUpdateMap);
-        } else if (StatementOfServiceWhatWasServed.statementOfServiceOrder
-            .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
-            //Orders
-            handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
+
+        if (caseData.getStatementOfService() != null
+            && caseData.getStatementOfService().getStmtOfServiceWhatWasServed() != null) {
+            if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+                .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
+                handleSosForApplicationPacks(authorisation, caseData, caseDataUpdateMap);
+            } else if (StatementOfServiceWhatWasServed.statementOfServiceOrder
+                .equals(caseData.getStatementOfService().getStmtOfServiceWhatWasServed())) {
+                //Orders
+                handleSosForOrders(authorisation, caseData, caseDataUpdateMap);
+            }
         }
 
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
+        // Log servedOrderIds for debugging
+        if (caseDataUpdateMap.containsKey("stmtOfServiceForOrder")) {
+            Object stmtOfServiceForOrder = caseDataUpdateMap.get("stmtOfServiceForOrder");
+            if (stmtOfServiceForOrder instanceof List<?>) {
+                @SuppressWarnings("unchecked")
+                List<Element<StmtOfServiceAddRecipient>> recipients = (List<Element<StmtOfServiceAddRecipient>>) stmtOfServiceForOrder;
+                recipients.forEach(recipient -> {
+                    if (recipient.getValue() != null) {
+                        log.info("Recipient {} has servedOrderIds: {}",
+                            recipient.getValue().getSelectedPartyName(),
+                            recipient.getValue().getServedOrderIds());
+                    }
+                });
+            }
+        }
         return caseDataUpdateMap;
     }
 
@@ -145,24 +167,28 @@ public class StmtOfServImplService {
         log.info("SOS for Application packs");
         List<Element<StmtOfServiceAddRecipient>> sosRecipients = new ArrayList<>();
         //Get all sos recipients
-        caseData.getStatementOfService().getStmtOfServiceAddRecipient()
-            .stream()
-            .map(Element::getValue)
-            .forEach(sosRecipient -> {
-                sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, null);
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                .stream()
+                .map(Element::getValue)
+                .forEach(sosRecipient -> {
+                    sosRecipient = buildRecipientAndUpdateOrderCollection(authorisation, caseData, sosRecipient, null);
 
-                //PRL-5979 - Send cover letter with access code to respondents
-                caseDataMap.put(
-                    ACCESS_CODE_NOTIFICATIONS,
-                    sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, sosRecipient)
-                );
+                    caseDataMap.put(
+                        ACCESS_CODE_NOTIFICATIONS,
+                        sendAccessCodesToRespondentsByCourtLegalRep(authorisation, caseData, sosRecipient)
+                    );
 
-                sosRecipients.add(element(sosRecipient.toBuilder()
-                                              .respondentDynamicList(null) //clear dynamic list after sending access code info
-                                              .build()));
-            });
+                    sosRecipients.add(element(sosRecipient.toBuilder()
+                        .respondentDynamicList(null)
+                        .orderList(null)
+                        .build()));
+                });
+        }
         //Add all existing sos recipients & update into case data
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForApplication());
         }
         caseDataMap.put(STMT_OF_SERVICE_FOR_APPLICATION, sosRecipients);
@@ -194,36 +220,41 @@ public class StmtOfServImplService {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
 
         //Get all sos recipients
-        caseData.getStatementOfService().getStmtOfServiceAddRecipient()
-            .stream()
-            .map(Element::getValue)
-            .forEach(sosRecipient -> {
-                sosRecipient = getUpdatedSosRecipient(authorisation, caseData, sosRecipient, orderCollection);
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+            caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                .stream()
+                .map(Element::getValue)
+                .forEach(sosRecipient -> {
+                    sosRecipient = buildRecipientAndUpdateOrderCollection(authorisation, caseData, sosRecipient, orderCollection);
 
-                sosRecipients.add(element(sosRecipient.toBuilder()
-                                              .respondentDynamicList(null) //clear dynamic list
-                                              .build()));
-            });
+                    sosRecipients.add(element(sosRecipient.toBuilder()
+                                                  .respondentDynamicList(null) //clear dynamic list
+                                                  .build()));
+                });
+        }
 
         //Add all existing sos recipients & update into case data
-        if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+        if (caseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
             sosRecipients.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
         }
+
         caseDataMap.put("stmtOfServiceForOrder", sosRecipients);
         //PRL-6122
         caseDataMap.put(ORDER_COLLECTION, orderCollection);
     }
 
-    private StmtOfServiceAddRecipient getUpdatedSosRecipient(String authorisation,
-                                                             CaseData caseData,
-                                                             StmtOfServiceAddRecipient recipient,
-                                                             List<Element<OrderDetails>> orderCollection) {
-        log.info("Inside *getUpdatedSosRecipient*");
+    private StmtOfServiceAddRecipient buildRecipientAndUpdateOrderCollection(String authorisation,
+                                                                              CaseData caseData,
+                                                                              StmtOfServiceAddRecipient recipient,
+                                                                              List<Element<OrderDetails>> orderCollection) {
+        log.info("Building recipient and updating order collection for case type: {}", caseData.getCaseTypeOfApplication());
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (ALL_RESPONDENTS.equals(recipient.getRespondentDynamicList().getValue().getLabel())) {
                 List<String> respondentNamesList = CaseUtils.getPartyNameList(caseData.getRespondents());
                 String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
-                recipient = getRecipient(
+                recipient = buildRecipientWithPartyAndOrderDetails(
                     authorisation,
                     recipient,
                     CaseUtils.getPartyIdListAsString(caseData.getRespondents()),
@@ -235,29 +266,53 @@ public class StmtOfServImplService {
                                           ManageOrdersUtils.getServedParties(caseData.getRespondents()));
 
             } else {
-                recipient = getRecipient(authorisation,
+                recipient = buildRecipientWithPartyAndOrderDetails(authorisation,
                                          recipient,
                                          recipient.getRespondentDynamicList().getValue().getCode(),
                                          recipient.getRespondentDynamicList().getValue().getLabel()
                 );
 
                 StmtOfServiceAddRecipient finalRecipient = recipient;
+
                 List<Element<PartyDetails>> partiesServed = caseData.getRespondents().stream()
                     .filter(respondent -> respondent.getId().toString().equals(
-                            finalRecipient.getRespondentDynamicList().getValue().getCode()))
+                        finalRecipient.getRespondentDynamicList().getValue().getCode()))
                     .toList();
+
+                if (partiesServed.isEmpty() && CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                    partiesServed = caseData.getApplicants().stream()
+                        .filter(applicant -> applicant.getId().toString().equals(
+                            finalRecipient.getRespondentDynamicList().getValue().getCode()))
+                        .toList();
+                }
+
                 //PRL-6122
                 updateOrdersServedParties(caseData, orderCollection, ManageOrdersUtils.getServedParties(partiesServed));
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            recipient = getRecipient(authorisation,
+            recipient = buildRecipientWithPartyAndOrderDetails(authorisation,
                                      recipient,
                                      recipient.getRespondentDynamicList().getValue().getCode(),
                                      recipient.getRespondentDynamicList().getValue().getLabel()
             );
+
+            // Check if selected party is respondent or applicant
+            String selectedPartyId = recipient.getRespondentDynamicList().getValue().getCode();
+            PartyDetails selectedParty = null;
+
+            if (caseData.getRespondentsFL401() != null
+                && caseData.getRespondentsFL401().getPartyId().toString().equals(selectedPartyId)) {
+                selectedParty = caseData.getRespondentsFL401();
+            } else if (caseData.getApplicantsFL401() != null
+                       && caseData.getApplicantsFL401().getPartyId().toString().equals(selectedPartyId)) {
+                selectedParty = caseData.getApplicantsFL401();
+            }
+
             //PRL-6122
-            updateOrdersServedParties(caseData, orderCollection,
-                                      List.of(ManageOrdersUtils.getServedParty(caseData.getRespondentsFL401())));
+            if (selectedParty != null) {
+                updateOrdersServedParties(caseData, orderCollection,
+                                          List.of(ManageOrdersUtils.getServedParty(selectedParty)));
+            }
         }
         return recipient;
     }
@@ -271,6 +326,13 @@ public class StmtOfServImplService {
             nullSafeCollection(orderCollection)
                 .stream()
                 .filter(order -> SOS_PENDING.equals(order.getValue().getSosStatus()))
+                .filter(order -> null != caseData.getStatementOfService()
+                    && null != caseData.getStatementOfService().getStmtOfServiceAddRecipient()
+                    && caseData.getStatementOfService().getStmtOfServiceAddRecipient().stream()
+                    .anyMatch(element -> null != element.getValue().getOrderList()
+                        && null != element.getValue().getOrderList().getValue()
+                        && element.getValue().getOrderList().getValue().stream()
+                        .anyMatch(listElement -> listElement.getCode().equals(String.valueOf(order.getId())))))
                 .forEach(order -> {
                     log.info("Order is pending for SOS {}", order.getId());
                     List<Element<ServedParties>> updatedServedParties = new ArrayList<>(order.getValue().getServeOrderDetails().getServedParties());
@@ -305,10 +367,13 @@ public class StmtOfServImplService {
                           .collect(Collectors.toSet())::contains);
     }
 
-    private StmtOfServiceAddRecipient getRecipient(String authorisation,
-                                                   StmtOfServiceAddRecipient recipient,
-                                                   String selectedPartyId,
-                                                   String selectedPartyName) {
+    private StmtOfServiceAddRecipient buildRecipientWithPartyAndOrderDetails(String authorisation,
+                                                                              StmtOfServiceAddRecipient recipient,
+                                                                              String selectedPartyId,
+                                                                              String selectedPartyName) {
+
+        List<String> servedOrderIds = extractServedOrderIds(recipient);
+
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
             .selectedPartyName(selectedPartyName)
@@ -320,7 +385,20 @@ public class StmtOfServImplService {
             .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
             //PRL-6478 - Reset to null as not to show duplicate date field in XUI
             .servedDateTimeOption(null)
+            .servedOrderIds(servedOrderIds)
+            .orderList(null)
             .build();
+    }
+
+    private List<String> extractServedOrderIds(StmtOfServiceAddRecipient recipient) {
+        if (recipient.getOrderList() != null
+            && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
+            return recipient.getOrderList().getValue().stream()
+                .map(DynamicMultiselectListElement::getCode)
+                .collect(Collectors.toList());
+        }
+        log.warn("No orders selected for statement of service - orderList is null or empty");
+        return null;
     }
 
     private SosUploadedByEnum getSosUploadedBy(String authorisation) {
@@ -338,22 +416,46 @@ public class StmtOfServImplService {
     }
 
     private List<DynamicListElement> getRespondentsList(CaseData caseData) {
-        List<DynamicListElement> respondentListItems = new ArrayList<>();
+        List<DynamicListElement> partyListItems = new ArrayList<>();
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            IncrementalInteger i = new IncrementalInteger(1);
+            // Add applicants
+            if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                IncrementalInteger applicantIndex = new IncrementalInteger(1);
+                caseData.getApplicants()
+                    .forEach(applicant ->
+                                 partyListItems.add(DynamicListElement.builder()
+                                                        .code(applicant.getId().toString())
+                                                        .label(applicant.getValue().getLabelForDynamicList()
+                                                                   + " (Applicant " + applicantIndex.getAndIncrement() + ")")
+                                                        .build()));
+            }
+            // Add respondents
+            IncrementalInteger respondentIndex = new IncrementalInteger(1);
             caseData.getRespondents()
                 .forEach(respondent ->
-                             respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
-                                                         .label(respondent.getValue().getLabelForDynamicList()
-                                                                    + " (Respondent " + i.getAndIncrement() + ")").build()));
-            respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
+                             partyListItems.add(DynamicListElement.builder()
+                                                    .code(respondent.getId().toString())
+                                                    .label(respondent.getValue().getLabelForDynamicList()
+                                                               + " (Respondent " + respondentIndex.getAndIncrement() + ")")
+                                                    .build()));
+            partyListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            String name = caseData.getRespondentsFL401().getLabelForDynamicList() + " (Respondent)";
-            respondentListItems.add(DynamicListElement.builder()
-                                        .code(caseData.getRespondentsFL401().getPartyId().toString())
-                                        .label(name).build());
+            // Add applicant
+            if (caseData.getApplicantsFL401() != null) {
+                String applicantName = caseData.getApplicantsFL401().getLabelForDynamicList() + " (Applicant)";
+                partyListItems.add(DynamicListElement.builder()
+                                       .code(caseData.getApplicantsFL401().getPartyId().toString())
+                                       .label(applicantName)
+                                       .build());
+            }
+            // Add respondent
+            String respondentName = caseData.getRespondentsFL401().getLabelForDynamicList() + " (Respondent)";
+            partyListItems.add(DynamicListElement.builder()
+                                   .code(caseData.getRespondentsFL401().getPartyId().toString())
+                                   .label(respondentName)
+                                   .build());
         }
-        return respondentListItems;
+        return partyListItems;
     }
 
     public ServedApplicationDetails checkAndServeRespondentPacksPersonalService(CaseData caseData, String authorization) {
@@ -509,10 +611,11 @@ public class StmtOfServImplService {
             .selectedPartyId(String.join(COMMA, sosObject.getPartiesServed()))
                                       .uploadedBy(getSosUploadedBy(authorisation))
                                       .submittedDateTime(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)).toLocalDateTime())
-            .partiesServedDateTime(sosObject.getPartiesServedDate())
+                                      .partiesServedDateTime(sosObject.getPartiesServedDate())
             .build()));
         //Add all existing sos recipients & update into case data
-        if (CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForOrder())) {
+        if (updatedCaseData.getStatementOfService() != null
+            && CollectionUtils.isNotEmpty(updatedCaseData.getStatementOfService().getStmtOfServiceForOrder())) {
             sosRecipients.addAll(updatedCaseData.getStatementOfService().getStmtOfServiceForOrder());
         }
         updatedCaseDataMap.put("stmtOfServiceForOrder", sosRecipients);
@@ -728,14 +831,13 @@ public class StmtOfServImplService {
                                                                      String template) {
         if (!CaseUtils.hasDashboardAccess(respondent)
             && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-            List<Document> documents = null;
             try {
                 //cover sheets
-                documents = new ArrayList<>(serviceOfApplicationPostService
+                List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
                                                 .getCoverSheets(caseData, authorization,
                                                                 respondent.getValue().getAddress(),
                                                                 respondent.getValue().getLabelForDynamicList(),
-                                                                DOCUMENT_COVER_SHEET_HINT
+                                                                respondent.getValue().getLabelForDynamicList()
                                                 ));
 
                 //cover letters
@@ -813,5 +915,4 @@ public class StmtOfServImplService {
                                              .build())
                            .build());
     }
-
 }
