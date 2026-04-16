@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -202,8 +201,7 @@ public class UpdateHearingActualsService {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(
                 Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
-                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
-                Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build()
+                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build()
         );
 
         //Hearing state
