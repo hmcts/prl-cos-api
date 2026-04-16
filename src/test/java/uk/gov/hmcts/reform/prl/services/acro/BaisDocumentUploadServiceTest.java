@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
@@ -193,6 +194,8 @@ class BaisDocumentUploadServiceTest {
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(List.of(createOrderDetails()))
                         .familymanCaseNumber("familymanCaseNumber")
+                        .applicant(PartyDetails.builder().build())
+                        .respondent(PartyDetails.builder().build())
                         .build())
                     .build(),
                 AcroCaseDetail.builder()
@@ -200,6 +203,8 @@ class BaisDocumentUploadServiceTest {
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(null)
                         .familymanCaseNumber("familymanCaseNumber")
+                        .applicant(PartyDetails.builder().build())
+                        .respondent(PartyDetails.builder().build())
                         .build())
                     .build(),
                 AcroCaseDetail.builder()
@@ -207,6 +212,12 @@ class BaisDocumentUploadServiceTest {
                     .caseData(AcroCaseData.builder()
                         .familymanCaseNumber("familymanCaseNumber")
                         .fl404Orders(Collections.emptyList())
+                        .applicant(PartyDetails.builder().isEmailAddressConfidential(null)
+                                     .isPhoneNumberConfidential(null)
+                                     .build())
+                        .respondent(PartyDetails.builder().isEmailAddressConfidential(null)
+                                      .isPhoneNumberConfidential(null)
+                                      .build())
                         .build())
                     .build()
             ))
@@ -371,8 +382,12 @@ class BaisDocumentUploadServiceTest {
             "ID", new Object[]{caseData.getId(), capturedData.getId(), "caseData.getId()"},
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
-            "Applicant", new Object[]{caseData.getApplicant(), capturedData.getApplicant(), "caseData.getApplicant()"},
-            "Respondent", new Object[]{caseData.getRespondent(), capturedData.getRespondent(), "caseData.getRespondent()"},
+            "Applicant", new Object[]{caseData.getApplicant().toBuilder().isPhoneNumberConfidential(YesOrNo.No)
+                .isEmailAddressConfidential(YesOrNo.No).build(),
+                capturedData.getApplicant(), "caseData.getApplicant()"},
+            "Respondent", new Object[]{caseData.getRespondent().toBuilder().isPhoneNumberConfidential(YesOrNo.No)
+                .isEmailAddressConfidential(YesOrNo.No).build(),
+                capturedData.getRespondent(), "caseData.getRespondent()"},
             "Court Name", new Object[]{caseData.getCourtName(), capturedData.getCourtName(), "caseData.getCourtName()"},
             "Court EPIMS ID", new Object[]{caseData.getCourtEpimsId(), capturedData.getCourtEpimsId(),
                 "caseData.getCourtEpimsId()"},
@@ -425,6 +440,8 @@ class BaisDocumentUploadServiceTest {
         return AcroCaseData.builder()
             .familymanCaseNumber("familymanCaseNumber")
             .fl404Orders(List.of(createOrderDetails()))
+            .applicant(PartyDetails.builder().build())
+            .respondent(PartyDetails.builder().build())
             .caseHearings(hearings)
             .build();
     }
@@ -463,6 +480,8 @@ class BaisDocumentUploadServiceTest {
                 .caseData(AcroCaseData.builder()
                     .fl404Orders(List.of(createOrderDetails()))
                     .familymanCaseNumber("familymanCaseNumber")
+                    .applicant(PartyDetails.builder().build())
+                    .respondent(PartyDetails.builder().build())
                     .build())
                 .build()))
             .build();

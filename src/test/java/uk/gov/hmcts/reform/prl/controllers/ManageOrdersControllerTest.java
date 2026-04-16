@@ -1093,6 +1093,8 @@ public class ManageOrdersControllerTest {
         );
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
+        verify(manageOrderService, times(1))
+            .removeLocalAuthorityFromCase(any(CaseData.class), anyMap());
     }
 
     @Test
@@ -1649,6 +1651,8 @@ public class ManageOrdersControllerTest {
         );
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
+        verify(manageOrderService, times(1))
+            .removeLocalAuthorityFromCase(caseData, stringObjectMap);
     }
 
     @Test

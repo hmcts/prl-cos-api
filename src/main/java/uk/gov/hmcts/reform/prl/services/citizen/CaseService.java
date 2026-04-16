@@ -722,6 +722,8 @@ public class CaseService {
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
             //add cafacss uploaded docs
             otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            //add local authority uploaded docs
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()));
             //add court staff uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
             //add citizen uploaded docs
@@ -1654,10 +1656,12 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
+                .filter(Objects::nonNull)
                 .map(Element::getValue)
+                .filter(Objects::nonNull)
                 .filter(emailNotification -> {
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
-                    return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
+                    return Objects.equals(partyId, emailNotification.getPartyIds());
                 })
                 .map(emailNotification ->
                     getSodDocuments(
