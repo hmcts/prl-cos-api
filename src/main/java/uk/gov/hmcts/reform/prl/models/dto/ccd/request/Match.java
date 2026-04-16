@@ -50,4 +50,7 @@ public class Match {
     @JsonProperty("data.orderCollection.value.orderType")
     private String orderType;
 
+    @JsonProperty("data.caseTypeOfApplication")
+    private String currentHearingStatus;
+
 }

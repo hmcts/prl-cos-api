@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
@@ -201,7 +203,9 @@ public class UpdateHearingActualsService {
         //C100 cases where fm5 reminders are not sent already
         List<Should> shoulds = List.of(
                 Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
-                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build()
+                Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
+                Should.builder().match(Match.builder().currentHearingStatus(LISTED).build()).build()
+
         );
 
         //Hearing state
@@ -212,7 +216,7 @@ public class UpdateHearingActualsService {
         )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(1).must(mustFilter).build();
+        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
