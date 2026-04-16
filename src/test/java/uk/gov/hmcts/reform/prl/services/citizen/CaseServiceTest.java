@@ -1999,7 +1999,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCirAndRiskAssessmentDocsAreNotReturnedToLipDashboard() {
+    void testCirAndRiskAssessmentDocsAreNotReturnedToLipDashboard() {
         // Given - CIR Transfer Request and CIR Extension Request docs in cafcassUploadDocListDocTab
         // (simulates admin marking the docs as non-restricted during review — they must still be hidden)
         QuarantineLegalDoc cirTransferDoc = QuarantineLegalDoc.builder()
@@ -2040,7 +2040,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testFetchIdamRoles() {
+    void testFetchIdamRoles() {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
         Map<String, String> roles = caseService.fetchIdamAmRoles(AUTH_TOKEN, "test");
         assertEquals("role", roles.get("test"));

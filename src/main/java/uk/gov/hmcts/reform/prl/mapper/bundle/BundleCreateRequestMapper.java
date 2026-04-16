@@ -410,34 +410,18 @@ public class BundleCreateRequestMapper {
     //Updated to retrieve otherDocuments according to the new manageDocuments event
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         CaseData caseData) {
-        List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> allDocuments = new ArrayList<>();
         ReviewDocuments reviewDocuments = caseData.getReviewDocuments();
         if (null != reviewDocuments) {
-            if (null != reviewDocuments.getCourtStaffUploadDocListDocTab()
-                && !reviewDocuments.getCourtStaffUploadDocListDocTab().isEmpty()) {
-                allDocuments.addAll(reviewDocuments.getCourtStaffUploadDocListDocTab());
-            }
-            if (null != reviewDocuments.getCafcassUploadDocListDocTab()
-                && !reviewDocuments.getCafcassUploadDocListDocTab().isEmpty()) {
-                allDocuments.addAll(reviewDocuments.getCafcassUploadDocListDocTab());
-            }
-            if (null != reviewDocuments.getLocalAuthorityUploadDocListDocTab()
-                && !reviewDocuments.getLocalAuthorityUploadDocListDocTab().isEmpty()) {
-                allDocuments.addAll(reviewDocuments.getLocalAuthorityUploadDocListDocTab());
-            }
-            if (null != reviewDocuments.getLegalProfUploadDocListDocTab()
-                && !reviewDocuments.getLegalProfUploadDocListDocTab().isEmpty()) {
-                allDocuments.addAll(reviewDocuments.getLegalProfUploadDocListDocTab());
-            }
-            if (null != reviewDocuments.getCitizenUploadedDocListDocTab()
-                && !reviewDocuments.getCitizenUploadedDocListDocTab().isEmpty()) {
-                allDocuments.addAll(reviewDocuments.getCitizenUploadedDocListDocTab());
-            }
+            addIfNotEmpty(allDocuments, reviewDocuments.getCourtStaffUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getCafcassUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getLocalAuthorityUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getLegalProfUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getCitizenUploadedDocListDocTab());
         }
 
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        List<QuarantineLegalDoc> allDocs = ElementUtils.unwrapElements(allDocuments);
-        for (QuarantineLegalDoc doc : allDocs) {
+        for (QuarantineLegalDoc doc : ElementUtils.unwrapElements(allDocuments)) {
             BundlingRequestDocument otherDoc = mapBundlingRequestDocumentForOtherDocs(doc);
             if (null != otherDoc) {
                 log.info("otherDoc in bundle with filename: {} for case: {}", otherDoc.documentFileName, caseData.getId());
@@ -445,6 +429,12 @@ public class BundleCreateRequestMapper {
             }
         }
         return ElementUtils.wrapElements(otherBundlingDocuments);
+    }
+
+    private <T> void addIfNotEmpty(List<T> target, List<T> source) {
+        if (null != source && !source.isEmpty()) {
+            target.addAll(source);
+        }
     }
 
 
