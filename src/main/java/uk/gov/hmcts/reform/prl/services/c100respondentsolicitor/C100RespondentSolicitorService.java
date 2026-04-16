@@ -1025,6 +1025,7 @@ public class C100RespondentSolicitorService {
             caseData = updateRefugeDocumentList(caseData, amended);
 
             String party = representedRespondent.getValue().getLabelForDynamicList();
+
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
                 element(representedRespondent.getId(), amended)
@@ -1040,6 +1041,9 @@ public class C100RespondentSolicitorService {
             String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
                     ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
+
+            // representedRespondent uses amended details, so the correct details are pulled onto the C8
+            representedRespondent = element(representedRespondent.getId(), amended);
 
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
                 authorisation,
@@ -1125,6 +1129,7 @@ public class C100RespondentSolicitorService {
                 .placeOfBirth(respondent.getResponse().getCitizenDetails().getPlaceOfBirth())
                 .liveInRefuge(respondent.getResponse().getCitizenDetails().getLiveInRefuge())
                 .address(respondent.getResponse().getCitizenDetails().getAddress())
+                .isCurrentAddressKnown(respondent.getResponse().getCitizenDetails().getAddress() != null ? YesOrNo.Yes : YesOrNo.No)
                 .email(respondent.getResponse().getCitizenDetails().getContact() != null
                         ? respondent.getResponse().getCitizenDetails().getContact().getEmail() : null)
                 .phoneNumber(respondent.getResponse().getCitizenDetails().getContact() != null
