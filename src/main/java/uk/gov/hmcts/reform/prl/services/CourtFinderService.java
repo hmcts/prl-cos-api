@@ -60,7 +60,7 @@ public class CourtFinderService {
                                                .getCourtSlug());
                 }
             } else {
-                return getC100NearestFamilyCourt(caseData);
+                return getC100NearestFamilyCourt(getPostcode(caseData));
 
             }
         } catch (Exception e) {
@@ -69,15 +69,13 @@ public class CourtFinderService {
         return null;
     }
 
-    private Court getC100NearestFamilyCourt(CaseData caseData) throws NotFoundException {
+    public Court getC100NearestFamilyCourt(String postcode) throws NotFoundException {
         Court court = null;
         if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
-            court = osCourtFinderService.getC100NearestFamilyCourt(
-                getPostcode(caseData));
+            court = osCourtFinderService.getC100NearestFamilyCourt(postcode);
         } else {
             ServiceArea serviceArea = courtFinderApi
-                .findClosestChildArrangementsCourtByPostcode(
-                    getPostcode(caseData));
+                .findClosestChildArrangementsCourtByPostcode(postcode);
             if (serviceArea != null && !serviceArea.getCourts().isEmpty()) {
                 court = getCourtDetails(serviceArea.getCourts()
                                            .get(0)

@@ -168,7 +168,7 @@ North Somerset Council ,Bristol Civil and Family Justice Centre,Bristol Civil An
 Bath and North East Somerset Council ,Bristol Civil and Family Justice Centre,Bristol Civil And Family Justice Centre,114,,,819890,"Redcliff Street,BS1 6GR",,Open,Bristol,South West
 Swindon County Council ,Swindon Combined Court ,Swindon Combined Court,3935,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Swindon County Council ,South West
 Wiltshire Council ,Swindon Combined Court ,Swindon Combined Court,3940,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Wiltshire Council ,South West
-Hampshire County Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1770,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Hampshire County Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1770,GU31;GU32;GU33;PO7;PO8;PO9:PO10;PO11;PO12;PO13;PO14;PO15;PO16,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
 Southampton City Council ,Southampton Combined Court,Southampton Combined Court Centre,1780,,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council ,South West
 Isle of Wight Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,2114,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Isle of Wight Council ,South West
 Portsmouth City Council ,Portsmouth Combined Court ,Portsmouth Combined Court Centre,1775,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Portsmouth City Council ,South West
@@ -182,4 +182,188 @@ Plymouth City Council,Plymouth Combined Court ,Plymouth Combined Court,1160,PL;T
 Torbay Council,Exeter Law Courts,Exeter Combined Court,1165,EX,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Torbay Council ,South West
 Torbay Council,Plymouth Combined Court ,Plymouth Combined Court,1165,PL;TQ,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Torbay Council ,South West
 Somerset Council ,Taunton Combined Court ,"Taunton Crown, County And Family Court",3300,,,382409,"Shire Hall,TA1 4EU",,Open,Somerset Council ,South West
-Hampshire County Council,Basingstoke County Court and Family Court,Basingstoke County Court And Family Court,1770,RG21;RG22;RG23;RG24,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Hampshire County Council,Basingstoke County Court and Family Court,Basingstoke County Court And Family Court,1770,GU10;GU11;GU12;GU14;GU17;GU26;GU30;GU34;GU35;GU46;RG21;RG22;RG23;RG24;RG25;RG26;RG27;RG28;RG29;SO20;SO21;SO22;SO23;SO24;SP9;SP10;SP11,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Burnley Borough Council,Preston Family Court,Preston Family Court,2315,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Chorley Borough Council,Preston Family Court,Preston Family Court,2320,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Fylde Borough Council,Preston Family Court,Preston Family Court,2325,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Hyndburn Borough Council,Preston Family Court,Preston Family Court,2330,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Lancaster City Council,Preston Family Court,Preston Family Court,2335,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Pendle Borough Council,Preston Family Court,Preston Family Court,2340,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Preston City Council,Preston Family Court,Preston Family Court,2345,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Ribble Valley Borough Council,Preston Family Court,Preston Family Court,2350,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Rossendale Borough Council,Preston Family Court,Preston Family Court,2355,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+South Ribble Borough Council,Preston Family Court,Preston Family Court,2360,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+West Lancashire Borough Council,Preston Family Court,Preston Family Court,2365,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+Wyre Borough Council,Preston Family Court,Preston Family Court,2370,,,102476,"Sessions House, Lancaster Road,PR1 2PD",,Open,Lancashire,North West
+"Bournemouth, Christchurch And Poole Council",Bournemouth Combined Court,Bournemouth Combined Court,1260,,,101633,"Wessex Fields, Castle Lane East,BH7 7DS",,Open,"Bournemouth, Christchurch and Poole Council ",South West
+Dorset Council,Bournemouth Combined Court,Bournemouth Combined Court,1265,,,101633,"Wessex Fields, Castle Lane East,BH7 7DS",,Open,"Bournemouth, Christchurch and Poole Council ",South West
+Adur District Council,Worthing County Court,Wrexham Law Courts,3805,,,637145,"Wrexham Law Courts Bodhyfyd, The Law Courts,LL12 7BP",,Open,,
+Arun District Council,Worthing Count Court,Wrexham Law Courts,3810,,,637145,"Wrexham Law Courts Bodhyfyd, The Law Courts,LL12 7BP",,Open,,
+Chichester District Council,Worthing County Court,Wrexham Law Courts,3815,,,637145,"Wrexham Law Courts Bodhyfyd, The Law Courts,LL12 7BP",,Open,,
+Crawley Borough Council,Brighton County Court,Brighton County And Family Court,3820,,,298390,"1 Edward Street Brighton East Sussex,BN2 0JD",,Open,Sussex,South East
+Eastbourne Borough Council,Hastings County Court,Hastings Magistrates' Court,1410,,,784691,"The Law Courts, Bohemia Road,TN34 1QX",,Open,,
+Hastings Borough Council,Hastings County Court,Hastings Magistrates' Court,1410,,,784691,"The Law Courts, Bohemia Road,TN34 1QX",,Open,,
+Horsham District Council,Brighton County Court,Brighton County And Family Court,3825,,,298390,"1 Edward Street Brighton East Sussex,BN2 0JD",,Open,Sussex,South East
+Lewes District Council,Brighton County Court,Brighton County And Family Court,1425,,,298390,"1 Edward Street Brighton East Sussex,BN2 0JD",,Open,Sussex,South East
+Mid Sussex District Council,Brighton County Court,Brighton County And Family Court,3830,,,298390,"1 Edward Street Brighton East Sussex,BN2 0JD",,Open,Sussex,South East
+Rother District Council,Hastings County Court,Hastings Magistrates' Court,1430,,,784691,"The Law Courts, Bohemia Road,TN34 1QX",,Open,,
+Wealden District Council,Hastings County Court,Hastings Magistrates' Court,1435,,,784691,"The Law Courts, Bohemia Road,TN34 1QX",,Open,,
+Worthing Borough Council,Worthing County Court,Wrexham Law Courts,3835,,,637145,"Wrexham Law Courts Bodhyfyd, The Law Courts,LL12 7BP",,Open,,
+Bath And North East Somerset Council,Bristol County Court,Bristol Civil And Family Justice Centre,114,,,819890,"Redcliff Street,BS1 6GR",,Open,Bristol,South West
+Bristol City Council,Bristol County Court,Bristol Civil And Family Justice Centre,116,,,819890,"Redcliff Street,BS1 6GR",,Open,Bristol,South West
+Cheltenham Borough Council,Gloucester County Court,Gloucestershire Family and Civil Court,1605,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+Cotswold District Council,Gloucester County Court,Gloucestershire Family and Civil Court,1610,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+Forest Of Dean District Council,Gloucester County Court,Gloucestershire Family and Civil Court,1615,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+Gloucester City Council,Gloucester County Court,Gloucestershire Family and Civil Court,1620,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+Gloucestershire County Council,Gloucester County Court,Gloucestershire Family and Civil Court,1600,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+North Somerset Council,Bristol County Court,Bristol Civil And Family Justice Centre,121,,,819890,"Redcliff Street,BS1 6GR",,Open,Bristol,South West
+South Gloucestershire Council,Bristol County Court,Bristol Civil And Family Justice Centre,119,,,819890,"Redcliff Street,BS1 6GR",,Open,Bristol,South West
+Stroud District Council,Gloucester County Court,Gloucestershire Family and Civil Court,1605,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+Tewkesbury Borough Council,Gloucester County Court,Gloucestershire Family and Civil Court,1605,,,198592,"Kimbrose Way, Gloucester Docks,GL1 2DE",,Open,Bristol,South West
+Hartlepool Borough Council,Teesside Family Court,Teesside Combined Court Centre,724,,,195537,"The Combined Centre, Russell Street, Middlesbrough,TS1 2AE",,Open,Cleveland and South Durham,North East
+Stockton-On-Tees Borough Council,Teesside Family Court,Teesside Combined Court Centre,738,,,195537,"The Combined Centre, Russell Street, Middlesbrough,TS1 2AE",,Open,Cleveland and South Durham,North East
+North Warwickshire Borough Council,Coventry Family Court,Coventry Combined Court Centre,3705,,,497679,"Much Park Street, Coventry,CV1 2SN",,Open,Coventry & Warwickshire,Midlands
+Nuneaton And Bedworth Borough Council,Coventry Family Court,Coventry Combined Court Centre,3710,,,497679,"Much Park Street, Coventry,CV1 2SN",,Open,Coventry & Warwickshire,Midlands
+Rugby Borough Council,Coventry Family Court,Coventry Combined Court Centre,3715,,,497679,"Much Park Street, Coventry,CV1 2SN",,Open,Coventry & Warwickshire,Midlands
+Stratford-On-Avon District Council,Coventry Family Court,Coventry Combined Court Centre,3720,,,497679,"Much Park Street, Coventry,CV1 2SN",,Open,Coventry & Warwickshire,Midlands
+Warwick District Council,Coventry Family Court,Coventry Combined Court Centre,3725,,,497679,"Much Park Street, Coventry,CV1 2SN",,Open,Coventry & Warwickshire,Midlands
+Amber Valley Borough Council,Derby Family Court,Derby Combined Court Centre,1005,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+Bolsover District Council,Derby Family Court,Derby Combined Court Centre,1010,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+Chesterfield Borough Council,Derby Family Court,Derby Combined Court Centre,1015,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+Derbyshire Dales District Council,Derby Family Court,Derby Combined Court Centre,1045,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+Erewash Borough Council,Derby Family Court,Derby Combined Court Centre,1025,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+High Peak Borough Council,Derby Family Court,Derby Combined Court Centre,1030,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+North East Derbyshire District Council,Derby Family Court,Derby Combined Court Centre,1035,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+South Derbyshire District Council,Derby Family Court,Derby Combined Court Centre,1040,,,201339,"The Morledge,DE1 2XE",,Open,Derbyshire,Midlands
+Devon County Council,Plymouth Combined Court,Plymouth Combined Court,1155,,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Plymouth City Council ,South West
+East Devon District Council,Exeter Combined Court,Exeter Combined Court,1105,,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Plymouth City Council ,South West
+Exeter City Council,Exeter Combined Court,Exeter Combined Court,1110,,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Plymouth City Council ,South West
+Mid Devon District Council,Exeter Combined Court,Exeter Combined Court,1135,,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Plymouth City Council ,South West
+North Devon District Council,Exeter Combined Court,Exeter Combined Court,1115,,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Plymouth City Council ,South West
+Plymouth City Council,Plymouth Combined Court,Plymouth Combined Court,1160,,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Plymouth City Council ,South West
+South Hams District Council,Plymouth Combined Court,Plymouth Combined Court,1125,,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Plymouth City Council ,South West
+Teignbridge District Council,Plymouth Combined Court,Plymouth Combined Court,1130,,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Plymouth City Council ,South West
+Torbay Council,Plymouth Combined Court,Plymouth Combined Court,1165,,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Plymouth City Council ,South West
+Torridge District Council,Exeter Combined Court,Exeter Combined Court,1145,,,735217,"Southernhay Gardens, Exeter,EX1 1UH",,Open,Plymouth City Council ,South West
+West Devon Borough Council,Plymouth Combined Court,Plymouth Combined Court,1150,,,339463,"The Law Courts, Armada Way,PL1 2ER",,Open,Plymouth City Council ,South West
+Babergh District Council,Chelmsford County Court,Chelmsford County And Family Court,3505,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Basildon Borough Council,Chelmsford County Court,Chelmsford County And Family Court,1505,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Braintree District Council,Chelmsford County Court,Chelmsford County And Family Court,1510,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Brentwood Borough Council,Chelmsford County Court,Chelmsford County And Family Court,1515,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Castle Point Borough Council,Chelmsford County Court,Chelmsford County And Family Court,1520,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Chelmsford City Council,Chelmsford County Court,Chelmsford County And Family Court,1525,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Colchester City Council,Chelmsford County Court,Chelmsford County And Family Court,1530,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+East Suffolk Council,Chelmsford County Court,Chelmsford County And Family Court,3540,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Epping Forest District Council,Chelmsford County Court,Chelmsford County And Family Court,1535,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Harlow District Council,Chelmsford County Court,Chelmsford County And Family Court,1540,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Ipswich Borough Council,Chelmsford County Court,Chelmsford County And Family Court,3515,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Maldon District Council,Chelmsford County Court,Chelmsford County And Family Court,1545,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Mid Suffolk District Council,Chelmsford County Court,Chelmsford County And Family Court,3520,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Rochford District Council,Chelmsford County Court,Chelmsford County And Family Court,1550,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Tendring District Council,Chelmsford County Court,Chelmsford County And Family Court,1560,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Uttlesford District Council,Chelmsford County Court,Chelmsford County And Family Court,1570,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+West Suffolk Council,Chelmsford County Court,Chelmsford County And Family Court,3545,,,816875,"Priory Place,CM2 0PP",,Open,Essex and Suffolk,South East
+Elmbridge Borough Council,West London Family Court,West London Family Court,3605,,,373584,"Gloucester House, 4 Dukes Green, Feltham, Middlesex,TW14 0LR",,Open,West London,London
+Epsom And Ewell Borough Council,West London Family Court,West London Family Court,3610,,,373584,"Gloucester House, 4 Dukes Green, Feltham, Middlesex,TW14 0LR",,Open,West London,London
+Guildford Borough Council,West London Family Court,West London Family Court,3615,,,373584,"Gloucester House, 4 Dukes Green, Feltham, Middlesex,TW14 0LR",,Open,West London,London
+Mole Valley District Council,Guildford County and Family Court,Guildford Magistrates' Court And Family Court,3620,,,568484,"Mary Road, The Law Courts,GU1 4PS",,Open,Surrey,South East
+Reigate And Banstead Borough Council,Guildford County and Family Court,Guildford Magistrates' Court And Family Court,3625,,,568484,"Mary Road, The Law Courts,GU1 4PS",,Open,Surrey,South East
+Runnymede Borough Council,Staines County & Family Court ,Staines Magistrates' Court And Family Court,3630,,,298828,"Knowle Green, The Court House,TW18 1XH",,Open,,
+Spelthorne Borough Council,Staines County & Family Court ,Staines Magistrates' Court And Family Court,3635,,,298828,"Knowle Green, The Court House,TW18 1XH",,Open,,
+Surrey Heath Borough Council,Guildford County and Family Court,Guildford Magistrates' Court And Family Court,3640,,,568484,"Mary Road, The Law Courts,GU1 4PS",,Open,Surrey,South East
+Tandridge District Council,Guildford County and Family Court,Guildford Magistrates' Court And Family Court,3645,,,568484,"Mary Road, The Law Courts,GU1 4PS",,Open,Surrey,South East
+Waverley Borough Council,Guildford County and Family Court ,Guildford Magistrates' Court And Family Court,3650,,,568484,"Mary Road, The Law Courts,GU1 4PS",,Open,Surrey,South East
+Woking Borough Council,Guildford County and Family Court,Guildford Magistrates' Court And Family Court,3655,,,568484,"Mary Road, The Law Courts,GU1 4PS",,Open,Surrey,South East
+Blaby District Council,Leicester Family Court,Leicester Crown Court,2405,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+Charnwood Borough Council,Leicester Family Court,Leicester Crown Court,2410,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+Harborough District Council,Leicester Family Court,Leicester Crown Court,2415,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+Hinckley & Bosworth Borough Council,Leicester Family Court,Leicester Crown Court,2420,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+Melton Borough Council,Leicester Family Court,Leicester Crown Court,2430,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+North West Leicestershire District Council,Leicester Family Court,Leicester Crown Court,2435,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+Oadby And Wigston Borough Council,Leicester Family Court,Leicester Crown Court,2440,,,425094,"90 Wellington Street, Leicester,LE1 6HG",,Open,Leicestershire,Midlands
+Boston Borough Council,Lincoln Family Court,Lincoln County Court And Family Court,2505,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+City Of Lincoln Council,Lincoln Family Court,Lincoln County Court And Family Court,2515,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+East Lindsey District Council,Lincoln Family Court,Lincoln County Court And Family Court,2510,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+North Kesteven District Council,Lincoln Family Court,Lincoln County Court And Family Court,2520,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+South Holland District Council,Lincoln Family Court,Lincoln County Court And Family Court,2525,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+South Kesteven District Council,Lincoln Family Court,Lincoln County Court And Family Court,2530,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+West Lindsey District Council,Lincoln Family Court,Lincoln County Court And Family Court,2535,,,195465,"High Street,LN5 7PS",,Open,Lincolnshire,Midlands
+Ashford Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2205,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Canterbury City Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2210,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Dartford Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2215,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Dover District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2220,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Folkestone & Hythe District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2250,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Gravesham Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2230,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Maidstone Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2235,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Sevenoaks District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2245,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Swale Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2255,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Thanet District Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2260,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Tonbridge & Malling Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2265,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Tunbridge Wells Borough Council,MEDWAY COUNTY COURT ,Medway County Court Anchorage House,2270,,,487294,"47-67 High Street Chatham Kent,ME4 4DW",,Open,Kent,South East
+Buckinghamshire Council,Milton Keynes County Court,Milton Keynes County Court And Family Court,440,,,815997,"Silbury Boulevard,MK9 2DT",,Open,Buckinghamshire,South East
+Milton Keynes City Council,Milton Keynes County Court,Milton Keynes County Court And Family Court,435,,,815997,"Silbury Boulevard,MK9 2DT",,Open,Buckinghamshire,South East
+Cherwell District Council,Oxford County Court,Oxford Combined Court Centre,3105,,,371016,"St Aldates,OX1 1TL",,Open,Berkshire and Oxford,South East
+Oxford City Council,Oxford County Court,Oxford Combined Court Centre,3110,,,371016,"St Aldates,OX1 1TL",,Open,Berkshire and Oxford,South East
+South Oxfordshire District Council,Oxford County Court,Oxford Combined Court Centre,3115,,,371016,"St Aldates,OX1 1TL",,Open,Berkshire and Oxford,South East
+Vale Of White Horse District Council,Oxford County Court,Oxford Combined Court Centre,3120,,,371016,"St Aldates,OX1 1TL",,Open,Berkshire and Oxford,South East
+West Oxfordshire District Council,Oxford County Court,Oxford Combined Court Centre,3125,,,371016,"St Aldates,OX1 1TL",,Open,Berkshire and Oxford,South East
+Borough Of King'S Lynn And West Norfolk,Norwich County Court,Norwich Combined Court Centre,2635,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+Breckland District Council,Norwich County Court,Norwich Combined Court Centre,2605,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+Broadland District Council,Norwich County Court,Norwich Combined Court Centre,2610,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+Great Yarmouth Borough Council,Norwich County Court,Norwich Combined Court Centre,2615,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+North Norfolk District Council,Norwich County Court,Norwich Combined Court Centre,2620,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+Norwich City Council,Norwich County Court,Norwich Combined Court Centre,2625,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+South Norfolk District Council,Norwich County Court,Norwich Combined Court Centre,2630,,,471332,"The Law Courts, Bishopgate,NR3 1UR",,Open,Norfolk,South East
+Ashfield District Council,Nottingham Family Court,Nottingham County Court And Family Court,3005,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Bassetlaw District Council,Nottingham Family Court,Nottingham County Court And Family Court,3010,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Broxtowe Borough Council,Nottingham Family Court,Nottingham County Court And Family Court,3015,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Gedling Borough Council,Nottingham Family Court,Nottingham County Court And Family Court,3020,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Mansfield District Council,Nottingham Family Court,Nottingham County Court And Family Court,3025,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Newark & Sherwood District Council,Nottingham Family Court,Nottingham County Court And Family Court,3030,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Rushcliffe Borough Council,Nottingham Family Court,Nottingham County Court And Family Court,3040,,,424213,"Canal Street,NG1 7EJ",,Open,Nottinghamshire ,Midlands
+Cambridge City Council,Cambridge County Court,Cambridge County Court And Family Court,505,,,650344,"197 East Road,CB1 1BA",,Open,,
+East Cambridgeshire District Council,Cambridge County Court,Cambridge County Court And Family Court,510,,,650344,"197 East Road,CB1 1BA",,Open,,
+Fenland District Council,Cambridge County Court,Cambridge County Court And Family Court,515,,,650344,"197 East Road,CB1 1BA",,Open,,
+Huntingdonshire District Council,Cambridge County Court,Cambridge County Court And Family Court,520,,,650344,"197 East Road,CB1 1BA",,Open,,
+South Cambridgeshire District Council,Cambridge County Court,Cambridge County Court And Family Court,530,,,650344,"197 East Road,CB1 1BA",,Open,,
+Basingstoke And Deane Borough Council,Basingstoke Combined Court,Basingstoke County Court And Family Court,1705,,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+East Hampshire District Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1710,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Eastleigh Borough Council,Southampton Combined Court,Southampton Combined Court Centre,1715,,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council ,South West
+Fareham Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1720,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Gosport Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1725,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Hampshire County Council,Southampton Combined Court,Southampton Combined Court Centre,1770,SO16;SO30;SO32;SO40;SO41;SO42;SO45;SO50;SO51;SO52;SO53,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council ,South West
+Hart District Council,Basingstoke Combined Court,Basingstoke County Court And Family Court,1730,,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Havant Borough Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1735,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Isle Of Wight Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,2114,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+New Forest District Council,Southampton Combined Court,Southampton Combined Court Centre,1740,,,43104,"The Courts of Justice, London Road,SO15 2XQ",,Open,Southampton City Council ,South West
+Portsmouth City Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1775,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Rushmoor Borough Council,Basingstoke County Court,Basingstoke County Court And Family Court,1750,,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Southampton City Council,Portsmouth Combined Court,Portsmouth Combined Court Centre,1780,,,460592,"Courts of Justice, Winston Churchill Avenue,PO1 2EB",,Open,Hampshire County Council ,South West
+Test Valley Borough Council,Basingstoke County Court,Basingstoke County Court And Family Court,1760,,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Winchester City Council,Basingstoke County Court,Basingstoke County Court And Family Court,1765,,,457273,"The Court House, London Road,RG21 4AB",,Open,Hampshire County Council ,South West
+Barnsley Metropolitan Borough Council,Sheffield Combined Court,Sheffield Family Hearing Centre,4405,,,778638,"48 West Bar, Sheffield, South Yorkshire,S3 8PH",,Open,South Yorkshire,North East
+Cannock Chase District Council,Wolverhampton Family Court,Wolverhampton Combined Court Centre,3405,,,41047,"Pipers Row, Wolverhampton,WV1 3LQ",,Open,Black Country & Shropshire,Midlands
+East Staffordshire Borough Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3410,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+Lichfield District Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3415,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+Newcastle-Under-Lyme Borough Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3420,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+South Staffordshire Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3430,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+Stafford Borough Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3425,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+Staffordshire Moorlands District Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3435,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+Tamworth Borough Council,Stoke-on-Trent Combined Court,Stoke-On-Trent Combined Court,3445,,,195496,"Bethesda Street,ST1 3BP",,Open,Staffordshire,Midlands
+Swindon Borough Council,Swindon Family Court,Swindon Combined Court,3935,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Swindon County Council ,South West
+Wiltshire Council,Swindon Family Court,Swindon Combined Court,3940,,,438850,"The Law Courts, Islington Street,SN1 2HG",,Open,Swindon County Council ,South West
+Somerset Council,Taunton Family Court,"Taunton Crown, County And Family Court",3300,,,382409,"Shire Hall,TA1 4EU",,Open,Somerset Council ,South West
+Cornwall Council,Truro Family Court,Truro Combined Court,840,,,475776,"Courts of Justice, Edward Street,TR1 2PB",,Open,Cornwall Council ,South West
+Council Of The Isles Of Scilly,Truro Family Court,Truro Combined Court,835,,,475776,"Courts of Justice, Edward Street,TR1 2PB",,Open,Cornwall Council ,South West
+Bromsgrove District Council,Truro Family Court,Truro Combined Court,1805,,,475776,"Courts of Justice, Edward Street,TR1 2PB",,Open,Cornwall Council ,South West
+Malvern Hills District Council,Worcester Combined Court,Worcester Combined Court,1820,,,102050,"Shire Hall, Foregate Street,WR1 1EQ",,Open,Hereford & Worcester,Midlands
+Redditch Borough Council,Worcester Combined Court,Worcester Combined Court,1825,,,102050,"Shire Hall, Foregate Street,WR1 1EQ",,Open,Hereford & Worcester,Midlands
+Worcester City Council,Worcester Combined Court,Worcester Combined Court,1835,,,102050,"Shire Hall, Foregate Street,WR1 1EQ",,Open,Hereford & Worcester,Midlands
+Wychavon District Council,Worcester Combined Court,Worcester Combined Court,1840,,,102050,"Shire Hall, Foregate Street,WR1 1EQ",,Open,Hereford & Worcester,Midlands
+Wyre Forest District Council,Worcester Combined Court,Worcester Combined Court,1845,,,102050,"Shire Hall, Foregate Street,WR1 1EQ",,Open,Hereford & Worcester,Midlands
+Bracknell Forest Council,Reading County Court,Reading County Court And Family Court,335,,,185657,"Friar Street,RG1 1HE",,Open,Berkshire and Oxford,South East
+West Berkshire Council,Reading County Court,Reading County Court And Family Court,340,,,185657,"Friar Street,RG1 1HE",,Open,Berkshire and Oxford,South East
+Reading Borough Council,Reading County Court,Reading County Court And Family Court,345,,,185657,"Friar Street,RG1 1HE",,Open,Berkshire and Oxford,South East
+Slough Borough Council,Reading County Court,Reading County Court And Family Court,350,,,185657,"Friar Street,RG1 1HE",,Open,Berkshire and Oxford,South East
+Royal Borough Of Windsor And Maidenhead,Reading County Court,Reading County Court And Family Court,355,,,185657,"Friar Street,RG1 1HE",,Open,Berkshire and Oxford,South East
+Wokingham Borough Council,Reading County Court,Reading County Court And Family Court,360,,,185657,"Friar Street,RG1 1HE",,Open,Berkshire and Oxford,South East
