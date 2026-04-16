@@ -23,7 +23,7 @@ public enum CourtOrderTypeEnum {
     medicalTreatment("Medical treatment"),
     relocateChildrenDifferentUkAreaA("Relocating the children to a different area in England and Wales"),
     relocateChildrenOutsideUkA("Relocating the children outside of England and Wales (including Scotland and Northern Ireland)"),
-    returningChildrenToYourCare("Returning the children to your care");
+    returningChildrenToYourCare("Returning the children to your care"),
     specificIssueOrder("Specific Issue Order");
 
     private final String displayedValue;
