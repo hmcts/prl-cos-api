@@ -403,7 +403,7 @@ public class ManageDocumentsService {
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .uploaderRole(loggedInUserType)
-            .renameDocument(manageDocument.isRenameDocument())
+            .renameDocument(YesOrNo.Yes.getDisplayedValue().equals(manageDocument.getRenameDocument()))
             .documentNameOverride(manageDocument.getDocumentNameOverride())
             .build();
         return setQuarantineDocumentForUploader(manageDocument, loggedInUserType, quarantineLegalDoc);

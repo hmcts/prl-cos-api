@@ -24,7 +24,7 @@ public class ManageDocuments {
     private final String documentDetails;
     private final List<RestrictToCafcassHmcts> documentRestrictCheckbox;
 
-    private final boolean renameDocument;
+    private final YesOrNo renameDocument;
     private final String documentNameOverride;
 
     //PRL-4320 - manage docs redesign
