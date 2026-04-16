@@ -834,3 +834,8 @@ hwf-update-case-state-task:
 prepare-hearing-bundle:
   calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
 
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: FULL

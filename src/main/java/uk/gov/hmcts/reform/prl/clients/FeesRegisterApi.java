@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 
 @FeignClient(
     name = "fees-register-api",
     url = "${fees-register.api.url}",
-    configuration = FeignClientProperties.FeignClientConfiguration.class
+    configuration = FeignRetryConfig.class
 )
 public interface FeesRegisterApi {
     @GetMapping("/fees-register/fees/lookup")

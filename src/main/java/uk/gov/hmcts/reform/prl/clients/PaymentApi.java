@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 import uk.gov.hmcts.reform.prl.models.dto.payment.OnlineCardPaymentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
@@ -16,7 +17,8 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
 
 @ConditionalOnProperty(prefix = "payments", name = "api.url")
-@FeignClient(name = "payments", url = "${payments.api.url}")
+@FeignClient(name = "payments", url = "${payments.api.url}",
+    configuration = FeignRetryConfig.class)
 public interface PaymentApi {
 
     @PostMapping(value = "/service-request", consumes = "application/json")
