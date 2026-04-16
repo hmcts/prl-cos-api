@@ -605,6 +605,7 @@ public class PrlAppsConstants {
     public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
     public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
     public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
+    public static final String SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID = "respondentApplication";
     public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
     public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
     public static final String CASE_SUMMARY = "Case summary";
