@@ -3298,14 +3298,27 @@ public class ManageOrderService {
 
     private void addC21OrderDetails(CaseData caseData,
                                     Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
-            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-            ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : " ");
+
+        caseDataUpdated.put("selectedC21Order", getSelectedC21OrderDisplayName(caseData));
 
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;
         caseDataUpdated.put("c21OrderOptions", c21OrderType);
         caseDataUpdated.put("typeOfC21Order", c21OrderType != null ? BOLD_BEGIN + c21OrderType.getDisplayedValue() + BOLD_END : "");
+    }
+
+    private String getSelectedC21OrderDisplayName(CaseData caseData) {
+        String emptyString = "";
+        if (null == caseData.getManageOrders()) {
+            return emptyString;
+        }
+        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
+            return BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END;
+        }
+        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.uploadAnOrder) {
+            return BOLD_BEGIN + caseData.getChildArrangementOrders().getDisplayedValue() + BOLD_END;
+        }
+        return emptyString;
     }
 
     private void updateCourtName(CallbackRequest callbackRequest,
