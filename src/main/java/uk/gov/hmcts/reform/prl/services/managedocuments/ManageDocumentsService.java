@@ -322,14 +322,12 @@ public class ManageDocumentsService {
     private QuarantineLegalDoc updateQuarantineLegalDocForLocalAuthority(QuarantineLegalDoc quarantineLegalDoc) {
         if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
             || ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
-            log.info("inside updateQuarantineLegalDocForLocalAuthority 1");
             return quarantineLegalDoc.toBuilder()
                 .isConfidential(YesOrNo.Yes)
                 .categoryName(quarantineLegalDoc.getCategoryName())
                 .categoryId(quarantineLegalDoc.getCategoryId())
                 .build();
         }
-        log.info("inside updateQuarantineLegalDocForLocalAuthority 2");
         return quarantineLegalDoc;
     }
 
