@@ -245,25 +245,19 @@ public class ManageDocumentsService {
                 .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
-            log.info("inside for transformAndMoveDocument 1 ");
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-            log.info("inside for transformAndMoveDocument 2 ");
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
-            log.info("inside for transformAndMoveDocument 3 {} ", userRole);
-            log.info("inside for transformAndMoveDocument 4 {} ", quarantineLegalDoc.getCategoryId());
 
             if (!userRole.equals(COURT_ADMIN)) {
                 if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
                     || DocumentPartyEnum.CAFCASS_CYMRU.equals(
                     manageDocument.getDocumentParty())) && null != quarantineLegalDoc) {
-                    log.info("inside for transformAndMoveDocument 4.1 {} ", quarantineLegalDoc.getCategoryId());
                     quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
                         quarantineLegalDoc
                     );
                 } else if (isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId())
                     && null != quarantineLegalDoc) {
-                    log.info("inside for transformAndMoveDocument 5 {} ", quarantineLegalDoc.getCategoryId());
                     quarantineLegalDoc = updateQuarantineLegalDocForLocalAuthority(
                         quarantineLegalDoc
                     );
@@ -283,7 +277,6 @@ public class ManageDocumentsService {
             } else {
 
                 if (userRole.equals(LOCAL_AUTHORITY)) {
-                    log.info("Local Authority has multiple tasks possibility {} ", isWaTaskSetForFirstDocumentIteration);
                     isWaTaskSetForFirstDocumentIteration = false;
                 }
 
@@ -482,10 +475,7 @@ public class ManageDocumentsService {
     }
 
     private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc) {
-        log.info("caseData.getDocumentManagementDetails {}", caseData.getDocumentManagementDetails());
-        boolean newTaskRequired = isGivenDocumentExists(caseData, quarantineLegalDoc.getCategoryId()).isEmpty();
-        log.info("newTaskRequired {} ", newTaskRequired);
-        return newTaskRequired;
+        return isGivenDocumentExists(caseData, quarantineLegalDoc.getCategoryId()).isEmpty();
     }
 
     private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(CaseData caseData, String categoryId) {

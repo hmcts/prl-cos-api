@@ -165,13 +165,14 @@ public class BaseCaseData {
 
     private List<Element<Document>> miamDocumentsCopy;
 
+    private YesOrNo orderInPlacePermissionRequired;
+    private String orderDetailsForPermissions;
+    private Document uploadOrderDocForPermission;
+
     /* Local authority policies */
     @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
     private LocalAuthority localAuthority;
-    private YesOrNo orderInPlacePermissionRequired;
-    private String orderDetailsForPermissions;
-    private Document uploadOrderDocForPermission;
 
 }
