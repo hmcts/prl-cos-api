@@ -382,10 +382,14 @@ class BaisDocumentUploadServiceTest {
             "ID", new Object[]{caseData.getId(), capturedData.getId(), "caseData.getId()"},
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
-            "Applicant", new Object[]{caseData.getApplicant().toBuilder().isPhoneNumberConfidential(YesOrNo.No)
+            "Applicant", new Object[]{caseData.getApplicant().toBuilder()
+                .isAddressConfidential(YesOrNo.No)
+                .isPhoneNumberConfidential(YesOrNo.No)
                 .isEmailAddressConfidential(YesOrNo.No).build(),
                 capturedData.getApplicant(), "caseData.getApplicant()"},
-            "Respondent", new Object[]{caseData.getRespondent().toBuilder().isPhoneNumberConfidential(YesOrNo.No)
+            "Respondent", new Object[]{caseData.getRespondent().toBuilder()
+                .isAddressConfidential(YesOrNo.No)
+                .isPhoneNumberConfidential(YesOrNo.No)
                 .isEmailAddressConfidential(YesOrNo.No).build(),
                 capturedData.getRespondent(), "caseData.getRespondent()"},
             "Court Name", new Object[]{caseData.getCourtName(), capturedData.getCourtName(), "caseData.getCourtName()"},
