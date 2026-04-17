@@ -407,6 +407,8 @@ public class ManageDocumentsService {
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
+            .renameDocument(quarantineLegalDoc.getRenameDocument())
+            .documentNameOverride(quarantineLegalDoc.getDocumentNameOverride())
             .build();
 
     }
@@ -425,6 +427,8 @@ public class ManageDocumentsService {
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .uploaderRole(loggedInUserType)
+            .renameDocument(manageDocument.getRenameDocument())
+            .documentNameOverride(manageDocument.getDocumentNameOverride())
             .build();
         return setQuarantineDocumentForUploader(manageDocument, loggedInUserType, quarantineLegalDoc);
     }
@@ -598,7 +602,7 @@ public class ManageDocumentsService {
     public Document getQuarantineDocumentForUploader(String uploadedBy,
                                                      QuarantineLegalDoc quarantineLegalDoc) {
         log.info("uploadedBy " + uploadedBy);
-        return switch (uploadedBy) {
+        Document document = switch (uploadedBy) {
             case LEGAL_PROFESSIONAL -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
@@ -608,6 +612,38 @@ public class ManageDocumentsService {
             case COURTNAV -> quarantineLegalDoc.getCourtNavQuarantineDocument();
             default -> null;
         };
+
+        if (document == null) {
+            return document;
+        } else {
+            return updateDocumentFromAppliedFileName(document, quarantineLegalDoc);
+        }
+    }
+
+    private Document updateDocumentFromAppliedFileName(Document document, QuarantineLegalDoc quarantineLegalDoc) {
+        return Document.builder()
+            .documentCreatedOn(document.getDocumentCreatedOn())
+            .documentHash(document.getDocumentHash())
+            .documentUrl(document.getDocumentUrl())
+            .categoryId(document.getCategoryId())
+            .documentBinaryUrl(document.getDocumentBinaryUrl())
+            .uploadTimeStamp(document.getUploadTimeStamp())
+            .documentFileName(determineChangedDocumentFileName(document, quarantineLegalDoc))
+            .build();
+    }
+
+    private String determineChangedDocumentFileName(Document document, QuarantineLegalDoc quarantineLegalDoc) {
+        if (YesOrNo.Yes.equals(quarantineLegalDoc.getRenameDocument())) {
+            String originalName = document.getDocumentFileName();
+            String enteredNewName = quarantineLegalDoc.getDocumentNameOverride();
+            String originalExtension = originalName.substring(originalName.indexOf(".") + 1);
+            String newName = enteredNewName + "." + originalExtension;;
+            log.info("Renaming document name {} with new name {}", originalName, newName);
+            return newName;
+        } else {
+            return document.getDocumentFileName();
+        }
+
     }
 
     private QuarantineLegalDoc setQuarantineDocumentForUploader(ManageDocuments manageDocument, String uploadedBy,
