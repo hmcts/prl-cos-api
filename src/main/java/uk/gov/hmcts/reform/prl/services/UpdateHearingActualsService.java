@@ -38,7 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -63,15 +65,30 @@ public class UpdateHearingActualsService {
     public void updateHearingActuals() {
 
         //Fetch all cases in Hearing state pending fm5 reminder notifications
-        log.info("Running Hearing actual task cron job...");
-        List<CaseDetails> caseDetailsList = retrieveCasesInHearingState();
+        log.info("Running Hearing actual task cron job==>12345...");
+        List<CaseDetails> caseDetailsList = emptyIfNull(retrieveCasesInHearingState());
+        caseDetailsList.stream()
+            .forEach(caseDetail -> {
+                log.info("caseDetail.getId() ==> {}", caseDetail.getId());
+                log.info("caseDetail.getState() ==> {}", caseDetail.getState());
+                Map<String, Object> data = caseDetail.getData();
+                if (nonNull(data)) {
+                    log.info("data.id ==> {}", data.get("id"));
+                    log.info("data.refernce ==> {}", data.get("reference"));
+                }
+            });
         try {
             if (isNotEmpty(caseDetailsList)) {
                 log.info("Cases exist with current hearing");
+                List<String> listOfCaseidsForHearings = emptyIfNull(getListOfCaseidsForHearings(
+                    caseDetailsList));
+                log.info("listOfCaseidsForHearings==>{}", listOfCaseidsForHearings);
+                listOfCaseidsForHearings.forEach(caseId -> log.info("caseId ==>{}", caseId));
+                Map<String, List<String>> caseIds = fetchAndFilterHearingsForTodaysDate(listOfCaseidsForHearings);
+                log.info("fetchAndFilterHearingsForTodaysDate caseIds {}", caseIds);
                 createUpdateHearingActualWaTask(
                     caseDetailsList,
-                    fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
-                        caseDetailsList))
+                    caseIds
                 );
             }
         } catch (Exception e) {
@@ -92,10 +109,14 @@ public class UpdateHearingActualsService {
         log.info("Case Id's {}", caseIds);
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).forEach(caseDetails -> {
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                log.info("caseId {}", caseId);
+                log.info("caseDetails {}", caseDetails);
+                Map<String, Object> data = caseDetails.getData();
+                log.info("caseDetails.data {}", data);
+                CaseData caseData = nonNull(data) ? CaseUtils.getCaseData(caseDetails, objectMapper) : null;
                 log.info("Hearing id {}", hearingId);
                 triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
-                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                if (nonNull(caseData) && !checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
                     log.info("Hearing id is not mapped in orders");
                     triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
                 }
@@ -157,7 +178,7 @@ public class UpdateHearingActualsService {
         SearchResultResponse response = SearchResultResponse.builder().cases(new ArrayList<>()).build();
 
         QueryParam ccdQueryParam = buildCcdQueryParam();
-
+        log.info("QueryParam ==>{}", ccdQueryParam);
         try {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -167,6 +188,7 @@ public class UpdateHearingActualsService {
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
             response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
+            log.info("SearchResultResponse==>{}", response);
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
         }
@@ -185,6 +207,7 @@ public class UpdateHearingActualsService {
                 Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
                 Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
                 Should.builder().match(Match.builder().nextHearingDate(LocalDate.now()).build()).build()
+
         );
 
         //Hearing state
@@ -195,7 +218,7 @@ public class UpdateHearingActualsService {
         )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
+        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(1).must(mustFilter).build();
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
@@ -207,6 +230,9 @@ public class UpdateHearingActualsService {
     private List<String> fetchFieldsRequiredForHearingActualTask() {
         return List.of(
             "data.nextHearingDate",
+            "data.hearingListed",
+            "data.currentHearingStatus",
+            "data.currentHearingId",
             "data.draftOrderCollection",
             "data.orderCollection"
         );
