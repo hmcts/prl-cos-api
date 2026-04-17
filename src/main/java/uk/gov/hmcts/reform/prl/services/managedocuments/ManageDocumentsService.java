@@ -361,6 +361,7 @@ public class ManageDocumentsService {
 
             // These Cafcass England doc types always get Confidential_ filename prefix even when not restricted
             if (CAFCASS.equals(quarantineLegalDoc.getUploaderRole())
+                && quarantineLegalDoc.getDocumentType() != null
                 && CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES.contains(quarantineLegalDoc.getDocumentType())) {
                 Document originalDoc = getQuarantineDocumentForUploader(CAFCASS, quarantineLegalDoc);
                 if (originalDoc != null) {
