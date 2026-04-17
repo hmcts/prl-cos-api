@@ -424,7 +424,7 @@ class CustomOrderServiceTest {
             // Verify placeholders were built correctly
             assertEquals("123", placeholders.get("caseNumber"));
             assertEquals("Family Court London", placeholders.get("courtName"));
-            assertEquals("John Doe", placeholders.get("applicantName"));
+            assertEquals("John Doe", placeholders.get("applicant1Name"));
             assertEquals("Jane Smith", placeholders.get("respondent1Name"));
             return renderedBytes;
         });
@@ -630,7 +630,7 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("Sarah Johnson", placeholders.get("applicantName"));
+        assertEquals("Sarah Johnson", placeholders.get("applicant1Name"));
     }
 
     @Test
@@ -653,7 +653,7 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("Michael Solicitor", placeholders.get("applicantRepresentativeName"));
+        assertEquals("Michael Solicitor", placeholders.get("applicant1RepresentativeName"));
     }
 
     @Test
@@ -677,8 +677,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, null);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        assertEquals("Jane Doe", placeholders.get("applicantName"));
-        assertEquals("Legal Rep", placeholders.get("applicantRepresentativeName"));
+        assertEquals("Jane Doe", placeholders.get("applicant1Name"));
+        assertEquals("Legal Rep", placeholders.get("applicant1RepresentativeName"));
     }
 
     @Test
@@ -1368,9 +1368,9 @@ class CustomOrderServiceTest {
         assertEquals("Central Family Court", placeholders.get("courtName"));
 
         // Verify applicant
-        assertEquals("Alice Thompson", placeholders.get("applicantName"));
-        assertEquals("Robert Counsel QC", placeholders.get("applicantRepresentativeName"));
-        assertEquals(", legally represented", placeholders.get("applicantRepresentativeClause"));
+        assertEquals("Alice Thompson", placeholders.get("applicant1Name"));
+        assertEquals("Robert Counsel QC", placeholders.get("applicant1RepresentativeName"));
+        assertEquals(", legally represented", placeholders.get("applicant1RepresentativeClause"));
 
         // Verify respondent 1 - Mother
         assertEquals("Barbara Jones", placeholders.get("respondent1Name"));

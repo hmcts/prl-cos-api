@@ -28,6 +28,7 @@ public class PoiTlDocxRenderer {
     private static final Configure CONFIG = Configure.builder()
         .bind("children", LOOP_ROW_POLICY)
         .bind("respondents", LOOP_ROW_POLICY)
+        .bind("applicants", LOOP_ROW_POLICY)
         .build();
 
     public byte[] render(byte[] templateDocxBytes, Map<String, Object> data) {

@@ -62,6 +62,7 @@ public class CustomOrderService {
     private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
     private static final String JUDGE_OR_MAGISTRATES_LAST_NAME = "judgeOrMagistratesLastName";
     private static final String DATE_ORDER_MADE = "dateOrderMade";
+    private static final String APPLICANT_PREFIX = "applicant";
     private static final String RESPONDENT_PREFIX = "respondent";
     private static final String DEFAULT_ORDER_NAME = "custom_order";
     private static final String DOCX_EXTENSION = ".docx";
@@ -920,40 +921,6 @@ public class CustomOrderService {
     }
 
     /**
-     * Populates applicant placeholders for the header template.
-     */
-    private void populateApplicantPlaceholders(Map<String, Object> data, CaseData caseData, boolean isFL401) {
-        log.info("Populating applicant placeholders. isFL401={}, hasApplicantsFL401={}, hasApplicants={}",
-            isFL401, caseData.getApplicantsFL401() != null,
-            caseData.getApplicants() != null && !caseData.getApplicants().isEmpty());
-        if (isFL401 && caseData.getApplicantsFL401() != null) {
-            PartyDetails applicant = caseData.getApplicantsFL401();
-            log.info("Using FL401 applicant: {} {}", applicant.getFirstName(), applicant.getLastName());
-            populateApplicantData(data, applicant);
-        } else if (caseData.getApplicants() != null && !caseData.getApplicants().isEmpty()) {
-            var applicant = caseData.getApplicants().getFirst().getValue();
-            log.info("Using C100 applicant: {} {}", applicant.getFirstName(), applicant.getLastName());
-            populateApplicantData(data, applicant);
-        } else {
-            log.warn("No applicant data found, using empty placeholders");
-            setEmptyApplicantPlaceholders(data);
-        }
-    }
-
-    private void populateApplicantData(Map<String, Object> data, PartyDetails applicant) {
-        data.put(APPLICANT_NAME, getFullName(applicant.getFirstName(), applicant.getLastName()));
-        String appRep = getRepresentativeName(applicant);
-        data.put("applicantRepresentativeName", appRep);
-        data.put("applicantRepresentativeClause", formatRepresentativeClause(appRep));
-    }
-
-    private void setEmptyApplicantPlaceholders(Map<String, Object> data) {
-        data.put(APPLICANT_NAME, "");
-        data.put("applicantRepresentativeName", "");
-        data.put("applicantRepresentativeClause", "");
-    }
-
-    /**
      * Builds placeholder map for the header template from case data.
      */
     private Map<String, Object> buildHeaderPlaceholders(Long caseId, CaseData caseData, Map<String, Object> caseDataMap) {
@@ -1013,7 +980,7 @@ public class CustomOrderService {
 
         // Determine case type and populate party details
         boolean isFL401 = FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData));
-        populateApplicantPlaceholders(data, caseData, isFL401);
+        populateApplicants(data, caseData, isFL401);
         populateRespondents(data, caseData, isFL401);
         populateChildrensGuardian(data, caseData);
         populateChildrenPlaceholders(data, caseData, isFL401);
@@ -1111,6 +1078,57 @@ public class CustomOrderService {
     }
 
     /**
+     * Populates applicant placeholders including solicitors and relationship to children.
+     * Handles both C100 (list of applicants) and FL401 (single applicant).
+     */
+    private void populateApplicants(Map<String, Object> data, CaseData caseData, boolean isFL401) {
+        List<Map<String, String>> applicantRows = new ArrayList<>();
+
+        if (isFL401 && caseData.getApplicantsFL401() != null) {
+            populateFl401Applicant(data, caseData, applicantRows);
+        } else if (caseData.getApplicants() != null) {
+            populateC100Applicants(data, caseData, applicantRows);
+        }
+
+        fillEmptyApplicantSlots(data);
+        data.put("applicants", applicantRows);
+        log.info("Populated {} applicant rows", applicantRows.size());
+    }
+
+    private void populateFl401Applicant(Map<String, Object> data, CaseData caseData, List<Map<String, String>> applicantRows) {
+        PartyDetails applicant = caseData.getApplicantsFL401();
+        log.debug(" FL401 Applicant: relationshipToChildren='{}', representativeFirstName='{}', representativeLastName='{}'",
+                  applicant.getRelationshipToChildren(), applicant.getRepresentativeFirstName(), applicant.getRepresentativeLastName());
+
+        String name = getFullName(applicant.getFirstName(), applicant.getLastName());
+        String relationship = getEffectiveRelationship(caseData, applicant, 1, null, name);
+        String representative = getRepresentativeName(applicant);
+
+        applicantRows.add(buildPartyRow(1, name, relationship, representative));
+        putApplicantPlaceholders(data, 1, name, relationship, representative);
+    }
+
+    private void populateC100Applicants(Map<String, Object> data, CaseData caseData, List<Map<String, String>> applicantRows) {
+        int index = 1;
+        for (Element<PartyDetails> applicantElement : caseData.getApplicants()) {
+            PartyDetails applicant = applicantElement.getValue();
+            String applicantId = applicantElement.getId() != null ? applicantElement.getId().toString() : null;
+
+            log.debug(" Applicant {}: id='{}', relationshipToChildren='{}', representativeFirstName='{}', representativeLastName='{}'",
+                      index, applicantId, applicant.getRelationshipToChildren(),
+                      applicant.getRepresentativeFirstName(), applicant.getRepresentativeLastName());
+
+            String name = getFullName(applicant.getFirstName(), applicant.getLastName());
+            String relationship = getEffectiveRelationship(caseData, applicant, index, applicantId, name);
+            String representative = getRepresentativeName(applicant);
+
+            applicantRows.add(buildPartyRow(index, name, relationship, representative));
+            putApplicantPlaceholders(data, index, name, relationship, representative);
+            index++;
+        }
+    }
+
+    /**
      * Populates respondent placeholders including solicitors and relationship to children.
      * Handles both C100 (list of respondents) and FL401 (single respondent).
      */
@@ -1137,7 +1155,7 @@ public class CustomOrderService {
         String relationship = getEffectiveRelationship(caseData, respondent, 1, null, name);
         String representative = getRepresentativeName(respondent);
 
-        respondentRows.add(buildRespondentRow(1, name, relationship, representative));
+        respondentRows.add(buildPartyRow(1, name, relationship, representative));
         putRespondentPlaceholders(data, 1, name, relationship, representative);
     }
 
@@ -1155,7 +1173,7 @@ public class CustomOrderService {
             String relationship = getEffectiveRelationship(caseData, respondent, index, respondentId, name);
             String representative = getRepresentativeName(respondent);
 
-            respondentRows.add(buildRespondentRow(index, name, relationship, representative));
+            respondentRows.add(buildPartyRow(index, name, relationship, representative));
             putRespondentPlaceholders(data, index, name, relationship, representative);
             index++;
         }
@@ -1169,7 +1187,7 @@ public class CustomOrderService {
         return relationship;
     }
 
-    private Map<String, String> buildRespondentRow(int index, String name, String relationship, String representative) {
+    private Map<String, String> buildPartyRow(int index, String name, String relationship, String representative) {
         Map<String, String> row = new HashMap<>();
         row.put("ordinal", getOrdinal(index));
         row.put("name", name);
@@ -1189,12 +1207,30 @@ public class CustomOrderService {
         };
     }
 
+    private void putApplicantPlaceholders(Map<String, Object> data, int index, String name, String relationship, String representative) {
+        data.put(APPLICANT_PREFIX + index + "Name", name);
+        data.put(APPLICANT_PREFIX + index + "RelationshipToChild", relationship);
+        data.put(APPLICANT_PREFIX + index + "RelationshipClause", relationship.isEmpty() ? "" : "(" + relationship + ")");
+        data.put(APPLICANT_PREFIX + index + "RepresentativeName", representative);
+        data.put(APPLICANT_PREFIX + index + "RepresentativeClause", formatRepresentativeClause(representative));
+    }
+
     private void putRespondentPlaceholders(Map<String, Object> data, int index, String name, String relationship, String representative) {
         data.put(RESPONDENT_PREFIX + index + "Name", name);
         data.put(RESPONDENT_PREFIX + index + "RelationshipToChild", relationship);
         data.put(RESPONDENT_PREFIX + index + "RelationshipClause", relationship.isEmpty() ? "" : "(" + relationship + ")");
         data.put(RESPONDENT_PREFIX + index + "RepresentativeName", representative);
         data.put(RESPONDENT_PREFIX + index + "RepresentativeClause", formatRepresentativeClause(representative));
+    }
+
+    private void fillEmptyApplicantSlots(Map<String, Object> data) {
+        for (int i = 1; i <= 5; i++) {
+            data.putIfAbsent(APPLICANT_PREFIX + i + "Name", "");
+            data.putIfAbsent(APPLICANT_PREFIX + i + "RelationshipToChild", "");
+            data.putIfAbsent(APPLICANT_PREFIX + i + "RelationshipClause", "");
+            data.putIfAbsent(APPLICANT_PREFIX + i + "RepresentativeName", "");
+            data.putIfAbsent(APPLICANT_PREFIX + i + "RepresentativeClause", "");
+        }
     }
 
     private void fillEmptyRespondentSlots(Map<String, Object> data) {
