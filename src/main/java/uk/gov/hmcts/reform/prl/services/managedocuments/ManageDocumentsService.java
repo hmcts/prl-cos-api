@@ -383,7 +383,7 @@ public class ManageDocumentsService {
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
-            .renameDocument(quarantineLegalDoc.isRenameDocument())
+            .renameDocument(quarantineLegalDoc.getRenameDocument())
             .documentNameOverride(quarantineLegalDoc.getDocumentNameOverride())
             .build();
 
@@ -403,7 +403,7 @@ public class ManageDocumentsService {
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .uploaderRole(loggedInUserType)
-            .renameDocument(YesOrNo.Yes.equals(manageDocument.getRenameDocument()))
+            .renameDocument(manageDocument.getRenameDocument())
             .documentNameOverride(manageDocument.getDocumentNameOverride())
             .build();
         return setQuarantineDocumentForUploader(manageDocument, loggedInUserType, quarantineLegalDoc);
@@ -609,7 +609,7 @@ public class ManageDocumentsService {
     }
 
     private String determineChangedDocumentFileName(Document document, QuarantineLegalDoc quarantineLegalDoc) {
-        if (quarantineLegalDoc.isRenameDocument()) {
+        if (YesOrNo.Yes.equals(quarantineLegalDoc.getRenameDocument())) {
             String originalName = document.getDocumentFileName();
             String enteredNewName = quarantineLegalDoc.getDocumentNameOverride();
             String originalExtension = originalName.substring(originalName.indexOf(".") + 1);

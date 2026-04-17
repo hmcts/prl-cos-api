@@ -2254,7 +2254,7 @@ public class ManageDocumentsServiceTest {
                                            .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba")
                                            .documentFileName("originalName.pdf")
                                            .build())
-            .renameDocument(true)
+            .renameDocument(YesOrNo.Yes)
             .documentNameOverride("newName")
             .build();
         uk.gov.hmcts.reform.prl.models.documents.Document document1 = manageDocumentsService
