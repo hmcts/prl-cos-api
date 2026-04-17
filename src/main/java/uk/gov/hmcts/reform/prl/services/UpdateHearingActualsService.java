@@ -230,6 +230,9 @@ public class UpdateHearingActualsService {
     private List<String> fetchFieldsRequiredForHearingActualTask() {
         return List.of(
             "data.nextHearingDate",
+            "data.hearingListed",
+            "data.currentHearingStatus",
+            "data.currentHearingId",
             "data.draftOrderCollection",
             "data.orderCollection"
         );
