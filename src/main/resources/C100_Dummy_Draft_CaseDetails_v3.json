@@ -560,6 +560,7 @@
           "solicitorTelephone": null,
           "isPlaceOfBirthKnown": "No",
           "isDateOfBirthUnknown": null,
+          "liveInRefuge": "No",
           "isAddressConfidential": null,
           "isCurrentAddressKnown": "No",
           "relationshipToChildren": null,
