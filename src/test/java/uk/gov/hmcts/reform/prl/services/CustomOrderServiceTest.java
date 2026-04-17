@@ -94,7 +94,7 @@ class CustomOrderServiceTest {
     private ArgumentCaptor<Map<String, Object>> placeholdersCaptor;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Mocks initialized by @ExtendWith(MockitoExtension.class)
     }
 
@@ -4111,18 +4111,18 @@ class CustomOrderServiceTest {
 
     @Test
     void testStripFormNumberFromDescription_withNull_returnsNull() {
-        assertNull(customOrderService.stripFormNumberFromDescription(null));
+        assertNull(customOrderService.stripFormNumberFromDescription(null, null));
     }
 
     @Test
-    void testStripFormNumberFromDescription_withParenthetical_stripsIt() {
-        String result = customOrderService.stripFormNumberFromDescription("Parental responsibility order (C45A)");
+    void testStripFormNumberFromDescription_withBrackets_stripsIt() {
+        String result = customOrderService.stripFormNumberFromDescription("Parental responsibility order (C45A)", "C45A");
         assertEquals("Parental responsibility order", result);
     }
 
     @Test
-    void testStripFormNumberFromDescription_withoutParenthetical_returnsAsIs() {
-        String result = customOrderService.stripFormNumberFromDescription("Some order name");
+    void testStripFormNumberFromDescription_withoutBrackets_returnsAsIs() {
+        String result = customOrderService.stripFormNumberFromDescription("Some order name", "C45");
         assertEquals("Some order name", result);
     }
 
@@ -4409,7 +4409,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    public void testGetDisplayOrderNameForC21ApplicationRefused() {
+    void testGetDisplayOrderNameForC21ApplicationRefused() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("customC21OrderDetails", Map.of("orderOptions", "c21ApplicationRefused"));
@@ -4425,7 +4425,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    public void testGetDisplayOrderNameForC21OtherFallsBackToGeneralOrder() {
+    void testGetDisplayOrderNameForC21OtherFallsBackToGeneralOrder() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("customC21OrderDetails", Map.of("orderOptions", "c21other"));
@@ -4441,7 +4441,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    public void testGetDisplayOrderNameForOccupation() {
+    void testGetDisplayOrderNameForOccupation() {
         CaseData caseData = CaseData.builder().build();
 
         String result = customOrderService.getDisplayOrderName(
@@ -4455,7 +4455,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    public void testGetDisplayOrderNameForNoticeOfProceedingsReturnsDescription() {
+    void testGetDisplayOrderNameForNoticeOfProceedingsReturnsDescription() {
         CaseData caseData = CaseData.builder().build();
 
         String result = customOrderService.getDisplayOrderName(

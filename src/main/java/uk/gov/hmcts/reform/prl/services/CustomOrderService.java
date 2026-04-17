@@ -170,6 +170,8 @@ public class CustomOrderService {
             case occupation -> "FL404";
             case powerOfArrest -> "FL406";
             case amendDischargedVaried, blank -> "FL404B";
+            case noticeOfProceedingsParties -> "C6";
+            case noticeOfProceedingsNonParties -> "C6A";
             default -> null;
         };
     }
@@ -199,26 +201,16 @@ public class CustomOrderService {
      * Strips the form number in parentheses from an order description.
      * E.g., "Parental responsibility order (C45A)" -> "Parental responsibility order"
      */
-    String stripFormNumberFromDescription(String description) {
+    String stripFormNumberFromDescription(String description, String formNumber) {
         if (description == null) {
             return null;
         }
 
-        String trimmed = description.trim();
-        int openBracket = trimmed.lastIndexOf('(');
-        int closeBracket = trimmed.lastIndexOf(')');
-
-        if (openBracket >= 0 && closeBracket == trimmed.length() - 1 && openBracket < closeBracket) {
-            String formNumber = trimmed.substring(openBracket + 1, closeBracket);
-            boolean isAlphaNumeric = !formNumber.isEmpty()
-                && formNumber.chars().allMatch(Character::isLetterOrDigit);
-
-            if (isAlphaNumeric) {
-                return trimmed.substring(0, openBracket).trim();
-            }
+        if (StringUtils.isNotBlank(formNumber)) {
+            return description.replace("(" + formNumber + ")", "").trim();
         }
 
-        return trimmed;
+        return description;
     }
 
     /**
@@ -2074,7 +2066,7 @@ public class CustomOrderService {
         }
 
         String formNumber = getFormNumberForOrder(selectedOption);
-        String strippedDescription = stripFormNumberFromDescription(orderDescription);
+        String strippedDescription = stripFormNumberFromDescription(orderDescription, formNumber);
 
         if (formNumber != null && StringUtils.isNotBlank(strippedDescription)) {
             return formNumber + " - " + strippedDescription;
