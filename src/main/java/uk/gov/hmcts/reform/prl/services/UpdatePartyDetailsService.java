@@ -475,9 +475,8 @@ public class UpdatePartyDetailsService {
             .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
             .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
             .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
-            .liveInRefuge(partyDetails.getIsCurrentAddressKnown() != null ? partyDetails.getLiveInRefuge() : null)
-            .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
-                                             && YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+            .liveInRefuge(partyDetails.getLiveInRefuge())
+            .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
             .isAddressConfidential(partyDetails.getIsAddressConfidential())
             .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
@@ -645,8 +644,6 @@ public class UpdatePartyDetailsService {
         return false;
     }
 
-
-
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
@@ -778,7 +775,7 @@ public class UpdatePartyDetailsService {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
-        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+        if (CollectionUtils.isEmpty(applicants)) {
             applicants = new ArrayList<>();
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             applicants.add(partyDetails);
@@ -794,7 +791,7 @@ public class UpdatePartyDetailsService {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
-        if (CollectionUtils.isEmpty(respondents) || CollectionUtils.size(respondents) < 1) {
+        if (CollectionUtils.isEmpty(respondents)) {
             respondents = new ArrayList<>();
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             respondents.add(partyDetails);
@@ -833,7 +830,7 @@ public class UpdatePartyDetailsService {
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
-            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+            if (CollectionUtils.isEmpty(children)) {
                 children = new ArrayList<>();
                 Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);

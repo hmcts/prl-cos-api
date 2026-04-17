@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -44,7 +46,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_CONFIDENTIAL_DETAILS;
@@ -72,7 +78,10 @@ class ConfidentialityTabServiceTest {
                     boolean expectedAddressConfidential, boolean expectedEmailConfidential, boolean expectedPhoneConfidential) {
     }
 
+    @InjectMocks
     ConfidentialityTabService confidentialityTabService;
+    @Spy
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     Address address;
     PartyDetails partyDetails1;
@@ -83,8 +92,6 @@ class ConfidentialityTabServiceTest {
 
     @BeforeEach
     void setUp() {
-        confidentialityTabService = new ConfidentialityTabService();
-
         address = Address.builder()
             .addressLine1("AddressLine1")
             .postTown("Xyz town")
@@ -768,10 +775,16 @@ class ConfidentialityTabServiceTest {
         assertEquals(Yes, updatedPartyDetails.getIsAddressConfidential());
         assertEquals(Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
         assertEquals(Yes, updatedPartyDetails.getIsEmailAddressConfidential());
+
+        verifyNoInteractions(confidentialityC8RefugeService);
     }
 
-    @Test
-    void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations() {
+    @ParameterizedTest
+    @MethodSource("confidentialFields")
+    void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations(ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        doCallRealMethod().when(confidentialityC8RefugeService)
+            .updateConfidentialityForPartiesLivingInRefuge(anyString(), any(PartyDetails.class), any(Boolean.class));
+
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
@@ -789,9 +802,9 @@ class ConfidentialityTabServiceTest {
             .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .isEmailAddressConfidential(Yes)
+            .isAddressConfidential(confidentialFields.address() ? Yes : No)
+            .isPhoneNumberConfidential(confidentialFields.phoneNumber() ? Yes : No)
+            .isEmailAddressConfidential(confidentialFields.emailAddress() ? Yes : No)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString(
@@ -807,13 +820,25 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(No, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(No, updatedPartyDetails.getIsEmailAddressConfidential());
+        verifyConfidentialFields(updatedPartyDetails, confidentialFields);
     }
 
-    @Test
-    void testUpdateOtherPeopleConfidentiality_withEmptyRelations() {
+    private static Stream<Arguments> confidentialFields() {
+        return Stream.of(
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, true, true)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, false, true)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, true, false)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, false, false)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(false, false, false))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("confidentialFields")
+    void testUpdateOtherPeopleConfidentiality_withEmptyRelations(ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        doCallRealMethod().when(confidentialityC8RefugeService)
+            .updateConfidentialityForPartiesLivingInRefuge(anyString(), any(PartyDetails.class), any(Boolean.class));
+
         // Mock data
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -824,9 +849,9 @@ class ConfidentialityTabServiceTest {
             .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .isEmailAddressConfidential(Yes)
+            .isAddressConfidential(confidentialFields.address() ? Yes : No)
+            .isPhoneNumberConfidential(confidentialFields.phoneNumber() ? Yes : No)
+            .isEmailAddressConfidential(confidentialFields.emailAddress() ? Yes : No)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
@@ -841,13 +866,22 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(No, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(No, updatedPartyDetails.getIsEmailAddressConfidential());
+        verifyConfidentialFields(updatedPartyDetails, confidentialFields);
     }
 
-    @Test
-    void testUpdateOtherPeopleConfidentiality_withNullRelations() {
+    private void verifyConfidentialFields(PartyDetails partyDetails,
+                                          ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        assertEquals(confidentialFields.address(), Yes.equals(partyDetails.getIsAddressConfidential()));
+        assertEquals(confidentialFields.phoneNumber(), Yes.equals(partyDetails.getIsPhoneNumberConfidential()));
+        assertEquals(confidentialFields.emailAddress(), Yes.equals(partyDetails.getIsEmailAddressConfidential()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("confidentialFields")
+    void testUpdateOtherPeopleConfidentiality_withNullRelations(ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        doCallRealMethod().when(confidentialityC8RefugeService)
+            .updateConfidentialityForPartiesLivingInRefuge(anyString(), any(PartyDetails.class), any(Boolean.class));
+
         // Mock data
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -858,9 +892,9 @@ class ConfidentialityTabServiceTest {
             .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .isEmailAddressConfidential(Yes)
+            .isAddressConfidential(confidentialFields.address() ? Yes : No)
+            .isPhoneNumberConfidential(confidentialFields.phoneNumber() ? Yes : No)
+            .isEmailAddressConfidential(confidentialFields.emailAddress() ? Yes : No)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
@@ -873,9 +907,7 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(No, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(No, updatedPartyDetails.getIsEmailAddressConfidential());
+        verifyConfidentialFields(updatedPartyDetails, confidentialFields);
     }
 
     @Test

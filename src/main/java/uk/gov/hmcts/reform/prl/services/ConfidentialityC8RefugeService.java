@@ -44,26 +44,27 @@ public class ConfidentialityC8RefugeService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
-    public void processForcePartiesConfidentialityIfLivesInRefugeForC100(
-        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
-        Map<String, Object> updatedCaseData,
-        String party,
-        boolean cleanUpNeeded) {
+    public void processForcePartiesConfidentialityIfLivesInRefugeForC100(Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+                                                                         Map<String, Object> updatedCaseData, String party,
+                                                                         boolean cleanUpNeeded) {
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             for (PartyDetails partyDetails : partyDetailsList) {
-                if (partyDetails.getIsCurrentAddressKnown() != null) {
-                    if (eligibleForRefuge(partyDetails)) {
-                        forceConfidentialityChangeForRefuge(party, partyDetails);
-                    } else if (cleanUpNeeded) {
-                        partyDetails.setRefugeConfidentialityC8Form(null);
-                    }
+                if (eligibleForRefuge(partyDetails)) {
+                    forceConfidentialityChangeForRefuge(party, partyDetails);
                 } else if (cleanUpNeeded) {
-                    partyDetails.setLiveInRefuge(null);
                     partyDetails.setRefugeConfidentialityC8Form(null);
                 }
             }
             updatedCaseData.put(party, partyDetailsWrappedList);
+        }
+    }
+
+    public void updateConfidentialityForPartiesLivingInRefuge(String party, PartyDetails partyDetails, boolean cleanUpNeeded) {
+        if (eligibleForRefuge(partyDetails)) {
+            forceConfidentialityChangeForRefuge(party, partyDetails);
+        } else if (cleanUpNeeded) {
+            partyDetails.setRefugeConfidentialityC8Form(null);
         }
     }
 

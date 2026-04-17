@@ -45,6 +45,14 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialityTabService {
 
+    private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
+
+    record ConfidentialFields(boolean address, boolean emailAddress, boolean phoneNumber) {
+        boolean isConfidentialFieldSet() {
+            return address || emailAddress || phoneNumber;
+        }
+    }
+
     public Map<String, Object> updateConfidentialityDetails(CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             return getC100ConfidentialityDetails(caseData);
@@ -183,58 +191,69 @@ public class ConfidentialityTabService {
         ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation, Map<Object, PartyDetails> objectPartyDetailsMap) {
         Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
             childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
-        if (partyDetails.isPresent()) {
-            return Element.<OtherPersonConfidentialityDetails>builder()
-                .value(OtherPersonConfidentialityDetails.builder()
-                           .firstName(partyDetails.get().getFirstName())
-                           .lastName(partyDetails.get().getLastName())
-                           .previousName(partyDetails.get().getPreviousName())
-                           .relationshipToChildDetails(childrenAndOtherPeopleRelation
-                                                           .getChildAndOtherPeopleRelation().getDisplayedValue())
-                           .gender(partyDetails.get().getGender())
-                           .dateOfBirth(partyDetails.get().getDateOfBirth())
-                           .address(partyDetails.get().getAddress())
-                           .addressLivedLessThan5YearsDetails(partyDetails.get().getAddressLivedLessThan5YearsDetails())
-                           .email(partyDetails.get().getEmail())
-                           .phoneNumber(partyDetails.get().getPhoneNumber())
-                           .build()).build();
-        }
-        return null;
+        return partyDetails.map(details -> Element.<OtherPersonConfidentialityDetails>builder()
+            .value(OtherPersonConfidentialityDetails.builder()
+                       .firstName(details.getFirstName())
+                       .lastName(details.getLastName())
+                       .previousName(details.getPreviousName())
+                       .relationshipToChildDetails(childrenAndOtherPeopleRelation
+                                                       .getChildAndOtherPeopleRelation().getDisplayedValue())
+                       .gender(details.getGender())
+                       .dateOfBirth(details.getDateOfBirth())
+                       .address(details.getAddress())
+                       .addressLivedLessThan5YearsDetails(details.getAddressLivedLessThan5YearsDetails())
+                       .email(details.getEmail())
+                       .phoneNumber(details.getPhoneNumber())
+                       .build())
+            .build())
+            .orElse(null);
     }
 
     public List<Element<ApplicantConfidentialityDetails>> getConfidentialApplicantDetails(List<PartyDetails> currentApplicants) {
         List<Element<ApplicantConfidentialityDetails>> tempConfidentialApplicants = new ArrayList<>();
         for (PartyDetails applicant : currentApplicants) {
-            boolean addressSet = false;
-            boolean emailSet = false;
-            boolean phoneSet = false;
-            if (isNotEmpty(applicant.getAddress())) {
-                addressSet = findIsConfidentialField(
-                    applicant.getLiveInRefuge(),
-                    applicant.getIsAddressConfidential()
-                );
+
+            ConfidentialFields confidentialFields;
+            if (YesOrNo.Yes.equals(applicant.getIsPartyIdentityConfidential())) {
+                confidentialFields = new ConfidentialFields(true, true, true);
+            } else {
+                confidentialFields = getConfidentialFields(applicant);
             }
 
-            if (isNotEmpty(applicant.getEmail())) {
-                emailSet = findIsConfidentialField(
-                    applicant.getLiveInRefuge(),
-                    applicant.getIsEmailAddressConfidential()
-                );
-            }
-
-            if (isNotEmpty(applicant.getPhoneNumber())) {
-                phoneSet = findIsConfidentialField(
-                    applicant.getLiveInRefuge(),
-                    applicant.getIsPhoneNumberConfidential()
-                );
-            }
-            if (addressSet || emailSet || phoneSet) {
-                tempConfidentialApplicants
-                    .add(getApplicantConfidentialityElement(addressSet, emailSet, phoneSet, applicant));
+            if (confidentialFields.isConfidentialFieldSet()) {
+                tempConfidentialApplicants.add(getApplicantConfidentialityElement(confidentialFields, applicant));
             }
         }
 
         return tempConfidentialApplicants;
+    }
+
+    private ConfidentialFields getConfidentialFields(PartyDetails partyDetails) {
+        boolean addressSet = false;
+        boolean emailSet = false;
+        boolean phoneSet = false;
+        if (isNotEmpty(partyDetails.getAddress())) {
+            addressSet = findIsConfidentialField(
+                partyDetails.getLiveInRefuge(),
+                partyDetails.getIsAddressConfidential()
+            );
+        }
+
+        if (isNotEmpty(partyDetails.getEmail())) {
+            emailSet = findIsConfidentialField(
+                partyDetails.getLiveInRefuge(),
+                partyDetails.getIsEmailAddressConfidential()
+            );
+        }
+
+        if (isNotEmpty(partyDetails.getPhoneNumber())) {
+            phoneSet = findIsConfidentialField(
+                partyDetails.getLiveInRefuge(),
+                partyDetails.getIsPhoneNumberConfidential()
+            );
+        }
+
+        return new ConfidentialFields(addressSet, emailSet, phoneSet);
     }
 
     private boolean findIsConfidentialField(YesOrNo liveInRefuge, YesOrNo isFieldConfidential) {
@@ -245,17 +264,17 @@ public class ConfidentialityTabService {
         }
     }
 
-    private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(boolean addressSet,
-                                                                                        boolean emailSet, boolean phoneSet, PartyDetails applicant) {
+    private Element<ApplicantConfidentialityDetails> getApplicantConfidentialityElement(ConfidentialFields confidentialFields,
+                                                                                        PartyDetails applicant) {
 
         return Element
             .<ApplicantConfidentialityDetails>builder()
             .value(ApplicantConfidentialityDetails.builder()
                        .firstName(applicant.getFirstName())
                        .lastName(applicant.getLastName())
-                       .address(addressSet ? applicant.getAddress() : null)
-                       .phoneNumber(phoneSet ? applicant.getPhoneNumber() : null)
-                       .email(emailSet ? applicant.getEmail() : null)
+                       .address(confidentialFields.address ? applicant.getAddress() : null)
+                       .phoneNumber(confidentialFields.phoneNumber ? applicant.getPhoneNumber() : null)
+                       .email(confidentialFields.emailAddress ? applicant.getEmail() : null)
                        .build()).build();
     }
 
@@ -283,6 +302,8 @@ public class ConfidentialityTabService {
 
     public List<Element<PartyDetails>> updateOtherPeopleConfidentiality(List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations,
                                                                         List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
+        updateOtherPeopleIdentityConfidentiality(childrenAndOtherPeopleRelations, otherPartyInTheCaseRevised);
+
         return ofNullable(otherPartyInTheCaseRevised)
             .map(otherPeople -> {
                 List<String> otherPersonIds = ofNullable(childrenAndOtherPeopleRelations)
@@ -306,20 +327,34 @@ public class ConfidentialityTabService {
                                                 .id(partyDetails.getId())
                                                 .build());
                     } else {
+                        PartyDetails updatedPartyDetails = partyDetails.getValue().toBuilder().build();
+                        confidentialityC8RefugeService.updateConfidentialityForPartiesLivingInRefuge("otherPeople",
+                                                                                                     updatedPartyDetails,
+                                                                                                     false);
                         otherPeopleList.add(Element.<PartyDetails>builder()
-                                                .value(partyDetails.getValue().toBuilder()
-                                                           .isAddressConfidential(YesOrNo.No)
-                                                           .isPhoneNumberConfidential(YesOrNo.No)
-                                                           .isEmailAddressConfidential(YesOrNo.No)
-                                                           .isPartyIdentityConfidential(YesOrNo.No)
-                                                           .build())
+                                                .value(updatedPartyDetails)
                                                 .id(partyDetails.getId())
                                                 .build());
                     }
                 }
                 return otherPeopleList;
             })
-            .orElseGet(() -> null);
+            .orElse(null);
+    }
+
+    private void updateOtherPeopleIdentityConfidentiality(List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelations,
+                                                          List<Element<PartyDetails>> otherPartyInTheCaseRevised) {
+
+        Optional.ofNullable(otherPartyInTheCaseRevised).ifPresent(parties -> parties
+            .forEach(element -> {
+                boolean identityConfidential = Optional.ofNullable(childrenAndOtherPeopleRelations)
+                    .map(list -> list.stream()
+                        .map(Element::getValue)
+                        .filter(r -> r.getOtherPeopleId().equals(element.getId().toString()))
+                        .anyMatch(r -> YesOrNo.Yes.equals(r.getIsOtherPeopleIdConfidential())))
+                    .orElse(false);
+                element.getValue().setIsPartyIdentityConfidential(identityConfidential ?  YesOrNo.Yes : YesOrNo.No);
+            }));
     }
 
     private Map<String, Object> getC100ConfidentialityDetails(CaseData caseData) {

@@ -186,13 +186,6 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
     @Test
     public void whenOtherPeopleInTheCasePresentExceptPlaceOfBirth() {
 
-        OtherPersonRelationshipToChild personRelationshipToChild = OtherPersonRelationshipToChild.builder()
-            .personRelationshipToChild("Test relationship")
-            .build();
-
-        Element<OtherPersonRelationshipToChild> wrappedList = Element.<OtherPersonRelationshipToChild>builder()
-            .value(personRelationshipToChild).build();
-
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .address(Address.builder()
