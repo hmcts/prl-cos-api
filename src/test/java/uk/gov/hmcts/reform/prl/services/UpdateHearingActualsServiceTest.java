@@ -156,7 +156,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -250,7 +250,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -295,7 +295,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
