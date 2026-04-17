@@ -1101,7 +1101,7 @@ public class CustomOrderService {
                   applicant.getRelationshipToChildren(), applicant.getRepresentativeFirstName(), applicant.getRepresentativeLastName());
 
         String name = getFullName(applicant.getFirstName(), applicant.getLastName());
-        String relationship = getEffectiveRelationship(caseData, applicant, 1, null, name);
+        String relationship = getEffectiveApplicantRelationship(caseData, applicant, 1, null, name);
         String representative = getRepresentativeName(applicant);
 
         applicantRows.add(buildPartyRow(1, name, relationship, representative));
@@ -1119,7 +1119,7 @@ public class CustomOrderService {
                       applicant.getRepresentativeFirstName(), applicant.getRepresentativeLastName());
 
             String name = getFullName(applicant.getFirstName(), applicant.getLastName());
-            String relationship = getEffectiveRelationship(caseData, applicant, index, applicantId, name);
+            String relationship = getEffectiveApplicantRelationship(caseData, applicant, index, applicantId, name);
             String representative = getRepresentativeName(applicant);
 
             applicantRows.add(buildPartyRow(index, name, relationship, representative));
@@ -1152,7 +1152,7 @@ public class CustomOrderService {
             respondent.getRelationshipToChildren(), respondent.getRepresentativeFirstName(), respondent.getRepresentativeLastName());
 
         String name = getFullName(respondent.getFirstName(), respondent.getLastName());
-        String relationship = getEffectiveRelationship(caseData, respondent, 1, null, name);
+        String relationship = getEffectiveRespondentRelationship(caseData, respondent, 1, null, name);
         String representative = getRepresentativeName(respondent);
 
         respondentRows.add(buildPartyRow(1, name, relationship, representative));
@@ -1170,7 +1170,7 @@ public class CustomOrderService {
                 respondent.getRepresentativeFirstName(), respondent.getRepresentativeLastName());
 
             String name = getFullName(respondent.getFirstName(), respondent.getLastName());
-            String relationship = getEffectiveRelationship(caseData, respondent, index, respondentId, name);
+            String relationship = getEffectiveRespondentRelationship(caseData, respondent, index, respondentId, name);
             String representative = getRepresentativeName(respondent);
 
             respondentRows.add(buildPartyRow(index, name, relationship, representative));
@@ -1179,7 +1179,17 @@ public class CustomOrderService {
         }
     }
 
-    private String getEffectiveRelationship(CaseData caseData, PartyDetails respondent, int index, String respondentId, String name) {
+    private String getEffectiveApplicantRelationship(CaseData caseData, PartyDetails applicant, int index,
+                                                     String applicantId, String name) {
+        String relationship = StringUtils.defaultString(applicant.getRelationshipToChildren());
+        if (relationship.isEmpty()) {
+            relationship = getApplicantRelationshipFromRelations(caseData, index, applicantId, name);
+        }
+        return relationship;
+    }
+
+    private String getEffectiveRespondentRelationship(CaseData caseData, PartyDetails respondent, int index,
+                                                      String respondentId, String name) {
         String relationship = StringUtils.defaultString(respondent.getRelationshipToChildren());
         if (relationship.isEmpty()) {
             relationship = getRespondentRelationshipFromRelations(caseData, index, respondentId, name);
@@ -1244,6 +1254,33 @@ public class CustomOrderService {
     }
 
     /**
+     * Gets the applicant's relationship to children from the Relations data.
+     * Uses childAndApplicantRelations which stores per-applicant relationship to each child.
+     * If a applicant has different relationships to different children, all unique relationships are returned.
+     *
+     * @param caseData The case data
+     * @param applicantIndex 1-based index of the respondent (1 for first applicant, etc.)
+     * @param applicantId The applicant's ID if available
+     * @param applicantName The applicant's name for matching if ID doesn't match
+     * @return The relationship display value (e.g., "Mother", "Father", or "Mother, Step-mother") or empty string
+     */
+    private String getApplicantRelationshipFromRelations(CaseData caseData, int applicantIndex,
+                                                          String applicantId, String applicantName) {
+        String result = findApplicantRelationshipFromNewModel(caseData, applicantIndex, applicantId, applicantName);
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        result = findApplicantRelationshipFromOldModel(caseData);
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        log.debug(" No applicant relationship found for applicant {}", applicantIndex);
+        return "";
+    }
+
+    /**
      * Gets the respondent's relationship to children from the Relations data.
      * Uses childAndRespondentRelations which stores per-respondent relationship to each child.
      * If a respondent has different relationships to different children, all unique relationships are returned.
@@ -1256,12 +1293,12 @@ public class CustomOrderService {
      */
     private String getRespondentRelationshipFromRelations(CaseData caseData, int respondentIndex,
                                                           String respondentId, String respondentName) {
-        String result = findRelationshipFromNewModel(caseData, respondentIndex, respondentId, respondentName);
+        String result = findRespondentRelationshipFromNewModel(caseData, respondentIndex, respondentId, respondentName);
         if (!result.isEmpty()) {
             return result;
         }
 
-        result = findRelationshipFromOldModel(caseData);
+        result = findRespondentRelationshipFromOldModel(caseData);
         if (!result.isEmpty()) {
             return result;
         }
@@ -1270,7 +1307,28 @@ public class CustomOrderService {
         return "";
     }
 
-    private String findRelationshipFromNewModel(CaseData caseData, int respondentIndex,
+    private String findApplicantRelationshipFromNewModel(CaseData caseData, int applicantIndex,
+                                                          String applicantId, String applicantName) {
+        if (!hasChildAndApplicantRelations(caseData)) {
+            return "";
+        }
+
+        var relations = caseData.getRelations().getChildAndApplicantRelations();
+
+        String result = findApplicantRelationshipByName(relations, applicantName);
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        result = findApplicantRelationshipById(relations, applicantId, applicantIndex);
+        if (!result.isEmpty()) {
+            return result;
+        }
+
+        return findApplicantRelationshipByIndex(relations, applicantIndex);
+    }
+
+    private String findRespondentRelationshipFromNewModel(CaseData caseData, int respondentIndex,
                                                  String respondentId, String respondentName) {
         if (!hasChildAndRespondentRelations(caseData)) {
             return "";
@@ -1279,17 +1337,23 @@ public class CustomOrderService {
         var relations = caseData.getRelations().getChildAndRespondentRelations();
         logRelationEntries(relations, respondentIndex, respondentId, respondentName);
 
-        String result = findRelationshipByName(relations, respondentName);
+        String result = findRespondentRelationshipByName(relations, respondentName);
         if (!result.isEmpty()) {
             return result;
         }
 
-        result = findRelationshipById(relations, respondentId, respondentIndex);
+        result = findRespondentRelationshipById(relations, respondentId, respondentIndex);
         if (!result.isEmpty()) {
             return result;
         }
 
-        return findRelationshipByIndex(relations, respondentIndex);
+        return findRespondentRelationshipByIndex(relations, respondentIndex);
+    }
+
+    private boolean hasChildAndApplicantRelations(CaseData caseData) {
+        return caseData.getRelations() != null
+            && caseData.getRelations().getChildAndApplicantRelations() != null
+            && !caseData.getRelations().getChildAndApplicantRelations().isEmpty();
     }
 
     private boolean hasChildAndRespondentRelations(CaseData caseData) {
@@ -1309,8 +1373,30 @@ public class CustomOrderService {
         }
     }
 
-    private String findRelationshipByName(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
-                                          String respondentName) {
+    private String findApplicantRelationshipByName(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation>> relations,
+                                                    String applicantName) {
+        if (StringUtils.isBlank(applicantName)) {
+            return "";
+        }
+        java.util.Set<String> relationships = new java.util.LinkedHashSet<>();
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            if (applicantName.equalsIgnoreCase(relation.getApplicantFullName())
+                && relation.getChildAndApplicantRelation() != null) {
+                relationships.add(relation.getChildAndApplicantRelation().getDisplayedValue());
+            }
+        }
+        if (!relationships.isEmpty()) {
+            String result = String.join(", ", relationships);
+            log.debug(" Found applicant '{}' relationships by name match: '{}'", applicantName, result);
+            return result;
+        }
+        return "";
+    }
+
+    private String findRespondentRelationshipByName(
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
+        String respondentName) {
         if (respondentName == null || respondentName.isEmpty()) {
             return "";
         }
@@ -1330,8 +1416,30 @@ public class CustomOrderService {
         return "";
     }
 
-    private String findRelationshipById(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
-                                        String respondentId, int respondentIndex) {
+    private String findApplicantRelationshipById(
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation>> relations, String applicantId,
+        int applicantIndex) {
+        if (applicantId == null || applicantId.isEmpty()) {
+            return "";
+        }
+        java.util.Set<String> relationships = new java.util.LinkedHashSet<>();
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            if (applicantId.equals(relation.getApplicantId()) && relation.getChildAndApplicantRelation() != null) {
+                relationships.add(relation.getChildAndApplicantRelation().getDisplayedValue());
+            }
+        }
+        if (!relationships.isEmpty()) {
+            String result = String.join(", ", relationships);
+            log.debug(" Found applicant {} relationships by ID match: '{}'", applicantIndex, result);
+            return result;
+        }
+        return "";
+    }
+
+    private String findRespondentRelationshipById(
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations, String respondentId,
+        int respondentIndex) {
         if (respondentId == null || respondentId.isEmpty()) {
             return "";
         }
@@ -1350,8 +1458,33 @@ public class CustomOrderService {
         return "";
     }
 
-    private String findRelationshipByIndex(List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations,
-                                           int respondentIndex) {
+    private String findApplicantRelationshipByIndex(
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation>> relations, int applicantIndex) {
+        java.util.Map<String, java.util.Set<String>> applicantToRelationships = new java.util.LinkedHashMap<>();
+        for (var relElement : relations) {
+            var relation = relElement.getValue();
+            String respName = relation.getApplicantFullName();
+            if (respName != null && relation.getChildAndApplicantRelation() != null) {
+                applicantToRelationships
+                    .computeIfAbsent(respName, k -> new java.util.LinkedHashSet<>())
+                    .add(relation.getChildAndApplicantRelation().getDisplayedValue());
+            }
+        }
+
+        int count = 0;
+        for (var entry : applicantToRelationships.entrySet()) {
+            count++;
+            if (count == applicantIndex) {
+                String result = String.join(", ", entry.getValue());
+                log.debug(" Found applicant {} ('{}') relationships by index: '{}'", applicantIndex, entry.getKey(), result);
+                return result;
+            }
+        }
+        return "";
+    }
+
+    private String findRespondentRelationshipByIndex(
+        List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation>> relations, int respondentIndex) {
         java.util.Map<String, java.util.Set<String>> respondentToRelationships = new java.util.LinkedHashMap<>();
         for (var relElement : relations) {
             var relation = relElement.getValue();
@@ -1375,7 +1508,22 @@ public class CustomOrderService {
         return "";
     }
 
-    private String findRelationshipFromOldModel(CaseData caseData) {
+    private String findApplicantRelationshipFromOldModel(CaseData caseData) {
+        if (caseData.getChildren() == null || caseData.getChildren().isEmpty()) {
+            return "";
+        }
+        for (var childElement : caseData.getChildren()) {
+            var child = childElement.getValue();
+            if (child.getApplicantsRelationshipToChild() != null) {
+                String displayValue = child.getApplicantsRelationshipToChild().getDisplayedValue();
+                log.debug(" Found applicant relationship from children model: '{}'", displayValue);
+                return displayValue;
+            }
+        }
+        return "";
+    }
+
+    private String findRespondentRelationshipFromOldModel(CaseData caseData) {
         if (caseData.getChildren() == null || caseData.getChildren().isEmpty()) {
             return "";
         }
