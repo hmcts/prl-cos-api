@@ -270,6 +270,9 @@ public class ReviewDocumentService {
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList());
         }
+        if (isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())) {
+            tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList());
+        }
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())) {
             tempQuarantineDocumentList.addAll(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList());
         }
