@@ -65,6 +65,14 @@ import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -75,8 +83,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_CATEGORY_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
@@ -124,6 +130,16 @@ public class ManageDocumentsService {
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
+    private static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
+        CHILD_IMPACT_REPORT_1_LA,
+        CHILD_IMPACT_REPORT_2_LA,
+        SECTION_7_REPORT_LA,
+        SECTION_7_ADDENDUM_REPORT_LA,
+        LOCAL_AUTHORITY_INVOLVEMENT_LA,
+        SECTION_47_LA,
+        CIR_EXTENSION_REQUEST_LA,
+        CIR_TRANSFER_REQUEST_LA
+    );
 
     public record LaTasks(String id, String value) {}
 
@@ -158,16 +174,22 @@ public class ManageDocumentsService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
-                    .filter(category -> isUserRoleLA == category.getCategoryId().equals("localAuthorityDocuments"))
+                    .filter(category -> !isUserRoleLA || category.getCategoryId().equals("localAuthorityDocuments"))
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .toList();
+
+                List<String> docsToExclude = new ArrayList<>(List.of(quarantineCategoriesToRemove()));
+                if (!isUserRoleLA) {
+                    docsToExclude.addAll(EXCLUDED_LA_DOCS_LIST_FOR_ADMIN);
+                }
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(
                     parentCategories,
                     dynamicListElementList,
-                    Arrays.asList(quarantineCategoriesToRemove())
+                    docsToExclude
                 );
+                docsToExclude.clear();
 
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
@@ -419,14 +441,12 @@ public class ManageDocumentsService {
     }
 
     private QuarantineLegalDoc covertManageDocToQuarantineDoc(ManageDocuments manageDocument, UserDetails userDetails) {
-        boolean isCourtPartySelected = DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty());
-
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .categoryId(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_CATEGORY_ID : manageDocument.getDocumentCategories().getValueCode())
-            .categoryName(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_LABEL : manageDocument.getDocumentCategories().getValueLabel())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
             //PRL-4320 - Manage documents redesign
             .isConfidential(manageDocument.getIsConfidential())
             .isRestricted(manageDocument.getIsRestricted())

@@ -101,6 +101,22 @@ public enum DocTypeOtherDocumentsEnum {
     section47La("section47La","Section 47 enquiry"),
     @JsonProperty("localAuthorityOtherDoc")
     localAuthorityOtherDoc("localAuthorityOtherDoc","Local Authority other documents"),
+    @JsonProperty("childImpactReport1La")
+    childImpactReport1La("childImpactReport1La","Child Impact Report 1"),
+    @JsonProperty("childImpactReport2La")
+    childImpactReport2La("childImpactReport2La","Child Impact Report 2"),
+    @JsonProperty("section7ReportLa")
+    section7ReportLa("section7ReportLa","Section 7 report"),
+    @JsonProperty("section7AddendumReportLa")
+    section7AddendumReportLa("section7AddendumReportLa","Section 7 addendum report"),
+    @JsonProperty("localAuthorityInvolvementLa")
+    localAuthorityInvolvementLa("localAuthorityInvolvementLa","Local Authority involvement letter"),
+    @JsonProperty("section47La")
+    section47La("section47La","Section 47 enquiry"),
+    @JsonProperty("cirExtensionRequestLa")
+    cirExtensionRequestLa("cirExtensionRequestLa", "CIR extension request"),
+    @JsonProperty("cirTransferRequestLa")
+    cirTransferRequestLa("cirTransferRequestLa", "CIR transfer request"),
     @JsonProperty("medicalReports")
     medicalReports("medicalReports", "Medical reports"),
     @JsonProperty("DNAReports_expertReport")
