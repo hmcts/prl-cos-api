@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -69,34 +69,35 @@ public class CaseDocumentControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockBean
-    DocumentGenService documentGenService;
+    @MockitoBean
+    private DocumentGenService documentGenService;
 
-    @MockBean
-    UploadDocumentService uploadService;
+    @MockitoBean
+    private UploadDocumentService uploadService;
 
-    @MockBean
-    AuthorisationService authorisationService;
+    @MockitoBean
+    private AuthorisationService authorisationService;
 
-    @MockBean
-    CoreCaseDataApi coreCaseDataApi;
-    @MockBean
-    IdamClient idamClient;
+    @MockitoBean
+    private CoreCaseDataApi coreCaseDataApi;
 
-    @MockBean
-    CaseService caseService;
+    @MockitoBean
+    private IdamClient idamClient;
 
-    @MockBean
-    EmailService emailService;
+    @MockitoBean
+    private CaseService caseService;
 
-    @MockBean
-    CitizenDocumentService citizenDocumentService;
+    @MockitoBean
+    private EmailService emailService;
 
-    @MockBean
-    UserInfo userInfo;
+    @MockitoBean
+    private CitizenDocumentService citizenDocumentService;
+
+    @MockitoBean
+    private UserInfo userInfo;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Before
     public void setUp() {
@@ -139,10 +140,6 @@ public class CaseDocumentControllerIntegrationTest {
     public void testGenerateCitizenStatementDocument() throws Exception {
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        Map<String, Object> map = new HashMap<>();
-        map.put("caseId", "123");
-        map.put("citizenUploadedDocumentList", List.of(element(UploadedDocuments.builder().build())));
-        map.put("partyId", "7663081e-778d-4317-b278-7642b740d317");
 
         String caseDetails = ResourceLoader.loadJson("requests/c100-respondent-solicitor-c1adraft-generate.json");
 
@@ -242,15 +239,6 @@ public class CaseDocumentControllerIntegrationTest {
             "application/pdf",
             "test content".getBytes()
         );
-
-        String jsonRequest = "{"
-            + "\"caseId\": \"123\","
-            + "\"documentType\": \"statement\","
-            + "\"partyName\": \"John Doe\","
-            + "\"partyId\": \"7663081e-778d-4317-b278-7642b740d317\","
-            + "\"isApplicant\": \"true\","
-            + "\"documentRequestedByCourt\": \"YES\""
-            + "}";
 
         mockMvc.perform(
                 multipart(url)
@@ -363,7 +351,7 @@ public class CaseDocumentControllerIntegrationTest {
             .document(Document.builder().documentFileName("test.pdf").build())
             .build();
 
-        when(documentGenService.generateAndUploadDocument(anyString(), any())).thenReturn(documentResponse);
+        when(documentGenService.generateAndUploadDocument(anyString(), any())).thenReturn(List.of(documentResponse));
 
         String url = "/citizen-generate-document";
         String jsonRequest = "{"
