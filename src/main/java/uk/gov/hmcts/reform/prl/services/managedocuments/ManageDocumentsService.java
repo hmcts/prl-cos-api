@@ -125,6 +125,8 @@ public class ManageDocumentsService {
     public static final String DETAILS_ERROR_MESSAGE_WELSH
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
 
+    public record LaTasks(String id, String value) {}
+
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authorization);
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
@@ -444,7 +446,6 @@ public class ManageDocumentsService {
     }
 
     public void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
-        log.info("Entering setFlagsForWaTask {} ", userRole);
         //Setting this flag for WA task
         if (userRole.equals(CITIZEN)
             || quarantineLegalDoc.getIsConfidential() != null
@@ -454,7 +455,6 @@ public class ManageDocumentsService {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
 
-        log.info("inside setFlagsForWaTask {} ", caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList());
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || userRole.equals(LOCAL_AUTHORITY) //LA - need multiple tasks, so opening up the possibilities
@@ -465,17 +465,17 @@ public class ManageDocumentsService {
             && caseData.getScannedDocuments().size() > 1)) {
             if (userRole.equals(LOCAL_AUTHORITY)) {
                 if (isNewTaskRequired(caseData, quarantineLegalDoc)) {
-                    log.info("inside setFlagsForWaTask isNewTaskRequired");
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+                    ArrayList<LaTasks> listOfTasksForLa = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
+                        ? (ArrayList<LaTasks>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
+                    listOfTasksForLa.add(new LaTasks(String.valueOf(UUID.randomUUID()), quarantineLegalDoc.getCategoryId()));
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
+                                        listOfTasksForLa);
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
                 }
             } else {
-                log.info("inside setFlagsForWaTask isNewTaskRequired no LA");
+
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
-            log.info("caseDataUpdated.category for LA {} ",caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
-            log.info("caseDataUpdated.triggered  for LA {} ",caseDataUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-            log.info("caseDataUpdated.restricted for LA {} ",caseDataUpdated.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }

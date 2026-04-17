@@ -3149,8 +3149,12 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals(
+            1,
+            ((ArrayList<ManageDocumentsService.LaTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY)).size()
+        );
+        assertEquals(
             ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA,
-            caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY)
+            ((ArrayList<ManageDocumentsService.LaTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY)).get(0).value()
         );
     }
 
