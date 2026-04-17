@@ -110,6 +110,8 @@ public class UpdateHearingActualsService {
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).forEach(caseDetails -> {
                 log.info("caseId {}", caseId);
+                log.info("caseDetails {}", caseDetails);
+                log.info("caseDetails.data {}", caseDetails.getData());
                 CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
                 log.info("Hearing id {}", hearingId);
                 triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
