@@ -231,7 +231,6 @@ public class DgsService {
         CaseData caseDataFromCcd = nonNull(caseDetailsFromCcd) ? CaseUtils.getCaseData(caseDetailsFromCcd, objectMapper) : null;
         boolean applicantWitnessStatement = false;
         boolean respondentWitnessStatement = false;
-        LocalDate issueDate = null;
         String familymanCaseNumber = null;
         String courtName = null;
 
@@ -241,7 +240,6 @@ public class DgsService {
         }
 
         if (nonNull(caseDataFromCcd)) {
-            issueDate = caseDataFromCcd.getIssueDate();
             familymanCaseNumber = caseDataFromCcd.getFamilymanCaseNumber();
             courtName = caseDataFromCcd.getCourtName();
         }
@@ -250,7 +248,6 @@ public class DgsService {
         caseDetails.put(CASE_ID, caseId);
         caseDetails.put(COURT_NAME_FIELD, courtName);
         caseDetails.put(CASE_DATA_ID, Long.parseLong(caseId));
-        caseDetails.put(ISSUE_DATE_FIELD, issueDate);
         caseDetails.put(FAMILYMAN_CASE_NUMBER, familymanCaseNumber);
         caseDetails.put(
             APPLICANT_NAME,
