@@ -171,7 +171,7 @@ public class CustomOrderService {
             case powerOfArrest -> "FL406";
             case amendDischargedVaried, blank -> "FL404B";
             case noticeOfProceedingsParties -> "C6";
-            case noticeOfProceedingsNonParties -> "C6A";
+            case noticeOfProceedingsNonParties -> "C6a";
             default -> null;
         };
     }
