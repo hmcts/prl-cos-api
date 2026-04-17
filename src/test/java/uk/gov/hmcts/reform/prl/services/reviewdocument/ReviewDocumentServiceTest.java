@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -1340,6 +1341,55 @@ public class ReviewDocumentServiceTest {
             cafcassUploadDocListDocTab.get(0).getValue().getMiamCertificateDocument().getDocumentFileName()
         );
         Assert.assertEquals("MIAMCertificate", cafcassUploadDocListDocTab.get(0).getValue().getCategoryId());
+    }
+
+    @Test
+    public void testReviewProcessForAlwaysConfidentialCafcassDocTypesHaveConfidentialPrefixWhenDecisionNo() {
+        doCallRealMethod().when(manageDocumentsService).renameAndReuploadFileToBeConfidential(any());
+        when(objectMapper.convertValue((Object) any(), (Class<Object>) any())).thenReturn(quarantineCaseDoc);
+
+        for (String docType : CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES) {
+            Mockito.clearInvocations(manageDocumentsService);
+
+            List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
+            QuarantineLegalDoc cafcassAlwaysConfidentialDoc = QuarantineLegalDoc.builder()
+                .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
+                .categoryId("MIAMCertificate")
+                .documentType(docType)
+                .uploaderRole(CAFCASS)
+                .cafcassQuarantineDocument(document)
+                .isConfidential(YesOrNo.Yes)
+                .documentUploadedDate(LocalDateTime.now())
+                .build();
+            quarantineDocsList.add(element(
+                UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
+                cafcassAlwaysConfidentialDoc
+            ));
+
+            CaseData caseData = CaseData.builder()
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .cafcassQuarantineDocsList(quarantineDocsList)
+                                               .build())
+                .reviewDocuments(ReviewDocuments.builder()
+                                     .reviewDecisionYesOrNo(YesNoNotSure.no)
+                                     .cafcassUploadDocListDocTab(new ArrayList<>())
+                                     .build())
+                .build();
+            Map<String, Object> caseDataMap = new HashMap<>();
+
+            reviewDocumentService.processReviewDocument(
+                caseDataMap,
+                caseData,
+                UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
+            );
+
+            // Document still routes to regular case file tab (not confidential/restricted)
+            Assert.assertNotNull(caseDataMap.get("cafcassUploadDocListDocTab"));
+            Assert.assertNull("Doc type " + docType + " should NOT go to confidential tab", caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
+
+            // Verify rename was invoked once per doc type
+            verify(manageDocumentsService, times(1)).renameAndReuploadFileToBeConfidential(document);
+        }
     }
 
     @Test

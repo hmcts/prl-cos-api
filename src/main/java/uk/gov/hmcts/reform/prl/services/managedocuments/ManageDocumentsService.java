@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -357,6 +358,18 @@ public class ManageDocumentsService {
                 .isRestricted(null)
                 .restrictedDetails(null)
                 .build();
+
+            // These Cafcass England doc types always get Confidential_ filename prefix even when not restricted
+            if (CAFCASS.equals(quarantineLegalDoc.getUploaderRole())
+                && CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES.contains(quarantineLegalDoc.getDocumentType())) {
+                Document originalDoc = getQuarantineDocumentForUploader(CAFCASS, quarantineLegalDoc);
+                if (originalDoc != null) {
+                    Document renamedDoc = renameAndReuploadFileToBeConfidential(originalDoc);
+                    quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                        .cafcassQuarantineDocument(renamedDoc)
+                        .build();
+                }
+            }
 
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,

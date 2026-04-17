@@ -55,6 +55,12 @@ public class CafcassUploadDocService {
     public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
         DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
     );
+
+    // These Cafcass England doc types must always be prefixed with Confidential_
+    // regardless of the admin's restricted decision see https://tools.hmcts.net/jira/browse/FPVTL-2412
+    public static final List<String> ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES = List.of(
+        DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
+    );
     public static final String MANAGE_DOC_UPLOADED_CATEGORY = "manageDocUploadedCategory";
 
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
