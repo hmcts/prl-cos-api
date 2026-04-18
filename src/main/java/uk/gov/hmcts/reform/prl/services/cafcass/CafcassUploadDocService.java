@@ -137,7 +137,9 @@ public class CafcassUploadDocService {
                      caseId, typeOfDocument, quarantineLegalDoc.getCategoryId(), isDuplicate);
             if (!isDuplicate) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY,
+                                    Collections.singletonList(quarantineLegalDoc.getCategoryId())
+                );
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
                 caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);

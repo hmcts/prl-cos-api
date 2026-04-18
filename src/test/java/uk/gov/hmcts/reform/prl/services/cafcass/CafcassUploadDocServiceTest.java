@@ -248,7 +248,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_TRANSFER, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertEquals(List.of(DOC_TYPE_CIR_TRANSFER), caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
         assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
     }
 
@@ -270,7 +270,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_EXTENSION, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertEquals(List.of(DOC_TYPE_CIR_EXTENSION), caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
         assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
     }
 
@@ -292,7 +292,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
 
-        assertEquals("16aRiskAssessment", caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertEquals(List.of("16aRiskAssessment"), caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
         assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
     }
 
@@ -442,7 +442,7 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_TRANSFER, caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertEquals(List.of(DOC_TYPE_CIR_TRANSFER), caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
         assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
     }
 
