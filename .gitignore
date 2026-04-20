@@ -25,3 +25,11 @@ src/main/resources/application.yaml
 /.aat-env
 /bin/ccd-config-PRL-local.xlsx
 /.mirrord/mirrord.json
+/node_modules/.yarn-integrity
+/node_modules/.yarn-state.yml
+/.yarnrc.yml
+/gradle-8.7-bin.zip
+/package.json
+/.yarn/releases/yarn-4.12.0.cjs
+/yarn.lock
+/.yarn/install-state.gz
