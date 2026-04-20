@@ -53,8 +53,8 @@ public class DocxCombineUtils {
             // Security validation - reject documents with potentially dangerous content
             validateDocumentSecurity(userDoc);
 
-            // Lock in alignment on header doc before merge to prevent user doc styles overriding it
-            lockInAlignment(headerDoc);
+            // Lock in formatting on header doc before merge to prevent user doc styles overriding it
+            lockInFormatting(headerDoc);
 
             // NiceXWPFDocument.merge() handles all the complexity:
             // - Remaps numbering IDs to avoid conflicts
@@ -155,30 +155,43 @@ public class DocxCombineUtils {
     }
 
     /**
-     * Locks in alignment on all paragraphs in the header document.
+     * Locks in formatting on all paragraphs in the header document.
      * This prevents user document styles from overriding the header's formatting.
      */
-    private static void lockInAlignment(NiceXWPFDocument doc) {
+    private static void lockInFormatting(NiceXWPFDocument doc) {
         for (XWPFParagraph para : doc.getParagraphs()) {
-            setDirectAlignment(para);
+            setDirectFormatting(para);
         }
         for (XWPFTable table : doc.getTables()) {
             for (XWPFTableRow row : table.getRows()) {
                 for (XWPFTableCell cell : row.getTableCells()) {
                     for (XWPFParagraph para : cell.getParagraphs()) {
-                        setDirectAlignment(para);
+                        setDirectFormatting(para);
                     }
                 }
             }
         }
     }
 
-    private static void setDirectAlignment(XWPFParagraph para) {
+    private static void setDirectFormatting(XWPFParagraph para) {
+        // Lock alignment
         ParagraphAlignment alignment = para.getAlignment();
         if (alignment == null) {
             alignment = ParagraphAlignment.LEFT;
         }
         para.setAlignment(alignment);
+
+        // Lock indentation - get current values and set them directly
+        // This makes them direct formatting rather than style-based
+        int indentLeft = para.getIndentationLeft();
+        int indentRight = para.getIndentationRight();
+        int indentFirstLine = para.getIndentationFirstLine();
+        int indentHanging = para.getIndentationHanging();
+
+        if (indentLeft != -1) para.setIndentationLeft(indentLeft);
+        if (indentRight != -1) para.setIndentationRight(indentRight);
+        if (indentFirstLine != -1) para.setIndentationFirstLine(indentFirstLine);
+        if (indentHanging != -1) para.setIndentationHanging(indentHanging);
     }
 
     /**
