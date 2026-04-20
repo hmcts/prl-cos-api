@@ -89,18 +89,14 @@ public class DocxCombineUtils {
             return;
         }
 
-        log.info("Copying {} header(s) from user document", sourceHeaders.size());
-
         try {
-            for (XWPFHeader sourceHeader : sourceHeaders) {
-                XWPFHeader targetHeader = target.createHeader(HeaderFooterType.DEFAULT);
-                // Copy each paragraph from source header to target header
-                for (XWPFParagraph sourcePara : sourceHeader.getParagraphs()) {
-                    XWPFParagraph targetPara = targetHeader.createParagraph();
-                    copyParagraph(sourcePara, targetPara);
-                }
-                log.info("Copied header to merged document");
+            XWPFHeader sourceHeader = sourceHeaders.getFirst();
+            XWPFHeader targetHeader = target.createHeader(HeaderFooterType.DEFAULT);
+            for (XWPFParagraph sourcePara : sourceHeader.getParagraphs()) {
+                XWPFParagraph targetPara = targetHeader.createParagraph();
+                copyParagraph(sourcePara, targetPara);
             }
+            log.info("Copied header to merged document");
         } catch (Exception e) {
             log.warn("Failed to copy headers: {}", e.getMessage());
         }
@@ -113,18 +109,14 @@ public class DocxCombineUtils {
             return;
         }
 
-        log.info("Copying {} footer(s) from user document", sourceFooters.size());
-
         try {
-            for (XWPFFooter sourceFooter : sourceFooters) {
-                XWPFFooter targetFooter = target.createFooter(HeaderFooterType.DEFAULT);
-                // Copy each paragraph from source footer to target footer
-                for (XWPFParagraph sourcePara : sourceFooter.getParagraphs()) {
-                    XWPFParagraph targetPara = targetFooter.createParagraph();
-                    copyParagraph(sourcePara, targetPara);
-                }
-                log.info("Copied footer to merged document");
+            XWPFFooter sourceFooter = sourceFooters.getFirst();
+            XWPFFooter targetFooter = target.createFooter(HeaderFooterType.DEFAULT);
+            for (XWPFParagraph sourcePara : sourceFooter.getParagraphs()) {
+                XWPFParagraph targetPara = targetFooter.createParagraph();
+                copyParagraph(sourcePara, targetPara);
             }
+            log.info("Copied footer to merged document");
         } catch (Exception e) {
             log.warn("Failed to copy footers: {}", e.getMessage());
         }
@@ -188,10 +180,18 @@ public class DocxCombineUtils {
         int indentFirstLine = para.getIndentationFirstLine();
         int indentHanging = para.getIndentationHanging();
 
-        if (indentLeft != -1) para.setIndentationLeft(indentLeft);
-        if (indentRight != -1) para.setIndentationRight(indentRight);
-        if (indentFirstLine != -1) para.setIndentationFirstLine(indentFirstLine);
-        if (indentHanging != -1) para.setIndentationHanging(indentHanging);
+        if (indentLeft != -1) {
+            para.setIndentationLeft(indentLeft);
+        }
+        if (indentRight != -1) {
+            para.setIndentationRight(indentRight);
+        }
+        if (indentFirstLine != -1) {
+            para.setIndentationFirstLine(indentFirstLine);
+        }
+        if (indentHanging != -1) {
+            para.setIndentationHanging(indentHanging);
+        }
     }
 
     /**

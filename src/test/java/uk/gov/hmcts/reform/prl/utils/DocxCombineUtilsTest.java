@@ -163,7 +163,7 @@ class DocxCombineUtilsTest {
     }
 
     @Test
-    void testCombineDocuments_locksInAlignment() throws IOException {
+    void testCombineDocuments_locksInFormatting() throws IOException {
         byte[] headerBytes = createDocxWithCenteredParagraph("Centered Header");
         byte[] userBytes = createDocxWithJustifiedParagraph("Justified user content");
 
@@ -179,7 +179,7 @@ class DocxCombineUtilsTest {
     }
 
     @Test
-    void testCombineDocuments_locksInTableCellAlignment() throws IOException {
+    void testCombineDocuments_locksInTableCellFormatting() throws IOException {
         byte[] headerBytes = createDocxWithTableAndAlignment();
         byte[] userBytes = createDocxWithJustifiedParagraph("Justified user content");
 
