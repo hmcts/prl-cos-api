@@ -79,6 +79,10 @@ public enum DocTypeOtherDocumentsEnum {
     section37Report("section37Report","Section 37 report"),
     @JsonProperty("16ariskAssessment")
     riskAssessment("16aRiskAssessment","16a risk assessment"),
+    @JsonProperty("cirTransferRequest")
+    cirTransferRequest("cirTransferRequest","CIR Transfer Request"),
+    @JsonProperty("cirExtensionRequest")
+    cirExtensionRequest("cirExtensionRequest","CIR Extension Request"),
     @JsonProperty("guardianReport")
     guardianReport("guardianReport","Guardian report"),
     @JsonProperty("specialGuardianshipReport")

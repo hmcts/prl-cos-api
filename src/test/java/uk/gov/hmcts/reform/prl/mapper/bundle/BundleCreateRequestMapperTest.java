@@ -77,7 +77,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
@@ -559,11 +558,6 @@ public class BundleCreateRequestMapperTest {
             .documentParty("Cafcass Cymru").categoryName(SECTION_7_REPORT).categoryId("section7Report").build();
         courtStaffDoc.add(element(section7Report));
 
-        QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
-            .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
-            .documentParty("Cafcass Cymru").categoryName(SIXTEENA_RISK_ASSESSMENT).categoryId("16aRiskAssessment").build();
-        courtStaffDoc.add(element(sixteenARiskAssessment));
-
         QuarantineLegalDoc guardianReport = QuarantineLegalDoc.builder()
             .guardianReportDocument(Document.builder().documentFileName("guardianReport").build())
             .documentParty("Cafcass Cymru").categoryName(GUARDIAN_REPORT).categoryId("guardianReport").build();
@@ -679,11 +673,13 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().build(),"sample.yaml");
         assertNotNull(bundleCreateRequest);
-        // Should not contain police disclosures or medical records
+        // Should not contain police disclosures, medical records, anyOtherDocuments, 16A risk assessments,
+        // CIR Transfer Requests, or CIR Extension Requests (AC6)
         assertThat(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
                        .map(Element::getValue)
                        .map(BundlingRequestDocument::getDocumentFileName)
-                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
+                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments",
+                                                   "16ARiskAssessment", "cirTransferRequest", "cirExtensionRequest")
                            .contains(fileName)).toList())
             .asInstanceOf(LIST).isEmpty();
     }
@@ -716,6 +712,22 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
+    }
+
+    @Test
+    public void testBundleCreateRequestMapperWhenReviewDocumentsIsNull() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .bundleInformation(BundlingInformation.builder().build())
+            .reviewDocuments(null)
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
+            c100CaseData, "createBundle", null, "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+        assertNotNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments());
     }
 
     @Test

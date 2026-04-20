@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -18,8 +19,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.CafcassReportAndGuardianEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document.DocumentBuilder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
@@ -37,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -44,12 +48,30 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 public class CafcassUploadDocService {
 
     public static final List<String> ALLOWED_FILE_TYPES = List.of("pdf", "docx");
+
+    static final String DOC_TYPE_CIR_TRANSFER = "cirTransferRequest";
+    static final String DOC_TYPE_CIR_EXTENSION = "cirExtensionRequest";
+    static final String DOC_TYPE_S16A_RISK_ASSESSMENT = "S_16A_Risk_Assessment";
+
+    public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
+        DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
+    );
+
+    // These Cafcass England doc types must always be prefixed with Confidential_
+    // regardless of the admin's restricted decision see https://tools.hmcts.net/jira/browse/FPVTL-2412
+    public static final List<String> ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES = List.of(
+        DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
+    );
+    public static final String MANAGE_DOC_UPLOADED_CATEGORY = "manageDocUploadedCategory";
+
     public static final List<String> ALLOWED_TYPE_OF_DOCS = List.of(
-        "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review", "CMO_report",
+        "16_4_Report", "CR_1", "CR_2", "CIR_Part1", "CIR_Part2", "CIR_Review",
+        DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION,
+        "CMO_report",
         "Contact_Centre_Recordings", "Correspondence", "Direct_work", "Enforcement_report",
         "FAO_Report", "FAO_Workplan", "Letter_from_Child", "Other_Non_Section_7_Report",
         "Position_Statement", "Positive_Parenting_Programme_Report", "Re_W_Report",
-        "S_11H_Monitoring", "S_16A_Risk_Assessment", "Safeguarding_Letter",
+        "S_11H_Monitoring", DOC_TYPE_S16A_RISK_ASSESSMENT, "Safeguarding_Letter",
         "Safeguarding_Letter_Returner", "Safeguarding_Letter_Shorter_Template",
         "Safeguarding_Letter_Update", "Second_Gatekeeping_Safeguarding_Letter",
         "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report"
@@ -65,6 +87,8 @@ public class CafcassUploadDocService {
 
     public void uploadDocument(String authorisation, MultipartFile document,
                                String typeOfDocument, String caseId) {
+        log.info("Cafcass document upload request received for caseId: {}, typeOfDocument: {}", caseId,
+                 typeOfDocument);
         if (isValidDocument(document, typeOfDocument)) {
             CaseDetails caseDetails = checkIfCasePresent(caseId, authorisation);
             if (caseDetails == null) {
@@ -105,7 +129,25 @@ public class CafcassUploadDocService {
             quarantineLegalDoc
         );
 
-        caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
+            boolean isDuplicate = hasCafcassQuarantineDocOfSameCategory(
+                startAllTabsUpdateDataContent.caseData(),
+                quarantineLegalDoc.getCategoryId()
+            );
+            log.info("Cafcass urgent doc upload caseId={} type={} categoryId={} isDuplicate={}",
+                     caseId, typeOfDocument, quarantineLegalDoc.getCategoryId(), isDuplicate);
+            if (!isDuplicate) {
+                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
+                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY,
+                                    List.of(element(quarantineLegalDoc.getCategoryId()))
+                );
+            } else {
+                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);
+            }
+        } else {
+            caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+        }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
             quarantineLegalDoc,
@@ -123,6 +165,15 @@ public class CafcassUploadDocService {
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
+    }
+
+    private boolean hasCafcassQuarantineDocOfSameCategory(CaseData caseData, String categoryId) {
+        List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
+            ? caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
+            : null;
+        return !CollectionUtils.isEmpty(quarantineDocs) && quarantineDocs.stream()
+            .map(Element::getValue)
+            .anyMatch(doc -> categoryId.equals(doc.getCategoryId()));
     }
 
     private QuarantineLegalDoc createQuarantineDocFromCafcassUploadedDoc(String typeOfDocument,
@@ -190,6 +241,8 @@ public class CafcassUploadDocService {
         map.put("CIR_Part1", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Part2", CafcassReportAndGuardianEnum.section7Report);
         map.put("CIR_Review", CafcassReportAndGuardianEnum.section7Report);
+        map.put(DOC_TYPE_CIR_TRANSFER, CafcassReportAndGuardianEnum.cirTransferRequest);
+        map.put(DOC_TYPE_CIR_EXTENSION, CafcassReportAndGuardianEnum.cirExtensionRequest);
         map.put("CMO_report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Contact_Centre_Recordings", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Correspondence", CafcassReportAndGuardianEnum.otherDocs);
@@ -203,7 +256,7 @@ public class CafcassUploadDocService {
         map.put("Positive_Parenting_Programme_Report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("Re_W_Report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("S_11H_Monitoring", CafcassReportAndGuardianEnum.otherDocs);
-        map.put("S_16A_Risk_Assessment", CafcassReportAndGuardianEnum.riskAssessment);
+        map.put(DOC_TYPE_S16A_RISK_ASSESSMENT, CafcassReportAndGuardianEnum.riskAssessment);
         map.put("Safeguarding_Letter", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Returner", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Shorter_Template", CafcassReportAndGuardianEnum.safeguardingLetter);
