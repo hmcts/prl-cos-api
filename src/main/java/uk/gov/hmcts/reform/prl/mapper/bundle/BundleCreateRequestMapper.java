@@ -684,16 +684,6 @@ public class BundleCreateRequestMapper {
             .documentLink(doc.getSection47LaDocument())
             .documentFileName(doc.getSection47LaDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.laSectionSection47EnquiryReport).build() : null);
-        bundleMap.put(CIR_EXTENSION_REQUEST_LA, Objects.nonNull(doc.getCirExtensionRequestLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCirExtensionRequestLaDocument())
-            .documentFileName(doc.getCirExtensionRequestLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionCirExtensionRequestReport).build() : null);
-
-        bundleMap.put(CIR_TRANSFER_REQUEST_LA, Objects.nonNull(doc.getCirTransferRequestLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCirTransferRequestLaDocument())
-            .documentFileName(doc.getCirTransferRequestLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionCirTransferRequestReport).build() : null);
-
 
         bundleMap.put(
             LA_OTHER_DOCS,
