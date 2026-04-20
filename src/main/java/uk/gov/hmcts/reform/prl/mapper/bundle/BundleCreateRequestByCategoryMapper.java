@@ -38,6 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.reverse;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -86,11 +87,13 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                 FilterProperties filterProperties = document.getFilters().getFirst();
                 if (filterProperties != null && filterProperties.getCategory() != null) {
                     if ("/data/orders".equals(document.getProperty())) {
-                        ordersFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                        List<BundlingRequestDocument> orders = mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
-                        )));
+                        );
+                        reverse(orders);
+                        ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
                     } else if ("/data/applications".equals(document.getProperty())) {
                         applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),

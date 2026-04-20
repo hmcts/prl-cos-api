@@ -87,11 +87,13 @@ bundle:
           filters:
             - property: /documentGroup
               value: respondentPreviousOrdersSubmittedWithApplication
+              category: ordersFromOtherProceedings
         - type: documentSet
           property: /data/orders
           filters:
             - property: /documentGroup
               value: ordersSubmittedWithApplication
+              category: approvedOrders
         - type: documentSet
           property: /data/allOtherDocuments
           filters:
@@ -186,6 +188,42 @@ bundle:
             - property: /documentGroup
               value: laSection37Report
               category: sec37Report
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: laSectionChildImpactReport1Report
+              category: childImpactReport1La
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: laSectionChildImpactReport2Report
+              category: childImpactReport2La
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: laSectionSection7ReportReport
+              category: section7ReportLa
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: laSectionSection7AddendumReportReport
+              category: section7AddendumReportLa
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: laSectionLocalAuthorityInvolvementReport
+              category: localAuthorityInvolvementLa
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: laSectionSection47EnquiryReport
+              category: section47La
         - type: documentSet
           property: /data/allOtherDocuments
           filters:
