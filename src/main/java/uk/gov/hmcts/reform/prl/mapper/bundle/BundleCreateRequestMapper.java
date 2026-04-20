@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
@@ -91,12 +92,10 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class BundleCreateRequestMapper {
+@ConditionalOnProperty(prefix = "feature.toggle", name = "bundleByCategoryEnabled", havingValue = "false", matchIfMissing = true)
+public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
 
-    public static final String REDACTED_DOCUMENT_URL = "documents/00000000-0000-0000-0000-000000000000";
-    public static final String REDACTED_DOCUMENT_URL_BINARY = "documents/00000000-0000-0000-0000-000000000000/binary";
-    public static final String REDACTED_DOCUMENT_FILE_NAME = "*redacted*";
-
+    @Override
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
