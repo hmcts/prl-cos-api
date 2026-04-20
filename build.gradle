@@ -54,7 +54,7 @@ def versions = [
   springSecurityCrypto         : '6.5.9',
   springSecurityRsa            : '1.1.5',
   springBoot                   : '3.5.13',
-  springCloud                  : '4.3.0',
+  springCloud                  : '4.3.2',
   tomcat                       : '10.1.52',
   unirest                      : '1.4.9',
   ccdCaseDocumentAmClient      : '1.59.2',
@@ -339,7 +339,7 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.9'
 //  // CVE-2021-22112 - Privilege Escalation
   implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.9'
-  implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.0')
+  implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.2')
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
       exclude group: 'io.reactivex', module: 'rxnetty'
