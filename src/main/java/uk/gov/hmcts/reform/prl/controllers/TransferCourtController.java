@@ -176,15 +176,9 @@ public class TransferCourtController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-            Court closestChildArrangementsCourt = null;
+            Court closestChildArrangementsCourt;
             if (featureToggleService.isOsCourtLookupFeatureEnabled()) {
-                ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(caseData);
-                if (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null) {
-                    closestChildArrangementsCourt = courtCourtVenueMap.getRight();
-                }
-                if (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null) {
-                    caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
-                }
+                closestChildArrangementsCourt = getClosestChildArrangementsCourt(caseData, caseDataUpdated);
             } else {
                 closestChildArrangementsCourt = courtLocatorService.getNearestFamilyCourt(caseData);
             }
@@ -241,6 +235,18 @@ public class TransferCourtController {
             .build();
     }
 
+    private Court getClosestChildArrangementsCourt(CaseData caseData, Map<String, Object> caseDataUpdated) throws NotFoundException {
+        Court closestChildArrangementsCourt = null;
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(
+            caseData);
+        if (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null) {
+            closestChildArrangementsCourt = courtCourtVenueMap.getRight();
+        }
+        if (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null) {
+            caseDataUpdated.put(COURT_ID_FIELD, courtCourtVenueMap.getLeft().getCourtEpimmsId());
+        }
+        return closestChildArrangementsCourt;
+    }
 
 }
 
