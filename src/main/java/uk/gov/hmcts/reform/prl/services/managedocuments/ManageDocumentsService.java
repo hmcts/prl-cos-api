@@ -363,28 +363,25 @@ public class ManageDocumentsService {
                 .restrictedDetails(null)
                 .build();
 
-            // These Cafcass England doc types always get Confidential_ filename prefix even when not restricted
-            log.info("FPVTL-2412 always-confidential check: uploaderRole={}, documentType={}",
-                     quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc.getDocumentType());
-            if (CAFCASS.equals(quarantineLegalDoc.getUploaderRole())
-                && quarantineLegalDoc.getDocumentType() != null
-                && CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES.contains(quarantineLegalDoc.getDocumentType())) {
-                log.info("FPVTL-2412 applying Confidential_ prefix for docType={}", quarantineLegalDoc.getDocumentType());
-                Document originalDoc = getQuarantineDocumentForUploader(CAFCASS, quarantineLegalDoc);
-                if (originalDoc != null) {
-                    log.info("FPVTL-2412 renaming document: {}", originalDoc.getDocumentFileName());
-                    Document renamedDoc = renameAndReuploadFileToBeConfidential(originalDoc);
-                    log.info("FPVTL-2412 renamed document: {}", renamedDoc.getDocumentFileName());
-                    quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-                        .cafcassQuarantineDocument(renamedDoc)
-                        .build();
-                } else {
-                    log.warn("FPVTL-2412 originalDoc is null for uploaderRole={}, skipping rename", quarantineLegalDoc.getUploaderRole());
+            // this renaming was done for a requirement in FPVTL-2412 even when the document is marked as 'No'
+            // during review by admin
+            List<String> confidentialListForPathFinder = new ArrayList<>();
+            confidentialListForPathFinder.addAll(CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES);
+            confidentialListForPathFinder.add(CIR_EXTENSION_REQUEST_LA);
+            confidentialListForPathFinder.add(CIR_TRANSFER_REQUEST_LA);
+
+            if (CAFCASS.equals(quarantineLegalDoc.getUploaderRole()) || LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
+                Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
+                if (confidentialListForPathFinder.contains(quarantineLegalDoc.getDocumentType())) {
+                    Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
+                    quarantineLegalDoc = setQuarantineDocumentForUploader(
+                        ManageDocuments.builder()
+                            .document(updatedConfidentialDocument)
+                            .build(),
+                        quarantineLegalDoc.getUploaderRole(),
+                        quarantineLegalDoc
+                    );
                 }
-            } else {
-                log.info("FPVTL-2412 skipping always-confidential rename: uploaderRole={}, documentType={}, alwaysConfidentialTypes={}",
-                         quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc.getDocumentType(),
-                         CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES);
             }
 
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
