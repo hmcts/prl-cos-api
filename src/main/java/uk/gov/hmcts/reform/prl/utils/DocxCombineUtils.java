@@ -53,6 +53,9 @@ public class DocxCombineUtils {
             // Security validation - reject documents with potentially dangerous content
             validateDocumentSecurity(userDoc);
 
+            // Flatten SDT content controls to preserve form field values during merge
+            flattenSdtElements(userDoc);
+
             // Lock in formatting on header doc before merge to prevent user doc styles overriding it
             lockInFormatting(headerDoc);
 
@@ -239,5 +242,55 @@ public class DocxCombineUtils {
             log.error("Error during security validation: {}", e.getMessage());
             throw new IOException("Failed to validate document security", e);
         }
+    }
+
+    /**
+     * Flattens SDT (Structured Document Tag) content controls by replacing them with their content.
+     * Word form fields use SDT elements which don't survive the merge process well.
+     * This extracts the content and removes the SDT wrapper.
+     */
+    private static void flattenSdtElements(NiceXWPFDocument doc) {
+        int count = 0;
+        // Handle inline SDTs in paragraphs
+        for (XWPFParagraph para : doc.getParagraphs()) {
+            count += flattenInlineSdts(para);
+        }
+        // Handle SDTs in table cells
+        for (XWPFTable table : doc.getTables()) {
+            for (XWPFTableRow row : table.getRows()) {
+                for (XWPFTableCell cell : row.getTableCells()) {
+                    for (XWPFParagraph para : cell.getParagraphs()) {
+                        count += flattenInlineSdts(para);
+                    }
+                }
+            }
+        }
+        if (count > 0) {
+            log.info("Flattened {} inline SDT elements", count);
+        }
+    }
+
+    private static int flattenInlineSdts(XWPFParagraph para) {
+        try {
+            String xml = para.getCTP().xmlText();
+            if (!xml.contains("<w:sdt")) {
+                return 0;
+            }
+            // Replace SDT wrappers with just their content
+            // Pattern: <w:sdt>...<w:sdtContent>CONTENT</w:sdtContent></w:sdt> -> CONTENT
+            String flattened = xml.replaceAll(
+                "<w:sdt[^>]*>.*?<w:sdtContent[^>]*>(.*?)</w:sdtContent>\\s*</w:sdt>",
+                "$1"
+            );
+            if (!flattened.equals(xml)) {
+                para.getCTP().set(
+                    org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP.Factory.parse(flattened)
+                );
+                return 1;
+            }
+        } catch (Exception e) {
+            log.debug("Could not flatten SDTs in paragraph: {}", e.getMessage());
+        }
+        return 0;
     }
 }
