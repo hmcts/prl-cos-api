@@ -3543,7 +3543,8 @@ public class ManageDocumentsServiceTest {
             "LOCAL_AUTHORITY"
         );
 
-        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("localAuthorityUploadDocListDocTab");
+        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTab
+            = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("localAuthorityUploadDocListDocTab");
         assertNotNull(localAuthorityUploadDocListDocTab);
         assertEquals(1,localAuthorityUploadDocListDocTab.size());
 
