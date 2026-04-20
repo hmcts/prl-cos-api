@@ -40,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -138,7 +139,7 @@ public class CafcassUploadDocService {
             if (!isDuplicate) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
                 caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY,
-                                    Collections.singletonList(quarantineLegalDoc.getCategoryId())
+                                    List.of(element(quarantineLegalDoc.getCategoryId()))
                 );
             } else {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
