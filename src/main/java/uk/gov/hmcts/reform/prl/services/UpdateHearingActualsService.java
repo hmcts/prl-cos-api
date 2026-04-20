@@ -202,10 +202,25 @@ public class UpdateHearingActualsService {
 
     private Hearings fetchHearingsForCase(String caseId) {
         try {
-            return hearingApiClient.getHearingDetails(
+            log.info("Request Order: calling HMC getHearingDetails for caseId={}", caseId);
+            Hearings hearings = hearingApiClient.getHearingDetails(
                 systemUserService.getSysUserToken(), authTokenGenerator.generate(), caseId);
+            if (hearings == null) {
+                log.info("Request Order: HMC returned null for caseId={}", caseId);
+            } else {
+                log.info("Request Order: HMC response for caseId={}: hmctsServiceCode={}, caseRef={}, caseHearings={}",
+                         caseId, hearings.getHmctsServiceCode(), hearings.getCaseRef(),
+                         hearings.getCaseHearings() == null ? "null" : hearings.getCaseHearings().size() + " entries");
+                if (hearings.getCaseHearings() != null) {
+                    hearings.getCaseHearings().forEach(h ->
+                        log.info("Request Order: HMC hearing for caseId={}: hearingID={}, hmcStatus={}, scheduleDays={}",
+                                 caseId, h.getHearingID(), h.getHmcStatus(),
+                                 h.getHearingDaySchedule() == null ? "null" : h.getHearingDaySchedule().size()));
+                }
+            }
+            return hearings;
         } catch (Exception e) {
-            log.error("Request Order: failed to fetch hearings for caseId={}: {}", caseId, e.getMessage());
+            log.error("Request Order: failed to fetch hearings for caseId={}: {}", caseId, e.getMessage(), e);
             return null;
         }
     }
