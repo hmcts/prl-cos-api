@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -101,7 +102,7 @@ public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         }
 
-        Optional<YesOrNo> isLivingInRefuge = ofNullable(applicant.getLiveInRefuge());
+        Optional<YesNoIDontKnowV2> isLivingInRefuge = ofNullable(applicant.getLiveInRefuge());
         fields.add(isLivingInRefuge);
 
         validateAddress(applicant, fields);

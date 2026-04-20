@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -256,8 +257,8 @@ public class ConfidentialityTabService {
         return new ConfidentialFields(addressSet, emailSet, phoneSet);
     }
 
-    private boolean findIsConfidentialField(YesOrNo liveInRefuge, YesOrNo isFieldConfidential) {
-        if ((YesOrNo.Yes).equals(liveInRefuge)) {
+    private boolean findIsConfidentialField(YesNoIDontKnowV2 liveInRefuge, YesOrNo isFieldConfidential) {
+        if (YesNoIDontKnowV2.Yes.equals(liveInRefuge)) {
             return true;
         } else {
             return (YesOrNo.Yes).equals(isFieldConfidential);

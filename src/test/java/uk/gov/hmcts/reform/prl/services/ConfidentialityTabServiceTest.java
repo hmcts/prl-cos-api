@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -65,8 +66,8 @@ class ConfidentialityTabServiceTest {
 
     private static final YesOrNo ADDRESS_KNOWN = Yes;
     private static final YesOrNo ADDRESS_NOT_KNOWN = No;
-    private static final YesOrNo LIVING_IN_REFUGE = Yes;
-    private static final YesOrNo NOT_LIVING_IN_REFUGE = No;
+    private static final YesNoIDontKnowV2 LIVING_IN_REFUGE = YesNoIDontKnowV2.Yes;
+    private static final YesNoIDontKnowV2 NOT_LIVING_IN_REFUGE = YesNoIDontKnowV2.No;
     private static final YesOrNo KEEP_ADDRESS_CONFIDENTIAL = Yes;
     private static final YesOrNo DONT_KEEP_ADDRESS_CONFIDENTIAL = No;
     private static final YesOrNo KEEP_EMAIL_CONFIDENTIAL = Yes;
@@ -74,7 +75,8 @@ class ConfidentialityTabServiceTest {
     private static final YesOrNo KEEP_PHONE_CONFIDENTIAL = Yes;
     private static final YesOrNo DONT_KEEP_PHONE_CONFIDENTIAL = No;
 
-    record TestCase(YesOrNo addressKnown, YesOrNo liveInRefuge, YesOrNo addressConfidential, YesOrNo emailConfidential, YesOrNo phoneConfidential,
+    record TestCase(YesOrNo addressKnown, YesNoIDontKnowV2 liveInRefuge, YesOrNo addressConfidential,
+                    YesOrNo emailConfidential, YesOrNo phoneConfidential,
                     boolean expectedAddressConfidential, boolean expectedEmailConfidential, boolean expectedPhoneConfidential) {
     }
 
@@ -113,7 +115,7 @@ class ConfidentialityTabServiceTest {
             .isCurrentAddressKnown(Yes)
             .canYouProvidePhoneNumber(Yes)
             .isEmailAddressConfidential(Yes)
-            .liveInRefuge(Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .build();
 
         refugePartyDetails2 = PartyDetails.builder()
@@ -130,7 +132,7 @@ class ConfidentialityTabServiceTest {
             .isCurrentAddressKnown(Yes)
             .canYouProvidePhoneNumber(Yes)
             .phoneNumber("12345678900")
-            .liveInRefuge(Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .email("abc2@xyz.com")
             .build();
     }

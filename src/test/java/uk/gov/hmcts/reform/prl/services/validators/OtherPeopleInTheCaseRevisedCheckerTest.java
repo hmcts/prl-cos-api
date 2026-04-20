@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -102,7 +103,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
                          .addressLine1("add1")
                          .postCode("postcode")
                          .build())
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .refugeConfidentialityC8Form(Document.builder().build())
             .isAddressConfidential(YesOrNo.Yes)
             .isAtAddressLessThan5Years(YesOrNo.No)
@@ -243,7 +244,7 @@ public class OtherPeopleInTheCaseRevisedCheckerTest {
             .placeOfBirth("London")
             .isCurrentAddressKnown(YesOrNo.Yes)
             .isAtAddressLessThan5Years(YesOrNo.No)
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .address(Address.builder()
                          .addressLine1("add1")
                          .postCode("postcode")

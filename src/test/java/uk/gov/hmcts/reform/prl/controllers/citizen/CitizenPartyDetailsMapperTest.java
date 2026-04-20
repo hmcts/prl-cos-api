@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.CitizenUpdatePartyDataContent
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenPartyDetailsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CitizenRespondentAohElementsMapper;
@@ -678,7 +679,7 @@ class CitizenPartyDetailsMapperTest {
     void testBuildUpdatedCaseDataOtherPersonConfidentiality(String isAddressConfidentialStr,
                                                             String liveInRefugeStr, String testName) throws IOException {
         YesOrNo isAddressConfidential = YesOrNo.valueOf(isAddressConfidentialStr);
-        YesOrNo liveInRefuge = YesOrNo.valueOf(liveInRefugeStr);
+        YesNoIDontKnowV2 liveInRefuge = YesNoIDontKnowV2.valueOf(liveInRefugeStr);
 
         c100RebuildData = C100RebuildData.builder()
             .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
