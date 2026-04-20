@@ -298,6 +298,17 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+bankHolidays:
+  api:
+    url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
+
+# FPVTL-2408/2409 - Request Order task re-trigger cadence in working days.
+# Override per env (e.g. 0 in preview for fast E2E testing).
+request-order-task:
+  cadence-working-days:
+    c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
+    fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
+
 fees-register:
   api:
     url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}

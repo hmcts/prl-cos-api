@@ -5,9 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -114,7 +113,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor(force = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @SuperBuilder(toBuilder = true)
 public class CaseData extends BaseCaseData implements MappableObject {
@@ -714,7 +713,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private Flags caseFlags;
 
     @JsonUnwrapped
-    @Builder.Default
     private UploadAdditionalApplicationData uploadAdditionalApplicationData;
     private final List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle;
     private final DraftOrderOptionsEnum draftOrderOptions;
@@ -801,6 +799,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     @JsonUnwrapped
     private FM5ReminderNotificationDetails fm5ReminderNotificationDetails;
+
+    private List<Element<RequestOrderHearingTracking>> requestOrderTaskTrackingByHearing;
 
     @JsonUnwrapped
     private RemoveDraftOrderFields removeDraftOrderFields;
