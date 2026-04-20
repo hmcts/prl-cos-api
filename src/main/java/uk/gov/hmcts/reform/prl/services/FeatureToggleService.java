@@ -55,4 +55,12 @@ public class FeatureToggleService {
     public boolean isOsCourtLookupFeatureEnabled() {
         return isFeatureEnabled(IS_OS_COURT_LOOKUP_ENABLED);
     }
+
+    public boolean isAwaitingInformationEnabled() {
+        return isFeatureEnabled(Features.IS_AWAITING_INFORMATION_ENABLED);
+    }
+
+    public boolean isExitAwaitingInformationEnabled() {
+        return isFeatureEnabled(Features.IS_EXIT_AWAITING_INFORMATION_ENABLED);
+    }
 }

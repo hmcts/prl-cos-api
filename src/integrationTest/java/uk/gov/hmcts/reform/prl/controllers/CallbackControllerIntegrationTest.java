@@ -609,7 +609,7 @@ public class CallbackControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.isAddCaseNumberAdded").isEmpty())
+            .andExpect(jsonPath("$.data.isAddCaseNumberAdded").doesNotExist())
             .andReturn();
     }
 
