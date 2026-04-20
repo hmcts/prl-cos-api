@@ -457,6 +457,12 @@ public class CafcassCaseDataService {
                 caseData.getCafcassUploadDocListDocTab()
             );
         }
+        if (CollectionUtils.isNotEmpty(caseData.getLocalAuthorityUploadDocListDocTab())) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                caseData.getLocalAuthorityUploadDocListDocTab()
+            );
+        }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
