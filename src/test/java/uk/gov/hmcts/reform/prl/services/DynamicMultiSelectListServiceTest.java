@@ -155,7 +155,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOrderDetailsAsNull() throws Exception {
+    public void testOrderDetailsWhenOtherDetailsIsEmpty() throws Exception {
         caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                             .otherDetails(OtherOrderDetails.builder().build())
                                                             .build()).build())).build();
@@ -165,7 +165,7 @@ public class DynamicMultiSelectListServiceTest {
     }
 
     @Test
-    public void testOrderDetailsOtherDetailsAsNull() throws Exception {
+    public void testOrderDetailsWhenOrderServedDateIsEmpty() throws Exception {
         caseData = caseData.toBuilder().orderCollection(List.of(Element.<OrderDetails>builder()
                                                                     .value(OrderDetails.builder()
                                                                                .otherDetails(OtherOrderDetails.builder()
@@ -203,6 +203,31 @@ public class DynamicMultiSelectListServiceTest {
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
             .getOtherPeopleMultiSelectList(caseData);
         assertNotNull(listItems);
+    }
+
+    @Test
+    public void testOtherPeopleDetailsWithTaskListVersionV2() {
+        List<Element<PartyDetails>> otherPartyRevised = List.of(
+            Element.<PartyDetails>builder()
+                .id(UUID.fromString(TEST_UUID))
+                .value(PartyDetails.builder()
+                    .firstName("OtherFirst")
+                    .lastName("OtherLast")
+                    .build())
+                .build()
+        );
+
+        CaseData caseDataV2 = caseData.toBuilder()
+            .taskListVersion("v2")
+            .otherPartyInTheCaseRevised(otherPartyRevised)
+            .build();
+
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getOtherPeopleMultiSelectList(caseDataV2);
+
+        assertNotNull(listItems);
+        assertEquals(1, listItems.size());
+        assertEquals("OtherFirst OtherLast", listItems.get(0).getLabel());
     }
 
     @Test
@@ -249,6 +274,26 @@ public class DynamicMultiSelectListServiceTest {
                                                      .value(List.of(listElement, listElement))
                                                      .build());
         assertEquals("Child, Child", str);
+    }
+
+    @Test
+    public void testGetStringFromDynMulSelectList_returnsJoinedLabelsWhenPresent() {
+        DynamicMultiSelectList list = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code("1")
+                    .label("Alice Smith (Applicant 1)")
+                    .build(),
+                DynamicMultiselectListElement.builder()
+                    .code("2")
+                    .label("Bob Jones (Applicant 2)")
+                    .build()
+            ))
+            .build();
+
+        String result = dynamicMultiSelectListService.getStringFromDynamicMultiSelectList(list);
+
+        assertEquals("Alice Smith, Bob Jones", result);
     }
 
     @Test
@@ -311,6 +356,44 @@ public class DynamicMultiSelectListServiceTest {
         List<Element<Child>> str = dynamicMultiSelectListService
             .getChildrenForDocmosis(caseDataC100);
         assertNotNull(str);
+    }
+
+    @Test
+    public void testGetChildrenForDocmosisC100WithTaskListVersionV2() {
+        UUID childId = UUID.fromString(TEST_UUID);
+
+        List<Element<ChildDetailsRevised>> newChildDetails = List.of(
+            Element.<ChildDetailsRevised>builder()
+                .id(childId)
+                .value(ChildDetailsRevised.builder()
+                    .firstName("ChildFirst")
+                    .lastName("ChildLast")
+                    .build())
+                .build()
+        );
+
+        CaseData caseDataV2 = caseDataC100.toBuilder()
+            .taskListVersion("v2")
+            .newChildDetails(newChildDetails)
+            .manageOrders(ManageOrders.builder()
+                .isTheOrderAboutAllChildren(YesOrNo.No)
+                .isTheOrderAboutChildren(Yes)
+                .childOption(DynamicMultiSelectList.builder()
+                    .value(List.of(DynamicMultiselectListElement.builder()
+                        .code(childId.toString())
+                        .label("ChildFirst ChildLast")
+                        .build()))
+                    .build())
+                .build())
+            .build();
+
+        List<Element<Child>> children = dynamicMultiSelectListService
+            .getChildrenForDocmosis(caseDataV2);
+
+        assertNotNull(children);
+        assertEquals(1, children.size());
+        assertEquals("ChildFirst", children.get(0).getValue().getFirstName());
+        assertEquals("ChildLast", children.get(0).getValue().getLastName());
     }
 
 
@@ -512,5 +595,49 @@ public class DynamicMultiSelectListServiceTest {
     @Test
     public void testGetDynamicMultiSellectEMptyList() {
         assertEquals(1, dynamicMultiSelectListService.getEmptyDynMultiSelectList().getListItems().size());
+    }
+
+    @Test
+    public void testOrderDetailsWhenOtherDetailsIsNull() throws Exception {
+        caseData = caseData.toBuilder()
+            .orderCollection(List.of(
+                Element.<OrderDetails>builder()
+                    .id(UUID.fromString(TEST_UUID))
+                    .value(OrderDetails.builder()
+                               .orderTypeId("test")
+                               .otherDetails(null)
+                               .build())
+                    .build()
+            ))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = dynamicMultiSelectListService
+            .getOrdersAsDynamicMultiSelectList(caseData);
+
+        assertNotNull(dynamicMultiSelectList);
+    }
+
+    @Test
+    public void testOrderDetailsWhenOrderCollectionIsEmpty() throws Exception {
+        caseData = caseData.toBuilder()
+            .orderCollection(List.of())
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList =
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData);
+
+        assertNotNull(dynamicMultiSelectList);
+    }
+
+    @Test
+    public void testOrderDetailsWhenOrderCollectionIsNull() throws Exception {
+        caseData = caseData.toBuilder()
+            .orderCollection(null)
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList =
+            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData);
+
+        assertNotNull(dynamicMultiSelectList);
     }
 }

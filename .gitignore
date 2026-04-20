@@ -33,3 +33,17 @@ src/main/resources/application.yaml
 /package.json
 /yarn.lock
 /.yarn/releases/yarn-4.12.0.cjs
+/.aat-env*
+/target/poitl-output/*
+
+.aat-env*
+.devcontainer*
+.idea/
+*.iml
+.DS_Store
+build/
+out/
+target/
+
+.aat-env*
+.devcontainer/

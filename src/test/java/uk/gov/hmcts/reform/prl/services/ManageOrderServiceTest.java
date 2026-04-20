@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -102,6 +104,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabTo
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.Appointment;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -127,10 +130,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -150,6 +155,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
@@ -245,6 +251,9 @@ class ManageOrderServiceTest {
     private FinalisationDetailsService finalisationDetailsService;
     @Mock
     private RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
+
+    @Mock
+    private CustomOrderService customOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -2924,6 +2933,152 @@ class ManageOrderServiceTest {
         assertThrows(FeignException.class, () -> manageOrderService.getLoggedInUserType(auth));
     }
 
+    @Test
+    void testGetLoggedInUserTypeDetailsReturnsJudgeNotLegalAdviserForJudgeAmRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("judge");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.JUDGE.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsReturnsJudgeAndIsLegalAdviserForLegalAdviserAmRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("tribunal-caseworker");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.JUDGE.name(), result.userType());
+        assertTrue(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsReturnsCourtAdminForCourtAdminAmRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("hearing-centre-admin");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.COURT_ADMIN.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForJudgeRole() {
+        // Empty AM roles - should fall back to IDAM
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.JUDGE.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.JUDGE.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForLegalAdviserRole() {
+        // Empty AM roles - should fall back to IDAM
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.JUDGE.name(), result.userType());
+        assertTrue(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForCourtAdminRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.COURT_ADMIN.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForSolicitorRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.SOLICITOR.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.SOLICITOR.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsFallsBackToIdamForCitizenRole() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of(Roles.CITIZEN.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals(UserRoles.CITIZEN.name(), result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
+    @Test
+    void testGetLoggedInUserTypeDetailsReturnsEmptyWhenNoRoleMatches() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .id("123")
+            .roles(List.of("unknown-role")).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
+            .thenReturn(roleAssignmentServiceResponse);
+
+        ManageOrderService.LoggedInUserTypeDetails result = manageOrderService.getLoggedInUserTypeDetails("test");
+
+        assertEquals("", result.userType());
+        assertFalse(result.isLegalAdviser());
+    }
+
     private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
@@ -3994,7 +4149,9 @@ class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID());
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, "eventId", UUID.randomUUID(), caseDataMap);
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -4018,7 +4175,9 @@ class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID());
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, "eventId", UUID.randomUUID(), caseDataMap);
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
@@ -4043,7 +4202,9 @@ class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId", UUID.randomUUID());
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask(
+            "test token", caseData, "eventId", UUID.randomUUID(), caseDataMap);
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -6122,10 +6283,11 @@ class ManageOrderServiceTest {
             .manageOrders(manageOrders1)
             .build();
 
-        when(hearingService.createAutomatedHearing(authToken, null))
+        List<Element<HearingData>> hearingsList = manageOrders1.getOrdersHearingDetails();
+        when(hearingService.createAutomatedHearing(eq(authToken), any()))
             .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
         Exception exception = assertThrows(ManageOrderRuntimeException.class, () -> {
-            manageOrderService.createAutomatedHearingManagement(authToken, caseData, null);
+            manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingsList);
         });
         String expectedMessage = "Invalid Json";
         assertTrue(expectedMessage.contains(exception.getMessage()));
@@ -6892,5 +7054,1084 @@ class ManageOrderServiceTest {
         assertNotNull(updated.getLocalAuthoritySolicitorOrganisationName());
         assertEquals(YesOrNo.Yes, updated.getIsLocalAuthorityInvolvedInCase());
 
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldPopulateDateAndJudgeForNonJudgeUser() {
+        // Given - a hearing is selected and user is NOT a judge (court admin)
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("dateOrderMade", LocalDate.now());
+        // Put hearingsType in caseDataUpdated (as it would be in mid-event callback)
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - date should be populated from hearing
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Judge Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    private Map<String, Object> buildHearingsTypeMap(String label) {
+        Map<String, Object> valueMap = new HashMap<>();
+        valueMap.put("code", label);
+        valueMap.put("label", label);
+        Map<String, Object> hearingsTypeMap = new HashMap<>();
+        hearingsTypeMap.put("value", valueMap);
+        return hearingsTypeMap;
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldPreserveJudgeNameWhenJudgeLoggedIn() {
+        // Given - a hearing is selected and user IS a judge
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Different Judge")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-judge")).build());
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("dateOrderMade", LocalDate.now());
+        caseDataUpdated.put("judgeOrMagistratesLastName", "Logged In Judge Name");
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - date should be from hearing, but judge name preserved
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Logged In Judge Name", caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldHandleHmcApiFailureSilently() {
+        // Given - HMC API fails
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        when(hearingService.getHearings(anyString(), anyString())).thenThrow(new RuntimeException("HMC unavailable"));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - original date preserved, no exception thrown
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldPopulateJudgeTitleFromRefData() {
+        // Given - hearing selected with judge who has District Judge appointment
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        final String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+        JudicialUsersApiResponse judgeResponse = JudicialUsersApiResponse.builder()
+            .surname("Smith")
+            .fullName("John Smith")
+            .appointments(List.of(Appointment.builder().appointment("District Judge").build()))
+            .build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+        when(refDataUserService.getAllJudicialUserDetails(any(JudicialUsersApiRequest.class)))
+            .thenReturn(List.of(judgeResponse));
+
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
+        assertEquals(JudgeOrMagistrateTitleEnum.districtJudge, caseDataUpdated.get("judgeOrMagistrateTitle"));
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenNoHearingSelected() {
+        // Given - no hearing selected (hearingsType not in caseDataUpdated)
+        CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        // No hearingsType in caseDataUpdated - simulates no selection
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - nothing changed
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+        assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldNotPopulateWhenHearingDeselected() {
+        // Given - hearing was deselected (empty value in caseDataUpdated)
+        final CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        LocalDate originalDate = LocalDate.now();
+        caseDataUpdated.put("dateOrderMade", originalDate);
+        // Empty hearingsType - simulates deselection
+        Map<String, Object> emptyHearingsType = new HashMap<>();
+        emptyHearingsType.put("value", null);
+        caseDataUpdated.put("hearingsType", emptyHearingsType);
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - nothing changed
+        assertEquals(originalDate, caseDataUpdated.get("dateOrderMade"));
+        assertNull(caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    void testPopulateFieldsFromSelectedHearing_shouldFindHearingsTypeUnderManageOrders() {
+        // Given - hearingsType is nested under manageOrders in the map
+        LocalDateTime hearingDateTime = LocalDateTime.of(2024, 3, 15, 10, 0, 0);
+        String hearingLabel = "First Hearing - 15/03/2024 10:00:00";
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(hearingDateTime)
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge Smith")
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hearingTypeValue("First Hearing")
+            .hearingDaySchedule(List.of(schedule))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
+            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567890123456L)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        // Put hearingsType nested under manageOrders
+        Map<String, Object> manageOrdersMap = new HashMap<>();
+        manageOrdersMap.put("hearingsType", buildHearingsTypeMap(hearingLabel));
+        caseDataUpdated.put("manageOrders", manageOrdersMap);
+
+        // When
+        manageOrderService.populateFieldsFromSelectedHearing(authToken, caseData, caseDataUpdated);
+
+        // Then - should find and populate from nested hearingsType
+        assertEquals(LocalDate.of(2024, 3, 15), caseDataUpdated.get("dateOrderMade"));
+        assertEquals("Judge Smith", caseDataUpdated.get("judgeOrMagistratesLastName"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldSyncC43Fields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        Map<String, Object> c43Details = new HashMap<>();
+        c43Details.put("ordersToIssue", List.of("childArrangementsOrder", "specificIssueOrder"));
+        c43Details.put("childArrangementsOrderType", "liveWithOrder");
+        caseDataUpdated.put("customC43OrderDetails", c43Details);
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions and nameOfOrder set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder,
+            caseDataUpdated.get("createSelectOrderOptions"));
+        assertEquals("Child arrangements, specific issue or prohibited steps order (C43)",
+            caseDataUpdated.get("nameOfOrder"));
+
+        // Then - C43 fields synced
+        assertEquals(List.of("childArrangementsOrder", "specificIssueOrder"),
+            caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertEquals("liveWithOrder", caseDataUpdated.get("selectChildArrangementsOrder"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldSyncC21Fields() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+
+        Map<String, Object> c21Details = new HashMap<>();
+        c21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", c21Details);
+
+        // Pre-populate fields that should be cleared
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions and nameOfOrder set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            caseDataUpdated.get("createSelectOrderOptions"));
+        assertEquals("Blank order or directions (C21)",
+            caseDataUpdated.get("nameOfOrder"));
+
+        // Then - C21 field synced
+        assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
+
+        // Other fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenNoOrderTypeSelected() {
+        // Given
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", null);
+
+        // Pre-populate all fields
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions and nameOfOrder not set when customOrderNameOption is null
+        assertNull(caseDataUpdated.get("createSelectOrderOptions"));
+        assertNull(caseDataUpdated.get("nameOfOrder"));
+
+        // Then - all fields cleared
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearAllWhenOtherOrderTypeSelected() {
+        // Given - selecting "other" order type which has no sub-selections
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "other");
+
+        // Pre-populate all fields
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
+        caseDataUpdated.put("c21OrderOptions", "oldOption");
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - createSelectOrderOptions and nameOfOrder set from customOrderNameOption
+        assertEquals(CreateSelectOrderOptionsEnum.other,
+            caseDataUpdated.get("createSelectOrderOptions"));
+        assertEquals("Other (upload an order)",
+            caseDataUpdated.get("nameOfOrder"));
+
+        // Then - all fields cleared (other order type has no sub-selections)
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC43Details() {
+        // Given - C43 selected but no details filled in
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+        caseDataUpdated.put("customC43OrderDetails", new HashMap<>());
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - no errors, fields remain null
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldHandleEmptyC21Details() {
+        // Given - C21 selected but no details filled in
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataUpdated.put("customC21OrderDetails", new HashMap<>());
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - no errors, field remains null
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC43ToC21() {
+        // Given - user previously had C43 data, now switching to C21
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "blankOrderOrDirections");
+
+        // Old C43 data that should be cleared
+        Map<String, Object> oldC43Details = new HashMap<>();
+        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        oldC43Details.put("childArrangementsOrderType", "liveWithOrder");
+        caseDataUpdated.put("customC43OrderDetails", oldC43Details);
+        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("selectChildArrangementsOrder", "liveWithOrder");
+
+        // New C21 data
+        Map<String, Object> newC21Details = new HashMap<>();
+        newC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", newC21Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C21 data preserved
+        assertEquals("power_of_arrest", caseDataUpdated.get("c21OrderOptions"));
+        assertNotNull(caseDataUpdated.get("customC21OrderDetails"));
+
+        // C43 source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC43OrderDetails"));
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearSourceFieldsWhenSwitchingFromC21ToC43() {
+        // Given - user previously had C21 data, now switching to C43
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
+
+        // Old C21 data that should be cleared
+        Map<String, Object> oldC21Details = new HashMap<>();
+        oldC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", oldC21Details);
+        caseDataUpdated.put("c21OrderOptions", "power_of_arrest");
+
+        // New C43 data
+        Map<String, Object> newC43Details = new HashMap<>();
+        newC43Details.put("ordersToIssue", List.of("specificIssueOrder"));
+        caseDataUpdated.put("customC43OrderDetails", newC43Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - C43 data preserved
+        assertEquals(List.of("specificIssueOrder"), caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNotNull(caseDataUpdated.get("customC43OrderDetails"));
+
+        // C21 source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC21OrderDetails"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    void testSyncCustomOrderFieldsToPreExisting_shouldClearAllSourceFieldsWhenSwitchingToOther() {
+        // Given - user had data for multiple order types, now switching to "other"
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderNameOption", "other");
+
+        // Old C43 data
+        Map<String, Object> oldC43Details = new HashMap<>();
+        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("customC43OrderDetails", oldC43Details);
+
+        // Old C21 data
+        Map<String, Object> oldC21Details = new HashMap<>();
+        oldC21Details.put("orderOptions", "power_of_arrest");
+        caseDataUpdated.put("customC21OrderDetails", oldC21Details);
+
+        // When
+        manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
+
+        // Then - all source and synced fields cleared
+        assertNull(caseDataUpdated.get("customC43OrderDetails"));
+        assertNull(caseDataUpdated.get("customC21OrderDetails"));
+        assertNull(caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertNull(caseDataUpdated.get("selectChildArrangementsOrder"));
+        assertNull(caseDataUpdated.get("c21OrderOptions"));
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsCircuitJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Circuit Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .surname("Smith")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsDistrictJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("District Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.districtJudge, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsNullWhenUserNotFound() {
+        // Given
+        String idamUserId = "unknown-idam-id";
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of());
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsEmpty() {
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle("");
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsNullWhenIdamUserIdIsNull() {
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(null);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsNullWhenNoAppointments() {
+        // Given
+        String idamUserId = "test-idam-id";
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .surname("Smith")
+            .appointments(null)
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsNullWhenApiThrowsException() {
+        // Given
+        String idamUserId = "test-idam-id";
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenThrow(new RuntimeException("API error"));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertNull(result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsRecorder() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Recorder")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.recorder, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsDeputyCircuitJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Deputy Circuit Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.deputyCircuitJudge, result);
+    }
+
+    private static Stream<Arguments> highCourtJudgePostNominalsProvider() {
+        return Stream.of(
+            Arguments.of("Mr", JudgeOrMagistrateTitleEnum.theHonourableMrJustice),
+            Arguments.of("Mrs", JudgeOrMagistrateTitleEnum.theHonourableMrsJustice),
+            Arguments.of(null, null)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("highCourtJudgePostNominalsProvider")
+    void testGetLoggedInJudgeTitleForHighCourtJudge(String postNominals, JudgeOrMagistrateTitleEnum expectedTitle) {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals(postNominals)
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(expectedTitle, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForDeputyHighCourtJudge() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("Deputy High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Mr")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrJustice, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsHonourableMrJusticeForSir() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Sir")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrJustice, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForLady() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Lady")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMs() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Ms")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
+
+    @Test
+    void testGetLoggedInJudgeTitleReturnsHonourableMrsJusticeForMiss() {
+        // Given
+        String idamUserId = "test-idam-id";
+        Appointment appointment = Appointment.builder()
+            .appointment("High Court Judge")
+            .build();
+        JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
+            .sidamId(idamUserId)
+            .postNominals("Miss")
+            .appointments(List.of(appointment))
+            .build();
+
+        when(refDataUserService.getJudicialUserBySidamId(idamUserId))
+            .thenReturn(List.of(judgeDetails));
+
+        // When
+        JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
+
+        // Then
+        assertEquals(JudgeOrMagistrateTitleEnum.theHonourableMrsJustice, result);
+    }
+
+    @Test
+    void testPopulateServeOrderDetails_selectsOrderByNewOrderId() {
+        // Given - two orders, with the second one being the "new" order
+        String firstOrderId = "11111111-1111-1111-1111-111111111111";
+        String secondOrderId = "22222222-2222-2222-2222-222222222222";
+
+        DynamicMultiselectListElement firstElement = DynamicMultiselectListElement.builder()
+            .code(firstOrderId)
+            .label("C47A Order")
+            .build();
+        DynamicMultiselectListElement secondElement = DynamicMultiselectListElement.builder()
+            .code(secondOrderId)
+            .label("C43 Order")
+            .build();
+        DynamicMultiSelectList mockOrderList = DynamicMultiSelectList.builder()
+            .listItems(List.of(firstElement, secondElement))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)).thenReturn(mockOrderList);
+
+        Map<String, Object> headerMap = new HashMap<>();
+        headerMap.put("newOrderId", secondOrderId);
+
+        // When
+        manageOrderService.populateServeOrderDetails(caseData, headerMap);
+
+        // Then - the second order should be selected, not the first
+        DynamicMultiSelectList serveOrderList = (DynamicMultiSelectList) headerMap.get("serveOrderDynamicList");
+        assertNotNull(serveOrderList);
+        assertNotNull(serveOrderList.getValue());
+        assertEquals(1, serveOrderList.getValue().size());
+        assertEquals(secondOrderId, serveOrderList.getValue().get(0).getCode());
+    }
+
+    @Test
+    void testPopulateServeOrderDetails_fallsBackToFirstOrder_whenNewOrderIdNotProvided() {
+        // Given - two orders, no newOrderId specified
+        String firstOrderId = "11111111-1111-1111-1111-111111111111";
+        String secondOrderId = "22222222-2222-2222-2222-222222222222";
+
+        DynamicMultiselectListElement firstElement = DynamicMultiselectListElement.builder()
+            .code(firstOrderId)
+            .label("C47A Order")
+            .build();
+        DynamicMultiselectListElement secondElement = DynamicMultiselectListElement.builder()
+            .code(secondOrderId)
+            .label("C43 Order")
+            .build();
+        DynamicMultiSelectList mockOrderList = DynamicMultiSelectList.builder()
+            .listItems(List.of(firstElement, secondElement))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
+
+        when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)).thenReturn(mockOrderList);
+
+        Map<String, Object> headerMap = new HashMap<>();
+        // No newOrderId set
+
+        // When
+        manageOrderService.populateServeOrderDetails(caseData, headerMap);
+
+        // Then - should fall back to first order (index 0)
+        DynamicMultiSelectList serveOrderList = (DynamicMultiSelectList) headerMap.get("serveOrderDynamicList");
+        assertNotNull(serveOrderList);
+        assertNotNull(serveOrderList.getValue());
+        assertEquals(1, serveOrderList.getValue().size());
+        assertEquals(firstOrderId, serveOrderList.getValue().get(0).getCode());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_customOrder_courtAdmin_eligibleForAhr_setsAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        assertEquals(Yes, draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_createAnOrder_courtAdmin_eligibleForAhr_setsAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        assertEquals(Yes, draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_uploadAnOrder_courtAdmin_doesNotSetAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        // Even with eligible hearing data, uploadAnOrder should NOT trigger AHR
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        // uploadAnOrder does not have Page 19, so AHR should not be triggered
+        assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetDraftOrderCollection_customOrder_judge_doesNotSetAutoHearingPending() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Judge")
+            .email("test@judge.com")
+            .build();
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.JUDGE.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        // Only COURT_ADMIN should trigger AHR
+        assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetFinalOrderCollection_courtAdmin_noCheck_eligibleForAhr_setsAutoHearingPending() throws Exception {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .roles(List.of(Roles.COURT_ADMIN.getValue()))
+            .build());
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .manageOrders(ManageOrders.builder()
+                .ordersHearingDetails(hearingDataList)
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            "test token", caseData, ENGLISH);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+        assertNotNull(orderCollection);
+        assertFalse(orderCollection.isEmpty());
+        assertEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void testSetFinalOrderCollection_courtAdmin_noCheck_notEligibleForAhr_doesNotSetAutoHearingPending() throws Exception {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .roles(List.of(Roles.COURT_ADMIN.getValue()))
+            .build());
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        // No hearing details - not eligible for AHR
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
+            .manageOrders(ManageOrders.builder()
+                .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            "test token", caseData, ENGLISH);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
+        assertNotNull(orderCollection);
+        assertFalse(orderCollection.isEmpty());
+        // When not eligible for AHR, flag should not be Yes (can be null or No)
+        assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
     }
 }
