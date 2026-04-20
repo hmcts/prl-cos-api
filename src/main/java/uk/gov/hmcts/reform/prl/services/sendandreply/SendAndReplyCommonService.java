@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CAT
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
