@@ -105,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_STAFF;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_UPLOADED_CATEGORY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -2993,6 +2994,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3015,6 +3019,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3034,6 +3041,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3054,6 +3064,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3076,6 +3089,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3095,6 +3111,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3117,6 +3136,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3137,6 +3159,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST, uploadedCategory.get(0).getValue());
     }
 
     @Test
@@ -3156,6 +3181,9 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         assertEquals("CAFCASS", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        List<Element<String>> uploadedCategory = (List<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
+        assertEquals(1, uploadedCategory.size());
+        assertEquals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST, uploadedCategory.get(0).getValue());
     }
 
     @Test

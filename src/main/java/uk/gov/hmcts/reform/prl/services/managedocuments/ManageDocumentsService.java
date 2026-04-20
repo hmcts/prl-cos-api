@@ -466,7 +466,8 @@ public class ManageDocumentsService {
         }
 
         if (userRole.equals(CAFCASS)) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY, quarantineLegalDoc.getCategoryId());
+            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
+                                List.of(element(quarantineLegalDoc.getCategoryId())));
         }
 
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
