@@ -141,6 +141,8 @@ public class ManageDocumentsService {
         CIR_TRANSFER_REQUEST_LA
     );
 
+    public record CafcassTasks(String id, String value) {}
+
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authorization);
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
@@ -465,13 +467,9 @@ public class ManageDocumentsService {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
 
-        if (userRole.equals(CAFCASS)) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
-                                List.of(element(quarantineLegalDoc.getCategoryId())));
-        }
-
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            || userRole.equals(CAFCASS)
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
@@ -480,11 +478,15 @@ public class ManageDocumentsService {
             && caseData.getScannedDocuments().size() > 1)) {
             if (userRole.equals(CAFCASS)) {
                 if (isNewTaskRequired(caseData, quarantineLegalDoc)) {
-                    updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
-                } else {
-                    caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+                    ArrayList<CafcassTasks> listOfTasksForLa = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
+                        ? (ArrayList<CafcassTasks>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
+                    listOfTasksForLa.add(new CafcassTasks(String.valueOf(UUID.randomUUID()), quarantineLegalDoc.getCategoryId()));
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
+                                        listOfTasksForLa);
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
                 }
             } else {
+
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
         } else {
