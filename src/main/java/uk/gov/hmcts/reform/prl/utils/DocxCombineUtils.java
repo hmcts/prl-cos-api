@@ -173,25 +173,17 @@ public class DocxCombineUtils {
         }
         para.setAlignment(alignment);
 
-        // Lock indentation - get current values and set them directly
-        // This makes them direct formatting rather than style-based
+        // Lock indentation - set explicitly to prevent style inheritance
+        // Use current value if set, otherwise default to 0
         int indentLeft = para.getIndentationLeft();
         int indentRight = para.getIndentationRight();
         int indentFirstLine = para.getIndentationFirstLine();
         int indentHanging = para.getIndentationHanging();
 
-        if (indentLeft != -1) {
-            para.setIndentationLeft(indentLeft);
-        }
-        if (indentRight != -1) {
-            para.setIndentationRight(indentRight);
-        }
-        if (indentFirstLine != -1) {
-            para.setIndentationFirstLine(indentFirstLine);
-        }
-        if (indentHanging != -1) {
-            para.setIndentationHanging(indentHanging);
-        }
+        para.setIndentationLeft(indentLeft != -1 ? indentLeft : 0);
+        para.setIndentationRight(indentRight != -1 ? indentRight : 0);
+        para.setIndentationFirstLine(indentFirstLine != -1 ? indentFirstLine : 0);
+        para.setIndentationHanging(indentHanging != -1 ? indentHanging : 0);
     }
 
     /**

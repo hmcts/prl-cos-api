@@ -3009,13 +3009,14 @@ class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
-        // Assert - orderName should have the C43 formatted header: "C43 - description\nact reference"
+        // Assert - orderName and actReference are now separate placeholders
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertNotNull(orderName);
         assertTrue(orderName.startsWith("C43 - "), "C43 orderName should start with form number");
         assertTrue(orderName.contains("Child Arrangements Order"), "C43 orderName should contain order description");
-        assertTrue(orderName.contains("Section 8 Children Act 1989"), "C43 orderName should contain act reference");
+        assertEquals("Section 8 Children Act 1989", actReference, "C43 actReference should be separate placeholder");
     }
 
     // ========== Tests for HEARING OR PAPERS logic ==========
@@ -3546,7 +3547,9 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
-        assertFalse(orderName.contains("Act 1989") || orderName.contains("Act 1996"), "N117 should have no act reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertFalse(orderName.contains("Act 1989") || orderName.contains("Act 1996"), "N117 orderName should have no act reference");
+        assertEquals("", actReference, "N117 actReference should be empty");
     }
 
     // ========== Tests for exact order name format ==========
@@ -3565,19 +3568,14 @@ class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
-        // Assert - verify exact format: "FormNumber - Description\nActReference"
+        // Assert - orderName and actReference are now separate placeholders
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertNotNull(orderName);
         assertTrue(orderName.startsWith("C45A - "), "Order name should start with form number 'C45A - '");
-        assertTrue(orderName.contains("\n"), "Order name should contain newline separator");
-        assertTrue(orderName.endsWith("Children Act 1989"), "Order name should end with act reference");
-
-        // Verify the structure: FormNumber - Description\nActReference
-        String[] parts = orderName.split("\n");
-        assertEquals(2, parts.length, "Order name should have exactly two lines");
-        assertTrue(parts[0].startsWith("C45A - "), "First line should start with form number");
-        assertEquals("Children Act 1989", parts[1], "Second line should be the act reference");
+        assertFalse(orderName.contains("\n"), "Order name should not contain newline");
+        assertEquals("Children Act 1989", actReference, "Act reference should be separate placeholder");
     }
 
     @Test
@@ -3642,14 +3640,13 @@ class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
-        // Assert
+        // Assert - orderName and actReference are now separate placeholders
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertNotNull(orderName);
         assertTrue(orderName.startsWith("C21 - "), "C21 order should start with 'C21 - '");
-        String[] parts = orderName.split("\n");
-        assertEquals(2, parts.length, "C21 order should have form number line and act reference line");
-        assertEquals("Children Act 1989", parts[1], "C21 should have Children Act 1989 as act reference");
+        assertEquals("Children Act 1989", actReference, "C21 should have Children Act 1989 as actReference");
     }
 
     @Test
@@ -3666,13 +3663,14 @@ class CustomOrderServiceTest {
         // Act
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
-        // Assert
+        // Assert - orderName and actReference are now separate placeholders
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertNotNull(orderName);
         assertTrue(orderName.startsWith("SDO - "), "SDO should start with 'SDO - '");
-        assertTrue(orderName.contains("\n"), "SDO should have newline separator");
-        assertTrue(orderName.endsWith("Children Act 1989"), "SDO should end with Children Act 1989");
+        assertFalse(orderName.contains("\n"), "SDO orderName should not have newline");
+        assertEquals("Children Act 1989", actReference, "SDO should have Children Act 1989 as actReference");
     }
 
     // ========== Tests for updateDraftOrderCollection ==========
@@ -3823,8 +3821,9 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertEquals("My Custom Order", orderName);
-        assertFalse(orderName.contains("\n"), "Should not have newline when no act reference");
+        assertEquals("", actReference, "actReference should be empty when no act reference");
     }
 
     @Test

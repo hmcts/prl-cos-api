@@ -420,18 +420,16 @@ public class CustomOrderService {
         // Use caseId directly from controller (caseData.getId() may not be populated)
         data.put("caseNumber", String.valueOf(caseId));
         log.info("Placeholder 'caseNumber' = '{}'", caseId);
-        safePut(data, COURT_NAME, caseData::getCourtName);
+        safePut(data, COURT_NAME, () -> stripLineBreaks(caseData.getCourtName()));
 
         // Format order name with form number, description and act reference
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
         String actReference = getActReferenceForOrder(selectedOption);
         String displayOrderName = getDisplayOrderName(caseData, caseDataMap, selectedOption, orderDescription);
-        String formattedOrderName = StringUtils.isNotBlank(actReference)
-            ? displayOrderName + "\n" + actReference
-            : displayOrderName;
 
-        data.put("orderName", formattedOrderName);
+        data.put("orderName", displayOrderName);
+        data.put("actReference", StringUtils.defaultString(actReference, ""));
 
         safePut(data, "respondent1Name", () -> {
             var respondent = caseData.getRespondents().getFirst().getValue();
@@ -929,17 +927,15 @@ public class CustomOrderService {
         // Case details
         data.put("caseNumber", formatCaseNumber(String.valueOf(caseId)));
         populateFamilymanPlaceholders(data, caseData);
-        safePut(data, COURT_NAME, caseData::getCourtName);
+        safePut(data, COURT_NAME, () -> stripLineBreaks(caseData.getCourtName()));
 
         CustomOrderNameOptionsEnum selectedOption = parseCustomOrderNameOption(caseDataMap);
         String orderDescription = getEffectiveOrderName(caseData, caseDataMap);
         String actReference = getActReferenceForOrder(selectedOption);
         String displayOrderName = getDisplayOrderName(caseData, caseDataMap, selectedOption, orderDescription);
-        String formattedOrderName = StringUtils.isNotBlank(actReference)
-            ? displayOrderName + "\n" + actReference
-            : displayOrderName;
 
-        data.put("orderName", formattedOrderName);
+        data.put("orderName", displayOrderName);
+        data.put("actReference", StringUtils.defaultString(actReference, ""));
 
         // Judge details
         String judgeName = extractJudgeName(caseData, caseDataMap);
@@ -1601,6 +1597,16 @@ public class CustomOrderService {
         String first = StringUtils.defaultString(firstName);
         String last = StringUtils.defaultString(lastName);
         return (first + " " + last).trim();
+    }
+
+    /**
+     * Strips line breaks from a string, replacing with spaces.
+     */
+    private String stripLineBreaks(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace("\n", " ").replace("\r", " ");
     }
 
     /**
