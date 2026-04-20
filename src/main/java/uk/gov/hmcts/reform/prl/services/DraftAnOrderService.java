@@ -421,7 +421,7 @@ public class DraftAnOrderService {
 
                 updatedCaseData.put(
                     ORDER_COLLECTION,
-                    getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
+                    getFinalOrderCollection(authorisation, caseData, draftOrder, eventId, updatedCaseData)
                 );
                 draftOrderCollection.remove(
                     draftOrderCollection.indexOf(e)
@@ -474,7 +474,8 @@ public class DraftAnOrderService {
         return caseData;
     }
 
-    private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
+    private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder,
+                                                                String eventId, Map<String, Object> updatedCaseData) {
 
         List<Element<OrderDetails>> orderCollection;
         if (caseData.getOrderCollection() != null) {
@@ -484,6 +485,12 @@ public class DraftAnOrderService {
         }
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(convertDraftOrderToFinal(auth, caseData, draftOrder, eventId));
+
+        // Capture the new order ID for auto-selection in serve order page
+        if (!newOrderDetails.isEmpty()) {
+            updatedCaseData.put("newOrderId", newOrderDetails.get(0).getId().toString());
+        }
+
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
@@ -2499,7 +2506,7 @@ public class DraftAnOrderService {
             }
             caseDataUpdated.put(DATE_ORDER_MADE, LocalDate.now());
             caseDataUpdated.put("magistrateLastName", CollectionUtils.isNotEmpty(caseData.getMagistrateLastName())
-                ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
+                ? caseData.getMagistrateLastName() : List.of(element(MagistrateLastName.builder().build())));
 
             //PRL-4212 - Fetch & populate hearing data only in case order needs
             if (isHearingPageNeeded(
