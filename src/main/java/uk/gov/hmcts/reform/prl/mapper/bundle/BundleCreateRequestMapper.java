@@ -49,8 +49,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
@@ -684,16 +682,6 @@ public class BundleCreateRequestMapper {
             .documentLink(doc.getSection47LaDocument())
             .documentFileName(doc.getSection47LaDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.laSectionSection47EnquiryReport).build() : null);
-        bundleMap.put(CIR_EXTENSION_REQUEST_LA, Objects.nonNull(doc.getCirExtensionRequestLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCirExtensionRequestLaDocument())
-            .documentFileName(doc.getCirExtensionRequestLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionCirExtensionRequestReport).build() : null);
-
-        bundleMap.put(CIR_TRANSFER_REQUEST_LA, Objects.nonNull(doc.getCirTransferRequestLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCirTransferRequestLaDocument())
-            .documentFileName(doc.getCirTransferRequestLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionCirTransferRequestReport).build() : null);
-
 
         bundleMap.put(
             LA_OTHER_DOCS,
