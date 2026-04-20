@@ -47,6 +47,8 @@ public class QuarantineLegalDoc {
     private final Document section7ReportDocument;
     private final Document section37ReportDocument;
     private final Document sixteenARiskAssessmentDocument; // 16aRiskAssessment
+    private final Document cirTransferRequestDocument;
+    private final Document cirExtensionRequestDocument;
     private final Document guardianReportDocument;
     private final Document specialGuardianshipReportDocument;
     private final Document otherDocsDocument;

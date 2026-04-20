@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -357,6 +358,27 @@ public class ManageDocumentsService {
                 .isRestricted(null)
                 .restrictedDetails(null)
                 .build();
+
+            // this renaming was done for a requirement in FPVTL-2412 even when the document is marked as 'No'
+            // during review by admin
+            List<String> confidentialListForPathFinder = new ArrayList<>();
+            confidentialListForPathFinder.addAll(CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES);
+            confidentialListForPathFinder.add(CIR_EXTENSION_REQUEST_LA);
+            confidentialListForPathFinder.add(CIR_TRANSFER_REQUEST_LA);
+
+            if (CAFCASS.equals(quarantineLegalDoc.getUploaderRole()) || LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
+                Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
+                if (confidentialListForPathFinder.contains(quarantineLegalDoc.getDocumentType())) {
+                    Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
+                    quarantineLegalDoc = setQuarantineDocumentForUploader(
+                        ManageDocuments.builder()
+                            .document(updatedConfidentialDocument)
+                            .build(),
+                        quarantineLegalDoc.getUploaderRole(),
+                        quarantineLegalDoc
+                    );
+                }
+            }
 
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,

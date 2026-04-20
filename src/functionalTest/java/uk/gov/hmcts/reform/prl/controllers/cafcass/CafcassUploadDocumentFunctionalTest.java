@@ -90,4 +90,38 @@ public class CafcassUploadDocumentFunctionalTest {
             .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
 
     }
+
+    @Test
+    @Order(3)
+    public void givenCirTransferDocument_then200Response() throws IOException {
+        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .multiPart("file", fileToUpload)
+            .param("typeOfDocument", "cirTransferRequest")
+            .pathParam("caseId", caseDetails.getId())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200)
+            .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
+    }
+
+    @Test
+    @Order(4)
+    public void givenCirExtensionDocument_then200Response() throws IOException {
+        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .multiPart("file", fileToUpload)
+            .param("typeOfDocument", "cirExtensionRequest")
+            .pathParam("caseId", caseDetails.getId())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200)
+            .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
+    }
 }
