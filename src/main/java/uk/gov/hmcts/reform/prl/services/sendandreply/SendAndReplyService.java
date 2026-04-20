@@ -54,6 +54,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -114,6 +115,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -210,6 +212,12 @@ public class SendAndReplyService {
 
     @Value("${refdata.category-id}")
     private String hearingTypeCategoryId;
+
+    @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
+    private List<String> sendAndReplyFutureHearingStatuses;
+
+    @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
+    private List<String> sendAndReplyPastHearingStatuses;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -594,9 +602,28 @@ public class SendAndReplyService {
     }
 
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
-        Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
+        // FPVTL-2408/2409: use /hearings (all) rather than /getFutureHearings because HMC's
+        // "future" endpoint excludes AWAITING_ACTUALS and COMPLETED — states in which the
+        // user needs to chase a draft order. Filter client-side to the union of statuses
+        // PRL considers relevant for messaging: in-flight (future) + hearing-occurred.
+        Hearings futureHearings = hearingService.getHearings(authorization, caseId);
+        List<String> allowedStatuses = Stream
+            .concat(
+                ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream(),
+                ofNullable(sendAndReplyPastHearingStatuses).orElse(emptyList()).stream())
+            .map(String::trim)
+            .distinct()
+            .toList();
 
         if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
+
+            List<CaseHearing> filteredHearings = futureHearings.getCaseHearings().stream()
+                .filter(h -> allowedStatuses.contains(h.getHmcStatus()))
+                .toList();
+
+            if (filteredHearings.isEmpty()) {
+                return DynamicList.builder().value(DynamicListElement.EMPTY).build();
+            }
 
             Map<String, String> refDataCategoryValueMap = getRefDataMap(
                 authorization,
@@ -605,7 +632,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
 
-            List<DynamicListElement> hearingDropdowns = futureHearings.getCaseHearings().stream()
+            List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
                 .map(caseHearing -> {
                     //get hearingId
                     String hearingId = String.valueOf(caseHearing.getHearingID());

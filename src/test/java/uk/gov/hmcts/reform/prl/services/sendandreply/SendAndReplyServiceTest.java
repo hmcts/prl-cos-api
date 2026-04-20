@@ -789,7 +789,7 @@ public class SendAndReplyServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(categoriesAndDocuments);
-        when(hearingService.getFutureHearings(anyString(), anyString())).thenReturn(futureHearings);
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(futureHearings);
 
         Map<String, String> refDataCategoryValueMap = new HashMap<>();
 
@@ -801,6 +801,12 @@ public class SendAndReplyServiceTest {
             sendAndReplyService, "serviceCode", "serviceCode");
         ReflectionTestUtils.setField(
             sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "sendAndReplyFutureHearingStatuses",
+            List.of("LISTED", "AWAITING_ACTUALS"));
+        ReflectionTestUtils.setField(
+            sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
 
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
@@ -3089,7 +3095,7 @@ public class SendAndReplyServiceTest {
                         .build()))
                     .build()))
                 .build();
-        when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
+        when(hearingService.getHearings(auth, "1234")).thenReturn(futureHearings);
         Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
     }
 
