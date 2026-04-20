@@ -381,33 +381,32 @@ public class ManageDocumentsService {
                 );
             }
         } else {
-            log.info("a --> ");
+            log.info("a --> {} ", quarantineLegalDoc);
             // Remove these attributes for Non Confidential documents
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
                 .isConfidential(null)
                 .isRestricted(null)
                 .restrictedDetails(null)
                 .build();
-            log.info("b --> ");
+            log.info("b --> {} ", quarantineLegalDoc);
             List<String> confidentialListForPathFinder = Arrays.asList(CIR_EXTENSION_REQUEST_LA, CIR_TRANSFER_REQUEST_LA);
-            log.info("quarantineLegalDoc {}", quarantineLegalDoc.getUploaderRole());
-            if (LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
+            log.info("quarantineLegalDoc 2 {}", quarantineLegalDoc.getUploaderRole());
+            if (LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole())
+                && confidentialListForPathFinder.contains(quarantineLegalDoc.getCategoryId())) {
                 Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
                 log.info("document {}", document);
-                if (confidentialListForPathFinder.contains(document.getCategoryId())) {
-                    log.info("condition met");
-                    Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
-                    log.info("updatedConfidentialDocument {} ", updatedConfidentialDocument);
-                    quarantineLegalDoc = setQuarantineDocumentForUploader(
-                        ManageDocuments.builder()
-                            .document(updatedConfidentialDocument)
-                            .build(),
-                        quarantineLegalDoc.getUploaderRole(),
-                        quarantineLegalDoc
-                    );
-                    log.info("Ended ");
-                }
+                Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
+                log.info("updatedConfidentialDocument {} ", updatedConfidentialDocument);
+                quarantineLegalDoc = setQuarantineDocumentForUploader(
+                    ManageDocuments.builder()
+                        .document(updatedConfidentialDocument)
+                        .build(),
+                    quarantineLegalDoc.getUploaderRole(),
+                    quarantineLegalDoc
+                );
+                log.info("Ended ");
             }
+
 
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
@@ -508,7 +507,6 @@ public class ManageDocumentsService {
                     caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
                 }
             } else {
-
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
         } else {
