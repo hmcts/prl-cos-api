@@ -76,7 +76,7 @@ allprojects {
   group = 'uk.gov.hmcts.reform.prl'
   version = '0.0.1'
 
-  checkstyle.toolVersion = '9.2.1'
+  checkstyle.toolVersion = '10.25.0'
   checkstyle.configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
   checkstyle.maxWarnings(0)
 
@@ -274,7 +274,7 @@ ext['quartz.version'] = '2.4.0'
 
 configurations.configureEach {
   resolutionStrategy {
-    force 'org.bouncycastle:bcpkix-jdk18on:1.83'
+    force 'org.bouncycastle:bcpkix-jdk18on:1.84'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
     force 'org.springframework.security:spring-security-crypto:6.5.9'
     force 'ch.qos.logback:logback-classic:1.5.32'
@@ -371,6 +371,7 @@ dependencies {
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
+  implementation 'com.deepoove:poi-tl:1.12.2'
   implementation 'org.springframework.integration:spring-integration-sftp:6.5.8'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')

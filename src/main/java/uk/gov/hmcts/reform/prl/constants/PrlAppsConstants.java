@@ -1093,6 +1093,21 @@ public class PrlAppsConstants {
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
+    // Custom order fields
+    public static final String CUSTOM_ORDER_DOC = "customOrderDoc";
+    public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
+    public static final String CUSTOM_ORDER_NAME_OPTION = "customOrderNameOption";
+    public static final String NAME_OF_ORDER = "nameOfOrder";
+    public static final String AMEND_ORDER_SELECT_CHECK_OPTIONS = "amendOrderSelectCheckOptions";
+    public static final String WHAT_DO_WITH_ORDER = "whatDoWithOrder";
+    public static final String DO_YOU_WANT_TO_SERVE_ORDER = "doYouWantToServeOrder";
+    public static final String CUSTOM_ORDER_DATE_ENDS = "customOrderDateEnds";
+    public static final String CUSTOM_ORDER_DATE_ENDS_OPTIONS = "customOrderDateEndsOptions";
+    public static final String CUSTOM_C43_ORDER_DETAILS = "customC43OrderDetails";
+    public static final String CUSTOM_C21_ORDER_DETAILS = "customC21OrderDetails";
+    public static final String DD_MM_YYYY_DATE_FORMAT = "dd/MM/yyyy";
+    public static final String LOGGED_IN_USER_TYPE = "loggedInUserType";
+
     public static final String WA_REQ_SER_UPDATE = "requestSafeGuardingLetterUpdate";
 
     public static final String WA_SER_DUE_DATE = "safeGuardingLetterUploadDueDate";

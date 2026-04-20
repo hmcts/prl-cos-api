@@ -11,19 +11,20 @@ public enum ManageOrderFieldsEnum {
     amendOrderDynamicList("amendOrderDynamicList"),
     ordersNeedToBeServed("ordersNeedToBeServed"),
     loggedInUserType("loggedInUserType"),
-    doYouWantToServeOrder("doYouWantToServeOrder"),
-    whatDoWithOrder("whatDoWithOrder"),
+    //doYouWantToServeOrder("doYouWantToServeOrder"),
+    //whatDoWithOrder("whatDoWithOrder"), -removed from cleanup, need for custom order submitted callback
     currentOrderCreatedDateTime("currentOrderCreatedDateTime"),
     approvalDate("approvalDate"),
-    previewOrderDoc("previewOrderDoc"),
-    previewOrderDocWelsh("previewOrderDocWelsh"),
+    // previewOrderDoc - removed from cleanup, needed for custom order submitted callback to combine with user content
+    // previewOrderDocWelsh - removed from cleanup for consistency
+    // These are cleaned up explicitly after combining in submitted callback
     wasTheOrderApprovedAtHearing("wasTheOrderApprovedAtHearing"),
     judgeOrMagistratesLastName("judgeOrMagistratesLastName"),
     magistrateLastName("magistrateLastName"),
     justiceLegalAdviserFullName("justiceLegalAdviserFullName"),
     dateOrderMade("dateOrderMade"),
     hasJudgeProvidedHearingDetails("hasJudgeProvidedHearingDetails"),
-    amendOrderSelectCheckOptions("amendOrderSelectCheckOptions"),
+    // amendOrderSelectCheckOptions - removed from cleanup, needed in submitted callback to determine draft vs final order
     hearingsType("hearingsType"),
     ordersHearingDetails("ordersHearingDetails"),
     solicitorOrdersHearingDetails("solicitorOrdersHearingDetails"),
@@ -40,7 +41,9 @@ public enum ManageOrderFieldsEnum {
     judgeDirectionsToAdmin("judgeDirectionsToAdmin"),
     instructionsFromJudge("instructionsFromJudge"),
     courtAdminNotes("courtAdminNotes"),
-    nameOfOrder("nameOfOrder"),
+    // nameOfOrder - removed from cleanup, needed for custom order submitted callback
+    // nameOfOrder("nameOfOrder"),
+    // customOrderNameOption - not added to cleanup, needed for custom order submitted callback (dropdown selection)
     appointedGuardianName("appointedGuardianName"),
     orderName("orderName"),
     orderType("orderType"),
