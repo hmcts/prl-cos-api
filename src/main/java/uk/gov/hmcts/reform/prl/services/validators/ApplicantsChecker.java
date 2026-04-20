@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -146,9 +147,9 @@ public class ApplicantsChecker implements EventChecker {
         if (C100_CASE_TYPE.equals(caseTypeOfApplication)) {
             fields.add(ofNullable(applicant.getPlaceOfBirth()));
         }
-        Optional<YesOrNo> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
+        Optional<YesNoIDontKnowV2> liveInRefuge = ofNullable(applicant.getLiveInRefuge());
         fields.add(liveInRefuge);
-        if (liveInRefuge.isPresent() && Yes.equals(liveInRefuge.get())) {
+        if (liveInRefuge.isPresent() && YesNoIDontKnowV2.Yes.equals(liveInRefuge.get())) {
             fields.add(ofNullable(applicant.getRefugeConfidentialityC8Form()));
         }
         Optional<Address> address = ofNullable(applicant.getAddress());

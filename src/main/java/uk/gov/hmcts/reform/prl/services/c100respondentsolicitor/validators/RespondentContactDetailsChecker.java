@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -16,7 +17,6 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.CONFIRM_EDIT_CONTACT_DETAILS_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
@@ -72,9 +72,10 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             fields.add(ofNullable(citizenDetails.get().getFirstName()));
             fields.add(ofNullable(citizenDetails.get().getLastName()));
             fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
-            Optional<YesOrNo> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
+            Optional<YesNoIDontKnowV2> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
+
             fields.add(isLivingInRefuge);
-            if (isLivingInRefuge.isPresent() && Yes.equals(isLivingInRefuge.get())) {
+            if (isLivingInRefuge.isPresent() && YesNoIDontKnowV2.Yes.equals(isLivingInRefuge.get())) {
                 fields.add(ofNullable(citizenDetails.get().getRefugeConfidentialityC8Form()));
             }
             Optional<Address> address = ofNullable(citizenDetails.get().getAddress());

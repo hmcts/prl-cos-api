@@ -1160,6 +1160,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANTS_CONFIDENTIAL_DETAILS = "applicantsConfidentialDetails";
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String OTHER_PEOPLE_CONFIDENTIAL_DETAILS = "otherPeopleConfidentialDetails";
     public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
     public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
 }

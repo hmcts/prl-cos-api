@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -120,7 +120,7 @@ public class ApplicantsCheckerTest {
     @Test
     public void whenApplicantPresentButNotCompletedThenHasMandatoryReturnsFalse() {
 
-        PartyDetails applicant = PartyDetails.builder().firstName("TestName").liveInRefuge(YesOrNo.Yes).build();
+        PartyDetails applicant = PartyDetails.builder().firstName("TestName").liveInRefuge(YesNoIDontKnowV2.Yes).build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
 
@@ -163,7 +163,7 @@ public class ApplicantsCheckerTest {
         caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .caseCreatedBy(CaseCreatedBy.COURT_ADMIN)
-            .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
+            .applicantsFL401(PartyDetails.builder().liveInRefuge(YesNoIDontKnowV2.Yes).build())
             .build();
 
         assertFalse(applicantsChecker.hasMandatoryCompleted(caseData));

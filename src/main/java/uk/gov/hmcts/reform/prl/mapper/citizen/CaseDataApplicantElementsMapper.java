@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -107,11 +108,11 @@ public class CaseDataApplicantElementsMapper {
                 .address(buildAddress(applicantDto))
                 .isAtAddressLessThan5Years(applicantDto.getApplicantAddressHistory())
                 .addressLivedLessThan5YearsDetails(applicantDto.getApplicantProvideDetailsOfPreviousAddresses())
-                .isAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                .isAddressConfidential(YesNoIDontKnowV2.Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
                     : buildConfidentialField(contactDetailsPrivateList, ADDRESS_FIELD))
-                .isEmailAddressConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                .isEmailAddressConfidential(YesNoIDontKnowV2.Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
                     : buildConfidentialField(contactDetailsPrivateList, EMAIL_FIELD))
-                .isPhoneNumberConfidential(Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
+                .isPhoneNumberConfidential(YesNoIDontKnowV2.Yes.equals(applicantDto.getLiveInRefuge()) ? Yes
                     : buildConfidentialField(contactDetailsPrivateList, TELEPHONE_FIELD))
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .response(buildApplicantsResponse(applicantDto, contactDetailsPrivateList))
@@ -151,7 +152,7 @@ public class CaseDataApplicantElementsMapper {
 
     private static KeepDetailsPrivate buildKeepDetailsPrivate(ApplicantDto applicantDto,
                                                               List<String> contactDetailsPrivateList) {
-        return applicantDto.getLiveInRefuge().equals(Yes)
+        return YesNoIDontKnowV2.Yes.equals(applicantDto.getLiveInRefuge())
             ? buildKeepDetailsPrivateForRefugeApplicants()
             : buildKeepDetailsPrivateFromConfidentialityData(applicantDto, contactDetailsPrivateList);
     }

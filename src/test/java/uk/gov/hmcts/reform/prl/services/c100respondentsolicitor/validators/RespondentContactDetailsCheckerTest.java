@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -27,7 +27,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RespondentContactDetailsCheckerTest {
@@ -65,7 +64,7 @@ public class RespondentContactDetailsCheckerTest {
                                               .builder()
                                               .firstName("Test")
                                               .lastName("Test")
-                                              .liveInRefuge(No)
+                                              .liveInRefuge(YesNoIDontKnowV2.No)
                                               .dateOfBirth(LocalDate.of(2000, 8, 20))
                                               .address(address)
                                               .contact(Contact.builder()
@@ -85,7 +84,7 @@ public class RespondentContactDetailsCheckerTest {
                     .builder()
                     .firstName("Test")
                     .lastName("Test")
-                    .liveInRefuge(Yes)
+                    .liveInRefuge(YesNoIDontKnowV2.Yes)
                     .refugeConfidentialityC8Form(Document.builder().build())
                     .dateOfBirth(LocalDate.of(2000, 8, 20))
                     .address(address)
@@ -114,7 +113,7 @@ public class RespondentContactDetailsCheckerTest {
                                               .lastName("Test")
                                               .dateOfBirth(LocalDate.of(2000, 8, 20))
                                               .address(noAddress)
-                                              .liveInRefuge(YesOrNo.Yes)
+                                              .liveInRefuge(YesNoIDontKnowV2.Yes)
                                               .contact(Contact.builder()
                                                            .email("Test")
                                                            .phoneNumber("0785544").build())

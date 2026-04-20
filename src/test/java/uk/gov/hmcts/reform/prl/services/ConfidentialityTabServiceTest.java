@@ -4,11 +4,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -35,21 +41,50 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
 class ConfidentialityTabServiceTest {
 
+    private static final YesOrNo ADDRESS_KNOWN = Yes;
+    private static final YesOrNo ADDRESS_NOT_KNOWN = No;
+    private static final YesNoIDontKnowV2 LIVING_IN_REFUGE = YesNoIDontKnowV2.Yes;
+    private static final YesNoIDontKnowV2 NOT_LIVING_IN_REFUGE = YesNoIDontKnowV2.No;
+    private static final YesNoIDontKnowV2 DONT_KNOW_LIVING_IN_REFUGE = YesNoIDontKnowV2.IDontKnow;
+    private static final YesOrNo KEEP_ADDRESS_CONFIDENTIAL = Yes;
+    private static final YesOrNo DONT_KEEP_ADDRESS_CONFIDENTIAL = No;
+    private static final YesOrNo KEEP_EMAIL_CONFIDENTIAL = Yes;
+    private static final YesOrNo DONT_KEEP_EMAIL_CONFIDENTIAL = No;
+    private static final YesOrNo KEEP_PHONE_CONFIDENTIAL = Yes;
+    private static final YesOrNo DONT_KEEP_PHONE_CONFIDENTIAL = No;
+
+    record TestCase(YesOrNo addressKnown, YesNoIDontKnowV2 liveInRefuge, YesOrNo addressConfidential,
+                    YesOrNo emailConfidential, YesOrNo phoneConfidential,
+                    boolean expectedAddressConfidential, boolean expectedEmailConfidential, boolean expectedPhoneConfidential) {
+    }
+
+    @InjectMocks
     ConfidentialityTabService confidentialityTabService;
+    @Spy
+    ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
     Address address;
     PartyDetails partyDetails1;
@@ -60,8 +95,6 @@ class ConfidentialityTabServiceTest {
 
     @BeforeEach
     void setUp() {
-        confidentialityTabService = new ConfidentialityTabService();
-
         address = Address.builder()
             .addressLine1("AddressLine1")
             .postTown("Xyz town")
@@ -74,16 +107,16 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isCurrentAddressKnown(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .canYouProvideEmailAddress(Yes)
+            .isCurrentAddressKnown(Yes)
+            .canYouProvidePhoneNumber(Yes)
+            .isEmailAddressConfidential(Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .build();
 
         refugePartyDetails2 = PartyDetails.builder()
@@ -92,15 +125,15 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.No)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isCurrentAddressKnown(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .canYouProvideEmailAddress(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .isEmailAddressConfidential(No)
+            .canYouProvideEmailAddress(Yes)
+            .isCurrentAddressKnown(Yes)
+            .canYouProvidePhoneNumber(Yes)
             .phoneNumber("12345678900")
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .email("abc2@xyz.com")
             .build();
     }
@@ -114,12 +147,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         partyDetails2 = PartyDetails.builder()
@@ -128,10 +161,10 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .isEmailAddressConfidential(No)
             .phoneNumber("12345678900")
             .email("abc2@xyz.com")
             .build();
@@ -160,12 +193,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
         List<Element<ApplicantConfidentialityDetails>> expectedOutput = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
@@ -189,7 +222,7 @@ class ConfidentialityTabServiceTest {
             .applicantFullName("Test")
             .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
             .childAndApplicantRelationOtherDetails("dsdfs")
-            .childLivesWith(YesOrNo.Yes)
+            .childLivesWith(Yes)
             .build();
 
         Element<ChildrenAndApplicantRelation> childrenAndApplicantRelationElement =
@@ -199,8 +232,8 @@ class ConfidentialityTabServiceTest {
         ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Ramesh Meripe")
             .childFullName("Cherry Meripe").childAndOtherPeopleRelation(RelationshipsEnum.father)
-            .childLivesWith(YesOrNo.Yes)
-            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .childLivesWith(Yes)
+            .isChildLivesWithPersonConfidential(Yes)
             .build();
 
         Element<ChildrenAndOtherPeopleRelation> wrappedChildrenAndOther =
@@ -225,17 +258,17 @@ class ConfidentialityTabServiceTest {
                          .addressLine1("address")
                          .postTown("London")
                          .build())
-            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .isPlaceOfBirthKnown(Yes)
             .dateOfBirth(LocalDate.of(1999, 12, 10))
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
+            .canYouProvidePhoneNumber(Yes)
             .dxNumber("123456")
             .gender(Gender.female)
             .email("rame@gmail.com")
             .phoneNumber("07776817131")
             .previousName("testPreviousname")
-            .isDateOfBirthKnown(YesOrNo.Yes)
-            .isCurrentAddressKnown(YesOrNo.No)
+            .isDateOfBirthKnown(Yes)
+            .isCurrentAddressKnown(No)
             .build();
 
         Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
@@ -245,7 +278,7 @@ class ConfidentialityTabServiceTest {
         ChildrenAndRespondentRelation childrenAndRespondentRelation = ChildrenAndRespondentRelation.builder()
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
-            .childLivesWith(YesOrNo.Yes)
+            .childLivesWith(Yes)
             .childAndRespondentRelationOtherDetails("dsdfs")
             .build();
 
@@ -276,10 +309,10 @@ class ConfidentialityTabServiceTest {
     @Test
     void testChildConfidentialDetails() {
         OtherPersonWhoLivesWithChild personWhoLivesWithChild1 = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(Yes).relationshipToChildDetails("test")
             .firstName("Confidential First Name").lastName("Confidential Last Name").address(address).build();
         OtherPersonWhoLivesWithChild personWhoLivesWithChild2 = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.No).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(No).relationshipToChildDetails("test")
             .firstName("Nonconfidential test First Name").lastName("Nonconfidential test Last Name")
             .address(address).build();
 
@@ -330,12 +363,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         partyDetails2 = PartyDetails.builder()
@@ -344,19 +377,19 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .isEmailAddressConfidential(No)
             .phoneNumber("12345678900")
             .email("abc2@xyz.com")
             .build();
 
         OtherPersonWhoLivesWithChild personWhoLivesWithChild1 = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(Yes).relationshipToChildDetails("test")
             .firstName("Confidential First Name").lastName("Confidential Last Name").address(address).build();
         OtherPersonWhoLivesWithChild personWhoLivesWithChild2 = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.No).relationshipToChildDetails("test")
+            .isPersonIdentityConfidential(No).relationshipToChildDetails("test")
             .firstName("Nonconfidential test First Name").lastName("Nonconfidential test Last Name")
             .address(address).build();
 
@@ -408,7 +441,7 @@ class ConfidentialityTabServiceTest {
     void testFl401ChildConfidentialDetails() {
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .keepChildrenInfoConfidential(Yes)
             .build();
 
         List<Element<ChildrenLiveAtAddress>> listOfChildren = Collections.singletonList(element(child));
@@ -473,17 +506,17 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .keepChildrenInfoConfidential(Yes)
             .build();
 
         Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
@@ -531,7 +564,7 @@ class ConfidentialityTabServiceTest {
 
         ChildrenLiveAtAddress child = ChildrenLiveAtAddress.builder()
             .childFullName("Test")
-            .keepChildrenInfoConfidential(YesOrNo.Yes)
+            .keepChildrenInfoConfidential(Yes)
             .build();
 
         Element<ChildrenLiveAtAddress> child1 = Element.<ChildrenLiveAtAddress>builder().value(
@@ -567,12 +600,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         refugePartyDetails2 = refugePartyDetails2.toBuilder()
@@ -581,10 +614,10 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .isEmailAddressConfidential(YesOrNo.No)
+            .canYouProvideEmailAddress(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .isEmailAddressConfidential(No)
             .phoneNumber("12345678900")
             .email("abc2@xyz.com")
             .build();
@@ -622,12 +655,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
@@ -637,7 +670,7 @@ class ConfidentialityTabServiceTest {
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
-            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(Yes)
             .childAndOtherPeopleRelation(RelationshipsEnum.other)
             .otherPeopleFullName("ABC 1 XYZ 2")
             .childId("00000000-0000-0000-0000-000000000000").build();
@@ -670,12 +703,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
@@ -685,7 +718,7 @@ class ConfidentialityTabServiceTest {
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
-            .isChildLivesWithPersonConfidential(YesOrNo.No)
+            .isChildLivesWithPersonConfidential(No)
             .childAndOtherPeopleRelation(RelationshipsEnum.other)
             .otherPeopleFullName("ABC 1 XYZ 2")
             .childId("00000000-0000-0000-0000-000000000000").build();
@@ -710,7 +743,7 @@ class ConfidentialityTabServiceTest {
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
-            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(Yes)
             .childAndOtherPeopleRelation(RelationshipsEnum.other)
             .otherPeopleFullName("ABC 1 XYZ 2")
             .childId("00000000-0000-0000-0000-000000000000").build();
@@ -721,12 +754,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString(
@@ -742,17 +775,23 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(YesOrNo.Yes, updatedPartyDetails.getIsEmailAddressConfidential());
+        assertEquals(Yes, updatedPartyDetails.getIsAddressConfidential());
+        assertEquals(Yes, updatedPartyDetails.getIsPhoneNumberConfidential());
+        assertEquals(Yes, updatedPartyDetails.getIsEmailAddressConfidential());
+
+        verifyNoInteractions(confidentialityC8RefugeService);
     }
 
-    @Test
-    void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations() {
+    @ParameterizedTest
+    @MethodSource("confidentialFields")
+    void testUpdateOtherPeopleConfidentiality_withoutConfidentialRelations(ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        doCallRealMethod().when(confidentialityC8RefugeService)
+            .updateConfidentialityForPartiesLivingInRefuge(anyString(), any(PartyDetails.class), any(Boolean.class));
+
         // Mock data
         ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation.builder()
             .childFullName("test").otherPeopleFullName("test").otherPeopleId("00000000-0000-0000-0000-000000000000")
-            .isChildLivesWithPersonConfidential(YesOrNo.No)
+            .isChildLivesWithPersonConfidential(No)
             .childAndOtherPeopleRelation(RelationshipsEnum.other)
             .otherPeopleFullName("ABC 1 XYZ 2")
             .childId("00000000-0000-0000-0000-000000000000").build();
@@ -763,12 +802,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(confidentialFields.address() ? Yes : No)
+            .isPhoneNumberConfidential(confidentialFields.phoneNumber() ? Yes : No)
+            .isEmailAddressConfidential(confidentialFields.emailAddress() ? Yes : No)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().id(UUID.fromString(
@@ -784,13 +823,25 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+        verifyConfidentialFields(updatedPartyDetails, confidentialFields);
     }
 
-    @Test
-    void testUpdateOtherPeopleConfidentiality_withEmptyRelations() {
+    private static Stream<Arguments> confidentialFields() {
+        return Stream.of(
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, true, true)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, false, true)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, true, false)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(true, false, false)),
+            Arguments.of(new ConfidentialityTabService.ConfidentialFields(false, false, false))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("confidentialFields")
+    void testUpdateOtherPeopleConfidentiality_withEmptyRelations(ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        doCallRealMethod().when(confidentialityC8RefugeService)
+            .updateConfidentialityForPartiesLivingInRefuge(anyString(), any(PartyDetails.class), any(Boolean.class));
+
         // Mock data
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -798,12 +849,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(confidentialFields.address() ? Yes : No)
+            .isPhoneNumberConfidential(confidentialFields.phoneNumber() ? Yes : No)
+            .isEmailAddressConfidential(confidentialFields.emailAddress() ? Yes : No)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
@@ -818,13 +869,22 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+        verifyConfidentialFields(updatedPartyDetails, confidentialFields);
     }
 
-    @Test
-    void testUpdateOtherPeopleConfidentiality_withNullRelations() {
+    private void verifyConfidentialFields(PartyDetails partyDetails,
+                                          ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        assertEquals(confidentialFields.address(), Yes.equals(partyDetails.getIsAddressConfidential()));
+        assertEquals(confidentialFields.phoneNumber(), Yes.equals(partyDetails.getIsPhoneNumberConfidential()));
+        assertEquals(confidentialFields.emailAddress(), Yes.equals(partyDetails.getIsEmailAddressConfidential()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("confidentialFields")
+    void testUpdateOtherPeopleConfidentiality_withNullRelations(ConfidentialityTabService.ConfidentialFields confidentialFields) {
+        doCallRealMethod().when(confidentialityC8RefugeService)
+            .updateConfidentialityForPartiesLivingInRefuge(anyString(), any(PartyDetails.class), any(Boolean.class));
+
         // Mock data
         partyDetails1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -832,12 +892,12 @@ class ConfidentialityTabServiceTest {
             .dateOfBirth(LocalDate.of(2000, 1, 1))
             .gender(Gender.male)
             .address(address)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvideEmailAddress(Yes)
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isAddressConfidential(confidentialFields.address() ? Yes : No)
+            .isPhoneNumberConfidential(confidentialFields.phoneNumber() ? Yes : No)
+            .isEmailAddressConfidential(confidentialFields.emailAddress() ? Yes : No)
             .build();
 
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
@@ -850,9 +910,7 @@ class ConfidentialityTabServiceTest {
         // Assertions
         assertEquals(1, result.size());
         PartyDetails updatedPartyDetails = result.getFirst().getValue();
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsAddressConfidential());
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsPhoneNumberConfidential());
-        assertEquals(YesOrNo.No, updatedPartyDetails.getIsEmailAddressConfidential());
+        verifyConfidentialFields(updatedPartyDetails, confidentialFields);
     }
 
     @Test
@@ -867,5 +925,119 @@ class ConfidentialityTabServiceTest {
 
         // Assertions
         Assertions.assertNull(result);
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void givenCurrentAddressKnown_whenUpdateConfidentialityDetails_thenReturnsUpdatedDetails(TestCase testCase) {
+        Address address = Address.builder()
+            .addressLine1("742 Evergreen Terrace")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(List.of(Element.<PartyDetails>builder().value(
+                PartyDetails.builder()
+                    .isCurrentAddressKnown(testCase.addressKnown)
+                    .liveInRefuge(testCase.liveInRefuge)
+                    .address(address)
+                    .isAddressConfidential(testCase.addressConfidential)
+                    .email("otherparty@hmcts.net")
+                    .isEmailAddressConfidential(testCase.emailConfidential)
+                    .phoneNumber("01536504322")
+                    .isPhoneNumberConfidential(testCase.phoneConfidential)
+                    .build()).build()))
+            .build();
+
+        Map<String, Object> result = confidentialityTabService.updateConfidentialityDetails(caseData);
+
+        var otherPeopleConfidentialDetails = (List<Element<ApplicantConfidentialityDetails>>) result
+            .get(OTHER_PEOPLE_CONFIDENTIAL_DETAILS);
+
+        if (!testCase.expectedAddressConfidential && !testCase.expectedEmailConfidential && !testCase.expectedPhoneConfidential) {
+            assertThat(otherPeopleConfidentialDetails).isEmpty();
+        } else {
+            assertThat(otherPeopleConfidentialDetails).hasSize(1);
+            ApplicantConfidentialityDetails otherPeopleDetails = otherPeopleConfidentialDetails.getFirst().getValue();
+
+            if (testCase.expectedAddressConfidential) {
+                assertThat(otherPeopleDetails.getAddress()).isEqualTo(address);
+            } else {
+                assertThat(otherPeopleDetails.getAddress()).isNull();
+            }
+            if  (testCase.expectedEmailConfidential) {
+                assertThat(otherPeopleDetails.getEmail()).isEqualTo("otherparty@hmcts.net");
+            } else {
+                assertThat(otherPeopleDetails.getEmail()).isNull();
+            }
+            if (testCase.expectedPhoneConfidential) {
+                assertThat(otherPeopleDetails.getPhoneNumber()).isEqualTo("01536504322");
+            } else {
+                assertThat(otherPeopleDetails.getPhoneNumber()).isNull();
+            }
+        }
+    }
+
+    static Stream<Arguments> givenCurrentAddressKnown_whenUpdateConfidentialityDetails_thenReturnsUpdatedDetails() {
+        return Stream.of(
+            // Living in a refuge should always keep all details confidential
+            Arguments.of(new TestCase(ADDRESS_KNOWN, LIVING_IN_REFUGE, null, null, null, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL, null, null, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL, null, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, LIVING_IN_REFUGE, null, null, DONT_KEEP_PHONE_CONFIDENTIAL, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL, null, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, LIVING_IN_REFUGE, null, null, DONT_KEEP_PHONE_CONFIDENTIAL, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      DONT_KEEP_PHONE_CONFIDENTIAL, true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, LIVING_IN_REFUGE, null, null, null, true, true, true)),
+
+            // Not living in a refuge should keep details confidential based on the respective UI inputs
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  true, false, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  true, true, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  true, false, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, false, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  false, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, true, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, NOT_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, false, false)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, NOT_LIVING_IN_REFUGE, null, KEEP_EMAIL_CONFIDENTIAL,
+                                      KEEP_PHONE_CONFIDENTIAL, false, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, NOT_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      KEEP_PHONE_CONFIDENTIAL, false, false, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, NOT_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      DONT_KEEP_PHONE_CONFIDENTIAL, false, false, false)),
+
+            // Living in a refuge - don't know should keep details confidential based on the respective UI inputs
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  true, false, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  true, true, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  true, false, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, false, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  false, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, true, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, false, false)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, null, KEEP_EMAIL_CONFIDENTIAL,
+                                      KEEP_PHONE_CONFIDENTIAL, false, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      KEEP_PHONE_CONFIDENTIAL, false, false, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      DONT_KEEP_PHONE_CONFIDENTIAL, false, false, false))
+        );
     }
 }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -2093,7 +2094,7 @@ class UpdatePartyDetailsServiceTest {
         PartyDetails otherParties = PartyDetails.builder().firstName("test")
             .dateOfBirth(LocalDate.of(1976, 7, 7)).isDateOfBirthKnown(YesOrNo.Yes)
             .placeOfBirth("birthPlace").isPlaceOfBirthKnown(YesOrNo.Yes).isCurrentAddressKnown(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes).refugeConfidentialityC8Form(Document.builder().build())
+            .liveInRefuge(YesNoIDontKnowV2.Yes).refugeConfidentialityC8Form(Document.builder().build())
             .isAddressConfidential(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -2103,7 +2104,7 @@ class UpdatePartyDetailsServiceTest {
             .address(Address.builder().addressLine1("test").build()).lastName("test").build();
         Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
         PartyDetails otherParties2 = PartyDetails.builder().firstName("test")
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .refugeConfidentialityC8Form(Document.builder().build())
             .address(Address.builder().addressLine1("test").addressLine2("test").build()).lastName("test").build();
         Element<PartyDetails> wrappedOtherParties2 = Element.<PartyDetails>builder().value(otherParties2).build();

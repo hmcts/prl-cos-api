@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
@@ -725,7 +726,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private static PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+        if (YesNoIDontKnowV2.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
             existingPartyDetails = existingPartyDetails.toBuilder()
                 .response(getPartyResponse(existingPartyDetails).toBuilder()
                               .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
@@ -794,7 +795,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
             && null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()) {
             return existingPartyDetails.toBuilder()
