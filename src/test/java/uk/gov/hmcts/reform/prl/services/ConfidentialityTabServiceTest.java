@@ -68,6 +68,7 @@ class ConfidentialityTabServiceTest {
     private static final YesOrNo ADDRESS_NOT_KNOWN = No;
     private static final YesNoIDontKnowV2 LIVING_IN_REFUGE = YesNoIDontKnowV2.Yes;
     private static final YesNoIDontKnowV2 NOT_LIVING_IN_REFUGE = YesNoIDontKnowV2.No;
+    private static final YesNoIDontKnowV2 DONT_KNOW_LIVING_IN_REFUGE = YesNoIDontKnowV2.IDontKnow;
     private static final YesOrNo KEEP_ADDRESS_CONFIDENTIAL = Yes;
     private static final YesOrNo DONT_KEEP_ADDRESS_CONFIDENTIAL = No;
     private static final YesOrNo KEEP_EMAIL_CONFIDENTIAL = Yes;
@@ -1012,6 +1013,30 @@ class ConfidentialityTabServiceTest {
             Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, NOT_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
                                       KEEP_PHONE_CONFIDENTIAL, false, false, true)),
             Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, NOT_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      DONT_KEEP_PHONE_CONFIDENTIAL, false, false, false)),
+
+            // Living in a refuge - don't know should keep details confidential based on the respective UI inputs
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  true, false, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  true, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  true, true, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  true, false, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, false, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, KEEP_PHONE_CONFIDENTIAL,  false, true, true)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, true, false)),
+            Arguments.of(new TestCase(ADDRESS_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, DONT_KEEP_ADDRESS_CONFIDENTIAL,
+                                      DONT_KEEP_EMAIL_CONFIDENTIAL, DONT_KEEP_PHONE_CONFIDENTIAL,  false, false, false)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, null, KEEP_EMAIL_CONFIDENTIAL,
+                                      KEEP_PHONE_CONFIDENTIAL, false, true, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
+                                      KEEP_PHONE_CONFIDENTIAL, false, false, true)),
+            Arguments.of(new TestCase(ADDRESS_NOT_KNOWN, DONT_KNOW_LIVING_IN_REFUGE, null, DONT_KEEP_EMAIL_CONFIDENTIAL,
                                       DONT_KEEP_PHONE_CONFIDENTIAL, false, false, false))
         );
     }
