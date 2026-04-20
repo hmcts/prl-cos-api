@@ -178,6 +178,28 @@ class UpdateHearingActualsServiceRequestOrderTest {
     }
 
     @Test
+    void skipsCaseWhenAnyHearingHasLastFiredDateSet() {
+        // A previous cron run already fired; the task is still open in WA. Don't re-fire.
+        CaseData caseData = baseCaseBuilder("FL401")
+            .requestOrderTaskTrackingByHearing(List.of(
+                Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                        .hearingId(HEARING_ID)
+                        .lastFiredDate(LocalDate.now().minusDays(1))
+                        .build())
+                    .build()))
+            .build();
+        stubSearchReturning(caseData);
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        // HMC should NOT be called — the guard short-circuits before the HMC request.
+        verify(hearingApiClient, never()).getHearingDetails(anyString(), anyString(), anyString());
+    }
+
+    @Test
     void reTriggerAnchorsFromLastCompletedDateIgnoringHearingEndDate() {
         // Hearing ended 14 days ago but completion was 1 day ago. C100 cadence = 3 → no fire.
         LocalDate lastCompleted = LocalDate.now().minusDays(1);

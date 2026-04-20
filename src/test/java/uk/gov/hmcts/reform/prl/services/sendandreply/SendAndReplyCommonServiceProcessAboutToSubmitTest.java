@@ -106,13 +106,13 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
         List<Element<RequestOrderHearingTracking>> tracking =
             (List<Element<RequestOrderHearingTracking>>) response.getData().get("requestOrderTaskTrackingByHearing");
         assertThat(tracking).hasSize(1);
-        assertThat(tracking.get(0).getValue().getLastFiredDate()).isEqualTo(LocalDate.of(2026, 4, 10));
+        assertThat(tracking.get(0).getValue().getLastFiredDate()).isNull();
         assertThat(tracking.get(0).getValue().getLastCompletedDate())
             .isEqualTo(LocalDate.now(ZoneId.of("Europe/London")));
     }
 
     @Test
-    void doesNotTouchTrackingWhenMessageIsNotAboutHearing() {
+    void doesNotTouchTrackingWhenMessageIsNotAboutHearingAndNoExistingEntries() {
         CaseData caseData = CaseData.builder()
             .chooseSendOrReply(SEND)
             .caseTypeOfApplication("C100")
@@ -130,7 +130,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
     }
 
     @Test
-    void doesNotTouchTrackingWhenNoSelectedHearingCode() {
+    void doesNotTouchTrackingWhenNoSelectedHearingCodeAndNoExistingEntries() {
         CaseData caseData = CaseData.builder()
             .chooseSendOrReply(SEND)
             .caseTypeOfApplication("C100")
@@ -145,6 +145,83 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
 
         assertThat(response.getData()).doesNotContainKey("requestOrderTaskTrackingByHearing");
+    }
+
+    @Test
+    void clearsLastFiredDateOnAllEntriesEvenWhenMessageNotAboutHearing() {
+        // WA completion DMN auto-completes requestSolicitorOrder on ANY send-and-reply,
+        // so we must clear in-flight state regardless of messageAbout. This prevents the
+        // cron skipping the case forever if the user's chase message was filed under
+        // APPLICATION rather than HEARING.
+        Element<RequestOrderHearingTracking> existing = Element.<RequestOrderHearingTracking>builder()
+            .id(UUID.randomUUID())
+            .value(RequestOrderHearingTracking.builder()
+                .hearingId(HEARING_ID)
+                .lastFiredDate(LocalDate.of(2026, 4, 10))
+                .build())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .sendOrReplyMessage(SendOrReplyMessage.builder()
+                .sendMessageObject(Message.builder()
+                    .messageAbout(MessageAboutEnum.APPLICATION)
+                    .build())
+                .build())
+            .requestOrderTaskTrackingByHearing(List.of(existing))
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response =
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+
+        @SuppressWarnings("unchecked")
+        List<Element<RequestOrderHearingTracking>> tracking =
+            (List<Element<RequestOrderHearingTracking>>) response.getData().get("requestOrderTaskTrackingByHearing");
+        assertThat(tracking).hasSize(1);
+        assertThat(tracking.get(0).getValue().getLastFiredDate()).isNull();
+        assertThat(tracking.get(0).getValue().getLastCompletedDate()).isNull();
+    }
+
+    @Test
+    void clearsLastFiredDateOnOtherHearingsWhenOnlyOneAddressed() {
+        // Multi-hearing scenario: cron fired for [A, B]. User chases B via send-and-reply.
+        // B gets lastCompletedDate; A's lastFiredDate is cleared so the cron re-evaluates
+        // A on the next run (preventing A from being stuck "in flight" indefinitely).
+        String otherHearingId = "99";
+        Element<RequestOrderHearingTracking> addressed = Element.<RequestOrderHearingTracking>builder()
+            .id(UUID.randomUUID())
+            .value(RequestOrderHearingTracking.builder()
+                .hearingId(HEARING_ID)
+                .lastFiredDate(LocalDate.of(2026, 4, 10))
+                .build())
+            .build();
+        Element<RequestOrderHearingTracking> unaddressed = Element.<RequestOrderHearingTracking>builder()
+            .id(UUID.randomUUID())
+            .value(RequestOrderHearingTracking.builder()
+                .hearingId(otherHearingId)
+                .lastFiredDate(LocalDate.of(2026, 4, 10))
+                .build())
+            .build();
+        CaseData caseData = sendCaseAboutHearing(FUTURE_CODE)
+            .requestOrderTaskTrackingByHearing(List.of(addressed, unaddressed))
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response =
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+
+        @SuppressWarnings("unchecked")
+        List<Element<RequestOrderHearingTracking>> tracking =
+            (List<Element<RequestOrderHearingTracking>>) response.getData().get("requestOrderTaskTrackingByHearing");
+        assertThat(tracking).hasSize(2);
+        RequestOrderHearingTracking addressedAfter = tracking.stream()
+            .map(Element::getValue).filter(v -> HEARING_ID.equals(v.getHearingId())).findFirst().orElseThrow();
+        RequestOrderHearingTracking unaddressedAfter = tracking.stream()
+            .map(Element::getValue).filter(v -> otherHearingId.equals(v.getHearingId())).findFirst().orElseThrow();
+        assertThat(addressedAfter.getLastFiredDate()).isNull();
+        assertThat(addressedAfter.getLastCompletedDate())
+            .isEqualTo(LocalDate.now(ZoneId.of("Europe/London")));
+        assertThat(unaddressedAfter.getLastFiredDate()).isNull();
+        assertThat(unaddressedAfter.getLastCompletedDate()).isNull();
     }
 
     @Test

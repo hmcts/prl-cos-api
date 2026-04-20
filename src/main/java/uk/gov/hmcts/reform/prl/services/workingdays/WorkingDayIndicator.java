@@ -40,11 +40,6 @@ public class WorkingDayIndicator {
         return isWorkingDay(date) ? date : getNextWorkingDay(date.plusDays(1));
     }
 
-    /**
-     * Returns the number of working days strictly between {@code from} and {@code to}
-     * (exclusive of {@code from}, inclusive of {@code to}). Returns 0 when {@code to}
-     * is on or before {@code from}.
-     */
     public int workingDaysBetween(LocalDate from, LocalDate to) {
         requireNonNull(from);
         requireNonNull(to);

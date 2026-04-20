@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -129,27 +130,35 @@ public class SendAndReplyCommonService {
 
     private void recordRequestOrderCompletionForSelectedHearing(CaseData caseData,
                                                                 Map<String, Object> caseDataMap) {
+        List<Element<RequestOrderHearingTracking>> existing = caseData.getRequestOrderTaskTrackingByHearing() == null
+            ? List.of() : caseData.getRequestOrderTaskTrackingByHearing();
         String hearingId = extractHearingIdFromCurrentMessage(caseData);
-        if (hearingId == null) {
+        if (existing.isEmpty() && hearingId == null) {
             return;
         }
 
         LocalDate today = LocalDate.now(ZoneId.of("Europe/London"));
         Map<String, Element<RequestOrderHearingTracking>> byHearingId = new LinkedHashMap<>();
-        nullSafeCollection(caseData.getRequestOrderTaskTrackingByHearing())
-            .forEach(e -> byHearingId.put(e.getValue().getHearingId(), e));
+        existing.forEach(e -> byHearingId.put(e.getValue().getHearingId(), e));
 
-        Element<RequestOrderHearingTracking> entry = byHearingId.get(hearingId);
-        if (entry != null) {
-            entry.getValue().setLastCompletedDate(today);
-        } else {
-            byHearingId.put(hearingId, Element.<RequestOrderHearingTracking>builder()
-                .id(UUID.randomUUID())
-                .value(RequestOrderHearingTracking.builder()
-                    .hearingId(hearingId)
-                    .lastCompletedDate(today)
-                    .build())
-                .build());
+        // WA's completion DMN auto-completes the requestSolicitorOrder task on ANY
+        // send-and-reply. Clear the in-flight flag (lastFiredDate) on every tracked
+        // hearing so the cron re-evaluates cadence on the next run.
+        byHearingId.values().forEach(e -> e.getValue().setLastFiredDate(null));
+
+        if (hearingId != null) {
+            Element<RequestOrderHearingTracking> entry = byHearingId.get(hearingId);
+            if (entry != null) {
+                entry.getValue().setLastCompletedDate(today);
+            } else {
+                byHearingId.put(hearingId, Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                        .hearingId(hearingId)
+                        .lastCompletedDate(today)
+                        .build())
+                    .build());
+            }
         }
 
         caseDataMap.put("requestOrderTaskTrackingByHearing", new ArrayList<>(byHearingId.values()));

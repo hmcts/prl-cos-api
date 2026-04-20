@@ -129,6 +129,13 @@ public class UpdateHearingActualsService {
         String caseId = String.valueOf(caseDetails.getId());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
+        boolean awaitingCompletion = nullSafeCollection(caseData.getRequestOrderTaskTrackingByHearing()).stream()
+            .anyMatch(e -> e.getValue().getLastFiredDate() != null);
+        if (awaitingCompletion) {
+            log.info("Request Order: caseId={} skipping - previous fire awaiting completion", caseId);
+            return;
+        }
+
         Hearings hearings = fetchHearingsForCase(caseId);
         if (hearings == null || hearings.getCaseHearings() == null || hearings.getCaseHearings().isEmpty()) {
             log.info("Request Order: skipping caseId={} - no hearings from HMC", caseId);
