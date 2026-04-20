@@ -76,7 +76,7 @@ allprojects {
   group = 'uk.gov.hmcts.reform.prl'
   version = '0.0.1'
 
-  checkstyle.toolVersion = '9.2.1'
+  checkstyle.toolVersion = '10.25.0'
   checkstyle.configFile = new File(rootDir, "config/checkstyle/checkstyle.xml")
   checkstyle.maxWarnings(0)
 
@@ -365,6 +365,7 @@ dependencies {
   implementation group: 'com.opencsv', name: 'opencsv', version: '5.12.0', {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
+  implementation 'com.deepoove:poi-tl:1.12.2'
   implementation 'org.springframework.integration:spring-integration-sftp:6.5.8'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
