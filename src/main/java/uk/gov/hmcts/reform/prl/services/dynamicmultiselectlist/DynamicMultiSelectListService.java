@@ -42,10 +42,20 @@ public class DynamicMultiSelectListService {
 
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        log.info("getOrdersAsDynamicMultiSelectList: orderCollection size={}", orders != null ? orders.size() : 0);
         if (null != orders) {
-            orders.forEach(order -> listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
-                              .label(order.getValue().getLabelForDynamicList()).build()));
+            orders.forEach(order -> {
+                String orderTypeId = order.getValue().getOrderTypeId();
+                String servedDate = order.getValue().getOtherDetails() != null
+                    ? order.getValue().getOtherDetails().getOrderServedDate() : null;
+                String label = order.getValue().getLabelForDynamicList();
+                log.info("Order {}: orderTypeId='{}', servedDate='{}', label='{}'",
+                    order.getId(), orderTypeId, servedDate, label);
+                listItems.add(DynamicMultiselectListElement.builder().code(String.valueOf(order.getId()))
+                              .label(label).build());
+            });
         }
+        log.info("getOrdersAsDynamicMultiSelectList: returning {} list items", listItems.size());
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
