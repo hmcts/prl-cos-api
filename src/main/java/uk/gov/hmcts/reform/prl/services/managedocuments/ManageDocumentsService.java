@@ -334,11 +334,13 @@ public class ManageDocumentsService {
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
-
+        log.info("1 --> ");
         if (restrictedKey != null) {
             //This will be executed only during review documents
+            log.info("2 --> ");
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
+                log.info("3 --> ");
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
                 Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
@@ -356,6 +358,7 @@ public class ManageDocumentsService {
                 }
             }
             if (quarantineLegalDoc != null) {
+                log.info("4 --> ");
                 QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                     quarantineLegalDoc,
                     userDetails
@@ -367,7 +370,7 @@ public class ManageDocumentsService {
                         .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
                         .build();
                 }
-
+                log.info("5 --> ");
                 moveToConfidentialOrRestricted(
                     caseDataUpdated,
                     CONFIDENTIAL_DOCUMENTS.equals(restrictedKey)
@@ -378,13 +381,14 @@ public class ManageDocumentsService {
                 );
             }
         } else {
+            log.info("a --> ");
             // Remove these attributes for Non Confidential documents
             quarantineLegalDoc = quarantineLegalDoc.toBuilder()
                 .isConfidential(null)
                 .isRestricted(null)
                 .restrictedDetails(null)
                 .build();
-
+            log.info("b --> ");
             List<String> confidentialListForPathFinder = Arrays.asList(CIR_EXTENSION_REQUEST_LA, CIR_TRANSFER_REQUEST_LA);
             log.info("quarantineLegalDoc {}", quarantineLegalDoc.getUploaderRole());
             if (LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
