@@ -385,9 +385,7 @@ public class ManageDocumentsService {
                 .restrictedDetails(null)
                 .build();
 
-            List<String> confidentialListForPathFinder = new ArrayList<>();
-            confidentialListForPathFinder.add(CIR_EXTENSION_REQUEST_LA);
-            confidentialListForPathFinder.add(CIR_TRANSFER_REQUEST_LA);
+            List<String> confidentialListForPathFinder = Arrays.asList(CIR_EXTENSION_REQUEST_LA, CIR_TRANSFER_REQUEST_LA);
             log.info("quarantineLegalDoc {}", quarantineLegalDoc.getUploaderRole());
             if (LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
                 Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
