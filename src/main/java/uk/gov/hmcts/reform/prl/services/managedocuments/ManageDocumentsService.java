@@ -385,6 +385,28 @@ public class ManageDocumentsService {
                 .restrictedDetails(null)
                 .build();
 
+            List<String> confidentialListForPathFinder = new ArrayList<>();
+            confidentialListForPathFinder.add(CIR_EXTENSION_REQUEST_LA);
+            confidentialListForPathFinder.add(CIR_TRANSFER_REQUEST_LA);
+            log.info("quarantineLegalDoc {}", quarantineLegalDoc.getUploaderRole());
+            if (LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
+                Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
+                log.info("document {}", document);
+                if (confidentialListForPathFinder.contains(document.getCategoryId())) {
+                    log.info("condition met");
+                    Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
+                    log.info("updatedConfidentialDocument {} ", updatedConfidentialDocument);
+                    quarantineLegalDoc = setQuarantineDocumentForUploader(
+                        ManageDocuments.builder()
+                            .document(updatedConfidentialDocument)
+                            .build(),
+                        quarantineLegalDoc.getUploaderRole(),
+                        quarantineLegalDoc
+                    );
+                    log.info("Ended ");
+                }
+            }
+
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails
