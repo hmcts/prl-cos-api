@@ -3395,8 +3395,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Children Act 1989"), "C21 should have Children Act 1989 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Children Act 1989"), "C21 should have Children Act 1989 reference");
     }
 
     @Test
@@ -3412,8 +3412,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Children Act 1989"), "SDO should have Children Act 1989 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Children Act 1989"), "SDO should have Children Act 1989 reference");
     }
 
     @Test
@@ -3446,8 +3446,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Section 8 Children Act 1989"), "C43 should have Section 8 act reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Section 8 Children Act 1989"), "C43 should have Section 8 act reference");
     }
 
     @Test
@@ -3463,8 +3463,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Section 42 Family Law Act 1996"), "FL404A should have Section 42 act reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Section 42 Family Law Act 1996"), "FL404A should have Section 42 act reference");
     }
 
     @Test
@@ -3480,8 +3480,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Section 33 to 38 Family Law Act 1996"), "FL404 should have Section 33 to 38 act reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Section 33 to 38 Family Law Act 1996"), "FL404 should have Section 33 to 38 act reference");
     }
 
     @Test
@@ -3497,8 +3497,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Family Law Act 1996"), "FL406 should have Family Law Act 1996 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Family Law Act 1996"), "FL406 should have Family Law Act 1996 reference");
     }
 
     @Test
@@ -3514,8 +3514,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Family Law Act 1996"), "FL404B should have Family Law Act 1996 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Family Law Act 1996"), "FL404B should have Family Law Act 1996 reference");
     }
 
     @Test
@@ -3531,8 +3531,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertFalse(orderName.contains("Act 1989") || orderName.contains("Act 1996"), "C6 should have no act reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertFalse(actReference.contains("Act 1989") || actReference.contains("Act 1996"), "C6 should have no act reference");
     }
 
     @Test
