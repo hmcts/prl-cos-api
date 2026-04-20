@@ -269,8 +269,9 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertTrue(orderName.contains("C45A"), "Should contain form number");
-        assertTrue(orderName.contains("Children Act 1989"), "Should contain act reference");
+        assertTrue(actReference.contains("Children Act 1989"), "Should contain act reference");
     }
 
     // ========== Tests for CDAM workaround methods ==========
@@ -3198,9 +3199,10 @@ class CustomOrderServiceTest {
         // Assert
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         String orderName = (String) placeholders.get("orderName");
+        String actReference = (String) placeholders.get("actReference");
         assertNotNull(orderName);
         assertTrue(orderName.contains("C43"), "Should contain C43 reference");
-        assertTrue(orderName.contains("Section 8"), "Should contain Section 8 reference");
+        assertTrue(actReference.contains("Section 8"), "Should contain Section 8 reference");
     }
 
     // ========== Tests for respondent1Name extraction ==========
@@ -3359,8 +3361,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Family Procedure Rules 2010"), "C47A should have Family Procedure Rules 2010 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Family Procedure Rules 2010"), "C47A should have Family Procedure Rules 2010 reference");
     }
 
     @Test
@@ -3376,8 +3378,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Children Act 1989"), "C45A should have Children Act 1989 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Children Act 1989"), "C45A should have Children Act 1989 reference");
     }
 
     @Test
@@ -3427,8 +3429,8 @@ class CustomOrderServiceTest {
         customOrderService.renderHeaderPreview(caseId, caseData, caseDataMap);
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
-        String orderName = (String) placeholders.get("orderName");
-        assertTrue(orderName.contains("Children Act 1989"), "C43A should have Children Act 1989 reference");
+        String actReference = (String) placeholders.get("actReference");
+        assertTrue(actReference.contains("Children Act 1989"), "C43A should have Children Act 1989 reference");
     }
 
     @Test

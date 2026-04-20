@@ -90,7 +90,12 @@ public class DocxCombineUtils {
         }
 
         try {
-            XWPFHeader sourceHeader = sourceHeaders.getFirst();
+            // Find first header with actual text content
+            XWPFHeader sourceHeader = sourceHeaders.stream()
+                .filter(h -> h.getParagraphs().stream()
+                    .anyMatch(p -> p.getText() != null && !p.getText().trim().isEmpty()))
+                .findFirst()
+                .orElse(sourceHeaders.getFirst());
             XWPFHeader targetHeader = target.createHeader(HeaderFooterType.DEFAULT);
             for (XWPFParagraph sourcePara : sourceHeader.getParagraphs()) {
                 XWPFParagraph targetPara = targetHeader.createParagraph();
