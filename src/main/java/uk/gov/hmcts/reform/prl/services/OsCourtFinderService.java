@@ -4,6 +4,7 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.LocalAuthorityCourt;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.ordnancesurvey.OsPlacesResponse;
+import uk.gov.hmcts.reform.prl.models.ordnancesurvey.Result;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,9 +80,13 @@ public class OsCourtFinderService {
         } catch (Exception e) {
             log.info("OsCourtFinderService.getLocalCustodianCodeByPostCode() method is throwing exception : {}",e);
         }
-        if (osPlacesResponse != null
-            && !isEmpty(osPlacesResponse.getResults())) {
-            return osPlacesResponse.getResults().getFirst().getDpa().getLocalCustodianCode();
+        if (osPlacesResponse != null && !isEmpty(osPlacesResponse.getResults())) {
+            List<Result> filteredResultList = osPlacesResponse.getResults().stream()
+                .filter(result -> StringUtils.isNotEmpty(result.getDpa().getLocalCustodianCodeDescription()))
+                .toList();
+            if (CollectionUtils.isNotEmpty(filteredResultList)) {
+                return filteredResultList.getFirst().getDpa().getLocalCustodianCode();
+            }
         }
         return null;
     }
