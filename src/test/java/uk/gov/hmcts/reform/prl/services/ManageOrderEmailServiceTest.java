@@ -83,7 +83,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @SuppressWarnings({"java:S1607"})
 public class ManageOrderEmailServiceTest {
-    public static final String authToken = "Bearer TestAuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -142,6 +142,9 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     Time time;
+
+    @Mock
+    com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     Document englishOrderDoc;
     Document welshOrderDoc;
@@ -994,7 +997,7 @@ public class ManageOrderEmailServiceTest {
                                                                                 anyString(),
                                                                                 any(SendgridEmailConfig.class))).thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
     }
@@ -1064,7 +1067,7 @@ public class ManageOrderEmailServiceTest {
                                                                                 any(SendgridEmailConfig.class))).thenReturn(true);
 
         Map<String, Object> dataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, dataMap);
         Mockito.verifyNoInteractions(emailService);
     }
 
@@ -1124,7 +1127,7 @@ public class ManageOrderEmailServiceTest {
                                                                                 any(SendgridEmailConfig.class)))
             .thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, dataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
     }
@@ -1702,11 +1705,11 @@ public class ManageOrderEmailServiceTest {
                 .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, otherPerson.getAddress(),
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, AUTH_TOKEN, otherPerson.getAddress(),
             otherPerson.getLabelForDynamicList(),
             PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
             .thenReturn(List.of(coverLetterDoc));
-        when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
+        when(bulkPrintService.send(String.valueOf(caseData.getId()), AUTH_TOKEN, "OrderPack",
             List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
             otherPerson.getLabelForDynamicList())).thenReturn(uuid);
 
@@ -1715,7 +1718,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -1745,11 +1748,11 @@ public class ManageOrderEmailServiceTest {
                 .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverSheets(caseData, authToken, respondent.getAddress(),
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, AUTH_TOKEN, respondent.getAddress(),
             respondent.getLabelForDynamicList(),
             PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
             .thenReturn(List.of(coverLetterDoc));
-        when(bulkPrintService.send(String.valueOf(caseData.getId()), authToken, "OrderPack",
+        when(bulkPrintService.send(String.valueOf(caseData.getId()), AUTH_TOKEN, "OrderPack",
             List.of(coverLetterDoc, englishOrderDoc, welshOrderDoc, additionalOrderDoc),
             respondent.getLabelForDynamicList())).thenReturn(uuid);
 
@@ -1758,7 +1761,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -1820,7 +1823,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3269,7 +3272,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3303,7 +3306,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3339,7 +3342,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3375,7 +3378,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3408,7 +3411,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3445,7 +3448,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3481,7 +3484,7 @@ public class ManageOrderEmailServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3515,7 +3518,7 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
 
         //Then
         assertNotNull(caseDataMap.get("orderCollection"));
@@ -3886,7 +3889,7 @@ public class ManageOrderEmailServiceTest {
         );
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
         assertNotNull(caseDataMap.get("orderCollection"));
     }
 
@@ -3923,7 +3926,7 @@ public class ManageOrderEmailServiceTest {
         );
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
         assertNotNull(caseDataMap.get("orderCollection"));
     }
 
@@ -3987,5 +3990,297 @@ public class ManageOrderEmailServiceTest {
             .collect(Collectors.toList());
 
         assertTrue(capturedEmails.contains("respsol@law.com"));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_shouldUseOrderCollectionFromCaseDataMap() throws Exception {
+        // Test that when caseDataMap has orderCollection, ObjectMapper.convertValue is called
+        // to convert the raw map to typed list
+
+        UUID orderId = UUID.randomUUID();
+        Document orderDoc = Document.builder()
+            .documentUrl("http://test.url/order.pdf")
+            .documentBinaryUrl("http://test.url/binary/order.pdf")
+            .documentFileName("order.pdf")
+            .build();
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(orderDoc)
+            .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+            .build();
+        Element<OrderDetails> orderElement = Element.<OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build();
+        List<Element<OrderDetails>> orderCollection = List.of(orderElement);
+
+        // Create raw map representation (as it would come from caseDataUpdated)
+        List<Map<String, Object>> rawOrderCollection = new ArrayList<>();
+        rawOrderCollection.add(Map.of("id", orderId.toString()));
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("orderCollection", rawOrderCollection);
+
+        // Mock ObjectMapper to return the typed list
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(orderCollection);
+
+        // Mock documentLanguageService
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .build();
+        CaseData caseDataC100 = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(orderCollection)
+            .build();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", caseDataC100, caseDataMap);
+
+        // Verify ObjectMapper was called to convert the raw map (proves caseDataMap was used)
+        verify(objectMapper, times(1)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_shouldFallbackToCaseDataWhenCaseDataMapEmpty() throws Exception {
+        // Test that when caseDataMap doesn't have orderCollection, ObjectMapper is NOT called
+        // (caseData.getOrderCollection() is used directly)
+
+        UUID orderId = UUID.randomUUID();
+        Document orderDoc = Document.builder()
+            .documentUrl("http://test.url/order.pdf")
+            .documentBinaryUrl("http://test.url/binary/order.pdf")
+            .documentFileName("order.pdf")
+            .build();
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(orderDoc)
+            .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+            .build();
+
+        Element<OrderDetails> orderElement = Element.<OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build();
+        List<Element<OrderDetails>> orderCollection = List.of(orderElement);
+
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(orderCollection)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();  // Empty - no orderCollection
+
+        // Mock documentLanguageService
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Call the method
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify ObjectMapper was NOT called (fallback to caseData)
+        verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_customOrder_preservesOrderCollection() {
+        // Test that for custom orders (customOrderDoc present), the order collection
+        // from caseDataMap is preserved and not overwritten with caseData's collection
+
+        UUID orderId = UUID.randomUUID();
+
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("Custom Order Name")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(Document.builder()
+                .documentFileName("combined_custom_order.pdf")
+                .documentUrl("http://test/combined")
+                .documentBinaryUrl("http://test/combined/binary")
+                .build())
+            .build();
+
+        List<Element<OrderDetails>> orderCollectionInMap = new ArrayList<>();
+        orderCollectionInMap.add(Element.<OrderDetails>builder()
+            .id(orderId)
+            .value(orderDetails)
+            .build());
+
+        // caseData has a DIFFERENT orderTypeId (simulating stale data)
+        OrderDetails staleOrderDetails = OrderDetails.builder()
+            .orderTypeId("uploaded_file.docx")
+            .dateCreated(LocalDateTime.now())
+            .orderDocument(Document.builder()
+                .documentFileName("uploaded_file.docx")
+                .documentUrl("http://test/uploaded")
+                .documentBinaryUrl("http://test/uploaded/binary")
+                .build())
+            .build();
+
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .markedToServeEmailNotification(YesOrNo.No)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                .id(orderId)
+                .value(staleOrderDetails)
+                .build()))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderDoc", Document.builder()
+            .documentFileName("user_upload.docx")
+            .build());
+        caseDataMap.put("orderCollection", orderCollectionInMap);
+
+        // Mock documentLanguageService
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Mock objectMapper for the convertValue call
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(orderCollectionInMap);
+
+        // Call the method
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify that caseDataMap's orderCollection is preserved (not overwritten)
+        @SuppressWarnings("unchecked")
+        List<Element<OrderDetails>> resultCollection =
+            (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
+        assertNotNull(resultCollection);
+        assertEquals(1, resultCollection.size());
+        // The orderTypeId should be "Custom Order Name" (from caseDataMap), not "uploaded_file.docx" (from caseData)
+        assertEquals("Custom Order Name", resultCollection.get(0).getValue().getOrderTypeId());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_returnsEarlyWhenOrderCollectionIsNull() {
+        UUID orderId = UUID.randomUUID();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(orderId.toString())
+            .label("Test Order")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicList = DynamicMultiSelectList.builder()
+            .value(List.of(element))
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(serveOrderDynamicList)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case")
+            .manageOrders(manageOrders)
+            .orderCollection(null)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        // Should not throw - early return when orderCollection is null
+        manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
+
+        // Verify no email sending was attempted since we returned early
+        verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
+            any(), any(), any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_customOrder_returnsEarlyWhenMappedOrderCollectionIsNull() {
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(DynamicMultiSelectList.builder()
+                                       .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID).build()))
+                                       .build())
+            .markedToServeEmailNotification(YesOrNo.No)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderDoc", Document.builder().documentFileName("upload.docx").build());
+        caseDataMap.put("orderCollection", null);
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("auth", cd, caseDataMap);
+
+        verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
+
+    @Test
+    public void testSendEmailWhenOrderIsServed_customOrder_returnsEarlyWhenServeOrderDynamicListIsNull() {
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveOrderDynamicList(null)
+            .markedToServeEmailNotification(YesOrNo.No)
+            .build();
+
+        CaseData cd = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customOrderDoc", Document.builder().documentFileName("upload.docx").build());
+        caseDataMap.put("orderCollection", List.of(Map.of("id", TEST_UUID)));
+
+        when(documentLanguageService.docGenerateLang(any(CaseData.class)))
+            .thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build());
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("auth", cd, caseDataMap);
+
+        verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
     }
 }
