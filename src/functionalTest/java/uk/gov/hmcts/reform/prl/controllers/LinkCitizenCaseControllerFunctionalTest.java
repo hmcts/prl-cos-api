@@ -136,7 +136,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_validateAccessCode_then200Response() throws Exception {
+    public void givenRequestBody_validateAccessCode_thenDuplicateResponse() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY1);
         String requestBodyRevised = requestBody
@@ -152,7 +152,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .extract()
             .asString();
         Assert.assertNotNull(response);
-        Assert.assertEquals("Linked",response);
+        Assert.assertEquals("Duplicate",response);
     }
 
     @Test

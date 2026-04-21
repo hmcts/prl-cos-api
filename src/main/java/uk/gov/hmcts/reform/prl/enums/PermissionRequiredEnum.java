@@ -22,8 +22,13 @@ public enum PermissionRequiredEnum {
 
     @JsonCreator
     public static PermissionRequiredEnum getValue(String key) {
+        if ("Yes".equalsIgnoreCase(key)) {
+            return yes;
+        }
+        if ("No".equalsIgnoreCase(key)) {
+            return noNotRequired;
+        }
         return PermissionRequiredEnum.valueOf(key);
     }
-
 }
 

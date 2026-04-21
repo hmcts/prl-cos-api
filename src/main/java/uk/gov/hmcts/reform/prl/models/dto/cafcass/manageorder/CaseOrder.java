@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @AllArgsConstructor
@@ -122,12 +123,18 @@ public class CaseOrder {
     private String selectedHearingType;
 
     private String hearingId;
+    private List<Long> hearingIds;
 
     public void setHearingId(String hearingId) {
         if (null != hearingId && !hearingId.trim().isEmpty()) {
             this.hearingId = hearingId;
+            this.hearingIds = Stream.of(hearingId.split(","))
+                .map(String::trim)
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
         } else {
             this.hearingId = null;
+            this.hearingIds = null;
         }
     }
 

@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -71,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -90,7 +92,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 public class UpdatePartyDetailsService {
 
-    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
         CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue(), CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()};
     public static final String C_8_OF = "C8 of ";
@@ -252,7 +253,7 @@ public class UpdatePartyDetailsService {
                     generateC8.accept(latest);
                 } catch (Exception e) {
                     log.error("Failed to generate C8 document for C100 case {}. Error: {}",
-                              callbackRequest.getCaseDetails().getId(), e.getMessage());
+                              callbackRequest.getCaseDetails().getId(), e.getMessage(), e);
                 }
             } else {
                 log.info("No respondents available for C8 generation for case: {}; skipping.",
@@ -615,7 +616,8 @@ public class UpdatePartyDetailsService {
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            respondentList = caseDataBefore.getRespondents().stream()
+            List<Element<PartyDetails>> respondents = caseDataBefore.getRespondents();
+            respondentList = emptyIfNull(respondents).stream()
                 .filter(resp1 -> resp1.getId().equals(respondent.getId())
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
@@ -950,12 +952,12 @@ public class UpdatePartyDetailsService {
             List<Element<PartyDetails>> removeParty = new ArrayList<>();
             removeParty.addAll(caseDataBefore.getApplicants().stream()
                 .filter(appBefore -> caseData.getApplicants().stream()
-                    .noneMatch(app -> app.getId().equals(appBefore.getId())))
+                    .noneMatch(app -> appBefore.getId().equals(app.getId())))
                 .toList());
 
             removeParty.addAll(caseDataBefore.getRespondents().stream()
                 .filter(respBefore -> caseData.getRespondents().stream()
-                    .noneMatch(resp -> resp.getId().equals(respBefore.getId())))
+                    .noneMatch(resp -> respBefore.getId().equals(resp.getId())))
                 .toList());
 
             if (!removeParty.isEmpty()) {

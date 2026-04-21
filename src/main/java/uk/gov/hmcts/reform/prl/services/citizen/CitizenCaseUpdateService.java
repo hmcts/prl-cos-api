@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -53,6 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_HWF_REF_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PERMISSION_REQUIRED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.READY_FOR_DELETION_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -155,6 +157,10 @@ public class CitizenCaseUpdateService {
                                                     String eventId,
                                                     CaseData citizenUpdatedCaseData)
         throws JsonProcessingException, NotFoundException {
+
+        // Find nearest court for the child post code
+        String courtName = getNearestCourtName(citizenUpdatedCaseData);
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(
                 caseId,
@@ -170,11 +176,10 @@ public class CitizenCaseUpdateService {
             .lastName(userDetails.getSurname().orElse(null))
             .emailAddress(userDetails.getEmail())
             .build();
-        // Find nearest court for the child post code
-        Court nearestCourt = courtLocatorService.getNearestFamilyCourt(citizenUpdatedCaseData);
+
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
-            .courtName((nearestCourt != null) ? nearestCourt.getCourtName() : "No Court Fetched")
+            .courtName(courtName)
             .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
 
@@ -202,6 +207,21 @@ public class CitizenCaseUpdateService {
         // Do not remove the next line as it will overwrite the case state change
         caseDataMapToBeUpdated.remove("state");
         Iterables.removeIf(caseDataMapToBeUpdated.values(), Objects::isNull);
+
+        String jsonData = citizenUpdatedCaseData.getC100RebuildData().getC100RebuildScreeningQuestions();
+
+        if (jsonData != null) {
+            DocumentResponse documentResponse =
+                objectMapper.readValue(jsonData, DocumentResponse.class);
+
+            if (documentResponse != null && documentResponse.getDocument() != null) {
+                caseDataMapToBeUpdated.put(
+                    PERMISSION_REQUIRED_DOCUMENT,
+                    documentResponse.getDocument()
+                );
+            }
+        }
+
         CaseDetails caseDetails = allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -212,6 +232,11 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+    }
+
+    private String getNearestCourtName(CaseData caseData) throws NotFoundException {
+        Court nearestCourt = courtLocatorService.getNearestFamilyCourt(caseData);
+        return nearestCourt != null ? nearestCourt.getCourtName() : "No Court Fetched";
     }
 
     private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {

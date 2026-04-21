@@ -307,6 +307,7 @@ public class CaseApplicationResponseService {
                 .partyName(partyName)
                 .createdBy(userDetails.getFullName())
                 .dateCreated(LocalDate.now())
+                .dateTimeCreated(LocalDateTime.now())
                 .citizenDocument(c8FinalDocument)
                 .build();
             if (caseData.getCitizenResponseDocuments() == null) {

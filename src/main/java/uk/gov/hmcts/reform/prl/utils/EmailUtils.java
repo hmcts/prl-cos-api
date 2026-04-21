@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -13,7 +14,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 
 @Slf4j
 public class EmailUtils {
-
 
     private EmailUtils() {
 
@@ -55,5 +55,16 @@ public class EmailUtils {
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
 
         return dynamicTemplateData;
+    }
+
+    public static boolean isValidEmailAddress(final String email) {
+        return isValidEmailAddress(email, false);
+    }
+
+    public static boolean isValidEmailAddress(final String email, boolean allowEmpty) {
+        if (allowEmpty && StringUtils.isEmpty(email)) {
+            return true;
+        }
+        return EmailValidator.getInstance().isValid(email);
     }
 }

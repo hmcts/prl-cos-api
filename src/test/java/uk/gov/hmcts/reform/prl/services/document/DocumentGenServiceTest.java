@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
 import feign.FeignException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -10,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -63,6 +64,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +72,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -144,63 +145,42 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@SuppressWarnings({"java:S1607"})
 public class DocumentGenServiceTest {
 
-    @Mock
-    DgsService dgsService;
-
-    @Mock
-    DocumentLanguageService documentLanguageService;
-
-    @Mock
-    OrganisationService organisationService;
-
     @InjectMocks
-    DocumentGenService documentGenService;
-
+    private DocumentGenService documentGenService;
     @Mock
-    CaseDocumentClient caseDocumentClient;
-
+    private DgsService dgsService;
     @Mock
-    DgsApiClient dgsApiClient;
-
+    private DocumentLanguageService documentLanguageService;
     @Mock
-    AuthTokenGenerator authTokenGenerator;
-
-    private GeneratedDocumentInfo generatedDocumentInfo;
-
+    private OrganisationService organisationService;
     @Mock
-    UploadDocumentService uploadService;
-
+    private CaseDocumentClient caseDocumentClient;
+    @Mock
+    private DgsApiClient dgsApiClient;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private UploadDocumentService uploadService;
     @Mock
     private Time dateTime;
-
     @Mock
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-
+    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
-    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
-    protected String fl401RespC8TemplateWelsh;
-
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-
-
-    CaseData c100CaseData;
-    CaseData c100CaseDataFinal;
-    CaseData c100CaseDataC1A;
-
-    CaseData fl401CaseData;
-    CaseData fl401CaseData1;
-    CaseData c100CaseDataNotIssued;
-    AllegationOfHarm allegationOfHarmYes;
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private GeneratedDocumentInfo generatedDocumentInfo;
+    private CaseData c100CaseData;
+    private CaseData c100CaseDataFinal;
+    private CaseData c100CaseDataC1A;
+    private CaseData fl401CaseData;
+    private CaseData fl401CaseData1;
+    private CaseData c100CaseDataNotIssued;
+    private AllegationOfHarm allegationOfHarmYes;
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
-    MockMultipartFile file;
-
-    private DocumentRequest documentRequest;
 
     @Before
     public void setUp() {
@@ -222,7 +202,6 @@ public class DocumentGenServiceTest {
             .name("Civil - Organisation 2")
             .contactInformation(contactInformationList)
             .build();
-
 
         PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
             .firstName("TestFirst")
@@ -268,7 +247,6 @@ public class DocumentGenServiceTest {
             .value(otherPersonConfidentialityDetails).build();
         List<Element<OtherPersonConfidentialityDetails>> otherPersonList = Collections.singletonList(otherPerson);
 
-
         ChildConfidentialityDetails childConfidentialityDetails = ChildConfidentialityDetails.builder()
             .firstName("ChildFirst")
             .lastName("ChildLast")
@@ -292,7 +270,6 @@ public class DocumentGenServiceTest {
             .taskListVersion(TASK_LIST_VERSION_V2)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -306,7 +283,6 @@ public class DocumentGenServiceTest {
             .allegationOfHarm(allegationOfHarmYes)
             .applicants(listOfApplicants)
             .state(State.CASE_WITHDRAWN)
-            //.allegationsOfHarmYesNo(No)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -319,10 +295,9 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(No).build())
             .taskListVersion(TASK_LIST_VERSION_V2)
-            //.allegationsOfHarmYesNo(Yes)
             .applicants(listOfApplicants)
             .state(State.CASE_ISSUED)
-            //.allegationsOfHarmYesNo(No)
+            .issueDate(LocalDate.now())
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -337,7 +312,6 @@ public class DocumentGenServiceTest {
             .state(State.CASE_ISSUED)
             .allegationOfHarm(AllegationOfHarm.builder().allegationsOfHarmYesNo(YesOrNo.Yes).build())
             .taskListVersion(TASK_LIST_VERSION_V2)
-            //.allegationsOfHarmYesNo(Yes)
             .applicantsConfidentialDetails(applicantConfidentialList)
             .childrenConfidentialDetails(childConfidentialList)
             .build();
@@ -404,46 +378,10 @@ public class DocumentGenServiceTest {
             .state(State.JUDICIAL_REVIEW)
             .home(homefull)
             .build();
-
-        file
-            = new MockMultipartFile(
-            "file",
-            "hello.txt",
-            MediaType.TEXT_PLAIN_VALUE,
-            "Hello, World!".getBytes()
-        );
-
-        ReflectionTestUtils.setField(documentGenService, "organisationService", organisationService);
-        ReflectionTestUtils.setField(documentGenService, "documentLanguageService", documentLanguageService);
-        ReflectionTestUtils.setField(documentGenService, "dgsService", dgsService);
-        ReflectionTestUtils.setField(
-            documentGenService,
-            "c100DocumentTemplateFinderService",
-            c100DocumentTemplateFinderService
-        );
-        ReflectionTestUtils.setField(
-            documentGenService,
-            "allegationOfHarmRevisedService",
-            allegationOfHarmRevisedService
-        );
-        ReflectionTestUtils.setField(documentGenService, "caseDocumentClient", caseDocumentClient);
-        ReflectionTestUtils.setField(documentGenService, "uploadService", uploadService);
-        ReflectionTestUtils.setField(documentGenService, "dgsApiClient", dgsApiClient);
-
-        documentRequest = DocumentRequest.builder()
-            .caseId("123")
-            .categoryId("POSITION_STATEMENTS")
-            .partyId("00000000-0000-0000-0000-000000000000")
-            .partyName("appf appl")
-            .partyType("applicant")
-            .restrictDocumentDetails("test details")
-            .freeTextStatements("free text to generate document")
-            .build();
     }
 
     @Test
     public void generateDocsForC100Test() throws Exception {
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -464,13 +402,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseData);
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -487,7 +422,6 @@ public class DocumentGenServiceTest {
 
     @Test
     public void generateDocsForC100TestFinalDoc() throws Exception {
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -505,29 +439,24 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataFinal);
 
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataFinal);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataFinal);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+        // Verify that if a case is issued then only C8 documents are updated and not C100 or C1A
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
+        verifyDocumentsNotUpdated(stringObjectMap, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
-        verify(dgsService, times(2)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
         );
-        verify(dgsService, times(2)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             any()
         );
         verifyNoMoreInteractions(dgsService);
     }
-
 
     @Test
     public void generateDocsForFL401TestWithOrganisation() throws Exception {
@@ -548,13 +477,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -569,7 +495,6 @@ public class DocumentGenServiceTest {
         verifyNoMoreInteractions(dgsService);
     }
 
-
     @Test
     public void testGenerateDraftDocumentEng() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
@@ -579,8 +504,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(AUTH_TOKEN, caseData);
-        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
-
+        verifyDocumentsUpdated(docMap, DRAFT_APPLICATION_DOCUMENT_FIELD);
     }
 
     @Test
@@ -592,8 +516,7 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
         Map<String, Object> docMap = documentGenService.generateDraftDocuments(AUTH_TOKEN, caseData);
-        assertTrue(docMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
-
+        verifyDocumentsUpdated(docMap, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
     }
 
     @Test
@@ -616,8 +539,7 @@ public class DocumentGenServiceTest {
             c100CaseData);
         Map<String, Object> stringObjectMap = documentGenService.generateDraftDocuments(AUTH_TOKEN, c100CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
-        assertTrue(stringObjectMap.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+        verifyDocumentsUpdated(stringObjectMap, DRAFT_APPLICATION_DOCUMENT_FIELD, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
 
         ArgumentCaptor<CaseDetails> cd = ArgumentCaptor.forClass(CaseDetails.class);
         verify(dgsService, atLeastOnce()).generateDocument(anyString(), cd.capture(), any());
@@ -625,7 +547,7 @@ public class DocumentGenServiceTest {
             c100CaseData.getCaseSolicitorName(),
             cd.getValue().getCaseData().getCaseSolicitorName()
         );
-        verify(dgsService, times(1)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             Mockito.any(CaseDetails.class),
             Mockito.any()
@@ -635,7 +557,6 @@ public class DocumentGenServiceTest {
 
     @Test
     public void generateDocsForC100TestWithC1A() throws Exception {
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -654,15 +575,11 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataC1A);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataC1A);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A
+        );
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -696,11 +613,9 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -734,15 +649,10 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData1);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData1);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -756,7 +666,6 @@ public class DocumentGenServiceTest {
         );
         verifyNoMoreInteractions(dgsService);
     }
-
 
     @Test
     public void testC8Formgenerationbasedconconfidentiality2() throws Exception {
@@ -854,9 +763,7 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
-
 
     @Test
     public void testC8Formgenerationbasedconconfidentiality_withoutTypeofOrders() throws Exception {
@@ -950,7 +857,6 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
@@ -1087,7 +993,7 @@ public class DocumentGenServiceTest {
             any(CaseDetails.class),
             Mockito.any()
         );
-        verify(dgsService, times(1)).generateWelshDocument(
+        verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
             Mockito.any()
@@ -1220,7 +1126,7 @@ public class DocumentGenServiceTest {
             false,
             respondentDetails
         );
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(),
@@ -1247,16 +1153,15 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationC1A() throws Exception {
         c100CaseData = c100CaseData.toBuilder().taskListVersion(TASK_LIST_VERSION_V2).build();
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
-
 
     @Test
     public void testBlankDocsGeneration() throws Exception {
@@ -1286,17 +1191,12 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDeleteDocumentException() {
-        doThrow(new RuntimeException("Exception while delete document")).when(uploadService).deleteDocument(
-            any(),
-            any()
-        );
+        //Given
+        doThrow(new RuntimeException("Exception while delete document")).when(uploadService).deleteDocument(any(),
+                                                                                                            any());
 
-        assertExpectedException(
-            () -> {
-                documentGenService
-                    .deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID");
-            }, RuntimeException.class, "Exception while delete document"
-        );
+        assertExpectedException(() -> documentGenService
+            .deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID"), RuntimeException.class, "Exception while delete document");
 
     }
 
@@ -1342,12 +1242,11 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
-        assertTrue(updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        verifyDocumentsUpdated(updatedCaseData, DOCUMENT_FIELD_FINAL_WELSH);
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForWelsh() throws Exception {
-
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForWelsh() {
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
 
@@ -1364,11 +1263,11 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
         assertEquals(updatedCaseData.get(IS_ENG_DOC_GEN), Yes.toString());
-        assertTrue(!updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
+        assertFalse(updatedCaseData.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForCitizen() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizen() {
         //Given
         when(documentLanguageService.docGenerateLang(c100CaseData)).thenReturn(DocumentLanguage
                                                                                    .builder().isGenEng(true).build());
@@ -1386,31 +1285,31 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_RESPONDENT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationForWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_WELSH, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationDefault() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, "", false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationC8DraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_DRAFT_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationC1ADraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_DRAFT_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -1424,7 +1323,7 @@ public class DocumentGenServiceTest {
             false,
             respondentDetails
         );
-        verify(dgsService, times(1)).generateDocument(
+        verify(dgsService).generateDocument(
             Mockito.anyString(),
             Mockito.anyString(),
             Mockito.any(),
@@ -1453,13 +1352,10 @@ public class DocumentGenServiceTest {
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataNotIssued);
 
-        Map<String, Object> stringObjectMap =
-            documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataNotIssued);
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataNotIssued);
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C1A));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                               DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_DRAFT_C1A);
 
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -1476,15 +1372,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testGenerateCitizenDocument() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", "Your position statements");
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues("Your position statements");
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1509,20 +1397,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithYourWitnessStatement() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", YOUR_WITNESS_STATEMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(YOUR_WITNESS_STATEMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1547,20 +1426,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithOtherWitnessStatement() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", OTHER_WITNESS_STATEMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(OTHER_WITNESS_STATEMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1585,20 +1455,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithMedicalRecords() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", MEDICAL_RECORDS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(MEDICAL_RECORDS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1623,20 +1484,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithMail_screenshots() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", MAIL_SCREENSHOTS_MEDIA_FILES);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(MAIL_SCREENSHOTS_MEDIA_FILES);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1661,20 +1513,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithLettersFromSchools() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", LETTERS_FROM_SCHOOL);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(LETTERS_FROM_SCHOOL);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1699,20 +1542,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithTenancyMortgageAgreement() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", TENANCY_MORTGAGE_AGREEMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(TENANCY_MORTGAGE_AGREEMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1737,20 +1571,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithPreviousOrderSubmitted() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", PREVIOUS_ORDERS_SUBMITTED);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(PREVIOUS_ORDERS_SUBMITTED);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1775,20 +1600,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithMedicalReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", MEDICAL_REPORTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(MEDICAL_REPORTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1813,20 +1629,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithPaternityTestReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", PATERNITY_TEST_REPORTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(PATERNITY_TEST_REPORTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1851,20 +1658,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithDrugAndAlcoholReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", DRUG_AND_ALCOHOL_TESTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(DRUG_AND_ALCOHOL_TESTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1889,20 +1687,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithPoliceReports() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", POLICE_REPORTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(POLICE_REPORTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1927,20 +1716,11 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
     public void testGenerateCitizenDocumentWithOtherDocument() throws Exception {
-        Map<String, String> documentValues = new HashMap<>();
-        documentValues.put("caseId", "1664294549087405");
-        documentValues.put("freeTextUploadStatements", "testing document gen");
-        documentValues.put("parentDocumentType", "Witness statements and evidence");
-        documentValues.put("documentType", OTHER_DOCUMENTS);
-        documentValues.put("partyName", "Sonali Citizen");
-        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
-        documentValues.put("documentRequestedByCourt", "No");
-        documentValues.put("isApplicant", "Yes");
+        Map<String, String> documentValues = createDocumentValues(OTHER_DOCUMENTS);
 
         GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest = GenerateAndUploadDocumentRequest.builder()
             .values(documentValues)
@@ -1965,11 +1745,10 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
-    public void testGenerateC7Document() throws Exception {
+    public void testGenerateC7Document() {
         CaseData caseData = CaseData.builder()
             .id(123456789123L)
             .welshLanguageRequirement(Yes)
@@ -2001,7 +1780,6 @@ public class DocumentGenServiceTest {
 
     @Test
     public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100Test() throws Exception {
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2022,10 +1800,8 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(6)).generateDocument(
             Mockito.anyString(),
@@ -2042,7 +1818,6 @@ public class DocumentGenServiceTest {
 
     @Test
     public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestFinalDoc() throws Exception {
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2063,12 +1838,8 @@ public class DocumentGenServiceTest {
             c100CaseDataFinal
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(4)).generateDocument(
             Mockito.anyString(),
@@ -2107,10 +1878,8 @@ public class DocumentGenServiceTest {
             fl401CaseData
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -2127,7 +1896,6 @@ public class DocumentGenServiceTest {
 
     @Test
     public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestWithC1A() throws Exception {
-
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2150,12 +1918,8 @@ public class DocumentGenServiceTest {
             c100CaseDataC1A
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A_WELSH,
+                               DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(6)).generateDocument(
             Mockito.anyString(),
@@ -2194,8 +1958,7 @@ public class DocumentGenServiceTest {
             fl401CaseData
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -2235,12 +1998,8 @@ public class DocumentGenServiceTest {
             fl401CaseData1
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_FINAL));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
+                               DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -2352,7 +2111,6 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
@@ -2447,7 +2205,6 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         verifyNoMoreInteractions(dgsService);
-
     }
 
     @Test
@@ -2714,7 +2471,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForFl404b() throws Exception {
         documentGenService.generateSingleDocument("auth", fl401CaseData, DA_LIST_ON_NOTICE_FL404B_DOCUMENT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
@@ -2746,13 +2503,9 @@ public class DocumentGenServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        assertExpectedException(
-            () -> {
-                documentGenService
-                    .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token");
-            }, InvalidResourceException.class, "Resource is invalid TestUrl"
-        );
-
+        assertExpectedException(() -> documentGenService
+            .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
+                                "Resource is invalid TestUrl");
     }
 
     @Test
@@ -2770,12 +2523,11 @@ public class DocumentGenServiceTest {
             .thenReturn(expectedResponse);
 
         assertExpectedException(
-            () -> {
-                documentGenService
-                    .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token");
-            }, InvalidResourceException.class, "Doc name TestUrl"
+            () -> documentGenService
+                .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"),
+            InvalidResourceException.class,
+            "Doc name TestUrl"
         );
-
     }
 
     @Test
@@ -2805,7 +2557,7 @@ public class DocumentGenServiceTest {
 
         documentGenService.convertToPdf(AUTH_TOKEN, document);
 
-        verify(caseDocumentClient, times(1)).getDocumentBinary(
+        verify(caseDocumentClient).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
     }
@@ -2835,12 +2587,8 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenReturn(generatedDocumentInfo);
 
-        assertExpectedException(
-            () -> {
-                documentGenService
-                    .convertToPdf(AUTH_TOKEN, document);
-            }, InvalidResourceException.class, "Doc name FL401-Final.docx"
-        );
+        assertExpectedException(() -> documentGenService
+            .convertToPdf(AUTH_TOKEN, document), InvalidResourceException.class, "Doc name FL401-Final.docx");
     }
 
     // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
@@ -2869,14 +2617,8 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenThrow(FeignException.class);
 
-        assertExpectedException(
-            () -> {
-                documentGenService.convertToPdf(AUTH_TOKEN, document);
-            },
-            NullPointerException.class,
-            "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
-                + "because \"generatedDocumentInfo\" is null"
-        );
+        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
+                                "PDF Conversion error");
     }
 
     @Test
@@ -2904,25 +2646,16 @@ public class DocumentGenServiceTest {
         when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
             .thenThrow(RuntimeException.class);
 
-        assertExpectedException(
-            () -> {
-                documentGenService.convertToPdf(AUTH_TOKEN, document);
-            },
-            NullPointerException.class,
-            "Cannot invoke \"uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo.getUrl()\" "
-                + "because \"generatedDocumentInfo\" is null"
-        );
+        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
+                                "PDF Conversion error");
     }
 
     @Test
     public void testUploadDocument() throws Exception {
-
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink =
-            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        binaryLink.href = randomAlphanumeric(10);
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink =
-            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-        selfLink.href = randomAlphanumeric(10);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = RandomStringUtils.secure().nextAlphanumeric(10);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = RandomStringUtils.secure().nextAlphanumeric(10);
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
             new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
@@ -2932,13 +2665,20 @@ public class DocumentGenServiceTest {
         uk.gov.hmcts.reform.ccd.document.am.model.Document document =
             uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphanumeric(10);
+        document.originalDocumentName = RandomStringUtils.secure().nextAlphanumeric(10);
+
+        MockMultipartFile file = new MockMultipartFile(
+            "file",
+            "hello.txt",
+            MediaType.TEXT_PLAIN_VALUE,
+            "Hello, World!".getBytes()
+        );
 
         when(uploadService.uploadDocument(any(), any(), any(), any())).thenReturn(document);
 
         documentGenService.uploadDocument(AUTH_TOKEN, file);
 
-        verify(uploadService, times(1)).uploadDocument(
+        verify(uploadService).uploadDocument(
             file.getBytes(),
             file.getOriginalFilename(),
             file.getContentType(),
@@ -2946,24 +2686,31 @@ public class DocumentGenServiceTest {
         );
 
         verifyNoMoreInteractions(uploadService);
-
     }
 
-
-    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail,
-                                                                 Class<T> expectedThrowableClass,
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
-    public void testGenerateAndUploadDocument() throws Exception {
+    public void testGenerateAndUploadDocument() {
         //Given
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
+            .build();
+
+        DocumentRequest documentRequest = DocumentRequest.builder()
+            .caseId("123")
+            .categoryId("POSITION_STATEMENTS")
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .partyName("appf appl")
+            .partyType("applicant")
+            .restrictDocumentDetails("test details")
+            .freeTextStatements("free text to generate document")
             .build();
 
         //When
@@ -3033,10 +2780,8 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
+                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
     }
 
     @Test
@@ -3070,10 +2815,8 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C8_DRAFT_WELSH));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_DRAFT_C8));
-        assertTrue(stringObjectMap.containsKey(DOCUMENT_FIELD_C1A_DRAFT_WELSH));
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
+                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
     }
 
     @Test
@@ -3114,13 +2857,13 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
-        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
-        verify(dgsService, times(1)).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
     }
 
 
@@ -3251,4 +2994,77 @@ public class DocumentGenServiceTest {
             .build();
         assertTrue(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
+
+    @Test
+    public void givenIssueCaseEvent_whenCreateIssueCaseDocuments_thenUpdateDocuments() throws Exception {
+        // Amend case data to trigger update of C1A document
+        c100CaseDataFinal = c100CaseDataFinal.toBuilder()
+            .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .build())
+            .build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            Mockito.anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(any(CaseData.class))).thenReturn(
+            c100CaseDataFinal);
+
+        Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN,
+                                                                                                    c100CaseDataFinal,
+                                                                                                    true);
+
+        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL,
+                               DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
+
+        verify(dgsService, times(3)).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        verify(dgsService, times(3)).generateWelshDocument(
+            anyString(),
+            any(CaseDetails.class),
+            any()
+        );
+        verifyNoMoreInteractions(dgsService);
+    }
+
+    private Map<String, String> createDocumentValues(String documentType) {
+        Map<String, String> documentValues = new HashMap<>();
+
+        documentValues.put("caseId", "1664294549087405");
+        documentValues.put("freeTextUploadStatements", "testing document gen");
+        documentValues.put("parentDocumentType", "Witness statements and evidence");
+        documentValues.put("documentType", documentType);
+        documentValues.put("partyName", "Sonali Citizen");
+        documentValues.put("partyId", "0c09b130-2eba-4ca8-a910-1f001bac01e6");
+        documentValues.put("documentRequestedByCourt", "No");
+        documentValues.put("isApplicant", "Yes");
+
+        return documentValues;
+    }
+
+    private void verifyDocumentsUpdated(Map<String, Object> caseData, String... documentFields) {
+        for (String documentField : documentFields) {
+            assertTrue(caseData.containsKey(documentField));
+        }
+    }
+
+    private void verifyDocumentsNotUpdated(Map<String, Object> caseData, String... documentFields) {
+        for (String documentField : documentFields) {
+            assertFalse(caseData.containsKey(documentField));
+        }
+    }
 }
+

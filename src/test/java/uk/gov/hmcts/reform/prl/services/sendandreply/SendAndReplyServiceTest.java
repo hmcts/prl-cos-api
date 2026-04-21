@@ -6,6 +6,7 @@ import feign.Request;
 import feign.Response;
 import org.apache.commons.collections.ListUtils;
 import org.assertj.core.api.Assertions;
+import org.instancio.Instancio;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1695,6 +1696,22 @@ public class SendAndReplyServiceTest {
 
     @Test
     public void testSetSenderAndGenerateMessageReplyList() {
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .senderName("Sender-ABC")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+        List<Element<Message>> messagesWithOneAdded = Arrays.asList(element(message1));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1706,7 +1723,61 @@ public class SendAndReplyServiceTest {
         Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(caseData, auth);
         MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
 
-        assertNotNull(updatedResponse.get("messageReplyDynamicList"));
+        DynamicList messageReplyDynamicList = (DynamicList) updatedResponse.get("messageReplyDynamicList");
+        assertNotNull(messageReplyDynamicList);
+        List<DynamicListElement> listItems = messageReplyDynamicList.getListItems();
+        listItems.forEach(item -> {
+            assertTrue(item.getLabel().contains(message1.getSenderName()));
+            assertTrue(item.getLabel().contains(message1.getMessageSubject()));
+        });
+        assertEquals("sender@email.com", messageMetaData.getSenderEmail());
+
+    }
+
+
+    @Test
+    public void testSetSenderAndGenerateMessageReplyListWithClientContext() {
+        // given
+        Message message1 = Message.builder()
+            .senderEmail("sender@email.com")
+            .senderName("Sender-ABC")
+            .recipientEmail("testRecipient1@email.com")
+            .messageSubject("testSubject1")
+            .messageUrgency("testUrgency1")
+            .dateSent(dateSent)
+            .messageContent("This is message 1 body")
+            .updatedTime(dateTime)
+            .status(OPEN)
+            .latestMessage("Message 1 latest message")
+            .messageHistory("")
+            .messageIdentifier("f192ceba-50a4-450d-b719-8a362ea24667")
+            .internalMessageWhoToSendTo(InternalMessageWhoToSendToEnum.COURT_ADMIN)
+            .internalMessageUrgent(YesOrNo.Yes)
+            .build();
+        List<Element<Message>> messagesWithOneAdded = Arrays.asList(element(message1));
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .messages(messagesWithOneAdded)
+                    .build())
+            .build();
+
+        // when
+        Map<String, Object> updatedResponse = sendAndReplyService.setSenderAndGenerateMessageReplyList(
+            caseData, auth, null);
+
+        // then
+        MessageMetaData messageMetaData = (MessageMetaData) updatedResponse.get("messageObject");
+
+        DynamicList messageReplyDynamicList = (DynamicList) updatedResponse.get("messageReplyDynamicList");
+        assertNotNull(messageReplyDynamicList);
+        List<DynamicListElement> listItems = messageReplyDynamicList.getListItems();
+        listItems.forEach(item -> {
+            assertTrue(item.getLabel().contains(message1.getSenderName()));
+            assertTrue(item.getLabel().contains(message1.getMessageSubject()));
+        });
         assertEquals("sender@email.com", messageMetaData.getSenderEmail());
 
     }
@@ -3635,6 +3706,23 @@ public class SendAndReplyServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyService.clearDynamicLists(callbackRequest);
         assertNull(caseDataAfterReset.getSendOrReplyMessage().getSendMessageObject().getSendReplyJudgeName().getIdamId());
+    }
+
+
+    @Test
+    public void testCheckTaskAssociatedWithMessage() {
+        // given
+        CaseData tempCaseData = Instancio.create(CaseData.class);
+        CaseData caseData = tempCaseData.toBuilder()
+            .optionSendOrReply(REPLY.name())
+            .messageIdentifier(UUID.randomUUID().toString())
+            .build();
+
+        // when
+        sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
+
+        // then
+        assertNull(caseData.getSendOrReplyMessage().getMessageReplyDynamicList());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {

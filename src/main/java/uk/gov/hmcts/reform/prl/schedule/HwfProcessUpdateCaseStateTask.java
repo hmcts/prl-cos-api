@@ -4,7 +4,7 @@ package uk.gov.hmcts.reform.prl.schedule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.services.HwfProcessUpdateCaseStateService;
+import uk.gov.hmcts.reform.prl.services.payment.HwfProcessUpdateCaseStateService;
 
 @Component
 @Slf4j

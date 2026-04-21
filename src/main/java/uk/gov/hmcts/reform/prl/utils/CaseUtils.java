@@ -72,7 +72,6 @@ import java.util.stream.IntStream;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static org.testng.util.Strings.isNotNullAndNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -92,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
@@ -419,6 +419,8 @@ public class CaseUtils {
             return BULK_SCAN;
         } else if (roles.contains(CITIZEN_ROLE)) {
             return CITIZEN;
+        } else if (roles.contains(LOCAL_AUTHORITY)) {
+            return LOCAL_AUTHORITY;
         }
 
         return CAFCASS;
@@ -645,8 +647,8 @@ public class CaseUtils {
         if (isNotEmpty(parties)) {
             applicantSolicitorList = parties.stream()
                 .map(Element::getValue)
-                .filter(partyDetails -> isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
-                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
+                .filter(partyDetails -> StringUtils.isNotEmpty(partyDetails.getRepresentativeFirstName())
+                    &&  StringUtils.isNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -659,8 +661,8 @@ public class CaseUtils {
             respondentSolicitorList = parties.stream()
                 .map(Element::getValue)
                 .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
-                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeFirstName())
-                    && isNotNullAndNotEmpty(partyDetails.getRepresentativeLastName()))
+                    &&  StringUtils.isNotEmpty(partyDetails.getRepresentativeFirstName())
+                    &&  StringUtils.isNotEmpty(partyDetails.getRepresentativeLastName()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
                 .toList();
         }
@@ -669,8 +671,8 @@ public class CaseUtils {
 
     public static String getFL401SolicitorName(PartyDetails party) {
         if (null != party
-            && isNotNullAndNotEmpty(party.getRepresentativeFirstName())
-            && isNotNullAndNotEmpty(party.getRepresentativeLastName())) {
+            && StringUtils.isNotEmpty(party.getRepresentativeFirstName())
+            && StringUtils.isNotEmpty(party.getRepresentativeLastName())) {
             return party.getRepresentativeFirstName() + " " + party.getRepresentativeLastName();
         }
         return null;
@@ -1183,5 +1185,15 @@ public class CaseUtils {
 
     public static String getContactInstructions(PartyDetails applicantsFL401) {
         return null != applicantsFL401.getApplicantContactInstructions() ? applicantsFL401.getApplicantContactInstructions() : null;
+    }
+
+    /**
+     * Checks if the case is a C100 case and has been issued by verifying the presence of an issue date.
+     *
+     * @param caseData the case data to check
+     * @return true if the case is a C100 case and has been issued, false otherwise
+     */
+    public static boolean isC100CaseIssued(CaseData caseData) {
+        return C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication()) && caseData.getIssueDate() != null;
     }
 }

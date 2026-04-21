@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.pitest.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -161,7 +160,7 @@ public class ConfidentialDetailsMapper {
     }
 
     private String getEmail(boolean emailSet, String email, CitizenDetails citizenDetails) {
-        if (!StringUtil.isNullOrEmpty(citizenDetails.getContact().getEmail())
+        if (StringUtils.isNotEmpty(citizenDetails.getContact().getEmail())
             && emailSet) {
             email = citizenDetails.getContact().getEmail();
         }

@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,6 +89,8 @@ class CaseDocumentControllerTest {
     private AuthorisationService authorisationService;
     @Mock
     private CitizenDocumentService citizenDocumentService;
+    @Mock
+    private UserInfo userInfo;
 
     @Test
     void testNotifyOtherPartiesRespondentCA() throws Exception {
@@ -258,7 +261,7 @@ class CaseDocumentControllerTest {
             .document(mockDocument)
             .build();
 
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(documentGenService.uploadDocument(AUTH_TOKEN, mockFile)).thenReturn(documentResponse);
 
@@ -443,7 +446,7 @@ class CaseDocumentControllerTest {
     void testDocumentUploadNotAuthorised() {
         MultipartFile mockFile = mock(MultipartFile.class);
 
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.empty());
 
         assertThrows(
             RuntimeException.class,
@@ -459,7 +462,7 @@ class CaseDocumentControllerTest {
             .status("SUCCESS")
             .build();
 
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(documentGenService.deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID")).thenReturn(documentResponse);
 
@@ -471,7 +474,7 @@ class CaseDocumentControllerTest {
 
     @Test
     void testDeleteDocumentNotAuthorised() {
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.empty());
 
         assertThrows(
             RuntimeException.class, () -> caseDocumentController.deleteDocument(
@@ -488,7 +491,7 @@ class CaseDocumentControllerTest {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
 
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(documentGenService.downloadDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID")).thenReturn(expectedResponse);
 
@@ -501,7 +504,7 @@ class CaseDocumentControllerTest {
 
     @Test
     void testDownloadDocumentNotAuthorised() {
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.empty());
 
         assertThrows(
             RuntimeException.class, () -> caseDocumentController.downloadDocument(
@@ -513,7 +516,7 @@ class CaseDocumentControllerTest {
 
     @Test
     void testGenerateDocumentThrowInvalidClientException() {
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.empty());
 
         DocumentRequest documentRequest = DocumentRequest.builder().build();
         assertThrows(
@@ -526,7 +529,7 @@ class CaseDocumentControllerTest {
 
     @Test
     void testGenerateDocumentThrowDocumentGenerationException() {
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(caseDocumentController.citizenGenerateDocument(AUTH_TOKEN, S2S_TOKEN, DocumentRequest.builder().build()))
             .thenThrow(DocumentGenerationException.class);
@@ -556,7 +559,7 @@ class CaseDocumentControllerTest {
             .document(Document.builder().build()).build();
 
         //When
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(documentGenService.generateAndUploadDocument(
             AUTH_TOKEN,
@@ -578,7 +581,7 @@ class CaseDocumentControllerTest {
 
     @Test
     void testSubmitCitizenDocumentsThrowInvalidClientException() {
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.empty());
 
         DocumentRequest documentRequest = DocumentRequest.builder().build();
         assertThrows(
@@ -600,7 +603,7 @@ class CaseDocumentControllerTest {
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();
 
         //When
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(citizenDocumentService.citizenSubmitDocuments(AUTH_TOKEN, documentRequest)).thenReturn(caseDetails);
 

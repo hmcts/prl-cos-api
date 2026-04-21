@@ -609,10 +609,10 @@ public class WelshLangMapper {
          * Attending the hearing.*/
         welshMap.put("isWelshNeeded_yes", "Bydd");
         welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
-        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
+        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Bydd eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
-            "Byddant eisiau darllen ac ysgrifennu yn Gymraeg"
+            "Bydd eisiau darllen ac ysgrifennu yn Gymraeg"
         );
         welshMap.put(SpokenOrWrittenWelshEnum.both.getDisplayedValue(), "Y ddau");
         welshMap.put("isInterpreterNeeded_yes", "Bydd");
@@ -1274,10 +1274,10 @@ public class WelshLangMapper {
          */
         welshMap.put("isWelshNeeded_yes", "Bydd");
         welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
-        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
+        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Bydd eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
-            "Byddant eisiau darllen ac ysgrifennu yn Gymraeg"
+            "Bydd eisiau darllen ac ysgrifennu yn Gymraeg"
         );
         welshMap.put("isInterpreterNeeded_yes", "Ydw");
         welshMap.put("isInterpreterNeeded_no", WELSH_NO_NAC_YDW);

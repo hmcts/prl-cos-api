@@ -240,6 +240,45 @@ public class Fm5ReminderServiceTest {
             .sendFm5ReminderNotifications(caseData, Fm5PendingParty.RESPONDENT);
     }
 
+    @Test
+    public void testSendFm5ReminderNotificationToBothPartiesWhenDatesAreAfterHearingAwayDays() {
+        List<Hearings> hearings = List.of(Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                .hmcStatus("LISTED")
+                .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+                    .build()))
+                .build()))
+            .build());
+
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+
+        fm5ReminderService.sendFm5ReminderNotifications(18L);
+
+        //verify
+        verify(fm5NotificationService, times(1))
+            .sendFm5ReminderNotifications(caseData, Fm5PendingParty.BOTH);
+    }
+
+    @Test
+    public void testSendFm5ReminderNotificationsToNoPartiesWhenHearingWasYesterday() {
+        List<Hearings> hearings = List.of(Hearings.hearingsWith()
+            .caseRef("123")
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                .hmcStatus("LISTED")
+                .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                    .hearingStartDateTime(LocalDateTime.now().minusDays(1))
+                    .build()))
+                .build()))
+            .build());
+        when(hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(any(), any(), anyList())).thenReturn(hearings);
+
+        fm5ReminderService.sendFm5ReminderNotifications(null);
+
+        //verify
+        verifyNoInteractions(fm5NotificationService);
+    }
 
     @Test
     public void testSendFm5ReminderNotificationsToNonePartiesWhenC1AAvailable() {

@@ -81,6 +81,8 @@ import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.deci
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.generatePartyUuidForC100;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.generatePartyUuidForFL401;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Component
@@ -429,6 +431,9 @@ public class NoticeOfChangePartiesService {
             organisations
         );
 
+        generatePartyUuidForC100(updPartyDetails);
+
+        Element<PartyDetails> updatedRepresentedRespondentElement;
         if (CARESPONDENT.equals(representing)) {
             caseData = updateRespondentFlags(partyIndex, caseData, typeOfNocEvent, updPartyDetails, partyDetailsElement);
         } else if (CAAPPLICANT.equals(representing)) {
@@ -530,6 +535,9 @@ public class NoticeOfChangePartiesService {
                 );
             }
         }
+
+        generatePartyUuidForFL401(caseData);
+
         return caseData;
     }
 

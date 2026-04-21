@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -12,7 +13,10 @@ import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRANSFERRED_COURT_FROM;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.isEmpty;
 
 @Service
 @Slf4j
@@ -34,8 +39,6 @@ public class AmendCourtService {
     private final LocationRefDataService locationRefDataService;
     private final CourtSealFinderService courtSealFinderService;
     private final ObjectMapper objectMapper;
-    private final EmailService emailService;
-    private final CaseWorkerEmailService caseWorkerEmailService;
     private final CaseSummaryTabService caseSummaryTab;
     private final DfjLookupService dfjLookupService;
 
@@ -73,19 +76,28 @@ public class AmendCourtService {
         return caseDataUpdated;
     }
 
-    public boolean validateCourtFields(CaseData caseData, List<String> errorList) {
-        if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())
-            && (caseData.getAnotherCourt() == null
-            || caseData.getCourtEmailAddress() == null)) {
-            errorList.add("Please enter court name and email address.");
-            return true;
-        } else if (CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() == null) {
-            errorList.add("Please select court name from list.");
-            return true;
-        } else if (!CollectionUtils.isEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
-            errorList.add("Please select one of the option for court name.");
-            return true;
+    public List<String> validateCourtFields(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck()) && caseData.getCourtList() != null) {
+            return List.of("Please select one of the options for court name.");
+        } else if (CollectionUtils.isNotEmpty(caseData.getCantFindCourtCheck())) {
+            List<String> errors = new ArrayList<>();
+            if (isEmpty(caseData.getAnotherCourt())) {
+                errors.add("Please enter court name.");
+            }
+            if (isEmpty(caseData.getCourtEmailAddress())) {
+                errors.add("Please enter court email address.");
+            }
+            if (!EmailUtils.isValidEmailAddress(caseData.getCourtEmailAddress())) {
+                errors.add("Please enter valid court email address.");
+            }
+            return errors;
+        } else if (CollectionUtils.isEmpty(caseData.getCantFindCourtCheck())
+            && caseData.getCourtList() == null) {
+            return List.of("Please select court name from list.");
         }
-        return false;
+        return Collections.emptyList();
     }
 }
+

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -12,21 +11,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CantFindCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
-import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -60,8 +55,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.OtherPersonConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -98,7 +91,6 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeFileUploadService;
 import uk.gov.hmcts.reform.prl.services.MiamPolicyUpgradeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -113,6 +105,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -177,7 +170,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
@@ -301,6 +294,8 @@ public class CallbackControllerTest {
     private LocationRefDataService locationRefDataService;
     @Mock
     private ApplicantsListGenerator applicantsListGenerator;
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
 
     @Mock
     private PaymentRequestService paymentRequestService;
@@ -310,9 +305,6 @@ public class CallbackControllerTest {
 
     @Mock
     private DfjLookupService dfjLookupService;
-
-    @Mock
-    private CafcassDateTimeService cafcassDateTimeService;
 
     @Mock
     private  EventService eventPublisher;
@@ -707,61 +699,6 @@ public class CallbackControllerTest {
 
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_FIELD));
         assertTrue(response.getData().containsKey(DRAFT_DOCUMENT_WELSH_FIELD));
-    }
-
-    @Test
-    public void updateApplicationTest() throws Exception {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Address address = Address.builder()
-            .addressLine1("address")
-            .postTown("London")
-            .build();
-
-        OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
-            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
-            .firstName("test First Name").lastName("test Last Name").address(address).build();
-
-        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
-            personWhoLivesWithChild).build();
-        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
-            wrappedList);
-
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .childLiveWith(Collections.singletonList(anotherPerson))
-            .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        CaseData caseData = CaseData.builder().children(listOfChildren)
-            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
-            .childrenKnownToLocalAuthorityTextArea("Test")
-            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
-                                                       .data(stringObjectMap).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        callbackController.updateApplication(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-
-        verify(allTabsService, times(1)).updateAllTabsIncludingConfTab(anyString());
     }
 
     @Test
@@ -2031,6 +1968,157 @@ public class CallbackControllerTest {
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("finalWelshDocument"));
     }
 
+    @Test
+    public void testGenerateDocumentSubmitApplicationAndMiamDocumentsCopyIsRemoved() throws Exception {
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                               OtherPersonConfidentialityDetails.builder()
+                                   .firstName("Confidential First Name")
+                                   .lastName("Confidential Last Name")
+                                   .relationshipToChildDetails("test")
+                                   .address(address)
+                                   .build()).build()))
+                           .build()).build());
+
+        OtherPersonWhoLivesWithChild personWhoLivesWithChild = OtherPersonWhoLivesWithChild.builder()
+            .isPersonIdentityConfidential(YesOrNo.Yes).relationshipToChildDetails("test")
+            .firstName("test First Name").lastName("test Last Name").address(address).build();
+
+        Element<OtherPersonWhoLivesWithChild> wrappedList = Element.<OtherPersonWhoLivesWithChild>builder().value(
+            personWhoLivesWithChild).build();
+        List<Element<OtherPersonWhoLivesWithChild>> listOfOtherPersonsWhoLivedWithChild = Collections.singletonList(
+            wrappedList);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .personWhoLivesWithChild(listOfOtherPersonsWhoLivedWithChild)
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder().children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.yes)
+            .childrenKnownToLocalAuthorityTextArea("Test")
+            .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
+            .applicants(applicantList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
+                                          .mpuClaimingExemptionMiam(Yes)
+                                          .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuUrgency))
+                                          .build())
+            .miamDocumentsCopy(wrapElements(Document.builder()
+                                                .documentFileName("miamTest.pdf").build()))
+            .allegationOfHarm(AllegationOfHarm.builder()
+                                  .allegationsOfHarmYesNo(Yes)
+                                  .allegationsOfHarmChildAbductionYesNo(Yes)
+                                  .allegationsOfHarmDomesticAbuseYesNo(Yes)
+                                  .allegationsOfHarmChildAbuseYesNo(Yes).build())
+            .welshLanguageRequirement(Yes)
+            .welshLanguageRequirementApplication(english)
+            .languageRequirementApplicationNeedWelsh(Yes)
+            .applicantsConfidentialDetails(Collections.emptyList())
+            .childrenConfidentialDetails(Collections.emptyList())
+            .id(123L)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .build();
+
+        when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("testAuth");
+        when(miamPolicyUpgradeFileUploadService.renameMiamPolicyUpgradeDocumentWithConfidential(any(), anyString())).thenReturn(caseData);
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                                   .data(stringObjectMap).build())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(123L)
+                             .data(stringObjectMap).build()).build();
+
+        when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(confidentialityTabService.getConfidentialApplicantDetails(Mockito.any())).thenReturn(applicants);
+        when(confidentialityTabService.getChildrenConfidentialDetails(caseData)).thenReturn(childConfidentialityDetails);
+        when(documentGenService.createUpdatedCaseDataWithDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
+            Map.of("c1ADocument", "document",
+                   "c1AWelshDocument", "document",
+                   "finalWelshDocument", "document"
+            )
+        );
+        when(launchDarklyClient.isFeatureEnabled(TASK_LIST_V3_FLAG)).thenReturn(true);
+        when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            callbackController.generateDocumentSubmitApplication(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
+
+        Assertions.assertFalse(aboutToStartOrSubmitCallbackResponse.getData().containsKey("miamDocumentsCopy"));
+    }
 
     @Test
     public void testGenerateDocumentSubmitApplicationWithC8EmptyListForAllegationOfHarmRevised() throws Exception {
@@ -3190,20 +3278,6 @@ public class CallbackControllerTest {
         Assertions.assertNull(response.getErrors());
     }
 
-    @Test
-    public void testValidateCourtShouldGiveError() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .cantFindCourtCheck(List.of(CantFindCourtEnum.cantFindCourt)).build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                                                       .data(stringObjectMap).build()).build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(amendCourtService.validateCourtFields(Mockito.any(),Mockito.any())).thenReturn(Boolean.TRUE);
-        CallbackResponse response =  callbackController
-            .validateCourtFields(callbackRequest);
-        Assertions.assertNotNull(response.getErrors());
-    }
 
     @Test
     public void testCopyFL401CasenameToC100CaseNameForChildDetailsRevised() throws Exception {

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
@@ -24,8 +24,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class ReviewAdditionalApplicationService {
+
+    private static final String ERROR_RETRIEVE_ADDITIONAL_APPLICATION =
+        "Unable to retrieve additional application details.";
 
     public Map<String, Object> populateReviewAdditionalApplication(CaseData caseData,
                                                                    Map<String, Object> caseDataMap,
@@ -48,11 +50,17 @@ public class ReviewAdditionalApplicationService {
         if (Event.REVIEW_ADDITIONAL_APPLICATION.getId().equals(eventId) && StringUtils.isNotEmpty(clientContext)) {
             log.info("Getting additional application id from client context");
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            additionalApplicationId = UUID.fromString(CaseUtils.getAdditionalApplicationId(waMapper));
+            String applicationId = CaseUtils.getAdditionalApplicationId(waMapper);
+            additionalApplicationId = Optional.ofNullable(applicationId).map(UUID::fromString).orElse(null);
         } else {
             log.info("Getting first additional application id from dynamic list ");
             additionalApplicationId = additionalApplicationCollection.getFirst().getId();
         }
+        if (additionalApplicationId == null) {
+            log.error("Could not find additional application details");
+            throw new IllegalStateException(ERROR_RETRIEVE_ADDITIONAL_APPLICATION);
+        }
+
         return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
     }
 

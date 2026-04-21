@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestReferenceStatusResponse;
+import uk.gov.hmcts.reform.prl.services.payment.FeeService;
+import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.math.BigDecimal;
@@ -51,8 +53,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.PAYMENT_REFERENCE;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.REDIRECT_URL;
 import static uk.gov.hmcts.reform.prl.controllers.citizen.FeesAndPaymentCitizenControllerTest.authToken;
-import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.ENG_LANGUAGE;
-import static uk.gov.hmcts.reform.prl.services.PaymentRequestService.GBP_CURRENCY;
+import static uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService.ENG_LANGUAGE;
+import static uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService.GBP_CURRENCY;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class PaymentRequestServiceTest {

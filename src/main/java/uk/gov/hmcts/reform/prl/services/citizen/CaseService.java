@@ -93,6 +93,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -721,6 +722,8 @@ public class CaseService {
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
             //add cafacss uploaded docs
             otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            //add local authority uploaded docs
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()));
             //add court staff uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
             //add citizen uploaded docs
@@ -1653,8 +1656,13 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
+                .filter(Objects::nonNull)
                 .map(Element::getValue)
-                .filter(emailNotification -> partyIdAndType.get(PARTY_ID).equals(emailNotification.getPartyIds()))
+                .filter(Objects::nonNull)
+                .filter(emailNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return Objects.equals(partyId, emailNotification.getPartyIds());
+                })
                 .map(emailNotification ->
                     getSodDocuments(
                         emailNotification.getDocs(),
@@ -1679,7 +1687,10 @@ public class CaseService {
 
             return servedDetails.getBulkPrintDetails().stream()
                 .map(Element::getValue)
-                .filter(postNotification -> partyIdAndType.get(PARTY_ID).equals(postNotification.getPartyIds()))
+                .filter(postNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return nonNull(partyId) && partyId.equals(postNotification.getPartyIds());
+                })
                 .map(postNotification ->
                          getSodDocuments(
                              postNotification.getPrintDocs(),

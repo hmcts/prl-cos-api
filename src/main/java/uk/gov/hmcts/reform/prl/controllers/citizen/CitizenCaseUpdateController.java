@@ -29,9 +29,9 @@ import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
 import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.AwpProcessHwfPaymentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService;
+import uk.gov.hmcts.reform.prl.services.payment.AwpProcessHwfPaymentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;

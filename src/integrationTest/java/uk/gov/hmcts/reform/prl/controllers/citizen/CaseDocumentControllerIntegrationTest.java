@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -90,6 +91,9 @@ public class CaseDocumentControllerIntegrationTest {
 
     @MockBean
     CitizenDocumentService citizenDocumentService;
+
+    @MockBean
+    UserInfo userInfo;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -185,7 +189,7 @@ public class CaseDocumentControllerIntegrationTest {
     public void testUploadCitizenStatementDocument() throws Exception {
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         when(documentGenService.uploadDocument(anyString(), any())).thenReturn(DocumentResponse.builder()
@@ -269,7 +273,7 @@ public class CaseDocumentControllerIntegrationTest {
     public void testUploadCitizenDocument() throws Exception {
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         when(documentGenService.uploadDocument(anyString(), any())).thenReturn(DocumentResponse.builder()
@@ -301,7 +305,7 @@ public class CaseDocumentControllerIntegrationTest {
     public void testDeleteDocument() throws Exception {
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         when(documentGenService.deleteDocument(anyString(), anyString())).thenReturn(DocumentResponse.builder()
@@ -323,7 +327,7 @@ public class CaseDocumentControllerIntegrationTest {
     public void testDownloadDocument() throws Exception {
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         MockMultipartFile file = new MockMultipartFile(
@@ -352,7 +356,7 @@ public class CaseDocumentControllerIntegrationTest {
     @Test
     public void testCitizenGenerateDocument() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         DocumentResponse documentResponse = DocumentResponse.builder()
@@ -382,7 +386,7 @@ public class CaseDocumentControllerIntegrationTest {
     @Test
     public void testCitizenSubmitDocuments() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
-        when(authorisationService.authoriseUser(anyString())).thenReturn(true);
+        when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
 
         CaseDetails caseDetails = CaseDetails.builder().id(123L).build();

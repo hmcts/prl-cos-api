@@ -8,12 +8,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 public enum InternalCaseworkerAmRolesEnum {
-    JUDGE("JUDGE", List.of("allocated-magistrate","judge")),
+    JUDGE("JUDGE", List.of("fee-paid-judge", "allocated-magistrate", "judge")),
     LEGAL_ADVISER("LEGAL_ADVISER", List.of("tribunal-caseworker", "senior-tribunal-caseworker")),
     COURT_ADMIN("COURT_ADMIN", List.of("hearing-centre-admin", "ctsc")),
     COURT_ADMIN_TEAM_LEADER("COURT_ADMIN_TEAM_LEADER", List.of("hearing-centre-admin", "ctsc", "team-leader")),
     CTSC("CTSC", List.of("ctsc")),
-    CAFCASS_CYMRU("CAFCASS_CYMRU", List.of("caseworker-privatelaw-externaluser-viewonly"));
+    CAFCASS_CYMRU("CAFCASS_CYMRU", List.of("caseworker-privatelaw-externaluser-viewonly")),
+    LOCAL_AUTHORITY("LOCAL_AUTHORITY", List.of("[LASOCIALWORKER]", "[LASOLICITOR]"));
 
     private final String user;
     private final List<String> roles;

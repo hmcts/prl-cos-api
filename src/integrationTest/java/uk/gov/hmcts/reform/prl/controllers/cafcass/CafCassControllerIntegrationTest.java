@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,17 +13,21 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataService;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.AUTHORISATION_HEADER;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_END_DATE_PARAM;
 import static uk.gov.hmcts.reform.prl.util.TestConstants.CAFCASS_END_DATE_PARAM_VALUE;
@@ -52,7 +55,10 @@ public class CafCassControllerIntegrationTest {
     private AuthTokenGenerator authTokenGenerator;
 
     @MockBean
-    CaseDataService caseDataService;
+    private UserInfo userInfo;
+
+    @MockBean
+    CafcassCaseDataService cafcassCaseDataService;
 
     @Before
     public void setUp() {
@@ -62,10 +68,11 @@ public class CafCassControllerIntegrationTest {
 
     @Test
     public void givenValidDatetimeRangeSearchCasesByCafCassControllerReturnOkStatus() throws Exception {
-        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
-        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
-        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(true);
-        Mockito.when(caseDataService.getCaseData(anyString(), anyString(), anyString()))
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(authorisationService.authoriseService("Bearer " + TEST_SERVICE_AUTH_TOKEN)).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
+        when(authorisationService.authoriseUser(TEST_AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(cafcassCaseDataService.getCaseData(anyString(), anyString(), anyString()))
             .thenReturn(CafCassResponse.builder().cases(new ArrayList<>()).build());
 
         mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
