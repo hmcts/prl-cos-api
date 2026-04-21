@@ -480,7 +480,7 @@ public class ManageDocumentsService {
                     listOfTasksForLa.add(new CafcassTasks(String.valueOf(UUID.randomUUID()), quarantineLegalDoc.getCategoryId()));
                     caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
                                         listOfTasksForLa);
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, LOCAL_AUTHORITY);
+                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole);
                 }
             } else {
 
