@@ -49,9 +49,9 @@ public class CafcassUploadDocService {
 
     public static final List<String> ALLOWED_FILE_TYPES = List.of("pdf", "docx");
 
-    static final String DOC_TYPE_CIR_TRANSFER = "cirTransferRequest";
-    static final String DOC_TYPE_CIR_EXTENSION = "cirExtensionRequest";
-    static final String DOC_TYPE_S16A_RISK_ASSESSMENT = "S_16A_Risk_Assessment";
+    public static final String DOC_TYPE_CIR_TRANSFER = "cirTransferRequest";
+    public static final String DOC_TYPE_CIR_EXTENSION = "cirExtensionRequest";
+    public static final String DOC_TYPE_S16A_RISK_ASSESSMENT = "S_16A_Risk_Assessment";
 
     public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
         DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT

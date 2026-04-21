@@ -81,6 +81,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -102,6 +105,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_STAFF;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.LOCAL_AUTHORITY;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -2969,6 +2974,117 @@ public class ManageDocumentsServiceTest {
         manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
 
         verifyNoInteractions(caseDocumentClient);
+    }
+
+    @Test
+    public void testMoveDocuments_nonConfidentialCafcassCirTransfer_isRenamedAsConfidential() {
+        setupCirRenameTestMocks();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
+            .uploaderRole("Cafcass").categoryId(DOC_TYPE_CIR_TRANSFER)
+            .cafcassQuarantineDocument(originalDoc).build();
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
+
+        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
+    }
+
+    @Test
+    public void testMoveDocuments_nonConfidentialCafcassCirExtension_isRenamedAsConfidential() {
+        setupCirRenameTestMocks();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
+            .uploaderRole("Cafcass").categoryId(DOC_TYPE_CIR_EXTENSION)
+            .cafcassQuarantineDocument(originalDoc).build();
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
+
+        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
+    }
+
+    @Test
+    public void testMoveDocuments_nonConfidentialCafcass16aRiskAssessment_isRenamedAsConfidential() {
+        setupCirRenameTestMocks();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
+            .uploaderRole("Cafcass").categoryId(SIXTEEN_A_RISK_ASSESSMENT)
+            .cafcassQuarantineDocument(originalDoc).build();
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
+
+        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
+    }
+
+    @Test
+    public void testMoveDocuments_nonConfidentialLaCirTransfer_isRenamedAsConfidential() {
+        setupCirRenameTestMocks();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
+            .uploaderRole("LOCAL_AUTHORITY").categoryId(CIR_TRANSFER_REQUEST_LA)
+            .localAuthorityQuarantineDocument(originalDoc).build();
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
+
+        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
+    }
+
+    @Test
+    public void testMoveDocuments_nonConfidentialLaCirExtension_isRenamedAsConfidential() {
+        setupCirRenameTestMocks();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
+            .uploaderRole("LOCAL_AUTHORITY").categoryId(CIR_EXTENSION_REQUEST_LA)
+            .localAuthorityQuarantineDocument(originalDoc).build();
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
+
+        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
+    }
+
+    @Test
+    public void testMoveDocuments_nonConfidentialCafcassUnrelatedCategory_isNotRenamed() {
+        setupCirRenameTestMocks();
+        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
+            .uploaderRole("Cafcass").categoryId("someOtherCategory")
+            .cafcassQuarantineDocument(originalDoc).build();
+
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
+
+        verify(manageDocumentsService, never()).renameAndReuploadFileToBeConfidential(any());
+    }
+
+    private void setupCirRenameTestMocks() {
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("test-token");
+        when(objectMapper.convertValue(any(Map.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(QuarantineLegalDoc.builder().build());
+    }
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document docWithUuid() {
+        return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("test.pdf")
+            .documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15")
+            .build();
+    }
+
+    private CaseData buildEmptyCaseData() {
+        return CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .build();
     }
 
 }

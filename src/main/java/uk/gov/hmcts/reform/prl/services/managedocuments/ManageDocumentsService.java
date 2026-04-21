@@ -44,7 +44,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -73,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -95,6 +95,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -361,25 +363,20 @@ public class ManageDocumentsService {
 
             // this renaming was done for a requirement in FPVTL-2412 even when the document is marked as 'No'
             // during review by admin
-            List<String> confidentialListForPathFinder = new ArrayList<>();
-            confidentialListForPathFinder.addAll(CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES);
-            confidentialListForPathFinder.add(CIR_EXTENSION_REQUEST_LA);
-            confidentialListForPathFinder.add(CIR_TRANSFER_REQUEST_LA);
-
-            if (CAFCASS.equals(quarantineLegalDoc.getUploaderRole()) || LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))  {
+            List<String> confidentialListForPathFinder = Arrays.asList(CIR_EXTENSION_REQUEST_LA, CIR_TRANSFER_REQUEST_LA,
+                DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, SIXTEEN_A_RISK_ASSESSMENT);
+            if ((CAFCASS.equals(quarantineLegalDoc.getUploaderRole()) || LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))
+                && confidentialListForPathFinder.contains(quarantineLegalDoc.getCategoryId())) {
                 Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
-                if (confidentialListForPathFinder.contains(quarantineLegalDoc.getDocumentType())) {
-                    Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
-                    quarantineLegalDoc = setQuarantineDocumentForUploader(
-                        ManageDocuments.builder()
-                            .document(updatedConfidentialDocument)
-                            .build(),
-                        quarantineLegalDoc.getUploaderRole(),
-                        quarantineLegalDoc
-                    );
-                }
+                Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
+                quarantineLegalDoc = setQuarantineDocumentForUploader(
+                    ManageDocuments.builder()
+                        .document(updatedConfidentialDocument)
+                        .build(),
+                    quarantineLegalDoc.getUploaderRole(),
+                    quarantineLegalDoc
+                );
             }
-
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails

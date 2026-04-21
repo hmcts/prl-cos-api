@@ -52,7 +52,6 @@ import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -81,6 +80,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -92,6 +92,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCU
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS_CYMRU;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -1348,14 +1350,15 @@ public class ReviewDocumentServiceTest {
         doCallRealMethod().when(manageDocumentsService).renameAndReuploadFileToBeConfidential(any());
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any())).thenReturn(quarantineCaseDoc);
 
-        for (String docType : CafcassUploadDocService.ALWAYS_CONFIDENTIAL_CAFCASS_DOC_TYPES) {
+        // Category IDs used by the new categoryId-based check in ManageDocumentsService
+        List<String> cafcassCategoryIds = List.of(DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, SIXTEEN_A_RISK_ASSESSMENT);
+        for (String categoryId : cafcassCategoryIds) {
             Mockito.clearInvocations(manageDocumentsService);
 
             List<Element<QuarantineLegalDoc>> quarantineDocsList = new ArrayList<>();
             QuarantineLegalDoc cafcassAlwaysConfidentialDoc = QuarantineLegalDoc.builder()
                 .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
-                .categoryId("MIAMCertificate")
-                .documentType(docType)
+                .categoryId(categoryId)
                 .uploaderRole(CAFCASS)
                 .cafcassQuarantineDocument(document)
                 .isConfidential(YesOrNo.Yes)
@@ -1385,7 +1388,7 @@ public class ReviewDocumentServiceTest {
 
             // Document still routes to regular case file tab (not confidential/restricted)
             Assert.assertNotNull(caseDataMap.get("cafcassUploadDocListDocTab"));
-            Assert.assertNull("Doc type " + docType + " should NOT go to confidential tab", caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
+            Assert.assertNull("Category " + categoryId + " should NOT go to confidential tab", caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
 
             // Verify rename was invoked once per doc type
             verify(manageDocumentsService, times(1)).renameAndReuploadFileToBeConfidential(document);
