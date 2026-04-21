@@ -3135,7 +3135,7 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("Cafcass")));
+            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
         ArrayList<ManageDocumentsService.CafcassTasks> uploadedCategory =
             (ArrayList<ManageDocumentsService.CafcassTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
         assertEquals(1, uploadedCategory.size());
@@ -3159,7 +3159,7 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("Cafcass")));
+            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
         ArrayList<ManageDocumentsService.CafcassTasks> uploadedCategory =
             (ArrayList<ManageDocumentsService.CafcassTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
         assertEquals(1, uploadedCategory.size());
@@ -3207,7 +3207,7 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("Cafcass")));
+            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
         ArrayList<ManageDocumentsService.CafcassTasks> uploadedCategory =
             (ArrayList<ManageDocumentsService.CafcassTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
         assertEquals(1, uploadedCategory.size());
@@ -3231,7 +3231,7 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("Cafcass")));
+            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
         ArrayList<ManageDocumentsService.CafcassTasks> uploadedCategory =
             (ArrayList<ManageDocumentsService.CafcassTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
         assertEquals(1, uploadedCategory.size());
@@ -3258,7 +3258,7 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("Cafcass")));
+            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
         ArrayList<ManageDocumentsService.CafcassTasks> uploadedCategory =
             (ArrayList<ManageDocumentsService.CafcassTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
         assertEquals(1, uploadedCategory.size());
@@ -3303,7 +3303,7 @@ public class ManageDocumentsServiceTest {
         );
         assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
         MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("Cafcass")));
+            Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
         ArrayList<ManageDocumentsService.CafcassTasks> uploadedCategory =
             (ArrayList<ManageDocumentsService.CafcassTasks>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
         assertEquals(1, uploadedCategory.size());
