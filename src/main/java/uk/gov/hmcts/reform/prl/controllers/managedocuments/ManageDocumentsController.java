@@ -38,7 +38,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/manage-documents")
@@ -147,7 +146,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
             callbackRequest,
             authorisation
         );
-
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        manageDocumentsService.cancelCirRequestTask(caseData, userDetails.getId());
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)

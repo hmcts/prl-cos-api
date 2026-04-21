@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
@@ -812,6 +813,24 @@ public class ManageDocumentsService {
             return !isEmpty(uploadDocListDocTab) ? uploadDocListDocTab : new ArrayList<>();
         } else {
             return !isEmpty(quarantineDocsList) ? quarantineDocsList : new ArrayList<>();
+        }
+    }
+
+    public void cancelCirRequestTask(CaseData caseData, String idamId) {
+        String caseId = String.valueOf(caseData.getId());
+        caseData.getLocalAuthorityUploadDocListDocTab
+        if (isUserAllocatedRoleForCaseLA(caseId, idamId)) {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+            );
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
         }
     }
 
