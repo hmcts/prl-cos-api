@@ -258,6 +258,7 @@ public class CafcassCaseDataService {
                 .cafcassUploadDocListDocTab(null)
                 .courtStaffUploadDocListDocTab(null)
                 .citizenUploadedDocListDocTab(null)
+                .localAuthorityUploadDocListDocTab(null)
                 .restrictedDocuments(null)
                 .confidentialDocuments(null)
                 .respondentAc8Documents(null)
