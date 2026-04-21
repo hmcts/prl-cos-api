@@ -23,7 +23,6 @@ public interface OsCourtFinderApi {
 
             return template -> {
                 template.query("key", apiKey);
-                template.query("maxresults", "1");
             };
         }
     }
