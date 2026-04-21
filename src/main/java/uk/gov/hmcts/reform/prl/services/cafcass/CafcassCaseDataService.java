@@ -892,6 +892,7 @@ public class CafcassCaseDataService {
             "data.bulkScannedDocListDocTab",
             "data.cafcassUploadDocListDocTab",
             "data.citizenUploadedDocListDocTab",
+            "data.localAuthorityUploadDocListDocTab",
             "data.restrictedDocuments",
             "data.confidentialDocuments",
             "data.respondentAc8Documents",
