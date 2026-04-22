@@ -55,7 +55,9 @@ public class CitizenDocumentsManagement {
             "importantInfoAboutAddressAndContact",
             "specialMeasures",
             "noticeOfHearing",
-            "caseSummary"
+            "caseSummary",
+            "cirExtensionRequestLa",
+            "cirTransferRequestLa"
         );
 
     public static final Set<String> otherDocumentsCategoriesForUI =
