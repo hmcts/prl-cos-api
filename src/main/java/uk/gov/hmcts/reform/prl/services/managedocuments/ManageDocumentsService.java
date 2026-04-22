@@ -818,8 +818,7 @@ public class ManageDocumentsService {
 
     public void cancelCirRequestTask(CaseData caseData, String idamId) {
         String caseId = String.valueOf(caseData.getId());
-        caseData.getLocalAuthorityUploadDocListDocTab
-        if (isUserAllocatedRoleForCaseLA(caseId, idamId)) {
+        if (isUserAllocatedRoleForCaseLA(caseId, idamId) && hasLaUploadedRequestedCIRDocs(caseData)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
@@ -832,6 +831,13 @@ public class ManageDocumentsService {
                 startAllTabsUpdateDataContent.caseDataMap()
             );
         }
+    }
+
+    private boolean hasLaUploadedRequestedCIRDocs(CaseData caseData) {
+        //flag work allocation true
+        //getLocalAuthorityUploadDocListDocTab includes all requested CIR docs in getLocalAuthorityMultipleDocuments
+
+        return false;
     }
 
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
