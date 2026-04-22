@@ -102,11 +102,10 @@ public class ConfidentialDetailsMapper {
     }
 
     private boolean checkIfLivesInRefuge(PartyDetails respondent) {
-        return ((YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown())
-            && YesNoIDontKnowV2.Yes.equals(respondent.getLiveInRefuge()))
+        return YesNoIDontKnowV2.Yes.equals(respondent.getLiveInRefuge())
             || (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()
-            && YesNoIDontKnowV2.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())));
+            && YesNoIDontKnowV2.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge()));
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,

@@ -443,7 +443,7 @@ public class UpdatePartyDetailsService {
             .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
             .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
             .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
-            .liveInRefuge(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getLiveInRefuge() : null)
+            .liveInRefuge(partyDetails.getLiveInRefuge())
             .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
                                              && YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
