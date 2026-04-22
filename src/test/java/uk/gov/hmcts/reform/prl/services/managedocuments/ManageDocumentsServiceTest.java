@@ -3082,7 +3082,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testMoveDocuments_nonConfidentialCafcassCirTransfer_isRenamedAsConfidential() {
+    public void testMoveDocumentsWhenNonConfidentialCafcassCirTransferIsRenamedAsConfidential() {
         setupCirRenameTestMocks();
         uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -3097,7 +3097,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testMoveDocuments_nonConfidentialCafcassCirExtension_isRenamedAsConfidential() {
+    public void testMoveDocumentsWhenNonConfidentialCafcassCirExtensionIsRenamedAsConfidential() {
         setupCirRenameTestMocks();
         uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -3112,7 +3112,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testMoveDocuments_nonConfidentialCafcass16aRiskAssessment_isRenamedAsConfidential() {
+    public void testMoveDocumentsWhenNonConfidentialCafcass16aRiskAssessmentIsRenamedAsConfidential() {
         setupCirRenameTestMocks();
         uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -3127,7 +3127,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testMoveDocuments_nonConfidentialLaCirTransfer_isRenamedAsConfidential() {
+    public void testMoveDocumentsWhenNonConfidentialLaCirTransferIsRenamedAsConfidential() {
         setupCirRenameTestMocks();
         uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -3142,7 +3142,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testMoveDocuments_nonConfidentialLaCirExtension_isRenamedAsConfidential() {
+    public void testMoveDocumentsWhenNonConfidentialLaCirExtensionIsRenamedAsConfidential() {
         setupCirRenameTestMocks();
         uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -3157,7 +3157,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testMoveDocuments_nonConfidentialCafcassUnrelatedCategory_isNotRenamed() {
+    public void testMoveDocumentsWhenNonConfidentialCafcassUnrelatedCategoryIsNotRenamed() {
         setupCirRenameTestMocks();
         uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
