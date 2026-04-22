@@ -280,6 +280,9 @@ public class ManageDocumentsService {
                 quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
                     quarantineLegalDoc
                 );
+            } else if (userRole.equals(COURT_ADMIN)) {
+                quarantineLegalDoc = updateQuarantineLegalDocForCourtAdmin(
+                    quarantineLegalDoc);
             }
 
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
@@ -311,6 +314,19 @@ public class ManageDocumentsService {
             .categoryName(quarantineLegalDoc.getCategoryName())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .build();
+    }
+
+    private QuarantineLegalDoc updateQuarantineLegalDocForCourtAdmin(QuarantineLegalDoc quarantineLegalDoc) {
+        if (DOC_TYPE_CIR_TRANSFER.equals(quarantineLegalDoc.getCategoryId())
+            || DOC_TYPE_CIR_EXTENSION.equals(quarantineLegalDoc.getCategoryId())
+            || SIXTEEN_A_RISK_ASSESSMENT.equals(quarantineLegalDoc.getCategoryId())) {
+            return quarantineLegalDoc.toBuilder()
+                .isConfidential(YesOrNo.Yes)
+                .categoryName(quarantineLegalDoc.getCategoryName())
+                .categoryId(quarantineLegalDoc.getCategoryId())
+                .build();
+        }
+        return quarantineLegalDoc;
     }
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,

@@ -986,6 +986,104 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void testCopyDocumentIfNotRestrictedAlwaysConfidentialCategoryWithCourtAdminRole() {
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+        uk.gov.hmcts.reform.prl.models.documents.Document uploadedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("cirTransfer.pdf")
+                .documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba")
+                .build();
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.RESPONDENT)
+            .documentCategories(DynamicList.builder().value(
+                DynamicListElement.builder().code(DOC_TYPE_CIR_TRANSFER).label("CIR Transfer Request").build()).build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uploadedDoc)
+            .build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("cirTransferRequestDocument", uploadedDoc);
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId(DOC_TYPE_CIR_TRANSFER).build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement)).build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        List<Element<QuarantineLegalDoc>> confidentialDocuments =
+            (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("confidentialDocuments");
+        assertNotNull(confidentialDocuments);
+        assertEquals(1, confidentialDocuments.size());
+        assertNull(caseDataMapUpdated.get("courtStaffUploadDocListDocTab"));
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
+
+    @Test
+    public void testCopyDocumentIfNotRestrictedWithCourtAdminRole() {
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
+        uk.gov.hmcts.reform.prl.models.documents.Document uploadedDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("other.pdf")
+                .documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba")
+                .build();
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.RESPONDENT)
+            .documentCategories(DynamicList.builder().value(
+                DynamicListElement.builder().code("MIAMCertificate").label("MIAM Certificate").build()).build())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uploadedDoc)
+            .build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("miamCertificateDocument", uploadedDoc);
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("MIAMCertificate").build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .manageDocuments(List.of(manageDocumentsElement)).build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        List<Element<QuarantineLegalDoc>> courtStaffTab =
+            (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+        assertNotNull(courtStaffTab);
+        assertEquals(1, courtStaffTab.size());
+        assertNull(caseDataMapUpdated.get("confidentialDocuments"));
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+    }
+
+    @Test
     public void testCopyDocumentIfRestrictedWithSoliRoleWithNonEmptyLegalProfUploadDocListDocTab() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
