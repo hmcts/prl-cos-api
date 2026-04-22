@@ -360,7 +360,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false);
     }
 
     @Test

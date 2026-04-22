@@ -535,13 +535,21 @@ public class SendAndReplyService {
         }
     }
 
-    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
+    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization,
+                                                        boolean includePastHearings) {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
 
         DynamicList legalAdviserList = getLegalAdviserList();
+
+        // includePastHearings=true is reserved for the WA-task chase flow
+        // (waSendOrReplyToMessages), where the user may need to message about a hearing
+        // that has already occurred. Regular send-and-reply paths pass false.
+        DynamicList hearings = includePastHearings
+            ? getAllHearingsDynamicList(authorization, s2sToken, caseReference)
+            : getFutureHearingDynamicList(authorization, s2sToken, caseReference);
 
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -561,11 +569,7 @@ public class SendAndReplyService {
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
-                                           .futureHearingsList(getFutureHearingDynamicList(
-                                               authorization,
-                                               s2sToken,
-                                               caseReference
-                                           ))
+                                           .futureHearingsList(hearings)
                                            .legalAdviserList(legalAdviserList)
                                            .build())
                     .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
@@ -601,23 +605,41 @@ public class SendAndReplyService {
         return applicantRespondentList;
     }
 
+    /**
+     * Returns a dropdown of hearings in statuses the user should message about BEFORE the hearing
+     * has occurred (in-flight: HEARING_REQUESTED, AWAITING_LISTING, LISTED, ...). This is the
+     * original pre-FPVTL-2408/2409 behaviour and is the right semantic for general messaging,
+     * additional applications, and c2 document attachment.
+     */
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
-        // FPVTL-2408/2409: use /hearings (all) rather than /getFutureHearings because HMC's
-        // "future" endpoint excludes AWAITING_ACTUALS and COMPLETED — states in which the
-        // user needs to chase a draft order. Filter client-side to the union of statuses
-        // PRL considers relevant for messaging: in-flight (future) + hearing-occurred.
-        Hearings futureHearings = hearingService.getHearings(authorization, caseId);
-        List<String> allowedStatuses = Stream
-            .concat(
+        return buildHearingDynamicList(authorization, s2sToken, caseId,
+            ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream()
+                .map(String::trim).distinct().toList());
+    }
+
+    /**
+     * Returns a dropdown of hearings in the union of future + past statuses — i.e. includes
+     * AWAITING_ACTUALS and COMPLETED. Used only by the WA-task chase flow
+     * (waSendOrReplyToMessages), where court staff need to message about a hearing that has
+     * already occurred but whose draft order is still outstanding (FPVTL-2408/2409).
+     */
+    public DynamicList getAllHearingsDynamicList(String authorization, String s2sToken, String caseId) {
+        List<String> allowed = Stream.concat(
                 ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream(),
                 ofNullable(sendAndReplyPastHearingStatuses).orElse(emptyList()).stream())
             .map(String::trim)
             .distinct()
             .toList();
+        return buildHearingDynamicList(authorization, s2sToken, caseId, allowed);
+    }
 
-        if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
+    private DynamicList buildHearingDynamicList(String authorization, String s2sToken, String caseId,
+                                                List<String> allowedStatuses) {
+        Hearings fetched = hearingService.getHearings(authorization, caseId);
 
-            List<CaseHearing> filteredHearings = futureHearings.getCaseHearings().stream()
+        if (fetched != null && fetched.getCaseHearings() != null && !fetched.getCaseHearings().isEmpty()) {
+
+            List<CaseHearing> filteredHearings = fetched.getCaseHearings().stream()
                 .filter(h -> allowedStatuses.contains(h.getHmcStatus()))
                 .toList();
 

@@ -247,7 +247,9 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                           @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest);
-        return processSendOrReplyMidEvent(authorisation, caseData);
+        // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
+        // exclusively for the WA chase flow).
+        return processSendOrReplyMidEvent(authorisation, caseData, false);
     }
 
 
@@ -260,7 +262,9 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        return processSendOrReplyMidEvent(authorisation, caseData);
+        // WA-task chase flow: include past hearings so the user can message about a
+        // hearing that has already occurred (FPVTL-2408/2409).
+        return processSendOrReplyMidEvent(authorisation, caseData, true);
     }
 
 
@@ -322,7 +326,8 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
 
-    private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData) {
+    private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData,
+                                                        boolean includePastHearings) {
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -331,7 +336,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
             }
         } else {
-            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation,
+                                                                                includePastHearings);
         }
 
         return CallbackResponse.builder().data(caseData).errors(errors).build();
