@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -64,6 +65,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -100,6 +102,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
+import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
@@ -816,9 +820,10 @@ public class ManageDocumentsService {
         }
     }
 
-    public void cancelCirRequestTask(CaseData caseData, String idamId) {
+    public void cancelCirRequestTask(CaseData caseData, String idamId, CallbackRequest callbackRequest) {
         String caseId = String.valueOf(caseData.getId());
-        if (isUserAllocatedRoleForCaseLA(caseId, idamId) && hasLaUploadedRequestedCIRDocs(caseData)) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (isUserAllocatedRoleForCaseLA(caseId, idamId) && hasLaUploadedRequestedCIRDocs(caseData, caseDataUpdated)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
@@ -833,10 +838,23 @@ public class ManageDocumentsService {
         }
     }
 
-    private boolean hasLaUploadedRequestedCIRDocs(CaseData caseData) {
-        //flag work allocation true
-        //getLocalAuthorityUploadDocListDocTab includes all requested CIR docs in getLocalAuthorityMultipleDocuments
+    public boolean hasLaUploadedRequestedCIRDocs(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        String laCirUpdateTaskSet = (String) caseDataUpdated.get("createCirUpdateTask");
+        if ("True".equals(laCirUpdateTaskSet)) {
+            Optional<List<LocalAuthorityDocumentsEnum>> laDocumentsAttachedToOrder =
+                Optional.ofNullable(caseData.getServeOrderData().getLocalAuthorityMultipleDocuments());
+            if (laDocumentsAttachedToOrder.isPresent()) {
+                Set<LocalAuthorityDocumentsEnum> cirDocuments =
+                    laDocumentsAttachedToOrder.get().stream().filter(cir -> cir.equals(LocalAuthorityDocumentsEnum.childImpactReport1)
+                        || cir.equals(LocalAuthorityDocumentsEnum.childImpactReport2)).collect(Collectors.toSet());
+                if (!cirDocuments.isEmpty()) {
+                    Set<String> localAuthorityDocumentsFromTab = caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().stream()
+                        .map(category -> category.getValue().getCategoryId()).collect(Collectors.toSet());
+                    return cirDocuments.stream().map(Enum::name).allMatch(localAuthorityDocumentsFromTab::contains);
+                }
 
+            }
+        }
         return false;
     }
 

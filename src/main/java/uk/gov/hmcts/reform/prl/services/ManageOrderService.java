@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
@@ -124,6 +125,8 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
@@ -3978,7 +3981,9 @@ public class ManageOrderService {
             log.info("setFieldsForWaTask: manageOrdersOptions did not match create/upload/custom, value was: {}",
                 manageOrdersOption);
         }
+
         setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
+        setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
@@ -3996,6 +4001,20 @@ public class ManageOrderService {
             waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
             waFieldsMap.put(
                 WA_SER_DUE_DATE, caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        }
+    }
+
+    public void setFieldsForRequestLocalAuthorityReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
+        if (Yes.equals(caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport())) {
+            Optional<List<LocalAuthorityDocumentsEnum>> laDocuments =
+                Optional.ofNullable(caseData.getServeOrderData().getLocalAuthorityMultipleDocuments());
+            if (laDocuments.isPresent()) {
+                if (!laDocuments.get().contains(LocalAuthorityDocumentsEnum.childImpactReport1)
+                    && !laDocuments.get().contains(LocalAuthorityDocumentsEnum.childImpactReport2)) {
+                    return;
+                }
+                waFieldsMap.put("createCirUpdateTask", "True");
+            }
         }
     }
 
