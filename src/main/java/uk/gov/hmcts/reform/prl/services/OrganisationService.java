@@ -170,10 +170,7 @@ public class OrganisationService {
     public Optional<Organisations> findUserOrganisation(String authorization) {
         try {
             return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));
-        } catch (FeignException.NotFound ex) {
-            log.error("Could not find org details of the logged in users ", ex);
-            return Optional.empty();
-        } catch (FeignException.Forbidden ex) {
+        } catch (FeignException.NotFound | FeignException.Forbidden ex) {
             log.error("Exception while getting org details of the logged in users ", ex);
             return Optional.empty();
         }
@@ -234,5 +231,3 @@ public class OrganisationService {
         }
     }
 }
-
-

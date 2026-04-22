@@ -544,6 +544,7 @@ import static org.mockito.Mockito.when;
             .name("Test Org")
             .build();
 
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenReturn(orgUser);
@@ -564,6 +565,7 @@ import static org.mockito.Mockito.when;
         // given
         String email = "user@malinator.com";
 
+        when(systemUserService.getSysUserToken()).thenReturn("serviceTestAuthtoken");
         when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         // simulate 404 returned by PRD when user not found
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
@@ -588,6 +590,7 @@ import static org.mockito.Mockito.when;
             .userIdentifier(userId)
             .build();
 
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(maskEmail.mask(email)).thenReturn("u**r@malinator.com");
         when(organisationApi.findUserByEmail(anyString(), anyString(), eq(email)))
             .thenReturn(orgUser);
