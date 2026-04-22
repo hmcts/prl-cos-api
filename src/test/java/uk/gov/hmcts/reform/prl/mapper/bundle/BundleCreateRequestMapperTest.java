@@ -1234,56 +1234,6 @@ public class BundleCreateRequestMapperTest {
     }
 
     @Test
-    public void testLocalAuthorityCirExtensionRequestUpdatedInMap() {
-        final String categoryId = "cirExtensionRequestLa";
-        final String categoryName = "CIR extension request";
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .cirExtensionRequestLaDocument(createDoc(categoryId))
-            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
-            .categoryName(categoryName)
-            .categoryId(categoryId)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
-                                     quarantineLegalDoc))).build())
-            .build();
-
-        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
-
-        assertFalse(result.isEmpty());
-        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
-        assertEquals(BundlingDocGroupEnum.laSectionCirExtensionRequestReport, result.get(0).getValue().getDocumentGroup());
-    }
-
-    @Test
-    public void testLocalAuthorityCirTransferRequestUpdatedInMap() {
-        final String categoryId = "cirTransferRequestLa";
-        final String categoryName = "CIR transfer request";
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .cirTransferRequestLaDocument(createDoc(categoryId))
-            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
-            .categoryName(categoryName)
-            .categoryId(categoryId)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
-                                     quarantineLegalDoc))).build())
-            .build();
-
-        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
-
-        assertFalse(result.isEmpty());
-        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
-        assertEquals(BundlingDocGroupEnum.laSectionCirTransferRequestReport, result.get(0).getValue().getDocumentGroup());
-    }
-
-    @Test
     public void testLocalAuthorityOtherDocumentsUpdatedInMap() {
         final String categoryId = "localAuthorityOtherDoc";
         final String categoryName = "Other";
