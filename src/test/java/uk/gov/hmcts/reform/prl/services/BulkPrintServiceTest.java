@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.BulkPrintException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -33,6 +34,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -177,12 +179,14 @@ public class BulkPrintServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
+        when(documentGenService.convertToPdf(anyString(), any(Document.class))).thenThrow(new PdfConversionException("PDF Conversion Error"));
+
         assertThrows(
             BulkPrintException.class,
             () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
-                                        null,
+                                        documentList,
                                         "test"
             ));
 
@@ -219,12 +223,27 @@ public class BulkPrintServiceTest {
 
     @Test
     public void sendLetterServiceWithInValidInput() {
+        // given
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+        when(documentGenService.convertToPdf(anyString(), any(Document.class))).thenThrow(new PdfConversionException("PDF Conversion Error"));
+
         assertThrows(
             BulkPrintException.class,
             () -> bulkPrintService.send("123",
                                         authToken,
                                         "abc",
-                                        null,
+                                        documentList,
                                         "test"
             )
         );
