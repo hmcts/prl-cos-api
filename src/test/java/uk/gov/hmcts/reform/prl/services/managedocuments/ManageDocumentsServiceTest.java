@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -3140,5 +3141,151 @@ public class ManageDocumentsServiceTest {
 
         assertNull(result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
         assertNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsFalseWhenCreateCirUpdateTaskNotSet() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of())
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsFalseWhenCreateCirUpdateTaskIsFalse() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of())
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("createCirUpdateTask", "False");
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsFalseWhenLaDocumentsIsNull() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(null)
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("createCirUpdateTask", "True");
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsFalseWhenNoCirDocsInOrderDocuments() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.section7Report))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(
+                                     element(QuarantineLegalDoc.builder()
+                                                 .categoryId("childImpactReport1")
+                                                 .build())))
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("createCirUpdateTask", "True");
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsTrueWhenCirDocUploadedToTab() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(
+                                     element(QuarantineLegalDoc.builder()
+                                                 .categoryId("childImpactReport1")
+                                                 .build())))
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("createCirUpdateTask", "True");
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsFalseWhenNotAllCirDocsUploadedToTab() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1,
+                                    LocalAuthorityDocumentsEnum.childImpactReport2))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(
+                                     element(QuarantineLegalDoc.builder()
+                                                 .categoryId("childImpactReport1")
+                                                 .build())))
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("createCirUpdateTask", "True");
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertFalse(result);
+    }
+
+    @Test
+    public void hasLaUploadedRequestedCirDocsReturnsTrueWhenBothCirDocsUploadedToTab() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1,
+                                    LocalAuthorityDocumentsEnum.childImpactReport2))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(
+                                     element(QuarantineLegalDoc.builder()
+                                                 .categoryId("childImpactReport1")
+                                                 .build()),
+                                     element(QuarantineLegalDoc.builder()
+                                                 .categoryId("childImpactReport2")
+                                                 .build())))
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("createCirUpdateTask", "True");
+
+        boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
+
+        Assert.assertTrue(result);
     }
 }

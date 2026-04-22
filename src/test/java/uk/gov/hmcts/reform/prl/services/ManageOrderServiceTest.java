@@ -58,6 +58,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -8133,5 +8134,103 @@ class ManageOrderServiceTest {
         assertFalse(orderCollection.isEmpty());
         // When not eligible for AHR, flag should not be Yes (can be null or No)
         assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
+    }
+
+    @Test
+    void setFieldsForRequestLocalAuthorityReportWaTaskDoesNothingWhenLocalAuthorityReportNotRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(No)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .build();
+        Map<String, Object> waFieldsMap = new HashMap<>();
+
+        manageOrderService.setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
+
+        assertFalse(waFieldsMap.containsKey("createCirUpdateTask"));
+    }
+
+    @Test
+    void setFieldsForRequestLocalAuthorityReportWaTaskDoesNothingWhenLocalAuthorityDocumentsIsNull() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(null)
+                                .build())
+            .build();
+        Map<String, Object> waFieldsMap = new HashMap<>();
+
+        manageOrderService.setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
+
+        assertFalse(waFieldsMap.containsKey("createCirUpdateTask"));
+    }
+
+    @Test
+    void setFieldsForRequestLocalAuthorityReportWaTaskDoesNothingWhenNoCirDocsInList() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.section7Report,
+                                    LocalAuthorityDocumentsEnum.section37Report))
+                                .build())
+            .build();
+        Map<String, Object> waFieldsMap = new HashMap<>();
+
+        manageOrderService.setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
+
+        assertFalse(waFieldsMap.containsKey("createCirUpdateTask"));
+    }
+
+    @Test
+    void setFieldsForRequestLocalAuthorityReportWaTaskSetsCirFlagWhenChildImpactReport1Present() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .build();
+        Map<String, Object> waFieldsMap = new HashMap<>();
+
+        manageOrderService.setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
+
+        assertEquals("True", waFieldsMap.get("createCirUpdateTask"));
+    }
+
+    @Test
+    void setFieldsForRequestLocalAuthorityReportWaTaskSetsCirFlagWhenChildImpactReport2Present() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport2))
+                                .build())
+            .build();
+        Map<String, Object> waFieldsMap = new HashMap<>();
+
+        manageOrderService.setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
+
+        assertEquals("True", waFieldsMap.get("createCirUpdateTask"));
+    }
+
+    @Test
+    void setFieldsForRequestLocalAuthorityReportWaTaskSetsCirFlagWhenBothCirDocsPresent() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1,
+                                    LocalAuthorityDocumentsEnum.childImpactReport2,
+                                    LocalAuthorityDocumentsEnum.section7Report))
+                                .build())
+            .build();
+        Map<String, Object> waFieldsMap = new HashMap<>();
+
+        manageOrderService.setFieldsForRequestLocalAuthorityReportWaTask(caseData, waFieldsMap);
+
+        assertEquals("True", waFieldsMap.get("createCirUpdateTask"));
     }
 }

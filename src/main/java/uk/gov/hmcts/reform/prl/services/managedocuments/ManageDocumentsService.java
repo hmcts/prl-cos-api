@@ -102,8 +102,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
-import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
@@ -823,7 +821,7 @@ public class ManageDocumentsService {
     public void cancelCirRequestTask(CaseData caseData, String idamId, CallbackRequest callbackRequest) {
         String caseId = String.valueOf(caseData.getId());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (isUserAllocatedRoleForCaseLA(caseId, idamId) && hasLaUploadedRequestedCIRDocs(caseData, caseDataUpdated)) {
+        if (isUserAllocatedRoleForCaseLA(caseId, idamId) && hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
@@ -838,7 +836,7 @@ public class ManageDocumentsService {
         }
     }
 
-    public boolean hasLaUploadedRequestedCIRDocs(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public boolean hasLaUploadedRequestedCirDocs(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String laCirUpdateTaskSet = (String) caseDataUpdated.get("createCirUpdateTask");
         if ("True".equals(laCirUpdateTaskSet)) {
             Optional<List<LocalAuthorityDocumentsEnum>> laDocumentsAttachedToOrder =
