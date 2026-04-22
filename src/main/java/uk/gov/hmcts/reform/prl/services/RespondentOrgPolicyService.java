@@ -47,15 +47,15 @@ public class RespondentOrgPolicyService {
 
         String caseId = String.valueOf(caseData.getId());
 
+        String caseType = CaseUtils.getCaseTypeOfApplication(caseData);
         for (int i = 0; i < respondents.size() && i < MAX_RESPONDENTS; i++) {
             PartyDetails respondent = respondents.get(i).getValue();
             if (isValidRespondent(respondent)) {
-                String policyKey = policyKey(CaseUtils.getCaseTypeOfApplication(caseData), i + 1);
-                Map<String, Object> updatedPolicy = updatePolicy(caseDataMap, policyKey, respondent, caseId);
-                if (updatedPolicy != null) {
-                    caseDataMap.put(policyKey, updatedPolicy);
-                    assignRoleIfPossible(updatedPolicy, respondent, caseId, policyKey);
-                }
+                int index1Based = i + 1;
+                String policyKey = policyKey(caseType, index1Based);
+                Map<String, Object> updatedPolicy = updatePolicy(caseDataMap, policyKey, respondent, caseId, caseType, index1Based);
+                caseDataMap.put(policyKey, updatedPolicy);
+                assignRoleIfPossible(updatedPolicy, respondent, caseId, policyKey);
             }
         }
         return caseDataMap;
@@ -72,23 +72,37 @@ public class RespondentOrgPolicyService {
         return hasRep && hasOrgId && StringUtils.isNotBlank(solicitorEmail);
     }
 
-    private Map<String, Object> updatePolicy(Map<String, Object> caseDataMap, String policyKey, PartyDetails respondent, String caseId) {
+    private Map<String, Object> updatePolicy(Map<String, Object> caseDataMap, String policyKey, PartyDetails respondent,
+                                             String caseId, String caseType, int index1Based) {
+        Map<String, Object> policyMap;
         Object existingObj = caseDataMap.get(policyKey);
-        if (!(existingObj instanceof Map<?, ?> existingPolicy)) {
-            log.warn("Policy {} missing or not a map on case {}; skipping", policyKey, caseId);
-            return null;
+
+        if (existingObj instanceof Map<?, ?> existingPolicy) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> existing = (Map<String, Object>) existingPolicy;
+            policyMap = new HashMap<>(existing);
+        } else {
+            log.info("Policy {} missing on case {}, creating new policy", policyKey, caseId);
+            policyMap = new HashMap<>();
+            policyMap.put("OrgPolicyCaseAssignedRole", getRespondentSolicitorRole(caseType, index1Based));
         }
+
         Map<String, Object> organisation = new HashMap<>();
         var solicitorOrg = respondent.getSolicitorOrg();
         organisation.put("OrganisationID", solicitorOrg.getOrganisationID());
         if (StringUtils.isNotBlank(solicitorOrg.getOrganisationName())) {
             organisation.put("OrganisationName", solicitorOrg.getOrganisationName());
         }
-        @SuppressWarnings("unchecked")
-        Map<String, Object> existingPolicyMap = (Map<String, Object>) existingPolicy;
-        Map<String, Object> updatedPolicy = new HashMap<>(existingPolicyMap);
-        updatedPolicy.put("Organisation", organisation);
-        return updatedPolicy;
+        policyMap.put("Organisation", organisation);
+        return policyMap;
+    }
+
+    private String getRespondentSolicitorRole(String caseType, int index1Based) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
+            return "[C100RESPONDENTSOLICITOR" + index1Based + "]";
+        } else {
+            return "[FL401RESPONDENTSOLICITOR]";
+        }
     }
 
     private void assignRoleIfPossible(Map<String, Object> updatedPolicy, PartyDetails respondent, String caseId, String policyKey) {

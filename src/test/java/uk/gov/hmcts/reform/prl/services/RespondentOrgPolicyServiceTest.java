@@ -163,9 +163,9 @@ class RespondentOrgPolicyServiceTest {
     }
 
     @Test
-    void shouldSkipWhenExistingPolicyIsNotAMap() {
+    void shouldCreatePolicyWhenMissing() {
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("caRespondent1Policy", "not-a-map");
+        // No policy exists
 
         PartyDetails respondent = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
@@ -173,6 +173,7 @@ class RespondentOrgPolicyServiceTest {
                               .organisationID("ORG123")
                               .organisationName("Test Org")
                               .build())
+            .solicitorEmail("test@solicitor.org")
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -184,7 +185,89 @@ class RespondentOrgPolicyServiceTest {
 
         Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
 
-        // unchanged
-        assertThat(updated.get("caRespondent1Policy")).isEqualTo("not-a-map");
+        assertThat(updated).containsKey("caRespondent1Policy");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> createdPolicy = (Map<String, Object>) updated.get("caRespondent1Policy");
+
+        assertThat(createdPolicy)
+            .containsEntry("OrgPolicyCaseAssignedRole", "[C100RESPONDENTSOLICITOR1]");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> organisation = (Map<String, Object>) createdPolicy.get("Organisation");
+
+        assertThat(organisation)
+            .containsEntry("OrganisationID", "ORG123")
+            .containsEntry("OrganisationName", "Test Org");
+    }
+
+    @Test
+    void shouldCreatePolicyForFl401WhenMissing() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("ORG456")
+                              .organisationName("DA Org")
+                              .build())
+            .solicitorEmail("da@solicitor.org")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(456L)
+            .caseTypeOfApplication("FL401")
+            .state(State.CASE_ISSUED)
+            .respondents(List.of(ElementUtils.element(respondent)))
+            .build();
+
+        Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
+
+        assertThat(updated).containsKey("daRespondent1Policy");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> createdPolicy = (Map<String, Object>) updated.get("daRespondent1Policy");
+
+        assertThat(createdPolicy)
+            .containsEntry("OrgPolicyCaseAssignedRole", "[FL401RESPONDENTSOLICITOR]");
+    }
+
+    @Test
+    void shouldCreatePolicyForSecondRespondent() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        PartyDetails respondent1 = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .build();
+
+        PartyDetails respondent2 = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("ORG789")
+                              .organisationName("Second Org")
+                              .build())
+            .solicitorEmail("second@solicitor.org")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(789L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .respondents(List.of(
+                ElementUtils.element(respondent1),
+                ElementUtils.element(respondent2)
+            ))
+            .build();
+
+        Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
+
+        assertThat(updated).containsKey("caRespondent2Policy");
+        assertThat(updated).doesNotContainKey("caRespondent1Policy");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> createdPolicy = (Map<String, Object>) updated.get("caRespondent2Policy");
+
+        assertThat(createdPolicy)
+            .containsEntry("OrgPolicyCaseAssignedRole", "[C100RESPONDENTSOLICITOR2]");
     }
 }
