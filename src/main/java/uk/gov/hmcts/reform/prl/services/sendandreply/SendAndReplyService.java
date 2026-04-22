@@ -536,7 +536,8 @@ public class SendAndReplyService {
     }
 
     public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization,
-                                                        boolean includePastHearings) {
+                                                        boolean includePastHearings,
+                                                        String lockToHearingId) {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
@@ -550,6 +551,14 @@ public class SendAndReplyService {
         DynamicList hearings = includePastHearings
             ? getAllHearingsDynamicList(authorization, s2sToken, caseReference)
             : getFutureHearingDynamicList(authorization, s2sToken, caseReference);
+
+        // lockToHearingId is set when the user opened this event from a Request Order WA
+        // task: narrow the dropdown to the hearing the task is bound to, so it appears
+        // selected and non-editable in EXUI (FPVTL-2408/2409). Falls back to the full list
+        // if the hearingId is somehow unmatched (defensive — Q4 fallback).
+        if (lockToHearingId != null) {
+            hearings = lockHearingDropdownTo(hearings, lockToHearingId);
+        }
 
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -685,6 +694,30 @@ public class SendAndReplyService {
 
     private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).toList();
+    }
+
+    /**
+     * Filters a hearings DynamicList down to the single element whose code starts with
+     * "{hearingId} - " and pre-selects it. Returns the input unchanged if no element
+     * matches — better to show the full list than nothing if the task's hearingId no
+     * longer corresponds to an HMC hearing (FPVTL-2408/2409 Q4 fallback).
+     */
+    private DynamicList lockHearingDropdownTo(DynamicList full, String hearingId) {
+        if (full == null || full.getListItems() == null || full.getListItems().isEmpty()) {
+            return full;
+        }
+        String prefix = hearingId + " - ";
+        DynamicListElement match = full.getListItems().stream()
+            .filter(e -> e.getCode() != null && e.getCode().startsWith(prefix))
+            .findFirst()
+            .orElse(null);
+        if (match == null) {
+            return full;
+        }
+        return DynamicList.builder()
+            .value(match)
+            .listItems(List.of(match))
+            .build();
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {

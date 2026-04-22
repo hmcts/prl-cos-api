@@ -248,8 +248,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
         CaseData caseData = getCaseData(callbackRequest);
         // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
-        // exclusively for the WA chase flow).
-        return processSendOrReplyMidEvent(authorisation, caseData, false);
+        // exclusively for the WA chase flow). No task context, so no hearing lock.
+        return processSendOrReplyMidEvent(authorisation, caseData, false, null);
     }
 
 
@@ -258,13 +258,25 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/send-or-reply-to-messages/mid-event-task")
     public CallbackResponse sendOrReplyToMessagesMidEventTask(@RequestHeader("Authorization")
                                                           @Parameter(hidden = true) String authorisation,
+                                                          @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
+                                                                         required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         // WA-task chase flow: include past hearings so the user can message about a
-        // hearing that has already occurred (FPVTL-2408/2409).
-        return processSendOrReplyMidEvent(authorisation, caseData, true);
+        // hearing that has already occurred. If the task's additionalProperties.hearingId
+        // is in the client-context header, lock the dropdown to that hearing
+        // (FPVTL-2408/2409).
+        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
+    }
+
+    private static String extractHearingIdFromClientContext(String clientContext) {
+        if (clientContext == null || clientContext.isBlank()) {
+            return null;
+        }
+        return CaseUtils.getHearingId(CaseUtils.getWaMapper(clientContext));
     }
 
 
@@ -327,7 +339,8 @@ public class SendAndReplyController extends AbstractCallbackController {
 
 
     private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData,
-                                                        boolean includePastHearings) {
+                                                        boolean includePastHearings,
+                                                        String lockToHearingId) {
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -337,7 +350,8 @@ public class SendAndReplyController extends AbstractCallbackController {
             }
         } else {
             caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation,
-                                                                                includePastHearings);
+                                                                                includePastHearings,
+                                                                                lockToHearingId);
         }
 
         return CallbackResponse.builder().data(caseData).errors(errors).build();

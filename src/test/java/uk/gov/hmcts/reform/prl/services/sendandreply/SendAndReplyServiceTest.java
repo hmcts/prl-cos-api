@@ -826,7 +826,7 @@ public class SendAndReplyServiceTest {
         DynamicList legalAdviserList = mock(DynamicList.class);
         when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter)).thenReturn(legalAdviserList);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false, null);
 
         assertNotNull(updatedCaseData);
         assertEquals("123 - hearingType1", updatedCaseData.getSendOrReplyMessage().getSendMessageObject()
@@ -869,7 +869,7 @@ public class SendAndReplyServiceTest {
             .build();
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
 
-        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false);
+        CaseData updatedCaseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, auth, false, null);
 
         assertNotNull(updatedCaseData);
         assertEquals("categoryId->documentURL", updatedCaseData.getSendOrReplyMessage()
@@ -3130,6 +3130,84 @@ public class SendAndReplyServiceTest {
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.getListItems().size());
         Assert.assertEquals("111 - hearingType1", result.getListItems().getFirst().getCode());
+    }
+
+    @Test
+    public void populateDynamicListsForSendAndReplyLocksDropdownToProvidedHearingId() {
+        // FPVTL-2408/2409 Step 7: WA chase flow — when lockToHearingId is given, the
+        // hearing dropdown is narrowed to the single matching element with its value set,
+        // so EXUI renders it as effectively non-editable.
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5)).build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("123").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(coreCaseDataApi.getCategoriesAndDocuments(any(), any(), any()))
+            .thenReturn(new CategoriesAndDocuments(1, List.of(), List.of()));
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2"));
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter))
+            .thenReturn(legalAdviserList);
+
+        CaseData updated = sendAndReplyService
+            .populateDynamicListsForSendAndReply(caseData, auth, true, "222");
+
+        DynamicList lockedHearings = updated.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList();
+        Assert.assertNotNull(lockedHearings);
+        Assert.assertEquals(1, lockedHearings.getListItems().size());
+        Assert.assertEquals("222 - hearingType2", lockedHearings.getListItems().getFirst().getCode());
+        Assert.assertNotNull(lockedHearings.getValue());
+        Assert.assertEquals("222 - hearingType2", lockedHearings.getValue().getCode());
+    }
+
+    @Test
+    public void populateDynamicListsForSendAndReplyFallsBackToFullListWhenHearingIdNotFound() {
+        // FPVTL-2408/2409 Q4 fallback: if the task's hearingId no longer corresponds to
+        // any HMC hearing, return the full dropdown rather than an empty/broken state.
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5)).build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("123").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(111L).hmcStatus("LISTED")
+                    .hearingType("hearingType1").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(222L).hmcStatus("COMPLETED")
+                    .hearingType("hearingType2").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
+        when(coreCaseDataApi.getCategoriesAndDocuments(any(), any(), any()))
+            .thenReturn(new CategoriesAndDocuments(1, List.of(), List.of()));
+        when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(Map.of("hearingType1", "val1", "hearingType2", "val2"));
+        DynamicList legalAdviserList = mock(DynamicList.class);
+        when(refDataUserService.getStaffDynamicList(legalAdviserDynamicListElementConverter))
+            .thenReturn(legalAdviserList);
+
+        CaseData updated = sendAndReplyService
+            .populateDynamicListsForSendAndReply(caseData, auth, true, "999");
+
+        DynamicList fallbackHearings = updated.getSendOrReplyMessage().getSendMessageObject().getFutureHearingsList();
+        Assert.assertNotNull(fallbackHearings);
+        Assert.assertEquals(2, fallbackHearings.getListItems().size());
     }
 
     @Test
