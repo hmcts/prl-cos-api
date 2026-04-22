@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -71,7 +72,8 @@ public class RespondentContactDetailsChecker implements RespondentEventChecker {
             fields.add(ofNullable(citizenDetails.get().getFirstName()));
             fields.add(ofNullable(citizenDetails.get().getLastName()));
             fields.add(ofNullable(citizenDetails.get().getDateOfBirth()));
-            Optional<YesOrNo> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
+            Optional<YesNoIDontKnowV2> isLivingInRefuge = ofNullable(citizenDetails.get().getLiveInRefuge());
+
             fields.add(isLivingInRefuge);
             Optional<Address> address = ofNullable(citizenDetails.get().getAddress());
             fields.add(address);

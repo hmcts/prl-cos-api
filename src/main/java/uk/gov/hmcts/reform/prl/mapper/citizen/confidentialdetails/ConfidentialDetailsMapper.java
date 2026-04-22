@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -102,10 +103,10 @@ public class ConfidentialDetailsMapper {
 
     private boolean checkIfLivesInRefuge(PartyDetails respondent) {
         return ((YesOrNo.Yes.equals(respondent.getIsCurrentAddressKnown())
-            && YesOrNo.Yes.equals(respondent.getLiveInRefuge()))
+            && YesNoIDontKnowV2.Yes.equals(respondent.getLiveInRefuge()))
             || (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()
-            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())));
+            && YesNoIDontKnowV2.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())));
     }
 
     private Element<ApplicantConfidentialityDetails> getRespondentConfidentialityElement(boolean addressSet,

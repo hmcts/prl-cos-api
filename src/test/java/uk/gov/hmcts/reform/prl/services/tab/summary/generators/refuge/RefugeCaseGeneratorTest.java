@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.tab.summary.generators.refuge;
 
 import org.junit.Test;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -45,7 +46,7 @@ public class RefugeCaseGeneratorTest {
         refugePartyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("Test")
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .dateOfBirth(LocalDate.of(2000, 8, 20))
             .address(address)
             .build();
@@ -75,7 +76,7 @@ public class RefugeCaseGeneratorTest {
         refugePartyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("Test")
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .dateOfBirth(LocalDate.of(2000, 8, 20))
             .address(address)
             .build();
@@ -98,7 +99,7 @@ public class RefugeCaseGeneratorTest {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("C100")
             .applicants(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
-                .liveInRefuge(YesOrNo.Yes).build()).build()))
+                .liveInRefuge(YesNoIDontKnowV2.Yes).build()).build()))
             .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                 .builder()
@@ -112,7 +113,7 @@ public class RefugeCaseGeneratorTest {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("C100")
             .respondents(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
-                .liveInRefuge(YesOrNo.Yes).build()).build()))
+                .liveInRefuge(YesNoIDontKnowV2.Yes).build()).build()))
             .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                 .builder()
@@ -126,7 +127,7 @@ public class RefugeCaseGeneratorTest {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("C100")
             .otherPartyInTheCaseRevised(List.of(Element.<PartyDetails>builder().value(PartyDetails.builder()
-                .liveInRefuge(YesOrNo.Yes).build()).build()))
+                .liveInRefuge(YesNoIDontKnowV2.Yes).build()).build()))
             .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                 .builder()
@@ -152,7 +153,7 @@ public class RefugeCaseGeneratorTest {
     public void testGenerateForFL401ApplicantRefuge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("FL401")
-                .applicantsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
+                .applicantsFL401(PartyDetails.builder().liveInRefuge(YesNoIDontKnowV2.Yes).build())
             .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                 .builder()
@@ -165,7 +166,7 @@ public class RefugeCaseGeneratorTest {
     public void testGenerateForFL401RespondentRefuge() {
         CaseSummary caseSummary = generator.generate(CaseData.builder()
             .caseTypeOfApplication("FL401")
-            .respondentsFL401(PartyDetails.builder().liveInRefuge(YesOrNo.Yes).build())
+            .respondentsFL401(PartyDetails.builder().liveInRefuge(YesNoIDontKnowV2.Yes).build())
             .build());
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().refugeCase(RefugeCase
                 .builder()
