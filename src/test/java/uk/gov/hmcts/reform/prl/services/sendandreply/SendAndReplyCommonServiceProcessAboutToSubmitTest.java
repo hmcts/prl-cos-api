@@ -31,8 +31,13 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 
 /**
  * Covers the orchestration method extracted from the controller (FPVTL-2408/2409).
- * Per-hearing tracking: lastCompletedDate is set ONLY when the current message is about
- * a hearing and has a selected hearing code. Otherwise the tracking collection is untouched.
+ * Per-hearing tracking rules after Step 6b:
+ *   - closesRequestOrderTask=false (regular /about-to-submit): tracking is NEVER touched.
+ *   - closesRequestOrderTask=true (-task /about-to-submit-task):
+ *       - No chased hearing in message: tracking is NEVER touched (short-circuit).
+ *       - Chased hearing identified: lastCompletedDate=today, lastFiredDate=null
+ *         on that entry only. Other hearings' entries are left as-is so their
+ *         in-flight guard survives.
  */
 @ExtendWith(MockitoExtension.class)
 class SendAndReplyCommonServiceProcessAboutToSubmitTest {
@@ -52,7 +57,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, caseDataMap);
+            commonService.processAboutToSubmit("auth", caseData, caseDataMap, true);
 
         @SuppressWarnings("unchecked")
         List<Element<RequestOrderHearingTracking>> tracking =
@@ -76,7 +81,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, caseDataMap);
+            commonService.processAboutToSubmit("auth", caseData, caseDataMap, true);
 
         @SuppressWarnings("unchecked")
         List<Element<RequestOrderHearingTracking>> tracking =
@@ -100,7 +105,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         @SuppressWarnings("unchecked")
         List<Element<RequestOrderHearingTracking>> tracking =
@@ -124,7 +129,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         assertThat(response.getData()).doesNotContainKey("requestOrderTaskTrackingByHearing");
     }
@@ -142,17 +147,17 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         assertThat(response.getData()).doesNotContainKey("requestOrderTaskTrackingByHearing");
     }
 
     @Test
-    void clearsLastFiredDateOnAllEntriesEvenWhenMessageNotAboutHearing() {
-        // WA completion DMN auto-completes requestSolicitorOrder on ANY send-and-reply,
-        // so we must clear in-flight state regardless of messageAbout. This prevents the
-        // cron skipping the case forever if the user's chase message was filed under
-        // APPLICATION rather than HEARING.
+    void leavesExistingTrackingUntouchedWhenMessageHasNoHearing() {
+        // Step 6b: when no chased hearing is identified, short-circuit — don't touch
+        // any existing tracking entry. (Previously we cleared lastFiredDate on every
+        // entry regardless; that's now actively wrong because request-order tasks are
+        // only auto-closed on waSendOrReplyToMessages with a specific hearing.)
         Element<RequestOrderHearingTracking> existing = Element.<RequestOrderHearingTracking>builder()
             .id(UUID.randomUUID())
             .value(RequestOrderHearingTracking.builder()
@@ -172,22 +177,20 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
-        @SuppressWarnings("unchecked")
-        List<Element<RequestOrderHearingTracking>> tracking =
-            (List<Element<RequestOrderHearingTracking>>) response.getData().get("requestOrderTaskTrackingByHearing");
-        assertThat(tracking).hasSize(1);
-        assertThat(tracking.get(0).getValue().getLastFiredDate()).isNull();
-        assertThat(tracking.get(0).getValue().getLastCompletedDate()).isNull();
+        // No tracking written to the response → the existing case-data entry stays as-is.
+        assertThat(response.getData()).doesNotContainKey("requestOrderTaskTrackingByHearing");
     }
 
     @Test
-    void clearsLastFiredDateOnOtherHearingsWhenOnlyOneAddressed() {
-        // Multi-hearing scenario: cron fired for [A, B]. User chases B via send-and-reply.
-        // B gets lastCompletedDate; A's lastFiredDate is cleared so the cron re-evaluates
-        // A on the next run (preventing A from being stuck "in flight" indefinitely).
+    void leavesOtherHearingsUntouchedWhenChasingOne() {
+        // Step 6b: multi-hearing scenario. Cron fired for [A=HEARING_ID, B=otherHearingId].
+        // User chases A via waSendOrReplyToMessages. A gets lastCompletedDate and its
+        // lastFiredDate cleared; B's entry is UNTOUCHED so its lastFiredDate guard keeps
+        // the cron from re-firing a duplicate task for B on the next run.
         String otherHearingId = "99";
+        LocalDate otherFired = LocalDate.of(2026, 4, 10);
         Element<RequestOrderHearingTracking> addressed = Element.<RequestOrderHearingTracking>builder()
             .id(UUID.randomUUID())
             .value(RequestOrderHearingTracking.builder()
@@ -199,7 +202,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .id(UUID.randomUUID())
             .value(RequestOrderHearingTracking.builder()
                 .hearingId(otherHearingId)
-                .lastFiredDate(LocalDate.of(2026, 4, 10))
+                .lastFiredDate(otherFired)
                 .build())
             .build();
         CaseData caseData = sendCaseAboutHearing(FUTURE_CODE)
@@ -207,7 +210,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .build();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         @SuppressWarnings("unchecked")
         List<Element<RequestOrderHearingTracking>> tracking =
@@ -217,11 +220,37 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
             .map(Element::getValue).filter(v -> HEARING_ID.equals(v.getHearingId())).findFirst().orElseThrow();
         RequestOrderHearingTracking unaddressedAfter = tracking.stream()
             .map(Element::getValue).filter(v -> otherHearingId.equals(v.getHearingId())).findFirst().orElseThrow();
+        // Chased hearing: completion stamped, in-flight cleared.
         assertThat(addressedAfter.getLastFiredDate()).isNull();
         assertThat(addressedAfter.getLastCompletedDate())
             .isEqualTo(LocalDate.now(ZoneId.of("Europe/London")));
-        assertThat(unaddressedAfter.getLastFiredDate()).isNull();
+        // Other hearing: UNTOUCHED.
+        assertThat(unaddressedAfter.getLastFiredDate()).isEqualTo(otherFired);
         assertThat(unaddressedAfter.getLastCompletedDate()).isNull();
+    }
+
+    @Test
+    void regularEndpointDoesNotTouchTrackingEvenWhenMessageIdentifiesHearing() {
+        // Step 6b: the regular /about-to-submit endpoint passes closesRequestOrderTask=false.
+        // Even if the user's message names a specific hearing, tracking stays untouched
+        // because the regular event doesn't close request-order tasks (completion DMN only
+        // matches waSendOrReplyToMessages after Step 1).
+        Element<RequestOrderHearingTracking> existing = Element.<RequestOrderHearingTracking>builder()
+            .id(UUID.randomUUID())
+            .value(RequestOrderHearingTracking.builder()
+                .hearingId(HEARING_ID)
+                .lastFiredDate(LocalDate.of(2026, 4, 10))
+                .build())
+            .build();
+        CaseData caseData = sendCaseAboutHearing(FUTURE_CODE)
+            .requestOrderTaskTrackingByHearing(List.of(existing))
+            .build();
+
+        AboutToStartOrSubmitCallbackResponse response =
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), false);
+
+        // No tracking written to the response → the existing case-data entry stays as-is.
+        assertThat(response.getData()).doesNotContainKey("requestOrderTaskTrackingByHearing");
     }
 
     @Test
@@ -229,7 +258,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
         CaseData caseData = sendCaseAboutHearing(FUTURE_CODE).build();
 
         AboutToStartOrSubmitCallbackResponse response =
-            commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+            commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         assertThat(response.getData()).containsEntry("CaseAccessCategory", "C100");
     }
@@ -238,7 +267,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
     void clearsTemporaryFieldsBeforeReturning() {
         CaseData caseData = sendCaseAboutHearing(FUTURE_CODE).build();
 
-        commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+        commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         verify(sendAndReplyService, org.mockito.Mockito.atLeastOnce())
             .removeTemporaryFields(any(), any(String[].class));
@@ -248,7 +277,7 @@ class SendAndReplyCommonServiceProcessAboutToSubmitTest {
     void doesNotCallCloseMessageWhenSending() {
         CaseData caseData = sendCaseAboutHearing(FUTURE_CODE).build();
 
-        commonService.processAboutToSubmit("auth", caseData, new HashMap<>());
+        commonService.processAboutToSubmit("auth", caseData, new HashMap<>(), true);
 
         verify(sendAndReplyService, never()).closeMessage(any(CaseData.class), any());
     }

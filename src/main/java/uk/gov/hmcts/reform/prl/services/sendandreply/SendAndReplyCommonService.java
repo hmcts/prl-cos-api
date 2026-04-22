@@ -106,14 +106,17 @@ public class SendAndReplyCommonService {
 
     /**
      * Orchestrates the about-to-submit callback for both /send-or-reply-to-messages/about-to-submit
-     * and its -task variant. Sends or replies to messages, clears temporary fields, stamps the
-     * case access category, and — if the message is about a specific hearing — records today as the
-     * Request Order task completion date for that hearing so the cron's per-hearing re-trigger
-     * cadence restarts from here (FPVTL-2408/2409).
+     * and its -task variant. Sends or replies to messages, clears temporary fields and stamps the
+     * case access category. When {@code closesRequestOrderTask} is true (the -task variant), also
+     * records today as the Request Order completion date for the chased hearing so the cron's
+     * per-hearing re-trigger cadence restarts from here (FPVTL-2408/2409). The regular variant
+     * passes false because after FPVTL-2408/2409 the completion DMN only closes request-order
+     * tasks on waSendOrReplyToMessages, not on the regular event.
      */
     public AboutToStartOrSubmitCallbackResponse processAboutToSubmit(String authorisation,
                                                                      CaseData caseData,
-                                                                     Map<String, Object> caseDataMap) {
+                                                                     Map<String, Object> caseDataMap,
+                                                                     boolean closesRequestOrderTask) {
         if (SEND.equals(caseData.getChooseSendOrReply())) {
             sendMessages(authorisation, caseData, caseDataMap);
         } else {
@@ -122,42 +125,42 @@ public class SendAndReplyCommonService {
 
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
         caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-        recordRequestOrderCompletionForSelectedHearing(caseData, caseDataMap);
+        if (closesRequestOrderTask) {
+            recordRequestOrderCompletionForChasedHearing(caseData, caseDataMap);
+        }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
-    private void recordRequestOrderCompletionForSelectedHearing(CaseData caseData,
-                                                                Map<String, Object> caseDataMap) {
-        List<Element<RequestOrderHearingTracking>> existing = caseData.getRequestOrderTaskTrackingByHearing() == null
-            ? List.of() : caseData.getRequestOrderTaskTrackingByHearing();
+    private void recordRequestOrderCompletionForChasedHearing(CaseData caseData,
+                                                              Map<String, Object> caseDataMap) {
         String hearingId = extractHearingIdFromCurrentMessage(caseData);
-        if (existing.isEmpty() && hearingId == null) {
+        if (hearingId == null) {
             return;
         }
 
+        List<Element<RequestOrderHearingTracking>> existing = caseData.getRequestOrderTaskTrackingByHearing() == null
+            ? List.of() : caseData.getRequestOrderTaskTrackingByHearing();
         LocalDate today = LocalDate.now(ZoneId.of("Europe/London"));
         Map<String, Element<RequestOrderHearingTracking>> byHearingId = new LinkedHashMap<>();
         existing.forEach(e -> byHearingId.put(e.getValue().getHearingId(), e));
 
-        // WA's completion DMN auto-completes the requestSolicitorOrder task on ANY
-        // send-and-reply. Clear the in-flight flag (lastFiredDate) on every tracked
-        // hearing so the cron re-evaluates cadence on the next run.
-        byHearingId.values().forEach(e -> e.getValue().setLastFiredDate(null));
-
-        if (hearingId != null) {
-            Element<RequestOrderHearingTracking> entry = byHearingId.get(hearingId);
-            if (entry != null) {
-                entry.getValue().setLastCompletedDate(today);
-            } else {
-                byHearingId.put(hearingId, Element.<RequestOrderHearingTracking>builder()
-                    .id(UUID.randomUUID())
-                    .value(RequestOrderHearingTracking.builder()
-                        .hearingId(hearingId)
-                        .lastCompletedDate(today)
-                        .build())
-                    .build());
-            }
+        Element<RequestOrderHearingTracking> entry = byHearingId.get(hearingId);
+        if (entry != null) {
+            // Per-hearing chase satisfied: stamp completion and clear the in-flight guard
+            // for this hearing only. Other hearings' entries are untouched — their tasks
+            // remain open and their lastFiredDate guard is intact, preventing duplicate
+            // fires on the next cron run.
+            entry.getValue().setLastCompletedDate(today);
+            entry.getValue().setLastFiredDate(null);
+        } else {
+            byHearingId.put(hearingId, Element.<RequestOrderHearingTracking>builder()
+                .id(UUID.randomUUID())
+                .value(RequestOrderHearingTracking.builder()
+                    .hearingId(hearingId)
+                    .lastCompletedDate(today)
+                    .build())
+                .build());
         }
 
         caseDataMap.put("requestOrderTaskTrackingByHearing", new ArrayList<>(byHearingId.values()));

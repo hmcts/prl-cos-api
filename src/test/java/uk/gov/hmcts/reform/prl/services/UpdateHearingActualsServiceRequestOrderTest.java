@@ -52,7 +52,8 @@ import static org.mockito.Mockito.when;
 /**
  * Tests for the Request Order task firing logic (FPVTL-2408/2409).
  * Per-hearing tracking: the cron reads hearings from HMC, applies per-hearing cadence,
- * and fires ENABLE_REQUEST_SOLICITOR_ORDER_TASK once per case with the updated collection.
+ * and fires ENABLE_REQUEST_SOLICITOR_ORDER_TASK once per qualifying hearing with
+ * currentHearingId set in the payload.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -178,8 +179,9 @@ class UpdateHearingActualsServiceRequestOrderTest {
     }
 
     @Test
-    void skipsCaseWhenAnyHearingHasLastFiredDateSet() {
-        // A previous cron run already fired; the task is still open in WA. Don't re-fire.
+    void skipsHearingWhenItHasLastFiredDateSet() {
+        // A previous cron run already fired for this hearing; its task is still open in WA.
+        // Per-hearing guard prevents a duplicate fire for the same hearing.
         CaseData caseData = baseCaseBuilder("FL401")
             .requestOrderTaskTrackingByHearing(List.of(
                 Element.<RequestOrderHearingTracking>builder()
@@ -191,12 +193,11 @@ class UpdateHearingActualsServiceRequestOrderTest {
                     .build()))
             .build();
         stubSearchReturning(caseData);
+        stubHearings(completedHearingEndingDaysAgo(5));
 
         service.processRequestOrderTasks();
 
         verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
-        // HMC should NOT be called — the guard short-circuits before the HMC request.
-        verify(hearingApiClient, never()).getHearingDetails(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -223,7 +224,7 @@ class UpdateHearingActualsServiceRequestOrderTest {
     }
 
     @Test
-    void firedEventCarriesUpdatedCollectionWithTodayAsLastFiredDate() {
+    void firedEventCarriesCurrentHearingIdAndUpdatedCollectionWithTodayAsLastFiredDate() {
         CaseData caseData = baseCaseBuilder("FL401").build();
         stubSearchReturning(caseData);
         stubHearings(completedHearingEndingDaysAgo(1));
@@ -234,12 +235,81 @@ class UpdateHearingActualsServiceRequestOrderTest {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
         verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
+        Map<String, Object> payload = captor.getValue();
+        assertThat(payload.get("currentHearingId")).isEqualTo(HEARING_ID);
         @SuppressWarnings("unchecked")
         List<Element<RequestOrderHearingTracking>> collection =
-            (List<Element<RequestOrderHearingTracking>>) captor.getValue().get("requestOrderTaskTrackingByHearing");
+            (List<Element<RequestOrderHearingTracking>>) payload.get("requestOrderTaskTrackingByHearing");
         assertThat(collection).hasSize(1);
         assertThat(collection.get(0).getValue().getHearingId()).isEqualTo(HEARING_ID);
         assertThat(collection.get(0).getValue().getLastFiredDate()).isEqualTo(LocalDate.now());
+    }
+
+    @Test
+    void firesOncePerQualifyingHearingEachWithItsOwnCurrentHearingId() {
+        // Three hearings on one case, all qualifying → three separate fires, each carrying
+        // its specific hearing id, so the resulting WA tasks are bound 1:1 to hearings.
+        CaseData caseData = baseCaseBuilder("FL401").build();
+        stubSearchReturning(caseData);
+        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+            .thenReturn(Hearings.hearingsWith()
+                .caseRef(CASE_ID)
+                .caseHearings(List.of(
+                    hearing("COMPLETED", "10", TODAY.minusDays(2)),
+                    hearing("COMPLETED", "20", TODAY.minusDays(2)),
+                    hearing("COMPLETED", "30", TODAY.minusDays(2))))
+                .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, times(3)).getStartUpdateForSpecificEvent(
+            eq(CASE_ID), eq(CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(allTabService, times(3))
+            .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
+        assertThat(captor.getAllValues())
+            .extracting(m -> (String) m.get("currentHearingId"))
+            .containsExactly("10", "20", "30");
+    }
+
+    @Test
+    void inMixedCaseFiresOnlyForHearingsNotAlreadyInFlight() {
+        // Three hearings: hearing 10 already has lastFiredDate set (task in flight in WA);
+        // hearings 20 and 30 are fresh. Only 20 and 30 should fire.
+        CaseData caseData = baseCaseBuilder("FL401")
+            .requestOrderTaskTrackingByHearing(List.of(
+                Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                        .hearingId("10")
+                        .lastFiredDate(LocalDate.now().minusDays(1))
+                        .build())
+                    .build()))
+            .build();
+        stubSearchReturning(caseData);
+        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+            .thenReturn(Hearings.hearingsWith()
+                .caseRef(CASE_ID)
+                .caseHearings(List.of(
+                    hearing("COMPLETED", "10", TODAY.minusDays(2)),
+                    hearing("COMPLETED", "20", TODAY.minusDays(2)),
+                    hearing("COMPLETED", "30", TODAY.minusDays(2))))
+                .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(
+            eq(CASE_ID), eq(CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(allTabService, times(2))
+            .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
+        assertThat(captor.getAllValues())
+            .extracting(m -> (String) m.get("currentHearingId"))
+            .containsExactly("20", "30");
     }
 
     @Test

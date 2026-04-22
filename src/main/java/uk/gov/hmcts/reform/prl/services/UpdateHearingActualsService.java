@@ -104,10 +104,12 @@ public class UpdateHearingActualsService {
     }
 
     /**
-     * For each candidate case, fires ENABLE_REQUEST_SOLICITOR_ORDER_TASK when the working-day
-     * cadence since the most recent anchor (last completion, last fire, or hearing date) has
-     * elapsed and no draft/saved order is yet mapped to the hearing. Cadence is 1 working day
-     * for FL401 (FPVTL-2408) and 3 working days for C100 (FPVTL-2409).
+     * For each candidate case, fires ENABLE_REQUEST_SOLICITOR_ORDER_TASK once per qualifying
+     * hearing (the unit of work is the hearing, not the case). Each event carries
+     * currentHearingId so the WA initiation DMN can bind the resulting task to that specific
+     * hearing via additionalProperties.hearingId. Cadence is 1 working day for FL401
+     * (FPVTL-2408) and 3 working days for C100 (FPVTL-2409). The per-hearing lastFiredDate
+     * guard prevents re-firing while a task for that hearing is still open.
      */
     public void processRequestOrderTasks() {
         log.info("Running Request Order task cron job...");
@@ -129,13 +131,6 @@ public class UpdateHearingActualsService {
         String caseId = String.valueOf(caseDetails.getId());
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        boolean awaitingCompletion = nullSafeCollection(caseData.getRequestOrderTaskTrackingByHearing()).stream()
-            .anyMatch(e -> e.getValue().getLastFiredDate() != null);
-        if (awaitingCompletion) {
-            log.info("Request Order: caseId={} skipping - previous fire awaiting completion", caseId);
-            return;
-        }
-
         Hearings hearings = fetchHearingsForCase(caseId);
         if (hearings == null || hearings.getCaseHearings() == null || hearings.getCaseHearings().isEmpty()) {
             log.info("Request Order: skipping caseId={} - no hearings from HMC", caseId);
@@ -154,7 +149,6 @@ public class UpdateHearingActualsService {
         nullSafeCollection(caseData.getRequestOrderTaskTrackingByHearing())
             .forEach(e -> trackingByHearingId.put(e.getValue().getHearingId(), e));
 
-        boolean fireEvent = false;
         for (CaseHearing hearing : hearings.getCaseHearings()) {
             String hearingId = hearing.getHearingID() == null ? null : String.valueOf(hearing.getHearingID());
             if (hearingId == null || !filterStatuses.contains(hearing.getHmcStatus())) {
@@ -175,6 +169,13 @@ public class UpdateHearingActualsService {
             }
 
             Element<RequestOrderHearingTracking> entry = trackingByHearingId.get(hearingId);
+            // Per-hearing in-flight guard: a task is already open for this specific hearing.
+            if (entry != null && entry.getValue().getLastFiredDate() != null) {
+                log.info("Request Order: caseId={} hearingId={} skipped - previous fire awaiting completion",
+                         caseId, hearingId);
+                continue;
+            }
+
             LocalDate lastCompleted = entry == null ? null : entry.getValue().getLastCompletedDate();
             LocalDate anchor = lastCompleted != null ? lastCompleted : hearingEndDate;
 
@@ -195,12 +196,10 @@ public class UpdateHearingActualsService {
                 trackingByHearingId.put(hearingId,
                     Element.<RequestOrderHearingTracking>builder().id(UUID.randomUUID()).value(value).build());
             }
-            fireEvent = true;
-            log.info("Request Order: caseId={} hearingId={} cadence met - firing", caseId, hearingId);
-        }
 
-        if (fireEvent) {
+            log.info("Request Order: caseId={} hearingId={} cadence met - firing", caseId, hearingId);
             Map<String, Object> caseDataUpdated = new HashMap<>();
+            caseDataUpdated.put("currentHearingId", hearingId);
             caseDataUpdated.put("requestOrderTaskTrackingByHearing", new ArrayList<>(trackingByHearingId.values()));
             triggerSystemEventForWorkAllocationTask(
                 caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), caseDataUpdated);

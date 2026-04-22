@@ -270,7 +270,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap);
+        // Regular event does not close request-order tasks (FPVTL-2408/2409).
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, false);
     }
 
 
@@ -282,7 +283,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap);
+        // WA-task variant closes the request-order task; update per-hearing tracking (FPVTL-2408/2409).
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, true);
     }
 
 
