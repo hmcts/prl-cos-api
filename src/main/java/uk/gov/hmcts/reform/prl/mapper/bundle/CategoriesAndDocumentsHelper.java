@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -30,11 +29,7 @@ public class CategoriesAndDocumentsHelper {
             String.valueOf(caseData.getId())
         );
 
-        List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
-            .sorted(Comparator.comparing(Category::getCategoryName))
-            .toList();
-
-        return parentCategories.stream()
+        return categoriesAndDocuments.getCategories().stream()
             .flatMap(this::flatMapRecursiveCategory)
             .toList();
     }
