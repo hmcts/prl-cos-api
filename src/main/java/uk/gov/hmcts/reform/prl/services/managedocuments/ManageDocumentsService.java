@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -65,7 +66,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -818,10 +819,9 @@ public class ManageDocumentsService {
         }
     }
 
-    public void cancelCirRequestTask(CaseData caseData, String idamId, CallbackRequest callbackRequest) {
+    public void cancelCirRequestTask(CaseData caseData) {
         String caseId = String.valueOf(caseData.getId());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        if (isUserAllocatedRoleForCaseLA(caseId, idamId) && hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated)) {
+        if (hasCirRequestedDocsUploaded(caseData)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
@@ -836,30 +836,17 @@ public class ManageDocumentsService {
         }
     }
 
-    public boolean hasLaUploadedRequestedCirDocs(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        String laCirUpdateTaskSet = (String) caseDataUpdated.get("createCirUpdateTask");
-        log.info("laCirUpdateTaskSet {} ", laCirUpdateTaskSet);
-        if ("True".equals(laCirUpdateTaskSet)) {
-            Optional<List<LocalAuthorityDocumentsEnum>> laDocumentsAttachedToOrder =
-                Optional.ofNullable(caseData.getServeOrderData().getLocalAuthorityMultipleDocuments());
-            log.info("laDocumentsAttachedToOrder {} ", laDocumentsAttachedToOrder);
-            if (laDocumentsAttachedToOrder.isPresent()) {
-                Set<LocalAuthorityDocumentsEnum> cirDocuments =
-                    laDocumentsAttachedToOrder.get().stream().filter(cir -> cir.equals(LocalAuthorityDocumentsEnum.childImpactReport1)
-                        || cir.equals(LocalAuthorityDocumentsEnum.childImpactReport2)).collect(Collectors.toSet());
-                log.info("cirDocuments {} ", cirDocuments);
-                if (!cirDocuments.isEmpty()) {
-                    Set<String> localAuthorityDocumentsFromTab = caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().stream()
-                        .map(category -> category.getValue().getCategoryId()).collect(Collectors.toSet());
-                    boolean flag = cirDocuments.stream().map(Enum::name).allMatch(localAuthorityDocumentsFromTab::contains);
-                    log.info("flag {} ",flag);
-                    return flag;
-                }
-
-            }
-            log.info("End of hasLaUploadedRequestedCirDocs");
-        }
-        return false;
+    public boolean hasCirRequestedDocsUploaded(CaseData caseData) {
+        return Stream.concat(
+            Optional.ofNullable(caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()).isPresent()
+                ? caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().stream() : Stream.empty(),
+            Optional.ofNullable(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()).isPresent()
+                ? caseData.getReviewDocuments().getCafcassUploadDocListDocTab().stream() : Stream.empty()
+        ).map(Element::getValue).anyMatch(
+            category -> category.getCategoryId().equals(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
+                || category.getCategoryId().equals(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
+                || category.getCategoryId().equals(CafcassCymruDocumentsEnum.childImpactReport1.getId())
+                || category.getCategoryId().equals(CafcassCymruDocumentsEnum.childImpactReport2.getId()));
     }
 
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
@@ -882,6 +869,7 @@ public class ManageDocumentsService {
         CaseData currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
 
         cleanupOldCopyOfConfidentialDocuments(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
+
     }
 
     void cleanupOldCopyOfConfidentialDocuments(String authorization, CaseData currentCaseData, CaseData previousCaseData) {

@@ -147,8 +147,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
             authorisation
         );
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        manageDocumentsService.cancelCirRequestTask(caseData, userDetails.getId(), callbackRequest);
+        manageDocumentsService.cancelCirRequestTask(caseData);
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.serveorder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -38,6 +39,11 @@ public enum CafcassCymruDocumentsEnum {
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
+    }
+
+    @JsonIgnore
+    public String getId() {
+        return id;
     }
 
     @JsonCreator
