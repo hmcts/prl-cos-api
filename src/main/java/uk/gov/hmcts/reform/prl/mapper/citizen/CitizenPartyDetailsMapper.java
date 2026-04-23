@@ -54,6 +54,7 @@ import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -471,6 +472,7 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             case SUPPORT_YOU_DURING_CASE -> {
+                System.out.println("-- citizen hearing needs is getting updated --");
                 return updateCitizenHearingNeedsDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails
@@ -545,12 +547,15 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenHearingNeedsDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        return existingPartyDetails.toBuilder()
+        System.out.println("support provided from CFE:" + citizenProvidedPartyDetails.getResponse().getSupportYouNeed());
+        PartyDetails loggedPartyDetails = existingPartyDetails.toBuilder()
             .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .supportYouNeed(citizenProvidedPartyDetails.getResponse().getSupportYouNeed())
                           .build())
             .build();
+        System.out.println("party details after:" + loggedPartyDetails);
+        return loggedPartyDetails;
     }
 
     private PartyDetails updateCitizenRemoveLegalRepresentativeFlag(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
