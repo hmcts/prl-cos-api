@@ -35,9 +35,12 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -3183,5 +3186,129 @@ public class ManageDocumentsServiceTest {
 
         assertNull(result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
         assertNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsTrueForLocalAuthorityCir1() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
+                                 .build())
+            .build();
+
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsTrueForLocalAuthorityCir2() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
+                                 .build())
+            .build();
+
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsTrueForCafcassCymruCir1() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(CafcassCymruDocumentsEnum.childImpactReport1.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .cafcassUploadDocListDocTab(List.of(element(doc)))
+                                 .build())
+            .build();
+
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsTrueForCafcassCymruCir2() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(CafcassCymruDocumentsEnum.childImpactReport2.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .cafcassUploadDocListDocTab(List.of(element(doc)))
+                                 .build())
+            .build();
+
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsFalseWhenNoCirDocs() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId("MIAMCertificate")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
+                                 .build())
+            .build();
+
+        Assert.assertFalse(manageDocumentsService.hasCirRequestedDocsUploaded(caseData));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsFalseWhenBothListsNull() {
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+
+        Assert.assertFalse(manageDocumentsService.hasCirRequestedDocsUploaded(caseData));
+    }
+
+    @Test
+    public void cancelCirRequestTaskCallsAllTabServiceWhenCirDocsPresent() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
+                                 .build())
+            .build();
+
+        when(allTabService.getStartUpdateForSpecificEvent(
+            "12345",
+            CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+        )).thenReturn(startAllTabsUpdateDataContent);
+        when(startAllTabsUpdateDataContent.authorisation()).thenReturn(auth);
+        when(startAllTabsUpdateDataContent.startEventResponse()).thenReturn(null);
+        when(startAllTabsUpdateDataContent.eventRequestData()).thenReturn(null);
+        when(startAllTabsUpdateDataContent.caseDataMap()).thenReturn(Map.of());
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder().build());
+
+        manageDocumentsService.cancelCirRequestTask(caseData);
+
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(
+            "12345",
+            CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+        );
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void cancelCirRequestTaskDoesNotCallAllTabServiceWhenNoCirDocs() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .build();
+
+        manageDocumentsService.cancelCirRequestTask(caseData);
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService, never()).submitAllTabsUpdate(any(), any(), any(), any(), any());
     }
 }
