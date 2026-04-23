@@ -2976,7 +2976,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void whenCirDocUploadedOnOrBeforeDueDate_shouldSetCirReceivedByDeadlineFlag() {
+    public void whenCirDocUploadedOnOrBeforeDueDateShouldSetCirReceivedByDeadlineFlag() {
         DynamicList cirDynamicList = DynamicList.builder()
             .value(DynamicListElement.builder().code("childImpactReport1").label("Child Impact Report 1").build())
             .build();
@@ -3019,7 +3019,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void whenCirDocUploadedAfterDueDate_shouldNotSetCirReceivedByDeadlineFlag() {
+    public void whenCirDocUploadedAfterDueDateShouldNotSetCirReceivedByDeadlineFlag() {
         DynamicList cirDynamicList = DynamicList.builder()
             .value(DynamicListElement.builder().code("childImpactReport2").label("Child Impact Report 2").build())
             .build();
@@ -3062,7 +3062,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void whenCirDocUploadedButNoCirDueDateOnCase_shouldNotSetCirFlags() {
+    public void whenCirDocUploadedButNoCirDueDateOnCaseShouldNotSetCirFlags() {
         DynamicList cirDynamicList = DynamicList.builder()
             .value(DynamicListElement.builder().code("childImpactReport1").label("Child Impact Report 1").build())
             .build();
@@ -3102,7 +3102,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void whenNonCirDocUploaded_shouldNotSetCirFlags() {
+    public void whenNonCirDocUploadedShouldNotSetCirFlags() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY)
             .documentCategories(DynamicList.builder()
@@ -3287,5 +3287,112 @@ public class ManageDocumentsServiceTest {
         boolean result = manageDocumentsService.hasLaUploadedRequestedCirDocs(caseData, caseDataUpdated);
 
         Assert.assertTrue(result);
+    }
+
+    @Test
+    public void cancelCirRequestTaskCallsAllTabServiceWhenUserIsLaAndCirDocsUploaded() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of(
+                                     element(QuarantineLegalDoc.builder().categoryId("childImpactReport1").build())))
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdatedMap = new HashMap<>();
+        caseDataUpdatedMap.put("createCirUpdateTask", "True");
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataUpdatedMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        manageDocumentsService.cancelCirRequestTask(caseData, "userId", callbackRequest);
+
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void cancelCirRequestTaskDoesNothingWhenUserIsNotLa() {
+        CaseData caseData = CaseData.builder().id(12345L).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(new HashMap<>()).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(false);
+
+        manageDocumentsService.cancelCirRequestTask(caseData, "userId", callbackRequest);
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService, never()).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void cancelCirRequestTaskDoesNothingWhenCirDocsNotYetUploadedToTab() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityMultipleDocuments(List.of(LocalAuthorityDocumentsEnum.childImpactReport1))
+                                .build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .localAuthorityUploadDocListDocTab(List.of())
+                                 .build())
+            .build();
+        Map<String, Object> caseDataUpdatedMap = new HashMap<>();
+        caseDataUpdatedMap.put("createCirUpdateTask", "True");
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataUpdatedMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(roleAssignmentService.isUserAllocatedRoleForCase(anyString(), anyString(), anyString())).thenReturn(true);
+
+        manageDocumentsService.cancelCirRequestTask(caseData, "userId", callbackRequest);
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService, never()).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void whenServeOrderDataPresentButNoDueDateSetShouldNotSetCirFlags() {
+        DynamicList cirDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("childImpactReport1").label("Child Impact Report 1").build())
+            .build();
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY)
+            .documentCategories(cirDynamicList)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        manageDocumentsElement = element(manageDocuments);
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments", manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder().build())
+            .serveOrderData(ServeOrderData.builder()
+                                .whenReportsMustBeFiledByLocalAuthority(null)
+                                .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(any(HashMap.class), eq(QuarantineLegalDoc.class)))
+            .thenReturn(QuarantineLegalDoc.builder().build());
+        when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
+                                                              .id("456").forename("test").surname("test")
+                                                              .roles(Collections.singletonList(LEGAL_ADVISER_ROLE))
+                                                              .build());
+
+        Map<String, Object> result = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        assertNull(result.get(CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE));
+        assertNull(result.get(CafcassAppConstants.CIR_UPLOADED_DATE));
     }
 }
