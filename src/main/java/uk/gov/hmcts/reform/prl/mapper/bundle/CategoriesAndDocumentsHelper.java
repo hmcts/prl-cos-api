@@ -35,7 +35,6 @@ public class CategoriesAndDocumentsHelper {
             .toList();
 
         return parentCategories.stream()
-            .flatMap(category -> category.getSubCategories().stream())
             .flatMap(this::flatMapRecursiveCategory)
             .toList();
     }
