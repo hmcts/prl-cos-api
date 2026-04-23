@@ -574,8 +574,8 @@ document:
       fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename_welsh: C8Document.pdf
     common:
-      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
-      doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_template: FL-PRL-APP-ENG-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: FL-PRL-APP-WEL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
       doc_cover_sheet_welsh_filename: WelshPrlPostDocumentCoverSheet.pdf
       prl_c21_template: FL-PRL-GOR-ENG-C21-Blank-Order-Final.docx
