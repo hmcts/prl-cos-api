@@ -73,7 +73,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
     }
 
     @Test
-    public void testAboutToSubmitOrder() throws Exception {
+    public void testOrder() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(buildRequest("order.json"))
@@ -88,7 +88,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
     }
 
     @Test
-    public void testAboutToSubmitServiceOfApplication() throws Exception {
+    public void testServiceOfApplication() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(buildRequest("service-of-application.json"))
@@ -104,7 +104,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
     }
 
     @Test
-    public void testAboutToSubmitSolicitorUploadedCaseDocument() throws Exception {
+    public void testSolicitorUploadedCaseDocument() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(buildRequest("case-document-solicitor-uploaded.json"))
@@ -118,7 +118,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
     }
 
     @Test
-    public void testAboutToSubmitSoASupportingDocument() throws Exception {
+    public void testSoASupportingDocument() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(buildRequest("service-of-application-supporting-document.json"))
@@ -131,7 +131,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
     }
 
     @Test
-    public void testAboutToSubmitApplicationWithinProceedingsC2() throws Exception {
+    public void testApplicationWithinProceedingsC2() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
         MvcResult result = mockMvc.perform(buildRequest("application-within-proceedings-c2.json"))
@@ -139,6 +139,23 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
             .andExpect(jsonPath(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE).doesNotExist())
             .andExpect(jsonPath("$.data.additionalApplicationsBundle[0].value.c2DocumentBundle.finalDocument").isEmpty())
             .andExpect(jsonPath("$.data.additionalApplicationsBundle[0].value.c2DocumentBundle.supportingEvidenceBundle", hasSize(1)))
+            .andReturn();
+
+        verifyResponseDeserialises(result);
+    }
+
+    @Test
+    public void testDraftOrderAndMessage() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        MvcResult result = mockMvc.perform(buildRequest("draft-order-and-message.json"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE).doesNotExist())
+            .andExpect(jsonPath("$.data.draftOrderCollection", hasSize(1)))
+            .andExpect(jsonPath("$.data.draftOrderCollection[0].value.orderType").exists())
+            .andExpect(jsonPath("$.data.draftOrderCollection[0].value.orderDocument").doesNotExist())
+            .andExpect(jsonPath("$.data.messages[0].value.internalMessageAttachDocs").isEmpty())
+            .andExpect(jsonPath("$.data.messages[0].value.messageIdentifier").value("79a658dd-b0ad-40e2-af7a-267a329a793c"))
             .andReturn();
 
         verifyResponseDeserialises(result);
