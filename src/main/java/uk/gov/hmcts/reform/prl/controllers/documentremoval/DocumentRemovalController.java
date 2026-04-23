@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -85,12 +86,29 @@ public class DocumentRemovalController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Document removal about to submit callback received for case id: {}", caseDetails.getId());
 
-        Map<String, Object> updatedCaseData = documentRemovalService.removeDocument(caseDetails);
+        Map<String, Object> updatedCaseData = documentRemovalService.removeDocumentFromCaseData(caseDetails);
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(updatedCaseData)
             .build();
     }
 
-    // TODO: Add in code to remove document from doc store
+    @PostMapping(path = "/submitted", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    public SubmittedCallbackResponse submitted(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws IOException {
+
+        if (!authorisationService.isAuthorized(authorisation, s2sToken)) {
+            throw (new InvalidClientException(INVALID_CLIENT));
+        }
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Document removal submitted callback received for case id: {}", caseDetails.getId());
+
+        documentRemovalService.deleteDocument(caseDetails);
+
+        return SubmittedCallbackResponse.builder()
+            .build();
+    }
 }

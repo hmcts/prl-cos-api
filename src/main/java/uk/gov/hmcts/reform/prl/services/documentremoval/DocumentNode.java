@@ -16,8 +16,4 @@ class DocumentNode {
     private String documentKey;
     private JsonNode document;
     private List<String> parentKeys;
-
-    public String getParentPath() {
-        return String.join(".", parentKeys);
-    }
 }

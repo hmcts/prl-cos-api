@@ -35,6 +35,7 @@ public class DocumentRemover {
     }
 
     private void removeDocumentFromJson(JsonNode root, String documentId) {
+        log.info("Removing document {} from JSON node", documentId);
         List<DocumentNode> documentNodesToRemove = new ArrayList<>();
 
         if (root.isObject()) {
@@ -44,7 +45,7 @@ public class DocumentRemover {
                 String fieldName = fieldNames.next();
                 JsonNode fieldValue = root.get(fieldName);
 
-                if (shouldRemoveDocument(fieldValue, documentId)) {
+                if (isNodeForDocumentId(fieldValue, documentId)) {
                     DocumentNode documentNode = new DocumentNode();
                     documentNode.setDocumentId(documentId);
                     documentNode.setDocument(fieldValue);
@@ -65,7 +66,8 @@ public class DocumentRemover {
             ((ObjectNode)documentNode.getParent()).remove(documentNode.getDocumentKey());
             int sizeAfter = parentNode.size();
 
-            log.info("Removed document node with id {}. Parent node size before: {}, after: {}", documentNode.getDocumentId(), sizeBefore, sizeAfter);
+            log.info("Removed document id {}. Parent node size before: {}, after: {}", documentNode.getDocumentId(),
+                     sizeBefore, sizeAfter);
         }
     }
 
@@ -98,10 +100,5 @@ public class DocumentRemover {
     private boolean isNodeForDocumentId(JsonNode node, String documentId) {
         return node.has(DOCUMENT_URL)
             && node.get(DOCUMENT_URL).asText().endsWith(documentId);
-    }
-
-    private boolean shouldRemoveDocument(JsonNode fieldValue, String documentId) {
-        return fieldValue.has(DOCUMENT_URL)
-            && fieldValue.get(DOCUMENT_URL).asText().endsWith(documentId);
     }
 }
