@@ -54,7 +54,6 @@ import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
