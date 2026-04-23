@@ -838,20 +838,26 @@ public class ManageDocumentsService {
 
     public boolean hasLaUploadedRequestedCirDocs(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String laCirUpdateTaskSet = (String) caseDataUpdated.get("createCirUpdateTask");
+        log.info("laCirUpdateTaskSet {} ", laCirUpdateTaskSet);
         if ("True".equals(laCirUpdateTaskSet)) {
             Optional<List<LocalAuthorityDocumentsEnum>> laDocumentsAttachedToOrder =
                 Optional.ofNullable(caseData.getServeOrderData().getLocalAuthorityMultipleDocuments());
+            log.info("laDocumentsAttachedToOrder {} ", laDocumentsAttachedToOrder);
             if (laDocumentsAttachedToOrder.isPresent()) {
                 Set<LocalAuthorityDocumentsEnum> cirDocuments =
                     laDocumentsAttachedToOrder.get().stream().filter(cir -> cir.equals(LocalAuthorityDocumentsEnum.childImpactReport1)
                         || cir.equals(LocalAuthorityDocumentsEnum.childImpactReport2)).collect(Collectors.toSet());
+                log.info("cirDocuments {} ", cirDocuments);
                 if (!cirDocuments.isEmpty()) {
                     Set<String> localAuthorityDocumentsFromTab = caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().stream()
                         .map(category -> category.getValue().getCategoryId()).collect(Collectors.toSet());
-                    return cirDocuments.stream().map(Enum::name).allMatch(localAuthorityDocumentsFromTab::contains);
+                    boolean flag = cirDocuments.stream().map(Enum::name).allMatch(localAuthorityDocumentsFromTab::contains);
+                    log.info("flag {} ",flag);
+                    return flag;
                 }
 
             }
+            log.info("End of hasLaUploadedRequestedCirDocs");
         }
         return false;
     }

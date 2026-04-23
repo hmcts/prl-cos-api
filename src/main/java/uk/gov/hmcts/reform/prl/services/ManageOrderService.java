@@ -4003,14 +4003,18 @@ public class ManageOrderService {
     }
 
     public void setFieldsForRequestLocalAuthorityReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
+        log.info("start {}", caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport());
         if (Yes.equals(caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport())) {
             Optional<List<LocalAuthorityDocumentsEnum>> laDocuments =
                 Optional.ofNullable(caseData.getServeOrderData().getLocalAuthorityMultipleDocuments());
+            log.info("laDocuments {} ", laDocuments);
             if (laDocuments.isPresent()) {
                 if (!laDocuments.get().contains(LocalAuthorityDocumentsEnum.childImpactReport1)
                     && !laDocuments.get().contains(LocalAuthorityDocumentsEnum.childImpactReport2)) {
+                    log.info("setFieldsForRequestLocalAuthorityReportWaTask 1");
                     return;
                 }
+                log.info("setFieldsForRequestLocalAuthorityReportWaTask 2");
                 waFieldsMap.put("createCirUpdateTask", "True");
             }
         }
