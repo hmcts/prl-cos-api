@@ -31,7 +31,6 @@ public class CcdCoreCaseDataService {
         boolean isRepresented
     ) {
         if (isRepresented) {
-            log.info("About to start Event for CaseWorker");
             return coreCaseDataApi.startEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -42,7 +41,6 @@ public class CcdCoreCaseDataService {
                 eventRequestData.getEventId()
             );
         } else {
-            log.info("About to start Event for Citizen");
             return coreCaseDataApi.startEventForCitizen(
                 authorisation,
                 authTokenGenerator.generate(),

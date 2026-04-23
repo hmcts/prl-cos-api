@@ -40,7 +40,6 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -70,15 +69,10 @@ public class UpdateHearingActualsService {
         try {
             if (isNotEmpty(caseDetailsList)) {
                 log.info("Cases exist with current hearing");
-                List<String> listOfCaseidsForHearings = emptyIfNull(getListOfCaseidsForHearings(
-                    caseDetailsList));
-                log.info("listOfCaseidsForHearings==>{}", listOfCaseidsForHearings);
-                listOfCaseidsForHearings.forEach(caseId -> log.info("caseId ==>{}", caseId));
-                Map<String, List<String>> caseIds = fetchAndFilterHearingsForTodaysDate(listOfCaseidsForHearings);
-                log.info("fetchAndFilterHearingsForTodaysDate caseIds {}", caseIds);
                 createUpdateHearingActualWaTask(
                     caseDetailsList,
-                    caseIds
+                    fetchAndFilterHearingsForTodaysDate(getListOfCaseidsForHearings(
+                        caseDetailsList))
                 );
             }
         } catch (Exception e) {

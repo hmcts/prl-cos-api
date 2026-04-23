@@ -79,7 +79,6 @@ public class HearingsManagementController extends AbstractCallbackController {
             throw new HearingManagementValidationException("Provide a valid s2s token");
         } else {
             log.info("Updating hearing request state change to {} for case {} ", caseState, hearingRequest.getCaseRef());
-            log.info("Hearing request {} ", hearingRequest);
             hearingManagementService.caseStateChangeForHearingManagement(hearingRequest,caseState);
         }
     }

@@ -50,5 +50,4 @@ public class Match {
     @JsonProperty("data.orderCollection.value.orderType")
     private String orderType;
 
-
 }
