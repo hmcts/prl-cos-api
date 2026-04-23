@@ -170,9 +170,6 @@ public class ManageDocumentsControllerTest {
 
     @Test
     public void testHandleSubmitted() {
-        UserDetails userDetails = UserDetails.builder().id("userId").build();
-        when(userService.getUserDetails(auth)).thenReturn(userDetails);
-
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
         abc.getBody().getConfirmationHeader();
         Assert.assertEquals("# Cyflwynwyd y ddogfen<br/>Documents submitted",abc.getBody().getConfirmationHeader());
