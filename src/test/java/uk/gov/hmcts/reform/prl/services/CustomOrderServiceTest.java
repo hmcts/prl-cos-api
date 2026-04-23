@@ -511,6 +511,27 @@ class CustomOrderServiceTest {
     }
 
     @Test
+    void testBuildHeaderPlaceholders_legalAdviserAlone_usesNameAsJudgeName() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser)
+                .build())
+            .justiceLegalAdviserFullName("Jane Advisor")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Jane Advisor", placeholders.get("judgeName"));
+        assertEquals("Justices' Legal Adviser", placeholders.get("judgeTitle"));
+        assertEquals("", placeholders.get("sittingWithLegalAdviser"));
+    }
+
+    @Test
     void testBuildHeaderPlaceholders_legalAdviserClausePopulated() throws IOException {
         Long caseId = 1234567890123456L;
         CaseData caseData = CaseData.builder()
@@ -524,6 +545,51 @@ class CustomOrderServiceTest {
 
         Map<String, Object> placeholders = placeholdersCaptor.getValue();
         assertEquals(" sitting with Justices' Legal Adviser Jane Advisor", placeholders.get("sittingWithLegalAdviser"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_judgeAlone_noSittingWithClause() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
+                .build())
+            .judgeOrMagistratesLastName("Smith")
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Smith", placeholders.get("judgeName"));
+        assertEquals("District Judge", placeholders.get("judgeTitle"));
+        assertEquals("", placeholders.get("sittingWithLegalAdviser"));
+    }
+
+    @Test
+    void testBuildHeaderPlaceholders_magistrateAlone_noSittingWithClause() throws IOException {
+        Long caseId = 1234567890123456L;
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate)
+                .build())
+            .magistrateLastName(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>builder()
+                    .value(uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
+                        .lastName("Jones").build())
+                    .build()))
+            .build();
+
+        byte[] renderedBytes = new byte[]{1, 2, 3};
+        when(poiTlDocxRenderer.render(any(), placeholdersCaptor.capture())).thenReturn(renderedBytes);
+
+        customOrderService.renderHeaderPreview(caseId, caseData, null);
+
+        Map<String, Object> placeholders = placeholdersCaptor.getValue();
+        assertEquals("Jones", placeholders.get("judgeName"));
+        assertEquals("", placeholders.get("sittingWithLegalAdviser"));
     }
 
     @Test
