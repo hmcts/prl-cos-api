@@ -802,6 +802,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private List<Element<RequestOrderHearingTracking>> requestOrderTaskTrackingByHearing;
 
+    private List<Element<UpdateHearingActualTracking>> updateHearingActualTracking;
+
     @JsonUnwrapped
     private RemoveDraftOrderFields removeDraftOrderFields;
 

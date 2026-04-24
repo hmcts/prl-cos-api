@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.UpdateHearingActualTracking;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
@@ -48,7 +49,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -95,11 +99,56 @@ public class UpdateHearingActualsService {
                 log.info("Cases exist with current hearing");
                 Map<String, List<String>> hearingsForToday = fetchAndFilterHearingsForTodaysDate(
                     getListOfCaseidsForHearings(caseDetailsList));
-                hearingsForToday.keySet().forEach(caseId -> triggerSystemEventForWorkAllocationTask(
-                    caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>()));
+                hearingsForToday.forEach(processHearings(caseDetailsList));
             }
         } catch (Exception e) {
             log.error("Error while updating hearing actuals", e);
+        }
+    }
+
+    private BiConsumer<String, List<String>> processHearings(List<CaseDetails> caseDetailsList) {
+        return (caseId, hearingIds) -> {
+            CaseDetails caseDetail = caseDetailsList.stream()
+                .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
+                .findFirst().orElse(null);
+            if (nonNull(caseDetail)) {
+                CaseData caseData = CaseUtils.getCaseData(caseDetail, objectMapper);
+                Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId = new LinkedHashMap<>();
+                nullSafeCollection(caseData.getUpdateHearingActualTracking())
+                    .forEach(e -> trackingByHearingId.put(e.getValue().getHearingId(), e));
+                hearingIds.forEach(hearingId -> processIndividualHearing(caseId, hearingId, trackingByHearingId));
+            }
+
+        };
+    }
+
+    private void processIndividualHearing(String caseId, String hearingId, Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId) {
+        Element<UpdateHearingActualTracking> entry = trackingByHearingId.get(hearingId);
+        if (isNull(entry) || isNull(entry.getValue().getLastFiredDate())) {
+            LocalDate today = LocalDate.now();
+            if (entry != null) {
+                entry.getValue().setLastFiredDate(today);
+            } else {
+                UpdateHearingActualTracking updateHearingActualTracking = UpdateHearingActualTracking.builder()
+                    .hearingId(hearingId)
+                    .lastFiredDate(today)
+                    .build();
+                trackingByHearingId.put(
+                    hearingId,
+                    Element.<UpdateHearingActualTracking>builder().id(UUID.randomUUID())
+                        .value(updateHearingActualTracking)
+                        .build()
+                );
+            }
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            caseDataUpdated.put(
+                "updateHearingActualTracking",
+                new ArrayList<>(trackingByHearingId.values())
+            );
+            triggerSystemEventForWorkAllocationTask(
+                caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), caseDataUpdated);
+        } else {
+            log.info("UpdateHearingActual Task has already been created for hearingId {}", hearingId);
         }
     }
 
