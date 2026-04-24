@@ -816,3 +816,7 @@ acro:
     remote-directory: /
     password: some_password
 
+bankHolidays:
+  api:
+    url: https://www.gov.uk
+

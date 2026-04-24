@@ -15,6 +15,10 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
+import uk.gov.hmcts.reform.prl.models.wa.ClientContext;
+import uk.gov.hmcts.reform.prl.models.wa.TaskData;
+import uk.gov.hmcts.reform.prl.models.wa.UserTask;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.text.DateFormat;
@@ -26,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -262,13 +265,11 @@ public class CommonUtils {
         }
 
         return ofNullable(waMapper)
-            .map(value -> value
-                .getClientContext()
-                .getUserTask())
-            .filter(Objects::nonNull)
-            .map(value -> value
-                .getTaskData()
-                .getAdditionalProperties()
-                .getMessageIdentifier()).orElse(null);
+            .map(WaMapper::getClientContext)
+            .map(ClientContext::getUserTask)
+            .map(UserTask::getTaskData)
+            .map(TaskData::getAdditionalProperties)
+            .map(AdditionalProperties::getMessageIdentifier)
+            .orElse(null);
     }
 }

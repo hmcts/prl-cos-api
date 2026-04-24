@@ -3,17 +3,31 @@ package uk.gov.hmcts.reform.prl.services.sendandreply;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageAboutEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
+import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
+import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 
 @Service
 @Slf4j
@@ -88,6 +102,88 @@ public class SendAndReplyCommonService {
 
         //WA - clear reply field in case of SEND
         sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
+    }
+
+    /**
+     * Orchestrates the about-to-submit callback for both /send-or-reply-to-messages/about-to-submit
+     * and its -task variant. Sends or replies to messages, clears temporary fields and stamps the
+     * case access category. When {@code closesRequestOrderTask} is true (the -task variant), also
+     * records today as the Request Order completion date for the chased hearing so the cron's
+     * per-hearing re-trigger cadence restarts from here (FPVTL-2408/2409). The regular variant
+     * passes false because after FPVTL-2408/2409 the completion DMN only closes request-order
+     * tasks on waSendOrReplyToMessages, not on the regular event.
+     */
+    public AboutToStartOrSubmitCallbackResponse processAboutToSubmit(String authorisation,
+                                                                     CaseData caseData,
+                                                                     Map<String, Object> caseDataMap,
+                                                                     boolean closesRequestOrderTask) {
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
+            sendMessages(authorisation, caseData, caseDataMap);
+        } else {
+            replyMessages(authorisation, caseData, caseDataMap);
+        }
+
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
+        if (closesRequestOrderTask) {
+            recordRequestOrderCompletionForChasedHearing(caseData, caseDataMap);
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
+
+    private void recordRequestOrderCompletionForChasedHearing(CaseData caseData,
+                                                              Map<String, Object> caseDataMap) {
+        String hearingId = extractHearingIdFromCurrentMessage(caseData);
+        if (hearingId == null) {
+            return;
+        }
+
+        List<Element<RequestOrderHearingTracking>> existing = caseData.getRequestOrderTaskTrackingByHearing() == null
+            ? List.of() : caseData.getRequestOrderTaskTrackingByHearing();
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/London"));
+        Map<String, Element<RequestOrderHearingTracking>> byHearingId = new LinkedHashMap<>();
+        existing.forEach(e -> byHearingId.put(e.getValue().getHearingId(), e));
+
+        Element<RequestOrderHearingTracking> entry = byHearingId.get(hearingId);
+        if (entry != null) {
+            // Per-hearing chase satisfied: stamp completion and clear the in-flight guard
+            // for this hearing only. Other hearings' entries are untouched — their tasks
+            // remain open and their lastFiredDate guard is intact, preventing duplicate
+            // fires on the next cron run.
+            entry.getValue().setLastCompletedDate(today);
+            entry.getValue().setLastFiredDate(null);
+        } else {
+            byHearingId.put(hearingId, Element.<RequestOrderHearingTracking>builder()
+                .id(UUID.randomUUID())
+                .value(RequestOrderHearingTracking.builder()
+                    .hearingId(hearingId)
+                    .lastCompletedDate(today)
+                    .build())
+                .build());
+        }
+
+        caseDataMap.put("requestOrderTaskTrackingByHearing", new ArrayList<>(byHearingId.values()));
+    }
+
+    private String extractHearingIdFromCurrentMessage(CaseData caseData) {
+        SendOrReplyMessage wrapper = caseData.getSendOrReplyMessage();
+        if (wrapper == null) {
+            return null;
+        }
+        Message message = SEND.equals(caseData.getChooseSendOrReply())
+            ? wrapper.getSendMessageObject()
+            : wrapper.getReplyMessageObject();
+        if (message == null
+            || !MessageAboutEnum.HEARING.equals(message.getMessageAbout())
+            || message.getSelectedFutureHearingCode() == null
+            || message.getSelectedFutureHearingCode().isBlank()) {
+            return null;
+        }
+        String code = message.getSelectedFutureHearingCode().trim();
+        int separator = code.indexOf(" - ");
+        String hearingId = separator < 0 ? code : code.substring(0, separator).trim();
+        return hearingId.isBlank() ? null : hearingId;
     }
 
 }

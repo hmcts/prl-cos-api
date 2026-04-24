@@ -360,7 +360,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
     }
 
     @Test
@@ -385,12 +385,67 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, callbackRequest);
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, null, callbackRequest);
 
         // then
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
         verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
 
+    }
+
+    @Test
+    public void midEventTaskForSendWithoutClientContextEnablesPastHearingsButLocksToNothing() {
+        // FPVTL-2408/2409 Step 7: WA-task chase flow without a clientContext (Q4 fallback
+        // / legacy task) — past hearings still appear, but the dropdown isn't locked.
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(SendOrReplyMessage.builder().respondToMessage(YesOrNo.No).messages(messages).build())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, null, callbackRequest);
+
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData, auth, true, null);
+    }
+
+    @Test
+    public void midEventTaskForSendWithClientContextHearingIdLocksDropdownToThatHearing() throws Exception {
+        // FPVTL-2408/2409 Step 7: WA-task chase flow with a clientContext carrying the
+        // task's additionalProperties.hearingId — the controller decodes it and passes
+        // the id through so the service narrows the dropdown to that one hearing.
+        String clientContextJson = """
+            {
+              "client_context": {
+                "user_task": {
+                  "task_data": {
+                    "additional_properties": {
+                      "hearingId": "999"
+                    }
+                  }
+                }
+              }
+            }
+            """;
+        ObjectMapper realMapper = new ObjectMapper();
+        realMapper.findAndRegisterModules();
+        uk.gov.hmcts.reform.prl.models.wa.WaMapper waMapper =
+            realMapper.readValue(clientContextJson, uk.gov.hmcts.reform.prl.models.wa.WaMapper.class);
+        String encodedClientContext = uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode(waMapper, realMapper);
+
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(SendOrReplyMessage.builder().respondToMessage(YesOrNo.No).messages(messages).build())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, encodedClientContext, callbackRequest);
+
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData, auth, true, "999");
     }
 
 
@@ -508,7 +563,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyCommonService).sendMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, false);
     }
 
     @Test
@@ -517,12 +572,16 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap, false))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
 
         // then
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, false);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
@@ -533,6 +592,10 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData(), true))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
@@ -540,7 +603,7 @@ public class SendAndReplyControllerTest {
 
         // verify
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDetails.getData());
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData(), true);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
