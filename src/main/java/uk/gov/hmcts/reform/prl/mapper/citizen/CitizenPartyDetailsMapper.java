@@ -546,15 +546,12 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenHearingNeedsDetails(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        System.out.println("support provided from CFE:" + citizenProvidedPartyDetails.getResponse().getSupportYouNeed());
-        PartyDetails loggedPartyDetails = existingPartyDetails.toBuilder()
+        return existingPartyDetails.toBuilder()
             .response(getPartyResponse(existingPartyDetails)
                           .toBuilder()
                           .supportYouNeed(citizenProvidedPartyDetails.getResponse().getSupportYouNeed())
                           .build())
             .build();
-        System.out.println("party details after:" + loggedPartyDetails);
-        return loggedPartyDetails;
     }
 
     private PartyDetails updateCitizenRemoveLegalRepresentativeFlag(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
