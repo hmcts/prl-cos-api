@@ -39,6 +39,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
@@ -611,6 +613,74 @@ public class RefDataUserServiceTest {
             IS_HEARINGCHILDREQUIRED_N
         );
         assertNull(commonResponse);
+    }
+
+    @Test
+    public void testGetJudicialUserBySidamIdReturnsUserDetails() {
+        String sidamId = "test-sidam-id-123";
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+
+        JudicialUsersApiResponse judge = JudicialUsersApiResponse.builder()
+            .surname("Smith")
+            .fullName("Judge Smith")
+            .sidamId(sidamId)
+            .build();
+        List<JudicialUsersApiResponse> judicialUsers = List.of(judge);
+
+        when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
+            anyMap()
+        )).thenReturn(judicialUsers);
+
+        List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Smith", result.get(0).getSurname());
+        assertEquals(sidamId, result.get(0).getSidamId());
+    }
+
+    @Test
+    public void testGetJudicialUserBySidamIdReturnsEmptyListWhenNotFound() {
+        String sidamId = "unknown-sidam-id";
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+
+        when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
+            anyMap()
+        )).thenReturn(List.of());
+
+        List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testEvictJudicialUserCache() {
+        refDataUserService.evictJudicialUserCache();
+    }
+
+    @Test
+    public void testGetJudicialUserBySidamIdReturnsNullWhenApiReturnsNull() {
+        String sidamId = "null-sidam-id";
+
+        when(idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
+
+        when(judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            eq(AUTH_TOKEN),
+            eq(S2S_TOKEN),
+            anyMap()
+        )).thenReturn(null);
+
+        List<JudicialUsersApiResponse> result = refDataUserService.getJudicialUserBySidamId(sidamId);
+
+        assertNull(result);
     }
 }
 
