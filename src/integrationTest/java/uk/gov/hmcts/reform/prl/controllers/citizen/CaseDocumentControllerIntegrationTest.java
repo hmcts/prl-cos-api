@@ -18,6 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -95,6 +96,9 @@ public class CaseDocumentControllerIntegrationTest {
 
     @MockitoBean
     private UserInfo userInfo;
+
+    @MockBean
+    AuthTokenGenerator authTokenGenerator;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -295,6 +299,7 @@ public class CaseDocumentControllerIntegrationTest {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(authorisationService.authoriseUser(anyString())).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(anyString())).thenReturn(true);
+        when(authTokenGenerator.generate()).thenReturn("testAuthToken");
 
         when(documentGenService.deleteDocument(anyString(), anyString())).thenReturn(DocumentResponse.builder()
                                                                                          .status("Success")
