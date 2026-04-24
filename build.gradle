@@ -17,9 +17,9 @@ plugins {
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '11.1.1'
   id 'org.sonarqube' version '5.1.0.4882'
-  id 'org.springframework.boot' version '3.5.13'
+  id 'org.springframework.boot' version '3.5.14'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.2093'
+  id 'com.github.hmcts.rse-cft-lib' version '0.19.2106'
 }
 
 def versions = [
@@ -41,7 +41,7 @@ def versions = [
   jacksonDatatypeJsr           : '2.20.1',
   jsonAssert                   : '1.5.3',
   junit                        : '6.0.3',
-  lombok                       : '1.18.44',
+  lombok                       : '1.18.46',
   pact                         : '4.1.11',
   pitest                       : '1.23.1',
   puppyCrawl                   : '13.4.0',
@@ -51,9 +51,9 @@ def versions = [
   serenityCucumber             : '4.3.4',
   serviceTokenGenerator        : '5.3.3',
   sonarPitest                  : '0.5',
-  springSecurityCrypto         : '6.5.9',
+  springSecurityCrypto         : '6.5.10',
   springSecurityRsa            : '1.1.5',
-  springBoot                   : '3.5.13',
+  springBoot                   : '3.5.14',
   springCloud                  : '4.3.0',
   tomcat                       : '10.1.52',
   unirest                      : '1.4.9',
@@ -270,7 +270,7 @@ configurations.configureEach {
   resolutionStrategy {
     force 'org.bouncycastle:bcpkix-jdk18on:1.84'
     force 'org.springframework.security:spring-security-rsa:1.1.5'
-    force 'org.springframework.security:spring-security-crypto:6.5.9'
+    force 'org.springframework.security:spring-security-crypto:6.5.10'
     force 'ch.qos.logback:logback-classic:1.5.32'
     force 'ch.qos.logback:logback-core:1.5.32'
   }
@@ -336,9 +336,9 @@ dependencies {
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
   implementation group: 'commons-net', name: 'commons-net', version: '3.13.0'
-  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.9'
+  implementation group: 'org.springframework.security', name: 'spring-security-web', version: '6.5.10'
 //  // CVE-2021-22112 - Privilege Escalation
-  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.9'
+  implementation group: 'org.springframework.security', name: 'spring-security-core', version: '6.5.10'
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.3.0')
     {
       exclude group: 'io.reactivex', module: 'io.reactivex'
