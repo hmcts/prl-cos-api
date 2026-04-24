@@ -471,7 +471,6 @@ public class CitizenPartyDetailsMapper {
                 );
             }
             case SUPPORT_YOU_DURING_CASE -> {
-                System.out.println("-- citizen hearing needs is getting updated --");
                 return updateCitizenHearingNeedsDetails(
                     existingPartyDetails,
                     citizenProvidedPartyDetails

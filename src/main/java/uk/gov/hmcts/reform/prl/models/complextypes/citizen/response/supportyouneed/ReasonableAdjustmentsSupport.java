@@ -45,4 +45,5 @@ public class ReasonableAdjustmentsSupport {
     private final String largePrintDetails;
     private final String parkingDetails;
     private final String differentChairDetails;
+    private final String languageSupportNotes;
 }
