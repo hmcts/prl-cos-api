@@ -2497,7 +2497,6 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, List<Document> coverLetter,
                                                      String servedParty) {
-       //changes here
         try {
             List<Document> docs = new ArrayList<>();
             if (coverLetter != null) {
