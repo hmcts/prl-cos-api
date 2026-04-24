@@ -2497,17 +2497,19 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, List<Document> coverLetter,
                                                      String servedParty) {
-
+       //changes here
         try {
-            List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
+            List<Document> docs = new ArrayList<>();
+            if (coverLetter != null) {
+                docs.addAll(coverLetter);
+            }
+            docs.addAll(serviceOfApplicationPostService
                                                       .getCoverSheets(caseData, authorization,
                                                                       party.getValue().getAddress(),
                                                                       party.getValue().getLabelForDynamicList(),
                                                                       DOCUMENT_COVER_SHEET_HINT
                                                       ));
-            if (coverLetter != null) {
-                docs.addAll(coverLetter);
-            }
+
             docs.addAll(packDocs);
             log.info("*** Sending docs to party Lip post");
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
