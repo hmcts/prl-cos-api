@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.config.BundleCategoryConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
@@ -13,6 +14,9 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.bundle.DocumentProperties;
+import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
+import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
@@ -33,11 +37,14 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
@@ -80,6 +87,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @ExtendWith(MockitoExtension.class)
 class BundleCreateRequestByCategoryMapperTest {
 
+    public static final String AUTH_TOKEN = "AUTH_TOKEN";
     @Mock
     private CategoriesAndDocumentsHelper categoriesAndDocumentsHelper;
 
@@ -498,6 +506,51 @@ class BundleCreateRequestByCategoryMapperTest {
             .mapCaseDataToBundleCreateRequest(c100CaseData, "eventI",
                                               Hearings.hearingsWith().build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
+        // Should not contain police disclosures or medical records
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
+                       .map(Element::getValue)
+                       .map(BundlingRequestDocument::getDocumentFileName)
+                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
+                           .contains(fileName)).toList().isEmpty());
+    }
+
+    @Test
+    void mapCaseDataToBundleCreateRequestNew() {
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+
+        Category subCategory = new Category(FM5_STATEMENTS, FM5_STATEMENTS, 3, List.of(documents), new ArrayList<>());
+        Category applicantApplicationCategory = new Category(APPLICANT_APPLICATION, APPLICANT_APPLICATION, 4, List.of(documents), new ArrayList<>());
+        Category category = new Category("parentCategoryId", "parentCategoryName", 2, List.of(documents), List.of(subCategory));
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(List.of(category, subCategory, applicantApplicationCategory));
+
+        FilterProperties fm5StatementsFilterProperties = FilterProperties.builder().value(FM5_STATEMENTS)
+            .category(FM5_STATEMENTS).build();
+        DocumentProperties documentProperties = DocumentProperties.builder().property("/data/allOtherDocuments")
+            .filters(List.of(fm5StatementsFilterProperties)).build();
+        FilterProperties applicantApplicationFilterProperties = FilterProperties.builder().value(APPLICANT_APPLICATION)
+            .category(APPLICANT_APPLICATION).build();
+        DocumentProperties applicationsDocumentProperties = DocumentProperties.builder().property("/data/applications")
+            .filters(List.of(applicantApplicationFilterProperties)).build();
+        FolderProperties folderProperties = FolderProperties.builder().name("folder1")
+            .documents(List.of(documentProperties, applicationsDocumentProperties)).build();
+        when(bundleCategoryConfig.getFolders()).thenReturn(List.of(folderProperties));
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventI",
+                                              Hearings.hearingsWith().build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+
         // Should not contain police disclosures or medical records
         assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
                        .map(Element::getValue)
