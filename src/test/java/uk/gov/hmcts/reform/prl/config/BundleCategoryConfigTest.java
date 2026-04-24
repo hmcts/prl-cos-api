@@ -16,7 +16,7 @@ class BundleCategoryConfigTest {
     private BundleCategoryConfig bundleCategoryConfig;
 
     @Test
-    public void whenFactoryProvidedThenYamlPropertiesInjected() {
+    void whenFactoryProvidedThenYamlPropertiesInjected() {
         assertEquals(5, bundleCategoryConfig.getFolders().size());
         assertEquals("Preliminary Documents", bundleCategoryConfig.getFolders().get(0).getName());
         assertEquals("Applications and Orders", bundleCategoryConfig.getFolders().get(1).getName());
