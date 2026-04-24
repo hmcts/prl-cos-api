@@ -433,6 +433,8 @@ public class UpdateHearingActualsService {
     private List<String> fetchFieldsRequiredForHearingActualTask() {
         return List.of(
             "data.nextHearingDate",
+            "data.requestOrderTaskTrackingByHearing",
+            "data.updateHearingActualTracking",
             "data.draftOrderCollection",
             "data.orderCollection"
         );
