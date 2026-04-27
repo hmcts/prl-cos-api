@@ -105,7 +105,9 @@ public class SendgridService {
                  TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - attachDocsStartTime));
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
-        mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
+        String templateId = getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference());
+        log.info("*** SendGrid templateId used - {}", templateId);
+        mail.setTemplateId(templateId);
         Request request = new Request();
         long startTime = System.currentTimeMillis();
         try {
