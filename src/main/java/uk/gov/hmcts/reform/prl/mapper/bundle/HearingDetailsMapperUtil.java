@@ -1,23 +1,26 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getBundleDateTime;
 
+@Slf4j
+@Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingDetailsMapperUtil {
 
-    public static BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
+    public BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
         if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
             List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
                 .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
@@ -34,18 +37,7 @@ public class HearingDetailsMapperUtil {
         return BundleHearingInfo.builder().build();
     }
 
-    public static String getBundleDateTime(LocalDateTime bundleDateTime) {
-        StringBuilder newBundleDateTime = new StringBuilder();
-        LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
-
-        return newBundleDateTime
-            .append(bundleDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
-            .append(EMPTY_SPACE_STRING)
-            .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
-            .toString();
-    }
-
-    public static String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
+    public String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
         return null != hearingDaySchedule.getHearingVenueName()
             ? hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress()
             : hearingDaySchedule.getHearingVenueAddress();

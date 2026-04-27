@@ -34,7 +34,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.mapper.bundle.HearingDetailsMapperUtil.getBundleDateTime;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getBundleDateTime;
 
 @Slf4j
 @RestController

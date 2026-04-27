@@ -85,6 +85,8 @@ import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGro
 @ConditionalOnProperty(prefix = "feature.toggle", name = "bundleByCategoryEnabled", havingValue = "false", matchIfMissing = true)
 public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
 
+    private final HearingDetailsMapperUtil hearingDetailsMapperUtil;
+
     @Override
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
@@ -103,7 +105,7 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                .hearingDetails(HearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
+                .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                 .applications(mapApplicationsFromCaseData(caseData))
                 .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                 .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();

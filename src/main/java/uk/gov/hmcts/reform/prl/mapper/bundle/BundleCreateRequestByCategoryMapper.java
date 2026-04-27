@@ -44,6 +44,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private final CategoriesAndDocumentsHelper categoriesAndDocumentsHelper;
     private final SystemUserService systemUserService;
     private final BundleCategoryConfig bundleCategoryConfig;
+    private final HearingDetailsMapperUtil hearingDetailsMapperUtil;
 
     @Override
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
@@ -104,7 +105,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                      .hearingDetails(HearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
+                      .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                       .applications(applicationDocumentFromCategory)
                       .orders(ordersFromCategory)
                       .allOtherDocuments(allOtherDocumentsFromCategory).build()).build();

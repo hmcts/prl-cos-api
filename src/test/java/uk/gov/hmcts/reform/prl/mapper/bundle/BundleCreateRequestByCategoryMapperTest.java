@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,8 +46,19 @@ class BundleCreateRequestByCategoryMapperTest {
     @Mock
     private BundleCategoryConfig bundleCategoryConfig;
 
+    private HearingDetailsMapperUtil hearingDetailsMapperUtil;
+
     @InjectMocks
     private BundleCreateRequestByCategoryMapper bundleCreateRequestByCategoryMapper;
+
+    @BeforeEach
+    void setUp() {
+        hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
+        bundleCreateRequestByCategoryMapper = new BundleCreateRequestByCategoryMapper(categoriesAndDocumentsHelper,
+                                                                                      systemUserService,
+                                                                                      bundleCategoryConfig,
+                                                                                      hearingDetailsMapperUtil);
+    }
 
     @Test
     void mapCaseDataToBundleCreateRequest() {
