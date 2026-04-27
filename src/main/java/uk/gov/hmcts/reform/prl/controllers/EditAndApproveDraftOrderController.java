@@ -240,7 +240,7 @@ public class EditAndApproveDraftOrderController {
                     caseDataUpdated,
                     caseData,
                     loggedInUserType,
-                    draftOrderId
+                    clientContext
                 );
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -305,8 +305,8 @@ public class EditAndApproveDraftOrderController {
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
-                                     CaseData caseData, String loggedInUserType, String draftOrderId) {
-
+                                     CaseData caseData, String loggedInUserType, String clientContext) {
+        String draftOrderId = getDraftOrderIdFromContext(clientContext);
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
