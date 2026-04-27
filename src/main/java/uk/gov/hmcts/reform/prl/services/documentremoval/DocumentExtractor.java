@@ -37,7 +37,7 @@ public class DocumentExtractor {
     }
 
     private void handleObjectNode(JsonNode node, Map<String, Document> documents) {
-        if (node.has(DOCUMENT_URL)) {
+        if (isDocumentNode(node)) {
             try {
                 Document document = objectMapper.treeToValue(node, Document.class);
                 String documentId = document.getDocumentId();
@@ -50,6 +50,10 @@ public class DocumentExtractor {
             }
         }
         node.fields().forEachRemaining(entry -> traverseNodes(entry.getValue(), documents));
+    }
+
+    private boolean isDocumentNode(JsonNode node) {
+        return node.isObject() && node.has(DOCUMENT_URL);
     }
 
     private boolean shouldReplaceDocument(Document existingDocument, Document candidateDocument) {
