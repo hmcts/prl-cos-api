@@ -81,26 +81,16 @@ public class DocumentRemover {
      */
     private void processArrayNode(JsonNode root, String documentId) {
         ArrayNode arrayNode = (ArrayNode) root;
-        List<Integer> indexesToRemove = new ArrayList<>();
-        for (int i = 0; i < arrayNode.size(); i++) {
-            JsonNode arrayElement = arrayNode.get(i);
-            if (arrayElement.has(COLLECTION_VALUE_KEY)) {
-                JsonNode valueObject = arrayElement.get(COLLECTION_VALUE_KEY);
-
+        Iterator<JsonNode> it = arrayNode.elements();
+        while (it.hasNext()) {
+            JsonNode element = it.next();
+            if (element.has(COLLECTION_VALUE_KEY)) {
+                JsonNode valueObject = element.get(COLLECTION_VALUE_KEY);
                 if (isNodeForDocumentId(valueObject, documentId)) {
-                    indexesToRemove.add(i);
+                    it.remove();
                 } else {
                     removeDocumentFromJson(valueObject, documentId);
                 }
-            }
-        }
-
-        if (!indexesToRemove.isEmpty()) {
-            // Remove elements in reverse order to avoid index shifting
-            for (int j = indexesToRemove.size() - 1; j >= 0; j--) {
-                int indexToRemove = indexesToRemove.get(j);
-                ((ArrayNode) root).remove(indexToRemove);
-                log.info("Removed document id {} from array at index {}", documentId, indexToRemove);
             }
         }
     }
