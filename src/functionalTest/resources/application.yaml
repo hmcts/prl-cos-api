@@ -227,6 +227,10 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+bankHolidays:
+  api:
+    url: ${BANK_HOLIDAYS_API_URL:}
+
 payments:
   api:
     url: ${PAY_URL:}
