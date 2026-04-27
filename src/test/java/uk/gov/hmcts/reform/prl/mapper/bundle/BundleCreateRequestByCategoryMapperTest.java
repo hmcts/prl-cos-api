@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ANY_OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_C1A_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_OTHER_DOCUMENTS;
@@ -541,6 +542,12 @@ class BundleCreateRequestByCategoryMapperTest {
             .category(APPLICANT_APPLICATION).build();
         DocumentProperties applicationsDocumentProperties = DocumentProperties.builder().property("/data/applications")
             .filters(List.of(applicantApplicationFilterProperties)).build();
+        FilterProperties ordersFilterProperties = FilterProperties.builder().value(ORDERS_SUBMITTED_WITH_APPLICATION)
+            .category(ORDERS_SUBMITTED_WITH_APPLICATION).build();
+        DocumentProperties ordersDocumentProperties = DocumentProperties.builder().property("/data/orders")
+            .filters(List.of(ordersFilterProperties)).build();
+
+
         FolderProperties folderProperties = FolderProperties.builder().name("folder1")
             .documents(List.of(documentProperties, applicationsDocumentProperties)).build();
         when(bundleCategoryConfig.getFolders()).thenReturn(List.of(folderProperties));
