@@ -19,25 +19,18 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -82,11 +75,8 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 
 @Slf4j
@@ -113,45 +103,12 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                .hearingDetails(mapHearingDetails(hearingDetails))
+                .hearingDetails(HearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                 .applications(mapApplicationsFromCaseData(caseData))
                 .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                 .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
     }
 
-    private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
-        if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
-            List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
-                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
-            if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
-                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
-                if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
-                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
-                        .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? getBundleDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
-                        .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
-                }
-            }
-        }
-        return BundleHearingInfo.builder().build();
-    }
-
-    public static String getBundleDateTime(LocalDateTime bundleDateTime) {
-        StringBuilder newBundleDateTime = new StringBuilder();
-        LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
-
-        return newBundleDateTime
-            .append(bundleDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
-            .append(EMPTY_SPACE_STRING)
-            .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
-            .toString();
-    }
-
-    private String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
-        return null != hearingDaySchedule.getHearingVenueName()
-            ? hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress()
-            : hearingDaySchedule.getHearingVenueAddress();
-    }
 
     List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
 
