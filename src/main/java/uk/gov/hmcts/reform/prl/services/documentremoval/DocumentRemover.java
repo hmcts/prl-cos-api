@@ -24,7 +24,7 @@ public class DocumentRemover {
 
     private final ObjectMapper objectMapper;
 
-    private static final String VALUE_KEY = "value";
+    private static final String COLLECTION_VALUE_KEY = "value";
 
     public Map<String, Object> removeDocument(Map<String, Object> caseData, String documentId) throws IOException {
         JsonNode root = objectMapper.valueToTree(caseData);
@@ -71,13 +71,21 @@ public class DocumentRemover {
         }
     }
 
+    /**
+     * Processes an array node assumed to represent a CCD collection.
+     * Iterates through each element (expected to be an object with "id" and "value" properties),
+     * and removes any element whose "value" node contains a document with the specified documentId.
+     *
+     * @param root       the array node to process
+     * @param documentId the document id to remove from the array
+     */
     private void processArrayNode(JsonNode root, String documentId) {
         ArrayNode arrayNode = (ArrayNode) root;
         List<Integer> indexesToRemove = new ArrayList<>();
         for (int i = 0; i < arrayNode.size(); i++) {
             JsonNode arrayElement = arrayNode.get(i);
-            if (arrayElement.has(VALUE_KEY)) {
-                JsonNode valueObject = arrayElement.get(VALUE_KEY);
+            if (arrayElement.has(COLLECTION_VALUE_KEY)) {
+                JsonNode valueObject = arrayElement.get(COLLECTION_VALUE_KEY);
 
                 if (isNodeForDocumentId(valueObject, documentId)) {
                     indexesToRemove.add(i);
@@ -92,7 +100,7 @@ public class DocumentRemover {
             for (int j = indexesToRemove.size() - 1; j >= 0; j--) {
                 int indexToRemove = indexesToRemove.get(j);
                 ((ArrayNode) root).remove(indexToRemove);
-                log.info("Removed array element at index {} containing document with id {}", indexToRemove, documentId);
+                log.info("Removed document id {} from array at index {}", documentId, indexToRemove);
             }
         }
     }
