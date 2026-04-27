@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
@@ -21,7 +23,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -96,4 +100,322 @@ class BundleCreateRequestByCategoryMapperTest {
                        .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
                            .contains(fileName)).toList().isEmpty());
     }
+
+
+    @Test
+    void testMapHearingDetailsWithNullHearings() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId", null, "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime() == null
+                   || bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().isEmpty());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    void testMapHearingDetailsWithEmptyHearings() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(new ArrayList<>()).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime() == null
+                   || bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().isEmpty());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    void testMapHearingDetailsWithNoListedHearings() {
+        final CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus("ADJOURNED").build());
+        caseHearings.add(CaseHearing.caseHearingWith().hmcStatus("CANCELLED").build());
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime() == null
+                   || bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().isEmpty());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    void testMapHearingDetailsWithEmptyHearingDaySchedule() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(new ArrayList<>())
+            .build());
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime() == null
+                   || bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().isEmpty());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    void testMapHearingDetailsWithCompleteHearingInformation() {
+        final CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        LocalDateTime hearingDateTime = LocalDateTime.of(2025, 3, 15, 10, 30);
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeId("judge123")
+            .hearingJudgeName("Judge John Smith")
+            .hearingVenueId("venue123")
+            .hearingVenueName("Manchester Crown Court")
+            .hearingVenueAddress("Judicial Building, Bridge Street, Manchester M2 1RB")
+            .hearingStartDateTime(hearingDateTime)
+            .build());
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(hearingDaySchedules)
+            .build());
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertEquals("Judge John Smith", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("15 Mar 2025"));
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("AM"));
+        assertEquals("Manchester Crown Court" + "\n" + "Judicial Building, Bridge Street, Manchester M2 1RB",
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+    }
+
+    @Test
+    void testMapHearingDetailsWithVenueAddressOnly() {
+        final CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeName("Judge Jane Doe")
+            .hearingVenueName(null)
+            .hearingVenueAddress("123 Court Street, London SW1A 1AA")
+            .hearingStartDateTime(LocalDateTime.of(2025, 4, 20, 14, 0))
+            .build());
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(hearingDaySchedules)
+            .build());
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertEquals("Judge Jane Doe", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertEquals("123 Court Street, London SW1A 1AA",
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("20 Apr 2025"));
+    }
+
+    @Test
+    void testMapHearingDetailsWithNullHearingStartDateTime() {
+        final CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeName("Judge Bob Wilson")
+            .hearingVenueName("Bristol County Court")
+            .hearingVenueAddress("Small Street, Bristol BS1 1DA")
+            .hearingStartDateTime(null)
+            .build());
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(hearingDaySchedules)
+            .build());
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        assertEquals("Judge Bob Wilson", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertEquals("Bristol County Court" + "\n" + "Small Street, Bristol BS1 1DA",
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().isEmpty());
+    }
+
+    @Test
+    void testMapHearingDetailsSelectsFirstListedHearingWhenMultipleExist() {
+        final CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        LocalDateTime firstHearingDateTime = LocalDateTime.of(2025, 5, 10, 9, 0);
+        LocalDateTime secondHearingDateTime = LocalDateTime.of(2025, 6, 15, 14, 0);
+
+        List<HearingDaySchedule> firstHearingSchedules = new ArrayList<>();
+        firstHearingSchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeName("Judge Alice Brown")
+            .hearingVenueName("Liverpool Court")
+            .hearingVenueAddress("31 Whitechapel, Liverpool L1 6DS")
+            .hearingStartDateTime(firstHearingDateTime)
+            .build());
+
+        List<HearingDaySchedule> secondHearingSchedules = new ArrayList<>();
+        secondHearingSchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeName("Judge Charles Davis")
+            .hearingVenueName("Leeds Court")
+            .hearingVenueAddress("Leeds Court Address")
+            .hearingStartDateTime(secondHearingDateTime)
+            .build());
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(firstHearingSchedules)
+            .build());
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(secondHearingSchedules)
+            .build());
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        // Should map the first LISTED hearing
+        assertEquals("Judge Alice Brown", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertEquals("Liverpool Court" + "\n" + "31 Whitechapel, Liverpool L1 6DS",
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("10 May 2025"));
+    }
+
+    @Test
+    void testMapHearingDetailsWithMultipleHearingDaySchedules() {
+        LocalDateTime firstDayDateTime = LocalDateTime.of(2025, 7, 5, 10, 0);
+        LocalDateTime secondDayDateTime = LocalDateTime.of(2025, 7, 6, 11, 0);
+
+        List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeName("Judge Emma Wilson")
+            .hearingVenueName("London Central Court")
+            .hearingVenueAddress("Central London Address")
+            .hearingStartDateTime(firstDayDateTime)
+            .build());
+        hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
+            .hearingJudgeName("Judge Francis Graham")
+            .hearingVenueName("North London Court")
+            .hearingVenueAddress("North London Address")
+            .hearingStartDateTime(secondDayDateTime)
+            .build());
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
+        caseHearings.add(CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingDaySchedule(hearingDaySchedules)
+            .build());
+
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(new ArrayList<>());
+        when(bundleCategoryConfig.getFolders()).thenReturn(new ArrayList<>());
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventId",
+                Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        // Should map the first day schedule
+        assertEquals("Judge Emma Wilson", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertEquals("London Central Court" + "\n" + "Central London Address",
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("5 Jul 2025"));
+    }
+
 }
