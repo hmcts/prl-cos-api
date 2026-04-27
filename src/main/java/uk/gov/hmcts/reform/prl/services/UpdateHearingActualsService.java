@@ -111,11 +111,10 @@ public class UpdateHearingActualsService {
             CaseDetails caseDetail = caseDetailsList.stream()
                 .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
                 .findFirst().orElse(null);
-            log.info("WATask1 caseId {}", caseId);
-            log.info("WATask1 caseDetail {}", caseDetail);
+
             if (nonNull(caseDetail)) {
                 CaseData caseData = CaseUtils.getCaseData(caseDetail, objectMapper);
-                log.info("WATask1 caseData {}", caseData);
+
                 Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId = new LinkedHashMap<>();
                 nullSafeCollection(caseData.getUpdateHearingActualTracking())
                     .forEach(e -> trackingByHearingId.put(e.getValue().getHearingId(), e));
@@ -127,7 +126,7 @@ public class UpdateHearingActualsService {
 
     private void processIndividualHearing(String caseId, String hearingId, Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId) {
         Element<UpdateHearingActualTracking> entry = trackingByHearingId.get(hearingId);
-        log.info("WATask1 entry {}", entry);
+
         if (isNull(entry) || isNull(entry.getValue().getLastFiredDate())) {
             LocalDate today = LocalDate.now();
             if (entry != null) {
@@ -149,7 +148,7 @@ public class UpdateHearingActualsService {
                 "updateHearingActualTracking",
                 new ArrayList<>(trackingByHearingId.values())
             );
-            log.info("WATask1 About to create Update Hearing Actual Task {}", caseDataUpdated);
+
             triggerSystemEventForWorkAllocationTask(
                 caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), caseDataUpdated);
         } else {
