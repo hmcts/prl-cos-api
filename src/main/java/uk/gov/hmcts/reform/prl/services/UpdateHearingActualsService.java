@@ -195,7 +195,7 @@ public class UpdateHearingActualsService {
         )).build();
         Must mustFilter = Must.builder().stateFilter(stateFilter).build();
 
-        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
+        Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(1).must(mustFilter).build();
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
@@ -207,6 +207,8 @@ public class UpdateHearingActualsService {
     private List<String> fetchFieldsRequiredForHearingActualTask() {
         return List.of(
             "data.nextHearingDate",
+            "data.id",
+            "data.caseTypeOfApplication",
             "data.draftOrderCollection",
             "data.orderCollection"
         );
