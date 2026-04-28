@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,7 @@ public class SendgridService {
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
     public static final String NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY = "Notification to party sent successfully";
+    public static final String CASE_REFERENCE = "caseReference";
 
     @Value("${send-grid.rpa.email.to}")
     private String toEmail;
@@ -97,6 +99,7 @@ public class SendgridService {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }
         Mail mail = new Mail();
+        addCustomArgsCaseReference(mail, sendgridEmailConfig.getCaseReference());
         long attachDocsStartTime = System.currentTimeMillis();
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
@@ -151,9 +154,10 @@ public class SendgridService {
                                                              String toEmailAddress, List<Document> listOfAttachments)
         throws IOException {
         String subject = emailProps.get("subject");
+        String caseNumber = emailProps.get(CASE_NUMBER);
         Content content = new Content("text/html", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
-            emailProps.get(CASE_NUMBER),
+            caseNumber,
             emailProps.get(CASE_NAME),
             emailProps.get("issueDate"),
             emailProps.get("applicationType"),
@@ -161,6 +165,7 @@ public class SendgridService {
             emailProps.get("courtName")
         ));
         Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmailAddress), content);
+        addCustomArgsCaseReference(mail, caseNumber);
         if (!listOfAttachments.isEmpty()) {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
@@ -201,5 +206,14 @@ public class SendgridService {
             attachments.setContent(documentAsString);
             mail.addAttachments(attachments);
         });
+    }
+
+    private void addCustomArgsCaseReference(Mail mail, String caseReference) {
+        if (StringUtils.isNotBlank(caseReference)) {
+            log.info("Adding case reference {} to custom args of SendGrid email", caseReference);
+            mail.addCustomArg(CASE_REFERENCE, caseReference);
+        } else {
+            log.warn("Case reference is empty, cannot add as custom arg to SendGrid email");
+        }
     }
 }
