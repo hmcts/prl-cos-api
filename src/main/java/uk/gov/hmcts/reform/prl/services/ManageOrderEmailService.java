@@ -968,27 +968,23 @@ public class ManageOrderEmailService {
                                           String name,
                                           String authorisation,
                                           List<Document> orderDocuments) {
-        List<Document> documents = new ArrayList<>();
-        //generate cover letter
-        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverSheets(
+        //generate Cover sheets
+        List<Document> coverSheets = serviceOfApplicationPostService.getCoverSheets(
             caseData,
             authorisation,
             address,
             name,
             DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
         );
-        if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
-            documents.addAll(coverLetterDocs);
+        if (CollectionUtils.isNotEmpty(coverSheets)) {
+            orderDocuments.addAll(coverSheets);
         }
-
-        //cover should be the first doc in the list, append all order docs
-        documents.addAll(orderDocuments);
 
         return bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
             ORDER_TYPE,
-            documents,
+            orderDocuments,
             name
         );
     }

@@ -354,13 +354,6 @@ public class NotificationService {
             try {
                 //generate cover sheet
                 String authorisation = systemUserService.getSysUserToken();
-                List<Document> responseDocuments = serviceOfApplicationPostService.getCoverSheets(
-                    caseData,
-                    authorisation,
-                    applicant.getValue().getAddress(),
-                    applicant.getValue().getLabelForDynamicList(),
-                    DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
-                );
 
                 //cover letters
                 Map<String, Object> dataMap = fetchApplicantResponseDataMap(caseData,
@@ -368,8 +361,18 @@ public class NotificationService {
                                                                             applicant.getValue().getLabelForDynamicList(),
                                                                             respondentName);
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                responseDocuments.addAll(serviceOfApplicationService.fetchCoverLetter(authorisation, coverLetterTemplateHint,
-                                                 dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh()));
+                List<Document>  responseDocuments = serviceOfApplicationService
+                    .fetchCoverLetter(authorisation, coverLetterTemplateHint, dataMap, documentLanguage.isGenEng(),
+                                      documentLanguage.isGenWelsh());
+
+                responseDocuments.addAll(serviceOfApplicationPostService.getCoverSheets(
+                    caseData,
+                    authorisation,
+                    applicant.getValue().getAddress(),
+                    applicant.getValue().getLabelForDynamicList(),
+                    DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+                ));
+
                 //response document
                 responseDocuments.add(responseDocument);
 
