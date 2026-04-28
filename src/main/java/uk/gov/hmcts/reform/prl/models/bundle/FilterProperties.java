@@ -28,5 +28,5 @@ public class FilterProperties {
     private String category;
 
     @JsonProperty("hasdraft")
-    private Boolean hasdraft;
+    private boolean hasdraft;
 }

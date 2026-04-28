@@ -100,7 +100,7 @@ public class BundleCreateRequestMapperTest {
     private BundleCreateRequestMapper bundleCreateRequestMapper;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
         bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil);
     }

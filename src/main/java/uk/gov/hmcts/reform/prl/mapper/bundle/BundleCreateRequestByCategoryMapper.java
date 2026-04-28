@@ -41,6 +41,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @ConditionalOnProperty(prefix = "feature.toggle", name = "bundleByCategoryEnabled", havingValue = "true", matchIfMissing = true)
 public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequestMapper {
 
+    private static final String DATA_ORDERS = "/data/orders";
+    private static final String DATA_APPLICATIONS = "/data/applications";
+    private static final String DATA_ALL_OTHER_DOCUMENTS = "/data/allOtherDocuments";
+
     private final CategoriesAndDocumentsHelper categoriesAndDocumentsHelper;
     private final SystemUserService systemUserService;
     private final BundleCategoryConfig bundleCategoryConfig;
@@ -73,11 +77,11 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         List<Element<BundlingRequestDocument>> applicationDocumentFromCategory = new ArrayList<>();
         List<Element<BundlingRequestDocument>> ordersFromCategory = new ArrayList<>();
 
-        bundleCategoryConfig.getFolders().stream().forEach(folder -> {
-            folder.getDocuments().stream().forEach(document -> {
+        bundleCategoryConfig.getFolders().forEach(folder -> {
+            folder.getDocuments().forEach(document -> {
                 FilterProperties filterProperties = document.getFilters().getFirst();
                 if (filterProperties != null && filterProperties.getCategory() != null) {
-                    if ("/data/orders".equals(document.getProperty())) {
+                    if (DATA_ORDERS.equals(document.getProperty())) {
                         List<BundlingRequestDocument> orders = mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
@@ -85,13 +89,13 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                         );
                         reverse(orders);
                         ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
-                    } else if ("/data/applications".equals(document.getProperty())) {
+                    } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
                         applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
                         )));
-                    } else if ("/data/allOtherDocuments".equals(document.getProperty())) {
+                    } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
                         allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
@@ -160,8 +164,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private boolean isDraftDocument(Document document, FilterProperties filterProperties) {
         if (document != null
             && document.getDocumentFileName() != null
-            && filterProperties.getHasdraft() != null
-            && filterProperties.getHasdraft()) {
+            && filterProperties.isHasdraft()) {
             return document.getDocumentFileName().contains("Draft");
         }
         return false;
