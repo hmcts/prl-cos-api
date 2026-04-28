@@ -938,19 +938,30 @@ public class CustomOrderService {
         data.put("actReference", StringUtils.defaultString(actReference, ""));
 
         // Judge details
+        String judgeTitle = extractJudgeTitle(caseData, caseDataMap);
+        String legalAdviserName = extractLegalAdviserName(caseData, caseDataMap);
+        boolean isJustLegalAdviser = "Justices' Legal Adviser".equals(judgeTitle);
+
+        // When title is Legal Adviser, use legal adviser name as the judge name
+        // This ensures createdBy is populated correctly
         String judgeName = extractJudgeName(caseData, caseDataMap);
+        if (isJustLegalAdviser && StringUtils.isNotEmpty(legalAdviserName)) {
+            judgeName = legalAdviserName;
+        }
         if (judgeName != null && !judgeName.isEmpty()) {
             data.put("judgeName", judgeName);
         }
-        String judgeTitle = extractJudgeTitle(caseData, caseDataMap);
         if (judgeTitle != null && !judgeTitle.isEmpty()) {
             data.put("judgeTitle", judgeTitle);
         }
 
-        // Legal adviser clause (e.g. "sitting with Justices' Legal Adviser Jane Smith")
-        String legalAdviserName = extractLegalAdviserName(caseData, caseDataMap);
+        // Legal adviser clause - just the name when legal adviser alone, "sitting with" when with a judge
         if (StringUtils.isNotEmpty(legalAdviserName)) {
-            data.put("sittingWithLegalAdviser", " sitting with Justices' Legal Adviser " + legalAdviserName);
+            if (isJustLegalAdviser) {
+                data.put("sittingWithLegalAdviser", "");
+            } else {
+                data.put("sittingWithLegalAdviser", " sitting with Justices' Legal Adviser " + legalAdviserName);
+            }
         } else {
             data.put("sittingWithLegalAdviser", "");
         }
