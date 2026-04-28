@@ -5,8 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
+import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
@@ -18,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.court.PathFinderMapping;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -29,18 +33,23 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.lang.String.valueOf;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_STATUS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COLON_SEPERATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_CODE_FROM_FACT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class C100IssueCaseService {
 
+    public static final String PATHFINDER_DECISION_YES = "Pathfinder Decision Yes";
     private final AllTabServiceImpl allTabsService;
     private final DocumentGenService documentGenService;
     private final LocationRefDataService locationRefDataService;
@@ -49,6 +58,9 @@ public class C100IssueCaseService {
     private final ObjectMapper objectMapper;
     private final EventService eventPublisher;
     private final DfjLookupService dfjLookupService;
+    private final PathFinderLookupService pathFinderLookupService;
+    private final CcdCoreCaseDataService ccdCoreCaseDataService;
+    private final SystemUserService systemUserService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -72,6 +84,12 @@ public class C100IssueCaseService {
                 caseDataUpdated.put(COURT_CODE_FROM_FACT, courtId);
                 caseDataUpdated.keySet().removeAll(dfjLookupService.getAllCourtFields());
                 caseDataUpdated.putAll(dfjLookupService.getDfjAreaFieldsByCourtId(baseLocationId));
+                Optional<PathFinderMapping> pathFinderMapping = pathFinderLookupService.getPathFinderMappingByCourtField(baseLocationId);
+                if (pathFinderMapping.isPresent() && pathFinderMapping.get().isPathFinderEnabled()) {
+                    caseDataUpdated.put("isPathfinderCase", Yes);
+                } else {
+                    caseDataUpdated.put("isPathfinderCase", No);
+                }
             }
             caseDataUpdated.put("localCourtAdmin", List.of(Element.<LocalCourtAdminEmail>builder().id(UUID.randomUUID())
                                                                .value(LocalCourtAdminEmail
@@ -136,7 +154,7 @@ public class C100IssueCaseService {
 
     public void issueAndSendToLocalCourNotification(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (YesOrNo.No.equals(caseData.getConsentOrder())) {
+        if (No.equals(caseData.getConsentOrder())) {
             SolicitorNotificationEmailEvent rpaEmailNotificationEvent = SolicitorNotificationEmailEvent.builder()
                 .typeOfEvent(SolicitorEmailNotificationEventEnum.notifyRpa.getDisplayedValue())
                 .caseDetailsModel(callbackRequest.getCaseDetails())
@@ -148,5 +166,34 @@ public class C100IssueCaseService {
             .caseDetailsModel(callbackRequest.getCaseDetails())
             .build();
         eventPublisher.publishEvent(notifyLocalCourtEvent);
+        if (Yes.equals(caseData.getIsPathfinderCase())) {
+            addPathFinderDecisionTotHistoryTab(callbackRequest);
+        }
+    }
+
+    public void addPathFinderDecisionTotHistoryTab(CallbackRequest callbackRequest) {
+
+        String systemAuthToken = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthToken);
+
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
+            PATH_FINDER_DECISION, systemUpdateUserId);
+
+        String caseId = valueOf(callbackRequest.getCaseDetails().getId());
+        var startEventResponse =
+            ccdCoreCaseDataService.startUpdate(systemAuthToken, eventRequestData, caseId, true);
+        Event event =  Event.builder()
+                .id(startEventResponse.getEventId())
+                .summary(PATHFINDER_DECISION_YES)
+                .build();
+
+        var caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(event)
+            .data(startEventResponse.getCaseDetails().getData())
+            .build();
+        ccdCoreCaseDataService.submitUpdate(
+            systemAuthToken, eventRequestData, caseDataContent, caseId, true);
+        log.info("PATH_FINDER_DECISION : History tab event is updated for case id: {}", caseId);
     }
 }
