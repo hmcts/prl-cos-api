@@ -44,7 +44,7 @@ def versions = [
   lombok                       : '1.18.46',
   pact                         : '4.1.11',
   pitest                       : '1.23.1',
-  puppyCrawl                   : '13.4.0',
+  puppyCrawl                   : '13.4.1',
   reformsJavaLogging           : '8.0.0',
   sendLetterClient             : '5.1.1',
   serenity                     : '4.3.4',
