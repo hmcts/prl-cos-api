@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -127,7 +126,6 @@ public class ReviewDocumentService {
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
-    public static final String REVIEW_DOC_NAME_OVERRIDE = "reviewDocNameOverride";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
     public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
     public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
@@ -397,10 +395,7 @@ public class ReviewDocumentService {
             isDocumentFound = processCourtNavDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
             //Bulk scan
             processBulkScanDocument(caseDataUpdated, caseData, uuid, isDocumentFound);
-
         }
-
-        renameSelectedReviewDocument(caseDataUpdated);
     }
 
     private boolean processReviewDocument(CaseData caseData,
@@ -429,38 +424,6 @@ public class ReviewDocumentService {
             caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
         return isDocumentFound;
-    }
-
-    private void renameSelectedReviewDocument(Map<String, Object> caseDataUpdated) {
-        Document reviewDoc = (Document) caseDataUpdated.get(REVIEW_DOC);
-        String reviewDocNameOverride = (String) caseDataUpdated.get(REVIEW_DOC_NAME_OVERRIDE);
-        if (reviewDocNameOverride != null) {
-            caseDataUpdated.put(REVIEW_DOC, updateDocumentFromAppliedFileName(reviewDoc, reviewDocNameOverride));
-        }
-    }
-
-    private Document updateDocumentFromAppliedFileName(Document document, String newFileName) {
-        return Document.builder()
-            .documentCreatedOn(document.getDocumentCreatedOn())
-            .documentHash(document.getDocumentHash())
-            .documentUrl(document.getDocumentUrl())
-            .categoryId(document.getCategoryId())
-            .documentBinaryUrl(document.getDocumentBinaryUrl())
-            .uploadTimeStamp(document.getUploadTimeStamp())
-            .documentFileName(determineChangedDocumentFileName(document, newFileName))
-            .build();
-    }
-
-    private String determineChangedDocumentFileName(Document document, String newFileName) {
-        if (StringUtils.isNotEmpty(newFileName)) {
-            String originalName = document.getDocumentFileName();
-            String originalExtension = originalName.substring(originalName.indexOf(".") + 1);
-            String newName = newFileName + "." + originalExtension;;
-            log.info("Renaming document name {} with new name {}", originalName, newName);
-            return newName;
-        } else {
-            return document.getDocumentFileName();
-        }
     }
 
     private boolean processCourtNavDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
