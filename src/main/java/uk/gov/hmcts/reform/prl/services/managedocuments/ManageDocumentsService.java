@@ -31,8 +31,6 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -53,11 +51,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -66,12 +64,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
@@ -101,8 +97,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_RECEIVED_BY_DEADLINE;
-import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CIR_UPLOADED_DATE;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
@@ -138,6 +132,7 @@ public class ManageDocumentsService {
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
+    private static final String PREFIX_CHILD_IMPACT_REPORT = "childImpactReport";
     private static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
         CHILD_IMPACT_REPORT_1_LA,
         CHILD_IMPACT_REPORT_2_LA,
@@ -260,38 +255,7 @@ public class ManageDocumentsService {
             caseDataUpdated,
             updatedUserDetails
         );
-        setCirReceivedFlagIfApplicable(caseData, caseDataUpdated);
-        caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
-    }
-
-    private static final Set<String> CIR_CATEGORY_IDS = Set.of(CHILD_IMPACT_REPORT1, CHILD_IMPACT_REPORT2);
-
-    private void setCirReceivedFlagIfApplicable(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        List<Element<ManageDocuments>> manageDocuments =
-            Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
-                .orElse(Collections.emptyList());
-        boolean hasCirDoc = manageDocuments.stream()
-            .map(Element::getValue)
-            .anyMatch(doc -> doc.getDocumentCategories() != null
-                && CIR_CATEGORY_IDS.contains(doc.getDocumentCategories().getValueCode()));
-        if (!hasCirDoc) {
-            return;
-        }
-        LocalDate dueDate = caseData.getServeOrderData() != null
-            ? caseData.getServeOrderData().getWhenReportsMustBeFiledByLocalAuthority() : null;
-        if (dueDate == null) {
-            log.info("No CIR due date set on case - skipping CIR deadline flags");
-            return;
-        }
-        LocalDate today = LocalDate.now(ZoneId.of(LONDON_TIME_ZONE));
-        caseDataUpdated.put(CIR_UPLOADED_DATE, today);
-        if (!today.isAfter(dueDate)) {
-            caseDataUpdated.put(CIR_RECEIVED_BY_DEADLINE, YesOrNo.Yes);
-            log.info("CIR document uploaded on or before due date {}", dueDate);
-        } else {
-            log.info("CIR document uploaded after due date {}", dueDate);
-        }
     }
 
     private void transformAndMoveDocument(CaseData caseData, Map<String, Object> caseDataUpdated,
@@ -819,9 +783,9 @@ public class ManageDocumentsService {
         }
     }
 
-    public void cancelCirRequestTask(CaseData caseData) {
+    public void cancelCirRequestTask(CaseData caseData, List<String> uploadedCategoryIds) {
         String caseId = String.valueOf(caseData.getId());
-        if (hasCirRequestedDocsUploaded(caseData)) {
+        if (hasCirRequestedDocsUploaded(caseData, uploadedCategoryIds)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
                 CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
@@ -836,17 +800,15 @@ public class ManageDocumentsService {
         }
     }
 
-    public boolean hasCirRequestedDocsUploaded(CaseData caseData) {
-        return Stream.concat(
-            Optional.ofNullable(caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()).isPresent()
-                ? caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().stream() : Stream.empty(),
-            Optional.ofNullable(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()).isPresent()
-                ? caseData.getReviewDocuments().getCafcassUploadDocListDocTab().stream() : Stream.empty()
-        ).map(Element::getValue).anyMatch(
-            category -> category.getCategoryId().equals(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
-                || category.getCategoryId().equals(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
-                || category.getCategoryId().equals(CafcassCymruDocumentsEnum.childImpactReport1.getId())
-                || category.getCategoryId().equals(CafcassCymruDocumentsEnum.childImpactReport2.getId()));
+
+    public boolean hasCirRequestedDocsUploaded(CaseData caseData, List<String> uploadedCategoryIds) {
+
+        Set<String> cirDocumentsRequested = Optional.ofNullable(caseData.getCirDocumentsRequested()).stream().flatMap(
+            Collection::stream).map(Element::getValue).collect(
+            Collectors.toSet());
+
+        return uploadedCategoryIds.stream().anyMatch(document -> document.startsWith(PREFIX_CHILD_IMPACT_REPORT)
+            && cirDocumentsRequested.stream().anyMatch(any->any.startsWith(PREFIX_CHILD_IMPACT_REPORT)));
     }
 
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
@@ -869,7 +831,6 @@ public class ManageDocumentsService {
         CaseData currentCaseData = CaseUtils.getCaseData(currentCaseDetails, objectMapper);
 
         cleanupOldCopyOfConfidentialDocuments(authorisation, currentCaseData, startAllTabsUpdateDataContent.caseData());
-
     }
 
     void cleanupOldCopyOfConfidentialDocuments(String authorization, CaseData currentCaseData, CaseData previousCaseData) {
@@ -904,7 +865,7 @@ public class ManageDocumentsService {
                 caseDataMap.put("restrictedDocuments", restrictedDocuments);
             }
         }
-        caseDataMap.remove("manageDocuments");
+        caseDataMap.put("manageDocuments", null);
         return caseDataMap;
     }
 

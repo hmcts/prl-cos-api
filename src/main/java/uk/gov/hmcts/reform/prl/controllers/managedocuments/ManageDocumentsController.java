@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +25,8 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -37,6 +40,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+
 
 @Slf4j
 @RestController
@@ -142,12 +146,21 @@ public class ManageDocumentsController extends AbstractCallbackController {
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
 
+        List<Element<ManageDocuments>> uploadedDocuments = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData().get("manageDocuments"), new TypeReference<>() {}
+        );
+
+        List<String> uploadedCategoryIds = uploadedDocuments
+            .stream().map(each->each.getValue().getDocumentCategories().getValueCode())
+            .toList();
+
+
         manageDocumentsService.appendConfidentialDocumentNameForCourtAdminAndUpdate(
             callbackRequest,
             authorisation
         );
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        manageDocumentsService.cancelCirRequestTask(caseData);
+        manageDocumentsService.cancelCirRequestTask(caseData, uploadedCategoryIds);
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)
