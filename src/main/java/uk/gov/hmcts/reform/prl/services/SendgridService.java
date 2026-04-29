@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPOSITION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
-
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -135,7 +134,6 @@ public class SendgridService {
         return sendgridEmailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
     }
 
-
     private Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
         emailProps.put(SUBJECT, "A case has been transferred to your court");
@@ -204,5 +202,4 @@ public class SendgridService {
             mail.addAttachments(attachments);
         });
     }
-
 }
