@@ -84,16 +84,15 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                 FilterProperties filterProperties = document.getFilters().getFirst();
                 if (filterProperties != null && filterProperties.getCategory() != null) {
                     if (DATA_ORDERS.equals(document.getProperty())) {
-                        List<BundlingRequestDocument> orders = mapBundlingRequestDocument(
+                        List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
-                        );
+                        ));
                         reverse(orders);
                         ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
                     } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
-                        List<BundlingRequestDocument> applications = new ArrayList<>();
-                        applications.addAll(mapBundlingRequestDocument(
+                        List<BundlingRequestDocument> applications = new ArrayList<>(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
