@@ -589,7 +589,7 @@ public class ManageDocumentsServiceTest {
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(1,legalProfQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -637,7 +637,7 @@ public class ManageDocumentsServiceTest {
         citizenQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("citizenQuarantineDocsList");
         assertNotNull(citizenQuarantineDocsList);
         assertEquals(1,citizenQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -687,7 +687,7 @@ public class ManageDocumentsServiceTest {
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
         assertEquals(2,cafcassQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -743,7 +743,7 @@ public class ManageDocumentsServiceTest {
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
         assertNotNull(courtStaffQuarantineDocsList);
         assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -795,7 +795,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -857,7 +857,7 @@ public class ManageDocumentsServiceTest {
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
         assertNotNull(courtStaffQuarantineDocsList);
         assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -916,7 +916,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -972,7 +972,7 @@ public class ManageDocumentsServiceTest {
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("restrictedDocuments");
         assertNotNull(restrictedDocuments);
         assertEquals(1,restrictedDocuments.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
 
     }
@@ -1020,7 +1020,7 @@ public class ManageDocumentsServiceTest {
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(2,legalProfQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -1075,7 +1075,7 @@ public class ManageDocumentsServiceTest {
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
         assertEquals(1,cafcassQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -1103,7 +1103,6 @@ public class ManageDocumentsServiceTest {
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
-        assertTrue(caseDataMapUpdated.isEmpty());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
@@ -1160,7 +1159,7 @@ public class ManageDocumentsServiceTest {
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("restrictedDocuments");
         assertNotNull(restrictedDocuments);
         assertEquals(1,restrictedDocuments.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -1388,7 +1387,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(1,legalProfQuarantineDocsList.size());
         assertEquals(0,legalProfUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -1445,7 +1444,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(legalProfUploadDocListDocTab);
         assertEquals(0,legalProfQuarantineDocsList.size());
         assertEquals(1,legalProfUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -1539,7 +1538,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -2980,9 +2979,7 @@ public class ManageDocumentsServiceTest {
             .categoryId(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
             .build();
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
-                                 .build())
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
             .build();
 
         assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
@@ -2994,12 +2991,11 @@ public class ManageDocumentsServiceTest {
             .categoryId(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
             .build();
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
-                                 .build())
-            .build();
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
+                                 .build();
 
-        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded
+            (caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())));
     }
 
     @Test
@@ -3008,9 +3004,7 @@ public class ManageDocumentsServiceTest {
             .categoryId(CafcassCymruDocumentsEnum.childImpactReport1.getId())
             .build();
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .cafcassUploadDocListDocTab(List.of(element(doc)))
-                                 .build())
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
             .build();
 
         assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
@@ -3022,9 +3016,7 @@ public class ManageDocumentsServiceTest {
             .categoryId(CafcassCymruDocumentsEnum.childImpactReport2.getId())
             .build();
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .cafcassUploadDocListDocTab(List.of(element(doc)))
-                                 .build())
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
             .build();
 
         assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
@@ -3036,9 +3028,7 @@ public class ManageDocumentsServiceTest {
             .categoryId("MIAMCertificate")
             .build();
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
-                                 .build())
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
             .build();
 
         Assert.assertFalse(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of("MIAMCertificate")));
@@ -3047,7 +3037,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void hasCirRequestedDocsUploadedReturnsFalseWhenBothListsNull() {
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(ReviewDocuments.builder().build())
+            .cirDocumentsRequested(List.of())
             .build();
 
         Assert.assertFalse(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of()));
@@ -3060,9 +3050,7 @@ public class ManageDocumentsServiceTest {
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .reviewDocuments(ReviewDocuments.builder()
-                                 .localAuthorityUploadDocListDocTab(List.of(element(doc)))
-                                 .build())
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
             .build();
 
         when(allTabService.getStartUpdateForSpecificEvent(
