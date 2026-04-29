@@ -62,6 +62,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
@@ -156,6 +157,8 @@ public class DocumentGenService {
     protected String c100C8DraftFilename;
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
+    @Value("${document.templates.c100.c100_resp_c8_template}")
+    protected String c100OtherC8Template;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template}")
     protected String fl401RespC8Template;
@@ -1047,6 +1050,9 @@ public class DocumentGenService {
                 template = c100RespC8DraftTemplate;
                 break;
             case C8_RESP_FINAL_HINT:
+                template = findFinalRespondentC8Template(isWelsh);
+                break;
+            case C8_OTHER_FINAL_HINT:
                 template = findFinalRespondentC8Template(isWelsh);
                 break;
             case C8_RESP_FL401_FINAL_HINT:

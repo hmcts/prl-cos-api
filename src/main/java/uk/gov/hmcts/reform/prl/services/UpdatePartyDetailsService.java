@@ -107,6 +107,7 @@ public class UpdatePartyDetailsService {
     private final ManageOrderService manageOrderService;
     private final C8ArchiveService c8ArchiveService;
     private final CaseNameService caseNameService;
+    private final C8Service c8Service;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -928,9 +929,10 @@ public class UpdatePartyDetailsService {
         return address;
     }
 
-    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest) {
+    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> updatedCaseData =  amendOtherPeopleInTheCase(callbackRequest);
-        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        updatedCaseData.putAll(c8Service.generateOtherPartiesC8s(callbackRequest, authorisation));
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
