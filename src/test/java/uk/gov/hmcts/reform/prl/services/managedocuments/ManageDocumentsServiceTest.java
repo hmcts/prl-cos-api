@@ -2994,8 +2994,10 @@ public class ManageDocumentsServiceTest {
             .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
                                  .build();
 
-        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded
-            (caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())));
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(
+            caseData,
+            List.of(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
+        ));
     }
 
     @Test
