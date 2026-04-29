@@ -58,6 +58,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -6385,6 +6387,70 @@ class ManageOrderServiceTest {
 
         assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
 
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForLaWaTaskWhenRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1La,
+                                    LocalAuthorityDocumentsEnum.childImpactReport2La,
+                                    LocalAuthorityDocumentsEnum.sec37Report
+                                ))
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+        @SuppressWarnings("unchecked")
+        List<Element<String>> result = (List<Element<String>>) waFieldsMap.get("cirDocumentsRequested");
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForLaWaTaskWhenNotRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(No)
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+        assertNull(waFieldsMap.get("cirDocumentsRequested"));
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForCafcassWaTaskWhenRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(Yes)
+                                .cafcassCymruDocuments(List.of(
+                                    CafcassCymruDocumentsEnum.childImpactReport1,
+                                    CafcassCymruDocumentsEnum.childImpactReport2,
+                                    CafcassCymruDocumentsEnum.safeGuardingLetter
+                                ))
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        @SuppressWarnings("unchecked")
+        List<Element<String>> result = (List<Element<String>>) waFieldsMap.get("cirDocumentsRequested");
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForCafcassWaTaskWhenNotRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(No)
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        assertNull(waFieldsMap.get("cirDocumentsRequested"));
     }
 
     @Test
