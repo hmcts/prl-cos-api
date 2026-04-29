@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.bundle.DocumentProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,9 +75,12 @@ class BundleCreateRequestByCategoryMapperTest {
                                               5, List.of(documents), new ArrayList<>());
         Category category = new Category("parentCategoryId", "parentCategoryName", 2, List.of(documents), List.of(subCategory));
 
+        ResponseDocuments responseDocuments = ResponseDocuments.builder().citizenDocument(Document.builder().build()).build();
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .applicantName("ApplicantFirstNameAndLastName")
+            .citizenResponseC7DocumentList(List.of(Element.<ResponseDocuments>builder().id(UUID.randomUUID())
+                                                       .value(responseDocuments).build()))
             .build();
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.config.BundleCategoryConfig;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.reverse;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
@@ -90,11 +92,19 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                         reverse(orders);
                         ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
                     } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
-                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                        List<BundlingRequestDocument> applications = new ArrayList<>();
+                        applications.addAll(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
-                        )));
+                        ));
+                        List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(
+                            caseData.getCitizenResponseC7DocumentList(), filterProperties);
+
+                        if (!citizenUploadedC7Documents.isEmpty()) {
+                            applications.addAll(citizenUploadedC7Documents);
+                        }
+                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(applications));
                     } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
                         allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
@@ -115,6 +125,20 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                       .allOtherDocuments(allOtherDocumentsFromCategory).build()).build();
 
     }
+
+    private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList,
+                                                                     FilterProperties filterPropertie) {
+        List<BundlingRequestDocument> c7Documents = new ArrayList<>();
+        Optional<List<Element<ResponseDocuments>>> uploadedC7CitizenDocs = ofNullable(citizenResponseC7DocumentList);
+        if (uploadedC7CitizenDocs.isEmpty()) {
+            return c7Documents;
+        }
+        ElementUtils.unwrapElements(citizenResponseC7DocumentList)
+            .forEach(c7CitizenResponseDocument -> c7Documents
+                .add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(), BundlingDocGroupEnum.c7Documents, filterPropertie)));
+        return c7Documents;
+    }
+
 
 
     private Document mapCategoryDocumentToPrlDocument(uk.gov.hmcts.reform.ccd.client.model.Document categoryDocument) {
