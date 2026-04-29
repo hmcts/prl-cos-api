@@ -87,7 +87,7 @@ public class AutomatedHearingCaseData {
     @JsonAlias({"applicantCaseName", "applicantOrRespondentCaseName"})
     private String applicantCaseName;
 
-    @JsonProperty("allPartyFlags")
+    @JsonUnwrapped
     private AllPartyFlags allPartyFlags;
 
     @JsonUnwrapped

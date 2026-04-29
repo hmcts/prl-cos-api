@@ -55,6 +55,7 @@ class OsCourtFinderServiceTest {
     void shouldFindCourt() throws NotFoundException {
         String epimmsId = "356855";
         String localCustodianCode = "5570";
+        String localCustodianDescription = "Custodian Name";
         LocalAuthorityCourt localAuthorityCourt = LocalAuthorityCourt.builder()
             .localCustodianCode(localCustodianCode)
             .specificPostCodes(new ArrayList<>())
@@ -66,7 +67,8 @@ class OsCourtFinderServiceTest {
         OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
             .results(List.of(Result.builder()
                                  .dpa(Dpa.builder()
-                                          .localCustodianCode(localCustodianCode).build())
+                                          .localCustodianCode(localCustodianCode)
+                                          .localCustodianCodeDescription(localCustodianDescription).build())
                                  .build()))
             .build();
 
@@ -171,10 +173,13 @@ class OsCourtFinderServiceTest {
     @Test
     void shouldReturnLocalCustodianCodeByPostCode() throws NotFoundException {
         String expectedValue = "123";
+        String localCustodianDescription = "Custodian Name";
         OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
             .results(List.of(Result.builder()
                                  .dpa(Dpa.builder()
-                                          .localCustodianCode(expectedValue).build())
+                                          .localCustodianCode(expectedValue)
+                                          .localCustodianCodeDescription(localCustodianDescription)
+                                          .build())
                                  .build()))
             .build();
         when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(osPlacesResponse);
@@ -182,6 +187,28 @@ class OsCourtFinderServiceTest {
         String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
 
         assertEquals(expectedValue, result);
+        verify(osCourtFinderApi).findCouncilByPostcode(anyString());
+    }
+
+    @Test
+    void shouldReturnLocalCustodianCodeByPostCodeWhenOneDpaHasBlankCustodianDescription() throws NotFoundException {
+        String localCustodianCode1 = "123";
+        String localCustodianCode2 = "456";
+        String localCustodianDescription = "Custodian Name";
+        Result result1 = Result.builder().dpa(Dpa.builder()
+                                                  .localCustodianCode(localCustodianCode1)
+                                                  .build()).build();
+        Result result2 = Result.builder().dpa(Dpa.builder()
+                                                 .localCustodianCode(localCustodianCode2)
+                                                  .localCustodianCodeDescription(localCustodianDescription)
+                                                 .build()).build();
+        OsPlacesResponse osPlacesResponse = OsPlacesResponse.builder()
+            .results(List.of(result1, result2)).build();
+        when(osCourtFinderApi.findCouncilByPostcode("EC2A2AB")).thenReturn(osPlacesResponse);
+
+        String result = osCourtFinderService.getLocalCustodianCodeByPostCode("EC2A2AB");
+
+        assertEquals(localCustodianCode2, result);
         verify(osCourtFinderApi).findCouncilByPostcode(anyString());
     }
 
