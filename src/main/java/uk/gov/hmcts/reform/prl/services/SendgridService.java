@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPOSITION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 
-
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -106,7 +105,9 @@ public class SendgridService {
                  TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - attachDocsStartTime));
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
-        mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
+        String templateId = getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference());
+        log.info("*** SendGrid templateId used - {}", templateId);
+        mail.setTemplateId(templateId);
         Request request = new Request();
         long startTime = System.currentTimeMillis();
         try {
@@ -132,7 +133,6 @@ public class SendgridService {
     private String getTemplateId(SendgridEmailTemplateNames templateName, LanguagePreference languagePreference) {
         return sendgridEmailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
     }
-
 
     private Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
@@ -202,5 +202,4 @@ public class SendgridService {
             mail.addAttachments(attachments);
         });
     }
-
 }
