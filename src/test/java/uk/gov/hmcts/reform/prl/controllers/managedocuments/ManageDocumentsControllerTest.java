@@ -170,6 +170,13 @@ public class ManageDocumentsControllerTest {
 
     @Test
     public void testHandleSubmitted() {
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentCategories(dynamicList)
+            .build();
+        Element<ManageDocuments> manageDocumentsElement = element(manageDocuments);
+        callbackRequest.getCaseDetails().getData().put("manageDocuments", List.of(manageDocumentsElement));
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(List.of(manageDocumentsElement));
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
         abc.getBody().getConfirmationHeader();
         Assert.assertEquals("# Cyflwynwyd y ddogfen<br/>Documents submitted",abc.getBody().getConfirmationHeader());

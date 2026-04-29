@@ -151,7 +151,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         );
 
         List<String> uploadedCategoryIds = uploadedDocuments
-            .stream().map(each->each.getValue().getDocumentCategories().getValueCode())
+            .stream().map(each -> each.getValue().getDocumentCategories().getValueCode())
             .toList();
 
 

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -24,7 +25,6 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_DUMMY_UPLOAD_FILE;
-import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
 
 /**
  * functional test case for cafcass safegaurding letter upload.
@@ -76,7 +76,7 @@ public class CafcassUploadDocumentFunctionalTest {
     @Test
     @Order(2)
     public void givenValidDocumentData_then200Response() throws IOException {
-        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+        final File fileToUpload = ResourceUtils.getFile(CAFCASS_DUMMY_UPLOAD_FILE);
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())

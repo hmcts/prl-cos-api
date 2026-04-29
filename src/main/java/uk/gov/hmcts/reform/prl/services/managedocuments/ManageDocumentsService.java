@@ -800,7 +800,6 @@ public class ManageDocumentsService {
         }
     }
 
-
     public boolean hasCirRequestedDocsUploaded(CaseData caseData, List<String> uploadedCategoryIds) {
 
         Set<String> cirDocumentsRequested = Optional.ofNullable(caseData.getCirDocumentsRequested()).stream().flatMap(
@@ -808,7 +807,7 @@ public class ManageDocumentsService {
             Collectors.toSet());
 
         return uploadedCategoryIds.stream().anyMatch(document -> document.startsWith(PREFIX_CHILD_IMPACT_REPORT)
-            && cirDocumentsRequested.stream().anyMatch(any->any.startsWith(PREFIX_CHILD_IMPACT_REPORT)));
+            && cirDocumentsRequested.stream().anyMatch(any -> any.startsWith(PREFIX_CHILD_IMPACT_REPORT)));
     }
 
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
