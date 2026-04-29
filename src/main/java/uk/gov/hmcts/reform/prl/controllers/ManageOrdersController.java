@@ -1044,8 +1044,9 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order - customOrderDoc being present is the indicator
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_DOC) != null;
+        // Check if this is a custom order - customOrderNameOption is only shown on custom order pages
+        // (not customOrderDoc which could be stale from a previous custom order)
+        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_NAME_OPTION) != null;
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
