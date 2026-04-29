@@ -114,6 +114,11 @@ public class CafcassUploadDocService {
             CAFCASS
         );
 
+        manageDocumentsService.cancelCirRequestTask(
+            startAllTabsUpdateDataContent.caseData(),
+            List.of(quarantineLegalDoc.getCategoryId())
+        );
+
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,

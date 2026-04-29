@@ -38,6 +38,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
@@ -3978,7 +3980,6 @@ public class ManageOrderService {
             log.info("setFieldsForWaTask: manageOrdersOptions did not match create/upload/custom, value was: {}",
                 manageOrdersOption);
         }
-
         setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
         setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
         setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
@@ -4004,17 +4005,25 @@ public class ManageOrderService {
 
     public void setFieldsForCirDocumentsRequestedForLaWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
         if (Yes.equals(caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport())) {
-            List<Element<String>> listOfTasksForLa = caseData.getServeOrderData().getLocalAuthorityMultipleDocuments().stream()
-                .map(each -> element(UUID.randomUUID(), each.getId())).toList();
-            waFieldsMap.put("cirDocumentsRequested", listOfTasksForLa);
+            List<Element<String>> cirDocumentsRequested = caseData.getServeOrderData().getLocalAuthorityMultipleDocuments().stream().filter(
+                category -> category.getId().equals(LocalAuthorityDocumentsEnum.childImpactReport1La.getId()) || category.getId().equals(
+                    LocalAuthorityDocumentsEnum.childImpactReport2La.getId())).map(each -> element(
+                UUID.randomUUID(),
+                each.getId()
+            )).toList();
+            waFieldsMap.put("cirDocumentsRequested", cirDocumentsRequested);
         }
     }
 
     public void setFieldsForCirDocumentsRequestedForCafcassWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
         if (Yes.equals(caseData.getServeOrderData().getCafcassOrCymruNeedToProvideReport())) {
-            List<Element<String>> listOfTasksForCafcass = caseData.getServeOrderData().getCafcassCymruDocuments().stream()
-                .map(each -> element(UUID.randomUUID(), each.getId())).toList();
-            waFieldsMap.put("cirDocumentsRequested", listOfTasksForCafcass);
+            List<Element<String>> cirDocumentsRequested = caseData.getServeOrderData().getCafcassCymruDocuments().stream().filter(
+                category -> category.getId().equals(CafcassCymruDocumentsEnum.childImpactReport1.getId()) || category.getId().equals(
+                    CafcassCymruDocumentsEnum.childImpactReport2.getId())).map(each -> element(
+                UUID.randomUUID(),
+                each.getId()
+            )).toList();
+            waFieldsMap.put("cirDocumentsRequested", cirDocumentsRequested);
         }
     }
 

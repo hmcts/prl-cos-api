@@ -51,7 +51,6 @@ public enum ManageOrderFieldsEnum {
     isHearingPageNeeded("isHearingPageNeeded"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
-    whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
