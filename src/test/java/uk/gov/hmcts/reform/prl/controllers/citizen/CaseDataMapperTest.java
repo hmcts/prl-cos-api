@@ -215,6 +215,22 @@ public class CaseDataMapperTest {
     }
 
     @Test
+    public void testCaseDataMapperReasonableAdjustmentsNewFields() throws IOException {
+        CaseData caseData1 = caseData.toBuilder()
+            .c100RebuildData(c100RebuildData
+                                 .toBuilder()
+                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra4.json"))
+                                 .build())
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
     public void testCaseDataMapperForOtherPersonDetails() throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()

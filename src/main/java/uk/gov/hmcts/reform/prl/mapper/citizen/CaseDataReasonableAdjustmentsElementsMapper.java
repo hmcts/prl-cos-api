@@ -84,12 +84,14 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                                .isInterpreterNeeded(buildInterpreterNeeded(languageList))
                                .interpreterNeeds(buildInterpreterNeeds(languageList, c100RebuildReasonableAdjustmentsElements
                                    .getNeedInterpreterInCertainLanguageDetails()))
-                               .isIntermediaryNeeded(communicationHelps.contains(intermediary.name()) ? YesOrNo.Yes : YesOrNo.No)
+                               .isIntermediaryNeeded(isIntermediaryRequired(communicationHelps,
+                                                                            c100RebuildReasonableAdjustmentsElements.getIntermediaryRequirements()))
                                .isSpecialArrangementsRequired(buildSpecialArrangementRequired(specialArrangementList))
                                .specialArrangementsRequired(buildSpecialArrangementList(specialArrangementList,
                                                                                         c100RebuildReasonableAdjustmentsElements
                                                                                             .getSpecialArrangementsOtherSubField()))
-                               .isDisabilityPresent(buildIsDisabilityPresent(disabilityRequirementsList))
+                               .isDisabilityPresent(buildIsDisabilityPresent(disabilityRequirementsList,
+                                                                             c100RebuildReasonableAdjustmentsElements.getAssistanceRequirements()))
                                .adjustmentsRequired(buildAdjustmentRequired(disabilityRequirementsList,
                                                                             c100RebuildReasonableAdjustmentsElements))
                                .build())
@@ -103,6 +105,13 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
     private static YesOrNo isWelshRequired(List<String> languageList) {
         return !languageList.isEmpty()
             && languageList.contains(READ_WRITE_WELSH) ? YesOrNo.Yes : YesOrNo.No;
+    }
+
+    private static YesOrNo isIntermediaryRequired(List<String> communicationHelps, YesOrNo intermediaryRequirements) {
+        if (communicationHelps != null && !communicationHelps.isEmpty()) {
+            return communicationHelps.contains(intermediary.name()) ? YesOrNo.Yes : YesOrNo.No;
+        }
+        return intermediaryRequirements;
     }
 
     private static List<Element<InterpreterNeed>> buildInterpreterNeeds(List<String> languageList,
@@ -148,12 +157,22 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildAdjustmentRequired(List<String> disabilityRequirementsList,
                           C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
+        if (c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null
+            || c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField() != null) {
+            return buildAdjustmentRequiredFromSubFields(c100RebuildReasonableAdjustmentsElements);
+        }
+
         StringBuilder adjustmentRequired = new StringBuilder();
         String documentInformation;
         String communicationHelpDetails;
         String extraSupportDetails;
         String feelComfortableSupportDetails;
         String helpTravellingMovingBuildingSupportDetails;
+
+        if (disabilityRequirementsList == null || disabilityRequirementsList.isEmpty()) {
+            return String.valueOf(adjustmentRequired);
+        }
+
         if (disabilityRequirementsList.contains(noSupportRequired.name())) {
             return noSupportRequired.getDisplayedValue();
         }
@@ -184,6 +203,23 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                     helpTravellingMovingBuildingSupportDetails);
         }
         return String.valueOf(adjustmentRequired);
+    }
+
+    private static String buildAdjustmentRequiredFromSubFields(
+        C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
+        StringBuilder adjustmentRequired = new StringBuilder();
+
+        if (c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField() != null) {
+            adjustmentRequired.append(c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField());
+        }
+
+        if (c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null) {
+            if (!adjustmentRequired.isEmpty()) {
+                adjustmentRequired.append(COMMA_SEPARATOR);
+            }
+            adjustmentRequired.append(c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField());
+        }
+        return adjustmentRequired.toString();
     }
 
     private static void appendData(StringBuilder stringBuilder,
@@ -312,8 +348,11 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         }
     }
 
-    private static YesOrNo buildIsDisabilityPresent(List<String> disabilityRequirementsList) {
-        return disabilityRequirementsList.contains(noSupportRequired.name()) ? YesOrNo.No : YesOrNo.Yes;
+    private static YesOrNo buildIsDisabilityPresent(List<String> disabilityRequirementsList, YesOrNo assistanceRequirements) {
+        if (disabilityRequirementsList != null && !disabilityRequirementsList.isEmpty()) {
+            return disabilityRequirementsList.contains(noSupportRequired.name()) ? YesOrNo.No : YesOrNo.Yes;
+        }
+        return assistanceRequirements;
     }
 
     private static String buildSpecialArrangementList(List<String> specialArrangementList, String otherSubField) {
