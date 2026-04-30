@@ -16,6 +16,5 @@ public class UpdateHearingActualTask implements Runnable {
     public void run() {
         //Invoke fm5 reminder service to evaluate & notify if needed
         updateHearingActualsService.updateHearingActuals();
-        updateHearingActualsService.processRequestOrderTasks();
     }
 }

@@ -100,9 +100,45 @@ public class UpdateHearingActualsService {
                 nullSafeCollection(caseData.getUpdateHearingActualTracking())
                     .forEach(e -> trackingByHearingId.put(e.getValue().getHearingId(), e));
                 hearingIds.forEach(hearingId -> processIndividualHearing(caseId, hearingId, trackingByHearingId));
+                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingIds)) {
+                    log.info("Hearing id is not mapped in orders");
+                    triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
+                }
             }
 
         };
+    }
+
+    private boolean checkIfHearingIdIsMappedInOrders(CaseData caseData, List<String> hearingId) {
+        log.info("Checking hearing id is mapped in orders");
+        if (!checkIfHearingIdIsMappedinDraftOrder(caseData, hearingId)) {
+            log.info("Hearing id not mapped in draft order");
+            return checkIfHearingIdIsMappedinSavedServedOrder(caseData, hearingId);
+        }
+        return true;
+    }
+
+    private boolean checkIfHearingIdIsMappedinDraftOrder(CaseData caseData, List<String> hearingId) {
+        return nullSafeCollection(caseData.getDraftOrderCollection())
+            .stream()
+            .map(Element::getValue)
+            .anyMatch(draftOrderElement -> nullSafeCollection(draftOrderElement.getManageOrderHearingDetails())
+                .stream()
+                .map(Element::getValue)
+                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue() != null
+                    && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
+    }
+
+    private boolean checkIfHearingIdIsMappedinSavedServedOrder(CaseData caseData, List<String> hearingId) {
+        return nullSafeCollection(caseData.getOrderCollection())
+            .stream()
+            .map(Element::getValue)
+            .anyMatch(orderElement -> nullSafeCollection(orderElement.getManageOrderHearingDetails())
+                .stream().map(Element::getValue)
+                .anyMatch(hearingData -> hearingData.getConfirmedHearingDates() != null
+                    && hearingData.getConfirmedHearingDates().getValue() != null
+                    && hearingId.contains(hearingData.getConfirmedHearingDates().getValue().getCode())));
     }
 
     private void processIndividualHearing(String caseId, String hearingId, Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId) {
@@ -137,17 +173,7 @@ public class UpdateHearingActualsService {
         }
     }
 
-    /**
-     * For each candidate case, fires ENABLE_REQUEST_SOLICITOR_ORDER_TASK once per qualifying
-     * hearing (the unit of work is the hearing, not the case). Each event carries
-     * currentHearingId so the WA initiation DMN can bind the resulting task to that specific
-     * hearing via additionalProperties.hearingId. Cadence is 1 working day for FL401
-     * (FPVTL-2408) and 3 working days for C100 (FPVTL-2409). The per-hearing lastFiredDate
-     * guard prevents re-firing while a task for that hearing is still open.
-     */
-    public void processRequestOrderTasks() {
 
-    }
 
     private Map<String, List<String>> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
         return hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(
