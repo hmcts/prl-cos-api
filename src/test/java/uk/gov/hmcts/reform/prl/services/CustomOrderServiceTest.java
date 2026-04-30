@@ -11,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -40,7 +41,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -48,7 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,8 +55,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -2233,6 +2236,49 @@ class CustomOrderServiceTest {
 
         // Assert - should skip processing (no download attempts)
         verify(documentGenService, never()).getDocumentBytes(any(), any(), any());
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_cleansUpCustomOrderDocAndPreviewOrderDoc() throws IOException {
+        // Verify customOrderDoc and previewOrderDoc are cleaned up after successful processing
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentFileName("custom.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("final.pdf")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CaseData caseData = CaseData.builder().id(123L).build();
+
+        // Use spy to mock just processCustomOrderOnSubmitted
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
+            anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
+
+        spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        // Assert cleanup happened
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
     // ========== Tests for findRelationshipById ==========
