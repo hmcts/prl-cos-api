@@ -65,8 +65,9 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         List<String> specialArrangementList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getSpecialArrangements())
                 .toList();
 
-        List<String> disabilityRequirementsList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getDisabilityRequirements())
-                .toList();
+        List<String> disabilityRequirementsList = nonNull(c100RebuildReasonableAdjustmentsElements.getDisabilityRequirements())
+            ? Arrays.stream(c100RebuildReasonableAdjustmentsElements.getDisabilityRequirements())
+              .toList() : Collections.emptyList();
 
         List<String> languageList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getLanguageNeeds())
                 .toList();
