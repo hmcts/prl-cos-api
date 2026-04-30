@@ -473,6 +473,13 @@ public class ManageOrdersController {
                 }
             }
 
+            // Clean up custom order fields BEFORE persisting - these fields are transient for the order journey
+            // and shouldn't persist to affect subsequent order creations.
+            // Note: This is a submitted callback using submitAllTabsUpdate, so the response is not used by CCD.
+            if (isCustomOrder) {
+                cleanupCustomOrderFields(caseDataUpdated);
+            }
+
             allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
@@ -482,11 +489,6 @@ public class ManageOrdersController {
 
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
-
-            // Clean up custom order fields to prevent them affecting subsequent order creations
-            if (isCustomOrder) {
-                cleanupCustomOrderFields(caseDataUpdated);
-            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -827,6 +829,7 @@ public class ManageOrdersController {
                 // Clear custom order fields when a different option is selected
                 // This prevents stale data from a cancelled custom order flow affecting other flows
                 caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+                caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -1044,9 +1047,11 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order - customOrderNameOption is only shown on custom order pages
-        // (not customOrderDoc which could be stale from a previous custom order)
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_NAME_OPTION) != null;
+        // Check if this is a custom order by looking at manageOrdersOptions (the user's selection in THIS flow)
+        // Do NOT use customOrderNameOption - it persists from previous completed custom orders
+        Object manageOrdersOption = callbackData.get("manageOrdersOptions");
+        boolean isCustomOrder = createCustomOrder.name().equals(manageOrdersOption)
+            || createCustomOrder.toString().equals(manageOrdersOption);
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);

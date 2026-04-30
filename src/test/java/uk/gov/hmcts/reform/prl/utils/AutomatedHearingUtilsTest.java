@@ -92,7 +92,7 @@ class AutomatedHearingUtilsTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataMap.put("manageOrdersOptions", "createCustomOrder");
         caseDataMap.put(DRAFT_ORDER_COLLECTION, currentDraftOrders);
 
         when(manageOrderService.createAutomatedHearingManagement(eq(authorisation), eq(caseData), any()))
@@ -162,7 +162,7 @@ class AutomatedHearingUtilsTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataMap.put("manageOrdersOptions", "createCustomOrder");
         caseDataMap.put(ORDER_COLLECTION, currentOrders);
 
         when(manageOrderService.createAutomatedHearingManagement(eq(authorisation), eq(caseData), any()))
@@ -201,7 +201,7 @@ class AutomatedHearingUtilsTest {
         orders.add(Element.<OrderDetails>builder().id(orderId).value(orderDetails).build());
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataMap.put("manageOrdersOptions", "createCustomOrder");
         caseDataMap.put(ORDER_COLLECTION, orders);
 
         AutomatedHearingUtils.automatedHearingManagementRequest(
@@ -243,7 +243,8 @@ class AutomatedHearingUtilsTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        // No customOrderDoc - so original flow
+        // No manageOrdersOptions or uploadAnOrder - so original flow (not custom order)
+        caseDataMap.put("manageOrdersOptions", "uploadAnOrder");
 
         when(manageOrderService.createAutomatedHearingManagement(eq(authorisation), eq(caseData), any()))
             .thenReturn(updatedHearingDetails);
@@ -328,16 +329,16 @@ class AutomatedHearingUtilsTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        caseDataMap.put("manageOrdersOptions", "createCustomOrder");
 
         when(manageOrderService.createAutomatedHearingManagement(eq(authorisation), eq(caseData), any()))
             .thenReturn(updatedHearingDetails);
 
-        // Call with null objectMapper
+        // Call with null objectMapper - even with createCustomOrder, null objectMapper uses original flow
         AutomatedHearingUtils.automatedHearingManagementRequest(
             authorisation, caseData, caseDataMap, manageOrderService, null);
 
-        // Verify AHR was called (original flow, not custom order flow)
+        // Verify AHR was called (original flow because objectMapper is null)
         verify(manageOrderService).createAutomatedHearingManagement(authorisation, caseData, hearingDetails);
 
         // Original flow updates caseDataMap from caseData's collection
@@ -345,9 +346,9 @@ class AutomatedHearingUtilsTest {
     }
 
     @Test
-    void testAutomatedHearingManagementRequest_staleCustomOrderDoc_shouldNotTriggerCustomOrderFlow() {
-        // This test verifies that stale customOrderDoc from a previous order
-        // does NOT trigger the custom order flow. Only customOrderNameOption
+    void testAutomatedHearingManagementRequest_staleCustomOrderNameOption_shouldNotTriggerCustomOrderFlow() {
+        // This test verifies that stale customOrderNameOption from a previous order
+        // does NOT trigger the custom order flow. Only manageOrdersOptions=createCustomOrder
         // (which indicates user selected custom order in THIS flow) should trigger it.
 
         UUID orderId = UUID.randomUUID();
@@ -376,9 +377,10 @@ class AutomatedHearingUtilsTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        // Stale customOrderDoc from previous order - should NOT trigger custom order flow
-        caseDataMap.put("customOrderDoc", "stale-doc-from-previous-order");
-        // NO customOrderNameOption - this is an upload order, not custom order
+        // Stale customOrderNameOption from previous order - should NOT trigger custom order flow
+        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        // manageOrdersOptions is uploadAnOrder - this is an upload order, not custom order
+        caseDataMap.put("manageOrdersOptions", "uploadAnOrder");
 
         when(manageOrderService.createAutomatedHearingManagement(eq(authorisation), eq(caseData), any()))
             .thenReturn(updatedHearingDetails);
