@@ -88,6 +88,26 @@ public class SendgridService {
         }
     }
 
+    public void sendEmail(String emailAddress, String subject, String content) {
+        Mail mail = new Mail(new Email(fromEmail), subject, new Email(emailAddress), new Content("text/plain", content));
+
+        try {
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint(MAIL_SEND);
+            request.setBody(mail.build());
+            Response response = sendGrid.api(request);
+            if (response.getStatusCode() == HttpStatus.ACCEPTED.value()) {
+                log.info("SendGrid email request sent successfully");
+            } else {
+                throw new SendGridNotificationException("SendGrid email request failed with status code "
+                                                            + response.getStatusCode());
+            }
+        } catch (IOException e) {
+            throw new SendGridNotificationException(e.getMessage(), e);
+        }
+    }
+
     public boolean sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
                                                       String authorization, SendgridEmailConfig sendgridEmailConfig) {
         Personalization personalization = new Personalization();

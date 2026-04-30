@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -17,4 +18,9 @@ public class TimeConfig {
         return () -> ZonedDateTime.now(ZoneId.of("Europe/London")).toLocalDateTime();
     }
 
+    @Bean
+    @Lazy
+    public Clock clock() {
+        return Clock.systemDefaultZone();
+    }
 }

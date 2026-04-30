@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -531,5 +532,30 @@ class SendgridServiceTest {
         );
 
         logger.detachAppender(appender);
+    }
+
+    @Test
+    void sendEmail_success() throws IOException {
+        when(sendGrid.api(any(Request.class))).thenReturn(new Response(HttpStatus.ACCEPTED.value(), null, null));
+
+        sendgridService.sendEmail("test@hmcts.net", "Email subject", "Email body");
+
+        verify(sendGrid).api(any(Request.class));
+    }
+
+    @Test
+    void sendEmail_whenResponseNotAccepted_thenThrowsException() throws IOException {
+        when(sendGrid.api(any(Request.class))).thenReturn(new Response(HttpStatus.BAD_REQUEST.value(), null, null));
+
+        assertThrows(SendGridNotificationException.class,
+                     () -> sendgridService.sendEmail("test@hmcts.net", "Email subject", "Email body"));
+    }
+
+    @Test
+    void sendEmail_whenException_thenThrowsException() throws IOException {
+        when(sendGrid.api(any(Request.class))).thenThrow(IOException.class);
+
+        assertThrows(SendGridNotificationException.class,
+                     () -> sendgridService.sendEmail("test@hmcts.net", "Email subject", "Email body"));
     }
 }

@@ -4,4 +4,8 @@ public class SendGridNotificationException extends RuntimeException {
     public SendGridNotificationException(String message) {
         super(message);
     }
+
+    public SendGridNotificationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

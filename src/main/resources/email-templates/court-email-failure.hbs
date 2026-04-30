@@ -1,0 +1,14 @@
+The following emails were not sent successfully:
+
+{{#each failedEmails}}
+  Case reference: {{caseReference}}
+  Email address: {{toEmailAddress}}
+  Sent date: {{sentDate}}
+  Subject: {{subject}}
+  Status: {{status}}
+  Reason: {{reason}}
+  Message ID: {{messageId}}
+  Template ID: {{templateId}}
+  Template name: {{templateName}}
+
+{{/each}}

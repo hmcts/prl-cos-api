@@ -297,6 +297,9 @@ send-grid:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
+  email-logs-api:
+    api-key: ${SEND_GRID_LOGS_API_KEY:xxxxxxxx}
+    days-to-query: ${SEND_GRID_LOGS_DAYS_TO_QUERY:1}
 
 fees-register:
   api:
