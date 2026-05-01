@@ -61,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -248,6 +249,9 @@ public class EditAndApproveDraftOrderController {
 
             }
             manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
+            caseDataUpdated.put(WA_PERFORMING_USER, manageOrderService.getLoggedInUserType(authorisation));
+            manageOrderService.setFieldsForCirDocumentsRequested(caseData, caseDataUpdated);
+            log.info("Performing user set {}", caseDataUpdated.get(WA_PERFORMING_USER));
             //Populate need to check automated hearing request
             manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);

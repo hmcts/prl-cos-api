@@ -3981,8 +3981,7 @@ public class ManageOrderService {
                 manageOrdersOption);
         }
         setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
-        setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
-        setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        setFieldsForCirDocumentsRequested(caseData, waFieldsMap);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
@@ -4001,6 +4000,11 @@ public class ManageOrderService {
             waFieldsMap.put(
                 WA_SER_DUE_DATE, caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
+    }
+
+    public void setFieldsForCirDocumentsRequested(CaseData caseData, Map<String, Object> waFieldsMap) {
+        setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+        setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
     }
 
     public void setFieldsForCirDocumentsRequestedForLaWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
