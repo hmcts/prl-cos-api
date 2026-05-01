@@ -107,28 +107,17 @@ Run these commands to get instant, color-coded coverage feedback in your termina
 * **Check Specific Class:** `./gradlew testWithCoverage -Ptarget=MyClassName`
 * **Check Multiple Classes:** `./gradlew testWithCoverage -Ptarget=ClassA,ClassB`
 
-The "Targeted" mode provides a line-by-line breakdown of missed instructions and branches.
+> The "Targeted" mode provides a line-by-line breakdown of missed instructions and branches.
 
 ---
 
-### ⚓ Git Pre-commit Hook
-A Git Pre-commit Hook is included to prevent "Red" builds in SonarQube.
+### ⚓ Git Pre-commit Hook (Opt-In)
+A Git Pre-commit Hook is included to prevent "Red" builds in SonarQube. By default, local commits remain fast and skip the coverage check.
 
 * **Installation:** Automatically installed/updated when you run `./gradlew build`.
-* **Behavior:** Every `git commit` triggers an aggregate coverage check. If total coverage is below 80%, the commit is blocked.
-* **Visibility:** Detailed reports appear in the IntelliJ "Git" or "Console" tab upon failure.
-
-#### 🔓 How to Bypass
-If you need to commit without running the coverage check (e.g., documentation or WIP spikes), use the bypass flag:
-
-`git commit -m "your message" --no-verify`
-
----
-
-### 🛠️ Troubleshooting
-If the hook is not firing, refresh the installation by running:
-
-`./gradlew installGitHooks`
+* **How to Run:** To verify your coverage during a commit, set the `VERIFY_COVERAGE` flag:
+  ```bash
+  VERIFY_COVERAGE=true git commit -m "My verified feature"
 There is no need to remove postgres and java or similar core images.
 
 ### Troubleshooting

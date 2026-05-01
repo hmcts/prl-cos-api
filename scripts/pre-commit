@@ -4,34 +4,28 @@
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo "🔍  PRE-COMMIT QUALITY GATE: Checking Aggregate Coverage..."
-echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+# Check if --verify is present in the git command arguments
+# Git passes the commit message file, but we can check the parent process
+# Or more simply, we check a custom environment variable we can alias.
+# However, the most 'Git-native' way for an opt-in is checking an ENV var.
 
-if [ ! -t 0 ] && [ -n "$IDEA_INITIAL_DIRECTORY" ]; then
-    # Only proceed if we are absolutely sure this is the final execution phase.
-    # When IntelliJ actually executes the commit, it usually sets these.
-    if [ -z "$GIT_PREFIX" ] && [ -z "$GIT_AUTHOR_DATE" ]; then
-        exit 0
-    fi
-fi
-
-# 2. ADDITIONAL SAFETY: Check if we are in a "rebase" or "merge" preview
-if [ -d ".git/rebase-merge" ] || [ -d ".git/rebase-apply" ]; then
+if [ "$VERIFY_COVERAGE" != "true" ]; then
+    # Skip silently and fast
     exit 0
 fi
 
-# Run the task. We use --quiet to ensure the report is the main focus.
-./gradlew testWithCoverage --quiet
-RESULT=$?
+echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo "🔍  OPT-IN QUALITY GATE: Running Coverage Check..."
+echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+# Run the task - filter out the JVM noise but show our println output
+./gradlew testWithCoverage --no-daemon | grep -v "OpenJDK 64-Bit Server VM warning"
+RESULT=${PIPESTATUS[0]}
 
 if [ $RESULT -ne 0 ]; then
-  echo "\n❌  [COMMIT BLOCKED]"
-  echo "Project coverage is below 80%. See report above for gaps."
-  echo "To bypass (not recommended): git commit --no-verify\n"
+  echo "\n❌  [COMMIT BLOCKED] Coverage is below 80%."
   exit 1
 fi
 
-echo "\n✅  [COMMIT ALLOWED]"
-echo "Quality standards met. Proceeding...\n"
+echo "\n✅  [COMMIT ALLOWED] Quality Gate Passed. 🛡️\n"
 exit 0
