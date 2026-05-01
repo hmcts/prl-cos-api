@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_BLANK_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
@@ -297,6 +298,10 @@ public class DocumentGenService {
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
+    @Value("${document.templates.common.prl_blank_cover_letter_template}")
+    protected String docBlankCoverLetterTemplate;
+    @Value("${document.templates.common.prl_blank_cover_letter_welsh_template}")
+    protected String docBlankCoverLetterWelshTemplate;
 
     @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
     protected String citizenC1aFinalResponseTemplate;
@@ -1115,6 +1120,9 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
                 template = findDocCoverSheetTemplateForServeOrder(isWelsh);
                 break;
+            case DOCUMENT_BLANK_COVER_SHEET_HINT:
+                template = findDocBlankCoverSheetTemplate(isWelsh);
+                break;
             case C1A_FINAL_RESPONSE_DOCUMENT:
                 template = getRespondentC1aResponseFinalTemplate(isWelsh);
                 break;
@@ -1193,6 +1201,10 @@ public class DocumentGenService {
     private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
         //Need to replace EMPTY_STRING with received welsh template
         return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
+    }
+
+    private String findDocBlankCoverSheetTemplate(boolean isWelsh) {
+        return !isWelsh ? docBlankCoverLetterTemplate : docBlankCoverLetterWelshTemplate;
     }
 
     private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
