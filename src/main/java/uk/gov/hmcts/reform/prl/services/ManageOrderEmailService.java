@@ -369,15 +369,10 @@ public class ManageOrderEmailService {
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
         }
 
-        //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
-        // For custom orders, work on caseDataMap's collection (which has the combined doc and correct orderTypeId)
+        // Set bulkIds in the orderCollection & update in caseDataMap
+        // Work on caseDataMap's collection (which has the combined doc and correct orderTypeId)
         // to avoid overwriting those updates with stale data from caseData
-        if (caseDataMap.get("customOrderDoc") != null) {
-            addBulkPrintIdsInOrderCollectionFromMap(caseDataMap, caseData.getManageOrders(), bulkPrintOrderDetails);
-        } else {
-            addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-            caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
-        }
+        addBulkPrintIdsInOrderCollectionFromMap(caseDataMap, caseData.getManageOrders(), bulkPrintOrderDetails);
     }
 
     private void handleFL401ServeOrderNotifications(String authorisation,

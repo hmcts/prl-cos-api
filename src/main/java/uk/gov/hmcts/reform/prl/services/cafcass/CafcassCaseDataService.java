@@ -258,6 +258,7 @@ public class CafcassCaseDataService {
                 .cafcassUploadDocListDocTab(null)
                 .courtStaffUploadDocListDocTab(null)
                 .citizenUploadedDocListDocTab(null)
+                .localAuthorityUploadDocListDocTab(null)
                 .restrictedDocuments(null)
                 .confidentialDocuments(null)
                 .respondentAc8Documents(null)
@@ -455,6 +456,12 @@ public class CafcassCaseDataService {
             parseQuarantineLegalDocs(
                 otherDocsList,
                 caseData.getCafcassUploadDocListDocTab()
+            );
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getLocalAuthorityUploadDocListDocTab())) {
+            parseQuarantineLegalDocs(
+                otherDocsList,
+                caseData.getLocalAuthorityUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
@@ -886,6 +893,7 @@ public class CafcassCaseDataService {
             "data.bulkScannedDocListDocTab",
             "data.cafcassUploadDocListDocTab",
             "data.citizenUploadedDocListDocTab",
+            "data.localAuthorityUploadDocListDocTab",
             "data.restrictedDocuments",
             "data.confidentialDocuments",
             "data.respondentAc8Documents",

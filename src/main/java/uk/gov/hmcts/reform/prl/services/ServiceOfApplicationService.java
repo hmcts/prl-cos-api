@@ -361,18 +361,17 @@ public class ServiceOfApplicationService {
 
                 if (null != other.getValue().getAddress()
                     && null != other.getValue().getAddress().getAddressLine1()) {
-                    List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
-                                                              .getCoverSheets(caseData, authorization,
-                                                                              other.getValue().getAddress(),
-                                                                              other.getValue().getLabelForDynamicList(),
-                                                                              DOCUMENT_COVER_SHEET_HINT
-                                                              ));
-                    docs.addAll(packN);
+                    packN.addAll(serviceOfApplicationPostService
+                                     .getCoverSheets(caseData, authorization,
+                                                     other.getValue().getAddress(),
+                                                     other.getValue().getLabelForDynamicList(),
+                                                     DOCUMENT_COVER_SHEET_HINT
+                                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
                         other,
-                        docs,
+                        packN,
                         servedParty
                     )));
                 }
