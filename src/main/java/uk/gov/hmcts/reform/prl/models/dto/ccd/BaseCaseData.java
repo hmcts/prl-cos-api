@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
@@ -175,6 +176,8 @@ public class BaseCaseData {
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
     private LocalAuthority localAuthority;
+
+    private List<Element<ApplicantConfidentialityDetails>> otherPeopleConfidentialDetails;
 
     private List<Element<ResponseDocuments>> otherPartyC8Documents;
     private List<Element<ResponseDocuments>> otherPartyC8DocumentsArchived;

@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -430,7 +431,7 @@ public class UpdatePartyDetailsService {
             .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
             .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
                                             ? partyDetails.getIsEmailAddressConfidential() : null)
-            .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+            .refugeConfidentialityC8Form(YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
             .build();
 
@@ -443,9 +444,9 @@ public class UpdatePartyDetailsService {
             .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
             .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
             .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
-            .liveInRefuge(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getLiveInRefuge() : null)
+            .liveInRefuge(partyDetails.getLiveInRefuge())
             .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
-                                             && YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                                             && YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
             .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
                                        ? partyDetails.getIsAddressConfidential() : null)
@@ -476,12 +477,11 @@ public class UpdatePartyDetailsService {
             .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
             .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
             .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
-            .liveInRefuge(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getLiveInRefuge() : null)
+            .liveInRefuge(partyDetails.getLiveInRefuge())
             .refugeConfidentialityC8Form(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
-                                             && YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+                                             && YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
                                              ? partyDetails.getRefugeConfidentialityC8Form() : null)
-            .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
-                                       ? partyDetails.getIsAddressConfidential() : null)
+            .isAddressConfidential(partyDetails.getIsAddressConfidential())
             .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
             .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
                                             ? partyDetails.getIsEmailAddressConfidential() : null)
@@ -629,11 +629,13 @@ public class UpdatePartyDetailsService {
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
                     || CaseUtils.isPhoneNumberChanged(respondent.getValue(), resp1.getValue())
+                    || !Objects.equals(respondent.getValue().getLiveInRefuge(), resp1.getValue().getLiveInRefuge())
                     || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
                     .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
+                || !Objects.equals(respondent.getValue().getLiveInRefuge(), respondentDetailsFL401.getLiveInRefuge())
                 || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
                 || (CaseUtils.isPhoneNumberChanged(respondent.getValue(), respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
@@ -646,8 +648,6 @@ public class UpdatePartyDetailsService {
         }
         return false;
     }
-
-
 
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
@@ -780,7 +780,7 @@ public class UpdatePartyDetailsService {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<PartyDetails>> applicants = caseData.getApplicants();
-        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+        if (CollectionUtils.isEmpty(applicants)) {
             applicants = new ArrayList<>();
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             applicants.add(partyDetails);
@@ -796,7 +796,7 @@ public class UpdatePartyDetailsService {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<PartyDetails>> respondents = caseData.getRespondents();
-        if (CollectionUtils.isEmpty(respondents) || CollectionUtils.size(respondents) < 1) {
+        if (CollectionUtils.isEmpty(respondents)) {
             respondents = new ArrayList<>();
             Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
             respondents.add(partyDetails);
@@ -835,7 +835,7 @@ public class UpdatePartyDetailsService {
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
-            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+            if (CollectionUtils.isEmpty(children)) {
                 children = new ArrayList<>();
                 Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);
