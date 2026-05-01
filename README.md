@@ -96,6 +96,39 @@ docker images
 docker image rm <image-id>
 ```
 
+## 🛡️ Quality & Coverage Tools
+
+To maintain our 80% coverage standard and reduce CI/CD feedback loops, this project includes a local Quality Gate.
+
+### 📊 Local Coverage Reports
+Run these commands to get instant, color-coded coverage feedback in your terminal:
+
+* **Check Total Project:** `./gradlew testWithCoverage`
+* **Check Specific Class:** `./gradlew testWithCoverage -Ptarget=MyClassName`
+* **Check Multiple Classes:** `./gradlew testWithCoverage -Ptarget=ClassA,ClassB`
+
+The "Targeted" mode provides a line-by-line breakdown of missed instructions and branches.
+
+---
+
+### ⚓ Git Pre-commit Hook
+A Git Pre-commit Hook is included to prevent "Red" builds in SonarQube.
+
+* **Installation:** Automatically installed/updated when you run `./gradlew build`.
+* **Behavior:** Every `git commit` triggers an aggregate coverage check. If total coverage is below 80%, the commit is blocked.
+* **Visibility:** Detailed reports appear in the IntelliJ "Git" or "Console" tab upon failure.
+
+#### 🔓 How to Bypass
+If you need to commit without running the coverage check (e.g., documentation or WIP spikes), use the bypass flag:
+
+`git commit -m "your message" --no-verify`
+
+---
+
+### 🛠️ Troubleshooting
+If the hook is not firing, refresh the installation by running:
+
+`./gradlew installGitHooks`
 There is no need to remove postgres and java or similar core images.
 
 ### Troubleshooting

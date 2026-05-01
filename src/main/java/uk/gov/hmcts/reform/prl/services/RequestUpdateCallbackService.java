@@ -67,8 +67,16 @@ public class RequestUpdateCallbackService {
             caseDetails,
             serviceRequestUpdateDto.getServiceRequestReference()
         );
+        CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseEvent caseEvent;
         if (isCasePayment) {
+            if (isDuplicatePayment(currentCaseData)) {
+                log.info("Payment already processed for case {} with service request reference {}, and payment reference {}, skipping update.",
+                         serviceRequestUpdateDto.getCcdCaseNumber(),
+                         currentCaseData.getPaymentServiceRequestReferenceNumber(),
+                         serviceRequestUpdateDto.getPayment().getPaymentReference());
+                return;
+            }
             caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
                 ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
         } else {
@@ -166,6 +174,12 @@ public class RequestUpdateCallbackService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         return !StringUtils.isEmpty(serviceRequestReference)
                 && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+    }
+
+    private boolean isDuplicatePayment(CaseData caseData) {
+        return Optional.ofNullable(caseData.getPaymentCallbackServiceRequestUpdate())
+            .map(paymentStatus -> PAID.equalsIgnoreCase(paymentStatus.getServiceRequestStatus()))
+            .orElse(false);
     }
 
     public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,

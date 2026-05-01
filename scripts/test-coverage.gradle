@@ -1,0 +1,111 @@
+import groovy.xml.XmlParser
+
+tasks.register("testWithCoverage") {
+  group = "verification"
+  description = "Runs tests and shows console coverage. Usage: ./gradlew testWithCoverage [-Ptarget=ClassA,ClassB]"
+
+  dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
+
+  doLast {
+    // Safety Valve: Allow skipping via Gradle property
+    if (project.hasProperty('skipCoverage')) {
+      logger.lifecycle("⏩ Coverage check skipped via gradle property.")
+      return
+    }
+
+    def targetInput = findProperty('target')?.toString() ?: ""
+    def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
+    def checkAll = targets.isEmpty()
+
+    def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
+
+    int grandMissedUnits = 0
+    int grandCoveredUnits = 0
+
+    if (reportFile.exists()) {
+      def parser = new XmlParser(false, false)
+
+      // 1. Disable the restriction that causes the "External DTD: Failed to read" error
+      parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+
+      // 2. Prevent the parser from actually trying to resolve the DTD file online
+      parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+
+      // 3. General safety (standard practice)
+      parser.setFeature("http://xml.org/sax/features/namespaces", false)
+
+      def report = parser.parse(reportFile)
+
+      report.'package'.each { pkg ->
+        pkg.'sourcefile'.each { sourceFile ->
+          def fileName = sourceFile.attribute('name') ?: ""
+          def className = fileName.replace(".java", "")
+
+          if (checkAll || targets.any { it.equalsIgnoreCase(className) }) {
+            int fileMissedInstr = 0
+            int fileCoveredInstr = 0
+            int fileMissedBranch = 0
+            int fileCoveredBranch = 0
+
+            sourceFile.'line'.each { line ->
+              fileMissedInstr += (line.attribute('mi') ?: "0").toInteger()
+              fileCoveredInstr += (line.attribute('ci') ?: "0").toInteger()
+              fileMissedBranch += (line.attribute('mb') ?: "0").toInteger()
+              fileCoveredBranch += (line.attribute('cb') ?: "0").toInteger()
+            }
+
+            grandMissedUnits += (fileMissedInstr + fileMissedBranch)
+            grandCoveredUnits += (fileCoveredInstr + fileCoveredBranch)
+
+            if (!checkAll) {
+              double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
+              double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
+              def color = filePct >= 80 ? "\u001B[32m" : "\u001B[31m"
+              def reset = "\u001B[0m"
+
+              logger.lifecycle("\n🎯 CLASS REPORT: ${fileName} (${color}${String.format("%.2f", filePct)}%${reset})")
+              logger.lifecycle("─" * 85)
+              sourceFile.'line'.each { line ->
+                if ((line.attribute('mi')?.toInteger() ?: 0) > 0 || (line.attribute('mb')?.toInteger() ?: 0) > 0) {
+                  logger.lifecycle(String.format("Line %-5s | Missed Instr: %-3s | Missed Branch: %-3s",
+                    line.attribute('nr'), line.attribute('mi'), line.attribute('mb')))
+                }
+              }
+            }
+          }
+        }
+      }
+
+      double grandTotal = grandMissedUnits + grandCoveredUnits
+      double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
+
+      def grandColor = grandPct >= 80 ? "\u001B[32m" : "\u001B[31m"
+      def grandStatus = grandPct >= 80 ? "✅ TOTAL PASS" : "❌ TOTAL FAIL"
+      def reset = "\u001B[0m"
+
+      logger.lifecycle("\n" + "━" * 85)
+      logger.lifecycle(checkAll ? " 🏁 TOTAL PROJECT COVERAGE (Aggregate)" : " 🏁 COMBINED PR SCORE (Targeted Classes)")
+      logger.lifecycle(" 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset} | Threshold: 80% | Status: ${grandStatus}")
+      logger.lifecycle("━" * 85 + "\n")
+
+      if (grandPct < 80) {
+        throw new GradleException("Coverage is below 80% threshold!")
+      }
+
+    } else {
+      throw new GradleException("JaCoCo XML report not found! Run tests first.")
+    }
+  }
+}
+
+tasks.register('installGitHooks', Copy) {
+  description = 'Copies git hooks from scripts/ to .git/hooks'
+  group = 'setup'
+  from new File(rootProject.rootDir, 'scripts/pre-commit')
+  into new File(rootProject.rootDir, '.git/hooks')
+  fileMode 0755
+}
+
+tasks.named('build') {
+  dependsOn 'installGitHooks'
+}

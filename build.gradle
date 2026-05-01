@@ -685,3 +685,5 @@ bootWithCCD {
 test {
   useJUnitPlatform()
 }
+
+apply from: 'scripts/test-coverage.gradle'
