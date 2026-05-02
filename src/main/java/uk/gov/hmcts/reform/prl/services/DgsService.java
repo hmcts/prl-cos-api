@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.mapper.AppObjectMapper;
@@ -18,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.document.docmosis.DocmosisRenderService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +25,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(prefix = "prl-dgs-api", name = "url")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DgsService {
 
-    private final DgsApiClient dgsApiClient;
+    private final DocmosisRenderService docmosisRenderService;
     private final AllegationOfHarmRevisedService allegationOfHarmService;
     private final HearingDataService hearingDataService;
     private final UserRoleService userRoleService;
@@ -42,11 +40,12 @@ public class DgsService {
                                                   Map<String, Object> dataMap) throws DocumentGenerationException {
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(dataMap).build()
-                );
-
+            GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+                    .caseId(caseId)
+                    .template(templateName)
+                    .values(dataMap)
+                    .build();
+            generatedDocumentInfo = docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -77,12 +76,14 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(tempCaseDetails).build()
-                );
+            GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+                .caseId(String.valueOf(caseDetails.getCaseData().getId()))
+                .template(templateName)
+                .values(tempCaseDetails)
+                .build();
+            generatedDocumentInfo = docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -140,13 +141,14 @@ public class DgsService {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(tempCaseDetails).build()
-                );
-
+            GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+                .caseId(String.valueOf(caseDetails.getCaseData().getId()))
+                .template(templateName)
+                .values(tempCaseDetails)
+                .build();
+            generatedDocumentInfo = docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (FeignException ex) {
             log.error(ERROR_MESSAGE, caseDetails.getCaseId());
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -156,7 +158,7 @@ public class DgsService {
 
     public GeneratedDocumentInfo generateCitizenDocument(String authorisation,
                                                          GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                                         String templateName) throws Exception {
+                                                         String templateName) {
 
         Map<String, Object> tempCaseDetails = new HashMap<>();
         String freeTextUploadStatements = null;
@@ -173,14 +175,14 @@ public class DgsService {
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
 
-
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(tempCaseDetails).build()
-                );
-
+            GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+                .caseId(caseId)
+                .template(templateName)
+                .values(tempCaseDetails)
+                .build();
+            generatedDocumentInfo = docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -206,16 +208,14 @@ public class DgsService {
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
 
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(
-                    authorisation,
-                    GenerateDocumentRequest.builder()
-                        .template(prlCitizenUploadTemplate)
-                        .values(tempCaseDetails).build()
-                );
-
+            GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+                .caseId(caseId)
+                .template(prlCitizenUploadTemplate)
+                .values(tempCaseDetails)
+                .build();
+            generatedDocumentInfo = docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);
@@ -224,14 +224,15 @@ public class DgsService {
     }
 
     public GeneratedDocumentInfo generateCoverLetterDocument(String authorisation, Map<String, Object> requestPayload,
-                                                             String templateName, String caseId) throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+                                                             String templateName, String caseId) {
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
-            generatedDocumentInfo =
-                dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
-                    .builder().template(templateName).values(requestPayload).build()
-                );
-
+            GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+                .caseId(caseId)
+                .template(templateName)
+                .values(requestPayload)
+                .build();
+            generatedDocumentInfo = docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
             log.error(ERROR_MESSAGE, caseId);
             throw new DocumentGenerationException(ex.getMessage(), ex);

@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.io.IOException;
@@ -83,7 +84,7 @@ class CustomOrderServiceTest {
     @Mock
     private AllTabServiceImpl allTabService;
     @Mock
-    private uk.gov.hmcts.reform.prl.clients.DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
     @Mock
     private DocumentSealingService documentSealingService;
 

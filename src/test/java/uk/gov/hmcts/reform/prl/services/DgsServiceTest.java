@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
+import uk.gov.hmcts.reform.prl.services.document.docmosis.DocmosisRenderService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,25 +40,21 @@ public class DgsServiceTest {
     private DgsService dgsService;
 
     @Mock
-    private DgsApiClient dgsApiClient;
+    private DocmosisRenderService docmosisRenderService;
     @Mock
     private UserRoleService userRoleService;
-
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
-
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
-
     @Mock
     private HearingDataService hearingDataService;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
     private CaseData caseData;
     private CaseDetails caseDetails;
     private GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest;
-
     private DocumentRequest documentRequest;
 
     @Before
@@ -90,7 +86,7 @@ public class DgsServiceTest {
             .builder()
             .values(values)
             .build();
-        when(dgsApiClient.generateDocument(Mockito.anyString(), Mockito.any(GenerateDocumentRequest.class)))
+        when(docmosisRenderService.renderAndStoreDocument(Mockito.anyString(), Mockito.any(GenerateDocumentRequest.class)))
             .thenReturn(generatedDocumentInfo);
 
         documentRequest = DocumentRequest.builder()
@@ -104,7 +100,7 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocument() throws Exception {
+    public void testToGenerateDocument() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -113,24 +109,25 @@ public class DgsServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
         Mockito.doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(caseData, dataMap);
 
-        assertEquals(dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
+        assertEquals(dgsService.generateDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
 
     }
 
     @Test
-    public void testToGenerateDocumentWithCaseData() throws Exception {
+    public void testToGenerateDocumentWithCaseData() {
         Map<String, Object> respondentDetails = new HashMap<>();
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        assertEquals(dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,
-                                                 respondentDetails), generatedDocumentInfo);
+        assertEquals(dgsService.generateDocument(
+            AUTH_TOKEN, null, PRL_DRAFT_TEMPLATE,
+            respondentDetails), generatedDocumentInfo);
     }
 
     @Test
-    public void testToGenerateCoverLetterDocument() throws Exception {
+    public void testToGenerateCoverLetterDocument() {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("coverLetter", "test.pdf");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -138,13 +135,14 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        assertNotNull(dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
-                                                "123"));
+        assertNotNull(dgsService.generateCoverLetterDocument(
+            AUTH_TOKEN, dataMap, PRL_DRAFT_TEMPLATE,
+            "123"));
     }
 
     @Test
-    public void testToGenerateDocumentWithCaseDataNoDataExpectedException() throws Exception {
-        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
+    public void testToGenerateDocumentWithCaseDataNoDataExpectedException() {
+        dgsService.generateDocument(AUTH_TOKEN, null, PRL_DRAFT_TEMPLATE, null);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });
@@ -152,10 +150,10 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
+    public void testToGenerateDocumentWithNoDataExpectedException() {
         Map<String, Object> dataMap = new HashMap<>();
         Mockito.doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(caseData, dataMap);
-        dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
+        dgsService.generateDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });
@@ -163,14 +161,14 @@ public class DgsServiceTest {
     }
 
     @Test
-    public void testToGenerateWelshDocument() throws Exception {
+    public void testToGenerateWelshDocument() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
 
-        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
+        assertEquals(dgsService.generateWelshDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
     }
 
     @Test
@@ -183,30 +181,31 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        assertEquals(dgsService.generateWelshDocument(authToken, caseDetails.getCaseId(), "C100",
-                                                      PRL_DRAFT_TEMPLATE, respondentDetails
+        assertEquals(dgsService.generateWelshDocument(
+            AUTH_TOKEN, caseDetails.getCaseId(), "C100",
+            PRL_DRAFT_TEMPLATE, respondentDetails
         ), generatedDocumentInfo);
     }
 
     @Test
-    public void testgenerateCitizenDocument() throws Exception {
+    public void testgenerateCitizenDocument() {
         dgsService.generateCitizenDocument(" ", generateAndUploadDocumentRequest, " ");
         assertEquals("test", generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements"));
     }
 
     @Test
-    public void testToGenerateDocumentWithEmptyHearingsData() throws Exception {
+    public void testToGenerateDocumentWithEmptyHearingsData() {
         CaseData caseData1 = CaseData.builder().manageOrders(ManageOrders.builder().build()).build();
         CaseDetails caseDetails1 = CaseDetails.builder()
             .caseId("123")
             .caseData(caseData1)
             .build();
 
-        assertEquals(dgsService.generateDocument(authToken, caseDetails1, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
+        assertEquals(dgsService.generateDocument(AUTH_TOKEN, caseDetails1, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
     }
 
     @Test
-    public void testGenerateCitizenDocument() throws Exception {
+    public void testGenerateCitizenDocument() {
         //Given
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -215,7 +214,7 @@ public class DgsServiceTest {
             .build();
 
         //When
-        doReturn(generatedDocumentInfo).when(dgsApiClient).generateDocument(
+        doReturn(generatedDocumentInfo).when(docmosisRenderService).renderAndStoreDocument(
             Mockito.anyString(),
             Mockito.any(GenerateDocumentRequest.class)
         );
@@ -237,7 +236,7 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> {
             dgsService.generateCitizenDocument(" ", generateAndUploadDocumentRequest, " ");
         }, DocumentGenerationException.class, null);
@@ -251,7 +250,7 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> {
             dgsService.generateCitizenDocument(" ", documentRequest, " ");
         }, DocumentGenerationException.class, null);
@@ -268,10 +267,11 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> {
-            dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
-                                                   "123");
+            dgsService.generateCoverLetterDocument(
+                AUTH_TOKEN, dataMap, PRL_DRAFT_TEMPLATE,
+                "123");
         }, DocumentGenerationException.class, null);
 
     }
@@ -284,9 +284,9 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> {
-            dgsService.generateWelshDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
+            dgsService.generateWelshDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE);
         }, DocumentGenerationException.class, null);
     }
 
@@ -300,9 +300,9 @@ public class DgsServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
         Mockito.doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(caseData, dataMap);
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> {
-            dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
+            dgsService.generateDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE);
         }, DocumentGenerationException.class, null);
     }
 
@@ -315,9 +315,9 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(RuntimeException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(RuntimeException.class);
         assertExpectedException(() -> {
-            dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,respondentDetails);
+            dgsService.generateDocument(AUTH_TOKEN, null, PRL_DRAFT_TEMPLATE, respondentDetails);
         }, DocumentGenerationException.class, null);
 
     }
@@ -331,9 +331,9 @@ public class DgsServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        when(dgsApiClient.generateDocument(any(),any())).thenThrow(FeignException.class);
+        when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> {
-            dgsService.generateDocument(authToken, null, PRL_DRAFT_TEMPLATE,respondentDetails);
+            dgsService.generateDocument(AUTH_TOKEN, null, PRL_DRAFT_TEMPLATE, respondentDetails);
         }, DocumentGenerationException.class, null);
 
     }
@@ -343,6 +343,4 @@ public class DgsServiceTest {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
     }
-
-
 }
