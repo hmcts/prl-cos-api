@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -128,9 +129,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -375,9 +379,9 @@ public class SendAndReplyServiceTest {
         caseData = CaseData.builder()
             .applicantCaseName("Test name")
             .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages)
-                .closedMessages(messages)
-                .messageMetaData(metaData)
-                .build())
+                                .closedMessages(messages)
+                                .messageMetaData(metaData)
+                                .build())
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
@@ -389,8 +393,8 @@ public class SendAndReplyServiceTest {
 
         caseDataWithAddedMessage = CaseData.builder()
             .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messagesWithOneAdded)
-                .messageMetaData(metaData)
-                .build())
+                                .messageMetaData(metaData)
+                                .build())
             .messageReply(message1)
             .messageContent("This is the message body")
             .replyMessageDynamicList(dynamicList)
@@ -463,8 +467,8 @@ public class SendAndReplyServiceTest {
             .build();
         CaseData caseDataWithPreFill = CaseData.builder()
             .sendOrReplyDto(SendOrReplyDto.builder()
-                .messageMetaData(preFillMetaData)
-                .build())
+                                .messageMetaData(preFillMetaData)
+                                .build())
             .build();
         assertTrue(sendAndReplyService.setSenderAndGenerateMessageList(caseData, auth).containsKey("messageObject"));
         assertEquals(sendAndReplyService.setSenderAndGenerateMessageList(
@@ -483,8 +487,8 @@ public class SendAndReplyServiceTest {
         CaseData caseDataNoMessages = CaseData.builder().sendOrReplyDto(SendOrReplyDto.builder().build()).build();
         CaseData caseDataWithMessageAdded = CaseData.builder()
             .sendOrReplyDto(SendOrReplyDto.builder()
-                .openMessages(Collections.singletonList(element(message3)))
-                .build())
+                                .openMessages(Collections.singletonList(element(message3)))
+                                .build())
             .build();
 
         sendAndReplyService.addNewMessage(caseDataNoMessages, message3);
@@ -805,14 +809,14 @@ public class SendAndReplyServiceTest {
 
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
-            .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                .applicationStatus(AWP_STATUS_SUBMITTED)
-                .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
-                .uploadedDateTime(dateSent).build())
-            .c2DocumentBundle(C2DocumentBundle.builder()
-                .applicationStatus(AWP_STATUS_SUBMITTED)
-                .uploadedDateTime(dateSent).build())
-            .build()));
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                                  .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
+                                                                                  .uploadedDateTime(dateSent).build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
+                                                                           .applicationStatus(AWP_STATUS_SUBMITTED)
+                                                                           .uploadedDateTime(dateSent).build())
+                                                     .build()));
 
         caseData = caseData.toBuilder().additionalApplicationsBundle(additionalApplicationsBundle).build();
         when(refDataService.getRefDataCategoryValueMap(anyString(), anyString(), anyString(), anyString())).thenReturn(
@@ -943,10 +947,10 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
-            .roles(List.of(JUDGE_ROLE))
-            .build());
+                                                              .roles(List.of(JUDGE_ROLE))
+                                                              .build());
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-            caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
     }
@@ -969,27 +973,27 @@ public class SendAndReplyServiceTest {
                             .applicationsList(dynamicList)
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList.toBuilder()
-                                .value(DynamicListElement.builder()
-                                    .code(UUID.randomUUID())
-                                    .label("test-document")
-                                    .build())
-                                .build())
+                                                        .value(DynamicListElement.builder()
+                                                                   .code(UUID.randomUUID())
+                                                                   .label("test-document")
+                                                                   .build())
+                                                        .build())
                             .sendReplyJudgeName(JudicialUser.builder().idamId("testIdam").personalCode("123").build())
                             .build()
                     ).build())
             .build();
 
         when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
-            .roles(List.of(LEGAL_ADVISER_ROLE))
-            .build());
+                                                              .roles(List.of(LEGAL_ADVISER_ROLE))
+                                                              .build());
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
         when(caseDocumentClient
-            .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
+                 .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
             .thenReturn(testDocument());
         Message message = sendAndReplyService.buildSendReplyMessage(data,
-            data.getSendOrReplyMessage().getSendMessageObject(), auth);
+                                                                    data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
     }
@@ -1018,9 +1022,9 @@ public class SendAndReplyServiceTest {
             .build();
 
         when(userService.getUserDetails(auth)).thenReturn(UserDetails.builder()
-            .build());
+                                                              .build());
         Message message = sendAndReplyService.buildSendReplyMessage(caseData,
-            caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
+                                                                    caseData.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
     }
@@ -1557,15 +1561,15 @@ public class SendAndReplyServiceTest {
         DynamicList dynamicList1 = DynamicList.builder().build();
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
         allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
-            .builder()
-            .messageIdentifier("test")
-            .judgeIdamId(TEST_UUID)
-            .build()));
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId(TEST_UUID)
+                                           .build()));
         CaseData caseData3 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
-                .allocatedJudgeForSendAndReply(allocatedJudgeList)
-                .build())
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
@@ -1606,15 +1610,15 @@ public class SendAndReplyServiceTest {
         DynamicList dynamicList1 = DynamicList.builder().build();
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
         allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
-            .builder()
-            .messageIdentifier("test")
-            .judgeIdamId("test")
-            .build()));
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId("test")
+                                           .build()));
         CaseData caseData4 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
-                .allocatedJudgeForSendAndReply(allocatedJudgeList)
-                .build())
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
@@ -1660,15 +1664,15 @@ public class SendAndReplyServiceTest {
         DynamicList dynamicList1 = DynamicList.builder().build();
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
         allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
-            .builder()
-            .messageIdentifier("test")
-            .judgeIdamId("test")
-            .build()));
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId("test")
+                                           .build()));
         CaseData caseData5 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyDto(SendOrReplyDto.builder()
-                .allocatedJudgeForSendAndReply(allocatedJudgeList)
-                .build())
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList)
+                                .build())
             .sendOrReplyMessage(
                 SendOrReplyMessage.builder()
                     .sendMessageObject(
@@ -1888,10 +1892,10 @@ public class SendAndReplyServiceTest {
             .build()));
         List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeList = new ArrayList<>();
         allocatedJudgeList.add(element(AllocatedJudgeForSendAndReply
-            .builder()
-            .messageIdentifier("test")
-            .judgeIdamId(TEST_UUID)
-            .build()));
+                                           .builder()
+                                           .messageIdentifier("test")
+                                           .judgeIdamId(TEST_UUID)
+                                           .build()));
         CaseData caseData6 = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .sendOrReplyMessage(
@@ -1900,7 +1904,7 @@ public class SendAndReplyServiceTest {
                     .messages(closedMessages)
                     .build())
             .sendOrReplyDto(SendOrReplyDto.builder()
-                .allocatedJudgeForSendAndReply(allocatedJudgeList).build())
+                                .allocatedJudgeForSendAndReply(allocatedJudgeList).build())
             .build();
 
         List<Element<Message>> closeMessages = sendAndReplyService.closeMessage(caseData6, caseDataMap);
@@ -2002,9 +2006,9 @@ public class SendAndReplyServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .chooseSendOrReply(SendOrReply.REPLY)
             .sendOrReplyDto(SendOrReplyDto.builder().openMessages(messages)
-                .closedMessages(messages)
-                .messageMetaData(metaData)
-                .build())
+                                .closedMessages(messages)
+                                .messageMetaData(metaData)
+                                .build())
             .sendOrReplyMessage(sendOrReplyMessage)
             .build();
 
@@ -2846,9 +2850,9 @@ public class SendAndReplyServiceTest {
         Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(serviceAuthToken,
-            EventRequestData.builder().build(),
-            StartEventResponse.builder().build(),
-            stringObjectMap, caseData1, null);
+                                                                                                        EventRequestData.builder().build(),
+                                                                                                        StartEventResponse.builder().build(),
+                                                                                                        stringObjectMap, caseData1, null);
         when(allTabService.getStartUpdateForSpecificEvent(any(), any())).thenReturn(startAllTabsUpdateDataContent);
         sendAndReplyService.closeAwPTask(caseData1);
         Mockito.verify(allTabService,Mockito.times(1)).getStartUpdateForSpecificEvent(any(), any());
@@ -2880,9 +2884,9 @@ public class SendAndReplyServiceTest {
                                                                                .code(UUID.fromString(TEST_UUID))
                                                                                .label("test")
                                                                                .build(),DynamicListElement.builder()
-                                                      .code(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                                                      .label("test")
-                                                      .build()))
+                                                                               .code(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                                                               .label("test")
+                                                                               .build()))
                                                   .build())
                             .futureHearingsList(dynamicList)
                             .submittedDocumentsList(dynamicList)
@@ -3005,15 +3009,15 @@ public class SendAndReplyServiceTest {
     public void testFetchAdditionalApplicationCodeIfExistWhileSendingMessage() {
         caseData = caseData.toBuilder()
             .sendOrReplyMessage(SendOrReplyMessage.builder()
-                .sendMessageObject(Message.builder()
-                    .applicationsList(DynamicList.builder()
-                        .value(DynamicListElement.builder()
-                            .code(UUID.randomUUID())
-                            .label("test")
-                            .build())
-                        .build())
-                    .build())
-                .build())
+                                    .sendMessageObject(Message.builder()
+                                                           .applicationsList(DynamicList.builder()
+                                                                                 .value(DynamicListElement.builder()
+                                                                                            .code(UUID.randomUUID())
+                                                                                            .label("test")
+                                                                                            .build())
+                                                                                 .build())
+                                                           .build())
+                                    .build())
             .build();
         Assert.assertNotNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
     }
@@ -3022,8 +3026,8 @@ public class SendAndReplyServiceTest {
     public void testFetchAdditionalApplicationCodeIfExistReturnNullWhileSendingMessage() {
         caseData = caseData.toBuilder()
             .sendOrReplyMessage(SendOrReplyMessage.builder()
-                .sendMessageObject(null)
-                .build())
+                                    .sendMessageObject(null)
+                                    .build())
             .build();
         Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.SEND));
     }
@@ -3032,13 +3036,13 @@ public class SendAndReplyServiceTest {
     public void testFetchAdditionalApplicationCodeIfExistWhileReplyingMessage() {
         DynamicList messageReplyDynamicList = DynamicList.builder()
             .value(DynamicListElement.builder()
-                .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
-                .label("test-label")
-                .build())
+                       .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                       .label("test-label")
+                       .build())
             .listItems(List.of(DynamicListElement.builder()
-                .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
-                .label("test-label")
-                .build()))
+                                   .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                                   .label("test-label")
+                                   .build()))
             .build();
         caseData = caseData.toBuilder()
             .sendOrReplyMessage(SendOrReplyMessage.builder()
@@ -3059,20 +3063,20 @@ public class SendAndReplyServiceTest {
     public void testFetchAdditionalApplicationCodeIfExistReturnNullWhileReplyingMessage() {
         DynamicList messageReplyDynamicList = DynamicList.builder()
             .value(DynamicListElement.builder()
-                .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
-                .label("test-label")
-                .build())
+                       .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                       .label("test-label")
+                       .build())
             .listItems(List.of(DynamicListElement.builder()
-                .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
-                .label("test-label")
-                .build()))
+                                   .code(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+                                   .label("test-label")
+                                   .build()))
             .build();
         caseData = caseData.toBuilder()
             .sendOrReplyMessage(SendOrReplyMessage.builder()
-                .messageReplyDynamicList(messageReplyDynamicList)
-                .messages(List.of(ElementUtils.element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),Message
-                    .builder().build())))
-                .build())
+                                    .messageReplyDynamicList(messageReplyDynamicList)
+                                    .messages(List.of(ElementUtils.element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),Message
+                                        .builder().build())))
+                                    .build())
             .build();
         Assert.assertNull(sendAndReplyService.fetchAdditionalApplicationCodeIfExist(caseData, SendOrReply.REPLY));
     }
@@ -3084,10 +3088,10 @@ public class SendAndReplyServiceTest {
                 .caseRef("1234")
                 .hmctsServiceCode("ABA5")
                 .caseHearings(List.of(CaseHearing.caseHearingWith()
-                    .hearingDaySchedule(List.of(HearingDaySchedule
-                        .hearingDayScheduleWith()
-                        .build()))
-                    .build()))
+                                          .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                          .hearingDayScheduleWith()
+                                                                          .build()))
+                                          .build()))
                 .build();
         when(hearingService.getFutureHearings(auth, "1234")).thenReturn(futureHearings);
         Assert.assertNotNull(sendAndReplyService.getFutureHearingDynamicList(auth,serviceAuthToken,"1234"));
@@ -3256,7 +3260,7 @@ public class SendAndReplyServiceTest {
 
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.getTemplate(
-            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+            any(CaseData.class), Mockito.anyString(), anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
             eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
@@ -3342,7 +3346,7 @@ public class SendAndReplyServiceTest {
 
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.getTemplate(
-            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+            any(CaseData.class), Mockito.anyString(), anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
             eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
@@ -3429,7 +3433,7 @@ public class SendAndReplyServiceTest {
 
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.getTemplate(
-            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
+            any(CaseData.class), Mockito.anyString(), anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
             eq(auth), eq(String.valueOf(caseDataExternalMessageFl401.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
@@ -3723,6 +3727,96 @@ public class SendAndReplyServiceTest {
 
         // then
         assertNull(caseData.getSendOrReplyMessage().getMessageReplyDynamicList());
+    }
+
+    @Test
+    public void testSendPostNotificationToExternalPartiesForC100IncludesAddressCoverLetter() throws Exception {
+        PartyDetails applicant = getApplicant();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        PartyDetails respondent = getRespondent();
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
+            .code(wrappedApplicant.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
+            .code(wrappedRespondents.getId().toString())
+            .label(applicant.getFirstName() + " " + applicant.getLastName())
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
+
+        DynamicList sendMessageDynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
+            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
+            .build();
+
+        Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement = Element.<SendAndReplyDynamicDoc>builder()
+            .id(UUID.randomUUID())
+            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(sendMessageDynamicList).build())
+            .build();
+
+        CaseData caseDataForExternalMessage = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .messageContent("some msg content")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .externalMessageAttachDocsList(List.of(sendAndReplyDynamicDocElement))
+                    .build())
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(documentGenService.getTemplate(
+            any(CaseData.class), anyString(), anyBoolean())).thenReturn("abc_template");
+        when(dgsService.generateDocument(
+            eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
+            .thenReturn(getGeneratedDocumentInfo());
+        when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()))
+            .thenReturn(UUID.randomUUID());
+        when(documentGenService.generateCoverLetter(
+            anyString(),
+            any(CaseData.class),
+            anyString(),
+            any(Address.class)
+        )).thenReturn(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("coverLetterUrl")
+                          .documentBinaryUrl("coverLetterUrl")
+                          .documentFileName("coverLetter.pdf")
+                          .build());
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataForExternalMessage, auth);
+
+        ArgumentCaptor<List<uk.gov.hmcts.reform.prl.models.documents.Document>> documentsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(bulkPrintService, atLeastOnce()).send(
+            anyString(),
+            anyString(),
+            anyString(),
+            documentsCaptor.capture(),
+            anyString()
+        );
+
+        List<uk.gov.hmcts.reform.prl.models.documents.Document> capturedDocs = documentsCaptor.getValue();
+        assertNotNull(capturedDocs.get(0).getDocumentFileName());
+        assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {

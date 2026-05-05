@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -102,6 +103,7 @@ public class ManageOrderEmailService {
     private final EmailService emailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final BulkPrintService bulkPrintService;
+    private final DocumentGenService documentGenService;
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final DocumentLanguageService documentLanguageService;
@@ -169,14 +171,14 @@ public class ManageOrderEmailService {
         return OrderEmailNotification
             .builder()
             .emailSubject(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
-                newAndFinalOrderFlag, languagePreferenceFlag, false))
+                                                                         newAndFinalOrderFlag, languagePreferenceFlag, false))
             .emailTitle(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
-                newAndFinalOrderFlag, languagePreferenceFlag, true))
+                                                                       newAndFinalOrderFlag, languagePreferenceFlag, true))
             .emailTitleWelsh(languagePreferenceFlag ? buildEmailTitleWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
-                multipleOrderFlag, newAndFinalOrderFlag) : "")
+                                                                                                        multipleOrderFlag, newAndFinalOrderFlag) : "")
             .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
             .emailTextWelsh(languagePreferenceFlag ? buildEmailTextWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
-                multipleOrderFlag, newAndFinalOrderFlag) : "")
+                                                                                                      multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrdersWelshSentence(languagePreferenceFlag ? multipleOrdersWelshSentence(multipleOrderFlag, newAndFinalOrderFlag) : "")
@@ -284,7 +286,7 @@ public class ManageOrderEmailService {
     }
 
     private String buildEmailTextWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
-                                                               boolean newAndFinalOrderFLag) {
+                                                                    boolean newAndFinalOrderFLag) {
         if (newAndFinalOrderFLag) {
             return OrderEmailConstants.ORDER_WEL_NEW_AND_FINAL;
         } else if (multipleOrderFlag) {
@@ -386,11 +388,11 @@ public class ManageOrderEmailService {
         if (YesNoNotApplicable.No.equals(manageOrders.getServeToRespondentOptions())) {
             log.info("Non personal service FL401");
             handleFL401NonPersonalServiceNotifications(authorisation,
-                                                        caseData,
-                                                        manageOrders,
-                                                        bulkPrintOrderDetails,
-                                                        orderDocuments,
-                                                        dynamicDataForEmail);
+                                                       caseData,
+                                                       manageOrders,
+                                                       bulkPrintOrderDetails,
+                                                       orderDocuments,
+                                                       dynamicDataForEmail);
 
 
         } else if (YesNoNotApplicable.Yes.equals(manageOrders.getServeToRespondentOptions())) {
@@ -398,7 +400,7 @@ public class ManageOrderEmailService {
             log.info("*** Is legal rep present : {}", manageOrders.getDisplayLegalRepOption());
             String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
                 ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions()
-                .getId();
+                                                                           .getId();
 
             handleFL401PersonalServiceNotifications(
                 authorisation,
@@ -434,12 +436,12 @@ public class ManageOrderEmailService {
                                                                       caseData.getRespondentsFL401()));
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         sendEmailToSolicitorOrNotifyParties(recipientsOptions.getValue(),
-                                             partyList,
-                                             caseData,
-                                             authorisation,
-                                             dynamicDataForEmail,
-                                             bulkPrintOrderDetails,
-                                             orderDocuments);
+                                            partyList,
+                                            caseData,
+                                            authorisation,
+                                            dynamicDataForEmail,
+                                            bulkPrintOrderDetails,
+                                            orderDocuments);
     }
 
 
@@ -700,11 +702,11 @@ public class ManageOrderEmailService {
                                               String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
         emailInformation.forEach(value ->
-             sendEmailViaSendGrid(authorisation,
-                                  orderDocuments,
-                                  dynamicData,
-                                  value.getEmailAddress(),
-                                  SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
+                                     sendEmailViaSendGrid(authorisation,
+                                                          orderDocuments,
+                                                          dynamicData,
+                                                          value.getEmailAddress(),
+                                                          SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
         );
     }
 
@@ -964,19 +966,24 @@ public class ManageOrderEmailService {
                                           String authorisation,
                                           List<Document> orderDocuments) {
         List<Document> documents = new ArrayList<>();
-        //generate cover letter
-        List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverSheets(
+        documents.add(documentGenService.generateCoverLetter(
+            authorisation,
+            caseData,
+            name,
+            address
+        ));
+        //generate Cover sheets
+        List<Document> coverSheets = serviceOfApplicationPostService.getCoverSheets(
             caseData,
             authorisation,
             address,
             name,
             DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
         );
-        if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
-            documents.addAll(coverLetterDocs);
+        if (CollectionUtils.isNotEmpty(coverSheets)) {
+            documents.addAll(coverSheets);
         }
 
-        //cover should be the first doc in the list, append all order docs
         documents.addAll(orderDocuments);
 
         return bulkPrintService.send(

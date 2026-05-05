@@ -26,7 +26,6 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
-
 ### Running the application with RSE CFT Lib
 [cftlib](https://github.com/hmcts/rse-cft-lib) is a Gradle plugin that provides a local CCD/ExUI environment
 in which `prl-cos-api` can be developed and tested.
