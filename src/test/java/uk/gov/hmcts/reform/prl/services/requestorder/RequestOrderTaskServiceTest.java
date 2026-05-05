@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.requestorder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -313,6 +314,45 @@ class RequestOrderTaskServiceTest {
         verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
+    @Test
+    void exceptionFromOneCaseDoesNotPreventProcessingOfTheNextCase() throws JsonProcessingException {
+        String secondCaseId = "456";
+        CaseData firstCase = baseCaseBuilder("FL401").build();
+        CaseData secondCase = baseCaseBuilder("FL401").id(Long.valueOf(secondCaseId)).build();
+        stubSearchReturningCases(firstCase, secondCase);
+        stubHearings(completedHearingEndingDaysAgo(1));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+        when(allTabService.getStartUpdateForSpecificEvent(eq(CASE_ID), anyString()))
+            .thenThrow(new RuntimeException("simulated failure for first case"));
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, times(1))
+            .submitAllTabsUpdate(anyString(), eq(secondCaseId), any(), any(), any());
+    }
+
+    @Test
+    void caseIsSkippedWhenHmcThrowsFetchingHearings() {
+        CaseData caseData = baseCaseBuilder("FL401").build();
+        stubSearchReturning(caseData);
+        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("HMC unavailable"));
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+    }
+
+    @Test
+    void noCasesAreProcessedWhenQueryParamCannotBeSerialised() throws JsonProcessingException {
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+
+        service.processRequestOrderTasks();
+
+        verify(coreCaseDataApi, never()).searchCases(anyString(), anyString(), anyString(), anyString());
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+    }
+
     private CaseData.CaseDataBuilder<?, ?> baseCaseBuilder(String caseType) {
         return CaseData.builder()
             .id(Long.valueOf(CASE_ID))
@@ -354,6 +394,21 @@ class RequestOrderTaskServiceTest {
         when(objectMapper.convertValue(searchResult, SearchResultResponse.class))
             .thenReturn(SearchResultResponse.builder().total(1).cases(List.of(caseDetails)).build());
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+    }
+
+    private void stubSearchReturningCases(CaseData... caseDataValues) {
+        List<CaseDetails> details = java.util.Arrays.stream(caseDataValues)
+            .map(c -> CaseDetails.builder().id(c.getId()).data(c.toMap(objectMapper)).build())
+            .toList();
+        SearchResult searchResult = SearchResult.builder().total(details.size()).cases(details).build();
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE_CONSTANT), any()))
+            .thenReturn(searchResult);
+        when(objectMapper.convertValue(searchResult, SearchResultResponse.class))
+            .thenReturn(SearchResultResponse.builder().total(details.size()).cases(details).build());
+        for (int i = 0; i < details.size(); i++) {
+            when(objectMapper.convertValue(details.get(i).getData(), CaseData.class))
+                .thenReturn(caseDataValues[i]);
+        }
     }
 
     private void stubSearchReturningEmpty() {

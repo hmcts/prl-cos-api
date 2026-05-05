@@ -605,6 +605,43 @@ public class SendAndReplyControllerTest {
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
+    @Test
+    public void submitTaskWithClientContextHearingIdForwardsHearingIdToProcessAboutToSubmit() throws Exception {
+        String clientContextJson = """
+            {
+              "client_context": {
+                "user_task": {
+                  "task_data": {
+                    "additional_properties": {
+                      "hearingId": "999"
+                    }
+                  }
+                }
+              }
+            }
+            """;
+        ObjectMapper realMapper = new ObjectMapper();
+        realMapper.findAndRegisterModules();
+        uk.gov.hmcts.reform.prl.models.wa.WaMapper waMapper =
+            realMapper.readValue(clientContextJson, uk.gov.hmcts.reform.prl.models.wa.WaMapper.class);
+        String encodedClientContext = uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode(waMapper, realMapper);
+
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = getCaseDataForSubmitted(caseDetails);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData(), "999"))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
+
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
+            .sendOrReplyToMessagesSubmitTask(auth, encodedClientContext, callbackRequest);
+
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData(), "999");
+        Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
+    }
+
 
 
     @Test

@@ -3137,6 +3137,33 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void getFutureHearingDynamicListReturnsEmptyDynamicListWhenNoHearingsMatchAllowedStatuses() {
+        ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
+        ReflectionTestUtils.setField(sendAndReplyService, "hearingTypeCategoryId", "hearingTypeCategoryId");
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyFutureHearingStatuses", List.of("LISTED"));
+        ReflectionTestUtils.setField(sendAndReplyService, "sendAndReplyPastHearingStatuses",
+            List.of("COMPLETED", "AWAITING_ACTUALS"));
+
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(5))
+            .build();
+        Hearings hearings = Hearings.hearingsWith().caseRef("1234").hmctsServiceCode("ABA5")
+            .caseHearings(List.of(
+                CaseHearing.caseHearingWith().hearingID(444L).hmcStatus("CANCELLED")
+                    .hearingType("hearingType4").hearingDaySchedule(List.of(schedule)).build(),
+                CaseHearing.caseHearingWith().hearingID(555L).hmcStatus("EXCEPTION")
+                    .hearingType("hearingType5").hearingDaySchedule(List.of(schedule)).build()))
+            .build();
+        when(hearingService.getHearings(auth, "1234")).thenReturn(hearings);
+
+        DynamicList result = sendAndReplyService.getFutureHearingDynamicList(auth, serviceAuthToken, "1234");
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(DynamicListElement.EMPTY, result.getValue());
+        Assert.assertNull(result.getListItems());
+    }
+
+    @Test
     public void populateDynamicListsForSendAndReplyLocksDropdownToProvidedHearingId() {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
         ReflectionTestUtils.setField(sendAndReplyService, "serviceCode", "serviceCode");
