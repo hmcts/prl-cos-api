@@ -100,6 +100,7 @@ docker image rm <image-id>
 To maintain our 80% coverage standard and reduce CI/CD feedback loops, this project includes a local Quality Gate.
 By default, local commits remain fast. You can "Opt-In" to the coverage gate so it runs automatically every time you hit commit.
 
+Note on Workflow: By default, the Quality Gate is DISABLED to keep your local development fast. We recommend enabling it `gate-on` when working on feature-complete code to catch coverage gaps early and avoid CI failures.
 ### 📊 Local Coverage Reports
 Run these commands to get instant, color-coded coverage feedback in your terminal:
 
