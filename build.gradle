@@ -685,3 +685,14 @@ bootWithCCD {
 test {
   useJUnitPlatform()
 }
+
+apply from: 'scripts/test-coverage.gradle'
+
+tasks.register('installGitHooks', Copy) {
+  from new File(rootProject.rootDir, 'scripts/pre-commit')
+  into { new File(rootProject.rootDir, '.git/hooks') }
+  fileMode 0755
+}
+
+// Make the build depend on installing hooks
+build.dependsOn "installGitHooks"

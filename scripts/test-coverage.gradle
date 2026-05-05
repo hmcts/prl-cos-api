@@ -1,0 +1,94 @@
+import groovy.xml.XmlParser
+
+tasks.register("testWithCoverage") {
+  group = "verification"
+  description = "Runs tests and shows console coverage."
+
+  dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
+
+  doLast {
+    def targetInput = findProperty('target')?.toString() ?: ""
+    def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
+    def checkAll = targets.isEmpty()
+
+    def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
+
+    def green = "\u001B[32m"
+    def red   = "\u001B[31m"
+    def reset = "\u001B[0m"
+
+    int grandMissedUnits = 0
+    int grandCoveredUnits = 0
+
+    if (reportFile.exists()) {
+      def parser = new XmlParser(false, false)
+      parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+      parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+      parser.setFeature("http://xml.org/sax/features/namespaces", false)
+
+      def report = parser.parse(reportFile)
+
+      report.'package'.each { pkg ->
+        pkg.'sourcefile'.each { sourceFile ->
+          def fileName = sourceFile.attribute('name') ?: ""
+          def className = fileName.replace(".java", "")
+          boolean isTargeted = targets.any { it.equalsIgnoreCase(className) }
+
+          if (checkAll || isTargeted) {
+            int fileMissedInstr = 0, fileCoveredInstr = 0
+            int fileMissedBranch = 0, fileCoveredBranch = 0
+
+            sourceFile.'line'.each { line ->
+              fileMissedInstr += (line.attribute('mi') ?: "0").toInteger()
+              fileCoveredInstr += (line.attribute('ci') ?: "0").toInteger()
+              fileMissedBranch += (line.attribute('mb') ?: "0").toInteger()
+              fileCoveredBranch += (line.attribute('cb') ?: "0").toInteger()
+            }
+
+            grandMissedUnits += (fileMissedInstr + fileMissedBranch)
+            grandCoveredUnits += (fileCoveredInstr + fileCoveredBranch)
+
+            if (!checkAll && isTargeted) {
+              double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
+              double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
+              def fileColor = filePct >= 80 ? green : red
+
+              logger.lifecycle("\n" + "━" * 85)
+              logger.lifecycle("${fileColor} 🎯 TARGET REPORT: ${fileName}${reset}")
+              logger.lifecycle("${fileColor} 📈 Score: ${String.format("%.2f", filePct)}% | Threshold: 80%${reset}")
+              logger.lifecycle("━" * 85)
+
+              sourceFile.'line'.each { line ->
+                int mi = (line.attribute('mi') ?: "0").toInteger()
+                if (mi > 0) {
+                  logger.lifecycle("${red} Line ${line.attribute('nr')}: MISSED${reset}")
+                }
+              }
+            }
+          }
+        }
+      }
+
+      double grandTotal = grandMissedUnits + grandCoveredUnits
+      double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
+
+      def grandColor = grandPct >= 80 ? green : red
+      def statusLabel = grandPct >= 80 ? "✅ PASS" : "❌ FAIL"
+
+      // THE SUMMARY TABLE
+      def white = "\u001B[38;5;253m"
+      logger.lifecycle("\n" + "━" * 85)
+      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
+
+      logger.lifecycle("${grandColor} ${title}${reset}")
+      logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: ${reset}${white}80%${reset}${white} | Status: ${reset}${grandColor}${statusLabel}${reset}")
+      logger.lifecycle("━" * 85 + "\n")
+      // Updated link to point to the nested html folder
+      logger.lifecycle("${white} 📁 Full Report: ${reset}${white}file://${reportFile.parentFile.path}/html/index.html${reset}")
+
+      if (grandPct < 80) {
+        throw new GradleException("Coverage is below 80% threshold!")
+      }
+    }
+  }
+}

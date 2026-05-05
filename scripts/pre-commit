@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Find the project root directory
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
+
+# 1. The Opt-In Gate
+if [ "$VERIFY_COVERAGE" != "true" ] && [ ! -f "$PROJECT_ROOT/.run-coverage-on-commit" ]; then
+    exit 0
+fi
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}🔍  PRE-COMMIT QUALITY GATE Checking Aggregate Coverage...${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+# 2. Run the task
+./gradlew testWithCoverage --console=plain
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+  echo -e "\n\033[0;31m❌  [COMMIT BLOCKED] Coverage below 80%.\033[0m" >&2
+  exit 1
+fi
+
+echo -e "\n${GREEN}✅  [COMMIT ALLOWED] Standards met. 🛡️${NC}\n"
+exit 0
