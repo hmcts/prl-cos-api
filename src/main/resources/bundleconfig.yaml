@@ -279,5 +279,3 @@ bundle:
           filters:
             - property: /documentGroup
               value: anyOtherDocuments
-              category: anyOtherDoc
-              hasdraft: true
