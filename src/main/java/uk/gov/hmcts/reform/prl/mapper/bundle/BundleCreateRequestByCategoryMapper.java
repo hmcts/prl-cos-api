@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Slf4j
@@ -156,7 +157,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                                                                BundlingDocGroupEnum applicationsDocGroup,
                                                                FilterProperties filterProperties) {
         // don't include redacted documents and draft documents
-        if (isRedactedDocument(document) || isDraftDocument(document, filterProperties)) {
+        if (isRedactedDocument(document) || isDraftDocument(document, filterProperties) || isConfidentialDocument(document)) {
             return null;
         }
 
@@ -189,6 +190,14 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             && document.getDocumentFileName() != null
             && filterProperties.isHasdraft()) {
             return document.getDocumentFileName().contains("Draft");
+        }
+        return false;
+    }
+
+    private boolean isConfidentialDocument(Document document) {
+        if (document != null
+            && document.getDocumentFileName() != null) {
+            return document.getDocumentFileName().contains(CONFIDENTIAL);
         }
         return false;
     }
