@@ -57,4 +57,16 @@ class PublicHolidaysCollectionTest {
         when(bankHolidaysApi.retrieveAll()).thenReturn(null);
         assertThat(collection.getPublicHolidays()).isEmpty();
     }
+
+    @Test
+    void getPublicHolidaysHandlesNullEnglandAndWales() {
+        when(bankHolidaysApi.retrieveAll()).thenReturn(new UkHolidayDates(null));
+        assertThat(collection.getPublicHolidays()).isEmpty();
+    }
+
+    @Test
+    void getPublicHolidaysHandlesNullEvents() {
+        when(bankHolidaysApi.retrieveAll()).thenReturn(new UkHolidayDates(new CountryHolidayDates(null)));
+        assertThat(collection.getPublicHolidays()).isEmpty();
+    }
 }
