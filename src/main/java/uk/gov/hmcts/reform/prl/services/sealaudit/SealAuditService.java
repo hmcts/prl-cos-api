@@ -23,8 +23,6 @@ import uk.gov.hmcts.reform.prl.services.sealaudit.SealDetectionService.SealStatu
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 
-import static uk.gov.service.notify.NotificationClient.prepareUpload;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static uk.gov.service.notify.NotificationClient.prepareUpload;
 
 @Slf4j
 @Service
@@ -75,7 +75,8 @@ public class SealAuditService {
     private boolean emailEnabled;
 
     private static final DateTimeFormatter LOG_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final String CSV_HEADER = "case_reference,court_name,order_collection_id,order_upload_timestamp,order_filename,date_order_made,first_served_datetime,seal_status";
+    private static final String CSV_HEADER =
+        "case_reference,court_name,order_collection_id,order_upload_timestamp,order_filename,date_order_made,first_served_datetime,seal_status";
 
     public void runAudit() {
         log.info("*** Starting Seal Audit Task ***");
@@ -156,6 +157,7 @@ public class SealAuditService {
                                 csvRows.add(buildCsvRow(caseReference, courtName, orderElement.getId().toString(),
                                     orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status));
                             }
+                            default -> log.warn("Unexpected seal status: {}", status);
                         }
                     }
 
