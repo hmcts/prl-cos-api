@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -102,6 +103,7 @@ public class ManageOrderEmailService {
     private final EmailService emailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final BulkPrintService bulkPrintService;
+    private final DocumentGenService documentGenService;
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final DocumentLanguageService documentLanguageService;
@@ -963,6 +965,13 @@ public class ManageOrderEmailService {
                                           String name,
                                           String authorisation,
                                           List<Document> orderDocuments) {
+        List<Document> documents = new ArrayList<>();
+        documents.add(documentGenService.generateCoverLetter(
+            authorisation,
+            caseData,
+            name,
+            address
+        ));
         //generate Cover sheets
         List<Document> coverSheets = serviceOfApplicationPostService.getCoverSheets(
             caseData,
@@ -972,14 +981,16 @@ public class ManageOrderEmailService {
             DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
         );
         if (CollectionUtils.isNotEmpty(coverSheets)) {
-            orderDocuments.addAll(coverSheets);
+            documents.addAll(coverSheets);
         }
+
+        documents.addAll(orderDocuments);
 
         return bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
             ORDER_TYPE,
-            orderDocuments,
+            documents,
             name
         );
     }
