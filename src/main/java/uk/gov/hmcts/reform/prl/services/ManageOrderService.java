@@ -4007,6 +4007,11 @@ public class ManageOrderService {
         setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
     }
 
+    public void setFieldsForCirDocumentsRequestedForEditAndApproveOrder(CaseData caseData, Map<String, Object> waFieldsMap, String authorisation) {
+        waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+        setFieldsForCirDocumentsRequested(caseData, waFieldsMap);
+    }
+
     public void setFieldsForCirDocumentsRequestedForLaWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
         if (Yes.equals(caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport())) {
             List<Element<String>> cirDocumentsRequested = caseData.getServeOrderData().getLocalAuthorityMultipleDocuments().stream().filter(
