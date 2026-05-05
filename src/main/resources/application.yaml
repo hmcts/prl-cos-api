@@ -828,6 +828,18 @@ acro:
     remote-directory: /
     password: ${ACRO_SFTP_USER_PASSWORD:test_password}
 
+seal-audit:
+  enabled: ${SEAL_AUDIT_ENABLED:false}
+  search-case-type-id: PRLAPPS
+  batch-size: ${SEAL_AUDIT_BATCH_SIZE:100}
+  batch-delay-seconds: ${SEAL_AUDIT_BATCH_DELAY_SECONDS:5}
+  from-date: ${SEAL_AUDIT_FROM_DATE:2024-04-01}
+  to-date: ${SEAL_AUDIT_TO_DATE:}
+  email:
+    enabled: ${SEAL_AUDIT_EMAIL_ENABLED:false}
+    to: ${SEAL_AUDIT_EMAIL_TO:}
+    template-id: ${SEAL_AUDIT_EMAIL_TEMPLATE_ID:}
+
 hwf-update-case-state-task:
   last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}
 
