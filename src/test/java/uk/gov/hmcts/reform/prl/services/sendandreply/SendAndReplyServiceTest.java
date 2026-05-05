@@ -12,7 +12,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -129,12 +128,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -3260,7 +3256,7 @@ public class SendAndReplyServiceTest {
 
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.getTemplate(
-            any(CaseData.class), Mockito.anyString(), anyBoolean())).thenReturn("abc_template");
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
             eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
@@ -3346,7 +3342,7 @@ public class SendAndReplyServiceTest {
 
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.getTemplate(
-            any(CaseData.class), Mockito.anyString(), anyBoolean())).thenReturn("abc_template");
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
             eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
@@ -3433,7 +3429,7 @@ public class SendAndReplyServiceTest {
 
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         when(documentGenService.getTemplate(
-            any(CaseData.class), Mockito.anyString(), anyBoolean())).thenReturn("abc_template");
+            any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn("abc_template");
         when(dgsService.generateDocument(
             eq(auth), eq(String.valueOf(caseDataExternalMessageFl401.getId())), eq("abc_template"), anyMap()))
             .thenReturn(getGeneratedDocumentInfo());
@@ -3727,96 +3723,6 @@ public class SendAndReplyServiceTest {
 
         // then
         assertNull(caseData.getSendOrReplyMessage().getMessageReplyDynamicList());
-    }
-
-    @Test
-    public void testSendPostNotificationToExternalPartiesForC100IncludesAddressCoverLetter() throws Exception {
-        PartyDetails applicant = getApplicant();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-
-        PartyDetails respondent = getRespondent();
-        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().id(respondent.getPartyId()).value(respondent).build();
-        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
-
-        DynamicMultiselectListElement dynamicListApplicantElement = DynamicMultiselectListElement.builder()
-            .code(wrappedApplicant.getId().toString())
-            .label(applicant.getFirstName() + " " + applicant.getLastName())
-            .build();
-
-        DynamicMultiselectListElement dynamicListRespondentElement = DynamicMultiselectListElement.builder()
-            .code(wrappedRespondents.getId().toString())
-            .label(applicant.getFirstName() + " " + applicant.getLastName())
-            .build();
-
-        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
-            .value(List.of(dynamicListApplicantElement, dynamicListRespondentElement)).build();
-
-        DynamicList sendMessageDynamicList = DynamicList.builder()
-            .value(DynamicListElement.builder().code(UUID.randomUUID()).build())
-            .listItems(List.of(DynamicListElement.builder().code("test1").build()))
-            .build();
-
-        Element<SendAndReplyDynamicDoc> sendAndReplyDynamicDocElement = Element.<SendAndReplyDynamicDoc>builder()
-            .id(UUID.randomUUID())
-            .value(SendAndReplyDynamicDoc.builder().submittedDocsRefList(sendMessageDynamicList).build())
-            .build();
-
-        CaseData caseDataForExternalMessage = CaseData.builder().id(12345L)
-            .chooseSendOrReply(SEND)
-            .caseTypeOfApplication("C100")
-            .replyMessageDynamicList(DynamicList.builder().build())
-            .applicants(applicantList)
-            .respondents(respondentList)
-            .sendOrReplyMessage(
-                SendOrReplyMessage.builder()
-                    .sendMessageObject(Message.builder()
-                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
-                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
-                                           .messageAbout(MessageAboutEnum.APPLICATION)
-                                           .messageContent("some msg content")
-                                           .build()
-                    )
-                    .respondToMessage(YesOrNo.No)
-                    .messages(messages)
-                    .externalMessageAttachDocsList(List.of(sendAndReplyDynamicDocElement))
-                    .build())
-            .build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        when(documentGenService.getTemplate(
-            any(CaseData.class), anyString(), anyBoolean())).thenReturn("abc_template");
-        when(dgsService.generateDocument(
-            eq(auth), eq(String.valueOf(caseDataForExternalMessage.getId())), eq("abc_template"), anyMap()))
-            .thenReturn(getGeneratedDocumentInfo());
-        when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()))
-            .thenReturn(UUID.randomUUID());
-        when(documentGenService.generateCoverLetter(
-            anyString(),
-            any(CaseData.class),
-            anyString(),
-            any(Address.class)
-        )).thenReturn(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                          .documentUrl("coverLetterUrl")
-                          .documentBinaryUrl("coverLetterUrl")
-                          .documentFileName("coverLetter.pdf")
-                          .build());
-
-        sendAndReplyService.sendNotificationToExternalParties(caseDataForExternalMessage, auth);
-
-        ArgumentCaptor<List<uk.gov.hmcts.reform.prl.models.documents.Document>> documentsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(bulkPrintService, atLeastOnce()).send(
-            anyString(),
-            anyString(),
-            anyString(),
-            documentsCaptor.capture(),
-            anyString()
-        );
-
-        List<uk.gov.hmcts.reform.prl.models.documents.Document> capturedDocs = documentsCaptor.getValue();
-        assertNotNull(capturedDocs.get(0).getDocumentFileName());
-        assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {

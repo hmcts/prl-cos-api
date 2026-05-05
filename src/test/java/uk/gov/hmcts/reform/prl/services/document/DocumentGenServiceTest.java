@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -78,9 +77,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -99,7 +96,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_BLANK_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -127,7 +123,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
@@ -2730,15 +2725,6 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testBlankCoverLetterTemplateEnglish() {
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "cover_letter_en");
-        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_BLANK_COVER_SHEET_HINT, false);
-
-        assertNotNull(template);
-        assertEquals("cover_letter_en", template);
-    }
-
-    @Test
     public void testCitizenCoverLetterTemplateWelsh() {
         ReflectionTestUtils.setField(
             documentGenService,
@@ -3031,128 +3017,6 @@ public class DocumentGenServiceTest {
             any()
         );
         verifyNoMoreInteractions(dgsService);
-    }
-
-    @Test
-    public void testGenerateCoverLetterEnglish() throws Exception {
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
-
-        Address address = Address.builder()
-            .addressLine1("addressLine1")
-            .postCode("postcode")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-
-        GeneratedDocumentInfo coverLetterDocInfo = GeneratedDocumentInfo.builder()
-            .url("coverLetterUrl")
-            .binaryUrl("coverLetterBinaryUrl")
-            .docName("coverLetter.pdf")
-            .build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(coverLetterDocInfo).when(dgsService).generateDocument(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyMap()
-        );
-
-        Document result = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
-
-        assertNotNull(result);
-        assertEquals("coverLetterUrl", result.getDocumentUrl());
-        assertEquals("coverLetterBinaryUrl", result.getDocumentBinaryUrl());
-        assertEquals("coverLetter.pdf", result.getDocumentFileName());
-        assertNotNull(result.getDocumentCreatedOn());
-
-        ArgumentCaptor<Map<String, Object>> dataMapCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(dgsService).generateDocument(
-            anyString(),
-            anyString(),
-            anyString(),
-            dataMapCaptor.capture()
-        );
-
-        Map<String, Object> capturedDataMap = dataMapCaptor.getValue();
-        assertEquals(caseData.getId(), capturedDataMap.get("id"));
-        assertEquals(address, capturedDataMap.get("address"));
-        assertEquals("Test Name", capturedDataMap.get(NAME));
-        assertNotNull(capturedDataMap.get("date"));
-    }
-
-    @Test
-    public void testGenerateCoverLetterWelsh() throws Exception {
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
-
-        Address address = Address.builder()
-            .addressLine1("addressLine1")
-            .postCode("postcode")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-
-        GeneratedDocumentInfo coverLetterDocInfo = GeneratedDocumentInfo.builder()
-            .url("coverLetterUrl")
-            .binaryUrl("coverLetterBinaryUrl")
-            .docName("coverLetterWelsh.pdf")
-            .build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        when(dgsService.generateDocument(
-            eq(AUTH_TOKEN),
-            eq(String.valueOf(caseData.getId())),
-            anyString(),
-            anyMap()
-        )).thenReturn(coverLetterDocInfo);
-
-        Document result = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
-
-        assertNotNull(result);
-        assertEquals("coverLetterWelsh.pdf", result.getDocumentFileName());
-        verify(documentLanguageService).docGenerateLang(caseData);
-        verify(dgsService).generateDocument(
-            eq(AUTH_TOKEN),
-            eq(String.valueOf(caseData.getId())),
-            anyString(),
-            anyMap()
-        );
-    }
-
-    @Test
-    public void testGenerateCoverLetterThrowsWhenDocumentGenerationFails() {
-        Address address = Address.builder()
-            .addressLine1("addressLine1")
-            .postCode("postcode")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        when(dgsService.generateDocument(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyMap()
-        )).thenThrow(new RuntimeException("Document generation failed"));
-
-        assertThrows(RuntimeException.class, () ->
-            documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address)
-        );
     }
 
     private Map<String, String> createDocumentValues(String documentType) {

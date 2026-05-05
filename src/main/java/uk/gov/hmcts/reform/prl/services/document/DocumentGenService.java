@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
-import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -48,7 +47,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -70,7 +68,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_BLANK_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -106,7 +103,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_DOCUMENT_TYPE;
@@ -301,10 +297,6 @@ public class DocumentGenService {
     protected String docCoverSheetServeOrderTemplate;
     @Value("${document.templates.common.doc_cover_sheet_welsh_serve_order_template}")
     protected String docCoverSheetWelshServeOrderTemplate;
-    @Value("${document.templates.common.prl_blank_cover_letter_template}")
-    protected String docBlankCoverLetterTemplate;
-    @Value("${document.templates.common.prl_blank_cover_letter_welsh_template}")
-    protected String docBlankCoverLetterWelshTemplate;
 
     @Value("${document.templates.common.prl_citizen_c1a_final_response_template}")
     protected String citizenC1aFinalResponseTemplate;
@@ -1123,9 +1115,6 @@ public class DocumentGenService {
             case DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT:
                 template = findDocCoverSheetTemplateForServeOrder(isWelsh);
                 break;
-            case DOCUMENT_BLANK_COVER_SHEET_HINT:
-                template = findDocBlankCoverSheetTemplate(isWelsh);
-                break;
             case C1A_FINAL_RESPONSE_DOCUMENT:
                 template = getRespondentC1aResponseFinalTemplate(isWelsh);
                 break;
@@ -1204,10 +1193,6 @@ public class DocumentGenService {
     private String findDocCoverSheetTemplateForServeOrder(boolean isWelsh) {
         //Need to replace EMPTY_STRING with received welsh template
         return !isWelsh ? docCoverSheetServeOrderTemplate : docCoverSheetWelshServeOrderTemplate;
-    }
-
-    private String findDocBlankCoverSheetTemplate(boolean isWelsh) {
-        return !isWelsh ? docBlankCoverLetterTemplate : docBlankCoverLetterWelshTemplate;
     }
 
     private String findDocCoverSheetC7DraftTemplate(boolean isWelsh) {
@@ -1616,39 +1601,5 @@ public class DocumentGenService {
 
     private boolean isCaseNotLocked(DocumentUpdateContext documentUpdateContext) {
         return documentUpdateContext.overrideC100CaseLock || !CaseUtils.isC100CaseIssued(documentUpdateContext.caseData);
-    }
-
-    public Document generateCoverLetter(String authorisation,
-                                         CaseData caseData,
-                                         String name,
-                                         Address address) {
-        Map<String, Object> dataMap = new HashMap<>();
-        dataMap.put("id", caseData.getId());
-        dataMap.put("address", address);
-        dataMap.put(NAME, name);
-        dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
-
-        log.info("*** Generating address cover letter for bulk print (no cover letter pack) ***");
-        try {
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            boolean isWelsh = documentLanguage.isGenWelsh();
-            String template = getTemplate(caseData, DOCUMENT_BLANK_COVER_SHEET_HINT, isWelsh);
-
-            GeneratedDocumentInfo coverLetter = dgsService.generateDocument(
-                authorisation,
-                String.valueOf(caseData.getId()),
-                template,
-                dataMap
-            );
-            return Document.builder()
-                .documentUrl(coverLetter.getUrl())
-                .documentFileName(coverLetter.getDocName())
-                .documentBinaryUrl(coverLetter.getBinaryUrl())
-                .documentCreatedOn(new Date())
-                .build();
-        } catch (Exception e) {
-            log.error("Generate address cover letter failed for case {} : {}", caseData.getId(), e.getMessage());
-            throw e;
-        }
     }
 }
