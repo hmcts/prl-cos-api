@@ -99,6 +99,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_BLANK_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
@@ -2726,6 +2727,15 @@ public class DocumentGenServiceTest {
 
         assertNotNull(template);
         assertEquals("citizen_cover_letter_en", template);
+    }
+
+    @Test
+    public void testBlankCoverLetterTemplateEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "cover_letter_en");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_BLANK_COVER_SHEET_HINT, false);
+
+        assertNotNull(template);
+        assertEquals("cover_letter_en", template);
     }
 
     @Test
