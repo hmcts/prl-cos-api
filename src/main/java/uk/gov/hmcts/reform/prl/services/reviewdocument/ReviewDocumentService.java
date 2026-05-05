@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -132,79 +133,39 @@ public class ReviewDocumentService {
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        //solcitor
+        //solicitor
         if (isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                   element.getValue().getUploaderRole(),
-                                                   element.getValue()
-                                               ).getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(
-                                                   DATE_TIME_PATTERN,
-                                                   element.getValue().getDocumentUploadedDate()
-                                               ))
-                                               .build())
+                                           .map(this::documentDynamicListElement)
+                                           .filter(Objects::nonNull)
                                            .toList());
         }
         //Cafcass
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                   element.getValue().getUploaderRole(),
-                                                   element.getValue()
-                                               ).getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(
-                                                   DATE_TIME_PATTERN,
-                                                   element.getValue().getDocumentUploadedDate()
-                                               ))
-                                               .build())
+                                           .map(this::documentDynamicListElement)
+                                           .filter(Objects::nonNull)
                                            .toList());
         }
         //Local Authority
         if (isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                   element.getValue().getUploaderRole(),
-                                                   element.getValue()
-                                               ).getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(
-                                                   DATE_TIME_PATTERN,
-                                                   element.getValue().getDocumentUploadedDate()
-                                               ))
-                                               .build())
+                                           .map(this::documentDynamicListElement)
+                                           .filter(Objects::nonNull)
                                            .toList());
         }
         //court staff
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                   element.getValue().getUploaderRole(),
-                                                   element.getValue()
-                                               ).getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(
-                                                   DATE_TIME_PATTERN,
-                                                   element.getValue().getDocumentUploadedDate()
-                                               ))
-                                               .build())
+                                           .map(this::documentDynamicListElement)
+                                           .filter(Objects::nonNull)
                                            .toList());
         }
         //citizen
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                   element.getValue().getUploaderRole(),
-                                                   element.getValue()
-                                               ).getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(
-                                                   DATE_TIME_PATTERN,
-                                                   element.getValue().getDocumentUploadedDate()
-                                               ))
-                                               .build())
+                                           .map(this::documentDynamicListElement)
+                                           .filter(Objects::nonNull)
                                            .toList());
         }
         //bulkscan
@@ -223,20 +184,30 @@ public class ReviewDocumentService {
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())) {
             log.info("inside prepare for courtnav uploaded docs");
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
-                                                   element.getValue().getUploaderRole(),
-                                                   element.getValue()
-                                               ).getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(
-                                                   DATE_TIME_PATTERN,
-                                                   element.getValue().getDocumentUploadedDate()
-                                               ))
-                                               .build())
+                                           .map(this::documentDynamicListElement)
+                                           .filter(Objects::nonNull)
                                            .toList());
             log.info("exit prepare for courtnav uploaded docs");
         }
         return dynamicListElements;
+    }
+
+    private DynamicListElement documentDynamicListElement(Element<QuarantineLegalDoc> element) {
+        QuarantineLegalDoc quarantineLegalDoc = element.getValue();
+        Document document = manageDocumentsService.getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(),
+                                                                                    quarantineLegalDoc);
+        if  (document == null) {
+            return null;
+        }
+
+        String label = document.getDocumentFileName()
+            + HYPHEN_SEPARATOR
+            + formatDateTime(DATE_TIME_PATTERN, element.getValue().getDocumentUploadedDate());
+
+        return DynamicListElement.builder()
+            .code(element.getId().toString())
+            .label(label)
+            .build();
     }
 
     public void getReviewedDocumentDetailsNew(CaseData caseData, Map<String, Object> caseDataUpdated) {

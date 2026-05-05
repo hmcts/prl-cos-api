@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -1849,5 +1850,31 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verifyNoInteractions(manageDocumentsService);
+    }
+
+    @Test
+    public void givenDocumentRemoved_whenFetchDocumentDynamicListElements_thenDocumentNotReturned() {
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .legalProfQuarantineDocsList(documentListWithRemovedDocument())
+                                           .cafcassQuarantineDocsList(documentListWithRemovedDocument())
+                                           .localAuthorityQuarantineDocsList(documentListWithRemovedDocument())
+                                           .courtStaffQuarantineDocsList(documentListWithRemovedDocument())
+                                           .citizenQuarantineDocsList(documentListWithRemovedDocument())
+                                           .courtNavQuarantineDocumentList(documentListWithRemovedDocument())
+                                           .build())
+            .build();
+
+        doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(), any());
+
+        List<DynamicListElement> dynamicListElements = reviewDocumentService.fetchDocumentDynamicListElements(caseData);
+        Assertions.assertTrue(dynamicListElements.isEmpty());
+    }
+
+    private List<Element<QuarantineLegalDoc>> documentListWithRemovedDocument() {
+        return List.of(element(UUID.randomUUID(), QuarantineLegalDoc.builder()
+            .uploaderRole(LEGAL_PROFESSIONAL)
+            .document(null)
+            .build()));
     }
 }
