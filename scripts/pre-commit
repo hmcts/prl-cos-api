@@ -1,31 +1,32 @@
-#!/bin/sh
+#!/bin/bash
 
 # ANSI Color Codes
 BLUE='\033[0;34m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
 NC='\033[0m'
 
-# Check if --verify is present in the git command arguments
-# Git passes the commit message file, but we can check the parent process
-# Or more simply, we check a custom environment variable we can alias.
-# However, the most 'Git-native' way for an opt-in is checking an ENV var.
-
+# Check if the opt-in flag is set
 if [ "$VERIFY_COVERAGE" != "true" ]; then
-    # Skip silently and fast
+    # Exit silently and instantly for normal commits
     exit 0
 fi
 
-echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo "🔍  OPT-IN QUALITY GATE: Running Coverage Check..."
-echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "🔍  ${BLUE}OPT-IN QUALITY GATE:${NC} Running Coverage Check..."
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
-# Run the task - filter out the JVM noise but show our println output
+# Run the task
 ./gradlew testWithCoverage --no-daemon | grep -v "OpenJDK 64-Bit Server VM warning"
+
+# PIPESTATUS[0] gets the exit code of ./gradlew, not the grep command
 RESULT=${PIPESTATUS[0]}
 
 if [ $RESULT -ne 0 ]; then
-  echo "\n❌  [COMMIT BLOCKED] Coverage is below 80%."
+  echo -e "\n${RED}❌  [COMMIT BLOCKED] Coverage is below 80% or tests failed.${NC}"
+  echo -e "Review the report above or run ./gradlew testWithCoverage manually.\n"
   exit 1
 fi
 
-echo "\n✅  [COMMIT ALLOWED] Quality Gate Passed. 🛡️\n"
+echo -e "\n${GREEN}✅  [COMMIT ALLOWED] Quality Gate Passed. 🛡️${NC}\n"
 exit 0

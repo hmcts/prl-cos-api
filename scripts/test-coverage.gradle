@@ -2,27 +2,21 @@ import groovy.xml.XmlParser
 
 tasks.register("testWithCoverage") {
   group = "verification"
-  description = "Runs tests and shows console coverage. Usage: ./gradlew testWithCoverage -Ptarget=ClassA,ClassB"
+  description = "Runs tests and shows console coverage. Usage: ./gradlew testWithCoverage [-Ptarget=ClassA,ClassB]"
 
   dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
 
   doLast {
-    // 1. INPUT HANDLING
     def targetInput = findProperty('target')?.toString() ?: ""
-    if (targetInput.isEmpty()) {
-      logger.lifecycle("\u001B[31m❌ Error: Please specify class(es). Usage: ./gradlew testWithCoverage -Ptarget=ServiceA,ServiceB\u001B[0m")
-      return
-    }
-
     def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
+    def checkAll = targets.isEmpty()
+
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
-    // 2. PR TOTALS (Initialised inside doLast scope)
     int grandMissedUnits = 0
     int grandCoveredUnits = 0
 
     if (reportFile.exists()) {
-      // Setup the Modern Parser with security relaxations for local XML
       def parser = new XmlParser(false, false)
       parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
       parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
@@ -30,97 +24,70 @@ tasks.register("testWithCoverage") {
 
       def report = parser.parse(reportFile)
 
-      // 3. CLASS ITERATION
-      targets.each { targetName ->
-        def fileName = targetName.endsWith(".java") ? targetName : "${targetName}.java"
-        def sourceFile = null
+      report.'package'.each { pkg ->
+        pkg.'sourcefile'.each { sourceFile ->
+          def fileName = sourceFile.attribute('name') ?: ""
+          def className = fileName.replace(".java", "")
+          boolean isTargeted = targets.any { it.equalsIgnoreCase(className) }
 
-        // Navigate packages safely
-        report.'package'.each { pkg ->
-          def found = pkg.'sourcefile'.find { it.attribute('name')?.equalsIgnoreCase(fileName) }
-          if (found) { sourceFile = found }
-        }
+          if (checkAll || isTargeted) {
+            int fileMissedInstr = 0, fileCoveredInstr = 0
+            int fileMissedBranch = 0, fileCoveredBranch = 0
 
-        if (sourceFile) {
-          int totalMissedInstr = 0
-          int totalCoveredInstr = 0
-          int totalMissedBranch = 0
-          int totalCoveredBranch = 0
+            sourceFile.'line'.each { line ->
+              fileMissedInstr += (line.attribute('mi') ?: "0").toInteger()
+              fileCoveredInstr += (line.attribute('ci') ?: "0").toInteger()
+              fileMissedBranch += (line.attribute('mb') ?: "0").toInteger()
+              fileCoveredBranch += (line.attribute('cb') ?: "0").toInteger()
+            }
 
-          sourceFile.'line'.each { line ->
-            totalMissedInstr += (line.attribute('mi') ?: "0").toInteger()
-            totalCoveredInstr += (line.attribute('ci') ?: "0").toInteger()
-            totalMissedBranch += (line.attribute('mb') ?: "0").toInteger()
-            totalCoveredBranch += (line.attribute('cb') ?: "0").toInteger()
-          }
+            grandMissedUnits += (fileMissedInstr + fileMissedBranch)
+            grandCoveredUnits += (fileCoveredInstr + fileCoveredBranch)
 
-          // Strict Math (Instructions + Branches)
-          double classTotal = totalMissedInstr + totalCoveredInstr + totalMissedBranch + totalCoveredBranch
-          double classCovered = totalCoveredInstr + totalCoveredBranch
-          double coveragePct = classTotal > 0 ? (classCovered / classTotal) * 100 : 0
+            if (!checkAll && isTargeted) {
+              double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
+              double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
+              def color = filePct >= 80 ? "\u001B[32m" : "\u001B[31m"
+              def reset = "\u001B[0m"
 
-          // Accumulate for PR summary
-          grandMissedUnits += (totalMissedInstr + totalMissedBranch)
-          grandCoveredUnits += (totalCoveredInstr + totalCoveredBranch)
+              logger.lifecycle("\n" + "━" * 85)
+              logger.lifecycle(" 🎯 TARGET REPORT: ${fileName}")
+              logger.lifecycle(" 📈 Score: ${color}${String.format("%.2f", filePct)}%${reset} | Threshold: 80%")
+              logger.lifecycle("━" * 85)
+              logger.lifecycle(String.format("%-10s | %-25s | %-15s | %-15s", "Line", "Status", "Missed Instr.", "Missed Br."))
+              logger.lifecycle("-" * 85)
 
-          def color = coveragePct >= 80 ? "\u001B[32m" : "\u001B[31m"
-          def reset = "\u001B[0m"
-          def passStatus = coveragePct >= 80 ? "✅ PASS" : "❌ FAIL"
-          def displayName = sourceFile.attribute('name') ?: fileName
-
-          logger.lifecycle("\n" + "┈" * 85)
-          logger.lifecycle(" 🎯 COVERAGE GAP REPORT: ${displayName}")
-          logger.lifecycle(" 📈 Score: ${color}${String.format("%.2f", coveragePct)}%${reset} | Threshold: 80% | Status: ${passStatus}")
-          logger.lifecycle("┈" * 85)
-          logger.lifecycle(String.format("%-10s | %-25s | %-15s | %-15s", "Line", "Status", "Missed Instr.", "Missed Branch #"))
-          logger.lifecycle("-" * 85)
-
-          sourceFile.'line'.each { line ->
-            int mi = (line.attribute('mi') ?: "0").toInteger()
-            int mb = (line.attribute('mb') ?: "0").toInteger()
-            int ci = (line.attribute('ci') ?: "0").toInteger()
-
-            if (mi > 0 || mb > 0) {
-              def status = (mi > 0 && ci == 0) ? "🔴 LINE MISSED" : "🟡 BRANCH MISSED"
-              logger.lifecycle(String.format("%-10s | %-25s | %-15s | %-15s",
-                line.attribute('nr'), status, mi, mb))
+              sourceFile.'line'.each { line ->
+                int mi = (line.attribute('mi') ?: "0").toInteger()
+                int mb = (line.attribute('mb') ?: "0").toInteger()
+                int ci = (line.attribute('ci') ?: "0").toInteger()
+                if (mi > 0 || mb > 0) {
+                  def status = (mi > 0 && ci == 0) ? "🔴 LINE MISSED" : "🟡 BRANCH MISSED"
+                  logger.lifecycle(String.format("%-10s | %-25s | %-15s | %-15s", line.attribute('nr'), status, mi, mb))
+                }
+              }
+              logger.lifecycle("━" * 85)
             }
           }
-
-          logger.lifecycle("-" * 85)
-          logger.lifecycle("📊 CLASS GAPS: ${totalMissedInstr} Instructions, ${totalMissedBranch} Branches remaining.")
-        } else {
-          logger.lifecycle("\n\u001B[33m❓ Could not find class: ${fileName} in the report.\u001B[0m")
         }
       }
 
-      // 4. FINAL COMBINED SUMMARY (Emoji-Aware & Alignment-Fixed)
-      if (targets.size() > 1) {
-        double grandTotal = grandMissedUnits + grandCoveredUnits
-        double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
+      // FINAL SUMMARY CALCULATION
+      double grandTotal = grandMissedUnits + grandCoveredUnits
+      double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
+      def grandColor = grandPct >= 80 ? "\u001B[32m" : "\u001B[31m"
+      def statusLabel = grandPct >= 80 ? "\u001B[32m✅ PASS\u001B[0m" : "\u001B[31m❌ FAIL\u001B[0m"
+      def reset = "\u001B[0m"
 
-        def grandColor = grandPct >= 80 ? "\u001B[32m" : "\u001B[31m"
-        def grandStatus = grandPct >= 80 ? "✅ TOTAL PASS" : "❌ TOTAL FAIL"
-        def reset = "\u001B[0m"
+      logger.lifecycle("\n" + "━" * 85)
+      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
+      logger.lifecycle(" ${title}")
+      logger.lifecycle(" 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset} | Threshold: 80% | Status: ${statusLabel}")
+      logger.lifecycle("━" * 85 + "\n")
 
-        def titleContent = " 🏁 COMBINED PR SCORE"
-        def statsContent = " Score: ${String.format("%.2f", grandPct)}% | Threshold: 80% | Status: ${grandStatus}"
-
-        int boxWidth = 83
-        // Subtract 1 for the multi-byte emoji character width
-        int titlePadding = boxWidth - titleContent.length() - 1
-        int statsPadding = boxWidth - statsContent.length() - 1
-
-        logger.lifecycle("\n┏" + "━" * boxWidth + "┓")
-        logger.lifecycle("┃" + titleContent + " ".multiply(titlePadding) + "┃")
-
-        def coloredStats = " Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset} | Threshold: 80% | Status: ${grandStatus}"
-        logger.lifecycle("┃" + coloredStats + " ".multiply(statsPadding) + "┃")
-        logger.lifecycle("┗" + "━" * boxWidth + "┛\n")
-      } else {
-        logger.lifecycle("\n" + "=" * 85 + "\n")
+      if (grandPct < 80) {
+        throw new GradleException("Coverage is below 80% threshold!")
       }
-
     } else {
       logger.lifecycle("\u001B[31m❌ JaCoCo XML report not found at: ${reportFile.path}\u001B[0m")
     }
