@@ -47,6 +47,7 @@ bundle:
           filters:
             - property: /documentGroup
               value: applicantAWPDocuments
+              category: applicationsWithinProceedings
         - type: documentSet
           property: /data/allOtherDocuments
           filters:
@@ -82,6 +83,13 @@ bundle:
           filters:
             - property: /documentGroup
               value: respondentAWPDocuments
+              category: applicationsWithinProceedingsRes
+        - type: documentSet
+          property: /data/allOtherDocuments
+          filters:
+            - property: /documentGroup
+              value: respondentAWPDocuments
+              category: applicationsFromOtherProceedings
         - type: documentSet
           property: /data/allOtherDocuments
           filters:
