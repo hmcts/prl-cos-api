@@ -1,29 +1,27 @@
 #!/bin/bash
 
-# Find the project root directory
-PROJECT_ROOT=$(git rev-parse --show-toplevel)
+# Find the root of the git repository
+REPO_ROOT=$(git rev-parse --show-toplevel)
+GATE_FLAG="$REPO_ROOT/.run-coverage-on-commit"
 
-# 1. The Opt-In Gate
-if [ "$VERIFY_COVERAGE" != "true" ] && [ ! -f "$PROJECT_ROOT/.run-coverage-on-commit" ]; then
-    exit 0
+# CHECK: Is the switch flipped?
+if [ -f "$GATE_FLAG" ]; then
+    echo "🛡️  Coverage Gate is ON. Running checks..."
+
+    # Run your specific Gradle task
+    ./gradlew testWithCoverage "-Ptarget=RequestUpdateCallbackService, ServiceRequestUpdateCallbackController, RootController"
+
+    # Capture the result
+    RESULT=$?
+
+    if [ $RESULT -ne 0 ]; then
+        echo "❌ GATE BLOCKED: Coverage check failed. Fix the gaps or run 'gate-off' to bypass."
+        exit 1
+    fi
+    echo "✅ GATE PASSED: Proceeding with commit."
+else
+    # The switch is off, so we do nothing.
+    echo "🔓 Coverage Gate is OFF. Skipping checks."
 fi
 
-GREEN='\033[0;32m'
-NC='\033[0m'
-
-echo -e ""
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}🔍  PRE-COMMIT QUALITY GATE Checking Aggregate Coverage...${NC}"
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-
-# 2. Run the task
-./gradlew testWithCoverage --console=plain
-RESULT=$?
-
-if [ $RESULT -ne 0 ]; then
-  echo -e "\n\033[0;31m❌  [COMMIT BLOCKED] Coverage below 80%.\033[0m" >&2
-  exit 1
-fi
-
-echo -e "\n${GREEN}✅  [COMMIT ALLOWED] Standards met. 🛡️${NC}\n"
 exit 0

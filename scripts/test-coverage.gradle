@@ -2,7 +2,7 @@ import groovy.xml.XmlParser
 
 tasks.register("testWithCoverage") {
   group = "verification"
-  description = "Coverage report with precise technical labeling and prioritized branch analysis."
+  description = "Full coverage report: Fixed XML DOCTYPE issues and clickable IDE links."
 
   dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
 
@@ -27,10 +27,10 @@ tasks.register("testWithCoverage") {
     def allClassNames = [] as Set
 
     if (reportFile.exists()) {
+      // FIXED: Allow DOCTYPE but disable DTD loading to avoid parser errors
       def parser = new XmlParser(false, false)
       parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
       parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-      parser.setFeature("http://xml.org/sax/features/namespaces", false)
 
       def report = parser.parse(reportFile)
 
@@ -70,43 +70,57 @@ tasks.register("testWithCoverage") {
               logger.lifecycle(" 📈 Score: ${color}${String.format("%.2f", filePct)}%${reset} | Threshold: 80%")
               logger.lifecycle("━" * 85)
 
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %-10s", "METRIC", "MISSED", "COVERED", "SCORE"))
+              logger.lifecycle("─" * 85)
+
               def instTotal = fileCoveredInstr + fileMissedInstr
-              def instPct = instTotal > 0 ? (fileCoveredInstr / instTotal * 100) : 100.0
+              def instPct = instTotal > 0 ? (fileCoveredInstr / (double)instTotal * 100) : 100.0
               def brnTotal = fileCoveredBranch + fileMissedBranch
-              def brnPct = brnTotal > 0 ? (fileCoveredBranch / brnTotal * 100) : 100.0
+              def brnPct = brnTotal > 0 ? (fileCoveredBranch / (double)brnTotal * 100) : 100.0
 
               logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %.2f%%", "Instructions", fileMissedInstr, fileCoveredInstr, instPct))
               logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %s", "Branches", fileMissedBranch, fileCoveredBranch, brnTotal > 0 ? String.format("%.2f%%", brnPct) : "N/A"))
               logger.lifecycle("━" * 85)
 
-              def javaFile = project.file("src/main/java/${pkgPath}/${fileName}")
+              def relativePath = "src/main/java/${pkgPath}/${fileName}"
+              def javaFile = project.file(relativePath)
               def linesContent = javaFile.exists() ? javaFile.readLines() : []
 
-              // --- 1. Branch Gaps ---
+              // --- SECTION 1: Logic Gaps (Branches) ---
               def branchGaps = sourceFile.'line'.findAll { (it.attribute('mb')?.toInteger() ?: 0) > 0 }
               if (!branchGaps.isEmpty()) {
                 logger.lifecycle(" ${yellow}⚠️  Logic Gaps (Partial Branches):${reset}")
                 branchGaps.each { line ->
-                  int lineNum = (line.attribute('nr')?.toString() ?: "0").toInteger()
-                  int mb = (line.attribute('mb')?.toString() ?: "0").toInteger()
-                  int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
-                  def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
-                  logger.lifecycle(String.format("   Line %-5s: %-50s ${gray}(M.Br: %s, M.Inst: %s)${reset}", lineNum, code, mb, mi))
+                  def lineAttr = line.attribute('nr')?.toString()
+                  if (lineAttr) {
+                    int lineNum = lineAttr.toInteger()
+                    int mb = (line.attribute('mb')?.toString() ?: "0").toInteger()
+                    int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
+                    def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
+
+                    logger.lifecycle(String.format("   %-65s ${gray}(M.Br: %s, M.Inst: %s)${reset}", "${relativePath}:${lineNum}", mb, mi))
+                    logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
+                  }
                 }
                 logger.lifecycle("─" * 85)
               }
 
-              // --- 2. Instruction Gaps (Updated Label) ---
+              // --- SECTION 2: Execution Gaps (Missing Instructions) ---
               def instrGaps = sourceFile.'line'.findAll {
                 (it.attribute('mi')?.toInteger() ?: 0) > 0 && (it.attribute('mb')?.toInteger() ?: 0) == 0
               }
               if (!instrGaps.isEmpty()) {
                 logger.lifecycle(" ${orange}💡 Execution Gaps (Missing Instructions/Lines not hit):${reset}")
                 instrGaps.each { line ->
-                  int lineNum = (line.attribute('nr')?.toString() ?: "0").toInteger()
-                  int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
-                  def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
-                  logger.lifecycle(String.format("   Line %-5s: %-50s ${gray}(M.Inst: %s)${reset}", lineNum, code, mi))
+                  def lineAttr = line.attribute('nr')?.toString()
+                  if (lineAttr) {
+                    int lineNum = lineAttr.toInteger()
+                    int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
+                    def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
+
+                    logger.lifecycle(String.format("   %-65s ${gray}(M.Inst: %s)${reset}", "${relativePath}:${lineNum}", mi))
+                    logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
+                  }
                 }
               }
 
@@ -119,7 +133,6 @@ tasks.register("testWithCoverage") {
         }
       }
 
-      // --- 3. Safeguard: Validation ---
       def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
       if (!checkAll && !missingTargets.isEmpty()) {
         logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
@@ -134,7 +147,6 @@ tasks.register("testWithCoverage") {
         throw new GradleException("Target class mismatch. Check spelling!")
       }
 
-      // --- 4. Summary ---
       double grandTotal = grandMissedUnits + grandCoveredUnits
       double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
       def grandColor = grandPct >= 80 ? green : red
