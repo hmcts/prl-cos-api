@@ -542,7 +542,7 @@ public class EditAndApproveDraftOrderController {
                     manageOrderService
                 );
             }
-            manageOrderService.setFieldsForCirDocumentsRequestedForEditAndApproveOrder(caseData, caseDataUpdated, authorisation);
+            manageOrderService.createCirDocumentsRequestedTask(caseData, authorisation);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(

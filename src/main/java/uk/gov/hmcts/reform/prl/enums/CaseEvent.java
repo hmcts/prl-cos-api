@@ -81,7 +81,8 @@ public enum CaseEvent {
     PATH_FINDER_DECISION("pathfinderDecision"),
     REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
     CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask"),
-    CANCEL_REQUEST_CIR_UPDATE_TASK("cancelRequestCirUpdateTask");
+    CANCEL_REQUEST_CIR_UPDATE_TASK("cancelRequestCirUpdateTask"),
+    CREATE_REQUEST_CIR_UPDATE_TASK("createRequestCirUpdateTask");
 
     private final String value;
 

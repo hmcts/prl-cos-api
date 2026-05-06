@@ -408,7 +408,7 @@ public class ManageOrdersController {
 
             // Custom order flow: combine header preview + user content, update the order
             Map<String, Object> callbackData = callbackRequest.getCaseDetails().getData();
-            manageOrderService.setFieldsForCirDocumentsRequested(caseData, caseDataUpdated);
+            manageOrderService.createCirDocumentsRequestedTask(caseData, authorisation);
             log.info("Submitted callback: callbackData has orderCollection={}, draftOrderCollection={}",
                 callbackData.get(ORDER_COLLECTION) != null,
                 callbackData.get(DRAFT_ORDER_COLLECTION) != null);
