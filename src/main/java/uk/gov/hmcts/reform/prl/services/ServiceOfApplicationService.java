@@ -326,7 +326,7 @@ public class ServiceOfApplicationService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add(
-            "<strong>LR, JAVA CODE CHANGE IN COS-API!!!!</strong><br>"
+            "<strong>LR, JAVA CODE CHANGE IN COS-API!!!! Another change!</strong><br>"
                 + "Certain documents will be automatically included in the pack this is served on parties(the people in the case)");
         collapsible.add(
             "This includes");
