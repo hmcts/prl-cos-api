@@ -3981,7 +3981,6 @@ public class ManageOrderService {
                 manageOrdersOption);
         }
         setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
-        setFieldsForCirDocumentsRequested(caseData, waFieldsMap);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);

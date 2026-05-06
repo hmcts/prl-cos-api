@@ -248,7 +248,6 @@ public class EditAndApproveDraftOrderController {
 
             }
             manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
-            manageOrderService.setFieldsForCirDocumentsRequestedForEditAndApproveOrder(caseData, caseDataUpdated, authorisation);
 
             //Populate need to check automated hearing request
             manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
@@ -543,6 +542,7 @@ public class EditAndApproveDraftOrderController {
                     manageOrderService
                 );
             }
+            manageOrderService.setFieldsForCirDocumentsRequestedForEditAndApproveOrder(caseData, caseDataUpdated, authorisation);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
