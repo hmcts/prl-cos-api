@@ -7,7 +7,7 @@ properties([
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 
-@Library("Infrastructure@fix/maven-central")
+@Library("Infrastructure)
 
 def type = "java"
 def product = "prl"
