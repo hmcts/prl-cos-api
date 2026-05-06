@@ -2,23 +2,29 @@ import groovy.xml.XmlParser
 
 tasks.register("testWithCoverage") {
   group = "verification"
-  description = "Runs tests and shows console coverage."
+  description = "Coverage report with precise technical labeling and prioritized branch analysis."
 
   dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
 
   doLast {
+    def green  = "\u001B[32m"
+    def red    = "\u001B[31m"
+    def reset  = "\u001B[0m"
+    def gray   = "\u001B[90m"
+    def white  = "\u001B[38;5;253m"
+    def yellow = "\u001B[33m"
+    def orange = "\u001B[38;5;208m"
+
     def targetInput = findProperty('target')?.toString() ?: ""
     def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
     def checkAll = targets.isEmpty()
 
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
-    def green = "\u001B[32m"
-    def red   = "\u001B[31m"
-    def reset = "\u001B[0m"
-
     int grandMissedUnits = 0
     int grandCoveredUnits = 0
+    def foundTargets = [] as Set
+    def allClassNames = [] as Set
 
     if (reportFile.exists()) {
       def parser = new XmlParser(false, false)
@@ -29,20 +35,26 @@ tasks.register("testWithCoverage") {
       def report = parser.parse(reportFile)
 
       report.'package'.each { pkg ->
+        def pkgPath = pkg.attribute('name').replace('.', '/')
+
         pkg.'sourcefile'.each { sourceFile ->
           def fileName = sourceFile.attribute('name') ?: ""
           def className = fileName.replace(".java", "")
+          allClassNames.add(className)
+
           boolean isTargeted = targets.any { it.equalsIgnoreCase(className) }
 
           if (checkAll || isTargeted) {
+            if (isTargeted) foundTargets.add(targets.find { it.equalsIgnoreCase(className) })
+
             int fileMissedInstr = 0, fileCoveredInstr = 0
             int fileMissedBranch = 0, fileCoveredBranch = 0
 
             sourceFile.'line'.each { line ->
-              fileMissedInstr += (line.attribute('mi') ?: "0").toInteger()
-              fileCoveredInstr += (line.attribute('ci') ?: "0").toInteger()
-              fileMissedBranch += (line.attribute('mb') ?: "0").toInteger()
-              fileCoveredBranch += (line.attribute('cb') ?: "0").toInteger()
+              fileMissedInstr  += (line.attribute('mi')?.toString() ?: "0").toInteger()
+              fileCoveredInstr += (line.attribute('ci')?.toString() ?: "0").toInteger()
+              fileMissedBranch += (line.attribute('mb')?.toString() ?: "0").toInteger()
+              fileCoveredBranch += (line.attribute('cb')?.toString() ?: "0").toInteger()
             }
 
             grandMissedUnits += (fileMissedInstr + fileMissedBranch)
@@ -51,40 +63,89 @@ tasks.register("testWithCoverage") {
             if (!checkAll && isTargeted) {
               double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
               double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
-              def fileColor = filePct >= 80 ? green : red
+              def color = filePct >= 80 ? green : red
 
               logger.lifecycle("\n" + "━" * 85)
-              logger.lifecycle("${fileColor} 🎯 TARGET REPORT: ${fileName}${reset}")
-              logger.lifecycle("${fileColor} 📈 Score: ${String.format("%.2f", filePct)}% | Threshold: 80%${reset}")
+              logger.lifecycle(" 🎯 TARGET REPORT: ${fileName}")
+              logger.lifecycle(" 📈 Score: ${color}${String.format("%.2f", filePct)}%${reset} | Threshold: 80%")
               logger.lifecycle("━" * 85)
 
-              sourceFile.'line'.each { line ->
-                int mi = (line.attribute('mi') ?: "0").toInteger()
-                if (mi > 0) {
-                  logger.lifecycle("${red} Line ${line.attribute('nr')}: MISSED${reset}")
+              def instTotal = fileCoveredInstr + fileMissedInstr
+              def instPct = instTotal > 0 ? (fileCoveredInstr / instTotal * 100) : 100.0
+              def brnTotal = fileCoveredBranch + fileMissedBranch
+              def brnPct = brnTotal > 0 ? (fileCoveredBranch / brnTotal * 100) : 100.0
+
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %.2f%%", "Instructions", fileMissedInstr, fileCoveredInstr, instPct))
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %s", "Branches", fileMissedBranch, fileCoveredBranch, brnTotal > 0 ? String.format("%.2f%%", brnPct) : "N/A"))
+              logger.lifecycle("━" * 85)
+
+              def javaFile = project.file("src/main/java/${pkgPath}/${fileName}")
+              def linesContent = javaFile.exists() ? javaFile.readLines() : []
+
+              // --- 1. Branch Gaps ---
+              def branchGaps = sourceFile.'line'.findAll { (it.attribute('mb')?.toInteger() ?: 0) > 0 }
+              if (!branchGaps.isEmpty()) {
+                logger.lifecycle(" ${yellow}⚠️  Logic Gaps (Partial Branches):${reset}")
+                branchGaps.each { line ->
+                  int lineNum = (line.attribute('nr')?.toString() ?: "0").toInteger()
+                  int mb = (line.attribute('mb')?.toString() ?: "0").toInteger()
+                  int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
+                  def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
+                  logger.lifecycle(String.format("   Line %-5s: %-50s ${gray}(M.Br: %s, M.Inst: %s)${reset}", lineNum, code, mb, mi))
+                }
+                logger.lifecycle("─" * 85)
+              }
+
+              // --- 2. Instruction Gaps (Updated Label) ---
+              def instrGaps = sourceFile.'line'.findAll {
+                (it.attribute('mi')?.toInteger() ?: 0) > 0 && (it.attribute('mb')?.toInteger() ?: 0) == 0
+              }
+              if (!instrGaps.isEmpty()) {
+                logger.lifecycle(" ${orange}💡 Execution Gaps (Missing Instructions/Lines not hit):${reset}")
+                instrGaps.each { line ->
+                  int lineNum = (line.attribute('nr')?.toString() ?: "0").toInteger()
+                  int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
+                  def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
+                  logger.lifecycle(String.format("   Line %-5s: %-50s ${gray}(M.Inst: %s)${reset}", lineNum, code, mi))
                 }
               }
+
+              if (branchGaps.isEmpty() && instrGaps.isEmpty()) {
+                logger.lifecycle(" ${green}✨ No gaps found!${reset}")
+              }
+              logger.lifecycle("━" * 85)
             }
           }
         }
       }
 
+      // --- 3. Safeguard: Validation ---
+      def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
+      if (!checkAll && !missingTargets.isEmpty()) {
+        logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
+        missingTargets.each { missing ->
+          logger.lifecycle("   - ${missing}")
+          def suggestions = allClassNames.findAll { it.toLowerCase().contains(missing.toLowerCase()) }.sort()
+          if (!suggestions.isEmpty()) {
+            logger.lifecycle("     ${green}Did you mean?${reset}")
+            suggestions.take(5).each { logger.lifecycle("      • ${it}") }
+          }
+        }
+        throw new GradleException("Target class mismatch. Check spelling!")
+      }
+
+      // --- 4. Summary ---
       double grandTotal = grandMissedUnits + grandCoveredUnits
       double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
-
       def grandColor = grandPct >= 80 ? green : red
-      def statusLabel = grandPct >= 80 ? "✅ PASS" : "❌ FAIL"
+      def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}❌ FAIL${reset}"
 
-      // THE SUMMARY TABLE
-      def white = "\u001B[38;5;253m"
       logger.lifecycle("\n" + "━" * 85)
       def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
-
-      logger.lifecycle("${grandColor} ${title}${reset}")
-      logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: ${reset}${white}80%${reset}${white} | Status: ${reset}${grandColor}${statusLabel}${reset}")
+      logger.lifecycle(" ${title}")
+      logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
       logger.lifecycle("━" * 85 + "\n")
-      // Updated link to point to the nested html folder
-      logger.lifecycle("${white} 📁 Full Report: ${reset}${white}file://${reportFile.parentFile.path}/html/index.html${reset}")
+      logger.lifecycle("${white} 📁 Full Report: file://${reportFile.parentFile.path}/html/index.html\n${reset}")
 
       if (grandPct < 80) {
         throw new GradleException("Coverage is below 80% threshold!")
