@@ -11,7 +11,7 @@ buildscript {
 plugins {
   id 'application'
   id 'checkstyle'
-  id 'com.github.ben-manes.versions' version '0.51.0'
+  id 'com.github.ben-manes.versions' version '0.54.0'
   id 'info.solidsoft.pitest' version '1.19.0-rc.3'
   id 'io.spring.dependency-management' version '1.1.7'
   id 'jacoco'
@@ -19,7 +19,6 @@ plugins {
   id 'org.sonarqube' version '5.1.0.4882'
   id 'org.springframework.boot' version '3.5.14'
   id 'au.com.dius.pact' version '4.2.6'
-  id 'com.github.hmcts.rse-cft-lib' version '0.19.2126'
 }
 
 def versions = [
@@ -337,7 +336,7 @@ dependencies {
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.13.4'
-  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.14'
+  implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '9.3.3'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
   implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.3'
@@ -605,8 +604,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
-  '**uk/gov/hmcts/reform/prl/services/sendandreply/SendAndReplyService.java'
+  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*'
 ]
 
 sonarqube {
@@ -660,33 +658,17 @@ tasks.register('buildCCDXlsx', Exec) {
   commandLine './bin/cftlib/build-ccd-xlsx-definitions.sh'
 }
 
-bootWithCCD {
-  group = 'cftlib'
-  description = 'Boots the local dev environment with CCD definitions loaded from the generated xlsx file.'
-  dependsOn(loadEnvSecrets)
-  dependsOn(buildCCDXlsx)
-
-  doFirst() {
-    project.file('./.aat-env').readLines().each() {
-      def index = it.indexOf("=")
-      def key = it.substring(0, index)
-      def value = it.substring(index + 1)
-      environment key, value
-    }
-  }
-
-  environment("spring.profiles.active", "local")
-  environment("RSE_LIB_ADDITIONAL_DATABASES", "camunda,wa_workflow_api,cft_task_db,cft_task_db_replica")
-  // ccd-data-store-api
-  environment("RD_LOCATION_REF_API_BASE_URL", "http://rd-location-ref-api-aat.service.core-compute-aat.internal")
-  environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_data,ccd_gw,ccd_ps,jui_webapp,pui_webapp,xui_webapp,aac_manage_case_assignment,am_role_assignment_service,wa_task_configuration_api,wa_task_management_api,wa_workflow_api,wa_task_monitor,ccd_case_document_am_api,prl_cos_api,wa_case_event_handler,hmc_cft_hearing_service,fis_hmc_api,ccd_next_hearing_date_updater")
-  environment("UPLOAD_TIMESTAMP_FEATURED_CASE_TYPES", "PRLAPPS")
-  // xui
-  environment("FEATURE_WORKALLOCATION_ENABLED", "true")
-  environment("SERVICES_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193")
-  environment("HEALTH_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193/health")
-}
-
 test {
   useJUnitPlatform()
 }
+
+apply from: 'scripts/test-coverage.gradle'
+
+tasks.register('installGitHooks', Copy) {
+  from new File(rootProject.rootDir, 'scripts/pre-commit')
+  into { new File(rootProject.rootDir, '.git/hooks') }
+  fileMode 0755
+}
+
+// Make the build depend on installing hooks
+build.dependsOn "installGitHooks"

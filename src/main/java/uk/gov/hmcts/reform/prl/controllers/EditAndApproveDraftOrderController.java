@@ -552,6 +552,7 @@ public class EditAndApproveDraftOrderController {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 caseDataUpdated
             );
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

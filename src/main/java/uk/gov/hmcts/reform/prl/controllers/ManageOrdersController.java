@@ -453,6 +453,7 @@ public class ManageOrdersController {
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
 
+            //TODO - check with Dharmendar
             manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
             // Debug: log orderCollection state before persisting
@@ -480,6 +481,8 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
+
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
 
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing

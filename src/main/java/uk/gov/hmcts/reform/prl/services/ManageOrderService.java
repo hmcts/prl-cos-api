@@ -242,6 +242,15 @@ public class ManageOrderService {
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
 
+    private static final String WHEN_REPORTS_MUST_BE_FILED = "whenReportsMustBeFiled";
+    private static final String WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY = "whenReportsMustBeFiledByLocalAuthority";
+
+    private static final List<String> listOfCirOrderFields = List.of(
+        "cafcassCymruDocuments", "localAuthorityMultipleDocuments",
+        "localAuthorityNeedToProvideReport", "cafcassOrCymruNeedToProvideReport",
+        WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, WHEN_REPORTS_MUST_BE_FILED
+    );
+
     public static final String VALIDATION_ADDRESS_ERROR_RESPONDENT = "This order cannot be served by post until the respondent's "
         + "address is given.";
     public static final String VALIDATION_ADDRESS_ERROR_OTHER_PARTY = "This order cannot be served by post until the other"
@@ -4007,12 +4016,16 @@ public class ManageOrderService {
         }
     }
 
-    public void createCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
+    public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
         Map<String, Object> waFieldsMap = new HashMap<>();
         waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+        LocalDate localAuthorityReportFiledByDate = caseData.getServeOrderData()
+            .getWhenReportsMustBeFiledByLocalAuthority();
+        LocalDate cafcassReportFiledByDate = caseData.getServeOrderData().getWhenReportsMustBeFiled();
         setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
         setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
         createCirDocumentsRequestedTask(caseData, waFieldsMap);
+        cleanUpCirOrderRequestFields(caseData, localAuthorityReportFiledByDate, cafcassReportFiledByDate);
     }
 
     private void createCirDocumentsRequestedTask(CaseData caseData, Map<String, Object> waFieldsMap) {
@@ -4036,6 +4049,33 @@ public class ManageOrderService {
         }
     }
 
+    private void cleanUpCirOrderRequestFields(CaseData caseData, LocalDate localAuthorityReportFiledByDate, LocalDate cafcassReportFiledByDate) {
+
+        String caseId = String.valueOf(caseData.getId());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+            caseId,
+            CaseEvent.UPDATE_ALL_TABS.getValue()
+        );
+
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, localAuthorityReportFiledByDate);
+        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED, cafcassReportFiledByDate);
+        for (String field : listOfCirOrderFields) {
+            if (caseDataMap.containsKey(field)) {
+                caseDataMap.put(field, null);
+            }
+        }
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+
+    }
+
     public void setFieldsForCirDocumentsRequestedForLaWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
         if (Yes.equals(caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport())) {
             List<Element<String>> cirDocumentsRequested = caseData.getServeOrderData().getLocalAuthorityMultipleDocuments().stream().filter(
@@ -4044,6 +4084,7 @@ public class ManageOrderService {
                 UUID.randomUUID(),
                 each.getId()
             )).toList();
+            waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED, null);
             waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
         }
     }
@@ -4056,6 +4097,7 @@ public class ManageOrderService {
                 UUID.randomUUID(),
                 each.getId()
             )).toList();
+            waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, null);
             waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
         }
     }
@@ -4363,4 +4405,5 @@ public class ManageOrderService {
             );
         }
     }
+
 }
