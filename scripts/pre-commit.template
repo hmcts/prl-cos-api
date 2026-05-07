@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Find the root of the git repository
+REPO_ROOT=$(git rev-parse --show-toplevel)
+GATE_FLAG="$REPO_ROOT/.run-coverage-on-commit"
+
+# CHECK: Is the switch flipped?
+if [ -f "$GATE_FLAG" ]; then
+    echo "🛡️  Coverage Gate is ON. Running checks..."
+
+    # 1. Get staged Java class names (e.g., "MyService,MyController")
+    # This filters for added/modified Java files and strips the path/extension
+    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR | grep '.java$' | xargs -I {} basename {} .java | paste -sd "," -)
+
+    # 2. If no Java files are staged, just proceed
+    if [ -z "$STAGED_CLASSES" ]; then
+        echo "ℹ️  No Java changes detected. Proceeding..."
+        exit 0
+    fi
+
+    echo "📊 Verifying coverage for: $STAGED_CLASSES"
+
+    # 3. Run the Gradle task with the dynamic list
+    ./gradlew testWithCoverage "-Ptarget=$STAGED_CLASSES"
+
+    # Capture the result
+    RESULT=$?
+
+    if [ $RESULT -ne 0 ]; then
+        echo "❌ GATE BLOCKED: Coverage check failed for [$STAGED_CLASSES]. Fix the gaps or run 'gate-off' to bypass."
+        exit 1
+    fi
+    echo "✅ GATE PASSED: Proceeding with commit."
+else
+    echo "🔓 Coverage Gate is OFF. Skipping checks."
+fi
+
+exit 0
