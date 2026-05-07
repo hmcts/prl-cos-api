@@ -11,7 +11,7 @@ buildscript {
 plugins {
   id 'application'
   id 'checkstyle'
-  id 'com.github.ben-manes.versions' version '0.51.0'
+  id 'com.github.ben-manes.versions' version '0.54.0'
   id 'info.solidsoft.pitest' version '1.19.0-rc.3'
   id 'io.spring.dependency-management' version '1.1.7'
   id 'jacoco'
@@ -605,8 +605,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
-  '**uk/gov/hmcts/reform/prl/services/sendandreply/SendAndReplyService.java'
+  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*'
 ]
 
 sonarqube {
