@@ -688,7 +688,8 @@ test {
 apply from: 'scripts/test-coverage.gradle'
 
 tasks.register('installGitHooks', Copy) {
-  from new File(rootProject.rootDir, 'scripts/pre-commit')
+  from new File(rootProject.rootDir, 'scripts/pre-commit.template')
+  rename { 'pre-commit' }
   into { new File(rootProject.rootDir, '.git/hooks') }
   fileMode 0755
 }
