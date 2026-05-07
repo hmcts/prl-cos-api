@@ -9,10 +9,12 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.services.sealaudit.SealDetectionService.SealStatus;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -177,6 +179,7 @@ class SealDetectionServiceTest {
 
         assertEquals(SealStatus.MISSING, status);
     }
+
     private byte[] createPdfWithNoPages() throws IOException {
         try (PDDocument document = new PDDocument()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
