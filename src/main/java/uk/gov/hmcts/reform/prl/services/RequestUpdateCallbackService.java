@@ -105,6 +105,8 @@ public class RequestUpdateCallbackService {
             );
         }
 
+        int git = 5;
+
         coreCaseDataService.submitUpdate(
             systemAuthorisation,
             eventRequestData,
