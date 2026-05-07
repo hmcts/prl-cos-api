@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -126,7 +125,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PATERNITY_TEST_REPORTS;
@@ -3024,9 +3022,9 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateCoverLetterEnglish() throws Exception {
+    public void testGenerateCoverLetterBothEnglishAndWelsh() throws Exception {
         ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetterWelsh");
 
         Address address = Address.builder()
             .addressLine1("addressLine1")
@@ -3038,89 +3036,48 @@ public class DocumentGenServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
 
-        GeneratedDocumentInfo coverLetterDocInfo = GeneratedDocumentInfo.builder()
+        GeneratedDocumentInfo englishDocInfo = GeneratedDocumentInfo.builder()
             .url("coverLetterUrl")
             .binaryUrl("coverLetterBinaryUrl")
             .docName("coverLetter.pdf")
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
-        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        doReturn(coverLetterDocInfo).when(dgsService).generateDocument(
-            anyString(),
-            anyString(),
-            anyString(),
-            anyMap()
-        );
-
-        Document result = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
-
-        assertNotNull(result);
-        assertEquals("coverLetterUrl", result.getDocumentUrl());
-        assertEquals("coverLetterBinaryUrl", result.getDocumentBinaryUrl());
-        assertEquals("coverLetter.pdf", result.getDocumentFileName());
-        assertNotNull(result.getDocumentCreatedOn());
-
-        ArgumentCaptor<Map<String, Object>> dataMapCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(dgsService).generateDocument(
-            anyString(),
-            anyString(),
-            anyString(),
-            dataMapCaptor.capture()
-        );
-
-        Map<String, Object> capturedDataMap = dataMapCaptor.getValue();
-        assertEquals(caseData.getId(), capturedDataMap.get("id"));
-        assertEquals(address, capturedDataMap.get("address"));
-        assertEquals("Test Name", capturedDataMap.get(NAME));
-        assertNotNull(capturedDataMap.get("date"));
-    }
-
-    @Test
-    public void testGenerateCoverLetterWelsh() throws Exception {
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
-        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
-
-        Address address = Address.builder()
-            .addressLine1("addressLine1")
-            .postCode("postcode")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .build();
-
-        GeneratedDocumentInfo coverLetterDocInfo = GeneratedDocumentInfo.builder()
-            .url("coverLetterUrl")
-            .binaryUrl("coverLetterBinaryUrl")
+        GeneratedDocumentInfo welshDocInfo = GeneratedDocumentInfo.builder()
+            .url("coverLetterWelshUrl")
+            .binaryUrl("coverLetterWelshBinaryUrl")
             .docName("coverLetterWelsh.pdf")
             .build();
 
-        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        when(dgsService.generateDocument(
-            eq(AUTH_TOKEN),
-            eq(String.valueOf(caseData.getId())),
+        doReturn(englishDocInfo).when(dgsService).generateDocument(
             anyString(),
-            anyMap()
-        )).thenReturn(coverLetterDocInfo);
-
-        Document result = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
-
-        assertNotNull(result);
-        assertEquals("coverLetterWelsh.pdf", result.getDocumentFileName());
-        verify(documentLanguageService).docGenerateLang(caseData);
-        verify(dgsService).generateDocument(
-            eq(AUTH_TOKEN),
-            eq(String.valueOf(caseData.getId())),
             anyString(),
+            eq("coverLetter"),
             anyMap()
         );
+        doReturn(welshDocInfo).when(dgsService).generateDocument(
+            anyString(),
+            anyString(),
+            eq("coverLetterWelsh"),
+            anyMap()
+        );
+
+        List<Document> results = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
+
+        assertNotNull(results);
+        assertEquals(2, results.size()); // both English and Welsh
+        assertEquals("coverLetter.pdf", results.get(0).getDocumentFileName());
+        assertEquals("coverLetterWelsh.pdf", results.get(1).getDocumentFileName());
+
+        verify(dgsService, times(2)).generateDocument(anyString(), anyString(), anyString(), anyMap());
     }
 
     @Test
     public void testGenerateCoverLetterThrowsWhenDocumentGenerationFails() {
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
+
         Address address = Address.builder()
             .addressLine1("addressLine1")
             .postCode("postcode")

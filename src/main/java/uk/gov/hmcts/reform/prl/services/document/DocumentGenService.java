@@ -46,7 +46,10 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -103,6 +106,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_WELSH_DOC_GEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LETTERS_FROM_SCHOOL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
@@ -1618,37 +1622,51 @@ public class DocumentGenService {
         return documentUpdateContext.overrideC100CaseLock || !CaseUtils.isC100CaseIssued(documentUpdateContext.caseData);
     }
 
-    public Document generateCoverLetter(String authorisation,
-                                        CaseData caseData,
-                                        String name,
-                                        Address address) {
+    public List<Document> generateCoverLetter(String authorisation,
+                                              CaseData caseData,
+                                              String name,
+                                              Address address) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
         dataMap.put("address", address);
         dataMap.put(NAME, name);
         dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
 
-        log.info("*** Generating address cover letter for bulk print (no cover letter pack) ***");
+        log.info("*** Generating address cover letter for bulk print ***");
         try {
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            boolean isWelsh = documentLanguage.isGenWelsh();
-            String template = getTemplate(caseData, DOCUMENT_BLANK_COVER_SHEET_HINT, isWelsh);
+            List<Document> coverLetters = new ArrayList<>();
 
-            GeneratedDocumentInfo coverLetter = dgsService.generateDocument(
-                authorisation,
-                String.valueOf(caseData.getId()),
-                template,
-                dataMap
-            );
-            return Document.builder()
-                .documentUrl(coverLetter.getUrl())
-                .documentFileName(coverLetter.getDocName())
-                .documentBinaryUrl(coverLetter.getBinaryUrl())
-                .documentCreatedOn(new Date())
-                .build();
+            if (documentLanguage.isGenEng()) {
+                coverLetters.add(generateCoverLetterForLanguage(authorisation, caseData, false, dataMap));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                coverLetters.add(generateCoverLetterForLanguage(authorisation, caseData, true, dataMap));
+            }
+
+            return coverLetters;
         } catch (Exception e) {
             log.error("Generate address cover letter failed for case {} : {}", caseData.getId(), e.getMessage());
             throw e;
         }
+    }
+
+    private Document generateCoverLetterForLanguage(String authorisation,
+                                                    CaseData caseData,
+                                                    boolean isWelsh,
+                                                    Map<String, Object> dataMap) {
+        String template = getTemplate(caseData, DOCUMENT_BLANK_COVER_SHEET_HINT, isWelsh);
+        GeneratedDocumentInfo coverLetter = dgsService.generateDocument(
+            authorisation,
+            String.valueOf(caseData.getId()),
+            template,
+            dataMap
+        );
+        return Document.builder()
+            .documentUrl(coverLetter.getUrl())
+            .documentFileName(coverLetter.getDocName())
+            .documentBinaryUrl(coverLetter.getBinaryUrl())
+            .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant()))
+            .build();
     }
 }

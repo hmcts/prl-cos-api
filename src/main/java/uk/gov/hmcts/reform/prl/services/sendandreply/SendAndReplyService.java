@@ -2107,7 +2107,7 @@ public class SendAndReplyService {
 
             List<Document> documents = new ArrayList<>();
 
-            documents.add(documentGenService.generateCoverLetter(
+            documents.addAll(documentGenService.generateCoverLetter(
                 authorisation,
                 caseData,
                 partyDetails.getLabelForDynamicList(),

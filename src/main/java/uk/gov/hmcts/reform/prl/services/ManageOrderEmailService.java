@@ -966,7 +966,7 @@ public class ManageOrderEmailService {
                                           String authorisation,
                                           List<Document> orderDocuments) {
         List<Document> documents = new ArrayList<>();
-        documents.add(documentGenService.generateCoverLetter(
+        documents.addAll(documentGenService.generateCoverLetter(
             authorisation,
             caseData,
             name,

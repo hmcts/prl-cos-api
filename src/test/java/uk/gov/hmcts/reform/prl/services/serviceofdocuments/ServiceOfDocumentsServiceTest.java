@@ -561,11 +561,11 @@ public class ServiceOfDocumentsServiceTest {
             any(CaseData.class),
             any(),
             any(Address.class)
-        )).thenReturn(Document.builder()
+        )).thenReturn(List.of(Document.builder()
                           .documentUrl("coverLetterUrl")
                           .documentBinaryUrl("coverLetterUrl")
                           .documentFileName("coverLetter.pdf")
-                          .build());
+                          .build()));
 
         when(bulkPrintService.send(
             anyString(), anyString(), anyString(), anyList(), anyString()
@@ -708,11 +708,11 @@ public class ServiceOfDocumentsServiceTest {
             any(CaseData.class),
             any(),
             any(Address.class)
-        )).thenReturn(Document.builder()
+        )).thenReturn(List.of(Document.builder()
                           .documentUrl("coverLetterUrl")
                           .documentBinaryUrl("coverLetterUrl")
                           .documentFileName("coverLetter.pdf")
-                          .build());
+                          .build()));
         when(bulkPrintService.send(
             anyString(), anyString(), anyString(), anyList(), anyString()
         )).thenReturn(UUID.fromString(TEST_UUID));

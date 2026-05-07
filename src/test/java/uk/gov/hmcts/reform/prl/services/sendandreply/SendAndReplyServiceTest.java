@@ -3797,11 +3797,11 @@ public class SendAndReplyServiceTest {
             any(CaseData.class),
             anyString(),
             any(Address.class)
-        )).thenReturn(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+        )).thenReturn(List.of(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                           .documentUrl("coverLetterUrl")
                           .documentBinaryUrl("coverLetterUrl")
                           .documentFileName("coverLetter.pdf")
-                          .build());
+                          .build()));
 
         sendAndReplyService.sendNotificationToExternalParties(caseDataForExternalMessage, auth);
 

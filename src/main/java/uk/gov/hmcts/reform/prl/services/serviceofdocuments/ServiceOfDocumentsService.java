@@ -665,7 +665,7 @@ public class ServiceOfDocumentsService {
                                                   Address address,
                                                   String servedParty) throws Exception {
         List<Document> documents = new ArrayList<>();
-        documents.add(documentGenService.generateCoverLetter(authorisation, caseData, name, address));
+        documents.addAll(documentGenService.generateCoverLetter(authorisation, caseData, name, address));
         documents.addAll(unwrapElements(docs));
         documents.addAll(serviceOfApplicationPostService
                              .getCoverSheets(

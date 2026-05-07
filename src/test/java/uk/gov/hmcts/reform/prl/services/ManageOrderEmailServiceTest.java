@@ -4373,11 +4373,11 @@ public class ManageOrderEmailServiceTest {
             any(CaseData.class),
             anyString(),
             any(Address.class)
-        )).thenReturn(Document.builder()
+        )).thenReturn(List.of(Document.builder()
                           .documentUrl("coverLetterUrl")
                           .documentBinaryUrl("coverLetterUrl")
                           .documentFileName("coverLetter.pdf")
-                          .build());
+                          .build()));
 
         when(serviceOfApplicationPostService.getCoverSheets(caseData, AUTH_TOKEN, otherPerson.getAddress(),
                                                             otherPerson.getLabelForDynamicList(),
