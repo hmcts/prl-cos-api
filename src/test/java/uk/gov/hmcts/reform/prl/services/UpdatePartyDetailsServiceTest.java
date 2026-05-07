@@ -113,6 +113,8 @@ class UpdatePartyDetailsServiceTest {
     @Mock
     C8ArchiveService c8ArchiveService;
     @Mock
+    C8Service c8Service;
+    @Mock
     CaseNameService caseNameService;
 
     @Test
@@ -2180,6 +2182,8 @@ class UpdatePartyDetailsServiceTest {
                 RefugeConfidentialDocuments.builder().build())),
             List.of(element(RefugeConfidentialDocuments.builder().build()))
         );
+        // todo check this test
+        when(c8Service.generateOtherPartiesC8s(any(), any(), any())).thenReturn(Map.of());
         when(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
             caseData, caseData, HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS[0])).thenReturn(
             refugeConfidentialDocumentsRecord);
