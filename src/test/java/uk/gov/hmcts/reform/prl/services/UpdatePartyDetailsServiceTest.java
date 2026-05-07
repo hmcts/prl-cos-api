@@ -2189,7 +2189,7 @@ class UpdatePartyDetailsServiceTest {
             Mockito.anyString()
         );
         Map<String, Object> updatedCaseData = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
-            callbackRequest);
+            callbackRequest, "authToken");
         assertNotNull(updatedCaseData);
     }
 

@@ -1,17 +1,20 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
-import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.time.LocalDate;
@@ -24,12 +27,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.JUDICIAL_REVIEW;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
@@ -37,29 +50,60 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 @AllArgsConstructor
 public class C8Service {
 
-    private final C100RespondentSolicitorService respondentSolicitorService;
     private final ManageOrderService manageOrderService;
     private final DocumentLanguageService documentLanguageService;
     private final DocumentGenService documentGenService;
     private final ObjectMapper objectMapper;
 
-    private ResponseDocuments generateC8ForOtherParty(CallbackRequest cb, CaseData caseData, Element<PartyDetails> partyDetails, String authorisation) {
-        String loggedInUserRole = manageOrderService.getLoggedInUserType(authorisation);
-        String requestOriginatedFrom = loggedInUserRole.equals(UserRoles.CITIZEN.name()) ? CITIZEN : "Other";
-        Map<String, Object> dataMap = respondentSolicitorService.populateDataMap(cb, null, requestOriginatedFrom);
+    // All states after the case has been issued => seal, no watermark, not stored in draft field
+    private static final List<State> SEALED_STATES = List.of(CASE_ISSUED, JUDICIAL_REVIEW, PREPARE_FOR_HEARING_CONDUCT_HEARING, DECISION_OUTCOME);
 
-        dataMap.put("respondent", partyDetails.getValue());
+    private Map<String, Object> populateDataMap(CaseData caseData) {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(COURT_NAME_FIELD, caseData.getCourtName());
+        dataMap.put(CASE_DATA_ID, caseData.getId());
+        dataMap.put(ISSUE_DATE_FIELD, caseData.getIssueDate());
+        dataMap.put(COURT_SEAL_FIELD,
+                    caseData.getCourtSeal() == null ? "[userImage:familycourtseal.png]" : caseData.getCourtSeal());
+        if (caseData.getTaskListVersion() != null
+            && (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            || TASK_LIST_VERSION_V3.equalsIgnoreCase(caseData.getTaskListVersion()))) {
+            List<Element<ChildDetailsRevised>> listOfChildren = caseData.getNewChildDetails();
+            dataMap.put(CHILDREN, listOfChildren);
+        } else {
+            List<Element<Child>> listOfChildren = caseData.getChildren();
+            dataMap.put(CHILDREN, listOfChildren);
+
+        }
+        return dataMap;
+    }
+
+    private ResponseDocuments generateC8ForOtherParty(CaseData caseData, Element<PartyDetails> partyDetails, String authorisation) {
+        String loggedInUserRole = isNotEmpty(caseData.getLoggedInUserRole())
+            ? caseData.getLoggedInUserRole()
+            : manageOrderService.getLoggedInUserType(authorisation);
+        Map<String, Object> dataMap = populateDataMap(caseData);
+
+        dataMap.put("party", objectMapper.convertValue(partyDetails.getValue(), new TypeReference<Map<String, Object>>() {}));
         dataMap.put("loggedInUserRole", loggedInUserRole);
-        dataMap.put("solicitorName", caseData.getCaseSolicitorName());
-        dataMap.put("caseSolicitorOrgName", caseData.getCaseSolicitorOrgName());
+        dataMap.put("repFullName", caseData.getCaseSolicitorName());
+        dataMap.put("solicitorOrg", caseData.getCaseSolicitorOrgName());
 
         if (loggedInUserRole.equals(UserRoles.CITIZEN.name())) {
             // populate Citizen signing names -> no solicitors so the applicant C8 uses the _first_ applicant
-            PartyDetails firstPartyDetails = caseData.getCaseTypeOfApplication().equals(FL401_CASE_TYPE)
+            PartyDetails firstPartyDetails = caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)
                 ? caseData.getApplicants().getFirst().getValue()
                 : caseData.getApplicantsFL401();
             dataMap.put("signedBy", firstPartyDetails.getLabelForDynamicList());
             dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+        }
+
+        if (SEALED_STATES.contains(caseData.getState())) {
+            dataMap.put("sealed", true);
+            dataMap.put("watermark", "");
+        } else {
+            dataMap.put("sealed", false);
+            dataMap.put("watermark", "DRAFT");
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -68,15 +112,17 @@ public class C8Service {
             c8Welsh = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
-                C8_RESP_FINAL_HINT,
+                C8_OTHER_FINAL_HINT,
                 true,
                 dataMap
             );
         }
+        // todo fix this, shouldn't need to reset the field...
+        dataMap.put("party", objectMapper.convertValue(partyDetails.getValue(), new TypeReference<Map<String, Object>>() {}));
         Document c8English = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
-            C8_RESP_FINAL_HINT,
+            C8_OTHER_FINAL_HINT,
             false,
             dataMap
         );
@@ -90,9 +136,7 @@ public class C8Service {
             .build();
     }
 
-    public Map<String, Object> generateOtherPartiesC8s(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+    public Map<String, Object> generateOtherPartiesC8s(CaseData caseData, CaseData caseDataBefore, String authorisation) {
 
         List<Element<PartyDetails>> othersAfter = nullSafeList(caseData.getOtherPartyInTheCaseRevised());
 
@@ -119,7 +163,7 @@ public class C8Service {
                     otherPartyC8DocumentsArchived.add(archived);
                 }
                 // Generate and add new C8
-                ResponseDocuments newC8 = generateC8ForOtherParty(callbackRequest, caseData, afterEl, authorisation);
+                ResponseDocuments newC8 = generateC8ForOtherParty(caseData, afterEl, authorisation);
                 otherPartyC8Documents.removeIf(el -> el.getId().equals(partyId));
                 otherPartyC8Documents.add(ElementUtils.element(partyId, newC8));
             } else if (hadConfidentialBefore && existingC8Opt.isPresent()) {
@@ -129,11 +173,14 @@ public class C8Service {
                 Element<ResponseDocuments> archived = ElementUtils.element(UUID.randomUUID(), toArchive.getValue());
                 otherPartyC8DocumentsArchived.add(archived);
             }
-            // else: nothing to do
         }
         Map<String, Object> updates = new HashMap<>();
-        updates.put("otherPartyC8Documents", otherPartyC8Documents);
-        updates.put("otherPartyC8DocumentsArchived", otherPartyC8DocumentsArchived);
+        if (SEALED_STATES.contains(caseData.getState())) {
+            updates.put("otherPartyC8Documents", otherPartyC8Documents);
+            updates.put("otherPartyC8DocumentsArchived", otherPartyC8DocumentsArchived);
+        } else {
+            updates.put("otherPartyC8DocumentsDraft", otherPartyC8Documents);
+        }
         return updates;
     }
 
@@ -142,6 +189,6 @@ public class C8Service {
             Yes.equals(partyDetails.get().getIsAddressConfidential())
                 || Yes.equals(partyDetails.get().getIsPhoneNumberConfidential())
                 || Yes.equals(partyDetails.get().getIsEmailAddressConfidential())
-                || Yes.equals(partyDetails.get().getLiveInRefuge()));
+                || YesNoIDontKnowV2.Yes.equals(partyDetails.get().getLiveInRefuge()));
     }
 }

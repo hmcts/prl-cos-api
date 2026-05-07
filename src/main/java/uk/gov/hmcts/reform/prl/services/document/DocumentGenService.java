@@ -157,8 +157,14 @@ public class DocumentGenService {
     protected String c100C8DraftFilename;
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
-    @Value("${document.templates.c100.c100_resp_c8_template}")
-    protected String c100OtherC8Template;
+    @Value("${document.templates.common.other_c8_template}")
+    protected String otherC8Template;
+    @Value("${document.templates.common.other_c8_filename}")
+    protected String otherC8FileName;
+    @Value("${document.templates.common.other_c8_template_welsh}")
+    protected String otherC8TemplateWelsh;
+    @Value("${document.templates.common.other_c8_filename_welsh}")
+    protected String otherC8FileNameWelsh;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template}")
     protected String fl401RespC8Template;
@@ -930,6 +936,9 @@ public class DocumentGenService {
             case C8_RESP_FINAL_HINT:
                 fileName = findFinalRespondentC8FileName(isWelsh);
                 break;
+            case C8_OTHER_FINAL_HINT:
+                fileName = !isWelsh ? otherC8FileName : otherC8FileNameWelsh;
+                break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
                 break;
@@ -1053,7 +1062,7 @@ public class DocumentGenService {
                 template = findFinalRespondentC8Template(isWelsh);
                 break;
             case C8_OTHER_FINAL_HINT:
-                template = findFinalRespondentC8Template(isWelsh);
+                template = !isWelsh ? otherC8Template : otherC8TemplateWelsh;
                 break;
             case C8_RESP_FL401_FINAL_HINT:
                 template = findFinalDaRespondentC8Template(isWelsh);

@@ -932,7 +932,8 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> updatedCaseData =  amendOtherPeopleInTheCase(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        updatedCaseData.putAll(c8Service.generateOtherPartiesC8s(callbackRequest, authorisation));
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+        updatedCaseData.putAll(c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, authorisation));
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(

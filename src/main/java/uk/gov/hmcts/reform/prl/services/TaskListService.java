@@ -107,6 +107,7 @@ public class TaskListService {
     private final C8ArchiveService c8ArchiveService;
 
     private final MiamPolicyUpgradeFileUploadService miamPolicyUpgradeFileUploadService;
+    private final C8Service c8Service;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
@@ -313,10 +314,17 @@ public class TaskListService {
                 c8ArchiveService.archiveC8DocumentIfConfidentialChanged(callbackRequest,caseData,caseDataUpdated);
 
                 caseDataUpdated.putAll(dgsService.createUpdatedCaseDataWithDocuments(authorisation, caseData));
+
+                CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
+                caseDataUpdated.putAll(c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, authorisation));
+
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
                     .c8ArchivedDocuments(updatedCaseData.getC8ArchivedDocuments())
+                    .otherPartyC8Documents(updatedCaseData.getOtherPartyC8Documents())
+                    .otherPartyC8DocumentsArchived(updatedCaseData.getOtherPartyC8DocumentsArchived())
+                    .otherPartyC8DocumentsDraft(updatedCaseData.getOtherPartyC8DocumentsDraft())
                     .c1ADocument(updatedCaseData.getC1ADocument())
                     .c8WelshDocument(updatedCaseData.getC8WelshDocument())
                     .finalDocument(updatedCaseData.getFinalDocument())
