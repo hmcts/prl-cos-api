@@ -4,15 +4,15 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.services.sealaudit.SealDetectionService.SealStatus;
-
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -145,6 +145,56 @@ class SealDetectionServiceTest {
                         sealHeight
                     );
                 }
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            document.save(baos);
+            return baos.toByteArray();
+        }
+    }
+
+    @Test
+    void shouldReturnErrorForInvalidPdfBytes() {
+        SealStatus status = sealDetectionService.detectSeal("not-a-pdf".getBytes());
+
+        assertEquals(SealStatus.ERROR, status);
+    }
+
+    @Test
+    void shouldReturnErrorForPdfWithNoPages() throws IOException {
+        byte[] pdfWithNoPages = createPdfWithNoPages();
+
+        SealStatus status = sealDetectionService.detectSeal(pdfWithNoPages);
+
+        assertEquals(SealStatus.ERROR, status);
+    }
+
+    @Test
+    void shouldReturnMissingForPdfWithRectangularImageOnly() throws IOException {
+        byte[] pdfWithRectangularImage = createPdfWithRectangularImage();
+
+        SealStatus status = sealDetectionService.detectSeal(pdfWithRectangularImage);
+
+        assertEquals(SealStatus.MISSING, status);
+    }
+    private byte[] createPdfWithNoPages() throws IOException {
+        try (PDDocument document = new PDDocument()) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            document.save(baos);
+            return baos.toByteArray();
+        }
+    }
+
+    private byte[] createPdfWithRectangularImage() throws IOException {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+
+            BufferedImage image = new BufferedImage(200, 80, BufferedImage.TYPE_INT_RGB);
+            PDImageXObject rectangularImage = LosslessFactory.createFromImage(document, image);
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                contentStream.drawImage(rectangularImage, 50, 700, 200, 80);
             }
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
