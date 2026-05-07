@@ -10,7 +10,7 @@ if [ -f "$GATE_FLAG" ]; then
 
     # 1. Get staged Java class names (e.g., "MyService,MyController")
     # This filters for added/modified Java files and strips the path/extension
-    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR | grep '.java$' | xargs -I {} basename {} .java | paste -sd "," -)
+    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.java$' | xargs -I {} basename {} .java | sort -u | paste -sd "," -)
 
     # 2. If no Java files are staged, just proceed
     if [ -z "$STAGED_CLASSES" ]; then
