@@ -110,7 +110,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZON
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAIL_SCREENSHOTS_MEDIA_FILES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_RECORDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MEDICAL_REPORTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_DOCUMENT_TYPE;
@@ -1628,9 +1627,8 @@ public class DocumentGenService {
                                               Address address) {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
-        dataMap.put("address", address);
-        dataMap.put(NAME, name);
-        dataMap.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+        dataMap.put("coverPageAddress", address);
+        dataMap.put("coverPagePartyName", name);
 
         log.info("*** Generating address cover letter for bulk print ***");
         try {
