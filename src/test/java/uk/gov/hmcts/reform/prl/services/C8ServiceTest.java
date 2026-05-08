@@ -11,10 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 
@@ -91,9 +94,9 @@ class C8ServiceTest {
         // Act
         Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
         // Assert
-        assertTrue(result.containsKey("otherPartyC8Documents"));
+        assertThat(result).containsKey("otherPartyC8Documents");
         List<?> docs = (List<?>) result.get("otherPartyC8Documents");
-        assertEquals(1, docs.size());
+        assertThat(docs).hasSize(1);
     }
 
     @Test
@@ -124,13 +127,13 @@ class C8ServiceTest {
         // Act
         Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
         // Assert
-        assertTrue(result.containsKey("otherPartyC8Documents"));
+        assertThat(result).containsKey("otherPartyC8Documents");
         List<?> docs = (List<?>) result.get("otherPartyC8Documents");
-        assertEquals(1, docs.size());
+        assertThat(docs).hasSize(1);
         Element<?> responseElement = (Element<?>) docs.getFirst();
         ResponseDocuments respDocs = (ResponseDocuments) responseElement.getValue();
-        assertEquals(englishDoc, respDocs.getRespondentC8Document());
-        assertEquals(welshDoc, respDocs.getRespondentC8DocumentWelsh());
+        assertThat(respDocs.getRespondentC8Document()).isEqualTo(englishDoc);
+        assertThat(respDocs.getRespondentC8DocumentWelsh()).isEqualTo(welshDoc);
     }
 
     @Test
@@ -181,23 +184,23 @@ class C8ServiceTest {
         // Act
         Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
         // Assert
-        assertTrue(result.containsKey("otherPartyC8Documents"));
-        assertTrue(result.containsKey("otherPartyC8DocumentsArchived"));
+        assertThat(result).containsKey("otherPartyC8Documents");
+        assertThat(result).containsKey("otherPartyC8DocumentsArchived");
         List<?> docs = (List<?>) result.get("otherPartyC8Documents");
         List<?> archived = (List<?>) result.get("otherPartyC8DocumentsArchived");
-        assertEquals(1, docs.size());
-        assertEquals(1, archived.size());
+        assertThat(docs).hasSize(1);
+        assertThat(archived).hasSize(1);
         // Check new docs are the new ones
         Element<?> responseElement = (Element<?>) docs.getFirst();
         ResponseDocuments respDocs = (ResponseDocuments) responseElement.getValue();
-        assertEquals(englishDoc, respDocs.getRespondentC8Document());
-        assertEquals(welshDoc, respDocs.getRespondentC8DocumentWelsh());
+        assertThat(respDocs.getRespondentC8Document()).isEqualTo(englishDoc);
+        assertThat(respDocs.getRespondentC8DocumentWelsh()).isEqualTo(welshDoc);
         // Check archived docs are the old ones
         Element<?> archivedElement = (Element<?>) archived.getFirst();
         ResponseDocuments archivedRespDocs = (ResponseDocuments) archivedElement.getValue();
-        assertEquals(oldEnglishDoc, archivedRespDocs.getRespondentC8Document());
-        assertEquals(oldWelshDoc, archivedRespDocs.getRespondentC8DocumentWelsh());
-        assertEquals(partyName, archivedRespDocs.getPartyName());
+        assertThat(archivedRespDocs.getRespondentC8Document()).isEqualTo(oldEnglishDoc);
+        assertThat(archivedRespDocs.getRespondentC8DocumentWelsh()).isEqualTo(oldWelshDoc);
+        assertThat(archivedRespDocs.getPartyName()).isEqualTo(partyName);
     }
 
     @Test
@@ -222,8 +225,8 @@ class C8ServiceTest {
         // Act
         Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
         // Assert
-        assertTrue(result.containsKey("otherPartyC8DocumentsDraft"));
+        assertThat(result).containsKey("otherPartyC8DocumentsDraft");
         List<?> docs = (List<?>) result.get("otherPartyC8DocumentsDraft");
-        assertEquals(1, docs.size());
+        assertThat(docs).hasSize(1);
     }
 }
