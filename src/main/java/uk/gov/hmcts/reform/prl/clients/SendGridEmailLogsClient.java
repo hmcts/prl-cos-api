@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.sendgrid.logs.SendGridMessageResponse;
 public interface SendGridEmailLogsClient {
     class FeignClientConfiguration {
 
-        @Value("${send-grid.email-logs-api.api-key}")
+        @Value("${send-grid.email-logs-api.api-key:xxx}")
         private String apiKey;
 
         @Bean

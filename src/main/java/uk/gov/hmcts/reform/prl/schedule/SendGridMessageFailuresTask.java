@@ -19,7 +19,7 @@ import java.util.List;
 @Slf4j
 public class SendGridMessageFailuresTask implements Runnable {
 
-    @Value("${send-grid.email-logs-api.days-to-query}")
+    @Value("${send-grid.email-logs-api.days-to-query:1}")
     private int daysToQuery;
 
     private final MessageFailureOrchestrator messageFailureOrchestrator;
