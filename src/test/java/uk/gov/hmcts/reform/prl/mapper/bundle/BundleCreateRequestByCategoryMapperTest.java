@@ -122,13 +122,13 @@ class BundleCreateRequestByCategoryMapperTest {
                                               Hearings.hearingsWith().build(), "sample.yaml");
 
         assertNotNull(bundleCreateRequest);
+        List<String> allOtherDocs = bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
+            .map(Element::getValue)
+            .map(BundlingRequestDocument::getDocumentFileName).toList();
 
-        // Should not contain police disclosures or medical records
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
-                       .map(Element::getValue)
-                       .map(BundlingRequestDocument::getDocumentFileName)
-                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
-                           .contains(fileName)).toList().isEmpty());
+        assertEquals(3,allOtherDocs.size());
+
+
     }
 
 

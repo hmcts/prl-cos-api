@@ -106,20 +106,22 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                             applications.addAll(citizenUploadedC7Documents);
                         }
 
+                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(applications));
+                    } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
+                        List<BundlingRequestDocument> allOtherDocs = new ArrayList<>(mapBundlingRequestDocument(
+                            allCategoriesToMap.get(filterProperties.getCategory()),
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
+                        ));
+
                         List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
                             caseData.getAdditionalApplicationsBundle(), filterProperties);
 
                         if (!otherAdditionalBundleDocs.isEmpty()) {
-                            applications.addAll(otherAdditionalBundleDocs);
+                            allOtherDocs.addAll(otherAdditionalBundleDocs);
                         }
 
-                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(applications));
-                    } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
-                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        )));
+                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(allOtherDocs));
                     }
                 }
             });
