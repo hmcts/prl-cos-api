@@ -8228,7 +8228,7 @@ class ManageOrderServiceTest {
         assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Testing LA CIR document: {0}")
     @EnumSource(
         value = LocalAuthorityDocumentsEnum.class,
         names = {"childImpactReport1La", "childImpactReport2La"}
@@ -8298,12 +8298,12 @@ class ManageOrderServiceTest {
         assertThat(waFieldsMap.get("whenReportsMustBeFiled")).isNull();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Testing Cafcass CIR document: {0}")
     @EnumSource(
         value = CafcassCymruDocumentsEnum.class,
         names = {"childImpactReport1", "childImpactReport2"}
     )
-    void testOrchestrateCirDocumentsRequestedTask_when_Cafcass_ChildImpactReport() {
+    void testOrchestrateCirDocumentsRequestedTask_when_Cafcass_ChildImpactReport(CafcassCymruDocumentsEnum cafcassCymruDocumentsEnum) {
         when(userService.getUserDetails(anyString()))
             .thenReturn(UserDetails.builder()
                             .id("123")
@@ -8319,7 +8319,7 @@ class ManageOrderServiceTest {
             .serveOrderData(ServeOrderData.builder()
                                 .whenReportsMustBeFiled(LocalDate.now())
                                 .cafcassOrCymruNeedToProvideReport(Yes)
-                                .cafcassCymruDocuments(of(childImpactReport1))
+                                .cafcassCymruDocuments(of(cafcassCymruDocumentsEnum))
                                 .build())
             .build();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -8360,7 +8360,7 @@ class ManageOrderServiceTest {
         Element<String> cirDocumentsRequestedList = ((List<Element<String>>)waFieldsMap.get("cirDocumentsRequested")).getFirst();
 
         assertThat(cirDocumentsRequestedList.getValue())
-            .isEqualTo("childImpactReport1");
+            .isEqualTo(cafcassCymruDocumentsEnum.getId());
 
         assertThat(waFieldsMap)
             .containsEntry("whenReportsMustBeFiled", LocalDate.now())
@@ -8368,8 +8368,13 @@ class ManageOrderServiceTest {
         assertThat(waFieldsMap.get("whenReportsMustBeFiledByLocalAuthority")).isNull();
     }
 
-    @Test
-    void testOrchestrateCirDocumentsRequestedTask_when_No_ChildImpactReport() {
+    @ParameterizedTest(name = "Testing Cafcass document: {0}")
+    @EnumSource(
+        value = CafcassCymruDocumentsEnum.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"childImpactReport1", "childImpactReport2"}
+    )
+    void testOrchestrateCirDocumentsRequestedTask_when_No_Cafcass_ChildImpactReport(CafcassCymruDocumentsEnum cafcassCymruDocumentsEnum) {
         when(userService.getUserDetails(anyString()))
             .thenReturn(UserDetails.builder()
                             .id("123")
@@ -8386,7 +8391,7 @@ class ManageOrderServiceTest {
                                 .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
                                 .whenReportsMustBeFiled(LocalDate.now())
                                 .cafcassOrCymruNeedToProvideReport(Yes)
-                                .cafcassCymruDocuments(of(safeGuardingLetter))
+                                .cafcassCymruDocuments(of(cafcassCymruDocumentsEnum))
                                 .build())
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -8394,6 +8399,76 @@ class ManageOrderServiceTest {
         caseDataMap.put("localAuthorityMultipleDocuments", List.of(Document.builder().build()));
         caseDataMap.put("localAuthorityNeedToProvideReport", No);
         caseDataMap.put("cafcassOrCymruNeedToProvideReport", Yes);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
+
+        verify(allTabService)
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+
+        assertThat(eventIdCaptor.getValue())
+            .isEqualTo(UPDATE_ALL_TABS.getValue());
+
+        verify(allTabService)
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
+
+        Map<String, Object> caseDataFields = caseDataMapCaptor.getAllValues().getFirst();
+
+        assertThat(caseDataFields.get("cirDocumentsRequested")).isNull();
+        assertThat(caseDataFields)
+            .containsEntry("whenReportsMustBeFiled", LocalDate.now())
+            .containsEntry("whenReportsMustBeFiledByLocalAuthority", LocalDate.now())
+            .containsEntry("cafcassCymruDocuments", null)
+            .containsEntry("localAuthorityMultipleDocuments", null)
+            .containsEntry("localAuthorityNeedToProvideReport", null)
+            .containsEntry("cafcassOrCymruNeedToProvideReport", null);
+    }
+
+    @ParameterizedTest(name = "Testing LA document: {0}")
+    @EnumSource(
+        value = LocalAuthorityDocumentsEnum.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"childImpactReport1La", "childImpactReport2La"}
+    )
+    void testOrchestrateCirDocumentsRequestedTask_when_No_LA_ChildImpactReport(LocalAuthorityDocumentsEnum localAuthorityDocumentsEnum) {
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(UserDetails.builder()
+                            .id("123")
+                            .roles(of(Roles.COURT_ADMIN.getValue()))
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder()
+                                .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
+                                .whenReportsMustBeFiled(LocalDate.now())
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(of(localAuthorityDocumentsEnum))
+                                .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("cafcassCymruDocuments", List.of(Document.builder().build()));
+        caseDataMap.put("localAuthorityMultipleDocuments", List.of(Document.builder().build()));
+        caseDataMap.put("localAuthorityNeedToProvideReport", Yes);
+        caseDataMap.put("cafcassOrCymruNeedToProvideReport", No);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
