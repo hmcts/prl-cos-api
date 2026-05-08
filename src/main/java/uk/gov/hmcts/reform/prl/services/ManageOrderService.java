@@ -247,8 +247,7 @@ public class ManageOrderService {
 
     private static final List<String> listOfCirOrderFields = List.of(
         "cafcassCymruDocuments", "localAuthorityMultipleDocuments",
-        "localAuthorityNeedToProvideReport", "cafcassOrCymruNeedToProvideReport",
-        WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, WHEN_REPORTS_MUST_BE_FILED
+        "localAuthorityNeedToProvideReport", "cafcassOrCymruNeedToProvideReport"
     );
 
     public static final String VALIDATION_ADDRESS_ERROR_RESPONDENT = "This order cannot be served by post until the respondent's "
@@ -4077,13 +4076,15 @@ public class ManageOrderService {
         );
 
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, localAuthorityReportFiledByDate);
-        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED, cafcassReportFiledByDate);
+
         for (String field : listOfCirOrderFields) {
             if (caseDataMap.containsKey(field)) {
                 caseDataMap.put(field, null);
             }
         }
+
+        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, localAuthorityReportFiledByDate);
+        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED, cafcassReportFiledByDate);
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
@@ -4103,8 +4104,11 @@ public class ManageOrderService {
                 UUID.randomUUID(),
                 each.getId()
             )).toList();
-            waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED, null);
-            waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
+
+            if (!cirDocumentsRequested.isEmpty()) {
+                waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED, null);
+                waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
+            }
         }
     }
 
@@ -4116,8 +4120,11 @@ public class ManageOrderService {
                 UUID.randomUUID(),
                 each.getId()
             )).toList();
-            waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, null);
-            waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
+
+            if (!cirDocumentsRequested.isEmpty()) {
+                waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, null);
+                waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
+            }
         }
     }
 
