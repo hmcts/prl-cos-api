@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.sealaudit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -46,6 +47,7 @@ public class SealAuditService {
     private final CaseDocumentClient caseDocumentClient;
     private final SealDetectionService sealDetectionService;
     private final NotificationClient notificationClient;
+    private final ObjectMapper objectMapper;
 
     @Value("${seal-audit.search-case-type-id:PRLAPPS}")
     private String searchCaseTypeId;
@@ -112,10 +114,10 @@ public class SealAuditService {
                 CaseDetails caseDetails = cases.get(i);
 
                 try {
-                    CaseData caseData = CcdObjectMapper.getObjectMapper()
-                        .convertValue(caseDetails.getData(), CaseData.class);
+                    CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
 
                     String caseReference = String.valueOf(caseDetails.getId());
+                    log.info("Processing Case {}", caseDetails.getId());
                     String courtName = caseData.getCourtName();
 
                     List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
@@ -202,6 +204,20 @@ public class SealAuditService {
                         "field": "data.orderCollection"
                       }
                     }
+                  ],
+                  "must_not": [
+                    {
+                      "terms": {
+                        "state.keyword": [
+                          "AWAITING_SUBMISSION_TO_HMCTS",
+                          "AWAITING_RESUBMISSION_TO_HMCTS",
+                          "SUBMITTED_PAID",
+                          "SUBMITTED_NOT_PAID",
+                          "CASE_WITHDRAWN",
+                          "DELETED"
+                        ]
+                      }
+                    }
                   ]
                 }
               },
@@ -244,7 +260,7 @@ public class SealAuditService {
         LocalDateTime firstServed = servedParties.stream()
             .map(Element::getValue)
             .map(ServedParties::getServedDateTime)
-            .filter(dt -> dt != null)
+            .filter(Objects::nonNull)
             .min(LocalDateTime::compareTo)
             .orElse(null);
 
@@ -278,7 +294,7 @@ public class SealAuditService {
         return order.getServeOrderDetails().getServedParties().stream()
             .map(Element::getValue)
             .map(ServedParties::getServedDateTime)
-            .filter(dt -> dt != null)
+            .filter(Objects::nonNull)
             .min(LocalDateTime::compareTo)
             .map(dt -> dt.format(LOG_DATE_FORMAT))
             .orElse(null);
