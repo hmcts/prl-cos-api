@@ -35,7 +35,9 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -45,6 +47,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS_CYMRU;
@@ -451,6 +454,7 @@ public class ReviewDocumentService {
                 .restrictedDetails(null)
                 .build();
         }
+        tempQuarantineDoe = renameQuarantineDocument(tempQuarantineDoe);
         manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             tempQuarantineDoe,
             userDetails,
@@ -459,6 +463,38 @@ public class ReviewDocumentService {
             userRole
         );
     }
+
+    private QuarantineLegalDoc renameQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc) {
+        if (isNotBlank(quarantineLegalDoc.getDocumentNewName())) {
+            Document document = manageDocumentsService.getQuarantineDocumentForUploader(
+                quarantineLegalDoc.getUploaderRole(),
+                quarantineLegalDoc
+            );
+            if (nonNull(document)) {
+                Document renamedDocument = document.toBuilder()
+                    .documentFileName(quarantineLegalDoc.getDocumentNewName())
+                    .build();
+                return updateQuarantineDocument(quarantineLegalDoc, renamedDocument);
+            }
+        }
+        return quarantineLegalDoc;
+    }
+
+    private QuarantineLegalDoc updateQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, Document renamedDocument) {
+        return switch (quarantineLegalDoc.getUploaderRole()) {
+            case LEGAL_PROFESSIONAL -> quarantineLegalDoc.toBuilder().document(renamedDocument).build();
+            case CAFCASS -> quarantineLegalDoc.toBuilder().cafcassQuarantineDocument(renamedDocument).build();
+            case COURT_STAFF -> quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(renamedDocument).build();
+            case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(renamedDocument).build();
+            case LOCAL_AUTHORITY ->
+                quarantineLegalDoc.toBuilder().localAuthorityQuarantineDocument(renamedDocument).build();
+            case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(renamedDocument).build();
+            case COURTNAV -> quarantineLegalDoc.toBuilder().courtNavQuarantineDocument(renamedDocument).build();
+            default -> quarantineLegalDoc;
+        };
+    }
+
+
 
     private void processBulkScanDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
