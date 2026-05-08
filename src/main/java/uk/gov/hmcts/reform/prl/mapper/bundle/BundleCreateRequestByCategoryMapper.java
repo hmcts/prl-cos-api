@@ -94,18 +94,11 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                         reverse(orders);
                         ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
                     } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
-                        List<BundlingRequestDocument> applications = new ArrayList<>(mapBundlingRequestDocument(
+                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
-                        ));
-                        List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(
-                            caseData.getCitizenResponseC7DocumentList(), filterProperties);
-
-                        if (!citizenUploadedC7Documents.isEmpty()) {
-                            applications.addAll(citizenUploadedC7Documents);
-                        }
-                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(applications));
+                        )));
                     } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
                         allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
@@ -116,6 +109,14 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                 }
             });
         });
+
+        // C7 documents
+        List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(
+            caseData.getCitizenResponseC7DocumentList(), FilterProperties.builder().build());
+
+        if (!citizenUploadedC7Documents.isEmpty()) {
+            applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(citizenUploadedC7Documents));
+        }
 
         // Add all other AWP Documents
         List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
