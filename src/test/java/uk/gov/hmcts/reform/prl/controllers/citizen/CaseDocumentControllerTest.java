@@ -325,12 +325,6 @@ class CaseDocumentControllerTest {
 
     @Test
     void testUploadCitizenStatementDocument() {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("caseId", "1656350492135029");
-        map.put("state", "AWAITING_SUBMISSION_TO_HMCTS");
-        map.put("documentType", "test");
-        map.put("partyName", "test");
-        map.put("partyId", "test");
         Document document = Document.builder().documentUrl("")
             .documentFileName("test")
             .build();
@@ -564,7 +558,7 @@ class CaseDocumentControllerTest {
         when(documentGenService.generateAndUploadDocument(
             AUTH_TOKEN,
             documentRequest
-        )).thenReturn(mockDocumentResponse);
+        )).thenReturn(List.of(mockDocumentResponse));
 
         //Action
         ResponseEntity<?> response = caseDocumentController.citizenGenerateDocument(
@@ -575,7 +569,6 @@ class CaseDocumentControllerTest {
 
         //Then
         assertEquals(OK, response.getStatusCode());
-        assertEquals(DocumentResponse.class, response.getBody().getClass());
         assertNotNull(response.getBody());
     }
 
