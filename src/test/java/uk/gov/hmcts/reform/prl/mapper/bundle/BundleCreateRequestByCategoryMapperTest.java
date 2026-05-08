@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
@@ -79,8 +80,13 @@ class BundleCreateRequestByCategoryMapperTest {
         Category category = new Category("parentCategoryId", "parentCategoryName", 2, List.of(documents), List.of(subCategory));
 
         ResponseDocuments responseDocuments = ResponseDocuments.builder().citizenDocument(Document.builder().build()).build();
-        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder().otherApplicationsBundle(
-            OtherApplicationsBundle.builder().finalDocument(List.of(ElementUtils.element(Document.builder().build()))).build()).build();
+        AdditionalApplicationsBundle additionalApplicationsBundle = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .finalDocument(List.of(ElementUtils.element(Document.builder().build())))
+                                         .supportingEvidenceBundle(List.of(
+                                             ElementUtils.element(SupportingEvidenceBundle.builder().document(Document.builder().build()).build())))
+                                         .build())
+            .build();
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .applicantName("ApplicantFirstNameAndLastName")

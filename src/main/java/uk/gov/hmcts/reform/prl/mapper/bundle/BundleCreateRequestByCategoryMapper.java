@@ -159,9 +159,22 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         }
         ElementUtils.unwrapElements(additionalApplicationsBundleList).stream()
             .filter(additionalBundle -> additionalBundle.getOtherApplicationsBundle() != null)
-            .forEach(applicationsBundle -> additionalApplicationsBundle
-                .addAll(mapBundlingRequestDocument(ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getFinalDocument()),
-                                                BundlingDocGroupEnum.applicantAWPDocuments, filterProperties)));
+            .forEach(applicationsBundle -> {
+                additionalApplicationsBundle
+                    .addAll(mapBundlingRequestDocument(
+                        ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getFinalDocument()),
+                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
+                    ));
+                if (applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
+                    ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle())
+                        .forEach(sp -> additionalApplicationsBundle
+                            .add(mapBundlingRequestDocument(
+                                sp.getDocument(),
+                                BundlingDocGroupEnum.applicantAWPDocuments,
+                                filterProperties
+                            )));
+                }
+            });
         return additionalApplicationsBundle;
     }
 
