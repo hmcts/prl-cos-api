@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import static uk.gov.service.notify.NotificationClient.prepareUpload;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@ConditionalOnProperty(prefix = "seal-audit", name = "enabled", havingValue = "true")
 public class SealAuditService {
 
     private final CoreCaseDataApi coreCaseDataApi;
@@ -77,8 +79,8 @@ public class SealAuditService {
     private boolean emailEnabled;
 
     private static final DateTimeFormatter LOG_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final String CSV_HEADER =
-        "case_reference,court_name,order_collection_id,order_upload_timestamp,order_filename,date_order_made,first_served_datetime,seal_status";
+    private static final String CSV_HEADER = "case_reference,court_name,order_collection_id,order_type,"
+        + "order_upload_timestamp,order_filename,date_order_made,first_served_datetime,seal_status";
 
     public void runAudit() {
         log.info("*** Starting Seal Audit Task ***");
@@ -137,6 +139,7 @@ public class SealAuditService {
 
                         SealStatus status = checkSealStatus(orderDoc, sysUserToken, s2sToken, caseReference);
 
+                        String orderType = order.getOrderTypeId();
                         String firstServedDateTime = getFirstServedDateTime(order);
                         String orderUploadTimestamp = orderDoc.getUploadTimeStamp() != null ? orderDoc.getUploadTimeStamp().toString() : null;
                         String orderFilename = orderDoc.getDocumentFileName();
@@ -147,17 +150,19 @@ public class SealAuditService {
                             case PRESENT -> presentSeals++;
                             case MISSING -> {
                                 missingSeals++;
-                                logOrderResult(caseReference, courtName, orderElement.getId().toString(),
+                                logOrderResult(caseReference, courtName, orderElement.getId().toString(), orderType,
                                     orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status);
                                 csvRows.add(buildCsvRow(caseReference, courtName, orderElement.getId().toString(),
-                                    orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status));
+                                                        orderType, orderUploadTimestamp, orderFilename, dateOrderMade,
+                                                        firstServedDateTime, status));
                             }
                             case ERROR -> {
                                 errors++;
-                                logOrderResult(caseReference, courtName, orderElement.getId().toString(),
+                                logOrderResult(caseReference, courtName, orderElement.getId().toString(), orderType,
                                     orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status);
                                 csvRows.add(buildCsvRow(caseReference, courtName, orderElement.getId().toString(),
-                                    orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status));
+                                                        orderType, orderUploadTimestamp, orderFilename, dateOrderMade,
+                                                        firstServedDateTime, status));
                             }
                             default -> log.warn("Unexpected seal status: {}", status);
                         }
@@ -326,6 +331,7 @@ public class SealAuditService {
         String caseReference,
         String courtName,
         String orderCollectionId,
+        String orderType,
         String orderUploadTimestamp,
         String orderFilename,
         String dateOrderMade,
@@ -333,11 +339,12 @@ public class SealAuditService {
         SealStatus sealStatus
     ) {
         log.info("SEAL_AUDIT_RESULT | case_reference={} | court_name={} | order_collection_id={} | "
-                     + "order_upload_timestamp={} | order_filename={} | date_order_made={} | "
+                     + "order_type={} | order_upload_timestamp={} | order_filename={} | date_order_made={} | "
                      + "first_served_datetime={} | seal_status={}",
                  caseReference,
                  courtName,
                  orderCollectionId,
+                 orderType,
                  orderUploadTimestamp,
                  orderFilename,
                  dateOrderMade,
@@ -350,6 +357,7 @@ public class SealAuditService {
         String caseReference,
         String courtName,
         String orderCollectionId,
+        String orderType,
         String orderUploadTimestamp,
         String orderFilename,
         String dateOrderMade,
@@ -360,6 +368,7 @@ public class SealAuditService {
             escapeCsv(caseReference),
             escapeCsv(courtName),
             escapeCsv(orderCollectionId),
+            escapeCsv(orderType),
             escapeCsv(orderUploadTimestamp),
             escapeCsv(orderFilename),
             escapeCsv(dateOrderMade),
