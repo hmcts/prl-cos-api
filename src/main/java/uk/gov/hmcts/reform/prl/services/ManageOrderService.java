@@ -4024,8 +4024,27 @@ public class ManageOrderService {
         LocalDate cafcassReportFiledByDate = caseData.getServeOrderData().getWhenReportsMustBeFiled();
         setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
         setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        cancelCirDocumentsRequestedTask(caseData, waFieldsMap);
         createCirDocumentsRequestedTask(caseData, waFieldsMap);
         cleanUpCirOrderRequestFields(caseData, localAuthorityReportFiledByDate, cafcassReportFiledByDate);
+    }
+
+    private void cancelCirDocumentsRequestedTask(CaseData caseData, Map<String, Object> waFieldsMap) {
+        if (waFieldsMap.get(CIR_DOCUMENTS_REQUESTED) != null) {
+            String caseId = String.valueOf(caseData.getId());
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+            );
+
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
+        }
     }
 
     private void createCirDocumentsRequestedTask(CaseData caseData, Map<String, Object> waFieldsMap) {
