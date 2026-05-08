@@ -454,7 +454,9 @@ public class ReviewDocumentService {
                 .restrictedDetails(null)
                 .build();
         }
-        tempQuarantineDoe = renameQuarantineDocument(tempQuarantineDoe);
+
+        String documentNewName = caseData.getReviewDocuments().getDocumentNewName();
+        tempQuarantineDoe = renameQuarantineDocument(tempQuarantineDoe, documentNewName);
         manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             tempQuarantineDoe,
             userDetails,
@@ -464,15 +466,15 @@ public class ReviewDocumentService {
         );
     }
 
-    private QuarantineLegalDoc renameQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc) {
-        if (isNotBlank(quarantineLegalDoc.getDocumentNewName())) {
+    private QuarantineLegalDoc renameQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, String documentNewName) {
+        if (isNotBlank(documentNewName)) {
             Document document = manageDocumentsService.getQuarantineDocumentForUploader(
                 quarantineLegalDoc.getUploaderRole(),
                 quarantineLegalDoc
             );
             if (nonNull(document)) {
                 Document renamedDocument = document.toBuilder()
-                    .documentFileName(quarantineLegalDoc.getDocumentNewName())
+                    .documentFileName(documentNewName)
                     .build();
                 return updateQuarantineDocument(quarantineLegalDoc, renamedDocument);
             }
