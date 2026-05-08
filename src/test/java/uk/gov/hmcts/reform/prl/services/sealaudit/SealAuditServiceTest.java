@@ -320,6 +320,7 @@ class SealAuditServiceTest {
             "123",
             "Court, with comma",
             "order-id",
+            "order type",
             "2025-01-15T10:00:00",
             "order \"quoted\".pdf",
             "15 Jan 2025",
@@ -328,7 +329,7 @@ class SealAuditServiceTest {
         );
 
         assertEquals(
-            "123,\"Court, with comma\",order-id,2025-01-15T10:00:00,"
+            "123,\"Court, with comma\",order-id,order type,2025-01-15T10:00:00,"
                 + "\"order \"\"quoted\"\".pdf\",15 Jan 2025,2025-01-15 10:30:00,MISSING",
             result
         );
