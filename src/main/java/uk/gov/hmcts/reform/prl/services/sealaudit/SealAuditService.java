@@ -58,7 +58,7 @@ public class SealAuditService {
     @Value("${seal-audit.batch-delay-seconds:5}")
     private int batchDelaySeconds;
 
-    @Value("${ccd.elastic-search-api.result-size:10000}")
+    @Value("${seal-audit.size:100}")
     private String resultSize;
 
     @Value("${seal-audit.from-date:2024-04-01}")
