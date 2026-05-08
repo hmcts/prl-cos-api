@@ -105,27 +105,25 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                         if (!citizenUploadedC7Documents.isEmpty()) {
                             applications.addAll(citizenUploadedC7Documents);
                         }
-
                         applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(applications));
                     } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
-                        List<BundlingRequestDocument> allOtherDocs = new ArrayList<>(mapBundlingRequestDocument(
+                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
                             allCategoriesToMap.get(filterProperties.getCategory()),
                             BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                             filterProperties
-                        ));
-
-                        List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
-                            caseData.getAdditionalApplicationsBundle(), filterProperties);
-
-                        if (!otherAdditionalBundleDocs.isEmpty()) {
-                            allOtherDocs.addAll(otherAdditionalBundleDocs);
-                        }
-
-                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(allOtherDocs));
+                        )));
                     }
                 }
             });
         });
+
+        // Add all other AWP Documents
+        List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
+            caseData.getAdditionalApplicationsBundle(), FilterProperties.builder().build());
+
+        if (!otherAdditionalBundleDocs.isEmpty()) {
+            allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(otherAdditionalBundleDocs));
+        }
 
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
