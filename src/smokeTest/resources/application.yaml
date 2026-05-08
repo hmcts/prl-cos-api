@@ -566,6 +566,10 @@ document:
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
+      other_c8_template: FL-PRL-GOR-ENG-OTHER-C8.docx
+      other_c8_filename: C8DocumentOtherPerson.pdf
+      other_c8_template_welsh: FL-PRL-GOR-WEL-OTHER-C8.docx
+      other_c8_filename_welsh: C8DocumentOtherPerson_Welsh.pdf
     citizen:
       prl_citizen_upload_template: PRL-CA-GOR-ENG-Draft-An-Order.docx
       prl_citizen_upload_filename: Self_created.pdf
