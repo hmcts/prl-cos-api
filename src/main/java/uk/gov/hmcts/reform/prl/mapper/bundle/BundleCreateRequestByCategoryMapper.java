@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
@@ -104,6 +105,14 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                         if (!citizenUploadedC7Documents.isEmpty()) {
                             applications.addAll(citizenUploadedC7Documents);
                         }
+
+                        List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
+                            caseData.getAdditionalApplicationsBundle(), filterProperties);
+
+                        if (!otherAdditionalBundleDocs.isEmpty()) {
+                            applications.addAll(otherAdditionalBundleDocs);
+                        }
+
                         applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(applications));
                     } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
                         allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
@@ -127,7 +136,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     }
 
     private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList,
-                                                                     FilterProperties filterPropertie) {
+                                                                     FilterProperties filterProperties) {
         List<BundlingRequestDocument> c7Documents = new ArrayList<>();
         Optional<List<Element<ResponseDocuments>>> uploadedC7CitizenDocs = ofNullable(citizenResponseC7DocumentList);
         if (uploadedC7CitizenDocs.isEmpty()) {
@@ -135,11 +144,39 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         }
         ElementUtils.unwrapElements(citizenResponseC7DocumentList)
             .forEach(c7CitizenResponseDocument -> c7Documents
-                .add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(), BundlingDocGroupEnum.c7Documents, filterPropertie)));
+                .add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(), BundlingDocGroupEnum.c7Documents, filterProperties)));
         return c7Documents;
     }
 
+    private List<BundlingRequestDocument> mapOtherAdditionalBundleFromCaseData(
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleList,
+        FilterProperties filterProperties) {
 
+        List<BundlingRequestDocument> additionalApplicationsBundle = new ArrayList<>();
+        Optional<List<Element<AdditionalApplicationsBundle>>> additionalApplicationsBundleDocs = ofNullable(additionalApplicationsBundleList);
+        if (additionalApplicationsBundleDocs.isEmpty()) {
+            return additionalApplicationsBundle;
+        }
+        ElementUtils.unwrapElements(additionalApplicationsBundleList).stream()
+            .filter(additionalBundle -> additionalBundle.getOtherApplicationsBundle() != null)
+            .forEach(applicationsBundle -> {
+                additionalApplicationsBundle
+                    .addAll(mapBundlingRequestDocument(
+                        ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getFinalDocument()),
+                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
+                    ));
+                if (applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
+                    ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle())
+                        .forEach(sp -> additionalApplicationsBundle
+                            .add(mapBundlingRequestDocument(
+                                sp.getDocument(),
+                                BundlingDocGroupEnum.applicantAWPDocuments,
+                                filterProperties
+                            )));
+                }
+            });
+        return additionalApplicationsBundle;
+    }
 
     private Document mapCategoryDocumentToPrlDocument(uk.gov.hmcts.reform.ccd.client.model.Document categoryDocument) {
 
