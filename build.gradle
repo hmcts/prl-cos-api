@@ -44,7 +44,7 @@ def versions = [
   lombok                       : '1.18.46',
   pact                         : '4.1.11',
   pitest                       : '1.23.1',
-  puppyCrawl                   : '13.4.1',
+  puppyCrawl                   : '13.4.2',
   reformsJavaLogging           : '8.0.0',
   sendLetterClient             : '5.1.1',
   serenity                     : '4.3.4',
@@ -297,7 +297,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   implementation 'org.mapstruct:mapstruct:1.6.3'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.7'
+  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.8'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
@@ -688,7 +688,8 @@ test {
 apply from: 'scripts/test-coverage.gradle'
 
 tasks.register('installGitHooks', Copy) {
-  from new File(rootProject.rootDir, 'scripts/pre-commit')
+  from new File(rootProject.rootDir, 'scripts/pre-commit.template')
+  rename { 'pre-commit' }
   into { new File(rootProject.rootDir, '.git/hooks') }
   fileMode 0755
 }
