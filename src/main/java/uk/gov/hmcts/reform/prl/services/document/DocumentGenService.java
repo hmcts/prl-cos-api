@@ -617,7 +617,7 @@ public class DocumentGenService {
 
     private static boolean isAohPresent(CaseData caseData) {
         return caseData.getAllegationOfHarmRevised() != null
-            && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo());
+                && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo());
     }
 
     public Map<String, Object> generateDraftDocumentsForC100CaseResubmission(String authorisation, CaseData caseData) {

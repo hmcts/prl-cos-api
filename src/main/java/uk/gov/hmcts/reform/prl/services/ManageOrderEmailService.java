@@ -171,14 +171,14 @@ public class ManageOrderEmailService {
         return OrderEmailNotification
             .builder()
             .emailSubject(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
-                                                                         newAndFinalOrderFlag, languagePreferenceFlag, false))
+                newAndFinalOrderFlag, languagePreferenceFlag, false))
             .emailTitle(buildEmailSubjectForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag,
-                                                                       newAndFinalOrderFlag, languagePreferenceFlag, true))
+                newAndFinalOrderFlag, languagePreferenceFlag, true))
             .emailTitleWelsh(languagePreferenceFlag ? buildEmailTitleWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
-                                                                                                        multipleOrderFlag, newAndFinalOrderFlag) : "")
+                multipleOrderFlag, newAndFinalOrderFlag) : "")
             .emailText(buildEmailTextForCitizenWithDashBoardAccess(isFinalOrderFlag, multipleOrderFlag, newAndFinalOrderFlag))
             .emailTextWelsh(languagePreferenceFlag ? buildEmailTextWelshForCitizenWithDashBoardAccess(isFinalOrderFlag,
-                                                                                                      multipleOrderFlag, newAndFinalOrderFlag) : "")
+                multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrders(multipleOrderFlag || newAndFinalOrderFlag ? "orders" : "order")
             .multipleOrdersWelsh(languagePreferenceFlag ? multipleOrdersWelsh(multipleOrderFlag, newAndFinalOrderFlag) : "")
             .multipleOrdersWelshSentence(languagePreferenceFlag ? multipleOrdersWelshSentence(multipleOrderFlag, newAndFinalOrderFlag) : "")
@@ -286,7 +286,7 @@ public class ManageOrderEmailService {
     }
 
     private String buildEmailTextWelshForCitizenWithDashBoardAccess(boolean isFinalOrderFlag, boolean multipleOrderFlag,
-                                                                    boolean newAndFinalOrderFLag) {
+                                                                boolean newAndFinalOrderFLag) {
         if (newAndFinalOrderFLag) {
             return OrderEmailConstants.ORDER_WEL_NEW_AND_FINAL;
         } else if (multipleOrderFlag) {
@@ -400,7 +400,7 @@ public class ManageOrderEmailService {
             log.info("*** Is legal rep present : {}", manageOrders.getDisplayLegalRepOption());
             String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
                 ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getPersonallyServeRespondentsOptions()
-                                                                           .getId();
+                .getId();
 
             handleFL401PersonalServiceNotifications(
                 authorisation,
@@ -702,11 +702,11 @@ public class ManageOrderEmailService {
                                               String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
         emailInformation.forEach(value ->
-                                     sendEmailViaSendGrid(authorisation,
-                                                          orderDocuments,
-                                                          dynamicData,
-                                                          value.getEmailAddress(),
-                                                          SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
+            sendEmailViaSendGrid(authorisation,
+                                 orderDocuments,
+                                 dynamicData,
+                                 value.getEmailAddress(),
+                                 SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
         );
     }
 

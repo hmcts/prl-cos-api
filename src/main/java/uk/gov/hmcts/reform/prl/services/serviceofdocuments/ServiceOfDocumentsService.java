@@ -212,7 +212,7 @@ public class ServiceOfDocumentsService {
         }
         //other persons
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-            && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()) {
+                && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()) {
             List<String> otherPersonIds = new ArrayList<>();
             caseData.getServiceOfApplication().getSoaOtherParties().getValue()
                 .forEach(element -> {

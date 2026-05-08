@@ -536,7 +536,8 @@ public class ServiceOfDocumentsServiceTest {
 
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder()
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
                                                                                .isGenEng(true)
                                                                                .isGenWelsh(true)
                                                                                .build());

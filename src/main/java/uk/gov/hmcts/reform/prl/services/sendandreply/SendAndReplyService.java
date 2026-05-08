@@ -1034,8 +1034,8 @@ public class SendAndReplyService {
                 return null != otherApplicationsBundle && null != otherApplicationsBundle.getApplicationStatus()
                     && otherApplicationsBundle.getApplicationStatus().equals(AWP_STATUS_SUBMITTED)
                     && selectedApplicationCode.equals(AWP_OTHER_APPLICATION_SNR_CODE
-                                                          .concat(UNDERSCORE)
-                                                          .concat(otherApplicationsBundle.getUploadedDateTime()));
+                                                     .concat(UNDERSCORE)
+                                                     .concat(otherApplicationsBundle.getUploadedDateTime()));
             }).findFirst();
 
         if (otherApplicationDocumentsElement.isPresent()) {
@@ -1497,7 +1497,7 @@ public class SendAndReplyService {
     private String generateExternalOrInternalWhoSendTO(String emailAddress, String externalOrInternalWhoSendTO) {
         return StringUtils.isNotEmpty(emailAddress) ? (StringUtils.isEmpty(
             externalOrInternalWhoSendTO)
-                                                       ? emailAddress : StringUtils.join(
+            ? emailAddress : StringUtils.join(
             externalOrInternalWhoSendTO,
             ",",
             emailAddress
@@ -1838,6 +1838,7 @@ public class SendAndReplyService {
                     applicantsRespondentInCase
                 );
                 if (party.isPresent()) {
+
                     handleExternalMessageNotifications(caseData, auth, party);
                 }
             }
