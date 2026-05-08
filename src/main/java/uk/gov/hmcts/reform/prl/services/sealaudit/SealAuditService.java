@@ -112,12 +112,12 @@ public class SealAuditService {
             List<CaseDetails> cases = searchResult.getCases();
             for (int i = 0; i < cases.size(); i++) {
                 CaseDetails caseDetails = cases.get(i);
+                log.info("Processing Case {}", caseDetails.getId());
 
                 try {
                     CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
 
                     String caseReference = String.valueOf(caseDetails.getId());
-                    log.info("Processing Case {}", caseDetails.getId());
                     String courtName = caseData.getCourtName();
 
                     List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
