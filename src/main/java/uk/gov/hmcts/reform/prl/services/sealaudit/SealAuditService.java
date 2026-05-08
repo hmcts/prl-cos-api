@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,6 @@ import static uk.gov.service.notify.NotificationClient.prepareUpload;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@ConditionalOnProperty(prefix = "seal-audit", name = "enabled", havingValue = "true")
 public class SealAuditService {
 
     private final CoreCaseDataApi coreCaseDataApi;
