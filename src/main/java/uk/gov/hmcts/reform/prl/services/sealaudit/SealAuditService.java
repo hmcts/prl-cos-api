@@ -79,8 +79,8 @@ public class SealAuditService {
     private boolean emailEnabled;
 
     private static final DateTimeFormatter LOG_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final String CSV_HEADER = "case_reference,court_name,order_collection_id,order_type,"
-        + "order_upload_timestamp,order_filename,date_order_made,first_served_datetime,seal_status";
+    private static final String CSV_HEADER = "case_reference,court_name,order_type,order_filename,date_order_made,"
+        + "seal_status,order_upload_timestamp";
 
     public void runAudit() {
         log.info("*** Starting Seal Audit Task ***");
@@ -152,17 +152,15 @@ public class SealAuditService {
                                 missingSeals++;
                                 logOrderResult(caseReference, courtName, orderElement.getId().toString(), orderType,
                                     orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status);
-                                csvRows.add(buildCsvRow(caseReference, courtName, orderElement.getId().toString(),
-                                                        orderType, orderUploadTimestamp, orderFilename, dateOrderMade,
-                                                        firstServedDateTime, status));
+                                csvRows.add(buildCsvRow(caseReference, courtName, orderType, orderUploadTimestamp,
+                                                        orderFilename, dateOrderMade, status));
                             }
                             case ERROR -> {
                                 errors++;
                                 logOrderResult(caseReference, courtName, orderElement.getId().toString(), orderType,
                                     orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status);
-                                csvRows.add(buildCsvRow(caseReference, courtName, orderElement.getId().toString(),
-                                                        orderType, orderUploadTimestamp, orderFilename, dateOrderMade,
-                                                        firstServedDateTime, status));
+                                csvRows.add(buildCsvRow(caseReference, courtName, orderType, orderUploadTimestamp,
+                                                        orderFilename, dateOrderMade, status));
                             }
                             default -> log.warn("Unexpected seal status: {}", status);
                         }
@@ -356,24 +354,20 @@ public class SealAuditService {
     private String buildCsvRow(
         String caseReference,
         String courtName,
-        String orderCollectionId,
         String orderType,
         String orderUploadTimestamp,
         String orderFilename,
         String dateOrderMade,
-        String firstServedDatetime,
         SealStatus sealStatus
     ) {
         return String.join(",",
             escapeCsv(caseReference),
             escapeCsv(courtName),
-            escapeCsv(orderCollectionId),
             escapeCsv(orderType),
-            escapeCsv(orderUploadTimestamp),
             escapeCsv(orderFilename),
             escapeCsv(dateOrderMade),
-            escapeCsv(firstServedDatetime),
-            sealStatus.name()
+            sealStatus.name(),
+            escapeCsv(orderUploadTimestamp)
         );
     }
 

@@ -319,18 +319,16 @@ class SealAuditServiceTest {
             "buildCsvRow",
             "123",
             "Court, with comma",
-            "order-id",
             "order type",
             "2025-01-15T10:00:00",
             "order \"quoted\".pdf",
             "15 Jan 2025",
-            "2025-01-15 10:30:00",
             SealStatus.MISSING
         );
 
         assertEquals(
-            "123,\"Court, with comma\",order-id,order type,2025-01-15T10:00:00,"
-                + "\"order \"\"quoted\"\".pdf\",15 Jan 2025,2025-01-15 10:30:00,MISSING",
+            "123,\"Court, with comma\",order type,"
+                + "\"order \"\"quoted\"\".pdf\",15 Jan 2025,MISSING,2025-01-15T10:00:00",
             result
         );
     }
