@@ -38,11 +38,11 @@ public class SendGridMessageFailuresTask implements Runnable {
     private String createQuery() {
         Instant from = getNow()
             .minusDays(daysToQuery)
-            .atStartOfDay(ZoneId.systemDefault())
+            .atStartOfDay(ZoneId.of("UTC"))
             .toInstant();
 
         Instant to = getNow()
-            .atStartOfDay(ZoneId.systemDefault())
+            .atStartOfDay(ZoneId.of("UTC"))
             .toInstant();
 
         return SendGridLogsQuery.builder()

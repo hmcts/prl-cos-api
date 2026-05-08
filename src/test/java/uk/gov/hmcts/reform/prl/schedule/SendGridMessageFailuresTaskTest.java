@@ -21,7 +21,7 @@ class SendGridMessageFailuresTaskTest {
         messageFailureOrchestrator = Mockito.mock(MessageFailureOrchestrator.class);
         Clock fixedClock = Clock.fixed(
             Instant.parse("2026-04-30T02:00:00Z"),
-            ZoneId.systemDefault()
+            ZoneId.of("UTC")
         );
         sendGridMessageFailuresTask = new SendGridMessageFailuresTask(messageFailureOrchestrator, fixedClock);
         ReflectionTestUtils.setField(sendGridMessageFailuresTask, "daysToQuery", 1);
@@ -31,8 +31,8 @@ class SendGridMessageFailuresTaskTest {
     void testRun() {
         sendGridMessageFailuresTask.run();
 
-        String expectedQuery = "sg_message_id_created_at >= TIMESTAMP \"2026-04-28T23:00:00Z\" AND "
-            + "sg_message_id_created_at < TIMESTAMP \"2026-04-29T23:00:00Z\" AND "
+        String expectedQuery = "sg_message_id_created_at >= TIMESTAMP \"2026-04-29T00:00:00Z\" AND "
+            + "sg_message_id_created_at < TIMESTAMP \"2026-04-30T00:00:00Z\" AND "
             + "status IN ('dropped', 'blocked', 'bounced')";
         verify(messageFailureOrchestrator).processQuery(expectedQuery);
     }
