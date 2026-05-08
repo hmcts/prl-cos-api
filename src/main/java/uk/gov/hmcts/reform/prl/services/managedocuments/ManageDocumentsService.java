@@ -113,7 +113,6 @@ public class ManageDocumentsService {
         + "(form FM5) cannot contain confidential information or be restricted.";
     public static final String FM5_ERROR_WELSH = "Ni all y datganiad safbwynt ar ddatrys anghydfod y tu allan i’r llys "
         + "(ffurflen FM5) gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.";
-
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
@@ -783,8 +782,6 @@ public class ManageDocumentsService {
             return !isEmpty(quarantineDocsList) ? quarantineDocsList : new ArrayList<>();
         }
     }
-
-
 
     public void cancelCirRequestTask(CaseData caseData, List<String> uploadedCategoryIds) {
         String caseId = String.valueOf(caseData.getId());
