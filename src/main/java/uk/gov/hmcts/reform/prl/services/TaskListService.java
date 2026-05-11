@@ -324,7 +324,6 @@ public class TaskListService {
                     .c8ArchivedDocuments(updatedCaseData.getC8ArchivedDocuments())
                     .otherPartyC8Documents(updatedCaseData.getOtherPartyC8Documents())
                     .otherPartyC8DocumentsArchived(updatedCaseData.getOtherPartyC8DocumentsArchived())
-                    .otherPartyC8DocumentsDraft(updatedCaseData.getOtherPartyC8DocumentsDraft())
                     .c1ADocument(updatedCaseData.getC1ADocument())
                     .c8WelshDocument(updatedCaseData.getC8WelshDocument())
                     .finalDocument(updatedCaseData.getFinalDocument())

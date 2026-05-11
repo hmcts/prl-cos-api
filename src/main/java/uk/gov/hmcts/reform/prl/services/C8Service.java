@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
@@ -97,12 +98,15 @@ public class C8Service {
             dataMap.put("signedDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
         }
 
+        // Uses the same template, but a different filename to indicate draft files
+        String templateHint = C8_OTHER_FINAL_HINT;
         if (SEALED_STATES.contains(caseData.getState())) {
             dataMap.put("sealed", true);
             dataMap.put("watermark", "");
         } else {
             dataMap.put("sealed", false);
             dataMap.put("watermark", "DRAFT");
+            templateHint = C8_OTHER_DRAFT_HINT;
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
@@ -111,17 +115,17 @@ public class C8Service {
             c8Welsh = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
-                C8_OTHER_FINAL_HINT,
+                templateHint,
                 true,
                 dataMap
             );
         }
-        // todo fix this, shouldn't need to reset the field...
+
         dataMap.put("party", objectMapper.convertValue(partyDetails.getValue(), new TypeReference<Map<String, Object>>() {}));
         Document c8English = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
-            C8_OTHER_FINAL_HINT,
+            templateHint,
             false,
             dataMap
         );
@@ -174,12 +178,8 @@ public class C8Service {
             }
         }
         Map<String, Object> updates = new HashMap<>();
-        if (SEALED_STATES.contains(caseData.getState())) {
-            updates.put("otherPartyC8Documents", otherPartyC8Documents);
-            updates.put("otherPartyC8DocumentsArchived", otherPartyC8DocumentsArchived);
-        } else {
-            updates.put("otherPartyC8DocumentsDraft", otherPartyC8Documents);
-        }
+        updates.put("otherPartyC8Documents", otherPartyC8Documents);
+        updates.put("otherPartyC8DocumentsArchived", otherPartyC8DocumentsArchived);
         return updates;
     }
 

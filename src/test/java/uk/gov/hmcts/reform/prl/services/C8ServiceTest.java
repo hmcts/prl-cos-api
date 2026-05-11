@@ -225,8 +225,8 @@ class C8ServiceTest {
         // Act
         Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
         // Assert
-        assertThat(result).containsKey("otherPartyC8DocumentsDraft");
-        List<?> docs = (List<?>) result.get("otherPartyC8DocumentsDraft");
+        assertThat(result).containsKey("otherPartyC8Documents");
+        List<?> docs = (List<?>) result.get("otherPartyC8Documents");
         assertThat(docs).hasSize(1);
     }
 }
