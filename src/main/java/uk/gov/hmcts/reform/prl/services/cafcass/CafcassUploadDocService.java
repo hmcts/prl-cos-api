@@ -114,17 +114,17 @@ public class CafcassUploadDocService {
             CAFCASS
         );
 
-        manageDocumentsService.cancelCirRequestTask(
-            startAllTabsUpdateDataContent.caseData(),
-            List.of(quarantineLegalDoc.getCategoryId())
-        );
-
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
             startAllTabsUpdateDataContent.startEventResponse(),
             startAllTabsUpdateDataContent.eventRequestData(),
             caseDataUpdated
+        );
+
+        manageDocumentsService.cancelCirRequestTask(
+            startAllTabsUpdateDataContent.caseData(),
+            List.of(quarantineLegalDoc.getCategoryId())
         );
 
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
