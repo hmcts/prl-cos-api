@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
@@ -113,28 +114,31 @@ class UploadAdditionalApplicationServiceTest {
     PartyDetails party;
     PartyDetails partyC2;
 
-    // reflect: private String categoryForParty(String)
-    private Method categoryForParty;
-
     // reflect: private static Document withCategory(Document, String)
     private Method withCategory;
 
-    // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName)
+    // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime,
+    // String partyName, PartyEnum partyType)
     private Method getC2DocumentBundle;
+
+    // reflect: private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
+    // String currentDateTime, String partyName, PartyEnum partyType)
+    private Method getOtherApplicationsBundle;
 
     @BeforeEach
     public void setUp() throws Exception {
-
-        categoryForParty = UploadAdditionalApplicationService.class.getDeclaredMethod("categoryForParty", String.class);
-        categoryForParty.setAccessible(true);
 
         withCategory = UploadAdditionalApplicationService.class
             .getDeclaredMethod("withCategory", Document.class, String.class);
         withCategory.setAccessible(true);
 
         getC2DocumentBundle = UploadAdditionalApplicationService.class
-            .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class);
+            .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class, PartyEnum.class);
         getC2DocumentBundle.setAccessible(true);
+
+        getOtherApplicationsBundle = UploadAdditionalApplicationService.class
+            .getDeclaredMethod("getOtherApplicationsBundle", CaseData.class, String.class, String.class, String.class, PartyEnum.class);
+        getOtherApplicationsBundle.setAccessible(true);
 
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
@@ -790,90 +794,59 @@ class UploadAdditionalApplicationServiceTest {
 
     @Test
     void applicantParty_setsApplicantCategoryOnDocs() throws Exception {
-        String party = "applicant";
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
+        PartyEnum partyType = PartyEnum.applicant;
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
+                                                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                       .document(Document.builder()
+                                                                                                     .documentFileName("other.pdf").build())
+                                                                                       .build())
+                                                 .build())
             .build();
 
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
+        OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "partyName", partyType);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("applicationsWithinProceedings", result.getCategoryId());
-        // sanity: other fields preserved
-        Assertions.assertEquals("c2.pdf", result.getDocumentFileName());
+        Assertions.assertEquals("applicationsWithinProceedings", result.getFinalDocument().get(0).getValue().getCategoryId());
     }
 
     @Test
     void respondentParty_setsRespondentCategoryOnDocs() throws Exception {
-        String party = "respondent";
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
+        PartyEnum partyType = PartyEnum.respondent;
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
+                                                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                       .document(Document.builder()
+                                                                                                     .documentFileName("other.pdf").build())
+                                                                                       .build())
+                                                 .build())
             .build();
 
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
+        OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "partyName", partyType);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("applicationsWithinProceedingsRes", result.getCategoryId());
+        Assertions.assertEquals("applicationsWithinProceedingsRes", result.getFinalDocument().get(0).getValue().getCategoryId());
     }
 
     @Test
-    void unknownParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "some-random-party");
-        Assertions.assertEquals("undefined", category);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
+    void otherParty_setsRespondentCategoryOnDocs() throws Exception {
+        PartyEnum partyType = PartyEnum.other;
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
+                                                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                       .document(Document.builder()
+                                                                                                     .documentFileName("other.pdf").build())
+                                                                                       .build())
+                                                 .build())
             .build();
 
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
+        OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "partyName", partyType);
 
         Assertions.assertNotNull(result);
-        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is unknown");
-    }
-
-    @Test
-    void undefinedParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "undefined");
-        Assertions.assertEquals("undefined", category);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
-            .build();
-
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is null");
-    }
-
-    @Test
-    void nullDocument_leavesCategoryUnset() {
-        String category = "lalalalalala";
-        Document result = null;
-        try {
-            result =
-                (Document) withCategory.invoke(uploadAdditionalApplicationService, null, category);
-        } catch (Exception e) {
-            Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
-        }
-
-        Assertions.assertNull(result, "Document must not be null");
+        Assertions.assertEquals("applicationsFromOtherProceedings", result.getFinalDocument().get(0).getValue().getCategoryId());
     }
 
     @Test
@@ -927,10 +900,10 @@ class UploadAdditionalApplicationServiceTest {
 
         C2DocumentBundle result = null;
         try {
-            //CaseData caseData, String author, String currentDateTime, String partyName
+            //CaseData caseData, String author, String currentDateTime, String partyName, PartyEnum partyType
             result =
                 (C2DocumentBundle) getC2DocumentBundle.invoke(uploadAdditionalApplicationService, caseData, "An Author",
-                    "2024-01-01", "Elise Lynn (respondent)");
+                    "2024-01-01", "Elise Lynn (respondent)", PartyEnum.respondent);
         } catch (Exception e) {
             Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
         }

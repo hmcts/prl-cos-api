@@ -63,7 +63,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -120,26 +119,25 @@ public class UploadAdditionalApplicationService {
 
     private static final String CAT_AWP_APPLICANT   = "applicationsWithinProceedings";
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
-    private static final String CAT_AWP_UNDEFINED = "undefined";
+    private static final String CAT_AWP_OTHER = "applicationsFromOtherProceedings";
 
-    private String categoryForParty(String raw) {
-        return switch (raw.toLowerCase(Locale.ENGLISH)) {
-            case "applicant" -> CAT_AWP_APPLICANT;
-            case "respondent" -> CAT_AWP_RESPONDENT;
-            default -> CAT_AWP_UNDEFINED;
-        };
+    private String categoryForParty(PartyEnum partyEnum) {
+        if (partyEnum != null) {
+            return switch (partyEnum) {
+                case PartyEnum.applicant, PartyEnum.applicant_solicitor -> CAT_AWP_APPLICANT;
+                case PartyEnum.respondent, PartyEnum.respondent_solicitor -> CAT_AWP_RESPONDENT;
+                default -> CAT_AWP_OTHER;
+            };
+        }  else {
+            return null;
+        }
     }
 
     private static Document withCategory(Document doc, String categoryId) {
-        if (categoryId.equals(CAT_AWP_UNDEFINED)) {
-            return doc; // if no category play safe and don't add a default
-        }
         if (doc == null) {
-            throw new IllegalArgumentException(
-                "Document cannot be null");
-        } else {
-            return doc.toBuilder().categoryId(categoryId).build();
+            return null;
         }
+        return doc.toBuilder().categoryId(categoryId).build();
     }
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
@@ -153,10 +151,12 @@ public class UploadAdditionalApplicationService {
             String currentDateTime = LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                 .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM);
 
-            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName);
+            PartyEnum partyType = getPartyType(selectedParties, caseData);
+            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName, partyType);
             OtherApplicationsBundle otherApplicationsBundle = getOtherApplicationsBundle(caseData,
                                                                                          author,
-                                                                                         currentDateTime, partyName
+                                                                                         currentDateTime, partyName,
+                                                                                         partyType
             );
 
             AdditionalApplicationsBundle additionalApplicationsBundle = getAdditionalApplicationsBundle(
@@ -166,7 +166,8 @@ public class UploadAdditionalApplicationService {
                 currentDateTime,
                 c2DocumentBundle,
                 otherApplicationsBundle,
-                selectedParties
+                selectedParties,
+                partyType
             );
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));
@@ -191,7 +192,8 @@ public class UploadAdditionalApplicationService {
     private AdditionalApplicationsBundle getAdditionalApplicationsBundle(String authorisation, CaseData caseData, String author,
                                                                          String currentDateTime, C2DocumentBundle c2DocumentBundle,
                                                                          OtherApplicationsBundle otherApplicationsBundle,
-                                                                         List<Element<ServedParties>> selectedParties) {
+                                                                         List<Element<ServedParties>> selectedParties,
+                                                                         PartyEnum partyType) {
         FeeResponse feeResponse = null;
         Optional<PaymentServiceResponse> paymentServiceResponse;
         Payment payment = null;
@@ -226,7 +228,7 @@ public class UploadAdditionalApplicationService {
         return AdditionalApplicationsBundle.builder().author(
                 author)
             .selectedParties(selectedParties)
-            .partyType(getPartyType(selectedParties, caseData))
+            .partyType(partyType)
             .uploadedDateTime(currentDateTime)
             .c2DocumentBundle(null != c2DocumentBundle
                                   ? c2DocumentBundle.toBuilder().applicationStatus(applicationStatus).build() : null)
@@ -389,7 +391,8 @@ public class UploadAdditionalApplicationService {
     }
 
     private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
-                                                               String currentDateTime, String partyName) {
+                                                               String currentDateTime, String partyName,
+                                                               PartyEnum partyType) {
         OtherApplicationsBundle otherApplicationsBundle = null;
         OtherApplicationType applicationType;
 
@@ -397,11 +400,12 @@ public class UploadAdditionalApplicationService {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
             applicationType = uploadAdditionalApplicationUtils.getOtherApplicationType(temporaryOtherApplicationsBundle);
+            String cat = categoryForParty(partyType);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
                 .applicantName(partyName)
-                .finalDocument(List.of(element(temporaryOtherApplicationsBundle.getDocument())))
+                .finalDocument(List.of(element(withCategory(temporaryOtherApplicationsBundle.getDocument(), cat))))
                 .documentRelatedToCase(CollectionUtils.isNotEmpty(temporaryOtherApplicationsBundle.getDocumentAcknowledge())
                                            ? Yes : No)
                 .urgency(null != temporaryOtherApplicationsBundle.getUrgencyTimeFrameType()
@@ -420,21 +424,10 @@ public class UploadAdditionalApplicationService {
         return otherApplicationsBundle;
     }
 
-    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
+    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName, PartyEnum partyType) {
         C2DocumentBundle c2DocumentBundle = null;
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
-            String category = "";
-            log.info("Inside mapping solicitor journey C2 category before if {}", category);
-            if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
-                category = "applicant";
-            } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
-                category = "respondent";
-            } else {
-                category = "undefined";
-            }
-
-            log.info("Inside mapping solicitor journey C2 category after if {}", category);
-            String cat = categoryForParty(category);
+            String cat = categoryForParty(partyType);
             log.info("Inside mapping solicitor journey C2 upload, final value for category is {}", cat);
 
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
