@@ -134,7 +134,7 @@ class SealAuditServiceTest {
             .cases(List.of(createCaseDetailsWithNoOrders()))
             .build();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(searchResult);
+            .thenReturn(searchResult);
 
         sealAuditService.runAudit();
         verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
