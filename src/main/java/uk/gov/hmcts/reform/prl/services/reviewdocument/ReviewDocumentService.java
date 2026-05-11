@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -456,7 +457,7 @@ public class ReviewDocumentService {
         }
 
         String documentNewName = caseData.getReviewDocuments().getDocumentNewName();
-        tempQuarantineDoe = renameQuarantineDocument(tempQuarantineDoe, documentNewName);
+        tempQuarantineDoe = applyDocumentRename(tempQuarantineDoe, documentNewName);
         manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             tempQuarantineDoe,
             userDetails,
@@ -466,7 +467,7 @@ public class ReviewDocumentService {
         );
     }
 
-    private QuarantineLegalDoc renameQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, String documentNewName) {
+    private QuarantineLegalDoc applyDocumentRename(QuarantineLegalDoc quarantineLegalDoc, String documentNewName) {
         if (isNotBlank(documentNewName)) {
             Document document = manageDocumentsService.getQuarantineDocumentForUploader(
                 quarantineLegalDoc.getUploaderRole(),
@@ -474,12 +475,20 @@ public class ReviewDocumentService {
             );
             if (nonNull(document)) {
                 Document renamedDocument = document.toBuilder()
-                    .documentFileName(documentNewName)
+                    .documentFileName(determineChangedDocumentFileName(documentNewName, document))
                     .build();
                 return updateQuarantineDocument(quarantineLegalDoc, renamedDocument);
             }
         }
         return quarantineLegalDoc;
+    }
+
+    private String determineChangedDocumentFileName(String newDocumentName, Document document) {
+        String originalName = document.getDocumentFileName();
+        String extension = FilenameUtils.getExtension(originalName);
+        String newName = isNotBlank(extension) ? newDocumentName + "." + extension : newDocumentName;
+        log.info("Renaming document name {} with new name {}", originalName, newName);
+        return newName;
     }
 
     private QuarantineLegalDoc updateQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, Document renamedDocument) {
