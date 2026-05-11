@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,7 +120,22 @@ class SealAuditServiceTest {
         sealAuditService.runAudit();
 
         verify(coreCaseDataApi).searchCases(anyString(), anyString(), anyString(), anyString());
-        verify(sealDetectionService, times(0)).detectSeal(any());
+        verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
+    }
+
+    @Test
+    void shouldSkipCasesWithNoOrders() {
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of(createCaseDetailsWithNoOrders()))
+            .build();
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+        .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+        verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
     }
 
     @Test
@@ -148,8 +164,7 @@ class SealAuditServiceTest {
 
         sealAuditService.runAudit();
 
-        verify(caseDocumentClient, never()).getDocumentBinary(anyString(), anyString(), anyString());
-        verify(sealDetectionService, never()).detectSeal(any());
+        verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
     }
 
     @Test
@@ -383,6 +398,16 @@ class SealAuditServiceTest {
 
         return CaseDetails.builder()
             .id(caseId)
+            .data(caseData)
+            .build();
+    }
+
+    private CaseDetails createCaseDetailsWithNoOrders() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("courtName", "Test Court");
+
+        return CaseDetails.builder()
+            .id(1111111111111111L)
             .data(caseData)
             .build();
     }

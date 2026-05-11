@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.sealaudit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -121,7 +122,7 @@ public class SealAuditService {
                     String courtName = caseData.getCourtName();
 
                     List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-                    if (orderCollection == null || orderCollection.isEmpty()) {
+                    if (CollectionUtils.isEmpty(orderCollection)) {
                         continue;
                     }
 
