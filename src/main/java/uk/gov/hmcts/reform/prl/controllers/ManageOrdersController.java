@@ -613,12 +613,6 @@ public class ManageOrdersController {
             } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
-            // For custom orders, set nameOfOrder so orderTypeId is populated correctly
-            if (ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
-                String effectiveOrderName = customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
-                caseData.setNameOfOrder(effectiveOrderName);
-                log.info("doSetHearingData: set nameOfOrder to '{}' for custom order", effectiveOrderName);
-            }
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData,
