@@ -10,8 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,8 +24,11 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
@@ -117,6 +123,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -134,6 +141,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.lang.String.valueOf;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -148,6 +157,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -168,6 +178,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CREATE_REQUEST_CIR_UPDATE_TASK;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.UPDATE_ALL_TABS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -180,6 +193,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum.childImpactReport1;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum.childImpactReport2;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum.safeGuardingLetter;
+import static uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum.childImpactReport1La;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.INVALID_EMAIL_ADDRESS_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
@@ -256,6 +273,15 @@ class ManageOrderServiceTest {
 
     @Mock
     private CustomOrderService customOrderService;
+
+    @Mock
+    private AllTabServiceImpl allTabService;
+
+    @Captor
+    private ArgumentCaptor<String> eventIdCaptor;
+
+    @Captor
+    private ArgumentCaptor<Map<String, Object>> caseDataMapCaptor;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -370,15 +396,15 @@ class ManageOrderServiceTest {
         now = dateTime.now();
         DynamicListElement dynamicListElement = DynamicListElement.builder().code(TEST_UUID).label(" ").build();
         dynamicList = DynamicList.builder()
-            .listItems(List.of(dynamicListElement))
+            .listItems(of(dynamicListElement))
             .value(dynamicListElement)
             .build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder()
             .code(TEST_UUID)
             .label("test")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
         List<Element<HearingData>> hearingDataList  = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -402,7 +428,7 @@ class ManageOrderServiceTest {
         when(dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(Mockito.any(CaseData.class)))
             .thenReturn(dynamicMultiSelectList);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+                                                                     .roles(of(Roles.JUDGE.getValue())).build());
         when(dynamicMultiSelectListService.getStringFromDynamicMultiSelectList(Mockito.any(DynamicMultiSelectList.class)))
             .thenReturn("testChild");
         when(userService.getUserByUserId(Mockito.anyString(), Mockito.anyString())).thenReturn(UserDetails.builder()
@@ -887,7 +913,7 @@ class ManageOrderServiceTest {
         builder.caseTypeOfApplication(C100_CASE_TYPE);
         builder.applicantCaseName("Test Case 45678");
         builder.manageOrdersOptions(amendOrderUnderSlipRule);
-        builder.orderCollection(List.of(element(OrderDetails.builder()
+        builder.orderCollection(of(element(OrderDetails.builder()
                                                     .orderType("other")
                                                     .otherDetails(OtherOrderDetails.builder()
                                                                       .orderCreatedDate("10-Feb-2023").build()).build())));
@@ -909,7 +935,7 @@ class ManageOrderServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .isCafcass(Yes)
             .applicantCaseName("Test Case 45678")
-            .orderCollection(List.of(element(OrderDetails.builder()
+            .orderCollection(of(element(OrderDetails.builder()
                                                  .orderType("other")
                                                  .otherDetails(OtherOrderDetails.builder()
                                                                    .orderCreatedDate("10-Feb-2023").build()).build())))
@@ -930,7 +956,7 @@ class ManageOrderServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .caseManagementLocation(CaseManagementLocation.builder().regionId("1").build())
             .applicantCaseName("Test Case 45678")
-            .orderCollection(List.of(element(OrderDetails.builder()
+            .orderCollection(of(element(OrderDetails.builder()
                                                  .orderType("other")
                                                  .otherDetails(OtherOrderDetails.builder()
                                                                    .orderCreatedDate("10-Feb-2023").build()).build())))
@@ -1109,7 +1135,7 @@ class ManageOrderServiceTest {
     void testPopulateFinalOrderFromCaseData() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
-                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+                                                                     .roles(of(Roles.JUDGE.getValue())).build());
 
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -1162,7 +1188,7 @@ class ManageOrderServiceTest {
     void testPopulateFinalOrderFromCaseDataWithNoCheck() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
-                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+                                                                     .roles(of(Roles.COURT_ADMIN.getValue())).build());
 
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -1195,7 +1221,7 @@ class ManageOrderServiceTest {
             .childOption(
                 dynamicMultiSelectList
             )
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -1207,7 +1233,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .standardDirectionOrder(StandardDirectionOrder.builder()
-                                        .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+                                        .sdoHearingsAndNextStepsList(of(SdoHearingsAndNextStepsEnum.factFindingHearing))
                                         .build())
             .fl401FamilymanCaseNumber("familyman12345")
             .dateOrderMade(LocalDate.now())
@@ -1298,7 +1324,7 @@ class ManageOrderServiceTest {
             .doesOrderClosesCase(Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(ManageOrders.builder()
-                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                              .ordersHearingDetails(of(element(HearingData.builder()
                                                                         .hearingDateConfirmOptionEnum(
                                                                             HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                                         .build())))
@@ -1749,7 +1775,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .manageOrders(manageOrders)
             .standardDirectionOrder(StandardDirectionOrder.builder()
-                                        .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+                                        .sdoHearingsAndNextStepsList(of(SdoHearingsAndNextStepsEnum.factFindingHearing))
                                         .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
@@ -1976,7 +2002,7 @@ class ManageOrderServiceTest {
     void testgetOrderToAmendDownloadLink() {
 
         CaseData caseData = CaseData.builder()
-            .orderCollection(List.of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+            .orderCollection(of(Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                         .builder()
                                                                                         .orderDocument(Document
                                                                                                            .builder()
@@ -2071,17 +2097,17 @@ class ManageOrderServiceTest {
 
         ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                      .emailInformation(EmailInformation.builder().emailName("").build())
                                                      .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -2092,9 +2118,9 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -2171,18 +2197,18 @@ class ManageOrderServiceTest {
             .otherParties(dynamicMultiSelectList)
             .cafcassServedOptions(Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -2232,18 +2258,18 @@ class ManageOrderServiceTest {
             .otherParties(dynamicMultiSelectList)
             .cafcassServedOptions(Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -2308,7 +2334,7 @@ class ManageOrderServiceTest {
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
@@ -2316,7 +2342,7 @@ class ManageOrderServiceTest {
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.post)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.post)
                                                        .postalInformation(PostalInformation.builder().postalName("").build())
                                                        .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -2325,8 +2351,8 @@ class ManageOrderServiceTest {
             .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
-            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .serveOtherPartiesDA(of(ServeOtherPartiesOptions.other))
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -2469,8 +2495,8 @@ class ManageOrderServiceTest {
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .respondents(List.of(partyDetailsElement))
+            .orderRecipients(of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .respondents(of(partyDetailsElement))
             .build();
         assertEquals("test (Respondent's Solicitor)\n", manageOrderService.getAllRecipients(caseData));
     }
@@ -2488,7 +2514,7 @@ class ManageOrderServiceTest {
             .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
-            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .orderRecipients(of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
             .respondentsFL401(partyDetails)
             .build();
         assertEquals("test test\n", manageOrderService.getAllRecipients(caseData));
@@ -2507,8 +2533,8 @@ class ManageOrderServiceTest {
         Element<PartyDetails> partyDetailsElement = element(partyDetails);
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
-            .applicants(List.of(partyDetailsElement))
+            .orderRecipients(of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
+            .applicants(of(partyDetailsElement))
             .build();
         assertEquals("test (Applicant's Solicitor)\n", manageOrderService.getAllRecipients(caseData));
     }
@@ -2526,7 +2552,7 @@ class ManageOrderServiceTest {
             .build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
-            .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
+            .orderRecipients(of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicantsFL401(partyDetails)
             .build();
         assertEquals("test\n", manageOrderService.getAllRecipients(caseData));
@@ -2643,7 +2669,7 @@ class ManageOrderServiceTest {
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
                               .childOption(dynamicMultiSelectList)
-                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                              .ordersHearingDetails(of(element(HearingData.builder()
                                                                         .hearingDateConfirmOptionEnum(
                                                                             HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                                         .build())))
@@ -2661,7 +2687,7 @@ class ManageOrderServiceTest {
     @Test
     void testPopulateDraftOrderForJudge() {
         when(userService.getUserDetails(Mockito.anyString()))
-            .thenReturn(UserDetails.builder().roles(List.of(Roles.JUDGE.getValue())).build());
+            .thenReturn(UserDetails.builder().roles(of(Roles.JUDGE.getValue())).build());
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         CaseData caseData = CaseData.builder()
@@ -2681,7 +2707,7 @@ class ManageOrderServiceTest {
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
                               .childOption(dynamicMultiSelectList)
-                              .ordersHearingDetails(List.of(element(HearingData.builder()
+                              .ordersHearingDetails(of(element(HearingData.builder()
                                                                         .hearingDateConfirmOptionEnum(
                                                                             HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                                         .build())))
@@ -2768,7 +2794,7 @@ class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+                                                                     .roles(of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -2800,7 +2826,7 @@ class ManageOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+                                                                     .roles(of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -2822,21 +2848,21 @@ class ManageOrderServiceTest {
     @Test
     void testGetLoggedInUserTypeSolicitor() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.SOLICITOR.getValue())).build());
+                                                                     .roles(of(Roles.SOLICITOR.getValue())).build());
         assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
     @Test
     void testGetLoggedInUserTypeCitizen() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.CITIZEN.getValue())).build());
+                                                                     .roles(of(Roles.CITIZEN.getValue())).build());
         assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
     @Test
     void testGetLoggedInUserTypeSystemUpdate() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
+                                                                     .roles(of(Roles.SYSTEM_UPDATE.getValue())).build());
         assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
@@ -2847,7 +2873,7 @@ class ManageOrderServiceTest {
             "hearing-centre-admin");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+                                                                     .roles(of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2862,7 +2888,7 @@ class ManageOrderServiceTest {
             "caseworker-privatelaw-solicitor");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.SOLICITOR.getValue())).build());
+                                                                     .roles(of(Roles.SOLICITOR.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2876,7 +2902,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("allocated-magistrate");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+                                                                     .roles(of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2890,7 +2916,7 @@ class ManageOrderServiceTest {
             "caseworker-privatelaw-systemupdate");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
+                                                                     .roles(of(Roles.SYSTEM_UPDATE.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2904,7 +2930,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.CITIZEN.getValue())).build());
+                                                                     .roles(of(Roles.CITIZEN.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2923,7 +2949,7 @@ class ManageOrderServiceTest {
         when(userService.getUserDetails(anyString())).thenReturn(
             UserDetails.builder()
                 .id(id)
-                .roles(List.of(Roles.SOLICITOR.getValue()))
+                .roles(of(Roles.SOLICITOR.getValue()))
                 .build()
         );
         when(authTokenGenerator.generate()).thenReturn(authToken);
@@ -2940,7 +2966,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("judge");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.JUDGE.getValue())).build());
+            .roles(of(Roles.JUDGE.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -2956,7 +2982,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("tribunal-caseworker");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+            .roles(of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -2972,7 +2998,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("hearing-centre-admin");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+            .roles(of(Roles.COURT_ADMIN.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -2989,7 +3015,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.JUDGE.getValue())).build());
+            .roles(of(Roles.JUDGE.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -3006,7 +3032,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+            .roles(of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -3022,7 +3048,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+            .roles(of(Roles.COURT_ADMIN.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -3038,7 +3064,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.SOLICITOR.getValue())).build());
+            .roles(of(Roles.SOLICITOR.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -3054,7 +3080,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of(Roles.CITIZEN.getValue())).build());
+            .roles(of(Roles.CITIZEN.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -3070,7 +3096,7 @@ class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("some-other-role");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
-            .roles(List.of("unknown-role")).build());
+            .roles(of("unknown-role")).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123"))
             .thenReturn(roleAssignmentServiceResponse);
@@ -3104,25 +3130,25 @@ class ManageOrderServiceTest {
             .code("test")
             .label("test")
             .build();
-        DynamicMultiSelectList dummyDynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(
+        DynamicMultiSelectList dummyDynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(
                 dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dummyDynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .recipientsOptions(dynamicMultiSelectList)
             .otherParties(dynamicMultiSelectList)
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -3176,35 +3202,35 @@ class ManageOrderServiceTest {
             .code("test")
             .label("test")
             .build();
-        DynamicMultiSelectList dummyDynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(
+        DynamicMultiSelectList dummyDynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(
                 dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailAddress("").build())
                                                        .build())))
             .recipientsOptions(dummyDynamicMultiSelectList)
             .otherParties(dummyDynamicMultiSelectList)
-            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+            .emailInformationCA(of(Element.<EmailInformation>builder()
                                             .value(EmailInformation.builder().emailAddress("test").build()).build()))
-            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+            .postalInformationCA(of(Element.<PostalInformation>builder()
                                              .value(PostalInformation.builder().postalAddress(
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .isTheOrderAboutAllChildren(No)
             .childOption(dummyDynamicMultiSelectList)
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -3246,23 +3272,23 @@ class ManageOrderServiceTest {
             .code("test")
             .label("testC47A")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid)
@@ -3307,21 +3333,21 @@ class ManageOrderServiceTest {
             .code("test")
             .label("testC21")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
 
@@ -3345,7 +3371,7 @@ class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(orderList)
-            .applicants(List.of(element(PartyDetails.builder().solicitorEmail("test").doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().solicitorEmail("test").doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
@@ -3380,8 +3406,8 @@ class ManageOrderServiceTest {
             .code("test")
             .label("testC21")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
@@ -3405,7 +3431,7 @@ class ManageOrderServiceTest {
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any(Hearings.class)))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
-            .thenReturn(List.of(Element.<HearingData>builder().build()));
+            .thenReturn(of(Element.<HearingData>builder().build()));
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -3413,13 +3439,13 @@ class ManageOrderServiceTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
 
@@ -3671,20 +3697,20 @@ class ManageOrderServiceTest {
             .code("test")
             .label("testC47A")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
 
@@ -3783,8 +3809,8 @@ class ManageOrderServiceTest {
     void testGetJudgeFullName() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("1234").personalCode("ABC").build())
-            .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .sdoFurtherList(List.of(SdoFurtherInstructionsEnum.newDirection))
+            .sdoLocalAuthorityList(of(SdoLocalAuthorityEnum.localAuthorityLetter))
+            .sdoFurtherList(of(SdoFurtherInstructionsEnum.newDirection))
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3810,21 +3836,21 @@ class ManageOrderServiceTest {
             .code("test")
             .label("testC47A")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
             .isTheOrderAboutAllChildren(Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
 
@@ -3874,21 +3900,21 @@ class ManageOrderServiceTest {
             .code("test")
             .label("testC21")
             .build();
-        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(List.of(dynamicMultiselectListElement))
-            .value(List.of(dynamicMultiselectListElement))
+        dynamicMultiSelectList = DynamicMultiSelectList.builder().listItems(of(dynamicMultiselectListElement))
+            .value(of(dynamicMultiselectListElement))
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isTheOrderAboutAllChildren(Yes)
             .cafcassCymruServedOptions(No)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesNoNotApplicable.No)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .build();
 
@@ -3923,7 +3949,7 @@ class ManageOrderServiceTest {
             .code("123")
             .label("John (Child 1)")
             .build();
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(List.of(dynamicMultiselectListElementUpdated));
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(of(dynamicMultiselectListElementUpdated));
 
         CaseData caseData1 = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         assertEquals("John (Child 1)", caseData1.getManageOrders().getChildOption().getListItems().get(0).getLabel());
@@ -4008,11 +4034,11 @@ class ManageOrderServiceTest {
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
@@ -4027,9 +4053,9 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -4066,9 +4092,9 @@ class ManageOrderServiceTest {
         Document document1 = Document.builder().documentFileName("abc.pdf").build();
         Document document2 = Document.builder().documentFileName("xyz.pdf").build();
         manageOrders = manageOrders.toBuilder()
-            .serveOrderAdditionalDocuments(List.of(element(document1), element(document2)))
+            .serveOrderAdditionalDocuments(of(element(document1), element(document2)))
             .serveOrderDynamicList(DynamicMultiSelectList.builder()
-                                       .value(List.of(
+                                       .value(of(
                                            DynamicMultiselectListElement.builder()
                                                .code("123")
                                                .label("test order")
@@ -4137,7 +4163,7 @@ class ManageOrderServiceTest {
     void testSetFieldsForWaTaskForJudgeCreateOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+                                                                     .roles(of(Roles.JUDGE.getValue())).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4163,7 +4189,7 @@ class ManageOrderServiceTest {
     void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+                                                                     .roles(of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4190,7 +4216,7 @@ class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
-                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+                                                                     .roles(of(Roles.JUDGE.getValue())).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -4228,13 +4254,13 @@ class ManageOrderServiceTest {
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                      .emailInformation(EmailInformation.builder().emailName("").build())
                                                      .build())))
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
@@ -4249,12 +4275,12 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
-            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+            .emailInformationCA(of(Element.<EmailInformation>builder()
                                             .value(EmailInformation.builder().emailAddress("test").build()).build()))
-            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+            .postalInformationCA(of(Element.<PostalInformation>builder()
                                              .value(PostalInformation.builder().postalAddress(
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
@@ -4473,7 +4499,7 @@ class ManageOrderServiceTest {
             .doesOrderClosesCase(Yes)
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .manageOrders(ManageOrders.builder().serveOrderDynamicList(partyDynamicMultiSelectList)
-                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .serveOtherPartiesDA(of(ServeOtherPartiesOptions.other))
                               .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin)
                               .build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
@@ -4500,12 +4526,12 @@ class ManageOrderServiceTest {
             .label("test label").build();
         elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+            .serveOtherPartiesDA(of(ServeOtherPartiesOptions.other))
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
@@ -4520,12 +4546,12 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
-            .emailInformationDA(List.of(Element.<EmailInformation>builder()
+            .emailInformationDA(of(Element.<EmailInformation>builder()
                                             .value(EmailInformation.builder().emailAddress("test").build()).build()))
-            .postalInformationDA(List.of(Element.<PostalInformation>builder()
+            .postalInformationDA(of(Element.<PostalInformation>builder()
                                              .value(PostalInformation.builder().postalAddress(
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
@@ -4596,12 +4622,12 @@ class ManageOrderServiceTest {
     @Test
     void givenRespondentLipNonPersonalServicePrefPostShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .contactPreferences(ContactPreferences.post)
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                     .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
                     .address(Address.builder().addressLine1("test address").build())
                 .build()));
         CaseData caseData = getCaseData();
@@ -4629,12 +4655,12 @@ class ManageOrderServiceTest {
     @Test
     void givenRespondentLipNonPersonalServiceContactPrefNotPresentShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                     .email("test@test.com")
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                     .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
                 .address(Address.builder().addressLine1("test address").build())
                 .build()));
         CaseData caseData = getCaseData();
@@ -4662,12 +4688,12 @@ class ManageOrderServiceTest {
     @Test
     void givenRespondentLipNonPersonalServiceEmailAddressNotPresentShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                     .contactPreferences(ContactPreferences.post)
                     .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
                 .address(Address.builder().addressLine1("test address").build())
                 .build()));
         CaseData caseData = getCaseData();
@@ -4695,12 +4721,12 @@ class ManageOrderServiceTest {
     @Test
     void givenRespondenNonPersonalServiceIfRepresentedShouldNotGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                 .contactPreferences(ContactPreferences.post)
                 .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
                 .address(Address.builder().addressLine1("test address").build())
                 .build()));
         CaseData caseData = getCaseData();
@@ -4728,7 +4754,7 @@ class ManageOrderServiceTest {
     @Test
     void givenRespondentLipNonPersonalServiceShouldNotGiveErrorIfAddressIsPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                     .email("test@test.com")
                     .address(Address.builder().addressLine1("test address").build())
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -4760,7 +4786,7 @@ class ManageOrderServiceTest {
     @Test
     void givenRespondentLipPersonalServiceShouldNotGiveError() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .contactPreferences(ContactPreferences.post)
                 .build()));
@@ -4791,12 +4817,12 @@ class ManageOrderServiceTest {
     @Test
     void givenOtherPartyNonPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .contactPreferences(ContactPreferences.post)
                 .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
@@ -4825,12 +4851,12 @@ class ManageOrderServiceTest {
     @Test
     void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .contactPreferences(ContactPreferences.post)
                 .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"), PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"), PartyDetails.builder()
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
@@ -4860,14 +4886,14 @@ class ManageOrderServiceTest {
     @Test
     void givenOtherPartyShouldNotGiveErrorIfAddressIsPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .contactPreferences(ContactPreferences.post)
                 .address(Address.builder()
                              .addressLine1("test address").build())
                 .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"), PartyDetails.builder()
+            of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"), PartyDetails.builder()
                 .address(Address.builder().addressLine1("test address").build())
                 .build()));
         CaseData caseData = getCaseData();
@@ -5165,7 +5191,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
@@ -5206,7 +5232,7 @@ class ManageOrderServiceTest {
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(List.of(Element.<HearingData>builder().build()));
+            .thenReturn(of(Element.<HearingData>builder().build()));
 
         List<Element<HearingData>> hearingDataListResp
             = manageOrderService.getHearingDataFromExistingHearingData("testAuth", hearingDataList, caseData);
@@ -5218,7 +5244,7 @@ class ManageOrderServiceTest {
     void testPopulateFinalOrderFromCaseDataForUploadAnOrder() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
-                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+                                                                     .roles(of(Roles.COURT_ADMIN.getValue())).build());
 
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -5317,12 +5343,12 @@ class ManageOrderServiceTest {
         List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
         dynamicMultiselectListElementList.add(dynamicMultiselectListElement1);
         dynamicMultiselectListElementList.add(dynamicMultiselectListElement2);
-        StandardDirectionOrder factFindingHearing = StandardDirectionOrder.builder().sdoHearingsAndNextStepsList(List.of(
+        StandardDirectionOrder factFindingHearing = StandardDirectionOrder.builder().sdoHearingsAndNextStepsList(of(
             SdoHearingsAndNextStepsEnum.factFindingHearing))
             .sdoWhoMadeAllegationsList(DynamicMultiSelectList.builder()
                                            .value(dynamicMultiselectListElementList).build())
             .sdoWhoNeedsToRespondAllegationsList(DynamicMultiSelectList.builder()
-                                                     .value(List.of(DynamicMultiselectListElement.builder().label("bb")
+                                                     .value(of(DynamicMultiselectListElement.builder().label("bb")
                                                                         .build())).build())
             .build();
         StandardDirectionOrder[] sdoNewPartnerParties = {cafcass, cymru, factFindingHearing};
@@ -5520,7 +5546,7 @@ class ManageOrderServiceTest {
             .applicants(partyDetails)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)/*
@@ -5568,7 +5594,7 @@ class ManageOrderServiceTest {
             .applicants(partyDetails)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
@@ -5617,7 +5643,7 @@ class ManageOrderServiceTest {
             .applicants(partyDetails)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
@@ -5666,7 +5692,7 @@ class ManageOrderServiceTest {
             .sdoDraHearingDetails(hearingDataInitial)
             .sdoSettlementHearingDetails(hearingDataInitial)
             .sdoDirectionsForFactFindingHearingDetails(hearingDataInitial)
-            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoHearingsAndNextStepsList(of(SdoHearingsAndNextStepsEnum.factFindingHearing))
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
 
 
@@ -5747,10 +5773,10 @@ class ManageOrderServiceTest {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder, prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
@@ -5766,12 +5792,12 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .personallyServeRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
-            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+            .emailInformationCA(of(Element.<EmailInformation>builder()
                                             .value(EmailInformation.builder().emailAddress("test").build()).build()))
-            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+            .postalInformationCA(of(Element.<PostalInformation>builder()
                                              .value(PostalInformation.builder().postalAddress(
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
@@ -5992,17 +6018,17 @@ class ManageOrderServiceTest {
 
         ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                      .emailInformation(EmailInformation.builder().emailName("").build())
                                                      .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -6013,9 +6039,9 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -6120,17 +6146,17 @@ class ManageOrderServiceTest {
 
         ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                      .emailInformation(EmailInformation.builder().emailName("").build())
                                                      .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -6141,9 +6167,9 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -6230,17 +6256,17 @@ class ManageOrderServiceTest {
         elements.add(element);
         ManageOrders manageOrders1 = ManageOrders.builder()
             .cafcassCymruServedOptions(No)
-            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder,prohibitedStepsOrder))
+            .childArrangementsOrdersToIssue(of(childArrangementsOrder, prohibitedStepsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+            .serveOrderAdditionalDocuments(of(Element.<Document>builder()
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                      .emailInformation(EmailInformation.builder().emailName("").build())
                                                      .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -6251,9 +6277,9 @@ class ManageOrderServiceTest {
                               .build())
             .serveToRespondentOptions(YesNoNotApplicable.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
-            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOtherPartiesCA(of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .ordersHearingDetails(List.of(element(HearingData.builder()
+            .ordersHearingDetails(of(element(HearingData.builder()
                                                       .hearingDateConfirmOptionEnum(
                                                           HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
                                                       .build())))
@@ -6394,8 +6420,8 @@ class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .serveOrderData(ServeOrderData.builder()
                                 .localAuthorityNeedToProvideReport(Yes)
-                                .localAuthorityMultipleDocuments(List.of(
-                                    LocalAuthorityDocumentsEnum.childImpactReport1La,
+                                .localAuthorityMultipleDocuments(of(
+                                    childImpactReport1La,
                                     LocalAuthorityDocumentsEnum.childImpactReport2La,
                                     LocalAuthorityDocumentsEnum.sec37Report
                                 ))
@@ -6426,10 +6452,10 @@ class ManageOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .serveOrderData(ServeOrderData.builder()
                                 .cafcassOrCymruNeedToProvideReport(Yes)
-                                .cafcassCymruDocuments(List.of(
-                                    CafcassCymruDocumentsEnum.childImpactReport1,
-                                    CafcassCymruDocumentsEnum.childImpactReport2,
-                                    CafcassCymruDocumentsEnum.safeGuardingLetter
+                                .cafcassCymruDocuments(of(
+                                    childImpactReport1,
+                                    childImpactReport2,
+                                    safeGuardingLetter
                                 ))
                                 .build())
             .build();
@@ -6490,7 +6516,7 @@ class ManageOrderServiceTest {
             .applicants(partyDetails)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .manageOrders(manageOrders)
@@ -6515,7 +6541,7 @@ class ManageOrderServiceTest {
     void testPopulateFinalOrderFromCaseDataWithNoCheck1() {
 
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
-                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+                                                                     .roles(of(Roles.COURT_ADMIN.getValue())).build());
 
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -6546,7 +6572,7 @@ class ManageOrderServiceTest {
             .isTheOrderAboutAllChildren(Yes)
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-            .childArrangementsOrdersToIssue(List.of(OrderTypeEnum.childArrangementsOrder))
+            .childArrangementsOrdersToIssue(of(OrderTypeEnum.childArrangementsOrder))
             .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.spendTimeWithOrder)
             .childOption(
                 dynamicMultiSelectList
@@ -6584,7 +6610,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.directionOnIssue)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
@@ -6617,7 +6643,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .manageOrders(manageOrders)
             .build();
@@ -6650,7 +6676,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
             .build();
@@ -6680,7 +6706,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
             .build();
@@ -6713,7 +6739,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
             .build();
@@ -6742,7 +6768,7 @@ class ManageOrderServiceTest {
         HearingDataPrePopulatedDynamicLists prePopulatedDynamicLists = HearingDataPrePopulatedDynamicLists
             .builder()
             .retrievedHearingDates(DynamicList.builder()
-                                       .listItems(List.of(
+                                       .listItems(of(
                                            DynamicListElement.builder()
                                                .label(label)
                                                .build()
@@ -6798,7 +6824,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
             .build();
@@ -6830,7 +6856,7 @@ class ManageOrderServiceTest {
         HearingDataPrePopulatedDynamicLists prePopulatedDynamicLists = HearingDataPrePopulatedDynamicLists
             .builder()
             .retrievedHearingDates(DynamicList.builder()
-                                       .listItems(List.of(
+                                       .listItems(of(
                                            DynamicListElement.builder()
                                                .label(label)
                                                .build()
@@ -6887,7 +6913,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
             .fl401FamilymanCaseNumber("familyman12345")
-            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .manageOrders(manageOrders)
             .judgeOrMagistratesLastName("Test Judge Name")
@@ -6982,7 +7008,7 @@ class ManageOrderServiceTest {
     public void validateAdditionalPartiesShouldReturnNoErrorsForValidEmails() {
         CaseData testData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
-                              .serveOrgDetailsList(List.of(
+                              .serveOrgDetailsList(of(
                                   element(ServeOrgDetails.builder()
                                               .serveByPostOrEmail(DeliveryByEnum.email)
                                               .emailInformation(EmailInformation.builder()
@@ -7013,7 +7039,7 @@ class ManageOrderServiceTest {
     public void validateAdditionalPartiesShouldReturnErrorsForInvalidEmails() {
         CaseData testData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
-                              .serveOrgDetailsList(List.of(
+                              .serveOrgDetailsList(of(
                                   element(ServeOrgDetails.builder()
                                               .serveByPostOrEmail(DeliveryByEnum.email)
                                               .emailInformation(EmailInformation.builder()
@@ -7135,13 +7161,13 @@ class ManageOrderServiceTest {
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hearingTypeValue("First Hearing")
-            .hearingDaySchedule(List.of(schedule))
+            .hearingDaySchedule(of(schedule))
             .build();
-        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(of(caseHearing)).build();
 
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
-            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+            .roles(of("caseworker-privatelaw-courtadmin")).build());
 
         final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -7181,13 +7207,13 @@ class ManageOrderServiceTest {
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hearingTypeValue("First Hearing")
-            .hearingDaySchedule(List.of(schedule))
+            .hearingDaySchedule(of(schedule))
             .build();
-        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(of(caseHearing)).build();
 
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
-            .roles(List.of("caseworker-privatelaw-judge")).build());
+            .roles(of("caseworker-privatelaw-judge")).build());
 
         final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -7241,20 +7267,20 @@ class ManageOrderServiceTest {
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hearingTypeValue("First Hearing")
-            .hearingDaySchedule(List.of(schedule))
+            .hearingDaySchedule(of(schedule))
             .build();
-        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(of(caseHearing)).build();
         JudicialUsersApiResponse judgeResponse = JudicialUsersApiResponse.builder()
             .surname("Smith")
             .fullName("John Smith")
-            .appointments(List.of(Appointment.builder().appointment("District Judge").build()))
+            .appointments(of(Appointment.builder().appointment("District Judge").build()))
             .build();
 
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
-            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+            .roles(of("caseworker-privatelaw-courtadmin")).build());
         when(refDataUserService.getAllJudicialUserDetails(any(JudicialUsersApiRequest.class)))
-            .thenReturn(List.of(judgeResponse));
+            .thenReturn(of(judgeResponse));
 
         final CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -7327,13 +7353,13 @@ class ManageOrderServiceTest {
             .build();
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hearingTypeValue("First Hearing")
-            .hearingDaySchedule(List.of(schedule))
+            .hearingDaySchedule(of(schedule))
             .build();
-        Hearings hearings = Hearings.hearingsWith().caseHearings(List.of(caseHearing)).build();
+        Hearings hearings = Hearings.hearingsWith().caseHearings(of(caseHearing)).build();
 
         when(hearingService.getHearings(anyString(), anyString())).thenReturn(hearings);
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder()
-            .roles(List.of("caseworker-privatelaw-courtadmin")).build());
+            .roles(of("caseworker-privatelaw-courtadmin")).build());
 
         CaseData caseData = CaseData.builder()
             .id(1234567890123456L)
@@ -7359,7 +7385,7 @@ class ManageOrderServiceTest {
         caseDataUpdated.put("customOrderNameOption", "childArrangementsSpecificProhibitedOrder");
 
         Map<String, Object> c43Details = new HashMap<>();
-        c43Details.put("ordersToIssue", List.of("childArrangementsOrder", "specificIssueOrder"));
+        c43Details.put("ordersToIssue", of("childArrangementsOrder", "specificIssueOrder"));
         c43Details.put("childArrangementsOrderType", "liveWithOrder");
         caseDataUpdated.put("customC43OrderDetails", c43Details);
 
@@ -7376,7 +7402,8 @@ class ManageOrderServiceTest {
             caseDataUpdated.get("nameOfOrder"));
 
         // Then - C43 fields synced
-        assertEquals(List.of("childArrangementsOrder", "specificIssueOrder"),
+        assertEquals(
+            of("childArrangementsOrder", "specificIssueOrder"),
             caseDataUpdated.get("childArrangementsOrdersToIssue"));
         assertEquals("liveWithOrder", caseDataUpdated.get("selectChildArrangementsOrder"));
 
@@ -7395,7 +7422,7 @@ class ManageOrderServiceTest {
         caseDataUpdated.put("customC21OrderDetails", c21Details);
 
         // Pre-populate fields that should be cleared
-        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("childArrangementsOrdersToIssue", of("oldOrder"));
 
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
@@ -7421,7 +7448,7 @@ class ManageOrderServiceTest {
         caseDataUpdated.put("customOrderNameOption", null);
 
         // Pre-populate all fields
-        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("childArrangementsOrdersToIssue", of("oldOrder"));
         caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
         caseDataUpdated.put("c21OrderOptions", "oldOption");
 
@@ -7445,7 +7472,7 @@ class ManageOrderServiceTest {
         caseDataUpdated.put("customOrderNameOption", "other");
 
         // Pre-populate all fields
-        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("oldOrder"));
+        caseDataUpdated.put("childArrangementsOrdersToIssue", of("oldOrder"));
         caseDataUpdated.put("selectChildArrangementsOrder", "oldType");
         caseDataUpdated.put("c21OrderOptions", "oldOption");
 
@@ -7501,10 +7528,10 @@ class ManageOrderServiceTest {
 
         // Old C43 data that should be cleared
         Map<String, Object> oldC43Details = new HashMap<>();
-        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        oldC43Details.put("ordersToIssue", of("childArrangementsOrder"));
         oldC43Details.put("childArrangementsOrderType", "liveWithOrder");
         caseDataUpdated.put("customC43OrderDetails", oldC43Details);
-        caseDataUpdated.put("childArrangementsOrdersToIssue", List.of("childArrangementsOrder"));
+        caseDataUpdated.put("childArrangementsOrdersToIssue", of("childArrangementsOrder"));
         caseDataUpdated.put("selectChildArrangementsOrder", "liveWithOrder");
 
         // New C21 data
@@ -7539,14 +7566,14 @@ class ManageOrderServiceTest {
 
         // New C43 data
         Map<String, Object> newC43Details = new HashMap<>();
-        newC43Details.put("ordersToIssue", List.of("specificIssueOrder"));
+        newC43Details.put("ordersToIssue", of("specificIssueOrder"));
         caseDataUpdated.put("customC43OrderDetails", newC43Details);
 
         // When
         manageOrderService.syncCustomOrderFieldsToPreExisting(caseDataUpdated);
 
         // Then - C43 data preserved
-        assertEquals(List.of("specificIssueOrder"), caseDataUpdated.get("childArrangementsOrdersToIssue"));
+        assertEquals(of("specificIssueOrder"), caseDataUpdated.get("childArrangementsOrdersToIssue"));
         assertNotNull(caseDataUpdated.get("customC43OrderDetails"));
 
         // C21 source and synced fields cleared
@@ -7562,7 +7589,7 @@ class ManageOrderServiceTest {
 
         // Old C43 data
         Map<String, Object> oldC43Details = new HashMap<>();
-        oldC43Details.put("ordersToIssue", List.of("childArrangementsOrder"));
+        oldC43Details.put("ordersToIssue", of("childArrangementsOrder"));
         caseDataUpdated.put("customC43OrderDetails", oldC43Details);
 
         // Old C21 data
@@ -7591,11 +7618,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .surname("Smith")
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7613,11 +7640,11 @@ class ManageOrderServiceTest {
             .build();
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7631,7 +7658,7 @@ class ManageOrderServiceTest {
         // Given
         String idamUserId = "unknown-idam-id";
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of());
+            .thenReturn(of());
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7669,7 +7696,7 @@ class ManageOrderServiceTest {
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7701,11 +7728,11 @@ class ManageOrderServiceTest {
             .build();
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7723,11 +7750,11 @@ class ManageOrderServiceTest {
             .build();
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7755,11 +7782,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .postNominals(postNominals)
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7778,11 +7805,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .postNominals("Mr")
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7801,11 +7828,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .postNominals("Sir")
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7824,11 +7851,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .postNominals("Lady")
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7847,11 +7874,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .postNominals("Ms")
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7870,11 +7897,11 @@ class ManageOrderServiceTest {
         JudicialUsersApiResponse judgeDetails = JudicialUsersApiResponse.builder()
             .sidamId(idamUserId)
             .postNominals("Miss")
-            .appointments(List.of(appointment))
+            .appointments(of(appointment))
             .build();
 
         when(refDataUserService.getJudicialUserBySidamId(idamUserId))
-            .thenReturn(List.of(judgeDetails));
+            .thenReturn(of(judgeDetails));
 
         // When
         JudgeOrMagistrateTitleEnum result = manageOrderService.getLoggedInJudgeTitle(idamUserId);
@@ -7898,7 +7925,7 @@ class ManageOrderServiceTest {
             .label("C43 Order")
             .build();
         DynamicMultiSelectList mockOrderList = DynamicMultiSelectList.builder()
-            .listItems(List.of(firstElement, secondElement))
+            .listItems(of(firstElement, secondElement))
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -7938,7 +7965,7 @@ class ManageOrderServiceTest {
             .label("C43 Order")
             .build();
         DynamicMultiSelectList mockOrderList = DynamicMultiSelectList.builder()
-            .listItems(List.of(firstElement, secondElement))
+            .listItems(of(firstElement, secondElement))
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -7972,7 +7999,7 @@ class ManageOrderServiceTest {
             .email("test@admin.com")
             .build();
 
-        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+        List<Element<HearingData>> hearingDataList = of(element(HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .build()));
 
@@ -8006,7 +8033,7 @@ class ManageOrderServiceTest {
             .email("test@admin.com")
             .build();
 
-        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+        List<Element<HearingData>> hearingDataList = of(element(HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
             .build()));
 
@@ -8043,7 +8070,7 @@ class ManageOrderServiceTest {
             .build();
 
         // Even with eligible hearing data, uploadAnOrder should NOT trigger AHR
-        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+        List<Element<HearingData>> hearingDataList = of(element(HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .build()));
 
@@ -8078,7 +8105,7 @@ class ManageOrderServiceTest {
             .email("test@judge.com")
             .build();
 
-        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+        List<Element<HearingData>> hearingDataList = of(element(HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .build()));
 
@@ -8109,7 +8136,7 @@ class ManageOrderServiceTest {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .forename("Test")
             .surname("Admin")
-            .roles(List.of(Roles.COURT_ADMIN.getValue()))
+            .roles(of(Roles.COURT_ADMIN.getValue()))
             .build());
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -8124,7 +8151,7 @@ class ManageOrderServiceTest {
 
         ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
 
-        List<Element<HearingData>> hearingDataList = List.of(element(HearingData.builder()
+        List<Element<HearingData>> hearingDataList = of(element(HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .build()));
 
@@ -8159,7 +8186,7 @@ class ManageOrderServiceTest {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .forename("Test")
             .surname("Admin")
-            .roles(List.of(Roles.COURT_ADMIN.getValue()))
+            .roles(of(Roles.COURT_ADMIN.getValue()))
             .build());
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -8201,4 +8228,283 @@ class ManageOrderServiceTest {
         assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
     }
 
+    @ParameterizedTest(name = "Testing LA CIR document: {0}")
+    @EnumSource(
+        value = LocalAuthorityDocumentsEnum.class,
+        names = {"childImpactReport1La", "childImpactReport2La"}
+    )
+    void testOrchestrateCirDocumentsRequestedTask_when_LA_ChildImpactReport(LocalAuthorityDocumentsEnum localAuthorityDocumentsEnum) {
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(UserDetails.builder()
+                            .id("123")
+                            .roles(of(Roles.COURT_ADMIN.getValue()))
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder()
+                                .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(of(localAuthorityDocumentsEnum))
+                                .build())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            new HashMap<String, Object>(),
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), CREATE_REQUEST_CIR_UPDATE_TASK.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
+
+        verify(allTabService, times(3))
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+        assertThat(eventIdCaptor.getAllValues())
+            .containsAll(of(CANCEL_REQUEST_CIR_UPDATE_TASK.getValue(),
+                            CREATE_REQUEST_CIR_UPDATE_TASK.getValue(),
+                            UPDATE_ALL_TABS.getValue()));
+
+        verify(allTabService, times(3))
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
+        Map<String, Object> waFieldsMap = caseDataMapCaptor.getAllValues().getFirst();
+
+        assertThat(waFieldsMap.get("cirDocumentsRequested")).isNotNull();
+
+        Element<String> cirDocumentsRequestedList = ((List<Element<String>>)waFieldsMap.get("cirDocumentsRequested")).getFirst();
+
+        assertThat(cirDocumentsRequestedList.getValue())
+            .isEqualTo(localAuthorityDocumentsEnum.getId());
+
+        assertThat(waFieldsMap)
+            .containsEntry("whenReportsMustBeFiledByLocalAuthority", LocalDate.now())
+            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name());
+        assertThat(waFieldsMap.get("whenReportsMustBeFiled")).isNull();
+    }
+
+    @ParameterizedTest(name = "Testing Cafcass CIR document: {0}")
+    @EnumSource(
+        value = CafcassCymruDocumentsEnum.class,
+        names = {"childImpactReport1", "childImpactReport2"}
+    )
+    void testOrchestrateCirDocumentsRequestedTask_when_Cafcass_ChildImpactReport(CafcassCymruDocumentsEnum cafcassCymruDocumentsEnum) {
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(UserDetails.builder()
+                            .id("123")
+                            .roles(of(Roles.COURT_ADMIN.getValue()))
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder()
+                                .whenReportsMustBeFiled(LocalDate.now())
+                                .cafcassOrCymruNeedToProvideReport(Yes)
+                                .cafcassCymruDocuments(of(cafcassCymruDocumentsEnum))
+                                .build())
+            .build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            new HashMap<String, Object>(),
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), CREATE_REQUEST_CIR_UPDATE_TASK.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
+
+        verify(allTabService, times(3))
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+        assertThat(eventIdCaptor.getAllValues())
+            .containsAll(of(CANCEL_REQUEST_CIR_UPDATE_TASK.getValue(),
+                            CREATE_REQUEST_CIR_UPDATE_TASK.getValue(),
+                            UPDATE_ALL_TABS.getValue()));
+
+        verify(allTabService, times(3))
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
+        Map<String, Object> waFieldsMap = caseDataMapCaptor.getAllValues().getFirst();
+
+        assertThat(waFieldsMap.get("cirDocumentsRequested")).isNotNull();
+
+        Element<String> cirDocumentsRequestedList = ((List<Element<String>>)waFieldsMap.get("cirDocumentsRequested")).getFirst();
+
+        assertThat(cirDocumentsRequestedList.getValue())
+            .isEqualTo(cafcassCymruDocumentsEnum.getId());
+
+        assertThat(waFieldsMap)
+            .containsEntry("whenReportsMustBeFiled", LocalDate.now())
+            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name());
+        assertThat(waFieldsMap.get("whenReportsMustBeFiledByLocalAuthority")).isNull();
+    }
+
+    @ParameterizedTest(name = "Testing Cafcass document: {0}")
+    @EnumSource(
+        value = CafcassCymruDocumentsEnum.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"childImpactReport1", "childImpactReport2"}
+    )
+    void testOrchestrateCirDocumentsRequestedTask_when_No_Cafcass_ChildImpactReport(CafcassCymruDocumentsEnum cafcassCymruDocumentsEnum) {
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(UserDetails.builder()
+                            .id("123")
+                            .roles(of(Roles.COURT_ADMIN.getValue()))
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder()
+                                .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
+                                .whenReportsMustBeFiled(LocalDate.now())
+                                .cafcassOrCymruNeedToProvideReport(Yes)
+                                .cafcassCymruDocuments(of(cafcassCymruDocumentsEnum))
+                                .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("cafcassCymruDocuments", List.of(Document.builder().build()));
+        caseDataMap.put("localAuthorityMultipleDocuments", List.of(Document.builder().build()));
+        caseDataMap.put("localAuthorityNeedToProvideReport", No);
+        caseDataMap.put("cafcassOrCymruNeedToProvideReport", Yes);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
+
+        verify(allTabService)
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+
+        assertThat(eventIdCaptor.getValue())
+            .isEqualTo(UPDATE_ALL_TABS.getValue());
+
+        verify(allTabService)
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
+
+        Map<String, Object> caseDataFields = caseDataMapCaptor.getAllValues().getFirst();
+
+        assertThat(caseDataFields.get("cirDocumentsRequested")).isNull();
+        assertThat(caseDataFields)
+            .containsEntry("whenReportsMustBeFiled", LocalDate.now())
+            .containsEntry("whenReportsMustBeFiledByLocalAuthority", LocalDate.now())
+            .containsEntry("cafcassCymruDocuments", null)
+            .containsEntry("localAuthorityMultipleDocuments", null)
+            .containsEntry("localAuthorityNeedToProvideReport", null)
+            .containsEntry("cafcassOrCymruNeedToProvideReport", null);
+    }
+
+    @ParameterizedTest(name = "Testing LA document: {0}")
+    @EnumSource(
+        value = LocalAuthorityDocumentsEnum.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"childImpactReport1La", "childImpactReport2La"}
+    )
+    void testOrchestrateCirDocumentsRequestedTask_when_No_LA_ChildImpactReport(LocalAuthorityDocumentsEnum localAuthorityDocumentsEnum) {
+        when(userService.getUserDetails(anyString()))
+            .thenReturn(UserDetails.builder()
+                            .id("123")
+                            .roles(of(Roles.COURT_ADMIN.getValue()))
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder()
+                                .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
+                                .whenReportsMustBeFiled(LocalDate.now())
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(of(localAuthorityDocumentsEnum))
+                                .build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("cafcassCymruDocuments", List.of(Document.builder().build()));
+        caseDataMap.put("localAuthorityMultipleDocuments", List.of(Document.builder().build()));
+        caseDataMap.put("localAuthorityNeedToProvideReport", Yes);
+        caseDataMap.put("cafcassOrCymruNeedToProvideReport", No);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseDataMap,
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
+
+        verify(allTabService)
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+
+        assertThat(eventIdCaptor.getValue())
+            .isEqualTo(UPDATE_ALL_TABS.getValue());
+
+        verify(allTabService)
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
+
+        Map<String, Object> caseDataFields = caseDataMapCaptor.getAllValues().getFirst();
+
+        assertThat(caseDataFields.get("cirDocumentsRequested")).isNull();
+        assertThat(caseDataFields)
+            .containsEntry("whenReportsMustBeFiled", LocalDate.now())
+            .containsEntry("whenReportsMustBeFiledByLocalAuthority", LocalDate.now())
+            .containsEntry("cafcassCymruDocuments", null)
+            .containsEntry("localAuthorityMultipleDocuments", null)
+            .containsEntry("localAuthorityNeedToProvideReport", null)
+            .containsEntry("cafcassOrCymruNeedToProvideReport", null);
+    }
 }
