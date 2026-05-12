@@ -68,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getOtherPerson;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -369,15 +370,10 @@ public class ManageOrderEmailService {
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
         }
 
-        //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
-        // For custom orders, work on caseDataMap's collection (which has the combined doc and correct orderTypeId)
+        // Set bulkIds in the orderCollection & update in caseDataMap
+        // Work on caseDataMap's collection (which has the combined doc and correct orderTypeId)
         // to avoid overwriting those updates with stale data from caseData
-        if (caseDataMap.get("customOrderDoc") != null) {
-            addBulkPrintIdsInOrderCollectionFromMap(caseDataMap, caseData.getManageOrders(), bulkPrintOrderDetails);
-        } else {
-            addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-            caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
-        }
+        addBulkPrintIdsInOrderCollectionFromMap(caseDataMap, caseData.getManageOrders(), bulkPrintOrderDetails);
     }
 
     private void handleFL401ServeOrderNotifications(String authorisation,
@@ -641,6 +637,7 @@ public class ManageOrderEmailService {
                 sendgridEmailTemplateName,
                 authorisation,
                 SendgridEmailConfig.builder()
+                    .caseReference(String.valueOf(dynamicDataForEmail.get(CASE_REFERENCE)))
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)
                     .listOfAttachments(orderDocuments)
@@ -659,14 +656,16 @@ public class ManageOrderEmailService {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + "/" + caseData.getId() + ORDERS);
         try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
-                authorisation,
-                SendgridEmailConfig.builder().toEmailAddress(
-                    cafcassCymruEmailId).dynamicTemplateData(
-                    dynamicData).listOfAttachments(
-                    orderDocuments).languagePreference(LanguagePreference.english).build()
-            );
+            SendgridEmailConfig config = SendgridEmailConfig.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .toEmailAddress(cafcassCymruEmailId)
+                .dynamicTemplateData(dynamicData)
+                .listOfAttachments(orderDocuments)
+                .languagePreference(LanguagePreference.english)
+                .build();
+
+            sendgridService.sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
+                                                                  authorisation, config);
         } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
                       cafcassCymruEmailId, e.getMessage());
