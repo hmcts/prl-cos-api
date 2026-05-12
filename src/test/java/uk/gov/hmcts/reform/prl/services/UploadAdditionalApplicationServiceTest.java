@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
@@ -118,11 +117,11 @@ class UploadAdditionalApplicationServiceTest {
     private Method withCategory;
 
     // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime,
-    // String partyName, PartyEnum partyType)
+    // String partyName)
     private Method getC2DocumentBundle;
 
     // reflect: private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
-    // String currentDateTime, String partyName, PartyEnum partyType)
+    // String currentDateTime, String partyName)
     private Method getOtherApplicationsBundle;
 
     @BeforeEach
@@ -133,11 +132,11 @@ class UploadAdditionalApplicationServiceTest {
         withCategory.setAccessible(true);
 
         getC2DocumentBundle = UploadAdditionalApplicationService.class
-            .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class, PartyEnum.class);
+            .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class);
         getC2DocumentBundle.setAccessible(true);
 
         getOtherApplicationsBundle = UploadAdditionalApplicationService.class
-            .getDeclaredMethod("getOtherApplicationsBundle", CaseData.class, String.class, String.class, String.class, PartyEnum.class);
+            .getDeclaredMethod("getOtherApplicationsBundle", CaseData.class, String.class, String.class, String.class);
         getOtherApplicationsBundle.setAccessible(true);
 
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
@@ -198,7 +197,7 @@ class UploadAdditionalApplicationServiceTest {
             )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().document(Document.builder().build()).build())
             .representedPartyType(CA_APPLICANT)
             .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
@@ -473,7 +472,7 @@ class UploadAdditionalApplicationServiceTest {
                                                                     .build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().document(Document.builder().build()).build())
             .additionalApplicantsList(partyDynamicMultiSelectList)
             .build();
         CaseData caseData = CaseData.builder()
@@ -606,11 +605,16 @@ class UploadAdditionalApplicationServiceTest {
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
             .build();
 
+        OtherApplicationsBundle otherApplicationsBundle = OtherApplicationsBundle.builder()
+            .document(Document.builder().build())
+            .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
+            .build();
+
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .additionalApplicationFeesToPay("£232.00")
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS).build())
+            .temporaryOtherApplicationsBundle(otherApplicationsBundle)
             .build();
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
@@ -794,7 +798,7 @@ class UploadAdditionalApplicationServiceTest {
 
     @Test
     void applicantParty_setsApplicantCategoryOnDocs() throws Exception {
-        PartyEnum partyType = PartyEnum.applicant;
+
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
                                                  .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
@@ -805,7 +809,7 @@ class UploadAdditionalApplicationServiceTest {
             .build();
 
         OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
-            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "partyName", partyType);
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "applicant partyName");
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("applicationsWithinProceedings", result.getFinalDocument().get(0).getValue().getCategoryId());
@@ -813,7 +817,6 @@ class UploadAdditionalApplicationServiceTest {
 
     @Test
     void respondentParty_setsRespondentCategoryOnDocs() throws Exception {
-        PartyEnum partyType = PartyEnum.respondent;
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
                                                  .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
@@ -824,7 +827,7 @@ class UploadAdditionalApplicationServiceTest {
             .build();
 
         OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
-            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "partyName", partyType);
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "respondent partyName");
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("applicationsWithinProceedingsRes", result.getFinalDocument().get(0).getValue().getCategoryId());
@@ -832,7 +835,6 @@ class UploadAdditionalApplicationServiceTest {
 
     @Test
     void otherParty_setsRespondentCategoryOnDocs() throws Exception {
-        PartyEnum partyType = PartyEnum.other;
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
                                                  .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
@@ -843,7 +845,7 @@ class UploadAdditionalApplicationServiceTest {
             .build();
 
         OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
-            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "partyName", partyType);
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "other partyName");
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("applicationsFromOtherProceedings", result.getFinalDocument().get(0).getValue().getCategoryId());
@@ -870,7 +872,7 @@ class UploadAdditionalApplicationServiceTest {
                                      .applicantName("Elise Lynn (respondent)")
                                      .document(inputDoc)
                                      .build())
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().document(Document.builder().build()).build())
             .representedPartyType(CA_APPLICANT)
             .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
@@ -903,7 +905,7 @@ class UploadAdditionalApplicationServiceTest {
             //CaseData caseData, String author, String currentDateTime, String partyName, PartyEnum partyType
             result =
                 (C2DocumentBundle) getC2DocumentBundle.invoke(uploadAdditionalApplicationService, caseData, "An Author",
-                    "2024-01-01", "Elise Lynn (respondent)", PartyEnum.respondent);
+                    "2024-01-01", "Elise Lynn (respondent)");
         } catch (Exception e) {
             Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
         }

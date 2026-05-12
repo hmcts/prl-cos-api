@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -63,6 +64,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -121,23 +123,20 @@ public class UploadAdditionalApplicationService {
     private static final String CAT_AWP_RESPONDENT = "applicationsWithinProceedingsRes";
     private static final String CAT_AWP_OTHER = "applicationsFromOtherProceedings";
 
-    private String categoryForParty(PartyEnum partyEnum) {
-        if (partyEnum != null) {
-            return switch (partyEnum) {
-                case PartyEnum.applicant, PartyEnum.applicant_solicitor -> CAT_AWP_APPLICANT;
-                case PartyEnum.respondent, PartyEnum.respondent_solicitor -> CAT_AWP_RESPONDENT;
-                default -> CAT_AWP_OTHER;
-            };
-        }  else {
-            return null;
-        }
+    private String categoryForParty(String raw) {
+        return switch (raw.toLowerCase(Locale.ENGLISH)) {
+            case "applicant" -> CAT_AWP_APPLICANT;
+            case "respondent" -> CAT_AWP_RESPONDENT;
+            default -> CAT_AWP_OTHER;
+        };
     }
 
     private static Document withCategory(Document doc, String categoryId) {
         if (doc == null) {
             return null;
+        } else {
+            return doc.toBuilder().categoryId(categoryId).build();
         }
-        return doc.toBuilder().categoryId(categoryId).build();
     }
 
     public void getAdditionalApplicationElements(String authorisation, String userAuthorisation, CaseData caseData,
@@ -151,12 +150,10 @@ public class UploadAdditionalApplicationService {
             String currentDateTime = LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                 .format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS_AM_PM);
 
-            PartyEnum partyType = getPartyType(selectedParties, caseData);
-            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName, partyType);
+            C2DocumentBundle c2DocumentBundle = getC2DocumentBundle(caseData, author, currentDateTime, partyName);
             OtherApplicationsBundle otherApplicationsBundle = getOtherApplicationsBundle(caseData,
                                                                                          author,
-                                                                                         currentDateTime, partyName,
-                                                                                         partyType
+                                                                                         currentDateTime, partyName
             );
 
             AdditionalApplicationsBundle additionalApplicationsBundle = getAdditionalApplicationsBundle(
@@ -166,8 +163,7 @@ public class UploadAdditionalApplicationService {
                 currentDateTime,
                 c2DocumentBundle,
                 otherApplicationsBundle,
-                selectedParties,
-                partyType
+                selectedParties
             );
 
             additionalApplicationElements.add(element(additionalApplicationsBundle));
@@ -192,8 +188,7 @@ public class UploadAdditionalApplicationService {
     private AdditionalApplicationsBundle getAdditionalApplicationsBundle(String authorisation, CaseData caseData, String author,
                                                                          String currentDateTime, C2DocumentBundle c2DocumentBundle,
                                                                          OtherApplicationsBundle otherApplicationsBundle,
-                                                                         List<Element<ServedParties>> selectedParties,
-                                                                         PartyEnum partyType) {
+                                                                         List<Element<ServedParties>> selectedParties) {
         FeeResponse feeResponse = null;
         Optional<PaymentServiceResponse> paymentServiceResponse;
         Payment payment = null;
@@ -228,7 +223,7 @@ public class UploadAdditionalApplicationService {
         return AdditionalApplicationsBundle.builder().author(
                 author)
             .selectedParties(selectedParties)
-            .partyType(partyType)
+            .partyType(getPartyType(selectedParties, caseData))
             .uploadedDateTime(currentDateTime)
             .c2DocumentBundle(null != c2DocumentBundle
                                   ? c2DocumentBundle.toBuilder().applicationStatus(applicationStatus).build() : null)
@@ -391,8 +386,7 @@ public class UploadAdditionalApplicationService {
     }
 
     private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
-                                                               String currentDateTime, String partyName,
-                                                               PartyEnum partyType) {
+                                                               String currentDateTime, String partyName) {
         OtherApplicationsBundle otherApplicationsBundle = null;
         OtherApplicationType applicationType;
 
@@ -400,7 +394,13 @@ public class UploadAdditionalApplicationService {
             OtherApplicationsBundle temporaryOtherApplicationsBundle = caseData.getUploadAdditionalApplicationData()
                 .getTemporaryOtherApplicationsBundle();
             applicationType = uploadAdditionalApplicationUtils.getOtherApplicationType(temporaryOtherApplicationsBundle);
-            String cat = categoryForParty(partyType);
+            String category = "";
+            log.info("Inside mapping solicitor journey other AWP category before if {}", category);
+            category = getCategoryTypeByPartyName(partyName);
+
+            log.info("Inside mapping solicitor journey other AWP category after if {}", category);
+            String cat = categoryForParty(category);
+            log.info("Inside mapping solicitor journey other AWP upload, final value for category is {}", cat);
             otherApplicationsBundle = OtherApplicationsBundle.builder()
                 .author(author)
                 .uploadedDateTime(currentDateTime)
@@ -425,10 +425,15 @@ public class UploadAdditionalApplicationService {
         return otherApplicationsBundle;
     }
 
-    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName, PartyEnum partyType) {
+    private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName) {
         C2DocumentBundle c2DocumentBundle = null;
         if (caseData.getUploadAdditionalApplicationData().getTemporaryC2Document() != null) {
-            String cat = categoryForParty(partyType);
+            String category = "";
+            log.info("Inside mapping solicitor journey C2 category before if {}", category);
+            category = getCategoryTypeByPartyName(partyName);
+
+            log.info("Inside mapping solicitor journey C2 category after if {}", category);
+            String cat = categoryForParty(category);
             log.info("Inside mapping solicitor journey C2 upload, final value for category is {}", cat);
 
             C2DocumentBundle temporaryC2Document = caseData.getUploadAdditionalApplicationData().getTemporaryC2Document();
@@ -470,6 +475,18 @@ public class UploadAdditionalApplicationService {
             }
         }
         return c2DocumentBundle;
+    }
+
+    private static @NonNull String getCategoryTypeByPartyName(String partyName) {
+        String category;
+        if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("applicant")) {
+            category = "applicant";
+        } else if (StringUtils.isNotEmpty(partyName) && partyName.toLowerCase().contains("respondent")) {
+            category = "respondent";
+        } else {
+            category = "undefined";
+        }
+        return category;
     }
 
     private List<CombinedC2AdditionalOrdersRequested> getReasonsForApplication(C2DocumentBundle temporaryC2Document) {
@@ -515,14 +532,7 @@ public class UploadAdditionalApplicationService {
             for (Element<SupportingEvidenceBundle> supportingEvidenceBundleElement : supportingEvidenceBundle) {
                 SupportingEvidenceBundle supportingEvidence = SupportingEvidenceBundle.builder()
                     .dateTimeUploaded(LocalDateTime.now())
-                    .document(supportingEvidenceBundleElement.getValue().getDocument() != null ? Document.builder().categoryId(cat)
-                                  .documentUrl(supportingEvidenceBundleElement.getValue().getDocument().getDocumentUrl())
-                                  .documentFileName(supportingEvidenceBundleElement.getValue().getDocument().getDocumentFileName())
-                                  .documentCreatedOn(supportingEvidenceBundleElement.getValue().getDocument().getDocumentCreatedOn())
-                                  .documentHash(supportingEvidenceBundleElement.getValue().getDocument().getDocumentHash())
-                                  .documentBinaryUrl(supportingEvidenceBundleElement.getValue().getDocument().getDocumentBinaryUrl())
-                                  .uploadTimeStamp(supportingEvidenceBundleElement.getValue().getDocument().getUploadTimeStamp())
-                                  .build() : null)
+                    .document(withCategory(supportingEvidenceBundleElement.getValue().getDocument(), cat))
                     .notes(supportingEvidenceBundleElement.getValue().getNotes())
                     .name(supportingEvidenceBundleElement.getValue().getName())
                     .documentRelatedToCase(CollectionUtils.isNotEmpty(supportingEvidenceBundleElement.getValue().getDocumentAcknowledge())

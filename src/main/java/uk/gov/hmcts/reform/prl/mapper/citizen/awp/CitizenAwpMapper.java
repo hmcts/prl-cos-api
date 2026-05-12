@@ -267,14 +267,7 @@ public class CitizenAwpMapper {
                     .uploadedBy(citizenAwpRequest.getPartyName())
                     .dateTimeUploaded(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .documentRelatedToCase(YesOrNo.Yes)
-                    .document(document != null ? Document.builder().categoryId(cat)
-                                  .documentUrl(document.getDocumentUrl())
-                                  .documentFileName(document.getDocumentFileName())
-                                  .documentCreatedOn(document.getDocumentCreatedOn())
-                                  .documentHash(document.getDocumentHash())
-                                  .documentBinaryUrl(document.getDocumentBinaryUrl())
-                                  .uploadTimeStamp(document.getUploadTimeStamp())
-                                  .build() : null)
+                    .document(withCategory(document, cat))
                     .build()
             )).toList();
     }
