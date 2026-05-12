@@ -11,12 +11,9 @@ import java.util.Map;
 @Data
 @Builder
 public class SendgridEmailConfig {
-
+    private String caseReference;
     private Map<String, Object> dynamicTemplateData;
-
     private String toEmailAddress;
-
     private List<Document> listOfAttachments;
-
     private LanguagePreference languagePreference;
 }
