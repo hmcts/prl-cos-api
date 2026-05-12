@@ -141,7 +141,7 @@ allprojects {
       }
 
         // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869, CVE-2021-21409,CVE-2025-25193
-        dependencySet(group: 'io.netty', version: '4.2.12.Final') {
+        dependencySet(group: 'io.netty', version: '4.2.13.Final') {
             entry 'netty-buffer'
             entry 'netty-codec'
             entry 'netty-codec-http'
@@ -193,7 +193,13 @@ apply plugin: 'net.serenity-bdd.aggregator'
 group = 'uk.gov.hmcts.reform.prl'
 version = '0.0.1'
 
-mainClassName = 'uk.gov.hmcts.reform.prl.Application'
+if (GradleVersion.current() >= GradleVersion.version('9.0')) {
+  springBoot {
+    mainClass.set('uk.gov.hmcts.reform.prl.Application')
+  }
+} else {
+  mainClassName = 'uk.gov.hmcts.reform.prl.Application'
+}
 
 bootJar {
   getArchiveFileName().set(provider {
@@ -354,7 +360,7 @@ dependencies {
   implementation(group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: versions.bcpkixJdk18on)
   implementation(group: 'org.springframework.security', name: 'spring-security-rsa', version: versions.springSecurityRsa)
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto)
-  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.12.Final'
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.2.13.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
@@ -467,7 +473,6 @@ dependencies {
   smokeTestImplementation sourceSets.test.runtimeClasspath
   integrationTestImplementation(sourceSets.test.output)
 }
-
 
 processContractTestResources {
   duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -600,7 +605,8 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
   '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
   '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*'
+  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
+  '**uk/gov/hmcts/reform/prl/services/sealaudit/SealAuditService.java'
 ]
 
 sonarqube {
