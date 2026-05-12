@@ -58,6 +58,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -6388,6 +6390,70 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    void testSetFieldsForCirDocumentsRequestedForLaWaTaskWhenRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(Yes)
+                                .localAuthorityMultipleDocuments(List.of(
+                                    LocalAuthorityDocumentsEnum.childImpactReport1La,
+                                    LocalAuthorityDocumentsEnum.childImpactReport2La,
+                                    LocalAuthorityDocumentsEnum.sec37Report
+                                ))
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+        @SuppressWarnings("unchecked")
+        List<Element<String>> result = (List<Element<String>>) waFieldsMap.get("cirDocumentsRequested");
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForLaWaTaskWhenNotRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .localAuthorityNeedToProvideReport(No)
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+        assertNull(waFieldsMap.get("cirDocumentsRequested"));
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForCafcassWaTaskWhenRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(Yes)
+                                .cafcassCymruDocuments(List.of(
+                                    CafcassCymruDocumentsEnum.childImpactReport1,
+                                    CafcassCymruDocumentsEnum.childImpactReport2,
+                                    CafcassCymruDocumentsEnum.safeGuardingLetter
+                                ))
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        @SuppressWarnings("unchecked")
+        List<Element<String>> result = (List<Element<String>>) waFieldsMap.get("cirDocumentsRequested");
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testSetFieldsForCirDocumentsRequestedForCafcassWaTaskWhenNotRequired() {
+        CaseData caseData = CaseData.builder()
+            .serveOrderData(ServeOrderData.builder()
+                                .cafcassOrCymruNeedToProvideReport(No)
+                                .build())
+            .build();
+        HashMap<String, Object> waFieldsMap = new HashMap<>();
+        manageOrderService.setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        assertNull(waFieldsMap.get("cirDocumentsRequested"));
+    }
+
+    @Test
     void testGetHearingData() {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any(Hearings.class)))
@@ -8134,4 +8200,5 @@ class ManageOrderServiceTest {
         // When not eligible for AHR, flag should not be Yes (can be null or No)
         assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
     }
+
 }

@@ -37,9 +37,12 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -597,7 +600,7 @@ public class ManageDocumentsServiceTest {
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(1,legalProfQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -645,7 +648,7 @@ public class ManageDocumentsServiceTest {
         citizenQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("citizenQuarantineDocsList");
         assertNotNull(citizenQuarantineDocsList);
         assertEquals(1,citizenQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -695,7 +698,7 @@ public class ManageDocumentsServiceTest {
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
         assertEquals(2,cafcassQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -867,7 +870,7 @@ public class ManageDocumentsServiceTest {
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
         assertNotNull(courtStaffQuarantineDocsList);
         assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -919,7 +922,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -981,7 +984,7 @@ public class ManageDocumentsServiceTest {
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
         assertNotNull(courtStaffQuarantineDocsList);
         assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -1040,7 +1043,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -1096,7 +1099,7 @@ public class ManageDocumentsServiceTest {
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("restrictedDocuments");
         assertNotNull(restrictedDocuments);
         assertEquals(1,restrictedDocuments.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
 
     }
@@ -1144,7 +1147,7 @@ public class ManageDocumentsServiceTest {
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(2,legalProfQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -1199,7 +1202,7 @@ public class ManageDocumentsServiceTest {
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
         assertEquals(1,cafcassQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -1227,7 +1230,6 @@ public class ManageDocumentsServiceTest {
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
-        assertTrue(caseDataMapUpdated.isEmpty());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
@@ -1284,7 +1286,7 @@ public class ManageDocumentsServiceTest {
         List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("restrictedDocuments");
         assertNotNull(restrictedDocuments);
         assertEquals(1,restrictedDocuments.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -1512,7 +1514,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(legalProfQuarantineDocsList);
         assertEquals(1,legalProfQuarantineDocsList.size());
         assertEquals(0,legalProfUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -1569,7 +1571,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(legalProfUploadDocListDocTab);
         assertEquals(0,legalProfQuarantineDocsList.size());
         assertEquals(1,legalProfUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
 
@@ -1663,7 +1665,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
         assertNotNull(courtStaffUploadDocListDocTab);
         assertEquals(1,courtStaffUploadDocListDocTab.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -3099,912 +3101,117 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirRequestDocumentsButNoTriggeredBySet() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
-        localAuthorityQuarantineDocsListInitial.add(element);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirRequestDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
-
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertEquals("LOCAL_AUTHORITY", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirTransferDocumentsButNoTriggeredBySet() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
-        localAuthorityQuarantineDocsListInitial.add(element);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsCirTransferDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertEquals("LOCAL_AUTHORITY", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsNonCirDocumentsButNoTriggeredBySet() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
-        localAuthorityQuarantineDocsListInitial.add(element);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsNonCirDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertEquals("LOCAL_AUTHORITY", caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenLocalAuthorityUploadsAnyDocumentsAndSetInCategoryMap() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA).isRestricted(YesOrNo.Yes).build());
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setLocalAuthorityQuarantineDocsList(localAuthorityQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "LOCAL_AUTHORITY",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertEquals(
-            1,
-            ((ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY)).size()
-        );
-        assertEquals(
-            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA,
-            ((ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY)).get(0).getValue()
-        );
-    }
-
-    @Test
-    public void testIsGivenDocumentsExistsShouldSetTriggeredByIfNoMatch() {
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(LOCAL_AUTHORITY)
-            .documentCategories(dynamicList)
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+    public void hasCirRequestedDocsUploadedReturnsTrueForLocalAuthorityCir1() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
             .build();
-
-        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments", manageDocuments);
-
-        caseDataMapInitial.put("localAuthorityQuarantineDocsList", new ArrayList<>());
-
-        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
-        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", localAuthorityUploadDocListDocTabInitial);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
             .build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
-        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-
-        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
-
-        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
-            "localAuthorityQuarantineDocsList");
-        assertNotNull(localAuthorityQuarantineDocsList);
-        assertEquals(1, localAuthorityQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals("LOCAL_AUTHORITY", caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
     }
 
     @Test
-    public void testIsGivenDocumentsExistsShouldNotSetTriggeredByIfMatchFound() {
-
-        subCategory1 = new Category(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA, "confidentialName", 1, List.of(document), null);
-        category = new Category("MIAMCertificate", "MIAM Certificate", 2, List.of(document), List.of(subCategory1));
-        categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
-
-        parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
-            .stream()
-            .sorted(Comparator.comparing(Category::getCategoryName))
-            .toList();
-
-        dynamicListElementList = new ArrayList<>();
-        CaseUtils.createCategorySubCategoryDynamicList(parentCategories, dynamicListElementList, categoriesToExclude);
-
-        dynamicList = DynamicList.builder().value(DynamicListElement.builder()
-                                                      .code(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA)
-                                                      .label(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).build())
-            .listItems(dynamicListElementList).build();
-
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(LOCAL_AUTHORITY)
-            .documentCategories(dynamicList)
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+    public void hasCirRequestedDocsUploadedReturnsTrueForLocalAuthorityCir2() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
             .build();
-
-        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments", manageDocuments);
-
-        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
-        localAuthorityUploadDocListDocTabInitial.add(element);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-
         CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .localAuthorityQuarantineDocsList(localAuthorityUploadDocListDocTabInitial)
-                                           .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
+                                 .build();
 
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
-        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-
-        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
-
-        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
-            "localAuthorityQuarantineDocsList");
-        assertNotNull(localAuthorityQuarantineDocsList);
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertNull(caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testIsGivenDocumentsExistsShouldSetTriggeredByIfQuarantineDocsIsNull() {
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(LOCAL_AUTHORITY)
-            .documentCategories(dynamicList)
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        final RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("[LASOLICITOR]");
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments", manageDocuments);
-
-        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", null);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(launchDarklyClient.isFeatureEnabled(ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY)).thenReturn(true);
-        when(roleAssignmentApi.getRoleAssignments(auth, authTokenGenerator.generate(), null, "123")).thenReturn(
-            roleAssignmentServiceResponse);
-
-        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
-
-        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
-            "localAuthorityQuarantineDocsList");
-        assertNotNull(localAuthorityQuarantineDocsList);
-        assertEquals(1, localAuthorityQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals("LOCAL_AUTHORITY", caseDataMapUpdated.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-    }
-
-    @Test
-    public void testCopyDocumentForNonCirDocumentsIfRestrictedWithLocalAuthorityRole() {
-
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(LOCAL_AUTHORITY)
-            .documentCategories(dynamicList)
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments", manageDocuments);
-
-        List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsListInitial = new ArrayList<>();
-        localAuthorityQuarantineDocsListInitial.add(element(QuarantineLegalDoc.builder().build()));
-        caseDataMapInitial.put("localAuthorityQuarantineDocsList", localAuthorityQuarantineDocsListInitial);
-
-        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
-        caseDataMapInitial.put("localAuthorityUploadDocListDocTab", localAuthorityUploadDocListDocTabInitial);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-
-        Map<String, Object> caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
-
-        localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
-            "localAuthorityQuarantineDocsList");
-        assertNotNull(localAuthorityQuarantineDocsList);
-        assertEquals(1, localAuthorityQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
-    }
-
-    @Test
-    public void testGetQuarantineDocumentForUploaderLocalAuthority() {
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .localAuthorityQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
-                                                  .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build()).build();
-        uk.gov.hmcts.reform.prl.models.documents.Document document1 = manageDocumentsService
-            .getQuarantineDocumentForUploader("LOCAL_AUTHORITY", quarantineLegalDoc
-            );
-
-        assertNotNull(document1);
-        assertEquals(quarantineLegalDoc.getLocalAuthorityQuarantineDocument().getDocumentUrl(),document1.getDocumentUrl());
-    }
-
-    @Test
-    public void testMoveCirDocumentsToRespectiveCategories() {
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No)
-            .isRestricted(YesOrNo.No)
-            .categoryId("test")
-            .localAuthorityQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document
-                                                  .builder().documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba")
-                                                  .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA)
-                                                  .documentFileName("test.pdf")
-                                                  .build())
-            .uploaderRole("LOCAL_AUTHORITY")
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                          .documentFileName("test.pdf")
-                          .documentUrl("http://test.link")
-                          .documentBinaryUrl("http://test.link")
-                          .build())
-            .build();
-
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(LOCAL_AUTHORITY)
-            .documentCategories(DynamicList.builder()
-                                    .value(DynamicListElement.builder().code("test").label("test").build())
-                                    .build())
-            .isRestricted(YesOrNo.No)
-            .isConfidential(YesOrNo.No)
-            .document(quarantineLegalDoc.getDocument())
-            .build();
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments", manageDocuments);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
-            .build();
-
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
-        when(systemUserService.getSysUserToken()).thenReturn("test-token");
-        when(authTokenGenerator.generate()).thenReturn("test-token");
-
-        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-
-        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
-            .thenReturn(expectedResponse);
-        when(caseDocumentClientApi.getDocumentBinary(anyString(), anyString(), any()))
-            .thenReturn(expectedResponse);
-
-        when(objectMapper.convertValue(any(Map.class), eq(QuarantineLegalDoc.class)))
-            .thenReturn(quarantineLegalDoc);
-        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class)))
-            .thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper))
-            .thenReturn(caseData);
-        when(userService.getUserDetails(anyString()))
-            .thenReturn(userDetailsStaff);
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc,
-            userDetailsSolicitorRole,
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(
             caseData,
-            caseDataMapInitial,
-            "LOCAL_AUTHORITY"
-        );
-
-        List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTab
-            = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("localAuthorityUploadDocListDocTab");
-        assertNotNull(localAuthorityUploadDocListDocTab);
-        assertEquals(1,localAuthorityUploadDocListDocTab.size());
-
+            List.of(LocalAuthorityDocumentsEnum.childImpactReport2La.getId())
+        ));
     }
 
     @Test
-    public void testMoveDocumentsWhenNonConfidentialCafcassCirTransferIsRenamedAsConfidential() {
-        setupCirRenameTestMocks();
-        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
-            .uploaderRole("Cafcass").categoryId(DOC_TYPE_CIR_TRANSFER)
-            .cafcassQuarantineDocument(originalDoc).build();
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
-
-        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
-    }
-
-    @Test
-    public void testMoveDocumentsWhenNonConfidentialCafcassCirExtensionIsRenamedAsConfidential() {
-        setupCirRenameTestMocks();
-        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
-            .uploaderRole("Cafcass").categoryId(DOC_TYPE_CIR_EXTENSION)
-            .cafcassQuarantineDocument(originalDoc).build();
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
-
-        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
-    }
-
-    @Test
-    public void testMoveDocumentsWhenNonConfidentialCafcass16aRiskAssessmentIsRenamedAsConfidential() {
-        setupCirRenameTestMocks();
-        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
-            .uploaderRole("Cafcass").categoryId(SIXTEEN_A_RISK_ASSESSMENT)
-            .cafcassQuarantineDocument(originalDoc).build();
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
-
-        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
-    }
-
-    @Test
-    public void testMoveDocumentsWhenNonConfidentialLaCirTransferIsRenamedAsConfidential() {
-        setupCirRenameTestMocks();
-        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
-            .uploaderRole("LOCAL_AUTHORITY").categoryId(CIR_TRANSFER_REQUEST_LA)
-            .localAuthorityQuarantineDocument(originalDoc).build();
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
-
-        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
-    }
-
-    @Test
-    public void testMoveDocumentsWhenNonConfidentialLaCirExtensionIsRenamedAsConfidential() {
-        setupCirRenameTestMocks();
-        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
-            .uploaderRole("LOCAL_AUTHORITY").categoryId(CIR_EXTENSION_REQUEST_LA)
-            .localAuthorityQuarantineDocument(originalDoc).build();
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
-
-        verify(manageDocumentsService).renameAndReuploadFileToBeConfidential(originalDoc);
-    }
-
-    @Test
-    public void testMoveDocumentsWhenNonConfidentialCafcassUnrelatedCategoryIsNotRenamed() {
-        setupCirRenameTestMocks();
-        uk.gov.hmcts.reform.prl.models.documents.Document originalDoc = docWithUuid();
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .isConfidential(YesOrNo.No).isRestricted(YesOrNo.No)
-            .uploaderRole("Cafcass").categoryId("someOtherCategory")
-            .cafcassQuarantineDocument(originalDoc).build();
-
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-            quarantineLegalDoc, userDetailsCafcassRole, buildEmptyCaseData(), new HashMap<>(), COURT_ADMIN);
-
-        verify(manageDocumentsService, never()).renameAndReuploadFileToBeConfidential(any());
-    }
-
-    private void setupCirRenameTestMocks() {
-        when(systemUserService.getSysUserToken()).thenReturn("test-token");
-        when(authTokenGenerator.generate()).thenReturn("test-token");
-        when(objectMapper.convertValue(any(Map.class), eq(QuarantineLegalDoc.class)))
-            .thenReturn(QuarantineLegalDoc.builder().build());
-    }
-
-    private uk.gov.hmcts.reform.prl.models.documents.Document docWithUuid() {
-        return uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentFileName("test.pdf")
-            .documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15")
+    public void hasCirRequestedDocsUploadedReturnsTrueForCafcassCymruCir1() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(CafcassCymruDocumentsEnum.childImpactReport1.getId())
             .build();
+        CaseData caseData = CaseData.builder()
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
+            .build();
+
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
     }
 
-    private CaseData buildEmptyCaseData() {
-        return CaseData.builder()
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsTrueForCafcassCymruCir2() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(CafcassCymruDocumentsEnum.childImpactReport2.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
+            .build();
+
+        assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsFalseWhenNoCirDocs() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId("MIAMCertificate")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
+            .build();
+
+        Assert.assertFalse(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of("MIAMCertificate")));
+    }
+
+    @Test
+    public void hasCirRequestedDocsUploadedReturnsFalseWhenBothListsNull() {
+        CaseData caseData = CaseData.builder()
+            .cirDocumentsRequested(List.of())
+            .build();
+
+        Assert.assertFalse(manageDocumentsService.hasCirRequestedDocsUploaded(caseData, List.of()));
+    }
+
+    @Test
+    public void cancelCirRequestTaskCallsAllTabServiceWhenCirDocsPresent() {
+        QuarantineLegalDoc doc = QuarantineLegalDoc.builder()
+            .categoryId(LocalAuthorityDocumentsEnum.childImpactReport1La.getId())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
+            .build();
+
+        when(allTabService.getStartUpdateForSpecificEvent(
+            "12345",
+            CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+        )).thenReturn(startAllTabsUpdateDataContent);
+        when(startAllTabsUpdateDataContent.authorisation()).thenReturn(auth);
+        when(startAllTabsUpdateDataContent.startEventResponse()).thenReturn(null);
+        when(startAllTabsUpdateDataContent.eventRequestData()).thenReturn(null);
+        when(startAllTabsUpdateDataContent.caseDataMap()).thenReturn(Map.of());
+        when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
+            .thenReturn(CaseDetails.builder().build());
+
+        manageDocumentsService.cancelCirRequestTask(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId()));
+
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(
+            "12345",
+            CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+        );
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void cancelCirRequestTaskDoesNotCallAllTabServiceWhenNoCirDocs() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
             .reviewDocuments(ReviewDocuments.builder().build())
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .build();
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenCafcassCymruUploadsSixTeenRiskDocumentsButNoTriggeredBySet() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(element);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
-    }
-
-    @Test
-    public void testSetFlagsNewWaTaskWhenCafcassCymruUploadsNonSixTeenRiskDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> otherElement = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.ANY_OTHER_DOC).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(otherElement);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-                                 Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
-        ArrayList<Element<String>> uploadedCategory =
-            (ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
-        assertEquals(1, uploadedCategory.size());
-        assertEquals(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT, uploadedCategory.get(0).getValue());
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenCafcassCymruUploadsSixTeenRiskDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT).isRestricted(YesOrNo.Yes).build());
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-                                 Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
-        ArrayList<Element<String>> uploadedCategory =
-            (ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
-        assertEquals(1, uploadedCategory.size());
-        assertEquals(ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT, uploadedCategory.get(0).getValue());
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirTransferDocumentsButNoTriggeredBySet() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(element);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
-    }
-
-    @Test
-    public void testSetFlagsNewWaTaskWhenCafcassCymruUploadsNonCirTransferDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> otherElement = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.ANY_OTHER_DOC).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(otherElement);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-                                 Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
-        ArrayList<Element<String>> uploadedCategory =
-            (ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
-        assertEquals(1, uploadedCategory.size());
-        assertEquals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST, uploadedCategory.get(0).getValue());
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirTransferDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-                                 Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
-        ArrayList<Element<String>> uploadedCategory =
-            (ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
-        assertEquals(1, uploadedCategory.size());
-        assertEquals(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST, uploadedCategory.get(0).getValue());
-    }
-
-    @Test
-    public void testSetFlagsNewWaTaskWhenCafcassCymruUploadsNonCirExtensionDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> otherElement = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.ANY_OTHER_DOC).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(otherElement);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-                                 Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
-        ArrayList<Element<String>> uploadedCategory =
-            (ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
-        assertEquals(1, uploadedCategory.size());
-        assertEquals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST, uploadedCategory.get(0).getValue());
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirRequestDocumentsButNoTriggeredBySet() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(element);
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
-        assertNull(caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
-    }
-
-    @Test
-    public void testSetFlagsWaTaskWhenCafcassCymruUploadsCirRequestDocumentsAndSetTriggeredBy() {
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
-
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-        assertEquals("True", caseDataUpdated1.get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
-        MatcherAssert.assertThat(caseDataUpdated1.get(MANAGE_DOCUMENTS_TRIGGERED_BY),
-                                 Matchers.anyOf(Matchers.is("LOCAL_AUTHORITY"), Matchers.is("CAFCASS")));
-        ArrayList<Element<String>> uploadedCategory =
-            (ArrayList<Element<String>>) caseDataUpdated1.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY);
-        assertEquals(1, uploadedCategory.size());
-        assertEquals(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST, uploadedCategory.get(0).getValue());
-    }
-
-    @Test
-    public void testOtherDocumentsExistIfNotCirTransferOfCafcassCymuru() {
-
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(dynamicList)
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocuments);
+        manageDocumentsService.cancelCirRequestTask(caseData, List.of());
 
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(element);
-        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
-
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-
-        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
-        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .categoryId(ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST).build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
-        listQuarantine.add(quarantineLegalDocElement);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .cafcassQuarantineDocsList(listQuarantine)
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
-
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
-
-        cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
-        assertNotNull(cafcassQuarantineDocsList);
-        assertEquals(2,cafcassQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
-    }
-
-    @Test
-    public void testOtherDocumentsExistIfNotCirExtensionOfCafcassCymuru() {
-
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(dynamicList)
-            .isRestricted(YesOrNo.Yes)
-            .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocuments);
-
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsListInitial = new ArrayList<>();
-        Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).isRestricted(YesOrNo.Yes).build());
-        cafcassQuarantineDocsListInitial.add(element);
-        caseDataMapInitial.put("cafcassQuarantineDocsList",cafcassQuarantineDocsListInitial);
-
-        Map<String, Object> caseDataUpdated1 = new HashMap<>();
-        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder().build();
-        documentManagementDetails.setCafcassQuarantineDocsList(cafcassQuarantineDocsListInitial);
-        manageDocumentsService.setFlagsForWaTask(
-            CaseData.builder().documentManagementDetails(documentManagementDetails).build(),
-            caseDataUpdated1, "Cafcass",
-            element.getValue()
-        );
-
-        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTabInitial = new ArrayList<>();
-        caseDataMapInitial.put("cafcassUploadDocListDocTab",cafcassUploadDocListDocTabInitial);
-
-        manageDocumentsElement = element(manageDocuments);
-
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
-            .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST).build();
-        quarantineLegalDocElement = element(quarantineLegalDoc);
-        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
-        listQuarantine.add(quarantineLegalDocElement);
-
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
-        CaseData caseData = CaseData.builder()
-            .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder()
-                                           .cafcassQuarantineDocsList(listQuarantine)
-                                           .manageDocuments(List.of(manageDocumentsElement))
-                                           .build())
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
-
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
-
-        cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
-        assertNotNull(cafcassQuarantineDocsList);
-        assertEquals(2,cafcassQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService, never()).submitAllTabsUpdate(any(), any(), any(), any(), any());
     }
 }

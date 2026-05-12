@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
@@ -55,13 +56,16 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -134,6 +138,7 @@ public class ManageDocumentsService {
         = "You must give a reason why the document should be restricted";
     public static final String DETAILS_ERROR_MESSAGE_WELSH
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
+    private static final String PREFIX_CHILD_IMPACT_REPORT = "childImpactReport";
     private static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
         CHILD_IMPACT_REPORT_1_LA,
         CHILD_IMPACT_REPORT_2_LA,
@@ -256,7 +261,6 @@ public class ManageDocumentsService {
             caseDataUpdated,
             updatedUserDetails
         );
-        caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
@@ -873,6 +877,33 @@ public class ManageDocumentsService {
         }
     }
 
+    public void cancelCirRequestTask(CaseData caseData, List<String> uploadedCategoryIds) {
+        String caseId = String.valueOf(caseData.getId());
+        if (hasCirRequestedDocsUploaded(caseData, uploadedCategoryIds)) {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+            );
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                startAllTabsUpdateDataContent.caseDataMap()
+            );
+        }
+    }
+
+    public boolean hasCirRequestedDocsUploaded(CaseData caseData, List<String> uploadedCategoryIds) {
+
+        Set<String> cirDocumentsRequested = Optional.ofNullable(caseData.getCirDocumentsRequested()).stream().flatMap(
+            Collection::stream).map(Element::getValue).collect(
+            Collectors.toSet());
+
+        return uploadedCategoryIds.stream().anyMatch(document -> document.startsWith(PREFIX_CHILD_IMPACT_REPORT)
+            && cirDocumentsRequested.stream().anyMatch(any -> any.startsWith(PREFIX_CHILD_IMPACT_REPORT)));
+    }
+
     public void appendConfidentialDocumentNameForCourtAdminAndUpdate(CallbackRequest callbackRequest, String authorisation) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartAllTabsUpdate(String.valueOf(callbackRequest.getCaseDetails().getId()));
@@ -927,7 +958,7 @@ public class ManageDocumentsService {
                 caseDataMap.put("restrictedDocuments", restrictedDocuments);
             }
         }
-        caseDataMap.remove("manageDocuments");
+        caseDataMap.put("manageDocuments", null);
         return caseDataMap;
     }
 

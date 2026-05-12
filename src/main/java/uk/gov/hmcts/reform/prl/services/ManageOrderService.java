@@ -16,8 +16,10 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
@@ -38,6 +40,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
@@ -91,6 +95,7 @@ import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -237,6 +242,15 @@ public class ManageOrderService {
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
 
+    private static final String WHEN_REPORTS_MUST_BE_FILED = "whenReportsMustBeFiled";
+    private static final String WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY = "whenReportsMustBeFiledByLocalAuthority";
+
+    private static final List<String> listOfCirOrderFields = List.of(
+        "cafcassCymruDocuments", "localAuthorityMultipleDocuments",
+        "localAuthorityNeedToProvideReport", "cafcassOrCymruNeedToProvideReport",
+        WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, WHEN_REPORTS_MUST_BE_FILED
+    );
+
     public static final String VALIDATION_ADDRESS_ERROR_RESPONDENT = "This order cannot be served by post until the respondent's "
         + "address is given.";
     public static final String VALIDATION_ADDRESS_ERROR_OTHER_PARTY = "This order cannot be served by post until the other"
@@ -248,6 +262,8 @@ public class ManageOrderService {
     public static final String POST = "post";
     public static final String SDO_FACT_FINDING_FLAG = "sdoFactFindingFlag";
     public static final String AND = " and";
+
+    public static final String CIR_DOCUMENTS_REQUESTED = "cirDocumentsRequested";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -646,6 +662,7 @@ public class ManageOrderService {
     private final FinalisationDetailsService finalisationDetailsService;
     private final CustomOrderService customOrderService;
     private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
+    private final AllTabServiceImpl allTabService;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -1126,7 +1143,8 @@ public class ManageOrderService {
     }
 
     public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
-        return ServeOrderDetails.builder()
+        final ServeOrderDetails.ServeOrderDetailsBuilder serveOrderDetails = ServeOrderDetails.builder();
+        serveOrderDetails
             .cafcassOrCymruNeedToProvideReport(
                 serveOrderData.getCafcassOrCymruNeedToProvideReport())
             .cafcassCymruDocuments(serveOrderData.getCafcassCymruDocuments())
@@ -1137,8 +1155,22 @@ public class ManageOrderService {
                     Locale.ENGLISH
                 )) : null)
             .orderEndsInvolvementOfCafcassOrCymru(
-                serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru())
-            .build();
+                serveOrderData.getOrderEndsInvolvementOfCafcassOrCymru());
+
+        if (null != serveOrderData.getLocalAuthorityNeedToProvideReport()
+            && serveOrderData.getLocalAuthorityNeedToProvideReport().equals(Yes)) {
+            serveOrderDetails
+                .localAuthorityNeedToProvideReport(serveOrderData.getLocalAuthorityNeedToProvideReport())
+                .localAuthorityMultipleDocuments(serveOrderData.getLocalAuthorityMultipleDocuments())
+                .whenReportsMustBeFiledByLocalAuthority(serveOrderData.getWhenReportsMustBeFiledByLocalAuthority() != null
+                                                            ? serveOrderData.getWhenReportsMustBeFiledByLocalAuthority()
+                    .format(DateTimeFormatter.ofPattern(
+                        PrlAppsConstants.D_MMM_YYYY,
+                        Locale.ENGLISH
+                    )) : null);
+        }
+
+        return serveOrderDetails.build();
     }
 
     public String getSelectedChildInfoFromMangeOrder(CaseData caseData) {
@@ -3984,6 +4016,92 @@ public class ManageOrderService {
         }
     }
 
+    public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
+        Map<String, Object> waFieldsMap = new HashMap<>();
+        waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+        LocalDate localAuthorityReportFiledByDate = caseData.getServeOrderData()
+            .getWhenReportsMustBeFiledByLocalAuthority();
+        LocalDate cafcassReportFiledByDate = caseData.getServeOrderData().getWhenReportsMustBeFiled();
+        setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+        setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+        createCirDocumentsRequestedTask(caseData, waFieldsMap);
+        cleanUpCirOrderRequestFields(caseData, localAuthorityReportFiledByDate, cafcassReportFiledByDate);
+    }
+
+    private void createCirDocumentsRequestedTask(CaseData caseData, Map<String, Object> waFieldsMap) {
+        if (waFieldsMap.get(CIR_DOCUMENTS_REQUESTED) != null) {
+            String caseId = String.valueOf(caseData.getId());
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.CREATE_REQUEST_CIR_UPDATE_TASK.getValue()
+            );
+
+            Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+            caseDataMap.putAll(waFieldsMap);
+
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataMap
+            );
+        }
+    }
+
+    private void cleanUpCirOrderRequestFields(CaseData caseData, LocalDate localAuthorityReportFiledByDate, LocalDate cafcassReportFiledByDate) {
+
+        String caseId = String.valueOf(caseData.getId());
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+            caseId,
+            CaseEvent.UPDATE_ALL_TABS.getValue()
+        );
+
+        Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
+        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, localAuthorityReportFiledByDate);
+        caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED, cafcassReportFiledByDate);
+        for (String field : listOfCirOrderFields) {
+            if (caseDataMap.containsKey(field)) {
+                caseDataMap.put(field, null);
+            }
+        }
+
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataMap
+        );
+
+    }
+
+    public void setFieldsForCirDocumentsRequestedForLaWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
+        if (Yes.equals(caseData.getServeOrderData().getLocalAuthorityNeedToProvideReport())) {
+            List<Element<String>> cirDocumentsRequested = caseData.getServeOrderData().getLocalAuthorityMultipleDocuments().stream().filter(
+                category -> category.getId().equals(LocalAuthorityDocumentsEnum.childImpactReport1La.getId()) || category.getId().equals(
+                    LocalAuthorityDocumentsEnum.childImpactReport2La.getId())).map(each -> element(
+                UUID.randomUUID(),
+                each.getId()
+            )).toList();
+            waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED, null);
+            waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
+        }
+    }
+
+    public void setFieldsForCirDocumentsRequestedForCafcassWaTask(CaseData caseData, Map<String, Object> waFieldsMap) {
+        if (Yes.equals(caseData.getServeOrderData().getCafcassOrCymruNeedToProvideReport())) {
+            List<Element<String>> cirDocumentsRequested = caseData.getServeOrderData().getCafcassCymruDocuments().stream().filter(
+                category -> category.getId().equals(CafcassCymruDocumentsEnum.childImpactReport1.getId()) || category.getId().equals(
+                    CafcassCymruDocumentsEnum.childImpactReport2.getId())).map(each -> element(
+                UUID.randomUUID(),
+                each.getId()
+            )).toList();
+            waFieldsMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, null);
+            waFieldsMap.put(CIR_DOCUMENTS_REQUESTED, cirDocumentsRequested);
+        }
+    }
+
     /**
      * Gets the order name for custom orders using CustomOrderService.
      */
@@ -4287,4 +4405,5 @@ public class ManageOrderService {
             );
         }
     }
+
 }
