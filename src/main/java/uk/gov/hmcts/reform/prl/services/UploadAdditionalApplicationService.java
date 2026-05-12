@@ -416,7 +416,8 @@ public class UploadAdditionalApplicationService {
                 ))
                 .supportingEvidenceBundle(createSupportingEvidenceBundle(
                     temporaryOtherApplicationsBundle.getSupportingEvidenceBundle(),
-                    author
+                    author,
+                    cat
                 ))
                 .applicationType(applicationType)
                 .build();
@@ -449,7 +450,8 @@ public class UploadAdditionalApplicationService {
                     .supplementsBundle(createSupplementsBundle(temporaryC2Document.getSupplementsBundle(), author))
                     .supportingEvidenceBundle(createSupportingEvidenceBundle(
                         temporaryC2Document.getSupportingEvidenceBundle(),
-                        author
+                        author,
+                        cat
                     ))
                     .c2ApplicationDetails(C2ApplicationDetails.builder()
                                               .consent(C2ApplicationTypeEnum.applicationWithNotice.equals(
@@ -506,13 +508,21 @@ public class UploadAdditionalApplicationService {
     }
 
     private List<Element<SupportingEvidenceBundle>> createSupportingEvidenceBundle(List<Element<SupportingEvidenceBundle>> supportingEvidenceBundle,
-                                                                                   String author) {
+                                                                                   String author,
+                                                                                   String cat) {
         List<Element<SupportingEvidenceBundle>> supportingElementList = new ArrayList<>();
         if (supportingEvidenceBundle != null && !supportingEvidenceBundle.isEmpty()) {
             for (Element<SupportingEvidenceBundle> supportingEvidenceBundleElement : supportingEvidenceBundle) {
                 SupportingEvidenceBundle supportingEvidence = SupportingEvidenceBundle.builder()
                     .dateTimeUploaded(LocalDateTime.now())
-                    .document(supportingEvidenceBundleElement.getValue().getDocument())
+                    .document(supportingEvidenceBundleElement.getValue().getDocument() != null ? Document.builder().categoryId(cat)
+                                  .documentUrl(supportingEvidenceBundleElement.getValue().getDocument().getDocumentUrl())
+                                  .documentFileName(supportingEvidenceBundleElement.getValue().getDocument().getDocumentFileName())
+                                  .documentCreatedOn(supportingEvidenceBundleElement.getValue().getDocument().getDocumentCreatedOn())
+                                  .documentHash(supportingEvidenceBundleElement.getValue().getDocument().getDocumentHash())
+                                  .documentBinaryUrl(supportingEvidenceBundleElement.getValue().getDocument().getDocumentBinaryUrl())
+                                  .uploadTimeStamp(supportingEvidenceBundleElement.getValue().getDocument().getUploadTimeStamp())
+                                  .build() : null)
                     .notes(supportingEvidenceBundleElement.getValue().getNotes())
                     .name(supportingEvidenceBundleElement.getValue().getName())
                     .documentRelatedToCase(CollectionUtils.isNotEmpty(supportingEvidenceBundleElement.getValue().getDocumentAcknowledge())

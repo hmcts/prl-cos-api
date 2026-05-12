@@ -196,7 +196,7 @@ public class CitizenAwpMapper {
                     .documentRelatedToCase(YesOrNo.Yes)
                     .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
                     .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
-                                                  ? getSupportingBundles(citizenAwpRequest) : null)
+                                                  ? getSupportingBundles(citizenAwpRequest, cat) : null)
                     .combinedReasonsForC2Application(Arrays.asList(CombinedC2AdditionalOrdersRequested
                                                                        .getValue(getApplicationKey(citizenAwpRequest)))) //REVISIT
                     //.otherReasonsFoC2Application(null) //REVISIT - NOT NEEDED FOR CITIZEN AS THERE IS OTHER OPTION
@@ -235,7 +235,7 @@ public class CitizenAwpMapper {
                 .documentRelatedToCase(YesOrNo.Yes)
                 .finalDocument(toDocElementsWithCategory(citizenAwpRequest.getUploadedApplicationForms(), cat))
                 .supportingEvidenceBundle(YesOrNo.Yes.equals(citizenAwpRequest.getHasSupportingDocuments())
-                                              ? getSupportingBundles(citizenAwpRequest) : null)
+                                              ? getSupportingBundles(citizenAwpRequest, cat) : null)
                 .urgency(YesOrNo.Yes.equals(citizenAwpRequest.getUrgencyInFiveDays())
                              ? getUrgency(citizenAwpRequest) : null)
                 .applicationType(OtherApplicationType.getValue(getApplicationKey(citizenAwpRequest))) //REVISIT
@@ -260,14 +260,21 @@ public class CitizenAwpMapper {
             .toList();
     }
 
-    private List<Element<SupportingEvidenceBundle>> getSupportingBundles(CitizenAwpRequest citizenAwpRequest) {
+    private List<Element<SupportingEvidenceBundle>> getSupportingBundles(CitizenAwpRequest citizenAwpRequest, String cat) {
         return nullSafeCollection(citizenAwpRequest.getSupportingDocuments()).stream()
             .map(document -> element(
                 SupportingEvidenceBundle.builder()
                     .uploadedBy(citizenAwpRequest.getPartyName())
                     .dateTimeUploaded(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .documentRelatedToCase(YesOrNo.Yes)
-                    .document(document)
+                    .document(document != null ? Document.builder().categoryId(cat)
+                                  .documentUrl(document.getDocumentUrl())
+                                  .documentFileName(document.getDocumentFileName())
+                                  .documentCreatedOn(document.getDocumentCreatedOn())
+                                  .documentHash(document.getDocumentHash())
+                                  .documentBinaryUrl(document.getDocumentBinaryUrl())
+                                  .uploadTimeStamp(document.getUploadTimeStamp())
+                                  .build() : null)
                     .build()
             )).toList();
     }

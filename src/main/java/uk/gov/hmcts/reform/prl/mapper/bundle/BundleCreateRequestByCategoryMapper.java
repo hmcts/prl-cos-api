@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
@@ -118,14 +117,6 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(citizenUploadedC7Documents));
         }
 
-        // Add all other AWP Documents
-        List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
-            caseData.getAdditionalApplicationsBundle(), FilterProperties.builder().build());
-
-        if (!otherAdditionalBundleDocs.isEmpty()) {
-            allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(otherAdditionalBundleDocs));
-        }
-
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
@@ -147,36 +138,6 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             .forEach(c7CitizenResponseDocument -> c7Documents
                 .add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(), BundlingDocGroupEnum.c7Documents, filterProperties)));
         return c7Documents;
-    }
-
-    private List<BundlingRequestDocument> mapOtherAdditionalBundleFromCaseData(
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleList,
-        FilterProperties filterProperties) {
-
-        List<BundlingRequestDocument> additionalApplicationsBundle = new ArrayList<>();
-        Optional<List<Element<AdditionalApplicationsBundle>>> additionalApplicationsBundleDocs = ofNullable(additionalApplicationsBundleList);
-        if (additionalApplicationsBundleDocs.isEmpty()) {
-            return additionalApplicationsBundle;
-        }
-        ElementUtils.unwrapElements(additionalApplicationsBundleList).stream()
-            .filter(additionalBundle -> additionalBundle.getOtherApplicationsBundle() != null)
-            .forEach(applicationsBundle -> {
-                additionalApplicationsBundle
-                    .addAll(mapBundlingRequestDocument(
-                        ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getFinalDocument()),
-                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
-                    ));
-                if (applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
-                    ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle())
-                        .forEach(sp -> additionalApplicationsBundle
-                            .add(mapBundlingRequestDocument(
-                                sp.getDocument(),
-                                BundlingDocGroupEnum.applicantAWPDocuments,
-                                filterProperties
-                            )));
-                }
-            });
-        return additionalApplicationsBundle;
     }
 
     private Document mapCategoryDocumentToPrlDocument(uk.gov.hmcts.reform.ccd.client.model.Document categoryDocument) {
