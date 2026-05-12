@@ -43,7 +43,7 @@ public class SendOrReplyMessage {
         return new String[]{
             "messageContent",
             "messageMetaData", "messageReplyDynamicList", "messageReplyTable","externalMessageAttachDocsList",
-            "internalMessageAttachDocsList"
+            "internalMessageAttachDocsList","selectedAdditionalApplicationsBundle"
         };
     }
 }

@@ -1799,7 +1799,7 @@ public class SendAndReplyService {
                 .forEach(document -> sendReplyTempDocs.add(
                     element(SendReplyTempDoc.builder()
                                 .attachedTime(message.getUpdatedTime())
-                                .document(document).build())));
+                                .document(Document.withoutCategory(document)).build())));
         }
 
         //documents from message history
@@ -1814,7 +1814,7 @@ public class SendAndReplyService {
                             .forEach(document -> sendReplyTempDocs.add(
                                 element(SendReplyTempDoc.builder()
                                             .attachedTime(attachedTime)
-                                            .document(document).build())));
+                                            .document(Document.withoutCategory(document)).build())));
                     }
                 });
         }

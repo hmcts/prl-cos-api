@@ -3119,11 +3119,13 @@ public class SendAndReplyServiceTest {
 
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
-        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
+        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime)
+            .document(internalMessageDoc).build();
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(uk.gov.hmcts.reform.prl.models.documents.Document.withoutCategory(expectedSendReplyTempDocument.getDocument()),
+                     updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue().getDocument());
         assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
@@ -3179,7 +3181,9 @@ public class SendAndReplyServiceTest {
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(
+            uk.gov.hmcts.reform.prl.models.documents.Document.withoutCategory(expectedSendReplyTempDocument.getDocument()),
+            updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue().getDocument());
         assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 

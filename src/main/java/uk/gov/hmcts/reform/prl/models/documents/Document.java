@@ -59,5 +59,18 @@ public class Document {
             .build();
     }
 
+    public static Document withoutCategory(Document document) {
+        if (document == null) {
+            return null;
+        }
+        return Document.builder()
+            .documentUrl(document.documentUrl)
+            .documentBinaryUrl(document.documentBinaryUrl)
+            .documentFileName(document.documentFileName)
+            .documentCreatedOn(document.documentCreatedOn)
+            .documentHash(document.documentHash)
+            .uploadTimeStamp(document.uploadTimeStamp)
+            .build();
+    }
 
 }
