@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,9 +85,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -111,11 +106,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROL
 import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_STAFF;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.LOCAL_AUTHORITY;
-import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
-import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
-import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_UPLOADED_CATEGORY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -755,7 +747,7 @@ public class ManageDocumentsServiceTest {
         localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("localAuthorityQuarantineDocsList");
         assertNotNull(localAuthorityQuarantineDocsList);
         assertEquals(2,localAuthorityQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
@@ -814,7 +806,7 @@ public class ManageDocumentsServiceTest {
         localAuthorityQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("localAuthorityQuarantineDocsList");
         assertNotNull(localAuthorityQuarantineDocsList);
         assertEquals(2,localAuthorityQuarantineDocsList.size());
-        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertNotNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
