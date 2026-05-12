@@ -162,7 +162,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -256,7 +256,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -301,7 +301,7 @@ public class UpdateHearingActualsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         updateHearingActualsService.updateHearingActuals();
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
+        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -329,7 +329,7 @@ public class UpdateHearingActualsServiceTest {
 
         assertEquals(LocalDate.now(), existingTracking.getValue().getLastFiredDate());
         verify(allTabService).getStartUpdateForSpecificEvent("123", CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue());
-        verify(allTabService).getStartUpdateForSpecificEvent("123", CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(allTabService, never()).getStartUpdateForSpecificEvent("123", CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
     }
 
     @Test
@@ -356,7 +356,7 @@ public class UpdateHearingActualsServiceTest {
         updateHearingActualsService.updateHearingActuals();
 
         verify(allTabService, never()).getStartUpdateForSpecificEvent("123", CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue());
-        verify(allTabService).getStartUpdateForSpecificEvent("123", CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(allTabService, never()).getStartUpdateForSpecificEvent("123", CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
     }
 
     @Test

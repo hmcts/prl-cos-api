@@ -99,8 +99,10 @@ class HearingChasePolicy {
     }
 
     /**
-     * A draft or saved order that references this hearing means the chase cycle is complete —
-     * the solicitor has produced an order for the hearing, so no further reminder is needed.
+     * Returns true if the hearing is already referenced by any order on the case — draft or
+     * saved, created by any user role. A match short-circuits the chase: once an order
+     * exists for the hearing (from a solicitor, judge, legal adviser, etc.),
+     * no further Request Order reminder is needed.
      */
     private static boolean isHearingMappedToOrder(CaseData caseData, String hearingId) {
         return isHearingReferencedBy(caseData.getDraftOrderCollection(),
