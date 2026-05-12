@@ -615,6 +615,11 @@ public class ManageOrdersController {
             } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
+            if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                String effectiveOrderName = customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
+                caseData.setNameOfOrder(effectiveOrderName);
+                caseDataUpdated.put(NAME_OF_ORDER, effectiveOrderName);
+            }
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData,
