@@ -452,7 +452,6 @@ public class ManageOrdersController {
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
 
-            //TODO - check with Dharmendar
             manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
 
             // Debug: log orderCollection state before persisting
