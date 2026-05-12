@@ -25,6 +25,7 @@ import java.io.IOException;
 import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_DUMMY_UPLOAD_FILE;
+import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
 
 /**
  * functional test case for cafcass safegaurding letter upload.
