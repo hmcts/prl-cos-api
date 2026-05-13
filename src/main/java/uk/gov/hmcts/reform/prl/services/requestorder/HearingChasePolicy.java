@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.requestorder;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
  * Encapsulates the rules deciding whether a hearing currently warrants a Request Order
  * task fire (FPVTL-2408/2409).
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 class HearingChasePolicy {
@@ -109,6 +111,20 @@ class HearingChasePolicy {
     private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
+
+        // FPVTL-2408/2409 diagnostic — dump rebuilt labels + saved codes so we can see why
+        // a solicitor-flow draft order isn't recognised as linked when we expect it to be.
+        // Remove once verified.
+        List<String> draftHearingsTypeCodes = nullSafeCollection(caseData.getDraftOrderCollection()).stream()
+            .map(Element::getValue)
+            .map(DraftOrder::getHearingsType)
+            .filter(Objects::nonNull)
+            .map(DynamicList::getValue)
+            .filter(Objects::nonNull)
+            .map(DynamicListElement::getCode)
+            .toList();
+        log.info("Request Order link-check: hearingId={} hearingTypeValue={} rebuiltLabels={} draftHearingsTypeCodes={}",
+            hearingId, hearing.getHearingTypeValue(), hearingLabels, draftHearingsTypeCodes);
 
         return isHearingReferencedByManageOrderHearingDetails(caseData.getDraftOrderCollection(),
                                                               DraftOrder::getManageOrderHearingDetails, hearingId)
