@@ -174,4 +174,6 @@ public class BaseCaseData {
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
     private LocalAuthority localAuthority;
+
+    private RenameDocument renameDocument;
 }
