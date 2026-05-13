@@ -377,7 +377,7 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(CaseDetails.builder().id(12345L).build());
         ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
             CourtVenue.builder().courtEpimmsId("123").build(),
-            Court.builder().courtName("Test court").build()
+            null
         );
 
         when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
