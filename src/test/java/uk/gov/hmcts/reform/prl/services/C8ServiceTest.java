@@ -8,7 +8,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -52,6 +54,8 @@ class C8ServiceTest {
             .partyId(otherId)
             .firstName("John")
             .lastName("Doe")
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .address(Address.builder().addressLine1("123 Main St").build())
             .isAddressConfidential(uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes)
             .build();
         Element<PartyDetails> partyElement = ElementUtils.element(otherId, partyDetails);

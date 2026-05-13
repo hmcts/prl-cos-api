@@ -153,11 +153,11 @@ public class C8Service {
                 .findElement(partyId, nullSafeList(caseDataBefore.getOtherPartyInTheCaseRevised()))
                 .map(Element::getValue);
 
-            boolean hadConfidentialBefore = hasConfidentialInfo(beforeDetails);
-            boolean hasConfidentialNow = hasConfidentialInfo(Optional.of(afterDetails));
+            boolean wasHiddenBefore = shouldHideInfo(beforeDetails);
+            boolean shouldHideNow = shouldHideInfo(Optional.of(afterDetails));
 
             Optional<Element<ResponseDocuments>> existingC8Opt = ElementUtils.findElement(partyId, otherPartyC8Documents);
-            if (hasConfidentialNow) {
+            if (shouldHideNow) {
                 // Archive old C8 if present
                 if (existingC8Opt.isPresent()) {
                     Element<ResponseDocuments> toArchive = existingC8Opt.get();
@@ -169,7 +169,7 @@ public class C8Service {
                 ResponseDocuments newC8 = generateC8ForOtherParty(caseData, afterEl, authorisation);
                 otherPartyC8Documents.removeIf(el -> el.getId().equals(partyId));
                 otherPartyC8Documents.add(ElementUtils.element(partyId, newC8));
-            } else if (hadConfidentialBefore && existingC8Opt.isPresent()) {
+            } else if (wasHiddenBefore && existingC8Opt.isPresent()) {
                 // Archive old C8 if present and no longer confidential
                 Element<ResponseDocuments> toArchive = existingC8Opt.get();
                 otherPartyC8Documents.remove(toArchive);
@@ -189,5 +189,19 @@ public class C8Service {
                 || Yes.equals(partyDetails.get().getIsPhoneNumberConfidential())
                 || Yes.equals(partyDetails.get().getIsEmailAddressConfidential())
                 || YesNoIDontKnowV2.Yes.equals(partyDetails.get().getLiveInRefuge()));
+    }
+
+    /**
+     * Should hide info only if something is confidential (or refuge)
+     * AND they have info to hide - address / email / phone number
+     * @param partyDetails - the other party to check
+     * @return true if the C8 should be generated
+     */
+    private boolean shouldHideInfo(Optional<PartyDetails> partyDetails) {
+        return hasConfidentialInfo(partyDetails)
+                && partyDetails.isPresent()
+                && (Yes.equals(partyDetails.get().getIsCurrentAddressKnown())
+                    || Yes.equals(partyDetails.get().getCanYouProvideEmailAddress())
+                    || Yes.equals(partyDetails.get().getCanYouProvidePhoneNumber()));
     }
 }
