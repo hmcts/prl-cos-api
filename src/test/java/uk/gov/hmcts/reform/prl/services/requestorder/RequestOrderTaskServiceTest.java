@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -63,7 +63,7 @@ class RequestOrderTaskServiceTest {
     @Mock AuthTokenGenerator authTokenGenerator;
     @Mock CoreCaseDataApi coreCaseDataApi;
     @Mock AllTabServiceImpl allTabService;
-    @Mock HearingApiClient hearingApiClient;
+    @Mock HearingService hearingService;
     @Mock WorkingDayIndicator workingDayIndicator;
 
     RequestOrderTaskService service;
@@ -87,7 +87,7 @@ class RequestOrderTaskServiceTest {
 
         service = new RequestOrderTaskService(
             systemUserService, authTokenGenerator, coreCaseDataApi,
-            hearingApiClient, allTabService, chasePolicy, objectMapper);
+            hearingService, allTabService, chasePolicy, objectMapper);
     }
 
     @Test
@@ -170,7 +170,7 @@ class RequestOrderTaskServiceTest {
     void skipsCasesWithNoHearingsFromHmc() {
         CaseData caseData = baseCaseBuilder("FL401").build();
         stubSearchReturning(caseData);
-        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+        when(hearingService.getHearings(anyString(), anyString()))
             .thenReturn(Hearings.hearingsWith().caseRef(CASE_ID).caseHearings(List.of()).build());
 
         service.processRequestOrderTasks();
@@ -246,7 +246,7 @@ class RequestOrderTaskServiceTest {
     void firesOncePerQualifyingHearingEachWithItsOwnCurrentHearingId() {
         CaseData caseData = baseCaseBuilder("FL401").build();
         stubSearchReturning(caseData);
-        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+        when(hearingService.getHearings(anyString(), anyString()))
             .thenReturn(Hearings.hearingsWith()
                 .caseRef(CASE_ID)
                 .caseHearings(List.of(
@@ -282,7 +282,7 @@ class RequestOrderTaskServiceTest {
                     .build()))
             .build();
         stubSearchReturning(caseData);
-        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+        when(hearingService.getHearings(anyString(), anyString()))
             .thenReturn(Hearings.hearingsWith()
                 .caseRef(CASE_ID)
                 .caseHearings(List.of(
@@ -335,7 +335,7 @@ class RequestOrderTaskServiceTest {
     void caseIsSkippedWhenHmcThrowsFetchingHearings() {
         CaseData caseData = baseCaseBuilder("FL401").build();
         stubSearchReturning(caseData);
-        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+        when(hearingService.getHearings(anyString(), anyString()))
             .thenThrow(new RuntimeException("HMC unavailable"));
 
         service.processRequestOrderTasks();
@@ -376,7 +376,7 @@ class RequestOrderTaskServiceTest {
     }
 
     private void stubHearings(CaseHearing... caseHearings) {
-        when(hearingApiClient.getHearingDetails(anyString(), anyString(), anyString()))
+        when(hearingService.getHearings(anyString(), anyString()))
             .thenReturn(Hearings.hearingsWith()
                 .caseRef(CASE_ID)
                 .caseHearings(List.of(caseHearings))

@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -27,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -60,7 +60,7 @@ public class RequestOrderTaskService {
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
-    private final HearingApiClient hearingApiClient;
+    private final HearingService hearingService;
     private final AllTabServiceImpl allTabService;
     private final HearingChasePolicy chasePolicy;
     private final ObjectMapper objectMapper;
@@ -112,9 +112,8 @@ public class RequestOrderTaskService {
 
     private Hearings fetchHearings(String caseId) {
         try {
-            Hearings hearings = hearingApiClient.getHearingDetails(
+            Hearings hearings = hearingService.getHearings(
                 systemUserService.getSysUserToken(),
-                authTokenGenerator.generate(),
                 caseId);
             if (hearings == null) {
                 log.info("Request Order: HMC returned null for caseId={}", caseId);

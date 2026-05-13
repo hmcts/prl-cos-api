@@ -100,6 +100,7 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.LocalDate;
@@ -2904,18 +2905,10 @@ public class ManageOrderService {
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
-                //get hearingType
-                String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
-                //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
-                return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
-                    if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
-                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
-                        String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
-                        return concat(concat(hearingType, " - "), hearingDate);
-                    }
-                    return null;
-                }).filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
+                return hearingDaySchedules.map(daySchedules -> daySchedules.stream()
+                    .map(daySchedule -> HearingLabelUtils.buildHearingsTypeLabel(caseHearing, daySchedule))
+                    .filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
             }).map(this::getDynamicListElements)
             .flatMap(Collection::stream)
             .toList();
@@ -3048,19 +3041,9 @@ public class ManageOrderService {
             if (caseHearing.getHearingDaySchedule() == null) {
                 continue;
             }
-
-            String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
-
             for (HearingDaySchedule schedule : caseHearing.getHearingDaySchedule()) {
-                if (schedule.getHearingStartDateTime() != null) {
-                    java.time.format.DateTimeFormatter formatter =
-                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
-                    String hearingDate = schedule.getHearingStartDateTime().format(formatter);
-                    String expectedLabel = hearingType + " - " + hearingDate;
-
-                    if (expectedLabel.equals(selectedLabel)) {
-                        return schedule;
-                    }
+                if (selectedLabel.equals(HearingLabelUtils.buildHearingsTypeLabel(caseHearing, schedule))) {
+                    return schedule;
                 }
             }
         }

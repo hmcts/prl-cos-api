@@ -108,6 +108,56 @@ class HearingChasePolicyTest {
     }
 
     @Test
+    void decideSkipsWhenDraftOrderUsesHearingsTypeLinkage() {
+        // Solicitor draft-an-order flow stores the hearing as the dropdown label, not the
+        // HMC UUID. Format: "<hearingTypeValue> - dd/MM/yyyy hh:mm:ss".
+        LocalDate hearingDate = TODAY.minusDays(2);
+        String label = "Allocation - " + hearingDate.atTime(9, 0).format(
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss"));
+        CaseHearing hearingWithType = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf(HEARING_ID))
+            .hmcStatus("COMPLETED")
+            .hearingTypeValue("Allocation")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                .hearingStartDateTime(hearingDate.atTime(9, 0))
+                .hearingEndDateTime(hearingDate.atTime(16, 0))
+                .build()))
+            .build();
+        CaseData caseData = fl401Case()
+            .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(label)))
+            .build();
+
+        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), TODAY);
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
+    }
+
+    @Test
+    void decideDoesNotSkipWhenHearingsTypeLabelDoesNotMatchAnyDaySchedule() {
+        // A solicitor draft was created for a DIFFERENT hearing — the chase should still fire.
+        LocalDate hearingDate = TODAY.minusDays(2);
+        CaseHearing hearingWithType = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf(HEARING_ID))
+            .hmcStatus("COMPLETED")
+            .hearingTypeValue("Allocation")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                .hearingStartDateTime(hearingDate.atTime(9, 0))
+                .hearingEndDateTime(hearingDate.atTime(16, 0))
+                .build()))
+            .build();
+        CaseData caseData = fl401Case()
+            .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel("Mention - 31/12/2026 14:00:00")))
+            .build();
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+
+        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), TODAY);
+
+        assertThat(decision.shouldFire()).isTrue();
+        assertThat(decision.description()).isEqualTo("cadence met - firing");
+    }
+
+    @Test
     void decideSkipsWhenHearingMappedToSavedOrder() {
         CaseData caseData = fl401Case()
             .orderCollection(List.of(savedOrderForHearing(HEARING_ID)))
@@ -237,6 +287,16 @@ class HearingChasePolicyTest {
                                 .build())
                             .build()
                     ).build()))
+                .build()
+        ).build();
+    }
+
+    private static Element<DraftOrder> draftOrderForHearingsTypeLabel(String label) {
+        return Element.<DraftOrder>builder().value(
+            DraftOrder.builder()
+                .hearingsType(DynamicList.builder()
+                    .value(DynamicListElement.builder().code(label).label(label).build())
+                    .build())
                 .build()
         ).build();
     }

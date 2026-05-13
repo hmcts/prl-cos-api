@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
+import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -62,7 +64,7 @@ class HearingChasePolicy {
         if (hearingEndDate == null || hearingEndDate.isAfter(today)) {
             return ChaseDecision.skipHearingNotEnded(hearingEndDate);
         }
-        if (isHearingMappedToOrder(caseData, hearingId)) {
+        if (isHearingMappedToOrder(caseData, hearing)) {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
@@ -104,16 +106,21 @@ class HearingChasePolicy {
      * exists for the hearing (from a solicitor, judge, legal adviser, etc.),
      * no further Request Order reminder is needed.
      */
-    private static boolean isHearingMappedToOrder(CaseData caseData, String hearingId) {
-        return isHearingReferencedBy(caseData.getDraftOrderCollection(),
-                                     DraftOrder::getManageOrderHearingDetails, hearingId)
-            || isHearingReferencedBy(caseData.getOrderCollection(),
-                                     OrderDetails::getManageOrderHearingDetails, hearingId);
+    private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
+        String hearingId = hearingIdOf(hearing);
+        Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
+
+        return isHearingReferencedByManageOrderHearingDetails(caseData.getDraftOrderCollection(),
+                                                              DraftOrder::getManageOrderHearingDetails, hearingId)
+            || isHearingReferencedByManageOrderHearingDetails(caseData.getOrderCollection(),
+                                                              OrderDetails::getManageOrderHearingDetails, hearingId)
+            || isDraftOrderReferencedByHearingsType(caseData.getDraftOrderCollection(), hearingLabels);
     }
 
-    private static <T> boolean isHearingReferencedBy(List<Element<T>> orders,
-                                                     Function<T, List<Element<HearingData>>> hearingDetailsExtractor,
-                                                     String hearingId) {
+    private static <T> boolean isHearingReferencedByManageOrderHearingDetails(
+            List<Element<T>> orders,
+            Function<T, List<Element<HearingData>>> hearingDetailsExtractor,
+            String hearingId) {
         return nullSafeCollection(orders).stream()
             .map(Element::getValue)
             .anyMatch(order -> orderReferencesHearing(order, hearingDetailsExtractor, hearingId));
@@ -131,5 +138,21 @@ class HearingChasePolicy {
             .map(DynamicList::getValue)
             .filter(Objects::nonNull).map(DynamicListElement::getCode)
             .anyMatch(hearingId::equals);
+    }
+
+    private static boolean isDraftOrderReferencedByHearingsType(List<Element<DraftOrder>> draftOrders,
+                                                                 Set<String> hearingLabels) {
+        if (hearingLabels.isEmpty()) {
+            return false;
+        }
+        return nullSafeCollection(draftOrders).stream()
+            .map(Element::getValue)
+            .map(DraftOrder::getHearingsType)
+            .filter(Objects::nonNull)
+            .map(DynamicList::getValue)
+            .filter(Objects::nonNull)
+            .map(DynamicListElement::getCode)
+            .filter(Objects::nonNull)
+            .anyMatch(hearingLabels::contains);
     }
 }
