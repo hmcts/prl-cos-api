@@ -193,7 +193,7 @@ public class C8Service {
 
     /**
      * Should hide info only if something is confidential (or refuge)
-     * AND they have info to hide - address / email / phone number
+     * AND they have info to hide - address / email / phone number.
      * @param partyDetails - the other party to check
      * @return true if the C8 should be generated
      */
