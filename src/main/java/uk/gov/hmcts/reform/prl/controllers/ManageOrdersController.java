@@ -620,6 +620,11 @@ public class ManageOrdersController {
                 caseData.setNameOfOrder(effectiveOrderName);
                 caseDataUpdated.put(NAME_OF_ORDER, effectiveOrderName);
             }
+            log.info("Custom order naming before save: customOrderNameOption={}, nameOfOrder={}, customOrderDoc={}",
+                     caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION),
+                     caseData.getNameOfOrder(),
+                     caseDataUpdated.get(CUSTOM_ORDER_DOC));
+
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData,
