@@ -101,7 +101,8 @@ class DocumentRemovalControllerTest {
         SubmittedCallbackResponse response = controller.submitted(auth, s2s, callbackRequest);
 
         assertNotNull(response);
-        verify(documentRemovalService).deleteDocument(any());
+        verify(documentRemovalService).deleteDocument(any(CaseDetails.class));
+        verify(documentRemovalService).executePostSubmittedActions(any(CallbackRequest.class));
     }
 
     @Test

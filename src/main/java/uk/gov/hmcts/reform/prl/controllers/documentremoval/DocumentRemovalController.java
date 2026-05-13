@@ -107,6 +107,7 @@ public class DocumentRemovalController {
         log.info("Document removal submitted callback received for case id: {}", caseDetails.getId());
 
         documentRemovalService.deleteDocument(caseDetails);
+        documentRemovalService.executePostSubmittedActions(callbackRequest);
 
         return SubmittedCallbackResponse.builder()
             .build();
