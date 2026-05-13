@@ -111,26 +111,29 @@ class HearingChasePolicy {
     private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
+        boolean hearingTypeLookupFailed = hearing.getHearingTypeValue() == null
+            || hearing.getHearingTypeValue().isBlank();
+        Set<String> hearingDateSuffixes = hearingTypeLookupFailed
+            ? HearingLabelUtils.buildHearingDateSuffixes(hearing)
+            : Set.of();
 
-        // FPVTL-2408/2409 diagnostic — dump rebuilt labels + saved codes so we can see why
-        // a solicitor-flow draft order isn't recognised as linked when we expect it to be.
-        // Remove once verified.
-        List<String> draftHearingsTypeCodes = nullSafeCollection(caseData.getDraftOrderCollection()).stream()
-            .map(Element::getValue)
-            .map(DraftOrder::getHearingsType)
-            .filter(Objects::nonNull)
-            .map(DynamicList::getValue)
-            .filter(Objects::nonNull)
-            .map(DynamicListElement::getCode)
-            .toList();
-        log.info("Request Order link-check: hearingId={} hearingTypeValue={} rebuiltLabels={} draftHearingsTypeCodes={}",
-            hearingId, hearing.getHearingTypeValue(), hearingLabels, draftHearingsTypeCodes);
+        if (hearingTypeLookupFailed) {
+            // Ref-data lookup that turns the HMC hearing type code into a human label
+            // (e.g. "ABA5-ALL" -> "Allocation") returned empty for the cron call, so
+            // any saved order's "<type> - <date>" code cannot match on the full label.
+            // Falling back to date-suffix matching keeps the chase correct while the
+            // upstream ref-data issue is investigated.
+            log.warn("Request Order link-check: hearingTypeValue empty for hearingId={} — "
+                    + "ref-data lookup likely failed; falling back to date-suffix match",
+                hearingId);
+        }
 
         return isHearingReferencedByManageOrderHearingDetails(caseData.getDraftOrderCollection(),
                                                               DraftOrder::getManageOrderHearingDetails, hearingId)
             || isHearingReferencedByManageOrderHearingDetails(caseData.getOrderCollection(),
                                                               OrderDetails::getManageOrderHearingDetails, hearingId)
-            || isDraftOrderReferencedByHearingsType(caseData.getDraftOrderCollection(), hearingLabels);
+            || isDraftOrderReferencedByHearingsType(
+                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes);
     }
 
     private static <T> boolean isHearingReferencedByManageOrderHearingDetails(
@@ -157,8 +160,9 @@ class HearingChasePolicy {
     }
 
     private static boolean isDraftOrderReferencedByHearingsType(List<Element<DraftOrder>> draftOrders,
-                                                                 Set<String> hearingLabels) {
-        if (hearingLabels.isEmpty()) {
+                                                                 Set<String> hearingLabels,
+                                                                 Set<String> hearingDateSuffixes) {
+        if (hearingLabels.isEmpty() && hearingDateSuffixes.isEmpty()) {
             return false;
         }
         return nullSafeCollection(draftOrders).stream()
@@ -169,6 +173,7 @@ class HearingChasePolicy {
             .filter(Objects::nonNull)
             .map(DynamicListElement::getCode)
             .filter(Objects::nonNull)
-            .anyMatch(hearingLabels::contains);
+            .anyMatch(code -> hearingLabels.contains(code)
+                || hearingDateSuffixes.contains(HearingLabelUtils.extractDateSuffix(code)));
     }
 }

@@ -134,6 +134,34 @@ class HearingChasePolicyTest {
     }
 
     @Test
+    void decideSkipsWhenHearingsTypeMatchesByDateSuffixDespiteEmptyTypeValue() {
+        // Cron-context: HearingService.getHearings ref-data lookup failed, so
+        // hearing.getHearingTypeValue() is blank. The draft order was saved earlier
+        // (when ref-data was working) with the full "Allocation - dd/MM/yyyy hh:mm:ss"
+        // label. Full-label match misses; date-suffix fallback still recognises the link.
+        LocalDate hearingDate = TODAY.minusDays(2);
+        String savedLabel = "Allocation - " + hearingDate.atTime(9, 0).format(
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss"));
+        CaseHearing hearingWithEmptyType = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf(HEARING_ID))
+            .hmcStatus("COMPLETED")
+            .hearingTypeValue("")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                .hearingStartDateTime(hearingDate.atTime(9, 0))
+                .hearingEndDateTime(hearingDate.atTime(16, 0))
+                .build()))
+            .build();
+        CaseData caseData = fl401Case()
+            .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(savedLabel)))
+            .build();
+
+        ChaseDecision decision = policy.decide(hearingWithEmptyType, caseData, emptyLedger(), TODAY);
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
+    }
+
+    @Test
     void decideDoesNotSkipWhenHearingsTypeLabelDoesNotMatchAnyDaySchedule() {
         // A solicitor draft was created for a DIFFERENT hearing — the chase should still fire.
         LocalDate hearingDate = TODAY.minusDays(2);
