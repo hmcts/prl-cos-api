@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -59,6 +60,7 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -92,6 +94,7 @@ public class CaseDocumentController {
     private final CaseService caseService;
     private final EmailService emailService;
     private final CitizenDocumentService citizenDocumentService;
+    private final AuthTokenGenerator authTokenGenerator;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
@@ -372,7 +375,29 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+        delinkCitizenUploadedDocument(authorisation, authTokenGenerator.generate(), documentId);
         return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
+    }
+
+    private void delinkCitizenUploadedDocument(String authorisation, String serviceAuthorization, String documentId) {
+        Optional<CaseData> matchedCaseData = Optional.ofNullable(caseService.retrieveCases(authorisation, serviceAuthorization))
+            .orElse(List.of())
+            .stream()
+            .filter(caseData -> isNotEmpty(caseData.getDocumentManagementDetails()))
+            .filter(caseData -> isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()))
+            .filter(caseData -> caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
+                .stream()
+                .anyMatch(element -> isNotEmpty(element.getValue().getCitizenQuarantineDocument())
+                    && documentId.equalsIgnoreCase(DocumentUtils.getDocumentId(element.getValue().getCitizenQuarantineDocument().getDocumentUrl()))))
+            .findFirst();
+
+        if (matchedCaseData.isEmpty()) {
+            return;
+        }
+
+        CaseData caseDataToUpdate = matchedCaseData.get();
+        String caseId = String.valueOf(caseDataToUpdate.getId());
+        caseService.delinkCitizenUploadedDocumentFromCase(authorisation, caseId, documentId);
     }
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
