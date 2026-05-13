@@ -97,7 +97,7 @@ public class CaseDocumentControllerIntegrationTest {
     @MockitoBean
     private UserInfo userInfo;
 
-    @MockBean
+    @MockitoBean
     AuthTokenGenerator authTokenGenerator;
 
     @Autowired
