@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.Confiden
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -321,8 +323,11 @@ public class CitizenCaseUpdateServiceTest {
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
             .thenReturn(CaseDetails.builder().id(12345L).build());
-        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
-            .thenReturn(Court.builder().courtName("Test court").build());
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
+            CourtVenue.builder().courtEpimmsId("123").build(),
+            Court.builder().courtName("Test court").build()
+        );
+        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
@@ -370,8 +375,12 @@ public class CitizenCaseUpdateServiceTest {
         when(objectMapper.convertValue(any(CaseData.class), eq(Map.class))).thenReturn(caseDetails1);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(12345L)))
             .thenReturn(CaseDetails.builder().id(12345L).build());
-        when(courtLocatorService.getNearestFamilyCourt(any(CaseData.class)))
-            .thenReturn(null);
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
+            CourtVenue.builder().courtEpimmsId("123").build(),
+            Court.builder().courtName("Test court").build()
+        );
+
+        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
         Assert.assertNotNull(citizenCaseUpdateService.submitCitizenC100Application(
             authToken,
             String.valueOf(caseId),
@@ -528,8 +537,13 @@ public class CitizenCaseUpdateServiceTest {
             .thenReturn(caseDetailsMap);
         when(partyLevelCaseFlagsService.generateAndStoreCaseFlags(anyString()))
             .thenReturn(CaseDetails.builder().id(12345L).build());
-        when(courtLocatorService.getNearestFamilyCourt(any()))
-            .thenReturn(Court.builder().courtName("Test court").build());
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
+            CourtVenue.builder().courtEpimmsId("123").build(),
+            Court.builder().courtName("Test court").build()
+        );
+
+        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
+
         when(allTabService.submitUpdateForSpecificUserEvent(
             any(), any(), any(), any(), any(), any()
         )).thenReturn(CaseDetails.builder().id(12345L).build());
@@ -589,6 +603,13 @@ public class CitizenCaseUpdateServiceTest {
                 caseData,
                 UserDetails.builder().build()
             );
+
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = new ImmutablePair<>(
+            CourtVenue.builder().courtEpimmsId("123").build(),
+            Court.builder().build()
+        );
+
+        when(courtLocatorService.getC100NearestFamilyCourtAndVenue(any(CaseData.class))).thenReturn(courtCourtVenueMap);
 
         when(citizenPartyDetailsMapper.buildUpdatedCaseData(any(), any()))
             .thenReturn(caseData);

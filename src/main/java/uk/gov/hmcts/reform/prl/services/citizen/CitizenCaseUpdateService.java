@@ -7,6 +7,7 @@ import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.citizen.awp.CitizenAwpRequest;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
@@ -159,7 +161,9 @@ public class CitizenCaseUpdateService {
         throws JsonProcessingException, NotFoundException {
 
         // Find nearest court for the child post code
-        String courtName = getNearestCourtName(citizenUpdatedCaseData);
+        ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(citizenUpdatedCaseData);
+        String courtName = courtCourtVenueMap.getRight() != null ? courtCourtVenueMap.getRight().getCourtName() : "No Court Fetched";;
+        String courtId = courtCourtVenueMap.getLeft() != null ? courtCourtVenueMap.getLeft().getCourtEpimmsId() : null;
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(
@@ -180,6 +184,7 @@ public class CitizenCaseUpdateService {
         CaseData dbCaseData = startAllTabsUpdateDataContent.caseData();
         dbCaseData = dbCaseData.toBuilder().userInfo(wrapElements(userInfo))
             .courtName(courtName)
+            .courtId(courtId)
             .taskListVersion(TASK_LIST_VERSION_V3)
             .build();
 
@@ -232,11 +237,6 @@ public class CitizenCaseUpdateService {
         );
 
         return partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
-    }
-
-    private String getNearestCourtName(CaseData caseData) throws NotFoundException {
-        Court nearestCourt = courtLocatorService.getNearestFamilyCourt(caseData);
-        return nearestCourt != null ? nearestCourt.getCourtName() : "No Court Fetched";
     }
 
     private static CaseData setPaymentDetails(CaseData citizenUpdatedCaseData, CaseData caseDataToSubmit) {
