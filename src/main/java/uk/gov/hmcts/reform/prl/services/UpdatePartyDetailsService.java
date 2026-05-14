@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -60,7 +61,9 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
@@ -77,6 +80,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_CONF
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
+import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
+import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.JUDICIAL_REVIEW;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -93,6 +100,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 public class UpdatePartyDetailsService {
 
+    private static final List<State> SEALED_STATES = List.of(CASE_ISSUED, JUDICIAL_REVIEW, PREPARE_FOR_HEARING_CONDUCT_HEARING, DECISION_OUTCOME);
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
         CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue(), CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()};
     public static final String C_8_OF = "C8 of ";
@@ -135,8 +143,8 @@ public class UpdatePartyDetailsService {
         }
 
         Consumer<CaseData> generateC8 = caseDataParam -> {
-            if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(State.valueOf(state))
-                || State.DECISION_OUTCOME.equals(State.valueOf(state))) {
+            if (PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(State.valueOf(state))
+                || DECISION_OUTCOME.equals(State.valueOf(state))) {
                 try {
                     archiveAndGenerateC8DocumentsForApplicant(updatedCaseData, callbackRequest, authorisation, caseDataParam);
                 } catch (Exception e) {
@@ -724,9 +732,7 @@ public class UpdatePartyDetailsService {
                 c8FinalDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
-                        caseData.getCaseTypeOfApplication()
-                                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
-                                : C8_RESP_FL401_FINAL_HINT,
+                        getC8RespondentHint(caseData),
                         false,
                         dataMap
                 );
@@ -736,9 +742,7 @@ public class UpdatePartyDetailsService {
                     c8FinalWelshDocument = documentGenService.generateSingleDocument(
                             authorisation,
                             caseData,
-                            caseData.getCaseTypeOfApplication()
-                                    .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
-                                    : C8_RESP_FL401_FINAL_HINT,
+                            getC8RespondentHint(caseData),
                             true,
                             dataMap
                     );
@@ -757,6 +761,20 @@ public class UpdatePartyDetailsService {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    private static @NonNull String getC8RespondentHint(CaseData caseData) {
+
+        if (SEALED_STATES.contains(caseData.getState())) {
+            return caseData.getCaseTypeOfApplication()
+                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                : C8_RESP_FL401_FINAL_HINT;
+        } else {
+            return caseData.getCaseTypeOfApplication()
+                .equals(C100_CASE_TYPE) ? C8_RESP_DRAFT_HINT
+                : C8_RESP_FL401_DRAFT_HINT;
+        }
+
     }
 
     private List<Element<ResponseDocuments>> getC8DocumentReverseOrderList(List<Element<ResponseDocuments>> c8Documents,
