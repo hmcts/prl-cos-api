@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -205,7 +204,8 @@ public class UpdatePartyDetailsService {
                                                   callbackRequest,
                                                   authorisation,
                                                   caseData,
-                                                  List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)));
+                                                  List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)),
+                                                  false);
                 generateC8.accept(caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}, Error: {}",
@@ -258,7 +258,7 @@ public class UpdatePartyDetailsService {
             if (respondentsForC8 != null && !respondentsForC8.isEmpty()) {
                 try {
                     generateC8DocumentsForRespondents(
-                        updatedCaseData, callbackRequest, authorisation, latest, respondentsForC8);
+                        updatedCaseData, callbackRequest, authorisation, latest, respondentsForC8, false);
                     generateC8.accept(latest);
                 } catch (Exception e) {
                     log.error("Failed to generate C8 document for C100 case {}. Error: {}",
@@ -557,10 +557,15 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
-                                                       CaseData caseData, List<Element<PartyDetails>> currentRespondents)
-        throws Exception {
+    public void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
+                                                       CaseData caseData, List<Element<PartyDetails>> currentRespondents,
+                                                  boolean forceRegenerate) {
         int respondentIndex = 0;
+        // Ensure we have the case state in our caseData object
+        CaseData fromRequest = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseData = caseData.toBuilder()
+            .state(fromRequest.getState())
+            .build();
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         for (Element<PartyDetails> respondent: currentRespondents) {
@@ -580,7 +585,11 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                                 updatedCaseData,
                                 caseData,
-                                dataMap, checkIfConfidentialityDetailsChangedRespondent(caseDataBefore, respondent),
+                                dataMap,
+                                forceRegenerate || checkIfConfidentialityDetailsChangedRespondent(
+                                    caseDataBefore,
+                                    respondent
+                                ),
                                 respondentIndex, respondent
             );
             respondentIndex++;
@@ -658,7 +667,7 @@ public class UpdatePartyDetailsService {
 
     public void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
-                                      Element<PartyDetails> respondent) throws Exception {
+                                      Element<PartyDetails> respondent) {
         //prl-6790 - getting user-role and adding to datamap
         dataMap.put("loggedInUserRole", manageOrderService.getLoggedInUserType(authorisation));
 
@@ -719,8 +728,7 @@ public class UpdatePartyDetailsService {
                                                                        Map<String, Object> dataMap,
                                                                        List<Element<ResponseDocuments>> c8Documents,
                                                                        boolean isDetailsChanged,
-                                                                       Element<PartyDetails> respondent)
-        throws  Exception {
+                                                                       Element<PartyDetails> respondent) {
         Document c8FinalDocument;
         Document c8FinalWelshDocument = null;
         String partyName = respondent.getValue().getLabelForDynamicList();
@@ -763,8 +771,7 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private static @NonNull String getC8RespondentHint(CaseData caseData) {
-
+    private String getC8RespondentHint(CaseData caseData) {
         if (SEALED_STATES.contains(caseData.getState())) {
             return caseData.getCaseTypeOfApplication()
                 .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT

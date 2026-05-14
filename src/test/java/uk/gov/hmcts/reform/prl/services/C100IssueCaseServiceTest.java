@@ -96,6 +96,9 @@ public class C100IssueCaseServiceTest {
     private WorkflowResult workflowResult;
 
     @Mock
+    private UpdatePartyDetailsService updatePartyDetailsService;
+
+    @Mock
     private DgsService dgsService;
 
     @Mock

@@ -61,6 +61,7 @@ public class C100IssueCaseService {
     private final PathFinderLookupService pathFinderLookupService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
+    private final UpdatePartyDetailsService updatePartyDetailsService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -114,6 +115,9 @@ public class C100IssueCaseService {
 
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
+
+        updatePartyDetailsService.generateC8DocumentsForRespondents(caseDataUpdated, callbackRequest, authorisation,
+                                                                    caseData, caseData.getRespondents(), true);
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails.
