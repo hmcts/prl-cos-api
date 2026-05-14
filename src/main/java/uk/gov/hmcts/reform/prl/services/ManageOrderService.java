@@ -123,7 +123,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -181,8 +180,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -3994,25 +3991,10 @@ public class ManageOrderService {
             log.info("setFieldsForWaTask: manageOrdersOptions did not match create/upload/custom, value was: {}",
                 manageOrdersOption);
         }
-        setFieldsForRequestSafeGuardingReportWaTask(caseData, waFieldsMap, eventId);
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
         return waFieldsMap;
-    }
-
-    public void setFieldsForRequestSafeGuardingReportWaTask(CaseData caseData, Map<String, Object> waFieldsMap, String eventId) {
-        if (((eventId.equals(MANAGE_ORDERS.getId()) && noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))
-                || eventId.equals(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
-                || eventId.equals(HEARING_EDIT_AND_APPROVE_ORDER.getId()))
-            && Yes.equals(caseData.getServeOrderData().getCafcassOrCymruNeedToProvideReport())
-            && ObjectUtils.isNotEmpty(caseData.getServeOrderData().getWhenReportsMustBeFiled())
-            && DAYS.between(LocalDate.now(), caseData.getServeOrderData().getWhenReportsMustBeFiled()) >= 7
-            && YesOrNo.Yes.equals(caseData.getIsPathfinderCase())) {
-            waFieldsMap.put(WA_REQ_SER_UPDATE, "Yes");
-            waFieldsMap.put(
-                WA_SER_DUE_DATE, caseData.getServeOrderData().getWhenReportsMustBeFiled().minusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE));
-        }
     }
 
     public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
