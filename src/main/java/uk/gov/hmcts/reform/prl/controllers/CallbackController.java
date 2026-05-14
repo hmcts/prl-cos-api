@@ -130,6 +130,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @RestController
@@ -466,7 +467,7 @@ public class CallbackController {
 
             caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
             List<Element<PartyDetails>> respondents = C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
-                ? caseData.getRespondents()
+                ? nullSafeList(caseData.getRespondents())
                 : List.of(element(caseData.getRespondentsFL401()));
             updatePartyDetailsService.generateC8DocumentsForRespondents(caseDataUpdated, callbackRequest, authorisation,
                                                                         caseData, respondents, true);
