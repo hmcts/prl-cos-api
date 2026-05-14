@@ -1386,9 +1386,9 @@ public class ReviewDocumentServiceTest {
                 UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
             );
 
-            // Document still routes to regular case file tab (not confidential/restricted)
-            Assert.assertNotNull(caseDataMap.get("cafcassUploadDocListDocTab"));
-            Assert.assertNull("Category " + categoryId + " should NOT go to confidential tab", caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
+            // Document still will stay back as confidential
+            Assert.assertNull(caseDataMap.get("cafcassUploadDocListDocTab"));
+            Assert.assertNotNull("Category " + categoryId + " should NOT go to confidential tab", caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
 
             // Verify rename was invoked once per doc type
             verify(manageDocumentsService, times(1)).renameAndReuploadFileToBeConfidential(document);

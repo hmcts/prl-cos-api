@@ -78,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -354,6 +353,9 @@ public class ManageDocumentsService {
 
     public void moveDocumentsToRespectiveCategoriesNew(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails,
                                                        CaseData caseData, Map<String, Object> caseDataUpdated, String userRole) {
+
+        quarantineLegalDoc = cirDocumentsAlwaysConfidentialDuringReview(quarantineLegalDoc);
+
         String restrictedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
         if (restrictedKey != null) {
             //This will be executed only during review documents
@@ -404,22 +406,6 @@ public class ManageDocumentsService {
                 .restrictedDetails(null)
                 .build();
 
-            // this renaming was done for a requirement in FPVTL-2412 even when the document is marked as 'No'
-            // during review by admin
-            List<String> confidentialListForPathFinder = Arrays.asList(CIR_EXTENSION_REQUEST_LA, CIR_TRANSFER_REQUEST_LA,
-                                                                       DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, SIXTEEN_A_RISK_ASSESSMENT);
-            if ((CAFCASS.equals(quarantineLegalDoc.getUploaderRole()) || LOCAL_AUTHORITY.equals(quarantineLegalDoc.getUploaderRole()))
-                && confidentialListForPathFinder.contains(quarantineLegalDoc.getCategoryId())) {
-                Document document = getQuarantineDocumentForUploader(quarantineLegalDoc.getUploaderRole(), quarantineLegalDoc);
-                Document updatedConfidentialDocument = renameAndReuploadFileToBeConfidential(document);
-                quarantineLegalDoc = setQuarantineDocumentForUploader(
-                    ManageDocuments.builder()
-                        .document(updatedConfidentialDocument)
-                        .build(),
-                    quarantineLegalDoc.getUploaderRole(),
-                    quarantineLegalDoc
-                );
-            }
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails
@@ -434,6 +420,20 @@ public class ManageDocumentsService {
                                                        quarantineLegalDoc,
                                                        userRole);
         }
+    }
+
+    private QuarantineLegalDoc cirDocumentsAlwaysConfidentialDuringReview(QuarantineLegalDoc quarantineLegalDoc) {
+        List<String> confidentialListForPathFinder = Arrays.asList(
+            CIR_EXTENSION_REQUEST_LA, CIR_TRANSFER_REQUEST_LA,
+            DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, SIXTEEN_A_RISK_ASSESSMENT
+        );
+        if (quarantineLegalDoc != null && confidentialListForPathFinder.contains(quarantineLegalDoc.getCategoryId())) {
+            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                .isConfidential(YesOrNo.Yes)
+                .isRestricted(YesOrNo.No)
+                .build();
+        }
+        return quarantineLegalDoc;
     }
 
     private QuarantineLegalDoc convertQuarantineDocumentToRightCategoryDocument(QuarantineLegalDoc quarantineLegalDoc, UserDetails userDetails) {
