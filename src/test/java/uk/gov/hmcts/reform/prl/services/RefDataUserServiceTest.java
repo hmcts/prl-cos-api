@@ -47,10 +47,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_SECOND_PAGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_TOTAL_RECORDS_HEADER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
@@ -101,8 +97,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(null);
         List<DynamicListElement> staffDetails = refDataUserService.getLegalAdvisorList();
         assertNull(staffDetails.get(0).getCode());
@@ -116,8 +112,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(null);
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
@@ -133,8 +129,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         ))
             .thenThrow(FeignException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
@@ -149,8 +145,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenThrow(FeignException.class);
 
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
@@ -182,8 +178,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(staffResponse);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
@@ -223,8 +219,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(staffResponse);
 
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
@@ -467,8 +463,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(staffResponseFirstPage);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
@@ -498,8 +494,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(staffResponseFirstPage);
 
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
@@ -534,8 +530,8 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
+            Integer.MAX_VALUE,
+            0
         )).thenReturn(staffResponseFirstPage);
 
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
@@ -546,22 +542,18 @@ public class RefDataUserServiceTest {
     }
 
     @Test
-    public void testGetStaffDynamicListDataSizeGtPageSize() {
+    public void testGetStaffDynamicListWithMultipleStaff() {
         StaffProfile staffProfile1 = StaffProfile.builder().userType(LEGALOFFICE)
             .lastName("David").emailId("test2@com").build();
         StaffProfile staffProfile2 = StaffProfile.builder().userType(LEGALOFFICE)
             .lastName("John").emailId("test1@com").build();
         StaffResponse staffResponse1 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
         StaffResponse staffResponse2 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile2).build();
-        List<StaffResponse> listOfStaffFirstPage = new ArrayList<>();
-        List<StaffResponse> listOfStaffSecondPage = new ArrayList<>();
-        listOfStaffFirstPage.add(staffResponse1);
-        listOfStaffSecondPage.add(staffResponse2);
-        //add a response header for total entries
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(RD_STAFF_TOTAL_RECORDS_HEADER, String.valueOf(RD_STAFF_PAGE_SIZE + 10));
-        ResponseEntity<List<StaffResponse>> staffResponseFirstPage = ResponseEntity.ok().headers(headers).body(listOfStaffFirstPage);
-        ResponseEntity<List<StaffResponse>> staffResponseSecondPage = ResponseEntity.ok().headers(headers).body(listOfStaffSecondPage);
+        List<StaffResponse> allStaff = new ArrayList<>();
+        allStaff.add(staffResponse1);
+        allStaff.add(staffResponse2);
+
+        ResponseEntity<List<StaffResponse>> staffResponseEntity = ResponseEntity.ok().body(allStaff);
 
         when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
         when(authTokenGenerator.generate()).thenReturn("s2sToken");
@@ -571,18 +563,9 @@ public class RefDataUserServiceTest {
             SERVICENAME,
             STAFFSORTCOLUMN,
             STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
-        )).thenReturn(staffResponseFirstPage);
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_SECOND_PAGE
-        )).thenReturn(staffResponseSecondPage);
+            Integer.MAX_VALUE,
+            0
+        )).thenReturn(staffResponseEntity);
 
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
         DynamicListElement mockDynamicListElement1 = mock(DynamicListElement.class);

@@ -38,10 +38,6 @@ import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_SECOND_PAGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_TOTAL_RECORDS_HEADER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
@@ -53,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 public class RefDataUserService {
 
     public static final String JUDICIAL_USER_CACHE = "judicialUserCache";
+    public static final String STAFF_REF_DATA_CACHE = "staffRefDataCache";
 
     private final AuthTokenGenerator authTokenGenerator;
     private final StaffResponseDetailsApi staffResponseDetailsApi;
@@ -75,18 +72,8 @@ public class RefDataUserService {
     public DynamicList getStaffDynamicList(StaffResponseToDynamicListElementFilter filter) {
         List<DynamicListElement> listItems = new ArrayList<>();
         try {
-            ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
-            listItems.addAll(applyStaffResponseFilter(response.getBody(), filter));
-
-            Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders()
-                                                                       .getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
-            int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
-            if (totalRecords > RD_STAFF_PAGE_SIZE) {
-                int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
-                for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
-                    listItems.addAll(applyStaffResponseFilter(getStaffResponse(pageNumber).getBody(), filter));
-                }
-            }
+            List<StaffResponse> allStaff = getAllStaffDetails();
+            listItems.addAll(applyStaffResponseFilter(allStaff, filter));
         } catch (Exception e) {
             log.error("Error retrieving staff list - {}", e.getMessage());
         }
@@ -106,40 +93,36 @@ public class RefDataUserService {
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
-            ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
-            if (null != response) {
-                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(
-                    RD_STAFF_TOTAL_RECORDS_HEADER));
-                int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
-                if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
-                    return onlyLegalAdvisor(response.getBody());
-                } else {
-                    List<DynamicListElement> listOfLegalAdvisors = onlyLegalAdvisor(response.getBody());
-                    int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
-                    for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
-                        listOfLegalAdvisors.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
-                    }
-                    return listOfLegalAdvisors;
-                }
-
-            }
+            List<StaffResponse> allStaff = getAllStaffDetails();
+            return onlyLegalAdvisor(allStaff);
         } catch (NoStaffResponseException e) {
             log.error("Staff details Lookup Failed - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
     }
 
-    public ResponseEntity<List<StaffResponse>> getStaffResponse(int pageNumber) {
+    /**
+     * Gets all staff details in a single request (no paging).
+     * Results are cached for 30 minutes.
+     *
+     * @return list of all staff responses
+     */
+    @Cacheable(cacheNames = STAFF_REF_DATA_CACHE)
+    public List<StaffResponse> getAllStaffDetails() {
+        log.info("Fetching all staff ref data (not cached)");
         try {
-            return staffResponseDetailsApi.getAllStaffResponseDetails(
+            ResponseEntity<List<StaffResponse>> response = staffResponseDetailsApi.getAllStaffResponseDetails(
                 idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
                 authTokenGenerator.generate(),
                 SERVICENAME,
                 STAFFSORTCOLUMN,
                 STAFFORDERASC,
-                RD_STAFF_PAGE_SIZE,
-                pageNumber
+                Integer.MAX_VALUE,
+                0
             );
+            List<StaffResponse> staffList = response.getBody();
+            log.info("Fetched {} staff members", staffList != null ? staffList.size() : 0);
+            return staffList != null ? staffList : Collections.emptyList();
         } catch (FeignException e) {
             throw new NoStaffResponseException("Failed to retrieve staff response", e);
         }
@@ -190,6 +173,12 @@ public class RefDataUserService {
     @Scheduled(fixedDelay = 1800000) // 30 minutes
     public void evictJudicialUserCache() {
         log.info("Evicting judicial user cache");
+    }
+
+    @CacheEvict(allEntries = true, cacheNames = STAFF_REF_DATA_CACHE)
+    @Scheduled(fixedDelay = 1800000) // 30 minutes
+    public void evictStaffRefDataCache() {
+        log.info("Evicting staff ref data cache");
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
