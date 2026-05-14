@@ -87,6 +87,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                                    .getNeedInterpreterInCertainLanguageDetails()))
                                .isIntermediaryNeeded(isIntermediaryRequired(communicationHelps,
                                                                             c100RebuildReasonableAdjustmentsElements.getIntermediaryRequirements()))
+                               .reasonsForIntermediary(c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField())
                                .isSpecialArrangementsRequired(buildSpecialArrangementRequired(specialArrangementList))
                                .specialArrangementsRequired(buildSpecialArrangementList(specialArrangementList,
                                                                                         c100RebuildReasonableAdjustmentsElements
@@ -160,7 +161,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                           C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
         if (c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null
             || c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField() != null) {
-            return buildAdjustmentRequiredFromSubFields(c100RebuildReasonableAdjustmentsElements);
+            return buildAdjustmentRequiredFromSubField(c100RebuildReasonableAdjustmentsElements);
         }
 
         StringBuilder adjustmentRequired = new StringBuilder();
@@ -206,21 +207,10 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
         return String.valueOf(adjustmentRequired);
     }
 
-    private static String buildAdjustmentRequiredFromSubFields(
-        C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
-        StringBuilder adjustmentRequired = new StringBuilder();
-
-        if (c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField() != null) {
-            adjustmentRequired.append(c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField());
-        }
-
-        if (c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null) {
-            if (!adjustmentRequired.isEmpty()) {
-                adjustmentRequired.append(COMMA_SEPARATOR);
-            }
-            adjustmentRequired.append(c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField());
-        }
-        return adjustmentRequired.toString();
+    private static String buildAdjustmentRequiredFromSubField(C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
+        return c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null
+            ? c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField()
+            : null;
     }
 
     private static void appendData(StringBuilder stringBuilder,
