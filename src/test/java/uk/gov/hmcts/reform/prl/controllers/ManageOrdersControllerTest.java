@@ -4871,9 +4871,9 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_staleCustomOrderFields_shouldNotTriggerCustomOrderFlow() throws Exception {
-        // Test that stale customOrderDoc and customOrderNameOption from a previous custom order
-        // do NOT trigger custom order flow. Only manageOrdersOptions=createCustomOrder should trigger it.
+    public void finalizeOrderSubmissionAndSendNotifications_staleCustomOrderDoc_shouldNotTriggerCustomOrderFlow() throws Exception {
+        // Test that stale customOrderDoc from a previous custom order does NOT trigger custom order flow.
+        // Only customOrderNameOption in callback data should trigger it.
         // This prevents upload orders from being incorrectly treated as custom orders.
 
         Document staleCustomOrderDoc = Document.builder()
@@ -4897,13 +4897,13 @@ public class ManageOrdersControllerTest {
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("id", 12345L);
 
-        // Callback data - has stale customOrderDoc AND customOrderNameOption from previous order
-        // But manageOrdersOptions is uploadAnOrder, so should NOT trigger custom order flow
+        // Callback data - has stale customOrderDoc but NO customOrderNameOption
+        // This simulates an upload order where customOrderDoc persisted from a previous custom order
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("id", 12345L);
         callbackDataMap.put("manageOrdersOptions", "uploadAnOrder");
         callbackDataMap.put("customOrderDoc", staleCustomOrderDoc);  // Stale from previous order
-        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");  // Also stale
+        // NO customOrderNameOption - this is NOT a custom order flow
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
