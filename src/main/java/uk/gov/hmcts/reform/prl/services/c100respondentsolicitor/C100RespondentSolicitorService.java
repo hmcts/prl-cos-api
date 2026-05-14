@@ -1530,7 +1530,8 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put(
                 "solicitorRepresented",
-                null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                (null != solicitorRepresentedRespondent.getValue().getUser()
+                    && null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented())
                         ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
         );
         if (null != response.getSupportYouNeed()) {
