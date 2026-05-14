@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,24 @@ public class ReviewAdditionalApplicationService {
             throw new IllegalStateException(ERROR_RETRIEVE_ADDITIONAL_APPLICATION);
         }
 
-        return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
+        AdditionalApplicationsBundle selectedAB = CaseUtils
+            .getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
+        if (selectedAB != null && selectedAB.getC2DocumentBundle() != null) {
+            ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getFinalDocument()).forEach(
+                document -> document.setCategoryId(null)
+            );
+            ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getSupplementsBundle()).forEach(
+                supplement -> supplement.getDocument().setCategoryId(null)
+            );
+        } else if (selectedAB != null && selectedAB.getOtherApplicationsBundle() != null) {
+            ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getFinalDocument()).forEach(
+                document -> document.setCategoryId(null)
+            );
+            ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getSupplementsBundle()).forEach(
+                supplement -> supplement.getDocument().setCategoryId(null)
+            );
+        }
+        return selectedAB;
     }
 
     public String getApplicationBundleDynamicCode(AdditionalApplicationsBundle additionalApplicationsBundle) {
