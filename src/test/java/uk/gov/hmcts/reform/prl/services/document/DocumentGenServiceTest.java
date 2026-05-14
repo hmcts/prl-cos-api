@@ -54,6 +54,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -165,6 +166,7 @@ public class DocumentGenServiceTest {
     private UploadDocumentService uploadService;
     @Mock
     private Time dateTime;
+    @SuppressWarnings("unused")
     @Mock
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
@@ -438,7 +440,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataFinal);
-
+        c100CaseDataFinal.setState(State.JUDICIAL_REVIEW);
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataFinal);
 
         // Verify that if a case is issued then only C8 documents are updated and not C100 or C1A
@@ -477,6 +479,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
+        fl401CaseData.setState(State.SUBMITTED_PAID);
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
 
         verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
@@ -1106,7 +1109,9 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        fl401CaseData.setState(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
+        // when
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(1)).generateWelshDocument(
             Mockito.anyString(),
@@ -1974,8 +1979,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo()
-        throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() throws Exception {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2015,8 +2019,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2()
-        throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2208,8 +2211,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_()
-        throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2351,8 +2353,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh()
-        throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2412,8 +2413,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish()
-        throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2657,13 +2657,11 @@ public class DocumentGenServiceTest {
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         selfLink.href = RandomStringUtils.secure().nextAlphanumeric(10);
 
-        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
-            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
         links.binary = binaryLink;
         links.self = selfLink;
 
-        uk.gov.hmcts.reform.ccd.document.am.model.Document document =
-            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
         document.links = links;
         document.originalDocumentName = RandomStringUtils.secure().nextAlphanumeric(10);
 
@@ -2697,6 +2695,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateAndUploadDocument() {
         //Given
+        ReflectionTestUtils.setField(documentGenService, "prlCitizenUploadTemplate", "FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2714,20 +2713,21 @@ public class DocumentGenServiceTest {
             .build();
 
         //When
-        doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
+        doReturn(List.of(generatedDocumentInfo)).when(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(DocumentRequest.class),
-            Mockito.any()
+            Mockito.any(),
+            any(DocumentCategory.class)
         );
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         //Action
-        DocumentResponse documentResponse = documentGenService.generateAndUploadDocument(AUTH_TOKEN, documentRequest);
+        List<DocumentResponse> documentResponses = documentGenService.generateAndUploadDocument(AUTH_TOKEN, documentRequest);
 
         //Then
-        assertNotNull(documentResponse);
-        assertNotNull(documentResponse.getDocument());
-        assertEquals(SUCCESS, documentResponse.getStatus());
+        assertNotNull(documentResponses);
+        assertNotNull(documentResponses.getFirst().getDocument());
+        assertEquals(SUCCESS, documentResponses.getFirst().getStatus());
     }
 
     @Test
@@ -2804,8 +2804,7 @@ public class DocumentGenServiceTest {
             .applicantsConfidentialDetails(new ArrayList<>())
             .childrenConfidentialDetails(new ArrayList<>())
             .allegationOfHarmRevised(AllegationOfHarmRevised
-                                         .builder().newAllegationsOfHarmYesNo(No).build()).allegationOfHarm(null)
-            .build();
+                                         .builder().newAllegationsOfHarmYesNo(No).build()).allegationOfHarm(null).build();
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
@@ -2869,11 +2868,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testSendReplyMessageTemplateWelsh() {
-        ReflectionTestUtils.setField(
-            documentGenService,
-            "docSendReplyMessageWelshTemplate",
-            "send_reply_message_letter_wel"
-        );
+        ReflectionTestUtils.setField(documentGenService, "docSendReplyMessageWelshTemplate", "send_reply_message_letter_wel");
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_SEND_REPLY_MESSAGE, true);
 
         assertNotNull(template);
@@ -2902,8 +2897,7 @@ public class DocumentGenServiceTest {
     public void testIsAnyC100_caseTypeNotC100_ApplicantInfoConfidential_returnsFalse() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
-            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(PartyDetails.builder().build())
-                                                      .build()))
+            .applicants(Collections.singletonList(Element.<PartyDetails>builder().value(PartyDetails.builder().build()).build()))
             .build();
         assertFalse(documentGenService.isAnyC100ApplicantInfoConfidential(caseData));
     }
