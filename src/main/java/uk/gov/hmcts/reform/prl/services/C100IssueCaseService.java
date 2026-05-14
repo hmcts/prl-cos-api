@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Service
 @Slf4j
@@ -116,8 +117,9 @@ public class C100IssueCaseService {
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
 
-        updatePartyDetailsService.generateC8DocumentsForRespondents(caseDataUpdated, callbackRequest, authorisation,
-                                                                    caseData, caseData.getRespondents(), true);
+        updatePartyDetailsService.generateC8DocumentsForRespondents(
+            caseDataUpdated, callbackRequest, authorisation, caseData, nullSafeList(caseData.getRespondents()), true
+        );
 
         // Refreshing the page in the same event. Hence no external event call needed.
         // Getting the tab fields and add it to the casedetails.
