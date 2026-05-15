@@ -2,6 +2,9 @@ package uk.gov.hmcts.reform.prl.services.documentremoval.postabouttosubmitaction
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -12,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -55,19 +59,16 @@ class DraftOrderUpdatedTest {
                 .isEqualTo(orderId);
     }
 
-    @Test
-    void shouldNotUpdateMapIfNoDraftOrdersRemoved() {
-        DraftOrder draftOrderWithDoc = mock(DraftOrder.class);
-        when(draftOrderWithDoc.getOrderDocument()).thenReturn(Document.builder().build());
-
+    @ParameterizedTest
+    @MethodSource("provideDraftOrdersWithDocuments")
+    void shouldNotUpdateMapIfDocumentRemains(DraftOrder draftOrder) {
         List<Element<DraftOrder>> draftOrders = new ArrayList<>();
         UUID orderId = UUID.randomUUID();
-        draftOrders.add(new Element<>(orderId, draftOrderWithDoc));
+        draftOrders.add(new Element<>(orderId, draftOrder));
 
         CaseData caseData = CaseData.builder()
             .draftOrderCollection(draftOrders)
             .build();
-
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
@@ -75,6 +76,33 @@ class DraftOrderUpdatedTest {
 
         // Map should not be updated since nothing was removed
         assertThat(caseDataUpdated).isEmpty();
+    }
+
+    private static Stream<Arguments> provideDraftOrdersWithDocuments() {
+        return Stream.of(
+            Arguments.of(draftOrderWithEnglishOnlyDoc()),
+            Arguments.of(draftOrderWithWelshOnlyDoc()),
+            Arguments.of(draftOrderWithEnglishAndWelshDoc())
+        );
+    }
+
+    private static DraftOrder draftOrderWithEnglishOnlyDoc() {
+        DraftOrder draftOrder = mock(DraftOrder.class);
+        when(draftOrder.getOrderDocument()).thenReturn(Document.builder().build());
+        return draftOrder;
+    }
+
+    private static DraftOrder draftOrderWithWelshOnlyDoc() {
+        DraftOrder draftOrder = mock(DraftOrder.class);
+        when(draftOrder.getOrderDocumentWelsh()).thenReturn(Document.builder().build());
+        return draftOrder;
+    }
+
+    private static DraftOrder draftOrderWithEnglishAndWelshDoc() {
+        DraftOrder draftOrder = mock(DraftOrder.class);
+        when(draftOrder.getOrderDocument()).thenReturn(Document.builder().build());
+        when(draftOrder.getOrderDocumentWelsh()).thenReturn(Document.builder().build());
+        return draftOrder;
     }
 
     @Test

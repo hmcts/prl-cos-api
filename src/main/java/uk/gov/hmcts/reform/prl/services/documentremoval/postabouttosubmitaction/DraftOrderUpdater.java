@@ -23,7 +23,9 @@ public class DraftOrderUpdater implements DocumentRemovalAboutToSubmitAction {
             .orElse(new ArrayList<>());
         int draftOrderCount = draftOrderCollection.size();
 
-        draftOrderCollection.removeIf(draftOrderElement -> draftOrderElement.getValue().getOrderDocument() == null);
+        // Remove the draft order element if both the English and Welsh documents are no longer present
+        draftOrderCollection.removeIf(draftOrderElement -> draftOrderElement.getValue().getOrderDocument() == null
+            && draftOrderElement.getValue().getOrderDocumentWelsh() == null);
 
         if (draftOrderCount != draftOrderCollection.size()) {
             log.info("Case ID {}: Draft order collection size before {} size after {}", caseData.getId(),
