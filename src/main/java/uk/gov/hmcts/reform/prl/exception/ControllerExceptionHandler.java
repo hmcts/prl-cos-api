@@ -86,4 +86,15 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
+
+    @ExceptionHandler(PdfConversionException.class)
+    public ResponseEntity<ErrorResponse> handlePdfConversionException(PdfConversionException ex) {
+        log.error("Exception occurred during PDF conversion due to: {}", ex.getMessage());
+        ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
+                                                                                         ex.getMessage())).build();
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

@@ -111,6 +111,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARIN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
@@ -496,6 +497,52 @@ public class CaseService {
         }
 
         return citizenDocumentsManagement;
+    }
+
+    public void delinkCitizenUploadedDocumentFromCase(String authToken, String caseId, String documentId) {
+        UserInfo userInfo = idamClient.getUserInfo(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(CITIZEN_UPLOADED_DOCUMENT);
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
+            caseEvent,
+            userInfo.getUid()
+        );
+
+        StartEventResponse startEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+
+        List<Element<QuarantineLegalDoc>> quarantineLegalDocList = Optional.ofNullable(
+                caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
+            )
+            .orElse(List.of())
+            .stream()
+            .filter(element -> !documentId.equalsIgnoreCase(
+                DocumentUtils.getDocumentId(element.getValue().getCitizenQuarantineDocument().getDocumentUrl())
+            ))
+            .toList();
+
+        Map<String, Object> quarantineLegalDocListMap = new HashMap<>();
+        quarantineLegalDocListMap.put("citizenQuarantineDocsList", quarantineLegalDocList);
+
+        CaseDataContent caseDataContent = ccdCoreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            quarantineLegalDocListMap
+        );
+
+        ccdCoreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+
     }
 
     private List<CitizenDocuments> getCitizenApplicationPacks(CaseData caseData,
@@ -1656,10 +1703,12 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
+                .filter(Objects::nonNull)
                 .map(Element::getValue)
+                .filter(Objects::nonNull)
                 .filter(emailNotification -> {
                     String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
-                    return nonNull(partyId) && partyId.equals(emailNotification.getPartyIds());
+                    return Objects.equals(partyId, emailNotification.getPartyIds());
                 })
                 .map(emailNotification ->
                     getSodDocuments(
