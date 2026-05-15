@@ -929,7 +929,8 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataMap = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest);
+            Map<String, Object> caseDataMap = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
+                callbackRequest, authorisation);
             cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
             return AboutToStartOrSubmitCallbackResponse
                 .builder()

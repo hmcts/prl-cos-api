@@ -551,6 +551,12 @@ document:
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
+      other_c8_template: FL-PRL-GOR-ENG-OTHER-C8.docx
+      other_c8_filename: C8Document.pdf
+      other_c8_draft_filename: C8Document_Draft.pdf
+      other_c8_template_welsh: FL-PRL-GOR-WEL-OTHER-C8.docx
+      other_c8_filename_welsh: C8Document_Welsh.pdf
+      other_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     citizen:
       prl_citizen_witness_statement_welsh_template: FL-PRL-GOR-WEL-Citizen-Witness-Statement.docx
       prl_citizen_witness_statement_template: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx

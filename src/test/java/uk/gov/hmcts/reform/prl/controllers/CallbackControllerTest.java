@@ -3443,7 +3443,7 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
             .caseTypeOfApplication(C100_CASE_TYPE).otherPartyInTheCaseRevised(otherPersonList).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest)).thenReturn(
+        when(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest, authToken)).thenReturn(
             caseDetailsWithOtherPerson);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController

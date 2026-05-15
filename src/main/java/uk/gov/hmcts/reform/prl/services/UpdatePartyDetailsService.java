@@ -108,6 +108,7 @@ public class UpdatePartyDetailsService {
     private final ManageOrderService manageOrderService;
     private final C8ArchiveService c8ArchiveService;
     private final CaseNameService caseNameService;
+    private final C8Service c8Service;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -928,9 +929,11 @@ public class UpdatePartyDetailsService {
         return address;
     }
 
-    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> updateOtherPeopleInTheCaseConfidentialityData(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> updatedCaseData =  amendOtherPeopleInTheCase(callbackRequest);
-        CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
 
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             confidentialityC8RefugeService.processForcePartiesConfidentialityIfLivesInRefugeForC100(
@@ -943,6 +946,11 @@ public class UpdatePartyDetailsService {
             findAndListRefugeDocsForC100(callbackRequest, caseData, updatedCaseData);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
+        // ensure "cleaned up data" for others is added back to the caseData model so we can use it in the other C8s
+        caseData = caseData.toBuilder()
+            .otherPartyInTheCaseRevised((List<Element<PartyDetails>>) updatedCaseData.get(OTHER_PARTY))
+            .build();
+        updatedCaseData.putAll(c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, authorisation));
         return updatedCaseData;
     }
 
