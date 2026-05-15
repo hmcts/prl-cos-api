@@ -27,7 +27,10 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -66,4 +69,44 @@ public class DraftOrdersListController {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping("/populate-draft-orders-list/mid-event")
+    public AboutToStartOrSubmitCallbackResponse viewDraftOrdersMidEvent(@RequestHeader("Authorization")
+                                                          @Parameter(hidden = true) String authorisation,
+                                                          @RequestBody CallbackRequest callbackRequest) {
+
+        List<String> errors = new ArrayList<>();
+        errors.add("You can only view Draft Orders.");
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors)
+            .build();
+    }
+
+
+    @PostMapping("/populate-draft-orders-list/about-to-submit")
+    public AboutToStartOrSubmitCallbackResponse viewDraftOrdersAboutToSubmit(@RequestHeader("Authorization")
+                                                                    @Parameter(hidden = true) String authorisation,
+                                                                    @RequestBody CallbackRequest callbackRequest) {
+
+        List<String> errors = new ArrayList<>();
+        errors.add("You can only view Draft Orders.");
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors)
+            .build();
+    }
+
+
+    @PostMapping("/populate-draft-orders-list/submitted")
+    public AboutToStartOrSubmitCallbackResponse viewDraftOrdersSubmitted(@RequestHeader("Authorization")
+                                                                @Parameter(hidden = true) String authorisation,
+                                                                @RequestBody CallbackRequest callbackRequest) {
+        List<String> errors = new ArrayList<>();
+        errors.add("You can only view Draft Orders.");
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors)
+            .build();
+
+    }
+
+
 }
