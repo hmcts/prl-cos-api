@@ -159,9 +159,8 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
 
     private static String buildAdjustmentRequired(List<String> disabilityRequirementsList,
                           C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
-        if (c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null
-            || c100RebuildReasonableAdjustmentsElements.getIntermediaryRequiredSubField() != null) {
-            return buildAdjustmentRequiredFromSubField(c100RebuildReasonableAdjustmentsElements);
+        if (c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null) {
+            return c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField();
         }
 
         StringBuilder adjustmentRequired = new StringBuilder();
@@ -205,12 +204,6 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                     helpTravellingMovingBuildingSupportDetails);
         }
         return String.valueOf(adjustmentRequired);
-    }
-
-    private static String buildAdjustmentRequiredFromSubField(C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
-        return c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField() != null
-            ? c100RebuildReasonableAdjustmentsElements.getAssistanceRequirementsSubField()
-            : null;
     }
 
     private static void appendData(StringBuilder stringBuilder,
