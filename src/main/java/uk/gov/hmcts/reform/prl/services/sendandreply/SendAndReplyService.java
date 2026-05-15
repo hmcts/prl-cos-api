@@ -1956,6 +1956,7 @@ public class SendAndReplyService {
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorization,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                .caseReference(String.valueOf(caseData.getId()))
                 .dynamicTemplateData(dynamicDataForEmail)
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
@@ -1963,8 +1964,6 @@ public class SendAndReplyService {
     }
 
     private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, List<String> emails, String authorization) {
-
-
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -1978,6 +1977,7 @@ public class SendAndReplyService {
                         SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
                         authorization,
                         SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                            .caseReference(String.valueOf(caseData.getId()))
                             .dynamicTemplateData(dynamicData)
                             .listOfAttachments(allSelectedDocuments)
                             .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
@@ -2028,7 +2028,7 @@ public class SendAndReplyService {
                 .documentCreatedOn(new Date())
                 .build();
         } catch (Exception e) {
-            log.error("Failed to generate message document {}", e);
+            log.error("Failed to generate message document", e);
         }
         return null;
     }
