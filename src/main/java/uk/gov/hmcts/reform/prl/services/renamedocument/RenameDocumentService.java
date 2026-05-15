@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
-import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityCheckService;
@@ -77,13 +77,12 @@ public class RenameDocumentService {
             MISSING_ADDRESS_WARNING_TEXT,
             serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
+        DynamicList categoriesAndDocumentsList = sendAndReplyService.getCategoriesAndDocuments(authorisation, String.valueOf(caseData.getId()));
         caseDataMap.put(
-            "renameDocumentsList", List.of(element(DocumentsDynamicList.builder()
-                                                    .documentsList(sendAndReplyService.getCategoriesAndDocuments(
-                                                        authorisation,
-                                                        String.valueOf(caseData.getId())
-                                                    )).build()))
-        );
+            "renameDocumentsList", List.of(element(DynamicList.builder()
+                                                       .listItems(categoriesAndDocumentsList.getListItems())
+                                                       .build())));
+
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
         caseDataMap.put(SOA_OTHER_PARTIES, DynamicMultiSelectList.builder().listItems(otherPeopleList).build());

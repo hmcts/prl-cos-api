@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 
 import java.util.List;
 
@@ -18,6 +18,6 @@ import java.util.List;
 public class RenameDocument {
 
     @JsonProperty("renameDocumentsList")
-    private List<Element<DocumentsDynamicList>> renameDocumentsList;
+    private List<Element<DynamicList>> renameDocumentsList;
 
 }
