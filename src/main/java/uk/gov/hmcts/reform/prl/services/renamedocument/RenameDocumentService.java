@@ -78,10 +78,7 @@ public class RenameDocumentService {
             serviceOfApplicationService.checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
         DynamicList categoriesAndDocumentsList = sendAndReplyService.getCategoriesAndDocuments(authorisation, String.valueOf(caseData.getId()));
-        caseDataMap.put(
-            "renameDocumentsList", List.of(element(DynamicList.builder()
-                                                       .listItems(categoriesAndDocumentsList.getListItems())
-                                                       .build())));
+        caseDataMap.put("renameDocumentsList", List.of(element(categoriesAndDocumentsList)));
 
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
