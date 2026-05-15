@@ -52,6 +52,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -164,6 +165,9 @@ public class ManageDocumentsServiceTest {
 
     @Mock
     private RoleAssignmentService roleAssignmentService;
+
+    @Mock
+    private FeatureToggleService featureToggleService;
 
     @Mock
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
@@ -3184,6 +3188,8 @@ public class ManageDocumentsServiceTest {
         when(startAllTabsUpdateDataContent.caseDataMap()).thenReturn(Map.of());
         when(allTabService.submitAllTabsUpdate(any(), any(), any(), any(), any()))
             .thenReturn(CaseDetails.builder().build());
+        when(featureToggleService.isCreateRequestCirUpdateTaskEnabled())
+            .thenReturn(true);
 
         manageDocumentsService.cancelCirRequestTask(caseData, List.of(LocalAuthorityDocumentsEnum.childImpactReport1La.getId()));
 

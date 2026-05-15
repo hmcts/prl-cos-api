@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -128,6 +129,7 @@ public class ManageDocumentsService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final NotificationService notificationService;
     private final RoleAssignmentService roleAssignmentService;
+    private final FeatureToggleService featureToggleService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -878,19 +880,21 @@ public class ManageDocumentsService {
     }
 
     public void cancelCirRequestTask(CaseData caseData, List<String> uploadedCategoryIds) {
-        String caseId = String.valueOf(caseData.getId());
-        if (hasCirRequestedDocsUploaded(caseData, uploadedCategoryIds)) {
-            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
-                caseId,
-                CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
-            );
-            allTabService.submitAllTabsUpdate(
-                startAllTabsUpdateDataContent.authorisation(),
-                caseId,
-                startAllTabsUpdateDataContent.startEventResponse(),
-                startAllTabsUpdateDataContent.eventRequestData(),
-                startAllTabsUpdateDataContent.caseDataMap()
-            );
+        if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
+            String caseId = String.valueOf(caseData.getId());
+            if (hasCirRequestedDocsUploaded(caseData, uploadedCategoryIds)) {
+                StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                    caseId,
+                    CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK.getValue()
+                );
+                allTabService.submitAllTabsUpdate(
+                    startAllTabsUpdateDataContent.authorisation(),
+                    caseId,
+                    startAllTabsUpdateDataContent.startEventResponse(),
+                    startAllTabsUpdateDataContent.eventRequestData(),
+                    startAllTabsUpdateDataContent.caseDataMap()
+                );
+            }
         }
     }
 
