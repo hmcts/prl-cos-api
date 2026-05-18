@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -517,7 +516,7 @@ public class ManageDocumentsService {
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
             if (userRole.equals(LOCAL_AUTHORITY) || userRole.equals(CAFCASS)) {
-                setFlagsForWaTaskForLAOrCafcass(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                setLAOrCafcassFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
             } else {
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
@@ -526,7 +525,7 @@ public class ManageDocumentsService {
         }
     }
 
-    private void setFlagsForWaTaskForLAOrCafcass(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
+    private void setLAOrCafcassFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
         if (isNewTaskRequired(caseData, quarantineLegalDoc, userRole)) {
             ArrayList<Element<String>> listOfTasks = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
                 ? (ArrayList<Element<String>>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
