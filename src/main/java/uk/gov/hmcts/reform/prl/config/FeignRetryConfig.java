@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
 
-@Configuration
 @Slf4j
 public class FeignRetryConfig extends FeignClientProperties.FeignClientConfiguration {
 
@@ -34,13 +33,14 @@ public class FeignRetryConfig extends FeignClientProperties.FeignClientConfigura
 
             // Only retry GET methods and 5xx responses
             boolean isGet = response.request().httpMethod() == feign.Request.HttpMethod.GET;
+            boolean isTargetMethod = methodKey.contains("ExtendedCaseDataApi#searchCases");
             int status = response.status();
 
-            if (isGet && status >= 500 && status < 600) {
+            if (isTargetMethod && isGet && status >= 500 && status < 600) {
                 log.warn("retrying now for status {}",  status);
                 return new feign.RetryableException(
                     status,
-                    "Retryable 5xx for GET",
+                    "Retryable 5xx for GET on searchCases",
                     response.request().httpMethod(),
                     null,
                     retryAfter,
