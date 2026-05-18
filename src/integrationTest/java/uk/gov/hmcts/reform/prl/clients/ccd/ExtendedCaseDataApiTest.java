@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
     "core_case_data.api.url=${core_case_data.api.url}"
 })
 @AutoConfigureWireMock(port = 0)
-public class ExtendedCaseDataApiRetryTest {
+public class ExtendedCaseDataApiTest {
 
     @Autowired
     private ExtendedCaseDataApi caseDataApi;
