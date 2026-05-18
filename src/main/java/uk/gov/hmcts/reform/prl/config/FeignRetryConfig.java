@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
 
