@@ -40,13 +40,6 @@ management:
 
   #If you use a database then uncomment below lines and update db properties accordingly
 spring:
-  cloud:
-    openfeign:
-      client:
-        config:
-          core-case-data-api:
-            # Enables the default retryer (100ms initial wait, 1s max wait, 5 total attempts)
-            retryer: feign.Retryer.Default
   config:
     import: "optional:configtree:/mnt/secrets/prl/"
   application:
