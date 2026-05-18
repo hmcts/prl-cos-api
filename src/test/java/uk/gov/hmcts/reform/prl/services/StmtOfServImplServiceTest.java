@@ -1260,8 +1260,8 @@ public class StmtOfServImplServiceTest {
         StmtOfServiceAddRecipient processedRecipient = stmtOfServiceForOrder.get(0).getValue();
         assertNotNull("Recipient should have servedOrderIds", processedRecipient.getServedOrderIds());
         assertEquals("Should have 2 served order IDs", 2, processedRecipient.getServedOrderIds().size());
-        assertEquals("First order ID should be order-1", "order-1", processedRecipient.getServedOrderIds().get(0));
-        assertEquals("Second order ID should be order-2", "order-2", processedRecipient.getServedOrderIds().get(1));
+        assertEquals("First order ID should be order-1", "order-1", processedRecipient.getServedOrderIds().get(0).getValue());
+        assertEquals("Second order ID should be order-2", "order-2", processedRecipient.getServedOrderIds().get(1).getValue());
     }
 
     @Test
@@ -1284,7 +1284,7 @@ public class StmtOfServImplServiceTest {
         StmtOfServiceAddRecipient existingRecipient = StmtOfServiceAddRecipient.builder()
             .selectedPartyId(TEST_UUID)
             .selectedPartyName("Existing Recipient")
-            .servedOrderIds(Arrays.asList("order-1", "order-2"))
+            .servedOrderIds(Arrays.asList(element("order-1"), element("order-2")))
             .stmtOfServiceDocument(Document.builder().documentFileName("existing.pdf").build())
             .build();
 
@@ -1328,14 +1328,14 @@ public class StmtOfServImplServiceTest {
         StmtOfServiceAddRecipient processedNewRecipient = stmtOfServiceForOrder.get(0).getValue();
         assertNotNull("New recipient should have servedOrderIds", processedNewRecipient.getServedOrderIds());
         assertEquals("New recipient should have 1 order ID", 1, processedNewRecipient.getServedOrderIds().size());
-        assertEquals("New recipient order ID should be order-3", "order-3", processedNewRecipient.getServedOrderIds().get(0));
+        assertEquals("New recipient order ID should be order-3", "order-3", processedNewRecipient.getServedOrderIds().get(0).getValue());
 
         // Check existing recipient still has its order IDs
         StmtOfServiceAddRecipient processedExistingRecipient = stmtOfServiceForOrder.get(1).getValue();
         assertNotNull("Existing recipient should have servedOrderIds", processedExistingRecipient.getServedOrderIds());
         assertEquals("Existing recipient should have 2 order IDs", 2, processedExistingRecipient.getServedOrderIds().size());
-        assertEquals("First existing order ID should be order-1", "order-1", processedExistingRecipient.getServedOrderIds().get(0));
-        assertEquals("Second existing order ID should be order-2", "order-2", processedExistingRecipient.getServedOrderIds().get(1));
+        assertEquals("First existing order ID should be order-1", "order-1", processedExistingRecipient.getServedOrderIds().get(0).getValue());
+        assertEquals("Second existing order ID should be order-2", "order-2", processedExistingRecipient.getServedOrderIds().get(1).getValue());
     }
 
     @Test
@@ -1463,13 +1463,13 @@ public class StmtOfServImplServiceTest {
         assertEquals(
             "First order ID should be order-1",
             "order-1",
-            processedRecipient.getServedOrderIds().get(0)
+            processedRecipient.getServedOrderIds().get(0).getValue()
         );
 
         assertEquals(
             "Second order ID should be order-2",
             "order-2",
-            processedRecipient.getServedOrderIds().get(1)
+            processedRecipient.getServedOrderIds().get(1).getValue()
         );
     }
 

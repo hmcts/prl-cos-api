@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
@@ -372,7 +371,7 @@ public class StmtOfServImplService {
                                                                               String selectedPartyId,
                                                                               String selectedPartyName) {
 
-        List<String> servedOrderIds = extractServedOrderIds(recipient);
+        List<Element<String>> servedOrderIds = extractServedOrderIds(recipient);
 
         return recipient.toBuilder()
             .selectedPartyId(selectedPartyId)
@@ -390,11 +389,11 @@ public class StmtOfServImplService {
             .build();
     }
 
-    private List<String> extractServedOrderIds(StmtOfServiceAddRecipient recipient) {
+    private List<Element<String>> extractServedOrderIds(StmtOfServiceAddRecipient recipient) {
         if (recipient.getOrderList() != null
             && CollectionUtils.isNotEmpty(recipient.getOrderList().getValue())) {
             return recipient.getOrderList().getValue().stream()
-                .map(DynamicMultiselectListElement::getCode)
+                .map(dynamicMultiselectListElement -> element(dynamicMultiselectListElement.getCode()))
                 .collect(Collectors.toList());
         }
         log.warn("No orders selected for statement of service - orderList is null or empty");
