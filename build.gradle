@@ -436,7 +436,7 @@ dependencies {
       exclude group: 'io.reactivex', module: 'rxnetty-contexts'
       exclude group: 'io.reactivex', module: 'rxnetty-servo'
     }
-  integrationTestImplementation 'org.springframework.cloud:spring-cloud-starter-contract-wiremock'
+  integrationTestImplementation 'org.springframework.cloud:spring-cloud-starter-contract-wiremock:4.1.2'
 
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
