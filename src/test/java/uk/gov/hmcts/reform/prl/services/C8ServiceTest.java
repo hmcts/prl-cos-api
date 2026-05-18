@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -30,6 +31,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
@@ -232,5 +235,77 @@ class C8ServiceTest {
         assertThat(result).containsKey("otherPartyC8Documents");
         List<?> docs = (List<?>) result.get("otherPartyC8Documents");
         assertThat(docs).hasSize(1);
+    }
+
+    @Test
+    void testGenerateOtherPartiesC8s_doNotGenerateWhenNoDetailsKnownEvenIfInRefuge() {
+        Element<PartyDetails> otherParty = baseCaseDataWithOtherParty().getOtherPartyInTheCaseRevised().getFirst();
+        PartyDetails noDetailsKnownParty = otherParty.getValue().toBuilder()
+            .isCurrentAddressKnown(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .canYouProvidePhoneNumber(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
+            .build();
+
+        CaseData caseData = baseCaseDataWithOtherParty().toBuilder()
+            .otherPartyInTheCaseRevised(List.of(ElementUtils.element(otherParty.getId(), noDetailsKnownParty)))
+            .build();
+        CaseData caseDataBefore = caseData.toBuilder().build();
+
+        Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
+
+        assertThat(result).containsKeys("otherPartyC8Documents", "otherPartyC8DocumentsArchived");
+        assertThat((List<?>) result.get("otherPartyC8Documents")).isEmpty();
+        assertThat((List<?>) result.get("otherPartyC8DocumentsArchived")).isEmpty();
+        verify(documentGenService, never()).generateSingleDocument(any(), any(), any(), anyBoolean(), anyMap());
+    }
+
+    @Test
+    void testGenerateOtherPartiesC8s_archiveOldC8WhenConfidentialInfoRemoved() {
+        CaseData caseDataBefore = baseCaseDataWithOtherParty();
+        Element<PartyDetails> otherPartyBefore = caseDataBefore.getOtherPartyInTheCaseRevised().getFirst();
+
+        Document oldEnglishDoc = Document.builder()
+            .documentUrl("existing-url-en")
+            .documentBinaryUrl("existing-binary-url-en")
+            .documentFileName("existing-c8-en.pdf")
+            .build();
+        Document oldWelshDoc = Document.builder()
+            .documentUrl("existing-url-cy")
+            .documentBinaryUrl("existing-binary-url-cy")
+            .documentFileName("existing-c8-cy.pdf")
+            .build();
+        ResponseDocuments existingC8 = ResponseDocuments.builder()
+            .partyName(otherPartyBefore.getValue().getFirstName() + " " + otherPartyBefore.getValue().getLastName())
+            .respondentC8Document(oldEnglishDoc)
+            .respondentC8DocumentWelsh(oldWelshDoc)
+            .build();
+
+        PartyDetails otherPartyAfterNoConfidential = otherPartyBefore.getValue().toBuilder()
+            .isAddressConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
+            .build();
+
+        CaseData caseData = caseDataBefore.toBuilder()
+            .otherPartyInTheCaseRevised(List.of(ElementUtils.element(otherPartyBefore.getId(), otherPartyAfterNoConfidential)))
+            // Existing C8 is linked to the same other party element id, which is how archive lookup works.
+            .otherPartyC8Documents(List.of(ElementUtils.element(otherPartyBefore.getId(), existingC8)))
+            .build();
+
+        Map<String, Object> result = c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, "auth");
+
+        assertThat(result).containsKeys("otherPartyC8Documents", "otherPartyC8DocumentsArchived");
+        assertThat((List<?>) result.get("otherPartyC8Documents")).isEmpty();
+        List<?> archived = (List<?>) result.get("otherPartyC8DocumentsArchived");
+        assertThat(archived).hasSize(1);
+        ResponseDocuments archivedRespDocs = (ResponseDocuments) ((Element<?>) archived.getFirst()).getValue();
+        assertThat(archivedRespDocs.getRespondentC8Document()).isEqualTo(oldEnglishDoc);
+        assertThat(archivedRespDocs.getRespondentC8DocumentWelsh()).isEqualTo(oldWelshDoc);
+        verify(documentGenService, never()).generateSingleDocument(any(), any(), any(), anyBoolean(), anyMap());
     }
 }
