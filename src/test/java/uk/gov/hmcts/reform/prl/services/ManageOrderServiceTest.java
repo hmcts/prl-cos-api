@@ -235,6 +235,9 @@ class ManageOrderServiceTest {
     @Mock
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    @Mock
+    private FeatureToggleService featureToggleService;
+
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
     private UUID uuid;
@@ -8267,6 +8270,8 @@ class ManageOrderServiceTest {
             .thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
             .thenReturn(startAllTabsUpdateDataContent);
+        when(featureToggleService.isCreateRequestCirUpdateTaskEnabled())
+            .thenReturn(true);
 
         manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
 
@@ -8337,6 +8342,8 @@ class ManageOrderServiceTest {
             .thenReturn(startAllTabsUpdateDataContent);
         when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
             .thenReturn(startAllTabsUpdateDataContent);
+        when(featureToggleService.isCreateRequestCirUpdateTaskEnabled())
+            .thenReturn(true);
 
         manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
 
@@ -8410,6 +8417,8 @@ class ManageOrderServiceTest {
 
         when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
             .thenReturn(startAllTabsUpdateDataContent);
+        when(featureToggleService.isCreateRequestCirUpdateTaskEnabled())
+            .thenReturn(true);
 
         manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, "authorisation");
 

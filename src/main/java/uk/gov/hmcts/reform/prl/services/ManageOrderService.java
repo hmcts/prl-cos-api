@@ -644,6 +644,8 @@ public class ManageOrderService {
 
     private final ObjectMapper objectMapper;
 
+    private final FeatureToggleService featureToggleService;
+
     private final ElementUtils elementUtils;
 
     private final RefDataUserService refDataUserService;
@@ -4016,15 +4018,17 @@ public class ManageOrderService {
     }
 
     public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
-        Map<String, Object> waFieldsMap = new HashMap<>();
-        waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
         LocalDate localAuthorityReportFiledByDate = caseData.getServeOrderData()
             .getWhenReportsMustBeFiledByLocalAuthority();
         LocalDate cafcassReportFiledByDate = caseData.getServeOrderData().getWhenReportsMustBeFiled();
-        setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
-        setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
-        cancelCirDocumentsRequestedTask(caseData, waFieldsMap);
-        createCirDocumentsRequestedTask(caseData, waFieldsMap);
+        if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
+            Map<String, Object> waFieldsMap = new HashMap<>();
+            waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+            setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
+            setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
+            cancelCirDocumentsRequestedTask(caseData, waFieldsMap);
+            createCirDocumentsRequestedTask(caseData, waFieldsMap);
+        }
         cleanUpCirOrderRequestFields(caseData, localAuthorityReportFiledByDate, cafcassReportFiledByDate);
     }
 
