@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -123,6 +124,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_REQUEST_SUPPORT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
@@ -1904,6 +1906,74 @@ public class CaseServiceTest {
         assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenNotifications()));
     }
 
+
+    @Test
+    void testDelinkCitizenUploadedDocumentFromCase() {
+        String documentId = "00000000-0000-0000-0000-000000000123";
+        Element<QuarantineLegalDoc> documentToDelink = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString(documentId))
+            .value(QuarantineLegalDoc.builder()
+                       .citizenQuarantineDocument(Document.builder()
+                                                        .documentUrl("http://dm-store:8080/documents/" + documentId)
+                                                        .build())
+                       .build())
+            .build();
+        Element<QuarantineLegalDoc> retainedDocument = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000124"))
+            .value(QuarantineLegalDoc.builder()
+                       .citizenQuarantineDocument(Document.builder()
+                                                        .documentUrl(
+                                                            "http://dm-store:8080/documents/00000000-0000-0000-0000-000000000124")
+                                                        .build())
+                       .build())
+            .build();
+        CaseData caseDataWithCitizenDocuments = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(List.of(documentToDelink, retainedDocument))
+                                           .build())
+            .build();
+        CaseDetails caseDetailsWithCitizenDocuments = CaseDetails.builder()
+            .id(Long.parseLong(CASE_ID))
+            .data(Map.of())
+            .build();
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(caseDetailsWithCitizenDocuments)
+            .build();
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(UserInfo.builder().uid("test-user-id").build());
+        when(coreCaseDataService.eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id")).thenReturn(eventRequestData);
+        when(coreCaseDataService.startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false)).thenReturn(startEventResponse);
+        when(objectMapper.convertValue(caseDetailsWithCitizenDocuments.getData(), CaseData.class))
+            .thenReturn(caseDataWithCitizenDocuments);
+        when(coreCaseDataService.createCaseDataContent(
+            Mockito.eq(startEventResponse),
+            Mockito.<Map<String, Object>>argThat(caseDataMap -> {
+                List<Element<QuarantineLegalDoc>> updatedDocuments =
+                    (List<Element<QuarantineLegalDoc>>) caseDataMap.get("citizenQuarantineDocsList");
+
+                return updatedDocuments.size() == 1
+                    && updatedDocuments.getFirst().getId().equals(retainedDocument.getId());
+            })
+        )).thenReturn(caseDataContent);
+
+        caseService.delinkCitizenUploadedDocumentFromCase(AUTH_TOKEN, CASE_ID, documentId);
+
+        Mockito.verify(coreCaseDataService).eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id");
+        Mockito.verify(coreCaseDataService).startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false);
+        Mockito.verify(coreCaseDataService).createCaseDataContent(
+            Mockito.eq(startEventResponse),
+            Mockito.<Map<String, Object>>argThat(caseDataMap -> {
+                List<Element<QuarantineLegalDoc>> updatedDocuments =
+                    (List<Element<QuarantineLegalDoc>>) caseDataMap.get("citizenQuarantineDocsList");
+
+                return updatedDocuments.size() == 1
+                    && updatedDocuments.getFirst().getId().equals(retainedDocument.getId());
+            })
+        );
+        Mockito.verify(coreCaseDataService).submitUpdate(AUTH_TOKEN, eventRequestData, caseDataContent, CASE_ID, false);
+    }
 
     @Test
      void testUpdateCitizenRaFlagsWithNullPartyDetailsMeta() {

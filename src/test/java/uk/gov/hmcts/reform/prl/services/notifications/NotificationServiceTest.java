@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -85,6 +88,9 @@ public class NotificationServiceTest {
 
     @Mock
     private BulkPrintService bulkPrintService;
+
+    @Captor
+    private ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigArgumentCaptor;
 
     private CaseData caseData;
     private CaseData fl401CaseData;
@@ -303,8 +309,6 @@ public class NotificationServiceTest {
         uploaderRole = CITIZEN;
     }
 
-
-
     @Test
     public void testNotificationsWhenSendGridNotificationExceptionOccurs() {
 
@@ -376,16 +380,27 @@ public class NotificationServiceTest {
         verify(sendgridService, times(numberOfExpectedInvocations)).sendEmailUsingTemplateWithAttachments(
             eq(sendGridEmailTemplate),
             anyString(),
-            any(SendgridEmailConfig.class)
+            sendgridEmailConfigArgumentCaptor.capture()
         );
+
+        if (numberOfExpectedInvocations > 0) {
+            verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
+        }
 
         verify(sendgridService, times(numberOfExpectedInvocations)).sendEmailUsingTemplateWithAttachments(
             eq(solicitorEmailTemplate),
             anyString(),
-            any(SendgridEmailConfig.class)
+            sendgridEmailConfigArgumentCaptor.capture()
         );
+
+        if (numberOfExpectedInvocations > 0) {
+            verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
+        }
     }
 
+    private void verifySendGridConfigContainsCaseReference(SendgridEmailConfig sendgridEmailConfig, long caseReference) {
+        assertEquals(String.valueOf(caseReference), sendgridEmailConfig.getCaseReference());
+    }
 
     @Test
     public void testCafcassCymruNotifications_C7Application() {
@@ -462,20 +477,22 @@ public class NotificationServiceTest {
                                                    SOLICITOR);
 
         await().untilAsserted(() -> {
-            verify(emailService, times(1)).send(eq("afl11@test.com"),
+            verify(emailService).send(eq("afl11@test.com"),
                                                 eq(EmailTemplateNames.C7_NOTIFICATION_APPLICANT), any(),
                                                 eq(LanguagePreference.english)
             );
-            verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+            verify(sendgridService).sendEmailUsingTemplateWithAttachments(
                 eq(SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT),
                 anyString(),
-                any(SendgridEmailConfig.class)
+                sendgridEmailConfigArgumentCaptor.capture()
             );
-            verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
+            verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
+            verify(sendgridService).sendEmailUsingTemplateWithAttachments(
                 eq(SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR),
                 anyString(),
-                any(SendgridEmailConfig.class)
+                sendgridEmailConfigArgumentCaptor.capture()
             );
+            verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
         });
     }
 
