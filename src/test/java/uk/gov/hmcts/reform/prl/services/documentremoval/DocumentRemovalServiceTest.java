@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentRemovalWrapper;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.documentremoval.postabouttosubmitaction.DocumentRemovalAboutToSubmitAction;
+import uk.gov.hmcts.reform.prl.services.documentremoval.submittedaction.DocumentRemovalSubmittedAction;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,8 +47,11 @@ class DocumentRemovalServiceTest {
     private DeleteDocumentService deleteDocumentService;
     @Mock
     private SystemUserService systemUserService;
+    @Mock
+    private DocumentRemovalAboutToSubmitAction documentRemovalAboutToSubmitAction;
+    @Mock
+    private DocumentRemovalSubmittedAction documentRemovalSubmittedAction;
 
-    @InjectMocks
     private DocumentRemovalService documentRemovalService;
 
     @Mock private CaseDetails caseDetails;
@@ -55,6 +61,10 @@ class DocumentRemovalServiceTest {
 
     @BeforeEach
     void setUp() {
+        documentRemovalService = new DocumentRemovalService(objectMapper, documentRetriever, documentRemover,
+                                                            deleteDocumentService, systemUserService,
+                                                            List.of(documentRemovalAboutToSubmitAction),
+                                                            List.of(documentRemovalSubmittedAction));
         document = Document.builder()
             .documentUrl("http://someserver/doc1")
             .documentFileName("file1.pdf")
@@ -132,6 +142,8 @@ class DocumentRemovalServiceTest {
         assertFalse(result.containsKey("documentToRemove"));
         assertFalse(result.containsKey("documentRemovalConfirmOptions"));
         assertEquals("someValue", result.get("someKey"));
+
+        verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
     }
 
     @Test
@@ -142,5 +154,13 @@ class DocumentRemovalServiceTest {
         documentRemovalService.deleteDocument(caseDetails);
 
         verify(deleteDocumentService).deleteDocument("token", "doc1");
+    }
+
+    @Test
+    void testExecuteSubmittedActions() {
+        CallbackRequest callbackRequest = mock(CallbackRequest.class);
+        documentRemovalService.executePostSubmittedActions(callbackRequest);
+
+        verify(documentRemovalSubmittedAction).onSubmitted(any(CallbackRequest.class));
     }
 }

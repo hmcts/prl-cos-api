@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -12,6 +13,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentRemovalWrapper;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.documentremoval.postabouttosubmitaction.DocumentRemovalAboutToSubmitAction;
+import uk.gov.hmcts.reform.prl.services.documentremoval.submittedaction.DocumentRemovalSubmittedAction;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.io.IOException;
@@ -32,6 +35,8 @@ public class DocumentRemovalService {
     private final DocumentRemover documentRemover;
     private final DeleteDocumentService deleteDocumentService;
     private final SystemUserService systemUserService;
+    private final List<DocumentRemovalAboutToSubmitAction> aboutToSubmitActions;
+    private final List<DocumentRemovalSubmittedAction> submittedActions;
 
     private static final DateTimeFormatter UPLOAD_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -85,6 +90,10 @@ public class DocumentRemovalService {
         // Cannot remove DOCUMENT_REMOVAL_CASE_DOCUMENTS as the selected document id is needed in the
         // submitted callback to delete the document from cdam
 
+        caseDetails.setData(updatedCaseData);
+        CaseData caseDataUpdated = CaseUtils.getCaseData(caseDetails, objectMapper);
+        aboutToSubmitActions.forEach(action -> action.onAboutToSubmit(caseDataUpdated, updatedCaseData));
+
         return updatedCaseData;
     }
 
@@ -97,6 +106,10 @@ public class DocumentRemovalService {
         String authToken = systemUserService.getSysUserToken();
         log.info("Deleting document with id {} from document store", documentId);
         deleteDocumentService.deleteDocument(authToken, documentId);
+    }
+
+    public void executePostSubmittedActions(CallbackRequest request) {
+        submittedActions.forEach(action -> action.onSubmitted(request));
     }
 
     private String formatSelectDocumentLabel(Document caseDocument) {

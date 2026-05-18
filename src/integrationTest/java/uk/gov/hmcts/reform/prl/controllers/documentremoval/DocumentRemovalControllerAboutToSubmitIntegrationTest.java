@@ -151,9 +151,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
         MvcResult result = mockMvc.perform(buildRequest("draft-order-and-message.json"))
             .andExpect(status().isOk())
             .andExpect(jsonPath(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE).doesNotExist())
-            .andExpect(jsonPath("$.data.draftOrderCollection", hasSize(1)))
-            .andExpect(jsonPath("$.data.draftOrderCollection[0].value.orderType").exists())
-            .andExpect(jsonPath("$.data.draftOrderCollection[0].value.orderDocument").doesNotExist())
+            .andExpect(jsonPath("$.data.draftOrderCollection").isEmpty())
             .andExpect(jsonPath("$.data.messages[0].value.internalMessageAttachDocs").isEmpty())
             .andExpect(jsonPath("$.data.messages[0].value.messageIdentifier").value("79a658dd-b0ad-40e2-af7a-267a329a793c"))
             .andReturn();
