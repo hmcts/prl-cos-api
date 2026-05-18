@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.document;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
+import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -45,14 +47,17 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
@@ -282,6 +287,10 @@ public class DocumentGenService {
     protected String privacyNoticeFilename;
     @Value("${document.templates.citizen.prl_citizen_upload_template}")
     protected String prlCitizenUploadTemplate;
+    @Value("${document.templates.citizen.prl_citizen_witness_statement_template}")
+    protected String prlCitizenWitnessStatementTemplate;
+    @Value("${document.templates.citizen.prl_citizen_witness_statement_welsh_template}")
+    protected String prlCitizenWitnessStatementWelshTemplate;
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
@@ -735,17 +744,19 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest, DocumentCategory documentCategory, String language) {
         StringBuilder fileNameBuilder = new StringBuilder();
 
         if (null != documentRequest.getPartyName()) {
             fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
             fileNameBuilder.append(UNDERSCORE);
         }
-        if (null != documentRequest.getCategoryId()) {
-            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
+        if (nonNull(documentCategory)) {
+            fileNameBuilder.append(documentCategory.getFileNamePrefix());
             fileNameBuilder.append(UNDERSCORE);
         }
+        fileNameBuilder.append(language);
+        fileNameBuilder.append(UNDERSCORE);
         fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
         fileNameBuilder.append(UNDERSCORE);
         fileNameBuilder.append(SUBMITTED_PDF);
@@ -1224,7 +1235,7 @@ public class DocumentGenService {
                                                      Optional<TypeOfApplicationOrders> typeOfApplicationOrders) {
         if (typeOfApplicationOrders.isPresent() && typeOfApplicationOrders.get().getOrderType().contains(
             FL401OrderTypeEnum.occupationOrder)
-            && Objects.nonNull(caseData.getHome())
+            && nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
                 caseData.getHome().getChildren().stream().map(Element::getValue).toList();
@@ -1555,41 +1566,66 @@ public class DocumentGenService {
                         .builder().template(DUMMY).values(tempCaseDetails).build()
                 );
             } catch (FeignException fe) {
-                log.error("FeignException while converting document to PDF: {}", fe.getMessage());
+                log.error("FeignException while converting document to PDF: {}", fe.getMessage(), fe);
             } catch (Exception e) {
-                log.error("Exception while converting document to PDF: {}", e.getMessage());
+                log.error("Exception while converting document to PDF: {}", e.getMessage(), e);
             }
-            return Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName(generatedDocumentInfo.getDocName())
-                .build();
+            if (nonNull(generatedDocumentInfo)) {
+                return Document.builder()
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentFileName(generatedDocumentInfo.getDocName())
+                    .build();
+            } else {
+                log.error("generatedDocumentInfo is null for documentURL {}, binary url{}, file name {}", document.getDocumentUrl(),
+                          document.getDocumentBinaryUrl(), document.getDocumentFileName());
+                throw new PdfConversionException("PDF Conversion error");
+            }
 
 
         }
         return document;
     }
 
-    public DocumentResponse generateAndUploadDocument(String authorisation,
+    public List<DocumentResponse> generateAndUploadDocument(String authorisation,
                                                       DocumentRequest documentRequest) throws DocumentGenerationException {
-        //generate file name
-        String fileName = getCitizenUploadedStatementFileName(documentRequest);
-        log.info("fileName {}", fileName);
+        String categoryId = documentRequest.getCategoryId();
+        DocumentCategory documentCategory = nonNull(categoryId) ? DocumentCategory.getValue(categoryId) : null;
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
+
+        List<String> citizenUploadTemplates = nonNull(documentCategory) && documentCategory.isWitnessStatement()
+            ? List.of(prlCitizenWitnessStatementTemplate, prlCitizenWitnessStatementWelshTemplate) : List.of(prlCitizenUploadTemplate);
+
+
+        List<GeneratedDocumentInfo> generatedDocumentInfos = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            prlCitizenUploadTemplate
+            citizenUploadTemplates,
+            documentCategory
         );
-        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
-        if (null != generatedDocumentInfo) {
+
+        log.info("generatedDocumentInfo {}", generatedDocumentInfos);
+
+        List<String> languages = List.of("ENG", "WELSH");
+        List<DocumentResponse> documentResponses = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(generatedDocumentInfos)) {
+            documentResponses = IntStream.range(0, generatedDocumentInfos.size())
+                .mapToObj(buildDocumentResponse(documentRequest, documentCategory, languages, generatedDocumentInfos))
+                .toList();
+        }
+        return documentResponses;
+    }
+
+    private IntFunction<DocumentResponse> buildDocumentResponse(DocumentRequest documentRequest, DocumentCategory documentCategory,
+                                                                List<String> languages, List<GeneratedDocumentInfo> generatedDocumentInfos) {
+        return i -> {
+            String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory, languages.get(i));
+            log.info("fileName {}", fileName);
             return DocumentResponse.builder()
                 .status(SUCCESS)
-                .document(generateDocumentField(fileName, generatedDocumentInfo))
+                .document(generateDocumentField(fileName, generatedDocumentInfos.get(i)))
                 .build();
-        }
-
-        return null;
+        };
     }
 
     private boolean isCaseNotLocked(DocumentUpdateContext documentUpdateContext) {

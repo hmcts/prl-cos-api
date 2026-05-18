@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.exception.SendGridNotificationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -65,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getOtherPerson;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -102,6 +106,7 @@ public class ManageOrderEmailService {
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final DocumentLanguageService documentLanguageService;
+    private final ObjectMapper objectMapper;
     public static final String ENGLISH_EMAIL = "english";
     public static final String WELSH_EMAIL = "welsh";
 
@@ -306,7 +311,7 @@ public class ManageOrderEmailService {
         ManageOrders manageOrders = caseData.getManageOrders();
         final String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
-        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData, caseDataMap);
         log.info("in sendEmailWhenOrderIsServed on case id {}", caseData.getId());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
@@ -365,9 +370,10 @@ public class ManageOrderEmailService {
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
         }
 
-        //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
-        addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-        caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+        // Set bulkIds in the orderCollection & update in caseDataMap
+        // Work on caseDataMap's collection (which has the combined doc and correct orderTypeId)
+        // to avoid overwriting those updates with stale data from caseData
+        addBulkPrintIdsInOrderCollectionFromMap(caseDataMap, caseData.getManageOrders(), bulkPrintOrderDetails);
     }
 
     private void handleFL401ServeOrderNotifications(String authorisation,
@@ -631,6 +637,7 @@ public class ManageOrderEmailService {
                 sendgridEmailTemplateName,
                 authorisation,
                 SendgridEmailConfig.builder()
+                    .caseReference(String.valueOf(dynamicDataForEmail.get(CASE_REFERENCE)))
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)
                     .listOfAttachments(orderDocuments)
@@ -649,14 +656,16 @@ public class ManageOrderEmailService {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + "/" + caseData.getId() + ORDERS);
         try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
-                authorisation,
-                SendgridEmailConfig.builder().toEmailAddress(
-                    cafcassCymruEmailId).dynamicTemplateData(
-                    dynamicData).listOfAttachments(
-                    orderDocuments).languagePreference(LanguagePreference.english).build()
-            );
+            SendgridEmailConfig config = SendgridEmailConfig.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .toEmailAddress(cafcassCymruEmailId)
+                .dynamicTemplateData(dynamicData)
+                .listOfAttachments(orderDocuments)
+                .languagePreference(LanguagePreference.english)
+                .build();
+
+            sendgridService.sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
+                                                                  authorisation, config);
         } catch (SendGridNotificationException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
                       cafcassCymruEmailId, e.getMessage());
@@ -711,26 +720,28 @@ public class ManageOrderEmailService {
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
             AtomicBoolean newOrdersExists = new AtomicBoolean(false);
             AtomicBoolean finalOrdersExists = new AtomicBoolean(false);
-            caseData.getOrderCollection().stream()
-                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
-                .forEach(order -> {
-                    if (StringUtils.equals(
-                        order.getValue().getTypeOfOrder(),
-                        SelectTypeOfOrderEnum.interim.getDisplayedValue()
-                    ) || StringUtils.equals(
-                        order.getValue().getTypeOfOrder(),
-                        SelectTypeOfOrderEnum.general.getDisplayedValue()
-                    )) {
-                        log.info("New order is selected to serve {}",order.getId());
-                        newOrdersExists.set(true);
-                    } else if (StringUtils.equals(
-                        order.getValue().getTypeOfOrder(),
-                        SelectTypeOfOrderEnum.finl.getDisplayedValue()
-                    )) {
-                        log.info("Final order is selected to serve {}",order.getId());
-                        finalOrdersExists.set(true);
-                    }
-                });
+            if (null != caseData.getOrderCollection()) {
+                caseData.getOrderCollection().stream()
+                    .filter(order -> selectedOrderIds.contains(order.getId().toString()))
+                    .forEach(order -> {
+                        if (StringUtils.equals(
+                            order.getValue().getTypeOfOrder(),
+                            SelectTypeOfOrderEnum.interim.getDisplayedValue()
+                        ) || StringUtils.equals(
+                            order.getValue().getTypeOfOrder(),
+                            SelectTypeOfOrderEnum.general.getDisplayedValue()
+                        )) {
+                            log.info("New order is selected to serve {}",order.getId());
+                            newOrdersExists.set(true);
+                        } else if (StringUtils.equals(
+                            order.getValue().getTypeOfOrder(),
+                            SelectTypeOfOrderEnum.finl.getDisplayedValue()
+                        )) {
+                            log.info("Final order is selected to serve {}",order.getId());
+                            finalOrdersExists.set(true);
+                        }
+                    });
+            }
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             dynamicData.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
@@ -776,6 +787,38 @@ public class ManageOrderEmailService {
                             .setBulkPrintOrderDetails(bulkPrints);
                     }
                 }));
+    }
+
+    /**
+     * Adds bulk print IDs to the order collection stored in caseDataMap.
+     * Used for custom orders where caseDataMap has updates (combined doc, orderTypeId) that
+     * would be lost if we overwrote it with caseData.getOrderCollection().
+     */
+    private void addBulkPrintIdsInOrderCollectionFromMap(Map<String, Object> caseDataMap,
+                                                         ManageOrders manageOrders,
+                                                         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        if (caseDataMap.get(ORDER_COLLECTION) == null || manageOrders.getServeOrderDynamicList() == null) {
+            return;
+        }
+
+        List<Element<OrderDetails>> orderCollection = objectMapper.convertValue(
+            caseDataMap.get(ORDER_COLLECTION),
+            new TypeReference<>() {}
+        );
+
+        manageOrders.getServeOrderDynamicList().getValue()
+            .forEach(element -> nullSafeCollection(orderCollection)
+                .forEach(orderDetailsElement -> {
+                    if (orderDetailsElement.getId().toString().equals(element.getCode())) {
+                        List<Element<BulkPrintOrderDetail>> bulkPrints = CollectionUtils.isNotEmpty(
+                            orderDetailsElement.getValue().getBulkPrintOrderDetails())
+                            ? orderDetailsElement.getValue().getBulkPrintOrderDetails() : new ArrayList<>();
+                        bulkPrints.addAll(bulkPrintOrderDetails);
+                        orderDetailsElement.getValue().setBulkPrintOrderDetails(bulkPrints);
+                    }
+                }));
+
+        caseDataMap.put(ORDER_COLLECTION, orderCollection);
     }
 
     private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,
@@ -949,12 +992,30 @@ public class ManageOrderEmailService {
         );
     }
 
-    private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
+    private List<Element<OrderDetails>> getOrderCollection(CaseData caseData, Map<String, Object> caseDataMap) {
+        // Use orderCollection from caseDataMap if available (for custom orders served immediately),
+        // otherwise fall back to caseData
+        if (caseDataMap != null && caseDataMap.containsKey(ORDER_COLLECTION)
+            && caseDataMap.get(ORDER_COLLECTION) instanceof List) {
+            return objectMapper.convertValue(
+                caseDataMap.get(ORDER_COLLECTION),
+                new TypeReference<>() {}
+            );
+        }
+        return caseData.getOrderCollection();
+    }
+
+    private List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData,
+                                                                         Map<String, Object> caseDataMap) {
         List<Document> orderDocuments = new ArrayList<>();
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            caseData.getOrderCollection().stream()
+            List<Element<OrderDetails>> orderCollection = getOrderCollection(caseData, caseDataMap);
+            if (orderCollection == null) {
+                return orderDocuments;
+            }
+            orderCollection.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (isNotEmpty(order.getValue().getOrderDocument())) {
