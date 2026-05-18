@@ -307,7 +307,10 @@ public class ManageDocumentsService {
         }
     }
 
-    private QuarantineLegalDoc getQuarantineLegalDoc(CaseData caseData, UserDetails userDetails, ManageDocuments manageDocument, QuarantineLegalDoc quarantineLegalDoc) {
+    private QuarantineLegalDoc getQuarantineLegalDoc(CaseData caseData,
+                                                     UserDetails userDetails,
+                                                     ManageDocuments manageDocument,
+                                                     QuarantineLegalDoc quarantineLegalDoc) {
         if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
             || DocumentPartyEnum.CAFCASS_CYMRU.equals(
             manageDocument.getDocumentParty())) && quarantineLegalDoc != null) {
@@ -525,7 +528,10 @@ public class ManageDocumentsService {
         }
     }
 
-    private void setLAOrCafcassFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
+    private void setLAOrCafcassFlagsForWaTask(CaseData caseData,
+                                              Map<String, Object> caseDataUpdated,
+                                              String userRole,
+                                              QuarantineLegalDoc quarantineLegalDoc) {
         if (isNewTaskRequired(caseData, quarantineLegalDoc, userRole)) {
             ArrayList<Element<String>> listOfTasks = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
                 ? (ArrayList<Element<String>>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
