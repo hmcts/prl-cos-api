@@ -110,7 +110,7 @@ public abstract class IntegrationTest {
     }
 
     private synchronized String getUserToken() {
-        username =  "simulate-delivered" + UUID.randomUUID() + "@mailinator.com";
+        username = "simulate-delivered" + UUID.randomUUID() + "@mailinator.com";
 
         if (userToken == null) {
             createCaseworkerUserInIdam(username, aatPassword);

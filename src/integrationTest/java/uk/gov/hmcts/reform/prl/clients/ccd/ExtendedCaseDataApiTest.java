@@ -10,11 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(properties = {
-    "core_case_data.api.url=${core_case_data.api.url}"
+    "core_case_data.api.url=http://localhost:${wiremock.server.port}"
 })
 @AutoConfigureWireMock(port = 0)
 public class ExtendedCaseDataApiTest {
@@ -31,7 +36,7 @@ public class ExtendedCaseDataApiTest {
         stubFor(get(urlEqualTo(expectedUrl))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs(Scenario.STARTED)
-                    .willReturn(aResponse().withStatus(503)) // 503 Service Unavailable
+                    .willReturn(aResponse().withStatus(503))
                     .willSetStateTo("Attempt 2"));
 
         stubFor(get(urlEqualTo(expectedUrl))
@@ -48,7 +53,7 @@ public class ExtendedCaseDataApiTest {
                                     .withHeader("Content-Type", "application/json")
                                     .withBody("{ \"id\": \"123456\" }")));
 
-        caseDataApi.getExtendedCaseDetails("Bearer auth", "Bearer service", testCaseId);
+        caseDataApi.searchCases("Bearer auth", "Bearer service", testCaseId);
 
         verify(3, getRequestedFor(urlEqualTo(expectedUrl)));
     }
@@ -59,7 +64,7 @@ public class ExtendedCaseDataApiTest {
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
-            caseDataApi.getExtendedCaseDetails("Bearer auth", "Bearer service", testCaseId);
+            caseDataApi.searchCases("Bearer auth", "Bearer service", testCaseId);
         });
 
         verify(1, getRequestedFor(urlEqualTo(expectedUrl)));
