@@ -149,6 +149,30 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("laSection37Report")
     laSection37Report("laSection37Report", "laSection37Report"),
 
+    @JsonProperty("laSectionChildImpactReport1Report")
+    laSectionChildImpactReport1Report("laSectionChildImpactReport1Report", "laSectionChildImpactReport1Report"),
+
+    @JsonProperty("laSectionChildImpactReport2Report")
+    laSectionChildImpactReport2Report("laSectionChildImpactReport2Report", "laSectionChildImpactReport2Report"),
+
+    @JsonProperty("laSectionSection7ReportReport")
+    laSectionSection7ReportReport("laSectionSection7ReportReport", "laSectionSection7ReportReport"),
+
+    @JsonProperty("laSectionSection7AddendumReportReport")
+    laSectionSection7AddendumReportReport("laSectionSection7AddendumReportReport", "laSectionSection7AddendumReportReport"),
+
+    @JsonProperty("laSectionLocalAuthorityInvolvementReport")
+    laSectionLocalAuthorityInvolvementReport("laSectionLocalAuthorityInvolvementReport", "laSectionLocalAuthorityInvolvementReport"),
+
+    @JsonProperty("laSectionSection47EnquiryReport")
+    laSectionSection47EnquiryReport("laSectionSection47EnquiryReport", "laSectionSection47EnquiryReport"),
+
+    @JsonProperty("laSectionCirExtensionRequestReport")
+    laSectionCirExtensionRequestReport("laSectionCirExtensionRequestReport", "laSectionCirExtensionRequestReport"),
+
+    @JsonProperty("laSectionCirTransferRequestReport")
+    laSectionCirTransferRequestReport("laSectionCirTransferRequestReport", "laSectionCirTransferRequestReport"),
+
     @JsonProperty("laOtherDocuments")
     laOtherDocuments("laOtherDocuments", "laOtherDocuments"),
 

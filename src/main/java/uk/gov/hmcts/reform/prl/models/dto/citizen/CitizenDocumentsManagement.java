@@ -45,7 +45,6 @@ public class CitizenDocumentsManagement {
         Set.of(
             "section37Report",
             "16aRiskAssessment",
-            "sec37Report",
             "publicFundingCertificates",
             "noticesOfActingDischarge",
             "requestForFASFormsToBeChanged",

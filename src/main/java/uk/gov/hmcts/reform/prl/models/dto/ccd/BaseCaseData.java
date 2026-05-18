@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -167,4 +168,10 @@ public class BaseCaseData {
     private YesOrNo orderInPlacePermissionRequired;
     private String orderDetailsForPermissions;
     private Document uploadOrderDocForPermission;
+
+    /* Local authority policies */
+    @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
+    private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
+
+    private LocalAuthority localAuthority;
 }

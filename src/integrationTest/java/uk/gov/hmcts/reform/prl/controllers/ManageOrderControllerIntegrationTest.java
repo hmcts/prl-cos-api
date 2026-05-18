@@ -167,6 +167,8 @@ public class ManageOrderControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(manageOrderService.getLoggedInUserTypeDetails(anyString()))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails("COURT_ADMIN", false));
 
         mockMvc.perform(
                 post(url)
