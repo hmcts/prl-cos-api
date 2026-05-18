@@ -519,7 +519,7 @@ public class ManageDocumentsService {
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
             if (userRole.equals(LOCAL_AUTHORITY) || userRole.equals(CAFCASS)) {
-                setLAOrCafcassFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                setLaOrCafcassFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
             } else {
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
@@ -528,7 +528,7 @@ public class ManageDocumentsService {
         }
     }
 
-    private void setLAOrCafcassFlagsForWaTask(CaseData caseData,
+    private void setLaOrCafcassFlagsForWaTask(CaseData caseData,
                                               Map<String, Object> caseDataUpdated,
                                               String userRole,
                                               QuarantineLegalDoc quarantineLegalDoc) {
