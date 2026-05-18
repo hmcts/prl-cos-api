@@ -102,7 +102,7 @@ public abstract class IntegrationTest {
 
     public Response callDocGenerateAndSave(String requestBody) {
         return DocumentGenerateUtil
-                .documentGenerate(
+            .documentGenerate(
                 requestBody,
                 documentGenerateUri,
                 "Bearer TestAuthToken"
