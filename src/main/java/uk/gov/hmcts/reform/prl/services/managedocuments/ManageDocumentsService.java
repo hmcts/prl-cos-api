@@ -279,18 +279,7 @@ public class ManageDocumentsService {
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
             if (!userRole.equals(COURT_ADMIN)) {
-                if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
-                    || DocumentPartyEnum.CAFCASS_CYMRU.equals(
-                    manageDocument.getDocumentParty())) && null != quarantineLegalDoc) {
-                    quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
-                        quarantineLegalDoc
-                    );
-                } else if (isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId())
-                    && null != quarantineLegalDoc) {
-                    quarantineLegalDoc = updateQuarantineLegalDocForLocalAuthority(
-                        quarantineLegalDoc
-                    );
-                }
+                quarantineLegalDoc = getQuarantineLegalDoc(caseData, userDetails, manageDocument, quarantineLegalDoc);
             } else if (userRole.equals(COURT_ADMIN)) {
                 quarantineLegalDoc = updateQuarantineLegalDocForCourtAdmin(
                     quarantineLegalDoc);
@@ -318,6 +307,25 @@ public class ManageDocumentsService {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
+    }
+
+    private QuarantineLegalDoc getQuarantineLegalDoc(CaseData caseData,
+                                                     UserDetails userDetails,
+                                                     ManageDocuments manageDocument,
+                                                     QuarantineLegalDoc quarantineLegalDoc) {
+        if ((DocumentPartyEnum.CAFCASS.equals(manageDocument.getDocumentParty())
+            || DocumentPartyEnum.CAFCASS_CYMRU.equals(
+            manageDocument.getDocumentParty())) && quarantineLegalDoc != null) {
+            quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
+                quarantineLegalDoc
+            );
+        } else if (isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId())
+            && quarantineLegalDoc != null) {
+            quarantineLegalDoc = updateQuarantineLegalDocForLocalAuthority(
+                quarantineLegalDoc
+            );
+        }
+        return quarantineLegalDoc;
     }
 
     private QuarantineLegalDoc updateQuarantineLegalDocForCafcass(QuarantineLegalDoc quarantineLegalDoc) {
@@ -513,20 +521,26 @@ public class ManageDocumentsService {
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
             if (userRole.equals(LOCAL_AUTHORITY) || userRole.equals(CAFCASS)) {
-                if (isNewTaskRequired(caseData, quarantineLegalDoc, userRole)) {
-                    ArrayList<Element<String>> listOfTasks = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
-                        ? (ArrayList<Element<String>>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
-                    listOfTasks.add(element(quarantineLegalDoc.getCategoryId()));
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
-                                        listOfTasks);
-                    caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole.toUpperCase());
-                }
+                setLaOrCafcassFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
             } else {
-
                 caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
             }
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
+        }
+    }
+
+    private void setLaOrCafcassFlagsForWaTask(CaseData caseData,
+                                              Map<String, Object> caseDataUpdated,
+                                              String userRole,
+                                              QuarantineLegalDoc quarantineLegalDoc) {
+        if (isNewTaskRequired(caseData, quarantineLegalDoc, userRole)) {
+            ArrayList<Element<String>> listOfTasks = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
+                ? (ArrayList<Element<String>>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
+            listOfTasks.add(element(quarantineLegalDoc.getCategoryId()));
+            caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
+                                listOfTasks);
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole.toUpperCase());
         }
     }
 
