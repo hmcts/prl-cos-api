@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -94,6 +95,9 @@ public class C100IssueCaseServiceTest {
 
     @Mock
     private WorkflowResult workflowResult;
+
+    @Mock
+    private UpdatePartyDetailsService updatePartyDetailsService;
 
     @Mock
     private DgsService dgsService;
@@ -427,6 +431,12 @@ public class C100IssueCaseServiceTest {
             .childrenKnownToLocalAuthorityTextArea("Test")
             .childrenSubjectOfChildProtectionPlan(YesNoDontKnow.yes)
             .applicants(applicantList)
+            .respondents(List.of(element(UUID.randomUUID(), PartyDetails.builder()
+                .phoneNumber("1234567890")
+                .isPhoneNumberConfidential(YesOrNo.Yes)
+                .firstName("John")
+                .lastName("Smith")
+                .build())))
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .allegationsOfHarmDomesticAbuseYesNo(Yes)
@@ -472,6 +482,8 @@ public class C100IssueCaseServiceTest {
             Mockito.any(CaseData.class),
             eq(true)
         );
+        verify(updatePartyDetailsService).generateC8DocumentsForRespondents(
+            any(), eq(callbackRequest), eq(authToken), any(), eq(caseData.getRespondents()), eq(true));
     }
 
     @Test

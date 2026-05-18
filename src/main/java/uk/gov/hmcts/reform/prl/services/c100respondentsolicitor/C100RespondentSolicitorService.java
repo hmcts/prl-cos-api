@@ -1530,7 +1530,8 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put(
                 "solicitorRepresented",
-                null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                (null != solicitorRepresentedRespondent.getValue().getUser()
+                    && null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented())
                         ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
         );
         if (null != response.getSupportYouNeed()) {
@@ -1662,7 +1663,8 @@ public class C100RespondentSolicitorService {
                 .contains(ConfidentialityListEnum.phoneNumber))) {
             dataMap.put(PHONE, THIS_INFORMATION_IS_CONFIDENTIAL);
             isConfidentialDataPresent = true;
-        } else if (null != response.getCitizenDetails().getContact()
+        } else if (null != response.getCitizenDetails()
+                && null != response.getCitizenDetails().getContact()
                 && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getPhoneNumber())) {
             dataMap.put(PHONE, response.getCitizenDetails().getContact().getPhoneNumber());
         } else {
@@ -1691,7 +1693,7 @@ public class C100RespondentSolicitorService {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
             }
         } else {
-            if (null != response.getCitizenDetails().getAddress()) {
+            if (null != response.getCitizenDetails() && null != response.getCitizenDetails().getAddress()) {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
             } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));

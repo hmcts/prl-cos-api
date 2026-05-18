@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -128,6 +129,8 @@ import static uk.gov.hmcts.reform.prl.enums.Event.SEND_TO_GATEKEEPER;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Slf4j
 @RestController
@@ -463,6 +466,12 @@ public class CallbackController {
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
 
             caseDataUpdated.put("gatekeepingDetails", gatekeepingDetails);
+            List<Element<PartyDetails>> respondents = C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                ? nullSafeList(caseData.getRespondents())
+                : List.of(element(caseData.getRespondentsFL401()));
+            updatePartyDetailsService.generateC8DocumentsForRespondents(caseDataUpdated, callbackRequest, authorisation,
+                                                                        caseData, respondents, true);
+
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);

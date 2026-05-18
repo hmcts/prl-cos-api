@@ -2203,6 +2203,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentAc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(true).build());
@@ -2223,6 +2224,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentBc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
@@ -2262,6 +2264,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentDc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().build());
@@ -2324,6 +2327,7 @@ class UpdatePartyDetailsServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());

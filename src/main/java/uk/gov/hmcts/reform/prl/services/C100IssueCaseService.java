@@ -43,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.PATH_FINDER_DECISION;
 import static uk.gov.hmcts.reform.prl.enums.State.PROCEEDS_IN_HERITAGE_SYSTEM;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Service
 @Slf4j
@@ -62,6 +63,7 @@ public class C100IssueCaseService {
     private final PathFinderLookupService pathFinderLookupService;
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
     private final SystemUserService systemUserService;
+    private final UpdatePartyDetailsService updatePartyDetailsService;
 
     public Map<String, Object> issueAndSendToLocalCourt(String authorisation, CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -116,6 +118,9 @@ public class C100IssueCaseService {
         // Generate All Docs and set to casedataupdated.
         caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
 
+        updatePartyDetailsService.generateC8DocumentsForRespondents(
+            caseDataUpdated, callbackRequest, authorisation, caseData, nullSafeList(caseData.getRespondents()), true
+        );
         CaseData caseDataBefore = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
         caseDataUpdated.putAll(c8Service.generateOtherPartiesC8s(caseData, caseDataBefore, authorisation));
 
