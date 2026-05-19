@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
-import uk.gov.hmcts.reform.prl.clients.ccd.ExtendedCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.prl.models.extendedcasedetails.ExtendedCaseDetails;
 
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import feign.FeignException;
