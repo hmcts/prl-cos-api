@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.clients.ccd;
 
 import uk.gov.hmcts.reform.prl.clients.ccd.ExtendedCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.models.extendedcasedetails.ExtendedCaseDetails;
 
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
@@ -25,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class ExtendedCaseDataApiTest {
 
     @Autowired
-    private ExtendedCaseDataApi caseDataApi;
+    private CoreCaseDataApi coreCaseDataApi;
 
     private final String testCaseId = "123456";
-    private final String expectedUrl = "/cases/" + testCaseId;
+    private final String caseType = "C100";
 
     @Test
     public void shouldRetryOn5xxServerError() {
@@ -53,9 +54,9 @@ public class ExtendedCaseDataApiTest {
                                     .withHeader("Content-Type", "application/json")
                                     .withBody("{ \"id\": \"123456\" }")));
 
-        caseDataApi.searchCases("Bearer auth", "Bearer service", testCaseId);
+        coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
 
-        verify(3, getRequestedFor(urlEqualTo(expectedUrl)));
+        verify(3, getRequestedFor(urlEqualTo(testCaseId)));
     }
 
     @Test
@@ -64,9 +65,9 @@ public class ExtendedCaseDataApiTest {
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
-            caseDataApi.searchCases("Bearer auth", "Bearer service", testCaseId);
+            coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
         });
 
-        verify(1, getRequestedFor(urlEqualTo(expectedUrl)));
+        verify(1, getRequestedFor(urlEqualTo(testCaseId)));
     }
 }

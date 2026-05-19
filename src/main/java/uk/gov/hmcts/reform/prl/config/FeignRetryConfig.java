@@ -32,7 +32,7 @@ public class FeignRetryConfig extends FeignClientProperties.FeignClientConfigura
 
             // Only retry GET methods and 5xx responses
             boolean isGet = response.request().httpMethod() == feign.Request.HttpMethod.GET;
-            boolean isTargetMethod = methodKey.contains("ExtendedCaseDataApi#searchCases");
+            boolean isTargetMethod = methodKey.contains("CoreCaseDataApi#searchCases");
             int status = response.status();
 
             if (isTargetMethod && isGet && status >= 500 && status < 600) {
