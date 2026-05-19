@@ -31,6 +31,10 @@ public class RespondentDetails {
     @JsonProperty("relationshipDetails")
     private RelationshipDetails relationshipDetails;
     private YesOrNo addressUnknown;
+    private YesOrNo isRespondentAddressConfidential;
+    private YesOrNo isRespondentTelephoneNumberConfidential;
+    private YesOrNo isRespondentEmailAddressConfidential;
+    private YesOrNo liveInRefuge;
 }
 
 

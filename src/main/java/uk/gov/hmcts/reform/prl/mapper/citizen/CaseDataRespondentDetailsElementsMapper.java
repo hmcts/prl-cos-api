@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -79,6 +80,12 @@ public class CaseDataRespondentDetailsElementsMapper {
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
                        ? respondentDetails.getRespondentContactDetail().getEmailAddress() : null)
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
+            .isPhoneNumberConfidential(respondentDetails.getIsRespondentTelephoneNumberConfidential())
+            .isAddressConfidential(respondentDetails.getIsRespondentAddressConfidential())
+            .isEmailAddressConfidential(respondentDetails.getIsRespondentEmailAddressConfidential())
+            .liveInRefuge(isNotEmpty(respondentDetails.getLiveInRefuge())
+                              ? YesNoIDontKnowV2.valueOf(respondentDetails.getLiveInRefuge().getDisplayedValue())
+                              : null)
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
             .build();
