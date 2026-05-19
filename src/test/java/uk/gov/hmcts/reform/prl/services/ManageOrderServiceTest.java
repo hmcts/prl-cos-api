@@ -130,7 +130,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -173,15 +172,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_REQ_SER_UPDATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_SER_DUE_DATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CANCEL_REQUEST_CIR_UPDATE_TASK;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CREATE_REQUEST_CIR_UPDATE_TASK;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.UPDATE_ALL_TABS;
-import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab;
@@ -191,7 +186,6 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum.childImpactReport1;
 import static uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum.childImpactReport2;
@@ -6322,100 +6316,6 @@ class ManageOrderServiceTest {
         });
         String expectedMessage = "Invalid Json";
         assertTrue(expectedMessage.contains(exception.getMessage()));
-    }
-
-    @Test
-    void testSetFieldsForRequestSafeGuardingReportWaTaskMoreThan7Days() {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
-            .serveOrderData(ServeOrderData.builder()
-                                .cafcassOrCymruNeedToProvideReport(Yes)
-                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
-                                .build())
-            .isPathfinderCase(Yes)
-            .build();
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
-            caseData,
-            updatedCaseData,
-            MANAGE_ORDERS.getId()
-        );
-
-        assertEquals(YES, updatedCaseData.get(WA_REQ_SER_UPDATE));
-        assertEquals(LocalDate.now().plusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE), updatedCaseData.get(WA_SER_DUE_DATE));
-    }
-
-    @Test
-    void testSetFieldsForRequestSafeGuardingReportWaTaskLessThan7Days() {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
-            .serveOrderData(ServeOrderData.builder()
-                                .cafcassOrCymruNeedToProvideReport(Yes)
-                                .whenReportsMustBeFiled(LocalDate.now().plusDays(3))
-                                .build())
-            .isPathfinderCase(Yes)
-            .build();
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
-            caseData,
-            updatedCaseData,
-            MANAGE_ORDERS.getId()
-        );
-
-        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
-        assertNull(updatedCaseData.get(WA_SER_DUE_DATE));
-    }
-
-    @Test
-    void testSetFieldsForRequestSafeGuardingReportWaTaskForManageOrder() {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(noCheck).build())
-            .serveOrderData(ServeOrderData.builder()
-                                .cafcassOrCymruNeedToProvideReport(No)
-                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
-                                .build())
-            .isPathfinderCase(Yes)
-            .build();
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
-            caseData,
-            updatedCaseData,
-            MANAGE_ORDERS.getId()
-        );
-
-        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
-    }
-
-    @Test
-    void testSetFieldsForRequestSafeGuardingReportWaTaskForAdminEditAndApproveOrder() {
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .serveOrderData(ServeOrderData.builder()
-                                .cafcassOrCymruNeedToProvideReport(No)
-                                .whenReportsMustBeFiled(LocalDate.now().plusDays(10))
-                                .build())
-            .isPathfinderCase(Yes)
-            .build();
-
-        HashMap<String, Object> updatedCaseData = new HashMap<>();
-        manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(
-            caseData,
-            updatedCaseData,
-            ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-        );
-
-        assertNull(updatedCaseData.get(WA_REQ_SER_UPDATE));
-
     }
 
     @Test

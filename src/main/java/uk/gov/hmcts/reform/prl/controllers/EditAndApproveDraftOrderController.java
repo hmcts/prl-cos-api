@@ -247,7 +247,6 @@ public class EditAndApproveDraftOrderController {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData, clientContext);
 
             }
-            manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
 
             //Populate need to check automated hearing request
             manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
