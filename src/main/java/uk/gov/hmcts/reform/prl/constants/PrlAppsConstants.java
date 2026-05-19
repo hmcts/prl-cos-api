@@ -1177,4 +1177,14 @@ public class PrlAppsConstants {
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
     public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
+    public static final String DOCUMENT_URL = "document_url";
+    public static final String DOCUMENT_FILENAME = "document_filename";
+    public static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    public static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
+
+    // Document Removal event
+    public static final String DOCUMENT_REMOVAL_CASE_DOCUMENTS = "documentRemovalCaseDocuments";
+    public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
+    public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
+
 }
