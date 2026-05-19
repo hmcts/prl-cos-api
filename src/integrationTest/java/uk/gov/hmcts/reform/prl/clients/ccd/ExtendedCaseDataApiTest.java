@@ -15,6 +15,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @SpringBootTest(properties = {
     "core_case_data.api.url=http://localhost:${wiremock.server.port}"
 })
