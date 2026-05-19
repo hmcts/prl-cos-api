@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -66,6 +67,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -822,7 +827,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
         Assert.assertEquals(1, bulkScannedDocListDocTab.size());
         Assert.assertNotNull(bulkScannedDocListDocTab.get(0).getValue().getUrl());
-        Assert.assertNull(bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
+        assertNull(bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
         Assert.assertEquals("123", bulkScannedDocListDocTab.get(0).getValue().getControlNumber());
         Assert.assertEquals("EXREF", bulkScannedDocListDocTab.get(0).getValue().getExceptionRecordReference());
     }
@@ -868,7 +873,7 @@ public class ReviewDocumentServiceTest {
         List<Element<QuarantineLegalDoc>> confidentialDocs =
             (List<Element<QuarantineLegalDoc>>) caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
         Assert.assertNotNull(confidentialDocs.get(0).getValue().getUrl());
-        Assert.assertNull(confidentialDocs.get(0).getValue().getCategoryId());
+        assertNull(confidentialDocs.get(0).getValue().getCategoryId());
         Assert.assertEquals("123", confidentialDocs.get(0).getValue().getControlNumber());
         Assert.assertEquals("EXREF", confidentialDocs.get(0).getValue().getExceptionRecordReference());
 
@@ -1902,5 +1907,132 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.cleanupOldCopyOfDocuments(currentCaseData, previousCaseData);
 
         verifyNoInteractions(manageDocumentsService);
+    }
+
+    @Test
+    public void givenDocumentRemoved_whenFetchDocumentDynamicListElements_thenDocumentNotReturned() {
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .legalProfQuarantineDocsList(documentListWithRemovedDocument())
+                                           .cafcassQuarantineDocsList(documentListWithRemovedDocument())
+                                           .localAuthorityQuarantineDocsList(documentListWithRemovedDocument())
+                                           .courtStaffQuarantineDocsList(documentListWithRemovedDocument())
+                                           .citizenQuarantineDocsList(documentListWithRemovedDocument())
+                                           .courtNavQuarantineDocumentList(documentListWithRemovedDocument())
+                                           .build())
+            .build();
+
+        doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(), any());
+
+        List<DynamicListElement> dynamicListElements = reviewDocumentService.fetchDocumentDynamicListElements(caseData);
+        Assertions.assertTrue(dynamicListElements.isEmpty());
+    }
+
+    private List<Element<QuarantineLegalDoc>> documentListWithRemovedDocument() {
+        return new ArrayList<>(List.of(element(UUID.randomUUID(), QuarantineLegalDoc.builder()
+            .uploaderRole(LEGAL_PROFESSIONAL)
+            .document(null)
+            .build())));
+    }
+
+    private static List<Element<QuarantineLegalDoc>> document() {
+        return new ArrayList<>(List.of(element(UUID.randomUUID(), QuarantineLegalDoc.builder()
+            .uploaderRole(LEGAL_PROFESSIONAL)
+            .document(Document.builder().build())
+            .build())));
+    }
+
+    @Test
+    public void givenDocumentRemoved_thenRemoveFromReviewDocuments() {
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .legalProfQuarantineDocsList(documentListWithRemovedDocument())
+                                           .cafcassQuarantineDocsList(documentListWithRemovedDocument())
+                                           .localAuthorityQuarantineDocsList(documentListWithRemovedDocument())
+                                           .courtStaffQuarantineDocsList(documentListWithRemovedDocument())
+                                           .citizenQuarantineDocsList(documentListWithRemovedDocument())
+                                           .courtNavQuarantineDocumentList(documentListWithRemovedDocument())
+                                           .build())
+            .build();
+
+        doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(), any());
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        reviewDocumentService.removeReviewDocumentWithMissingDocument(caseData, caseDataUpdated);
+        assertEquals(5, caseDataUpdated.size());
+        for (Object value : caseDataUpdated.values()) {
+            assertTrue(value instanceof List);
+            assertTrue(((List<?>) value).isEmpty());
+        }
+    }
+
+    @Test
+    public void givenDocumentTobeReviewed_whenHasDocumentsToBeReviewed_thenReturnsTrue() {
+        List<Element<QuarantineLegalDoc>> documents = document();
+
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .legalProfQuarantineDocsList(documents)
+                                           .build())
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+
+        caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .cafcassQuarantineDocsList(documents)
+                                           .build())
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+
+        caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtStaffQuarantineDocsList(documents)
+                                           .build())
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+
+        caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(documents)
+                                           .build())
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+
+        caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .localAuthorityQuarantineDocsList(documents)
+                                           .build())
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+
+        caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtNavQuarantineDocumentList(documents)
+                                           .build())
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+
+        List<Element<ScannedDocument>> scannedDocuments = List.of(element(ScannedDocument.builder().build()));
+        caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .scannedDocuments(scannedDocuments)
+            .build();
+
+        assertTrue(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
+    }
+
+    @Test
+    public void givenDocumentTobeReviewed_whenHasDocumentsToBeReviewed_thenReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .build();
+
+        assertFalse(reviewDocumentService.hasDocumentsToBeReviewed(caseData));
     }
 }
