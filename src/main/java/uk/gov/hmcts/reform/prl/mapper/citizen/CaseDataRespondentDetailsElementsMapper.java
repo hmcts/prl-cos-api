@@ -83,7 +83,9 @@ public class CaseDataRespondentDetailsElementsMapper {
             .isPhoneNumberConfidential(respondentDetails.getIsRespondentTelephoneNumberConfidential())
             .isAddressConfidential(respondentDetails.getIsRespondentAddressConfidential())
             .isEmailAddressConfidential(respondentDetails.getIsRespondentEmailAddressConfidential())
-            .liveInRefuge(isNotEmpty(respondentDetails.getLiveInRefuge()) ? YesNoIDontKnowV2.valueOf(respondentDetails.getLiveInRefuge().getDisplayedValue()) : null)
+            .liveInRefuge(isNotEmpty(respondentDetails.getLiveInRefuge())
+                              ? YesNoIDontKnowV2.valueOf(respondentDetails.getLiveInRefuge().getDisplayedValue())
+                              : null)
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
             .build();
