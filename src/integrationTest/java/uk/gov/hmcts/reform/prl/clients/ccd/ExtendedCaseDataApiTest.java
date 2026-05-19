@@ -16,6 +16,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+
 @SpringBootTest(properties = {
     "core_case_data.api.url=http://localhost:${wiremock.server.port}"
 })
@@ -27,44 +32,48 @@ public class ExtendedCaseDataApiTest {
 
     private final String testCaseId = "123456";
     private final String caseType = "C100";
+    private final String expectedUrl = "/searchCases";
 
     @Test
     public void shouldRetryOn5xxServerError() {
-        // Expect: 503 -> 503 -> 200 Success
-        stubFor(get(urlPathEqualTo(testCaseId))
+        // Expect: 503 -> 503 -> 200 Success for a POST request
+        stubFor(post(urlPathEqualTo(expectedUrl))
+                    .withQueryParam("ctid", equalTo(caseType))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs(Scenario.STARTED)
                     .willReturn(aResponse().withStatus(503))
                     .willSetStateTo("Attempt 2"));
 
-        stubFor(get(urlPathEqualTo(testCaseId))
+        stubFor(post(urlPathEqualTo(expectedUrl))
+                    .withQueryParam("ctid", equalTo(caseType))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs("Attempt 2")
                     .willReturn(aResponse().withStatus(503))
                     .willSetStateTo("Attempt 3"));
 
-        stubFor(get(urlPathEqualTo(testCaseId))
+        stubFor(post(urlPathEqualTo(expectedUrl))
+                    .withQueryParam("ctid", equalTo(caseType))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs("Attempt 3")
                     .willReturn(aResponse()
                                     .withStatus(200)
                                     .withHeader("Content-Type", "application/json")
-                                    .withBody("{ \"id\": \"123456\" }")));
+                                    .withBody("{ \"id\": \"" + testCaseId + "\" }")));
 
         coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
 
-        verify(3, getRequestedFor(urlPathEqualTo(testCaseId)));
+        verify(3, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
     }
 
     @Test
     public void shouldNotRetryOn4xxClientError() {
-        stubFor(get(urlPathEqualTo(testCaseId))
+        stubFor(post(urlPathEqualTo(testCaseId))
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
             coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
         });
 
-        verify(1, getRequestedFor(urlPathEqualTo(testCaseId)));
+        verify(1, postRequestedFor(urlPathEqualTo(testCaseId)));
     }
 }

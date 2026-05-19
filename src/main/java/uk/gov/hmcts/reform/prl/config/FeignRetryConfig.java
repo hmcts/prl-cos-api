@@ -32,10 +32,12 @@ public class FeignRetryConfig extends FeignClientProperties.FeignClientConfigura
 
             // Only retry GET methods and 5xx responses
             boolean isGet = response.request().httpMethod() == feign.Request.HttpMethod.GET;
-            boolean isTargetMethod = methodKey.contains("CoreCaseDataApi#searchCases");
+            boolean isPost = response.request().httpMethod() == feign.Request.HttpMethod.POST;
+            boolean isTargetMethod = methodKey.contains("CoreCaseDataApi#searchCases")
+                || methodKey.contains("ExtendedCaseDataApi#searchCases");
             int status = response.status();
 
-            if (isTargetMethod && isGet && status >= 500 && status < 600) {
+            if (isTargetMethod && (isGet || isPost) && status >= 500 && status < 600) {
                 log.warn("retrying now for status {}",  status);
                 return new feign.RetryableException(
                     status,
