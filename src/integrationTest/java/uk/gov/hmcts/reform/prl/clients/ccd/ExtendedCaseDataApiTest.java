@@ -34,19 +34,19 @@ public class ExtendedCaseDataApiTest {
     @Test
     public void shouldRetryOn5xxServerError() {
         // Expect: 503 -> 503 -> 200 Success
-        stubFor(get(urlEqualTo(expectedUrl))
+        stubFor(get(urlPathEqualTo(testCaseId))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs(Scenario.STARTED)
                     .willReturn(aResponse().withStatus(503))
                     .willSetStateTo("Attempt 2"));
 
-        stubFor(get(urlEqualTo(expectedUrl))
+        stubFor(get(urlPathEqualTo(testCaseId))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs("Attempt 2")
                     .willReturn(aResponse().withStatus(503))
                     .willSetStateTo("Attempt 3"));
 
-        stubFor(get(urlEqualTo(expectedUrl))
+        stubFor(get(urlPathEqualTo(testCaseId))
                     .inScenario("5xx Retry Scenario")
                     .whenScenarioStateIs("Attempt 3")
                     .willReturn(aResponse()
@@ -56,18 +56,18 @@ public class ExtendedCaseDataApiTest {
 
         coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
 
-        verify(3, getRequestedFor(urlEqualTo(testCaseId)));
+        verify(3, getRequestedFor(urlPathEqualTo(testCaseId)));
     }
 
     @Test
     public void shouldNotRetryOn4xxClientError() {
-        stubFor(get(urlEqualTo(expectedUrl))
+        stubFor(get(urlPathEqualTo(testCaseId))
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
             coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
         });
 
-        verify(1, getRequestedFor(urlEqualTo(testCaseId)));
+        verify(1, getRequestedFor(urlPathEqualTo(testCaseId)));
     }
 }
