@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.services.renamedocument.RenameDocumentService;
 
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -55,4 +56,29 @@ public class RenameDocumentsController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "about to s callback for rename documents")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            Map<String, Object> caseDataMap = renameDocumentService.handleAboutToSubmit(authorisation, callbackRequest);
+            if (caseDataMap.containsKey("errors")) {
+                List<String> errorList = (List<String>) caseDataMap.get("errors");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
+
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
 }
