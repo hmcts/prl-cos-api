@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -174,4 +176,16 @@ public class BaseCaseData {
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
     private LocalAuthority localAuthority;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private DocumentRemovalWrapper documentRemovalWrapper;
+
+    @JsonIgnore
+    public DocumentRemovalWrapper getDocumentRemovalWrapper() {
+        if (documentRemovalWrapper == null) {
+            this.documentRemovalWrapper = new DocumentRemovalWrapper();
+        }
+        return documentRemovalWrapper;
+    }
 }
