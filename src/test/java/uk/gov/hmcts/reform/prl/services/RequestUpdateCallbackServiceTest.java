@@ -261,6 +261,59 @@ class RequestUpdateCallbackServiceTest {
     }
 
     @Test
+    void shouldProcessCallbackCasePaymentSuccess() {
+        CaseData caseData = CaseData.builder()
+            .id(1L)
+            .paymentServiceRequestReferenceNumber("matching-case-reference")
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("matching-case-reference") // Forces isCasePayment = true
+            .serviceRequestStatus("Paid")                       // Forces isStatusPaid = true
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("reference")
+                         .build())
+            .build();
+
+        when(coreCaseDataService.findCaseById(anyString(), eq(caseId.toString()))).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        // Verify it triggers the standard case payment success callback event
+        verify(coreCaseDataService, times(2)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+    }
+
+    @Test
+    void shouldProcessCallbackAwpPaymentFailure() {
+        CaseData caseData = CaseData.builder()
+            .id(1L)
+            .paymentServiceRequestReferenceNumber("initial-case-reference") // Mismatch forces isCasePayment = false
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("completely-different-awp-reference")
+            .serviceRequestStatus("Failed")                                 // Forces isStatusPaid = false
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("reference")
+                         .build())
+            .build();
+
+        when(coreCaseDataService.findCaseById(anyString(), eq(caseId.toString()))).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        // Verify it triggers the AWP failure event path
+        verify(coreCaseDataService).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+    }
+
+    @Test
     void shouldHandleCourtFinderExceptionAndContinueProcessing() throws NotFoundException {
         CaseData caseData = CaseData.builder()
             .id(1L)

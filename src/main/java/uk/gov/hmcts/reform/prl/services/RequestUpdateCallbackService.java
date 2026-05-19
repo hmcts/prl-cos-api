@@ -177,7 +177,8 @@ public class RequestUpdateCallbackService {
     }
 
     private boolean isDuplicatePayment(CaseData caseData) {
-        return Optional.ofNullable(caseData.getPaymentCallbackServiceRequestUpdate())
+        return Optional.ofNullable(caseData)
+            .map(CaseData::getPaymentCallbackServiceRequestUpdate)
             .map(paymentStatus -> PAID.equalsIgnoreCase(paymentStatus.getServiceRequestStatus()))
             .orElse(false);
     }

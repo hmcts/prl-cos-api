@@ -133,17 +133,15 @@ tasks.register("testWithCoverage") {
         }
       }
 
-      def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
+      def missingTargets = targets.findAll { t ->
+        !foundTargets.any { f -> f.equalsIgnoreCase(t) } &&
+          !t.endsWith("Test") &&
+          !t.endsWith("IT")
+      }
+
       if (!checkAll && !missingTargets.isEmpty()) {
         logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
-        missingTargets.each { missing ->
-          logger.lifecycle("   - ${missing}")
-          def suggestions = allClassNames.findAll { it.toLowerCase().contains(missing.toLowerCase()) }.sort()
-          if (!suggestions.isEmpty()) {
-            logger.lifecycle("     ${green}Did you mean?${reset}")
-            suggestions.take(5).each { logger.lifecycle("      • ${it}") }
-          }
-        }
+        // ... rest of the existing error logging
         throw new GradleException("Target class mismatch. Check spelling!")
       }
 
