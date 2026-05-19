@@ -80,9 +80,12 @@ public class CaseDataRespondentDetailsElementsMapper {
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
                        ? respondentDetails.getRespondentContactDetail().getEmailAddress() : null)
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
-            .isPhoneNumberConfidential(respondentDetails.getIsRespondentTelephoneNumberConfidential())
-            .isAddressConfidential(respondentDetails.getIsRespondentAddressConfidential())
-            .isEmailAddressConfidential(respondentDetails.getIsRespondentEmailAddressConfidential())
+            .isPhoneNumberConfidential(YesNoIDontKnowV2.Yes.equals(respondentDetails.getLiveInRefuge()) ? Yes
+                : respondentDetails.getIsRespondentTelephoneNumberConfidential())
+            .isAddressConfidential(YesNoIDontKnowV2.Yes.equals(respondentDetails.getLiveInRefuge()) ? Yes
+                : respondentDetails.getIsRespondentAddressConfidential())
+            .isEmailAddressConfidential(YesNoIDontKnowV2.Yes.equals(respondentDetails.getLiveInRefuge()) ? Yes
+                : respondentDetails.getIsRespondentEmailAddressConfidential())
             .liveInRefuge(isNotEmpty(respondentDetails.getLiveInRefuge())
                               ? YesNoIDontKnowV2.valueOf(respondentDetails.getLiveInRefuge().getDisplayedValue())
                               : null)
