@@ -27,7 +27,6 @@ public class ViewDraftOrdersService {
     public List<Element<DraftOrder>> getDraftOrdersForUser(CaseDetails caseDetails, String authorisation) {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        UserDetails currentUserDetails = userService.getUserDetails(authorisation);
         Optional<Organisations> currentUserOrganisationsOpt = organisationService.findUserOrganisation(authorisation);
 
         List<Element<DraftOrder>> viewFilteredDraftOrders = new ArrayList<>();
@@ -38,9 +37,9 @@ public class ViewDraftOrdersService {
 
             /* Get the list of emails of the current user's organisation and iterate though to find which of the lists
              * to include in the result. */
-            String currentUserOrganisations = currentUserOrganisationsOpt.get().getOrganisationIdentifier();
+            String currentUserOrganisationId = currentUserOrganisationsOpt.get().getOrganisationIdentifier();
             String systemAuthorisation = systemUserService.getSysUserToken();
-            OrgSolicitors orgSolicitors = organisationService.getOrganisationSolicitorDetails(systemAuthorisation, currentUserOrganisations);
+            OrgSolicitors orgSolicitors = organisationService.getOrganisationSolicitorDetails(systemAuthorisation, currentUserOrganisationId);
 
             for (SolicitorUser solicitorUser : orgSolicitors.getUsers()) {
                 List<Element<DraftOrder>> userDraftOrders = createdEmailToDraftOrderMap.remove(solicitorUser.getEmail());
@@ -56,6 +55,7 @@ public class ViewDraftOrdersService {
             );
         } else {
             /* No organisation so just include draft orders that have been created by the current user. */
+            UserDetails currentUserDetails = userService.getUserDetails(authorisation);
             caseData.getDraftOrderCollection().stream()
                 .filter(e -> Objects.equals(currentUserDetails.getEmail(), e.getValue().getOtherDetails().getOrderCreatedByEmailId()))
                 .forEach(viewFilteredDraftOrders::add);

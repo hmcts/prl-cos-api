@@ -43,8 +43,8 @@ public class ViewDraftOrdersControllerTest {
     @Mock
     private Element<DraftOrder> mockDraftOrderElement;
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
     public void testCallBackURLAboutToStartEventFailsAuthorisation() {
@@ -59,7 +59,7 @@ public class ViewDraftOrdersControllerTest {
 
         // When
         InvalidClientException exception = assertThrows(InvalidClientException.class, () -> {
-            viewDraftOrdersController.callBackURLAboutToStartEvent(authToken, s2sToken, callbackRequest);
+            viewDraftOrdersController.callBackURLAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         });
 
         // Then
@@ -78,12 +78,12 @@ public class ViewDraftOrdersControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
-        when(viewDraftOrdersService.getDraftOrdersForUser(callbackRequest.getCaseDetails(), authToken))
+        when(viewDraftOrdersService.getDraftOrdersForUser(callbackRequest.getCaseDetails(), AUTH_TOKEN))
             .thenReturn(List.of(mockDraftOrderElement));
 
         // When
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            viewDraftOrdersController.callBackURLAboutToStartEvent(authToken, s2sToken, callbackRequest);
+            viewDraftOrdersController.callBackURLAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         // Then
         Map<String, Object> data = aboutToStartOrSubmitCallbackResponse.getData();
