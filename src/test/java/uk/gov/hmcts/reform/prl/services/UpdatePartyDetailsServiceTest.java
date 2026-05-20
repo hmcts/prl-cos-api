@@ -2340,7 +2340,7 @@ class UpdatePartyDetailsServiceTest {
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
         assertNotNull(updatedCaseData.get("respondentBc8Documents"));
-        assertEquals(1, ((ArrayList) updatedCaseData.get("respondentBc8Documents")).size());
+        assertEquals(1, ((List<?>) updatedCaseData.get("respondentBc8Documents")).size());
     }
 
     @Test
