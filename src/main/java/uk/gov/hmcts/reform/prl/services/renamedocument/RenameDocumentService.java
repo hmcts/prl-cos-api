@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services.renamedocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -35,7 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.ARROW_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
@@ -67,23 +69,91 @@ public class RenameDocumentService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         DynamicList documentsList = sendAndReplyService.getCategoriesAndDocuments(authorisation, String.valueOf(caseData.getId()));
-        caseDataMap.put("renameDocumentsList", List.of(element(documentsList)));
+        caseDataMap.put("renameDocumentsList", documentsList);
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
 
         DynamicList categoriesAndDocumentsList = getCategoriesSubcategories(authorisation, String.valueOf(caseData.getId()), isUserRoleLA);
-        caseDataMap.put("categoryDocumentsList", List.of(element(categoriesAndDocumentsList)));
+        caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
 
         return caseDataMap;
     }
 
     public Map<String, Object> handleAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
-        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
+            DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
+
+            if (selectedList.getValue() != null && StringUtils.isNotBlank(selectedList.getValue().getCode())) {
+                String selectedDocumentCode = selectedList.getValue().getCode();
+
+                // Extract UUID from the code (e.g., "CategoryId->UUID")
+                String documentId = selectedDocumentCode.contains(ARROW_SEPARATOR)
+                    ? selectedDocumentCode.substring(selectedDocumentCode.lastIndexOf(ARROW_SEPARATOR) + ARROW_SEPARATOR.length())
+                    : selectedDocumentCode;
+
+                Map<String, Object> documentMap = findDocumentMapById(caseDataMap, documentId);
+
+                if (documentMap != null) {
+                    String newName = caseData.getRenameDocument().getNewNameForDocument();
+                    if (StringUtils.isNotBlank(newName)) {
+                        String currentName = (String) documentMap.get("document_filename");
+                        if (StringUtils.isNotBlank(currentName)) {
+                            String extension = FilenameUtils.getExtension(currentName);
+                            String updatedName = StringUtils.isNotBlank(extension) ? newName + "." + extension : newName;
+                            log.info("Renaming document {} to {}", currentName, updatedName);
+                            documentMap.put("document_filename", updatedName);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Clean up temporary event fields
+        caseDataMap.remove("renameDocument");
 
         return caseDataMap;
     }
+
+
+    /**
+     * Recursively searches for a document Map object by its UUID.
+     * Returns the actual Map from caseDataMap so it can be mutated directly.
+     */
+    private Map<String, Object> findDocumentMapById(Map<String, Object> data, String documentId) {
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                Map<String, Object> mapValue = (Map<String, Object>) value;
+                if (mapValue.containsKey("document_url")) {
+                    String url = (String) mapValue.get("document_url");
+                    if (null != url && url.contains(documentId)) {
+                        return mapValue;
+                    }
+                } else {
+                    Map<String, Object> found = findDocumentMapById(mapValue, documentId);
+                    if (found != null) {
+                        return found;
+                    }
+                }
+            } else if (value instanceof List) {
+                List<?> listValue = (List<?>) value;
+                for (Object item : listValue) {
+                    if (item instanceof Map) {
+                        Map<String, Object> found = findDocumentMapById((Map<String, Object>) item, documentId);
+                        if (found != null) {
+                            return found;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 
     private DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA) {
         try {

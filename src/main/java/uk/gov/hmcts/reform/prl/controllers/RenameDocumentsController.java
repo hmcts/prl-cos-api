@@ -58,7 +58,7 @@ public class RenameDocumentsController {
     }
 
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "about to s callback for rename documents")
+    @Operation(description = "about to submit callback for rename documents")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
