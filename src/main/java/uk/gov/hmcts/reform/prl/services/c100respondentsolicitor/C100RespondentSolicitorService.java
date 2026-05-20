@@ -96,6 +96,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -2364,12 +2365,13 @@ public class C100RespondentSolicitorService {
         String note = "";
 
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-            log.info("respondent SolicitorPartyId:\n{}", respondent.getValue().getSolicitorPartyId().toString());
-            log.info("respondent PartyId:\n{}", respondent.getValue().getPartyId().toString());
-            log.info("respondent SolicitororgId:\n{}", respondent.getValue().getSolicitorOrgUuid().toString());
+            log.info("respondent SolicitorPartyId:\n{}", respondent.getValue().getSolicitorPartyId());
+            log.info("respondent PartyId:\n{}", respondent.getValue().getPartyId());
+            log.info("respondent SolicitororgId:\n{}", respondent.getValue().getSolicitorOrgUuid());
             log.info("user's Id:\n{}", userDetails.getId());
+            log.info("user's Id as UUID:\n{}", UUID.fromString(userDetails.getId()));
 
-            if (Objects.equals(respondent.getValue().getSolicitorPartyId().toString(), userDetails.getId())) {
+            if (Objects.equals(respondent.getValue().getSolicitorPartyId(), UUID.fromString(userDetails.getId()))) {
                 log.info("it's a match!");
                 AttendToCourt attendToCourt = respondent.getValue().getResponse().getAttendToCourt();
 
