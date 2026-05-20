@@ -2312,7 +2312,7 @@ public class C100RespondentSolicitorService {
         String authorisation,
         CaseData caseData) {
         String caseId = String.valueOf(caseData.getId());
-        // check if case note is actually needed otherwise dont create
+
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(
             caseId,
@@ -2338,7 +2338,7 @@ public class C100RespondentSolicitorService {
             CASE_NOTES,
             caseNoteDetails
         );
-
+        log.info("1- caseNotesMap:\n{}",caseNotesMap);
         caseNoteDetails.stream()
             .filter(caseNoteDetailsElement -> currentCaseNoteDetails.equals(caseNoteDetailsElement.getValue()))
             .findFirst()
@@ -2348,7 +2348,7 @@ public class C100RespondentSolicitorService {
                                WA_CASE_NOTE_ID,
                                id
                            ));
-
+        log.info("2- submitting caseNotesMap:\n{}",caseNotesMap);
         allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
