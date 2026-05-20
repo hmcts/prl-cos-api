@@ -98,7 +98,7 @@ java:
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
-    HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
+    HEARING_API_BASEURL : ${HEARING_API_BASEURL}
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API: http://rd-judicial-api-aat.service.core-compute-aat.internal
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal
@@ -106,4 +106,5 @@ java:
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     BARRISTER_FEATURE_ENABLED: true
     CAFCASS_DATE_TIME_FEATURE_ENABLED: true
+    CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED: true
     APP_ENV: "preview"
