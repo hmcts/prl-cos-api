@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -228,6 +229,10 @@ public class CaseDataMapperTest {
 
         //Then
         assertNotNull(updatedCaseData);
+        assertEquals(YesOrNo.Yes, updatedCaseData.getAttendHearing().getIsDisabilityPresent());
+        assertEquals("test", updatedCaseData.getAttendHearing().getAdjustmentsRequired());
+        assertEquals(YesOrNo.Yes, updatedCaseData.getAttendHearing().getIsIntermediaryNeeded());
+        assertEquals("test", updatedCaseData.getAttendHearing().getReasonsForIntermediary());
     }
 
     @Test
