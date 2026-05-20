@@ -2312,11 +2312,11 @@ public class C100RespondentSolicitorService {
         String authorisation,
         CaseData caseData) {
         String caseId = String.valueOf(caseData.getId());
-
+        // check if case note is actually needed otherwise dont create
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
             = allTabService.getStartUpdateForSpecificUserEvent(
             caseId,
-            CaseEvent.CITIZEN_LANG_SUPPORT_NOTES.getValue(),
+            CaseEvent.SOLICITOR_LANG_SUPPORT_NOTES.getValue(),
             authorisation
         );
 
@@ -2362,6 +2362,9 @@ public class C100RespondentSolicitorService {
 
     private String generateLanguageSupportCaseNote(CaseData caseData) {
         String note = "";
+        // Will the respondent or anyone else attending the court want to speak Welsh or read and write in Welsh during the proceeding?
+        // Do you know if an interpreter will be needed in the court to explain information in a certain language?
+        // Does the respondent, or anyone else attending court have a disability?
 
         if (caseData.getAttendHearing().getIsSpecialArrangementsRequired() != null) {
             note = note.concat(generateCaseNoteSection(

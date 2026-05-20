@@ -57,6 +57,7 @@ public enum CaseEvent {
     MARK_CASE_AS_PUBLIC("publicCaseAccess"),
     CHANGE_CASE_ACCESS_AS_SYSUSER("changeCaseAccess"),
     CITIZEN_LANG_SUPPORT_NOTES("citizenLanguageSupportNotes"),
+    SOLICITOR_LANG_SUPPORT_NOTES("solicitorLanguageSupportNotes"),
     CAFCASS_DOCUMENT_UPLOAD("cafcass-document-upload"),
     CITIZEN_PCQ_UPDATE("pcqUpdateForCitizen"),
     CITIZEN_RESPONSE_TO_AOH("citizenResponseToAoH"),
