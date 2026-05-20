@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.clients.ccd;
 
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import feign.FeignException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
