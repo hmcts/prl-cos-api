@@ -2320,7 +2320,7 @@ public class C100RespondentSolicitorService {
             authorisation
         );
 
-        String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData);
+        String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData, startAllTabsUpdateDataContent.userDetails());
 
         CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
             LANG_SUPPORT_NEED_SUBJECT,
@@ -2360,29 +2360,38 @@ public class C100RespondentSolicitorService {
         ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
     }
 
-    private String generateLanguageSupportCaseNote(CaseData caseData) {
+    private String generateLanguageSupportCaseNote(CaseData caseData, UserDetails userDetails) {
         String note = "";
-        // Will the respondent or anyone else attending the court want to speak Welsh or read and write in Welsh during the proceeding?
-        // Do you know if an interpreter will be needed in the court to explain information in a certain language?
-        // Does the respondent, or anyone else attending court have a disability?
 
-        if (caseData.getAttendHearing().getIsSpecialArrangementsRequired() != null) {
-            note = note.concat(generateCaseNoteSection(
-                SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
-                caseData.getAttendHearing().getIsSpecialArrangementsRequired().getDisplayedValue(),
-                caseData.getAttendHearing().getSpecialArrangementsRequired())
-            );
+        for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+            log.info("respondent SolicitorPartyId:\n{}", respondent.getValue().getSolicitorPartyId().toString());
+            log.info("respondent PartyId:\n{}", respondent.getValue().getPartyId().toString());
+            log.info("respondent SolicitororgId:\n{}", respondent.getValue().getSolicitorOrgUuid().toString());
+            log.info("user's Id:\n{}", userDetails.getId());
 
-            note = note.concat("\n");
-            note = note.concat("\n");
-        }
+            if (Objects.equals(respondent.getValue().getSolicitorPartyId().toString(), userDetails.getId())) {
+                log.info("it's a match!");
+                AttendToCourt attendToCourt = respondent.getValue().getResponse().getAttendToCourt();
 
-        if (caseData.getAttendHearing().getIsIntermediaryNeeded() != null) {
-            note = note.concat(generateCaseNoteSection(
-                INTERMEDIARY_REQUIRED_TEXT,
-                caseData.getAttendHearing().getIsIntermediaryNeeded().getDisplayedValue(),
-                caseData.getAttendHearing().getReasonsForIntermediary())
-            );
+                if (attendToCourt.getRespondentSpecialArrangements() != null) {
+                    note = note.concat(generateCaseNoteSection(
+                        SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
+                        attendToCourt.getRespondentSpecialArrangements().getDisplayedValue(),
+                        attendToCourt.getRespondentSpecialArrangementDetails())
+                    );
+
+                    note = note.concat("\n");
+                    note = note.concat("\n");
+                }
+
+                if (attendToCourt.getRespondentIntermediaryNeeds() != null) {
+                    note = note.concat(generateCaseNoteSection(
+                        INTERMEDIARY_REQUIRED_TEXT,
+                        attendToCourt.getRespondentIntermediaryNeeds().getDisplayedValue(),
+                        attendToCourt.getRespondentIntermediaryNeedDetails())
+                    );
+                }
+            }
         }
         return note;
     }
