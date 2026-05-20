@@ -54,22 +54,23 @@ public class ExtendedCaseDataApiTest {
                     .willReturn(aResponse()
                                     .withStatus(200)
                                     .withHeader("Content-Type", "application/json")
-                                    .withBody("{ \"id\": \"" + testCaseId + "\" }")));
+                                    .withBody("{ \"total\": 1, \"cases\": [{ \"id\": \"" + testCaseId + "\" }] }")));
 
-        coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
+        coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, "{}");
 
         verify(3, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
     }
 
     @Test
-    public void shouldNotRetryOn4xxClientError() {
-        stubFor(post(urlPathEqualTo(testCaseId))
+    void shouldNotRetryOn4xxClientError() {
+        stubFor(post(urlPathEqualTo(expectedUrl))
+                    .withQueryParam("ctid", equalTo(caseType))
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
-            coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, testCaseId);
+            coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, "{}");
         });
 
-        verify(1, postRequestedFor(urlPathEqualTo(testCaseId)));
+        verify(1, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
     }
 }
