@@ -118,6 +118,8 @@ public class ManageOrdersControllerFunctionalTest {
 
     private final RequestSpecification request2 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private final RequestSpecification request3 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
     private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
         = "requests/court-admin-manage-order-noapproval-required-request.json";
 
@@ -515,6 +517,10 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.serveOtherPartiesCA", equalTo(null))
             .body("data.cafcassCymruServedOptions", equalTo(null))
             .body("data.emailInformationCaOnlyC47a", equalTo(null))
+            .body("data.localAuthoritySolicitorOrganisationPolicy",
+                  equalTo(null))
+            .body("data.localAuthority.isLocalAuthorityInvolvedInCase",equalTo("No"))
+            .body("data.localAuthority.localAuthoritySolicitorOrganisationName",      equalTo(null))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
                   equalTo("Yes"))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
@@ -600,11 +606,23 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
+        CaseDetails caseDetails =  request2
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
 
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
 
-        request
+        request3
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)

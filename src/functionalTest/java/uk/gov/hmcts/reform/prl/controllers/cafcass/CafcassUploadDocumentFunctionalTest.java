@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -28,7 +29,6 @@ import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
 
 /**
  * functional test case for cafcass safegaurding letter upload.
- *<p></p>
  *  ignored the test case as caseId won't be available in PR & higher environment.
  */
 @Slf4j
@@ -77,7 +77,7 @@ public class CafcassUploadDocumentFunctionalTest {
     @Test
     @Order(2)
     public void givenValidDocumentData_then200Response() throws IOException {
-        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+        final File fileToUpload = ResourceUtils.getFile(CAFCASS_DUMMY_UPLOAD_FILE);
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
@@ -90,5 +90,39 @@ public class CafcassUploadDocumentFunctionalTest {
             .then().assertThat().statusCode(200)
             .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
 
+    }
+
+    @Test
+    @Order(3)
+    public void givenCirTransferDocument_then200Response() throws IOException {
+        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .multiPart("file", fileToUpload)
+            .param("typeOfDocument", "cirTransferRequest")
+            .pathParam("caseId", caseDetails.getId())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200)
+            .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
+    }
+
+    @Test
+    @Order(4)
+    public void givenCirExtensionDocument_then200Response() throws IOException {
+        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .multiPart("file", fileToUpload)
+            .param("typeOfDocument", "cirExtensionRequest")
+            .pathParam("caseId", caseDetails.getId())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200)
+            .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
     }
 }

@@ -240,14 +240,14 @@ public class EditAndApproveDraftOrderController {
                     caseDataUpdated,
                     caseData,
                     loggedInUserType,
-                    draftOrderId
+                    clientContext
                 );
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 editAndReturnOrder(authorisation, callbackRequest, caseDataUpdated, caseData, clientContext);
 
             }
-            manageOrderService.setFieldsForRequestSafeGuardingReportWaTask(caseData, caseDataUpdated, callbackRequest.getEventId());
+
             //Populate need to check automated hearing request
             manageOrderService.populateCheckForAutomatedRequest(caseData, caseDataUpdated, callbackRequest.getEventId());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -305,8 +305,8 @@ public class EditAndApproveDraftOrderController {
 
     private void editAndApproveOrder(String authorisation, CallbackRequest callbackRequest,
                                      Map<String, Object> caseDataUpdated,
-                                     CaseData caseData, String loggedInUserType, String draftOrderId) {
-
+                                     CaseData caseData, String loggedInUserType, String clientContext) {
+        String draftOrderId = getDraftOrderIdFromContext(clientContext);
         manageOrderService.setHearingOptionDetailsForTask(
             caseData,
             caseDataUpdated,
@@ -550,6 +550,7 @@ public class EditAndApproveDraftOrderController {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 caseDataUpdated
             );
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

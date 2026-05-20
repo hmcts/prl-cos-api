@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -63,6 +66,8 @@ public class BaseCaseData {
 
     @JsonProperty("c8ArchivedDocuments")
     private List<Element<Document>> c8ArchivedDocuments;
+
+    private List<Element<String>> cirDocumentsRequested;
 
     /**
      * Case Type Of Application.
@@ -155,8 +160,34 @@ public class BaseCaseData {
 
     private String dfjArea;
 
+    private String optionSendOrReply;
+
+    private String messageIdentifier;
+
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
 
     private List<Element<Document>> miamDocumentsCopy;
+
+    private YesOrNo orderInPlacePermissionRequired;
+    private String orderDetailsForPermissions;
+    private Document uploadOrderDocForPermission;
+
+    /* Local authority policies */
+    @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
+    private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
+
+    private LocalAuthority localAuthority;
+
+    @JsonUnwrapped
+    @Getter(AccessLevel.NONE)
+    private DocumentRemovalWrapper documentRemovalWrapper;
+
+    @JsonIgnore
+    public DocumentRemovalWrapper getDocumentRemovalWrapper() {
+        if (documentRemovalWrapper == null) {
+            this.documentRemovalWrapper = new DocumentRemovalWrapper();
+        }
+        return documentRemovalWrapper;
+    }
 }

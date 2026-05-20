@@ -605,6 +605,7 @@ public class PrlAppsConstants {
     public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
     public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
     public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
+    public static final String SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID = "respondentApplication";
     public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
     public static final String RESPONDENT_C1A_RESPONSE = "Respondent C1A response";
     public static final String CASE_SUMMARY = "Case summary";
@@ -806,6 +807,7 @@ public class PrlAppsConstants {
     public static final String HMC_STATUS_COMPLETED = "COMPLETED";
 
     public static final String CAFCASS = "Cafcass";
+    public  static final String LOCAL_AUTHORITY = "LOCAL_AUTHORITY";
 
     public static final String APPLICANTS = "applicants";
     public static final String RESPONDENTS = "respondents";
@@ -1091,9 +1093,20 @@ public class PrlAppsConstants {
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
-    public static final String WA_REQ_SER_UPDATE = "requestSafeGuardingLetterUpdate";
-
-    public static final String WA_SER_DUE_DATE = "safeGuardingLetterUploadDueDate";
+    // Custom order fields
+    public static final String CUSTOM_ORDER_DOC = "customOrderDoc";
+    public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
+    public static final String CUSTOM_ORDER_NAME_OPTION = "customOrderNameOption";
+    public static final String NAME_OF_ORDER = "nameOfOrder";
+    public static final String AMEND_ORDER_SELECT_CHECK_OPTIONS = "amendOrderSelectCheckOptions";
+    public static final String WHAT_DO_WITH_ORDER = "whatDoWithOrder";
+    public static final String DO_YOU_WANT_TO_SERVE_ORDER = "doYouWantToServeOrder";
+    public static final String CUSTOM_ORDER_DATE_ENDS = "customOrderDateEnds";
+    public static final String CUSTOM_ORDER_DATE_ENDS_OPTIONS = "customOrderDateEndsOptions";
+    public static final String CUSTOM_C43_ORDER_DETAILS = "customC43OrderDetails";
+    public static final String CUSTOM_C21_ORDER_DETAILS = "customC21OrderDetails";
+    public static final String DD_MM_YYYY_DATE_FORMAT = "dd/MM/yyyy";
+    public static final String LOGGED_IN_USER_TYPE = "loggedInUserType";
 
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
 
@@ -1144,5 +1157,30 @@ public class PrlAppsConstants {
 
     public static final String IS_INVOKED_FROM_TASK = "isInvokedFromTask";
     public static final String ALLOCATED_BARRISTER = "allocatedBarrister";
+    public static final String LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY = "localAuthoritySolicitorOrganisationPolicy";
+    public static final String LOCAL_AUTHORITY_DATA = "localAuthority";
+    public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
     public static final String CAFCASS_DATE_TIME = "cafcassDateTime";
+    public static final String PERMISSION_REQUIRED_DOCUMENT = "uploadOrderDocForPermission";
+    public static final String MESSAGE_REPLY_DYNAMIC_LIST = "messageReplyDynamicList";
+    public static final String MESSAGE_IDENTIFIER = "messageIdentifier";
+    public static final String TASK_ASSOCIATED_WITH_MESSAGE = "taskAssociatedWithMessage";
+    public static final String CHOOSE_SEND_OR_REPLY = "chooseSendOrReply";
+    public static final String OPTION_SEND_OR_REPLY = "optionSendOrReply";
+    public static final String EMPTY_VALUE = "EMPTY_VALUE";
+
+    public static final String APPLICANTS_CONFIDENTIAL_DETAILS = "applicantsConfidentialDetails";
+    public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
+    public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
+    public static final String DOCUMENT_URL = "document_url";
+    public static final String DOCUMENT_FILENAME = "document_filename";
+    public static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    public static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
+
+    // Document Removal event
+    public static final String DOCUMENT_REMOVAL_CASE_DOCUMENTS = "documentRemovalCaseDocuments";
+    public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
+    public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
+
 }

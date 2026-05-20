@@ -7,6 +7,7 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
@@ -38,6 +39,11 @@ public class ServeOrderDetails {
     private final YesOrNo cafcassOrCymruNeedToProvideReport;
     private final List<CafcassCymruDocumentsEnum> cafcassCymruDocuments;
     private final String whenReportsMustBeFiled;
+
+    private final YesOrNo localAuthorityNeedToProvideReport;
+    private final List<LocalAuthorityDocumentsEnum> localAuthorityMultipleDocuments;
+    private final String whenReportsMustBeFiledByLocalAuthority;
+
     private final YesOrNo orderEndsInvolvementOfCafcassOrCymru;
     private final YesOrNo doYouWantToServeOrder;
     private final WhatToDoWithOrderEnum whatDoWithOrder;
