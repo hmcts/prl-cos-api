@@ -47,7 +47,7 @@ public class ViewDraftOrdersControllerTest {
     public static final String S2S_TOKEN = "s2s AuthToken";
 
     @Test
-    public void testCallBackURLAboutToStartEventFailsAuthorisation() {
+    public void testCallBackUrlAboutToStartEventFailsAuthorisation() {
         // Given
         Map<String, Object> caseData = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -58,16 +58,15 @@ public class ViewDraftOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
 
         // When
-        InvalidClientException exception = assertThrows(InvalidClientException.class, () -> {
-            viewDraftOrdersController.callBackURLAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
-        });
+        InvalidClientException exception = assertThrows(InvalidClientException.class, () ->
+            viewDraftOrdersController.callBackUrlAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest));
 
         // Then
         assertEquals(INVALID_CLIENT, exception.getMessage());
     }
 
     @Test
-    public void testCallBackURLAboutToStartEvent() {
+    public void testCallBackUrlAboutToStartEvent() {
         // Given
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1L)
@@ -83,7 +82,7 @@ public class ViewDraftOrdersControllerTest {
 
         // When
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            viewDraftOrdersController.callBackURLAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+            viewDraftOrdersController.callBackUrlAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         // Then
         Map<String, Object> data = aboutToStartOrSubmitCallbackResponse.getData();
@@ -101,12 +100,12 @@ public class ViewDraftOrdersControllerTest {
     }
 
     @Test
-    public void testCallBackURLMidEventThrowsError() {
+    public void testCallBackUrlMidEventThrowsError() {
         // Given
 
         // When
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            viewDraftOrdersController.callBackURLMidEvent();
+            viewDraftOrdersController.callBackUrlMidEvent();
 
         // Then
         List<String> errors = aboutToStartOrSubmitCallbackResponse.getErrors();
@@ -118,12 +117,12 @@ public class ViewDraftOrdersControllerTest {
     }
 
     @Test
-    public void testCallBackURLAboutToSubmitEvent() {
+    public void testCallBackUrlAboutToSubmitEvent() {
         // Given
 
         // When
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            viewDraftOrdersController.callBackURLAboutToSubmitEvent();
+            viewDraftOrdersController.callBackUrlAboutToSubmitEvent();
 
         // Then
         List<String> errors = aboutToStartOrSubmitCallbackResponse.getErrors();
@@ -135,12 +134,12 @@ public class ViewDraftOrdersControllerTest {
     }
 
     @Test
-    public void testCallBackURLSubmittedEvent() {
+    public void testCallBackUrlSubmittedEvent() {
         // Given
 
         // When
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            viewDraftOrdersController.callBackURLSubmittedEvent();
+            viewDraftOrdersController.callBackUrlSubmittedEvent();
 
         // Then
         List<String> errors = aboutToStartOrSubmitCallbackResponse.getErrors();

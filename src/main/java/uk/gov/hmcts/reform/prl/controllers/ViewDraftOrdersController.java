@@ -18,9 +18,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
-import uk.gov.hmcts.reform.prl.services.*;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.ViewDraftOrdersService;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -40,14 +44,16 @@ public class ViewDraftOrdersController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse callBackURLAboutToStartEvent(
+    public AboutToStartOrSubmitCallbackResponse callBackUrlAboutToStartEvent(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            List<Element<DraftOrder>> viewFilteredDraftOrders =
+                viewDraftOrdersService.getDraftOrdersForUser(callbackRequest.getCaseDetails(), authorisation);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(Map.of("viewFilteredDraftOrders", viewDraftOrdersService.getDraftOrdersForUser(callbackRequest.getCaseDetails(), authorisation)))
+                .data(Map.of("viewFilteredDraftOrders", viewFilteredDraftOrders))
                 .build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
@@ -55,7 +61,7 @@ public class ViewDraftOrdersController {
     }
 
     @PostMapping("/populate-draft-orders-list/mid-event")
-    public AboutToStartOrSubmitCallbackResponse callBackURLMidEvent() {
+    public AboutToStartOrSubmitCallbackResponse callBackUrlMidEvent() {
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(List.of(READONLY_DRAFT_ORDERS_MESSAGE))
@@ -63,7 +69,7 @@ public class ViewDraftOrdersController {
     }
 
     @PostMapping("/populate-draft-orders-list/about-to-submit")
-    public AboutToStartOrSubmitCallbackResponse callBackURLAboutToSubmitEvent() {
+    public AboutToStartOrSubmitCallbackResponse callBackUrlAboutToSubmitEvent() {
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(List.of(READONLY_DRAFT_ORDERS_MESSAGE))
@@ -71,7 +77,7 @@ public class ViewDraftOrdersController {
     }
 
     @PostMapping("/populate-draft-orders-list/submitted")
-    public AboutToStartOrSubmitCallbackResponse callBackURLSubmittedEvent() {
+    public AboutToStartOrSubmitCallbackResponse callBackUrlSubmittedEvent() {
         return AboutToStartOrSubmitCallbackResponse.builder()
             .errors(List.of(READONLY_DRAFT_ORDERS_MESSAGE))
             .build();

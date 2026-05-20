@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,15 +13,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
-import uk.gov.hmcts.reform.prl.models.*;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
+import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
+import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,8 +60,6 @@ public class ViewDraftOrdersServiceTest {
     @Mock
     private Organisations currentUserOrganisations;
 
-    private AutoCloseable closeable;
-
     private static final String AUTH_TOKEN_WITH_ORGANISATION = "Bearer TestAuthToken with org";
     private static final String AUTH_TOKEN_NO_ORGANISATION = "Bearer TestAuthToken no org";
 
@@ -73,20 +80,6 @@ public class ViewDraftOrdersServiceTest {
         "nonOrgSolicitorEmail_4_@example.com",
         "nonOrgSolicitorEmail_5_@example.com"
     );
-
-    @BeforeEach
-    void setUp() {
-//        closeable = MockitoAnnotations.openMocks(this);
-
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception {
-        // Release the mocks from memory after each test iteration run
-        if (closeable != null) {
-            closeable.close();
-        }
-    }
 
     @Test
     public void testGetDraftOrdersForUserCurrentUserNoOrg() {
@@ -120,19 +113,32 @@ public class ViewDraftOrdersServiceTest {
         // Then
         assertFalse(userDraftOrderCollection.isEmpty());
     }
+
     static Stream<Arguments> parameterOrgSolicitorEmails() {
         return Stream.of(
             Arguments.of(
-                Arrays.asList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
-                Arrays.asList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0))
+                Collections.singletonList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
+                Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0))
             ),
             Arguments.of(
-                Arrays.asList(ORGANISATION_SOLICITOR_EMAILS.get(0), ORGANISATION_SOLICITOR_EMAILS.get(1), ORGANISATION_SOLICITOR_EMAILS.get(2)),
-                Arrays.asList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0))
+                Arrays.asList(
+                    ORGANISATION_SOLICITOR_EMAILS.get(0),
+                    ORGANISATION_SOLICITOR_EMAILS.get(1),
+                    ORGANISATION_SOLICITOR_EMAILS.get(2)
+                ),
+                Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0))
             ),
             Arguments.of(
-                Arrays.asList(),
-                Arrays.asList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0), OTHER_ORGANISATION_SOLICITOR_EMAILS.get(1), OTHER_ORGANISATION_SOLICITOR_EMAILS.get(2))
+                List.of(),
+                Arrays.asList(
+                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0),
+                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(1),
+                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(2)
+                )
+            ),
+            Arguments.of(
+                Collections.singletonList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
+                List.of()
             )
         );
     }
@@ -151,7 +157,10 @@ public class ViewDraftOrdersServiceTest {
         String systemAuthorisation = "sysAuthToken";
         when(systemUserService.getSysUserToken()).thenReturn(systemAuthorisation);
         OrgSolicitors orgSolicitors = mock(OrgSolicitors.class);
-        when(organisationService.getOrganisationSolicitorDetails(systemAuthorisation, currentUserOrganisationId)).thenReturn(orgSolicitors);
+        when(organisationService.getOrganisationSolicitorDetails(
+            systemAuthorisation,
+            currentUserOrganisationId
+        )).thenReturn(orgSolicitors);
         when(orgSolicitors.getUsers()).thenReturn(getUserOrgSolicitors());
 
         //  Set up case.
@@ -168,7 +177,8 @@ public class ViewDraftOrdersServiceTest {
             .map(email -> ViewDraftOrdersServiceTest.creatorOrderElement(otherOrgSolicitorEmails.indexOf(email), email))
             .toList();
 
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>(sameOrgSolicitorOrganisationsDrafts.size() + otherOrgSolicitorOrganisationsDrafts.size());
+        List<Element<DraftOrder>> draftOrderCollection =
+            new ArrayList<>(sameOrgSolicitorOrganisationsDrafts.size() + otherOrgSolicitorOrganisationsDrafts.size());
         draftOrderCollection.addAll(sameOrgSolicitorOrganisationsDrafts);
         draftOrderCollection.addAll(otherOrgSolicitorOrganisationsDrafts);
 
@@ -196,10 +206,10 @@ public class ViewDraftOrdersServiceTest {
                                                        .dateOrderMade(LocalDate.of(2026, 1, 1)
                                                                           .plusDays(iteration))
                                                        .otherDetails(
-            OtherDraftOrderDetails.builder()
-                .status(OrderStatusEnum.draftedByLR.getDisplayedValue())
-                .orderCreatedByEmailId(orderCreatorEmail)
-                .build()).build()).build();
+                                                           OtherDraftOrderDetails.builder()
+                                                               .status(OrderStatusEnum.draftedByLR.getDisplayedValue())
+                                                               .orderCreatedByEmailId(orderCreatorEmail)
+                                                               .build()).build()).build();
     }
 
 }
