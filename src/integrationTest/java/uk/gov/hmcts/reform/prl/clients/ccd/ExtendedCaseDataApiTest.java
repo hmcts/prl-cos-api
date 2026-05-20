@@ -14,6 +14,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.reset;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
@@ -32,6 +33,11 @@ public class ExtendedCaseDataApiTest {
     private final String testCaseId = "123456";
     private final String caseType = "C100";
     private final String expectedUrl = "/searchCases";
+
+    @BeforeEach
+    void setUp() {
+        reset();
+    }
 
     @Test
     public void shouldRetryOn5xxServerError() {
