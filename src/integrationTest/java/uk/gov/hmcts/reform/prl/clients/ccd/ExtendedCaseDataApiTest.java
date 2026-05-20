@@ -64,7 +64,7 @@ public class ExtendedCaseDataApiTest {
                     .willReturn(aResponse()
                                     .withStatus(200)
                                     .withHeader("Content-Type", "application/json")
-                                    .withBody("{ \"total\": 1, \"cases\": [{ \"id\": \"" + testCaseId + "\" }] }")));
+                                    .withBody("{ \"total\": 1, \"cases\": [{ \"id\": \""+ testCaseId + "\", \"case_data\": { \"applicantCaseName\": \"Test Name\" } }] }")
 
         coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, "{}");
 
