@@ -614,6 +614,7 @@ class CafcassCaseDataServiceTest {
             .respondentCc8Documents(List.of(element(responseDocuments)))
             .respondentDc8Documents(List.of(element(responseDocuments)))
             .respondentEc8Documents(List.of(element(responseDocuments)))
+            .otherPartyC8Documents(List.of(element(responseDocuments)))
             .specialArrangementsLetter(document)
             .additionalDocuments(document)
             .additionalDocumentsList(List.of(element(document)))
