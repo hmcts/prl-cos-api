@@ -361,7 +361,7 @@ public class C100RespondentSolicitorControllerTest {
             caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
 
         ResponseEntity<SubmittedCallbackResponse> response = c100RespondentSolicitorController
-            .submittedC7Response(authToken, callbackRequest);
+            .submittedC7Response(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
     }

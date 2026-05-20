@@ -204,9 +204,15 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<SubmittedCallbackResponse> submittedC7Response(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         publishEvent(new CaseDataChanged(caseData));
+
+        log.info("Generating solicitor C7 response case note");
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            respondentSolicitorService.addLanguageSupportCaseNotes(authorisation, caseData);
+        }
         return ok(respondentSolicitorService.submittedC7Response(caseData));
     }
 }

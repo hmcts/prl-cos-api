@@ -7,11 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
@@ -63,6 +68,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -74,6 +80,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -98,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
@@ -105,6 +113,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERMEDIARY_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
@@ -117,9 +126,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_W
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_ARRANGEMENTS_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_CASE_NOTE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -135,6 +146,7 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.no
 import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.travellinghelp;
 import static uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum.noSafetyrequirements;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.LANG_SUPPORT_NEED_SUBJECT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -169,6 +181,8 @@ public class C100RespondentSolicitorService {
     private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
+    private final AddCaseNoteService addCaseNoteService;
+    private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
@@ -2292,5 +2306,85 @@ public class C100RespondentSolicitorService {
                 .solicitorRepresentedPartyName(partyName)
                 .solicitorRepresentedPartyId(partyId)
                 .build();
+    }
+
+    public void addLanguageSupportCaseNotes(
+        String authorisation,
+        CaseData caseData) {
+        String caseId = String.valueOf(caseData.getId());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificUserEvent(
+            caseId,
+            CaseEvent.CITIZEN_LANG_SUPPORT_NOTES.getValue(),
+            authorisation
+        );
+
+        String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData);
+
+        CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+            LANG_SUPPORT_NEED_SUBJECT,
+            languageSupportCaseNotes,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+        Map<String, Object> caseNotesMap = new HashMap<>();
+
+        List<Element<CaseNoteDetails>> caseNoteDetails = addCaseNoteService.getCaseNoteDetails(
+            caseData,
+            currentCaseNoteDetails
+        );
+
+        caseNotesMap.put(
+            CASE_NOTES,
+            caseNoteDetails
+        );
+
+        caseNoteDetails.stream()
+            .filter(caseNoteDetailsElement -> currentCaseNoteDetails.equals(caseNoteDetailsElement.getValue()))
+            .findFirst()
+            .map(Element::getId)
+            .ifPresent(id ->
+                           caseNotesMap.put(
+                               WA_CASE_NOTE_ID,
+                               id
+                           ));
+
+        allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseNotesMap,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+        ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
+    }
+
+    private String generateLanguageSupportCaseNote(CaseData caseData) {
+        String note = "";
+
+        if (caseData.getAttendHearing().getIsSpecialArrangementsRequired() != null) {
+            note = note.concat(generateCaseNoteSection(
+                SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
+                caseData.getAttendHearing().getIsSpecialArrangementsRequired().getDisplayedValue(),
+                caseData.getAttendHearing().getSpecialArrangementsRequired())
+            );
+
+            note = note.concat("\n");
+            note = note.concat("\n");
+        }
+
+        if (caseData.getAttendHearing().getIsIntermediaryNeeded() != null) {
+            note = note.concat(generateCaseNoteSection(
+                INTERMEDIARY_REQUIRED_TEXT,
+                caseData.getAttendHearing().getIsIntermediaryNeeded().getDisplayedValue(),
+                caseData.getAttendHearing().getReasonsForIntermediary())
+            );
+        }
+        return note;
+    }
+
+    private String generateCaseNoteSection(String heading, String field, String subfield) {
+        return heading.concat("\n").concat(field).concat("\n").concat(subfield);
     }
 }
