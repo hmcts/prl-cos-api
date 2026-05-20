@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -80,6 +81,27 @@ public class ViewDraftOrdersServiceTest {
         "nonOrgSolicitorEmail_4_@example.com",
         "nonOrgSolicitorEmail_5_@example.com"
     );
+
+    @Test
+    public void testGetDraftOrdersForUserCurrentUserNullDraftOrders() {
+        // Given
+        Map<String, Object> caseDetailsData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1L)
+            .data(caseDetailsData).build();
+
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(null)
+            .build();
+        when(objectMapper.convertValue(caseDetailsData, CaseData.class)).thenReturn(caseData);
+
+        // When
+        List<Element<DraftOrder>> userDraftOrderCollection =
+            viewDraftOrdersService.getDraftOrdersForUser(caseDetails, AUTH_TOKEN_NO_ORGANISATION);
+
+        // Then
+        assertTrue(userDraftOrderCollection.isEmpty());
+    }
 
     @Test
     public void testGetDraftOrdersForUserCurrentUserNoOrg() {
