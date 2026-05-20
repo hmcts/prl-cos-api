@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.models.documents;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -71,6 +72,12 @@ public class Document {
             .documentHash(document.documentHash)
             .uploadTimeStamp(document.uploadTimeStamp)
             .build();
+    }
+  
+    @JsonIgnore
+    public String getDocumentId() {
+        String[] urlParts = documentUrl.split("/");
+        return urlParts[urlParts.length - 1];
     }
 
 }
