@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -81,6 +82,9 @@ public class SendAndReplyControllerTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private TaskUtils taskUtils;
 
     private CaseData replyCaseData;
     private Map<String, Object> caseDataMap;
