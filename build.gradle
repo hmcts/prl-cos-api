@@ -375,7 +375,7 @@ dependencies {
   implementation 'org.springframework.integration:spring-integration-sftp:6.5.8'
   implementation 'org.springframework.boot:spring-boot-starter-web'
   implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-  implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.1.1j'
+  implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:3.1.1'
   implementation 'org.springframework.boot:spring-boot-starter-aop'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
