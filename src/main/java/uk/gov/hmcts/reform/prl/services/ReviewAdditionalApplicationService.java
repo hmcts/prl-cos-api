@@ -68,14 +68,14 @@ public class ReviewAdditionalApplicationService {
             ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getFinalDocument()).forEach(
                 document -> document.setCategoryId(null)
             );
-            ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getSupplementsBundle()).forEach(
+            ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getSupportingEvidenceBundle()).forEach(
                 supplement -> supplement.getDocument().setCategoryId(null)
             );
         } else if (selectedAB != null && selectedAB.getOtherApplicationsBundle() != null) {
             ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getFinalDocument()).forEach(
                 document -> document.setCategoryId(null)
             );
-            ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getSupplementsBundle()).forEach(
+            ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getSupportingEvidenceBundle()).forEach(
                 supplement -> supplement.getDocument().setCategoryId(null)
             );
         }

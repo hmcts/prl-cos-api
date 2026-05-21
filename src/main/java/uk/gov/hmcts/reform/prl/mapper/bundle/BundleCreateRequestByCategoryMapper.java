@@ -186,8 +186,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
 
     private boolean isDraftDocument(Document document, FilterProperties filterProperties) {
         if (document != null
-            && document.getDocumentFileName() != null
-            && filterProperties.isHasdraft()) {
+            && document.getDocumentFileName() != null) {
             return document.getDocumentFileName().contains("Draft");
         }
         return false;
