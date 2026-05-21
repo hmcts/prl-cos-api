@@ -81,7 +81,9 @@ public enum CaseEvent {
     ISSUE_AND_SEND_TO_LOCAL_COURT_CALLBACK("issueAndSendToLocalCourtCallback"),
     PATH_FINDER_DECISION("pathfinderDecision"),
     REVIEW_ADDITIONAL_APPLICATION("reviewAdditionalApplication"),
-    CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask");
+    CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask"),
+    CANCEL_REQUEST_CIR_UPDATE_TASK("cancelRequestCirUpdateTask"),
+    CREATE_REQUEST_CIR_UPDATE_TASK("createRequestCirUpdateTask");
 
     private final String value;
 
