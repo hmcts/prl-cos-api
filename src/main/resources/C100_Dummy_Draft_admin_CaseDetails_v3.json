@@ -458,8 +458,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-            "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
           },
           "partyLevelFlag": {
             "details": [
@@ -952,8 +952,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-            "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
           },
           "partyLevelFlag": {
             "details": [
@@ -1485,8 +1485,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-            "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
           },
           "partyLevelFlag": {
             "details": [
@@ -1978,8 +1978,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org4.id:5S5EJUH}",
-            "OrganisationName": "${ts.${prl.environment}.org.org4.name:KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org4.id:5S5EJUH}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org4.name:KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q}"
           },
           "partyLevelFlag": {
             "details": [
@@ -2126,8 +2126,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-            "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
           },
           "solicitorEmail": "applicantSolicitor1@example.com",
           "contactPreferences": null,
@@ -2165,8 +2165,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-            "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
           },
           "solicitorEmail": "applicant2solicitor@example.com",
           "contactPreferences": null,
@@ -2279,8 +2279,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-            "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
           },
           "solicitorEmail": "applicant3Solicitor@example.com",
           "solicitorReference": null,
@@ -2321,8 +2321,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org4.id:5S5EJUH}",
-            "OrganisationName": "${ts.${prl.environment}.org.org4.name:KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org4.id:5S5EJUH}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org4.name:KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q}"
           },
           "solicitorEmail": "resp-sol@dsd.com",
           "solicitorReference": null,
@@ -2396,16 +2396,16 @@
     "applicationDetails": "asASs",
     "caApplicant1Policy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-        "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
     },
     "caApplicant2Policy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org3.id:F9I5I7G}",
-        "OrganisationName": "${ts.${prl.environment}.org.org3.name:Private law test organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org3.id:F9I5I7G}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org3.name:Private law test organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
@@ -2569,7 +2569,7 @@
     "respondentTaskListC": "",
     "respondentTaskListD": "",
     "respondentTaskListE": "",
-    "caseSolicitorOrgName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}",
+    "caseSolicitorOrgName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}",
     "childPassportDetails": {
       "newChildPassportPossession": [
         "mother",
@@ -3983,8 +3983,8 @@
     ],
     "applicantOrganisationPolicy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-        "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"

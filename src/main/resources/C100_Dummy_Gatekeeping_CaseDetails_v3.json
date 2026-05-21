@@ -425,8 +425,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-            "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
           },
           "partyLevelFlag": {
             "details": [],
@@ -869,8 +869,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-            "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
           },
           "partyLevelFlag": {
             "details": [],
@@ -1313,8 +1313,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-            "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
           },
           "partyLevelFlag": {
             "details": [],
@@ -2805,8 +2805,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-            "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
           },
           "solicitorEmail": "legal.solicitor@example.net",
           "contactPreferences": null,
@@ -2844,8 +2844,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-            "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
           },
           "solicitorEmail": "legal.solicitorjr@example.net",
           "contactPreferences": null,
@@ -2883,8 +2883,8 @@
           "placeOfBirth": "London",
           "previousName": null,
           "solicitorOrg": {
-            "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-            "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+            "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+            "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
           },
           "solicitorEmail": "legal.solicitorsr@example.net",
           "contactPreferences": null,
@@ -3173,24 +3173,24 @@
     "applicationDetails": "The reason being it could not be sorted by discussion. We request the court to help us to come to a decision.",
     "caApplicant1Policy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-        "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR1]"
     },
     "caApplicant2Policy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-        "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR2]"
     },
     "caApplicant3Policy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-        "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR3]"
@@ -3294,7 +3294,7 @@
     "respondentTaskListC": "",
     "respondentTaskListD": "",
     "respondentTaskListE": "",
-    "caseSolicitorOrgName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}",
+    "caseSolicitorOrgName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}",
     "childPassportDetails": {},
     "newOrdersRestraining": "No",
     "allocatedJudgeDetails": {
@@ -4205,8 +4205,8 @@
     ],
     "applicantOrganisationPolicy": {
       "Organisation": {
-        "OrganisationID": "${ts.${prl.environment}.org.org2.id:QO4A1Q8}",
-        "OrganisationName": "${ts.${prl.environment}.org.org2.name:FPRL-test-organisation}"
+        "OrganisationID": "${testing-support-data.${prl.environment}.org.org2.id:QO4A1Q8}",
+        "OrganisationName": "${testing-support-data.${prl.environment}.org.org2.name:FPRL-test-organisation}"
       },
       "OrgPolicyReference": null,
       "OrgPolicyCaseAssignedRole": "[APPLICANTSOLICITOR]"

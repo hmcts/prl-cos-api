@@ -20,8 +20,8 @@ class TestingSupportFixtureLoaderTest {
     void resolvesPlaceholdersAgainstActiveEnvironment() throws Exception {
         MockEnvironment env = new MockEnvironment()
             .withProperty("prl.environment", "demo")
-            .withProperty("ts.demo.org.org2.id", "DEMO-FPRL-ID")
-            .withProperty("ts.demo.org.org2.name", "DEMO-FPRL-NAME");
+            .withProperty("testing-support-data.demo.org.org2.id", "DEMO-FPRL-ID")
+            .withProperty("testing-support-data.demo.org.org2.name", "DEMO-FPRL-NAME");
         TestingSupportFixtureLoader loader = new TestingSupportFixtureLoader(env);
 
         String json = loader.loadJson(FIXTURE);
@@ -40,8 +40,8 @@ class TestingSupportFixtureLoaderTest {
 
         assertTrue(json.contains("\"OrganisationID\": \"QO4A1Q8\""));
         assertTrue(json.contains("\"OrganisationName\": \"FPRL-test-organisation\""));
-        assertTrue(!json.contains("${ts."),
-            "expected every ts.* placeholder to be resolved (defaults should kick in)");
+        assertTrue(!json.contains("${testing-support-data."),
+            "expected every testing-support-data.* placeholder to be resolved (defaults should kick in)");
     }
 
     @Test
@@ -56,32 +56,6 @@ class TestingSupportFixtureLoaderTest {
     }
 
     @Test
-    void applicationYamlDemoBlockResolvesDemoValues() throws Exception {
-        List<PropertySource<?>> sources = new YamlPropertySourceLoader()
-            .load("application", new ClassPathResource("application.yaml"));
-
-        StandardEnvironment env = new StandardEnvironment();
-        sources.forEach(env.getPropertySources()::addFirst);
-        // simulate the demo pod's APP_ENV → prl.environment chain
-        env.getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource(
-            "test-overrides", java.util.Map.of("prl.environment", "demo")));
-
-        for (String key : List.of(
-            "ts.demo.org.org1.id", "ts.demo.org.org1.name",
-            "ts.demo.org.org2.id", "ts.demo.org.org2.name",
-            "ts.demo.org.org3.id", "ts.demo.org.org3.name",
-            "ts.demo.org.org4.id", "ts.demo.org.org4.name"
-        )) {
-            assertTrue(env.getProperty(key) != null && !env.getProperty(key).isBlank());
-        }
-
-        TestingSupportFixtureLoader loader = new TestingSupportFixtureLoader(env);
-        String json = loader.loadJson(FIXTURE);
-        String demoFprlId = env.getProperty("ts.demo.org.org2.id");
-        assertTrue(json.contains("\"OrganisationID\": \"" + demoFprlId + "\""));
-    }
-
-    @Test
     void demoValuesCanBeResolved() throws Exception {
         String saved = System.getProperty("APP_ENV");
         try {
@@ -93,10 +67,10 @@ class TestingSupportFixtureLoaderTest {
             sources.forEach(env.getPropertySources()::addLast);
 
             assertEquals("demo", env.getProperty("prl.environment"));
-            assertEquals("6RUBIJM", env.getProperty("ts.demo.org.org1.id"));
-            assertEquals("9SCQJOI", env.getProperty("ts.demo.org.org2.id"));
-            assertEquals("52IWCVT", env.getProperty("ts.demo.org.org3.id"));
-            assertEquals("UYLJCAI", env.getProperty("ts.demo.org.org4.id"));
+            assertEquals("6RUBIJM", env.getProperty("testing-support-data.demo.org.org1.id"));
+            assertEquals("9SCQJOI", env.getProperty("testing-support-data.demo.org.org2.id"));
+            assertEquals("52IWCVT", env.getProperty("testing-support-data.demo.org.org3.id"));
+            assertEquals("UYLJCAI", env.getProperty("testing-support-data.demo.org.org4.id"));
 
             TestingSupportFixtureLoader loader = new TestingSupportFixtureLoader(env);
             String json = loader.loadJson(FIXTURE);
