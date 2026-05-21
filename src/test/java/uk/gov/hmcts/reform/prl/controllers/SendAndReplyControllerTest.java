@@ -203,7 +203,7 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth))).thenReturn(aboutToStartMap);
 
         // when
-        sendAndReplyController.handleSendOrMessageAboutToStartNextStep(auth,  sendCallbackRequest);
+        sendAndReplyController.handleSendOrMessageAboutToStartNextStep(auth,  null, sendCallbackRequest);
 
         // then
         verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth));

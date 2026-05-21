@@ -208,7 +208,10 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/send-or-reply-to-messages/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStartNextStep(@RequestHeader("Authorization")
                                                                                 @Parameter(hidden = true) String authorisation,
+                                                                                @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false)
+                                                                                String clientContext,
                                                                                 @RequestBody CallbackRequest callbackRequest) {
+        log.info("about-to-start call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
@@ -276,7 +279,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false)
                                                                             String clientContext,
                                                                             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Submitted call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
+        log.info("about-to-submit call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
@@ -304,7 +307,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                   @Parameter(hidden = true) String authorisation,
                   @RequestBody CallbackRequest callbackRequest,
                   @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
-        log.info("Submitted call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
+        log.info("submitted call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
