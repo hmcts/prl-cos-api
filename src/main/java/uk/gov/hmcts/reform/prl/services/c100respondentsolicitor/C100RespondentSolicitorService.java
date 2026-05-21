@@ -2323,7 +2323,7 @@ public class C100RespondentSolicitorService {
 
         String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData, startAllTabsUpdateDataContent.userDetails());
 
-        if (languageSupportCaseNotes == null || languageSupportCaseNotes.isEmpty()) {
+        if (StringUtils.isEmpty(languageSupportCaseNotes)) {
             log.info("No language support case note needed for case {}", caseId);
             return;
         }
@@ -2404,7 +2404,7 @@ public class C100RespondentSolicitorService {
     private String generateCaseNoteSection(String heading, String field, String subfield) {
         String section = heading.concat("\n").concat(field);
 
-        if (subfield != null && !subfield.isEmpty()) {
+        if (!StringUtils.isEmpty(subfield)) {
             section = section.concat("\n").concat(subfield);
         }
         return section;
