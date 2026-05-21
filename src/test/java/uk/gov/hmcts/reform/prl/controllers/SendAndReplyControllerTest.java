@@ -507,7 +507,7 @@ public class SendAndReplyControllerTest {
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, null, callbackRequest);
         verify(sendAndReplyCommonService).sendMessages(auth, caseData, caseDataMap);
     }
 
@@ -519,7 +519,8 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
+            .sendOrReplyToMessagesSubmit(auth, null, callbackRequest);
 
         // then
         verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);

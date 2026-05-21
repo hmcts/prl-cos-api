@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,6 +59,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final ElementUtils elementUtils;
     private final AllTabServiceImpl allTabService;
     private final SendAndReplyCommonService sendAndReplyCommonService;
+    private final TaskUtils taskUtils;
 
     @Autowired
     public SendAndReplyController(ObjectMapper objectMapper,
@@ -65,12 +67,14 @@ public class SendAndReplyController extends AbstractCallbackController {
                                   SendAndReplyService sendAndReplyService,
                                   ElementUtils elementUtils,
                                   AllTabServiceImpl allTabService,
-                                  SendAndReplyCommonService sendAndReplyCommonService) {
+                                  SendAndReplyCommonService sendAndReplyCommonService,
+                                  TaskUtils taskUtils) {
         super(objectMapper, eventPublisher);
         this.sendAndReplyService = sendAndReplyService;
         this.elementUtils = elementUtils;
         this.allTabService = allTabService;
         this.sendAndReplyCommonService = sendAndReplyCommonService;
+        this.taskUtils = taskUtils;
     }
 
     @PostMapping("/about-to-start")
@@ -269,7 +273,10 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
+                                                                            @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false)
+                                                                            String clientContext,
                                                                             @RequestBody CallbackRequest callbackRequest) {
+        log.info("Submitted call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
@@ -297,7 +304,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                   @Parameter(hidden = true) String authorisation,
                   @RequestBody CallbackRequest callbackRequest,
                   @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
-
+        log.info("Submitted call back additionproperites {}", taskUtils.getTaskAdditionalProperties(clientContext));
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
