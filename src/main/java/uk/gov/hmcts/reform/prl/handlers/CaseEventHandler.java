@@ -51,6 +51,7 @@ public class CaseEventHandler {
     public static final String C100_RESPONDENT_TASK_LIST_D = "respondentTaskListD";
     public static final String C100_RESPONDENT_TASK_LIST_E = "respondentTaskListE";
     public static final String C100_RESPONDENT_TASK_LIST = "respondentTaskList";
+    public static final String REFUGE_CASE = "refugeCase";
     public static final String TASK_LIST = "taskList";
     public static final String ID = "id";
 
@@ -91,7 +92,7 @@ public class CaseEventHandler {
                 respondentTaskListE,
                 ID,
                 caseId,
-                "refugeCase",
+                REFUGE_CASE,
                 refugeCase
         );
         allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
