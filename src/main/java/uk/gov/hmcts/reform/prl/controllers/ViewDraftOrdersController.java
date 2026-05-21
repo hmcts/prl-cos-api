@@ -18,8 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ViewDraftOrdersService;
 
@@ -50,10 +48,11 @@ public class ViewDraftOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            List<Element<DraftOrder>> viewFilteredDraftOrders =
-                viewDraftOrdersService.getDraftOrdersForUser(callbackRequest.getCaseDetails(), authorisation);
+            Map<String, Object> caseFieldsMap =
+                viewDraftOrdersService.getViewDraftOrdersCaseFieldsMap(callbackRequest.getCaseDetails(), authorisation);
+
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(Map.of("viewFilteredDraftOrders", viewFilteredDraftOrders))
+                .data(caseFieldsMap)
                 .build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));

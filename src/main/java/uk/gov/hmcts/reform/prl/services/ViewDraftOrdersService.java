@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,13 +36,17 @@ public class ViewDraftOrdersService {
     private final SystemUserService systemUserService;
     private final ObjectMapper objectMapper;
 
-    public List<Element<DraftOrder>> getDraftOrdersForUser(CaseDetails caseDetails, String authorisation) {
-        List<Element<DraftOrder>> viewFilteredDraftOrders = new ArrayList<>();
+    private static final String NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT = "No draft Orders outstanding";
+    private static final String FILTERED_DRAFT_ORDERS_CASE_FIELD = "filteredDraftOrders";
+    private static final String NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT_CASE_FIELD = "noFilteredDraftOrdersLabelText";
+
+    private List<Element<DraftOrder>> getDraftOrdersForUser(CaseDetails caseDetails, String authorisation) {
+        List<Element<DraftOrder>> filteredDraftOrders = new ArrayList<>();
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         if (CollectionUtils.isEmpty(draftOrderCollection)) {
-            return viewFilteredDraftOrders;
+            return filteredDraftOrders;
         }
 
         Optional<Organisations> currentUserOrganisationsOpt = organisationService.findUserOrganisation(authorisation);
@@ -58,23 +64,36 @@ public class ViewDraftOrdersService {
             for (SolicitorUser solicitorUser : orgSolicitors.getUsers()) {
                 List<Element<DraftOrder>> userDraftOrders = createdEmailToDraftOrderMap.remove(solicitorUser.getEmail());
                 if (Objects.nonNull(userDraftOrders)) {
-                    viewFilteredDraftOrders.addAll(userDraftOrders);
+                    filteredDraftOrders.addAll(userDraftOrders);
                 }
                 if (createdEmailToDraftOrderMap.isEmpty()) {
                     break;
                 }
             }
-            viewFilteredDraftOrders.sort(Comparator.comparing(
-                draftOrderElement -> draftOrderElement.getValue().getDateOrderMade())
+
+            filteredDraftOrders.sort(Comparator.<Element<DraftOrder>, LocalDate>comparing(
+                container -> container.getValue().getDateOrderMade()).reversed()
             );
+
         } else {
             /* No organisation so just include draft orders that have been created by the current user. */
             UserDetails currentUserDetails = userService.getUserDetails(authorisation);
             draftOrderCollection.stream()
                 .filter(e -> Objects.equals(currentUserDetails.getEmail(), e.getValue().getOtherDetails().getOrderCreatedByEmailId()))
-                .forEach(viewFilteredDraftOrders::add);
+                .forEach(filteredDraftOrders::add);
         }
 
-        return viewFilteredDraftOrders;
+        return filteredDraftOrders;
+    }
+
+    public Map<String, Object> getViewDraftOrdersCaseFieldsMap(CaseDetails caseDetails, String authorisation) {
+        List<Element<DraftOrder>> filteredDraftOrders = this.getDraftOrdersForUser(caseDetails, authorisation);
+
+        String noFilteredDraftOrdersLabelText = CollectionUtils.isEmpty(filteredDraftOrders) ?
+            NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT : StringUtil.EMPTY_STRING;
+
+        return Map.of(
+            FILTERED_DRAFT_ORDERS_CASE_FIELD, filteredDraftOrders,
+            NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT_CASE_FIELD, noFilteredDraftOrdersLabelText);
     }
 }

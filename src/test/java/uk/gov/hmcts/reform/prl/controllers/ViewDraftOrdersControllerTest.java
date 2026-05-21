@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.ViewDraftOrdersService;
 
@@ -21,7 +19,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -41,7 +38,7 @@ public class ViewDraftOrdersControllerTest {
     private ViewDraftOrdersService viewDraftOrdersService;
 
     @Mock
-    private Element<DraftOrder> mockDraftOrderElement;
+    private Map<String, Object> caseFieldsMap;
 
     public static final String AUTH_TOKEN = "Bearer TestAuthToken";
     public static final String S2S_TOKEN = "s2s AuthToken";
@@ -77,24 +74,15 @@ public class ViewDraftOrdersControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
-        when(viewDraftOrdersService.getDraftOrdersForUser(callbackRequest.getCaseDetails(), AUTH_TOKEN))
-            .thenReturn(List.of(mockDraftOrderElement));
+        when(viewDraftOrdersService.getViewDraftOrdersCaseFieldsMap(callbackRequest.getCaseDetails(), AUTH_TOKEN))
+            .thenReturn(caseFieldsMap);
 
         // When
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             viewDraftOrdersController.callBackUrlAboutToStartEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
 
         // Then
-        Map<String, Object> data = aboutToStartOrSubmitCallbackResponse.getData();
-        assertEquals(1, data.size());
-
-        Object viewFilteredDraftOrdersObj = data.get("viewFilteredDraftOrders");
-        assertInstanceOf(List.class, viewFilteredDraftOrdersObj);
-
-        List<Element<DraftOrder>> viewFilteredDraftOrdersList = (List) viewFilteredDraftOrdersObj;
-        assertEquals(1, viewFilteredDraftOrdersList.size());
-        assertEquals(mockDraftOrderElement, viewFilteredDraftOrdersList.getFirst());
-
+        assertEquals(caseFieldsMap, aboutToStartOrSubmitCallbackResponse.getData());
         assertNull(aboutToStartOrSubmitCallbackResponse.getErrors());
         assertNull(aboutToStartOrSubmitCallbackResponse.getWarnings());
     }

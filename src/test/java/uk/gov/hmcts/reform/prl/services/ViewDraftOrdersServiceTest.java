@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +85,7 @@ public class ViewDraftOrdersServiceTest {
     );
 
     @Test
-    public void testGetDraftOrdersForUserCurrentUserNullDraftOrders() {
+    public void testGetViewDraftOrdersCaseFieldsMap_NoDraftOrders() {
         // Given
         Map<String, Object> caseDetailsData = new HashMap<>();
         CaseDetails caseDetails = CaseDetails.builder()
@@ -96,15 +98,18 @@ public class ViewDraftOrdersServiceTest {
         when(objectMapper.convertValue(caseDetailsData, CaseData.class)).thenReturn(caseData);
 
         // When
-        List<Element<DraftOrder>> userDraftOrderCollection =
-            viewDraftOrdersService.getDraftOrdersForUser(caseDetails, AUTH_TOKEN_NO_ORGANISATION);
+        Map<String, Object> caseFieldsMap =
+            viewDraftOrdersService.getViewDraftOrdersCaseFieldsMap(caseDetails, AUTH_TOKEN_NO_ORGANISATION);
 
         // Then
+        List<Element<DraftOrder>> userDraftOrderCollection = (List<Element<DraftOrder>>)
+            caseFieldsMap.get("filteredDraftOrders");
         assertTrue(userDraftOrderCollection.isEmpty());
+        assertEquals("No draft Orders outstanding", caseFieldsMap.get("noFilteredDraftOrdersLabelText"));
     }
 
     @Test
-    public void testGetDraftOrdersForUserCurrentUserNoOrg() {
+    public void testGetViewDraftOrdersCaseFieldsMap_NoUserOrg() {
         // Given
         when(userService.getUserDetails(AUTH_TOKEN_NO_ORGANISATION)).thenReturn(currentUserDetails);
         when(currentUserDetails.getEmail()).thenReturn(CURRENT_USER_EMAIL);
@@ -129,47 +134,55 @@ public class ViewDraftOrdersServiceTest {
         when(objectMapper.convertValue(caseDetailsData, CaseData.class)).thenReturn(caseData);
 
         // When
-        List<Element<DraftOrder>> userDraftOrderCollection =
-            viewDraftOrdersService.getDraftOrdersForUser(caseDetails, AUTH_TOKEN_NO_ORGANISATION);
+        Map<String, Object> caseFieldsMap =
+            viewDraftOrdersService.getViewDraftOrdersCaseFieldsMap(caseDetails, AUTH_TOKEN_NO_ORGANISATION);
 
         // Then
+        List<Element<DraftOrder>> userDraftOrderCollection = (List<Element<DraftOrder>>)
+            caseFieldsMap.get("filteredDraftOrders");
         assertFalse(userDraftOrderCollection.isEmpty());
+        assertEquals(StringUtils.EMPTY, caseFieldsMap.get("noFilteredDraftOrdersLabelText"));
     }
 
     static Stream<Arguments> parameterOrgSolicitorEmails() {
         return Stream.of(
             Arguments.of(
                 Collections.singletonList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
-                Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0))
+                Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0)),
+                StringUtils.EMPTY
             ),
             Arguments.of(
                 Arrays.asList(
                     ORGANISATION_SOLICITOR_EMAILS.get(0),
-                    ORGANISATION_SOLICITOR_EMAILS.get(1),
-                    ORGANISATION_SOLICITOR_EMAILS.get(2)
+                    ORGANISATION_SOLICITOR_EMAILS.get(2),
+                    ORGANISATION_SOLICITOR_EMAILS.get(1)
                 ),
-                Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0))
+                Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0)),
+                StringUtils.EMPTY
             ),
             Arguments.of(
                 List.of(),
                 Arrays.asList(
+                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(2),
                     OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0),
-                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(1),
-                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(2)
-                )
+                    OTHER_ORGANISATION_SOLICITOR_EMAILS.get(1)
+                ),
+                "No draft Orders outstanding"
             ),
             Arguments.of(
                 Collections.singletonList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
-                List.of()
+                List.of(),
+                StringUtils.EMPTY
             )
         );
     }
 
     @ParameterizedTest
     @MethodSource("parameterOrgSolicitorEmails")
-    @DisplayName("Should return null when document URL is null")
-    public void testGetDraftOrdersForUserCurrentUserWithOrg(List<String> sameOrgSolicitorEmails,
-                                                            List<String> otherOrgSolicitorEmails) {
+    @DisplayName("Should ")
+    public void testGetViewDraftOrdersCaseFieldsMap_WithOrg(List<String> sameOrgSolicitorEmails,
+                                                            List<String> otherOrgSolicitorEmails,
+                                                            String noFilteredDraftOrdersLabelTextExpected) {
         // Given
         //  Setup User Organisation
         when(organisationService.findUserOrganisation(AUTH_TOKEN_WITH_ORGANISATION))
@@ -192,11 +205,12 @@ public class ViewDraftOrdersServiceTest {
             .data(caseDetailsData).build();
 
         List<Element<DraftOrder>> sameOrgSolicitorOrganisationsDrafts = sameOrgSolicitorEmails.stream()
-            .map(email -> creatorOrderElement(sameOrgSolicitorEmails.indexOf(email), email))
+            .map(email -> creatorOrderElement(ORGANISATION_SOLICITOR_EMAILS.indexOf(email), email))
             .toList();
 
         List<Element<DraftOrder>> otherOrgSolicitorOrganisationsDrafts = otherOrgSolicitorEmails.stream()
-            .map(email -> ViewDraftOrdersServiceTest.creatorOrderElement(otherOrgSolicitorEmails.indexOf(email), email))
+            .map(email ->
+                     ViewDraftOrdersServiceTest.creatorOrderElement(OTHER_ORGANISATION_SOLICITOR_EMAILS.indexOf(email), email))
             .toList();
 
         List<Element<DraftOrder>> draftOrderCollection =
@@ -210,11 +224,21 @@ public class ViewDraftOrdersServiceTest {
         when(objectMapper.convertValue(caseDetailsData, CaseData.class)).thenReturn(caseData);
 
         // When
-        List<Element<DraftOrder>> userDraftOrderCollection =
-            viewDraftOrdersService.getDraftOrdersForUser(caseDetails, AUTH_TOKEN_WITH_ORGANISATION);
+        Map<String, Object> caseFieldsMap =
+            viewDraftOrdersService.getViewDraftOrdersCaseFieldsMap(caseDetails, AUTH_TOKEN_WITH_ORGANISATION);
 
         // Then
-        assertEquals(sameOrgSolicitorOrganisationsDrafts, userDraftOrderCollection);
+        List<Element<DraftOrder>> userDraftOrderCollection = (List<Element<DraftOrder>>)
+            caseFieldsMap.get("filteredDraftOrders");
+
+        /* We expect the draft orders from the solicitors/barristers from within the sam eorganisation, but sorted. */
+        List<Element<DraftOrder>> userDraftOrderCollectionExpected = new ArrayList<>(sameOrgSolicitorOrganisationsDrafts);
+        userDraftOrderCollectionExpected.sort(Comparator.<Element<DraftOrder>, LocalDate>comparing(
+            container -> container.getValue().getDateOrderMade()).reversed()
+        );
+
+        assertEquals(userDraftOrderCollectionExpected, userDraftOrderCollection);
+        assertEquals(noFilteredDraftOrdersLabelTextExpected, caseFieldsMap.get("noFilteredDraftOrdersLabelText"));
     }
 
     private static List<SolicitorUser> getUserOrgSolicitors() {
