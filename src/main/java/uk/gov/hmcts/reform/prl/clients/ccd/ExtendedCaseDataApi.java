@@ -12,8 +12,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @FeignClient(
     name = "core-case-data-api",
     primary = false,
-    url = "${core_case_data.api.url}",
-    configuration = FeignRetryConfig.class
+    url = "${core_case_data.api.url}"
 )
 public interface ExtendedCaseDataApi {
     String SERVICE_AUTHORIZATION = "ServiceAuthorization";
