@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,6 +52,7 @@ public class CafCassController extends AbstractCallbackController {
     }
 
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Retry(name = "searchCasesRetryConfig", fallbackMethod = "searchCasesFallback")
     @Operation(description = "search case data")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search cases processed successfully",
@@ -60,8 +62,7 @@ public class CafCassController extends AbstractCallbackController {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
-    )  {
-        try {
+    ) {
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
             Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
@@ -87,12 +88,29 @@ public class CafCassController extends AbstractCallbackController {
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
-        } catch (ResponseStatusException e) {
-            return status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
-        } catch (FeignException feignException) {
-            return status(feignException.status()).body(new ApiError(feignException.getMessage()));
-        } catch (Exception e) {
-            return status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
-        }
+    }
+
+    public ResponseEntity<ApiError> searchCasesFallback(
+        String authorisation, String serviceAuthorisation,
+        String startDate, String endDate,
+        ResponseStatusException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError(e.getMessage()));
+    }
+
+    public ResponseEntity<ApiError> searchCasesFallback(
+        String authorisation, String serviceAuthorisation,
+        String startDate, String endDate,
+        FeignException feignException) {
+        int rawStatus = feignException.status();
+        int httpStatus = rawStatus > 0 ? rawStatus : 502;
+
+        return ResponseEntity.status(httpStatus).body(new ApiError(feignException.getMessage()));
+    }
+
+    public ResponseEntity<ApiError> searchCasesFallback(
+        String authorisation, String serviceAuthorisation,
+        String startDate, String endDate,
+        Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
     }
 }
