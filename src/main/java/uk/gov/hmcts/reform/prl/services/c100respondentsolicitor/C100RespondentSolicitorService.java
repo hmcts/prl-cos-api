@@ -2323,6 +2323,11 @@ public class C100RespondentSolicitorService {
 
         String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData, startAllTabsUpdateDataContent.userDetails());
 
+        if (languageSupportCaseNotes == null || languageSupportCaseNotes.isEmpty()) {
+            log.info("No language support case note needed for case {}", caseId);
+            return;
+        }
+
         CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
             LANG_SUPPORT_NEED_SUBJECT,
             languageSupportCaseNotes,
@@ -2339,7 +2344,7 @@ public class C100RespondentSolicitorService {
             CASE_NOTES,
             caseNoteDetails
         );
-        log.info("1- caseNotesMap:\n{}",caseNotesMap);
+
         caseNoteDetails.stream()
             .filter(caseNoteDetailsElement -> currentCaseNoteDetails.equals(caseNoteDetailsElement.getValue()))
             .findFirst()
@@ -2349,7 +2354,7 @@ public class C100RespondentSolicitorService {
                                WA_CASE_NOTE_ID,
                                id
                            ));
-        log.info("2- submitting caseNotesMap:\n{}",caseNotesMap);
+
         allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,
@@ -2362,56 +2367,46 @@ public class C100RespondentSolicitorService {
     }
 
     private String generateLanguageSupportCaseNote(CaseData caseData, UserDetails userDetails) {
-        String note = "";
+        return caseData.getRespondents().stream()
+            .filter(r -> Objects.equals(r.getValue().getSolicitorEmail(), userDetails.getEmail()))
+            .map(r -> generateAttendToCourtNote(r.getValue().getResponse().getAttendToCourt()))
+            .collect(Collectors.joining("\n\n"));
+    }
 
-        for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-            log.info("respondent SolicitorPartyId:\n{}", respondent.getValue().getSolicitorPartyId());
-            log.info("respondent PartyId:\n{}", respondent.getValue().getPartyId());
-            log.info("respondent SolicitororgId:\n{}", respondent.getValue().getSolicitorOrgUuid());
-            log.info("respondent solicitorReference:\n{}", respondent.getValue().getSolicitorReference());
-            log.info("respondent solicitorEmail:\n{}", respondent.getValue().getSolicitorEmail());
-            log.info("user's Id:\n{}", userDetails.getId());
-            log.info("user's email:\n{}", userDetails.getEmail());
+    private String generateAttendToCourtNote(AttendToCourt attendToCourt) {
+        List<String> sections = new ArrayList<>();
 
-            if (Objects.equals(respondent.getValue().getSolicitorEmail(), userDetails.getEmail())) {
-                log.info("it's a match!");
-                AttendToCourt attendToCourt = respondent.getValue().getResponse().getAttendToCourt();
-
-                if (attendToCourt.getHaveAnyDisability() != null) {
-                    note = note.concat(generateCaseNoteSection(
-                        DISABILITY_PRESENT_TEXT,
-                        attendToCourt.getHaveAnyDisability().getDisplayedValue(),
-                        attendToCourt.getDisabilityNeeds())
-                    );
-
-                    note = note.concat("\n");
-                    note = note.concat("\n");
-                }
-
-                if (attendToCourt.getRespondentSpecialArrangements() != null) {
-                    note = note.concat(generateCaseNoteSection(
-                        SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
-                        attendToCourt.getRespondentSpecialArrangements().getDisplayedValue(),
-                        attendToCourt.getRespondentSpecialArrangementDetails())
-                    );
-
-                    note = note.concat("\n");
-                    note = note.concat("\n");
-                }
-
-                if (attendToCourt.getRespondentIntermediaryNeeds() != null) {
-                    note = note.concat(generateCaseNoteSection(
-                        INTERMEDIARY_REQUIRED_TEXT,
-                        attendToCourt.getRespondentIntermediaryNeeds().getDisplayedValue(),
-                        attendToCourt.getRespondentIntermediaryNeedDetails())
-                    );
-                }
-            }
+        if (attendToCourt.getHaveAnyDisability() != null) {
+            sections.add(generateCaseNoteSection(
+                DISABILITY_PRESENT_TEXT,
+                attendToCourt.getHaveAnyDisability().getDisplayedValue(),
+                attendToCourt.getDisabilityNeeds())
+            );
         }
-        return note;
+        if (attendToCourt.getRespondentSpecialArrangements() != null) {
+            sections.add(generateCaseNoteSection(
+                SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
+                attendToCourt.getRespondentSpecialArrangements().getDisplayedValue(),
+                attendToCourt.getRespondentSpecialArrangementDetails())
+            );
+        }
+        if (attendToCourt.getRespondentIntermediaryNeeds() != null) {
+            sections.add(generateCaseNoteSection(
+                INTERMEDIARY_REQUIRED_TEXT,
+                attendToCourt.getRespondentIntermediaryNeeds().getDisplayedValue(),
+                attendToCourt.getRespondentIntermediaryNeedDetails())
+            );
+        }
+
+        return String.join("\n\n", sections);
     }
 
     private String generateCaseNoteSection(String heading, String field, String subfield) {
-        return heading.concat("\n").concat(field).concat("\n").concat(subfield);
+        String section = heading.concat("\n").concat(field);
+
+        if (subfield != null && !subfield.isEmpty()) {
+            section = section.concat("\n").concat(subfield);
+        }
+        return section;
     }
 }

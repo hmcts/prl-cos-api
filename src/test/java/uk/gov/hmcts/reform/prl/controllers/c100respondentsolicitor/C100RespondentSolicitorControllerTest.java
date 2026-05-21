@@ -53,6 +53,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -357,6 +359,7 @@ public class C100RespondentSolicitorControllerTest {
 
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(respondentSolicitorService.submittedC7Response(
             caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
 
@@ -364,6 +367,32 @@ public class C100RespondentSolicitorControllerTest {
             .submittedC7Response(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
+        verify(respondentSolicitorService).addLanguageSupportCaseNotes(authToken, caseData);
+    }
+
+    @Test
+    public void testC7ResponseSubmittedWhenNotAuthorised() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+        eventService.publishEvent(caseDataChanged);
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        when(respondentSolicitorService.submittedC7Response(
+            caseData)).thenReturn(SubmittedCallbackResponse.builder().build());
+
+        ResponseEntity<SubmittedCallbackResponse> response = c100RespondentSolicitorController
+            .submittedC7Response(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        verify(respondentSolicitorService, never()).addLanguageSupportCaseNotes(any(), any());
     }
 
     @Test
