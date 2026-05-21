@@ -89,8 +89,8 @@ public class ViewDraftOrdersService {
     public Map<String, Object> getViewDraftOrdersCaseFieldsMap(CaseDetails caseDetails, String authorisation) {
         List<Element<DraftOrder>> filteredDraftOrders = this.getDraftOrdersForUser(caseDetails, authorisation);
 
-        String noFilteredDraftOrdersLabelText = CollectionUtils.isEmpty(filteredDraftOrders) ?
-            NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT : StringUtil.EMPTY_STRING;
+        String noFilteredDraftOrdersLabelText = CollectionUtils.isEmpty(filteredDraftOrders)
+            ? NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT : StringUtil.EMPTY_STRING;
 
         return Map.of(
             FILTERED_DRAFT_ORDERS_CASE_FIELD, filteredDraftOrders,
