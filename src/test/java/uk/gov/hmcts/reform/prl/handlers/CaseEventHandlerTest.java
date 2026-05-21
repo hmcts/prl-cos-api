@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,8 @@ import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventVal
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -30,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge.RefugeCaseGenerator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +42,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,6 +65,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseEventHandlerTest {
+
+    @Mock
+    private RefugeCaseGenerator refugeCaseGenerator;
 
     @Mock
     private TaskListService taskListService;
@@ -85,6 +93,15 @@ public class CaseEventHandlerTest {
     private  ObjectMapper objectMapper;
 
     public static final String authToken = "Bearer TestAuthToken";
+
+    @Before
+    public void init() {
+        when(refugeCaseGenerator.generate(any()))
+            .thenReturn(CaseSummary.builder()
+                            .refugeCase(RefugeCase.builder()
+                                            .isRefugeCase(YesOrNo.No)
+                                            .build()).build());
+    }
 
     @Test
     public void shouldUpdateTaskListForCasesInOpenStateC100() {
@@ -391,7 +408,7 @@ public class CaseEventHandlerTest {
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
         verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()
+                Mockito.anyString(), Mockito.anyBoolean(), any()
         );
 
     }
@@ -456,8 +473,9 @@ public class CaseEventHandlerTest {
 
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
-        verify(respondentSolicitorTaskListRenderer).render(Mockito.any(), Mockito.any(), Mockito.anyString(),
-                Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()
+        verify(respondentSolicitorTaskListRenderer).render(
+            any(), any(), Mockito.anyString(),
+            Mockito.anyString(), Mockito.anyBoolean(), any()
         );
 
     }

@@ -1049,7 +1049,7 @@ public class C100RespondentSolicitorService {
                 authorisation,
                 callbackRequest,
                 caseData,
-                representedRespondent,
+                element(representedRespondent.getId(), amended),
                 quarantineLegalDocList
             );
 
