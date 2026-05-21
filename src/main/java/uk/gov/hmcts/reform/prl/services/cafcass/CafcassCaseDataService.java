@@ -543,7 +543,7 @@ public class CafcassCaseDataService {
                 ));
         }
         if (CollectionUtils.isNotEmpty(caseData.getOtherPartyC8Documents())) {
-            caseData.getRespondentEc8Documents().parallelStream().forEach(
+            caseData.getOtherPartyC8Documents().parallelStream().forEach(
                 responseDocumentsElement ->
                     populateRespondentDocument(
                         responseDocumentsElement.getValue().getRespondentC8Document(),
