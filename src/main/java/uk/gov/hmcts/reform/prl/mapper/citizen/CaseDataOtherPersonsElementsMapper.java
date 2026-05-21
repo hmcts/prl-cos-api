@@ -89,9 +89,6 @@ public class CaseDataOtherPersonsElementsMapper {
     }
 
     private static YesNoIDontKnowV2 livingInRefuge(OtherPersonDetail otherPersonDetails) {
-        if (otherPersonDetails == null) {
-            return YesNoIDontKnowV2.No;
-        }
         if (YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())) {
             return YesNoIDontKnowV2.No;
         } else if (!YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
