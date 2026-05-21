@@ -94,7 +94,7 @@ public class CafCassController extends AbstractCallbackController {
         String authorisation, String serviceAuthorisation,
         String startDate, String endDate,
         ResponseStatusException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError(e.getMessage()));
+        return ResponseEntity.status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
     }
 
     public ResponseEntity<ApiError> searchCasesFallback(
@@ -111,6 +111,6 @@ public class CafCassController extends AbstractCallbackController {
         String authorisation, String serviceAuthorisation,
         String startDate, String endDate,
         Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
     }
 }
