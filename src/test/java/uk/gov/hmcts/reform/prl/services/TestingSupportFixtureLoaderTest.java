@@ -26,20 +26,13 @@ class TestingSupportFixtureLoaderTest {
 
         String json = loader.loadJson(FIXTURE);
 
-        assertTrue(json.contains("\"OrganisationID\": \"DEMO-FPRL-ID\""),
-            "expected the FPRL OrganisationID to be substituted with the demo value");
-        assertTrue(json.contains("\"OrganisationName\": \"DEMO-FPRL-NAME\""),
-            "expected the FPRL OrganisationName to be substituted with the demo value");
-        assertTrue(!json.contains("\"QO4A1Q8\""),
-            "expected the AAT FPRL OrganisationID to have been replaced");
+        assertTrue(json.contains("\"OrganisationID\": \"DEMO-FPRL-ID\""));
+        assertTrue(json.contains("\"OrganisationName\": \"DEMO-FPRL-NAME\""));
+        assertTrue(!json.contains("\"QO4A1Q8\""));
     }
 
     @Test
     void usesInlineDefaultsWhenEnvHasNoOverrides() throws Exception {
-        // No prl.environment set → inner placeholder stays unresolved (non-required mode).
-        // Outer key lookup fails → inline defaults (AAT canonical) win.
-        // In real pods prl.environment is always set via application.yaml's `${APP_ENV:preview}` chain;
-        // this case is only reached by tests instantiating a bare MockEnvironment.
         MockEnvironment env = new MockEnvironment();
         TestingSupportFixtureLoader loader = new TestingSupportFixtureLoader(env);
 
@@ -66,7 +59,6 @@ class TestingSupportFixtureLoaderTest {
     void applicationYamlDemoBlockResolvesDemoValues() throws Exception {
         List<PropertySource<?>> sources = new YamlPropertySourceLoader()
             .load("application", new ClassPathResource("application.yaml"));
-        assertTrue(!sources.isEmpty(), "application.yaml should parse and produce at least one PropertySource");
 
         StandardEnvironment env = new StandardEnvironment();
         sources.forEach(env.getPropertySources()::addFirst);
@@ -80,15 +72,46 @@ class TestingSupportFixtureLoaderTest {
             "ts.demo.org.org3.id", "ts.demo.org.org3.name",
             "ts.demo.org.org4.id", "ts.demo.org.org4.name"
         )) {
-            assertTrue(env.getProperty(key) != null && !env.getProperty(key).isBlank(),
-                "expected application.yaml to declare a non-blank value for " + key);
+            assertTrue(env.getProperty(key) != null && !env.getProperty(key).isBlank());
         }
 
         TestingSupportFixtureLoader loader = new TestingSupportFixtureLoader(env);
         String json = loader.loadJson(FIXTURE);
         String demoFprlId = env.getProperty("ts.demo.org.org2.id");
-        assertTrue(json.contains("\"OrganisationID\": \"" + demoFprlId + "\""),
-            "expected OrganisationID to resolve to the demo value " + demoFprlId);
+        assertTrue(json.contains("\"OrganisationID\": \"" + demoFprlId + "\""));
+    }
+
+    @Test
+    void demoValuesCanBeResolved() throws Exception {
+        String saved = System.getProperty("APP_ENV");
+        try {
+            System.setProperty("APP_ENV", "demo");
+
+            StandardEnvironment env = new StandardEnvironment();
+            List<PropertySource<?>> sources = new YamlPropertySourceLoader()
+                .load("application", new ClassPathResource("application.yaml"));
+            sources.forEach(env.getPropertySources()::addLast);
+
+            assertEquals("demo", env.getProperty("prl.environment"));
+            assertEquals("6RUBIJM", env.getProperty("ts.demo.org.org1.id"));
+            assertEquals("9SCQJOI", env.getProperty("ts.demo.org.org2.id"));
+            assertEquals("52IWCVT", env.getProperty("ts.demo.org.org3.id"));
+            assertEquals("UYLJCAI", env.getProperty("ts.demo.org.org4.id"));
+
+            TestingSupportFixtureLoader loader = new TestingSupportFixtureLoader(env);
+            String json = loader.loadJson(FIXTURE);
+
+            assertTrue(json.contains("\"OrganisationID\": \"9SCQJOI\""));
+            assertTrue(json.contains("\"OrganisationName\": \"Private law Applicant organisation\""));
+            assertTrue(!json.contains("\"QO4A1Q8\""));
+            assertTrue(!json.contains("\"FPRL-test-organisation\""));
+        } finally {
+            if (saved != null) {
+                System.setProperty("APP_ENV", saved);
+            } else {
+                System.clearProperty("APP_ENV");
+            }
+        }
     }
 
     @Test
