@@ -96,7 +96,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -113,6 +112,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISABILITY_PRESENT_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERMEDIARY_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -2369,11 +2369,24 @@ public class C100RespondentSolicitorService {
             log.info("respondent PartyId:\n{}", respondent.getValue().getPartyId());
             log.info("respondent SolicitororgId:\n{}", respondent.getValue().getSolicitorOrgUuid());
             log.info("respondent solicitorReference:\n{}", respondent.getValue().getSolicitorReference());
+            log.info("respondent solicitorEmail:\n{}", respondent.getValue().getSolicitorEmail());
             log.info("user's Id:\n{}", userDetails.getId());
+            log.info("user's email:\n{}", userDetails.getEmail());
 
-            if (Objects.equals(respondent.getValue().getSolicitorPartyId(), UUID.fromString(userDetails.getId()))) {
+            if (Objects.equals(respondent.getValue().getSolicitorEmail(), userDetails.getEmail())) {
                 log.info("it's a match!");
                 AttendToCourt attendToCourt = respondent.getValue().getResponse().getAttendToCourt();
+
+                if (attendToCourt.getHaveAnyDisability() != null) {
+                    note = note.concat(generateCaseNoteSection(
+                        DISABILITY_PRESENT_TEXT,
+                        attendToCourt.getHaveAnyDisability().getDisplayedValue(),
+                        attendToCourt.getDisabilityNeeds())
+                    );
+
+                    note = note.concat("\n");
+                    note = note.concat("\n");
+                }
 
                 if (attendToCourt.getRespondentSpecialArrangements() != null) {
                     note = note.concat(generateCaseNoteSection(
