@@ -2368,8 +2368,8 @@ public class C100RespondentSolicitorService {
             log.info("respondent SolicitorPartyId:\n{}", respondent.getValue().getSolicitorPartyId());
             log.info("respondent PartyId:\n{}", respondent.getValue().getPartyId());
             log.info("respondent SolicitororgId:\n{}", respondent.getValue().getSolicitorOrgUuid());
+            log.info("respondent solicitorReference:\n{}", respondent.getValue().getSolicitorReference());
             log.info("user's Id:\n{}", userDetails.getId());
-            log.info("user's Id as UUID:\n{}", UUID.fromString(userDetails.getId()));
 
             if (Objects.equals(respondent.getValue().getSolicitorPartyId(), UUID.fromString(userDetails.getId()))) {
                 log.info("it's a match!");

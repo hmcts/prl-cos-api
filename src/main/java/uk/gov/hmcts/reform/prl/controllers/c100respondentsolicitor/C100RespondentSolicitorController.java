@@ -210,6 +210,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         publishEvent(new CaseDataChanged(caseData));
 
         log.info("Generating solicitor C7 response case note");
+        log.info("authoriseUser: {}", authorisationService.authoriseUser(authorisation));
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             respondentSolicitorService.addLanguageSupportCaseNotes(authorisation, caseData);
         }
