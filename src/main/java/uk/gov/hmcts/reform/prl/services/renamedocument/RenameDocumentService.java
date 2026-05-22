@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.renamedocument;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
@@ -65,93 +67,186 @@ public class RenameDocumentService {
 
     public Map<String, Object> handleAboutToStart(String authorisation,
                                                   CallbackRequest callbackRequest) {
+        log.info("Entering handleAboutToStart for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        DynamicList documentsList = sendAndReplyService.getCategoriesAndDocuments(authorisation, String.valueOf(caseData.getId()));
+        DynamicList documentsList = sendAndReplyService.getCategoriesAndDocuments(
+            authorisation,
+            String.valueOf(caseData.getId())
+        );
+        log.info(
+            "Found {} documents for dynamic list",
+            documentsList.getListItems() != null ? documentsList.getListItems().size() : 0
+        );
         caseDataMap.put("renameDocumentsList", documentsList);
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
+        log.info("Is user Local Authority: {}", isUserRoleLA);
 
-        DynamicList categoriesAndDocumentsList = getCategoriesSubcategories(authorisation, String.valueOf(caseData.getId()), isUserRoleLA);
+        DynamicList categoriesAndDocumentsList = getCategoriesSubcategories(
+            authorisation,
+            String.valueOf(caseData.getId()),
+            isUserRoleLA
+        );
         caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
 
         return caseDataMap;
     }
 
     public Map<String, Object> handleAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+        log.info("Entering handleAboutToSubmit for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
             DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
+            log.info(
+                "Selected document from dynamic list: {}",
+                selectedList.getValue() != null ? selectedList.getValue().getCode() : "null"
+            );
 
-            if (selectedList.getValue() != null && StringUtils.isNotBlank(selectedList.getValue().getCode())) {
-                String selectedDocumentCode = selectedList.getValue().getCode();
+            if (null != selectedList.getValue() && null != selectedList.getValue().getCode()) {
+                String documentCode = selectedList.getValue().getCode();
+                String[] codes = documentCode.split(ARROW_SEPARATOR);
+                String documentId = codes[codes.length - 1];
 
-                // Extract UUID from the code (e.g., "CategoryId->UUID")
-                String documentId = selectedDocumentCode.contains(ARROW_SEPARATOR)
-                    ? selectedDocumentCode.substring(selectedDocumentCode.lastIndexOf(ARROW_SEPARATOR) + ARROW_SEPARATOR.length())
-                    : selectedDocumentCode;
+                String newName = caseData.getRenameDocument().getNewNameForDocument();
 
-                Map<String, Object> documentMap = findDocumentMapById(caseDataMap, documentId);
-
-                if (documentMap != null) {
-                    String newName = caseData.getRenameDocument().getNewNameForDocument();
-                    if (StringUtils.isNotBlank(newName)) {
-                        String currentName = (String) documentMap.get("document_filename");
-                        if (StringUtils.isNotBlank(currentName)) {
-                            String extension = FilenameUtils.getExtension(currentName);
-                            String updatedName = StringUtils.isNotBlank(extension) ? newName + "." + extension : newName;
-                            log.info("Renaming document {} to {}", currentName, updatedName);
-                            documentMap.put("document_filename", updatedName);
-                        }
-                    }
+                if (isNotBlank(newName)) {
+                    log.info("Searching for document with ID: {}, to be rename: {}", documentId, newName);
                 }
+                findAndRenameDocument(caseDataMap, newName, documentId);
             }
+        } else {
+            log.warn("RenameDocument or RenameDocumentsList is null in caseData");
         }
 
-        // Clean up temporary event fields
         caseDataMap.remove("renameDocument");
-
         return caseDataMap;
     }
 
+    private void findAndRenameDocument(Object data, String newName, String documentId) {
+        if (data instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) data;
 
-    /**
-     * Recursively searches for a document Map object by its UUID.
-     * Returns the actual Map from caseDataMap so it can be mutated directly.
-     */
-    private Map<String, Object> findDocumentMapById(Map<String, Object> data, String documentId) {
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
-            Object value = entry.getValue();
-            if (value instanceof Map) {
-                Map<String, Object> mapValue = (Map<String, Object>) value;
-                if (mapValue.containsKey("document_url")) {
-                    String url = (String) mapValue.get("document_url");
-                    if (null != url && url.contains(documentId)) {
-                        return mapValue;
-                    }
-                } else {
-                    Map<String, Object> found = findDocumentMapById(mapValue, documentId);
-                    if (found != null) {
-                        return found;
-                    }
+            if (map.containsKey("document_url") && map.get("document_url") instanceof String) {
+                String url = (String) map.get("document_url");
+                if (url.contains(documentId)) {
+                    String currentName = (String) map.get("document_filename");
+                    String extension = FilenameUtils.getExtension(currentName);
+                    String newUploadName = isNotBlank(extension) ? newName + "." + extension : newName;
+
+                    log.info("Renaming the document");
+                    map.put("document_filename", newUploadName);
+                    return;
                 }
-            } else if (value instanceof List) {
-                List<?> listValue = (List<?>) value;
-                for (Object item : listValue) {
-                    if (item instanceof Map) {
-                        Map<String, Object> found = findDocumentMapById((Map<String, Object>) item, documentId);
-                        if (found != null) {
-                            return found;
-                        }
+            }
+
+            for (Object value : map.values()) {
+                findAndRenameDocument(value, newName, documentId);
+            }
+
+        } else if (data instanceof List) {
+            List<?> list = (List<?>) data;
+            for (Object item : list) {
+                findAndRenameDocument(item, newName, documentId);
+            }
+        }
+
+    }
+
+    private uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromDynamicList(String authorisation,
+                                                                                             DynamicList selectedDocument,
+                                                                                             String caseId) {
+        log.info("Fetching document for ID: {}", selectedDocument.getValue().getCode());
+        try {
+            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+                authorisation,
+                authTokenGenerator.generate(),
+                caseId
+            );
+            uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = getSelectedDocumentFromCategories(
+                categoriesAndDocuments.getCategories(),
+                selectedDocument
+            );
+            if (selectedDoc == null) {
+                log.info("Document not found in categories, searching in uncategorised documents...");
+                for (uk.gov.hmcts.reform.ccd.client.model.Document document : categoriesAndDocuments.getUncategorisedDocuments()) {
+                    if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
+                        .equalsIgnoreCase(selectedDocument.getValue().getCode())) {
+                        selectedDoc = document;
+                        break;
                     }
                 }
             }
+            return selectedDoc;
+        } catch (FeignException e) {
+            log.error("Feign error in getCategoriesAndDocuments: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error in getCategoriesAndDocuments: {}", e.getMessage());
         }
         return null;
+    }
+
+    private uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromCategories(List<Category> categoryList,
+                                                                                            DynamicList selectedDocument) {
+        uk.gov.hmcts.reform.ccd.client.model.Document documentSelected = null;
+
+        for (Category category : categoryList) {
+            log.info("Searching in category: {}", category.getCategoryId());
+            if (category.getDocuments() != null) {
+                for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
+                    String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
+                    String docId = codes[codes.length - 1];
+
+                    if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
+                        .equalsIgnoreCase(docId)) {
+                        log.info(
+                            "Matched document: {} in category: {}",
+                            document.getDocumentFilename(),
+                            category.getCategoryId()
+                        );
+                        documentSelected = document;
+                        break;
+                    }
+                }
+            }
+            if (null == documentSelected && category.getSubCategories() != null) {
+                documentSelected = getSelectedDocumentFromCategories(
+                    category.getSubCategories(),
+                    selectedDocument
+                );
+            }
+            if (documentSelected != null) {
+                break;
+            }
+        }
+        return documentSelected;
+    }
+
+    private uk.gov.hmcts.reform.prl.models.documents.Document applyDocumentRename(
+        uk.gov.hmcts.reform.prl.models.documents.Document document,
+        String documentNewName) {
+        log.info("Applying rename for document: {} to new name: {}", document.getDocumentFileName(), documentNewName);
+        if (isNotBlank(documentNewName) && nonNull(document)) {
+            uk.gov.hmcts.reform.prl.models.documents.Document renamedDocument = document.toBuilder()
+                .documentFileName(determineChangedDocumentFileName(documentNewName, document))
+                .build();
+            log.info("Successfully created renamed document object: {}", renamedDocument.getDocumentFileName());
+            return renamedDocument;
+        }
+        log.warn("Either documentNewName is blank or document is null. No rename applied.");
+        return document;
+    }
+
+    private String determineChangedDocumentFileName(String newDocumentName, uk.gov.hmcts.reform.prl.models.documents.Document document) {
+        String originalName = document.getDocumentFileName();
+        String extension = FilenameUtils.getExtension(originalName);
+        String newName = isNotBlank(extension) ? newDocumentName + "." + extension : newDocumentName;
+        log.info("Renaming document name {} with new name {}", originalName, newName);
+        return newName;
     }
 
 
@@ -193,7 +288,11 @@ public class RenameDocumentService {
 
     private boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
         return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
-            || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());
+            || roleAssignmentService.isUserAllocatedRoleForCase(
+            caseId,
+            idamId,
+            Roles.LOCAL_AUTHORITY_SOLICITOR.getValue()
+        );
     }
 
 }
