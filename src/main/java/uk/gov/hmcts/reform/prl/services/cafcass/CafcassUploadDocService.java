@@ -74,7 +74,8 @@ public class CafcassUploadDocService {
         "S_11H_Monitoring", DOC_TYPE_S16A_RISK_ASSESSMENT, "Safeguarding_Letter",
         "Safeguarding_Letter_Returner", "Safeguarding_Letter_Shorter_Template",
         "Safeguarding_Letter_Update", "Second_Gatekeeping_Safeguarding_Letter",
-        "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report"
+        "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report",
+        "Enforcement_Order_Suitability_Report", "Parental_Order_Reporter_Report"
     );
 
     private static final Map<String, CafcassReportAndGuardianEnum> DOCUMENT_TYPE_CATEGORY_MAP = createDocumentTypeMap();
@@ -262,6 +263,8 @@ public class CafcassUploadDocService {
         map.put("Re_W_Report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("S_11H_Monitoring", CafcassReportAndGuardianEnum.otherDocs);
         map.put(DOC_TYPE_S16A_RISK_ASSESSMENT, CafcassReportAndGuardianEnum.riskAssessment);
+        map.put("Enforcement_Order_Suitability_Report", CafcassReportAndGuardianEnum.enforcementOrderSuitabilityReport);
+        map.put("Parental_Order_Reporter_Report", CafcassReportAndGuardianEnum.parentalOrderReporterReport);
         map.put("Safeguarding_Letter", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Returner", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Shorter_Template", CafcassReportAndGuardianEnum.safeguardingLetter);

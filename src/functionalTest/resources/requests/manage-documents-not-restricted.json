@@ -80,11 +80,11 @@
               },
               {
                 "code": "16aRiskAssessment",
-                "label": "16a risk assessment"
+                "label": "Section 16A risk assessment"
               },
               {
                 "code": "guardianReport",
-                "label": "Guardian report"
+                "label": "Section 16.4 Guardian Report"
               },
               {
                 "code": "specialGuardianshipReport",
