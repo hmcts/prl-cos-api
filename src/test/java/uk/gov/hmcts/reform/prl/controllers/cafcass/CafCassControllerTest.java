@@ -261,7 +261,7 @@ public class CafCassControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
         assertNotNull(body);
-        assertEquals("An unexpected error occurred.", body.getMessage());
+        assertEquals(ex.getMessage(), body.getMessage())
     }
 
     // Helper method
