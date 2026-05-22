@@ -41,7 +41,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
     private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
-    private  final CafcassCaseDataService cafcassCaseDataService;
+    private final CafcassCaseDataService cafcassCaseDataService;
     private final AuthorisationService authorisationService;
 
     public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
@@ -61,33 +61,33 @@ public class CafCassController extends AbstractCallbackController {
     public ResponseEntity<Object> searchCasesByDates(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
-        @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
+        @RequestParam(name = "start_date") String startDate, @RequestParam(name = "end_date") String endDate
     ) throws Exception, FeignException, ResponseStatusException {
-            serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
-                ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
-            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
+            ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
 
-            if (userInfo.isPresent() && Boolean.TRUE.equals(
-                authorisationService.authoriseService(serviceAuthorisation))) {
-                if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
-                    log.info("processing request after authorization");
-                    LocalDateTime startDateTime = LocalDateTime.parse(startDate);
-                    LocalDateTime endDateTime = LocalDateTime.parse(endDate);
-                    if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
-                        return status(BAD_REQUEST).body(new ApiError(
-                            "Difference between end date and start date should not be more than 15 minutes"));
-                    }
-                    return ResponseEntity.ok(cafcassCaseDataService.getCaseData(
-                        authorisation,
-                        startDate,
-                        endDate
-                    ));
-                } else {
-                    throw new ResponseStatusException(UNAUTHORIZED);
+        if (userInfo.isPresent() && Boolean.TRUE.equals(
+            authorisationService.authoriseService(serviceAuthorisation))) {
+            if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
+                log.info("processing request after authorization");
+                LocalDateTime startDateTime = LocalDateTime.parse(startDate);
+                LocalDateTime endDateTime = LocalDateTime.parse(endDate);
+                if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
+                    return status(BAD_REQUEST).body(new ApiError(
+                        "Difference between end date and start date should not be more than 15 minutes"));
                 }
+                return ResponseEntity.ok(cafcassCaseDataService.getCaseData(
+                    authorisation,
+                    startDate,
+                    endDate
+                ));
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
+        } else {
+            throw new ResponseStatusException(UNAUTHORIZED);
+        }
     }
 
     public ResponseEntity<ApiError> searchCasesFallback(
