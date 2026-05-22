@@ -83,7 +83,9 @@ public enum CaseEvent {
     CLOSE_REVIEW_RA_REQUEST_TASK("closeReviewRARequestTask"),
     REQUEST_FURTHER_INFORMATION("requestFurtherInformation"),
     REQUEST_FURTHER_INFORMATION_HISTORY("requestFurtherInformationHistory"),
-    EXIT_AWAITING_INFORMATION("exitAwaitingInformation");
+    EXIT_AWAITING_INFORMATION("exitAwaitingInformation"),
+    CANCEL_REQUEST_CIR_UPDATE_TASK("cancelRequestCirUpdateTask"),
+    CREATE_REQUEST_CIR_UPDATE_TASK("createRequestCirUpdateTask");
 
     private final String value;
 
