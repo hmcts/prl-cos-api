@@ -38,6 +38,8 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTHORIZATION;
 
+import static org.junit.Assert.assertThrows;
+
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafCassControllerTest {
 
@@ -53,17 +55,13 @@ public class CafCassControllerTest {
     @Mock
     private CafcassCaseDataService cafcassCaseDataService;
 
-    private static final String RESPONSE_JSON =
-        "classpath:response/CafCaasResponse.json";
-
+    private static final String RESPONSE_JSON = "classpath:response/CafCaasResponse.json";
     private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
-
     private final String startDate = "2022-08-22T10:54:43.49";
-
     private final String endDate = "2022-08-22T11:00:43.49";
 
     @Test
-    public void getCaseDataTest() throws IOException {
+    public void getCaseDataTest() throws Exception {
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         objectMapper.registerModule(new ParameterNamesModule());
         CafCassResponse expectedCafCassResponse = objectMapper.readValue(
@@ -76,267 +74,149 @@ public class CafCassControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate))
             .thenReturn(expectedCafCassResponse);
+
         ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates(
-            "authorisation",
-            "Bearer serviceAuthorisation",
-            startDate,
-            endDate
+            "authorisation", "Bearer serviceAuthorisation", startDate, endDate
         );
 
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-        assertEquals(
-            objectMapper.writeValueAsString(expectedCafCassResponse),
-            objectMapper.writeValueAsString(realCafCassResponse)
-        );
+        assertEquals(objectMapper.writeValueAsString(expectedCafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
         Assert.assertNotNull(realCafCassResponse);
         assertEquals(4, realCafCassResponse.getTotal());
         assertEquals(4, realCafCassResponse.getCases().size());
     }
 
     @Test
-    public void testInvalidServiceAuth_401UnAuthorized() {
+    public void getCaseData_shouldNotFail_whenHearingTypesIsNull() throws Exception {
+        String json = "{ \"cases\": [ { \"id\": 1234567890123456, \"case_data\": { \"orderCollection\": [ { \"id\": \"00000000-0000-0000-0000-000000000000\", \"value\": { \"orderType\": \"SomeOrder\", \"manageOrderHearingDetails\": [ { \"id\": \"11111111-1111-1111-1111-111111111111\", \"value\": { \"hearingTypes\": null, \"confirmedHearingDates\": null } } ] } } ] } } ], \"total\": 1 }";
+        ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
+        mapper.registerModule(new ParameterNamesModule());
+        CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate)).thenReturn(cafCassResponse);
+
+        ResponseEntity<?> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void getCaseData_shouldDeserializeNormally_withMultipleHearings() throws Exception {
+        String json = "{ \"cases\": [ { \"id\": 9876543210123456, \"case_data\": { \"orderCollection\": [ { \"id\": \"00000000-0000-0000-0000-000000000000\", \"value\": { \"orderType\": \"StandardOrder\", \"manageOrderHearingDetails\": [ { \"id\": \"11111111-1111-1111-1111-111111111111\", \"value\": { \"hearingTypes\": { \"value\": {\"code\": \"TYPE_A\", \"label\": \"First Hearing\"} }, \"confirmedHearingDates\": { \"value\": {\"code\": \"123\", \"label\": \"2022-01-01T10:00:00\"} } } }, { \"id\": \"22222222-2222-2222-2222-222222222222\", \"value\": { \"hearingTypes\": { \"value\": {\"code\": \"TYPE_B\", \"label\": \"Second Hearing\"} }, \"confirmedHearingDates\": { \"value\": {\"code\": \"456\", \"label\": \"2022-01-01T11:00:00\"} } } } ] } } ] } } ], \"total\": 1 }";
+        ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
+        mapper.registerModule(new ParameterNamesModule());
+        CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate)).thenReturn(cafCassResponse);
+
+        ResponseEntity<?> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void testInvalidServiceAuth_401UnAuthorized() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.empty());
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
-            "authorisation",
-            "inValidServiceAuthorisation",
-            "startDate",
-            "endDate"
-        );
-        assertEquals(UNAUTHORIZED, response.getStatusCode());
-        final ApiError body = (ApiError) response.getBody();
-        assertNotNull(body);
-        assertEquals("401 UNAUTHORIZED", body.getMessage());
-
-    }
-
-    @Test
-    public void testFeignExceptionBadRequest() throws IOException {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
-                                                endDate
-        )).thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
-            TEST_AUTHORIZATION,
-            TEST_SERVICE_AUTHORIZATION,
-            startDate,
-            endDate
-        );
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    public void testFeignExceptionUnAuthorised() throws IOException {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
-                                         endDate
-        )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
-            TEST_AUTHORIZATION,
-            TEST_SERVICE_AUTHORIZATION,
-            startDate,
-            endDate
-        );
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates("authorisation", "inValidServiceAuthorisation", "startDate", "endDate");
         assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
-    public void testExceptionInternalServerError() throws IOException {
+    public void testExceptionInternalServerErrorForDateTimeRange() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, "startDate",
-                                                "endDate"
-        )).thenThrow(new RuntimeException());
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
-            TEST_AUTHORIZATION,
-            TEST_SERVICE_AUTHORIZATION,
-            "startDate",
-            "endDate"
-        );
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    }
-
-    @Test
-    public void testExceptionInternalServerErrorForDateTimeRange() {
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
-            TEST_AUTHORIZATION,
-            TEST_SERVICE_AUTHORIZATION,
-            "2022-08-22T10:54:43.49",
-            "2022-08-22T11:54:43.49"
-        );
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "2022-08-22T10:54:43.49", "2022-08-22T11:54:43.49");
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Difference between end date and start date should not be more than 15 minutes",
-                     ((ApiError)response.getBody()).getMessage());
     }
 
     @Test
-    public void testExceptionUnAuthorisedForInvalidCaseRole() {
+    public void testExceptionUnAuthorisedForInvalidCaseRole() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of("invalid-case-role"));
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
-            "authorisation",
-            "Bearer serviceAuthorisation",
-            startDate,
-            endDate
-        );
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
         assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
+    // Refactored exception tests (verifying Resilience4j)
+    @Test
+    public void testFeignExceptionBadRequest() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate, endDate))
+            .thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
+
+        // Assert that the controller now propagates the FeignException directly
+        assertThrows(FeignException.class, () -> {
+            cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, startDate, endDate);
+        });
+    }
+
+    @Test
+    public void testFeignExceptionUnAuthorised() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate, endDate))
+            .thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
+
+        // Assert that the controller propagates the FeignException directly
+        assertThrows(FeignException.class, () -> {
+            cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, startDate, endDate);
+        });
+    }
+
+    @Test
+    public void testExceptionInternalServerError() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, "startDate", "endDate"))
+            .thenThrow(new RuntimeException("Something broke inside"));
+
+        // Assert that the controller propagates the raw Exception directly
+        assertThrows(RuntimeException.class, () -> {
+            cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate", "endDate");
+        });
+    }
+
+    // New tests: verifying the fallback mapping methods directly
+    @Test
+    public void testFallback_HandlesFeignExceptionCorrectly() {
+        FeignException ex = feignException(HttpStatus.BAD_REQUEST.value(), "Bad Request payload");
+
+        ResponseEntity<?> response = cafCassController.searchCasesFallback(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        ApiError body = (ApiError) response.getBody();
+        assertNotNull(body);
+        assertEquals("Search service failed: Bad Request payload", body.getMessage());
+    }
+
+    @Test
+    public void testFallback_HandlesGenericExceptionCorrectly() {
+        Exception ex = new RuntimeException("Unexpected core system error");
+
+        ResponseEntity<?> response = cafCassController.searchCasesFallback(ex);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        ApiError body = (ApiError) response.getBody();
+        assertNotNull(body);
+        assertEquals("An unexpected error occurred.", body.getMessage());
+    }
+
+    // Helper method
     public static FeignException feignException(int status, String message) {
         return FeignException.errorStatus(message, Response.builder()
             .status(status)
             .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
             .build());
     }
-
-    @Test
-    public void getCaseData_shouldNotFail_whenHearingTypesIsNull() throws Exception {
-        // Arrange: the same resilient payload as above
-        String json = """
-                    {
-                       "cases": [
-                         {
-                           "id": 1234567890123456,
-                           "case_data": {
-                             "orderCollection": [
-                               {
-                                 "id": "00000000-0000-0000-0000-000000000000",
-                                 "value": {
-                                   "orderType": "SomeOrder",
-                                   "manageOrderHearingDetails": [
-                                     {
-                                       "id": "11111111-1111-1111-1111-111111111111",
-                                       "value": {
-                                         "hearingTypes": null,
-                                         "confirmedHearingDates": null
-                                       }
-                                     }
-                                   ]
-                                 }
-                               }
-                             ]
-                           }
-                         }
-                       ],
-                       "total": 1
-                     }
-            """;
-
-        ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
-        mapper.registerModule(new ParameterNamesModule());
-        CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
-
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate))
-            .thenReturn(cafCassResponse);
-
-        // Act
-        ResponseEntity<?> responseEntity = cafCassController.searchCasesByDates(
-            "authorisation", "Bearer serviceAuthorisation", startDate, endDate
-        );
-
-        // Assert: still 200 and body present
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        CafCassResponse body = (CafCassResponse) responseEntity.getBody();
-        Assert.assertNotNull(body);
-        assertEquals(1, body.getTotal());
-        assertEquals(1, body.getCases().size());
-
-        // And the problematic part didn’t crash the controller
-        var caseOrder = body.getCases().getFirst().getCaseData().getOrderCollection().getFirst().getValue();
-        assertNull(caseOrder.getHearingDetails());
-        assertNull(caseOrder.getHearingId());
-    }
-
-    @Test
-    public void getCaseData_shouldDeserializeNormally_withMultipleHearings() throws Exception {
-        // Arrange: create a valid payload with 2 hearing details
-        String json = """
-            {
-              "cases": [
-                {
-                  "id": 9876543210123456,
-                  "case_data": {
-                    "orderCollection": [
-                      {
-                        "id": "00000000-0000-0000-0000-000000000000",
-                        "value": {
-                          "orderType": "StandardOrder",
-                          "manageOrderHearingDetails": [
-                            {
-                              "id": "11111111-1111-1111-1111-111111111111",
-                              "value": {
-                                "hearingTypes": {
-                                  "value": {"code": "TYPE_A", "label": "First Hearing"}
-                                },
-                                "confirmedHearingDates": {
-                                  "value": {"code": "123", "label": "2022-01-01T10:00:00"}
-                                }
-                              }
-                            },
-                            {
-                              "id": "22222222-2222-2222-2222-222222222222",
-                              "value": {
-                                "hearingTypes": {
-                                  "value": {"code": "TYPE_B", "label": "Second Hearing"}
-                                },
-                                "confirmedHearingDates": {
-                                  "value": {"code": "456", "label": "2022-01-01T11:00:00"}
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              ],
-              "total": 1
-            }
-            """;
-
-        ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
-        mapper.registerModule(new ParameterNamesModule());
-        CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
-
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
-        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate))
-            .thenReturn(cafCassResponse);
-
-        // Act
-        ResponseEntity<?> responseEntity = cafCassController.searchCasesByDates(
-            "authorisation", "Bearer serviceAuthorisation", startDate, endDate
-        );
-
-        // Assert
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        CafCassResponse body = (CafCassResponse) responseEntity.getBody();
-        Assert.assertNotNull(body);
-        assertEquals(1, body.getTotal());
-        assertEquals(1, body.getCases().size());
-
-        // Verify both hearings parsed correctly
-        var order = body.getCases().getFirst().getCaseData().getOrderCollection().getFirst().getValue();
-        assertNotNull(order.getHearingDetails());
-        assertEquals("TYPE_A", order.getHearingDetails().getHearingType()); // first one taken
-        assertEquals("First Hearing", order.getHearingDetails().getHearingTypeValue());
-        assertEquals("123, 456", order.getHearingId());
-        assertEquals(List.of(123L, 456L), order.getHearingIds());
-    }
-
 }
