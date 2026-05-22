@@ -192,7 +192,7 @@ public class CafCassControllerTest {
     public void testFallback_HandlesFeignExceptionCorrectly() {
         FeignException ex = feignException(HttpStatus.BAD_REQUEST.value(), "Bad Request payload");
 
-        ResponseEntity<Object> response = cafCassController.searchCasesFallback(
+        ResponseEntity<ApiError> response = cafCassController.searchCasesFallback(
             TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION,
             startDate, endDate, ex);
 
@@ -206,7 +206,7 @@ public class CafCassControllerTest {
     public void testFallback_HandlesGenericExceptionCorrectly() {
         Exception ex = new RuntimeException("Unexpected core system error");
 
-        ResponseEntity<Object> response = cafCassController.searchCasesFallback(
+        ResponseEntity<ApiError> response = cafCassController.searchCasesFallback(
             TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION,
             startDate, endDate, ex);
 
