@@ -146,7 +146,7 @@ public class CafCassControllerTest {
 
     // Refactored exception tests (verifying Resilience4j)
     @Test
-    public void testFeignExceptionBadRequest() {
+    public void testFeignExceptionBadRequest() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
@@ -160,7 +160,7 @@ public class CafCassControllerTest {
     }
 
     @Test
-    public void testFeignExceptionUnAuthorised() {
+    public void testFeignExceptionUnAuthorised() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
@@ -174,7 +174,7 @@ public class CafCassControllerTest {
     }
 
     @Test
-    public void testExceptionInternalServerError() {
+    public void testExceptionInternalServerError() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
