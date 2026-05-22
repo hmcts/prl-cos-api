@@ -98,7 +98,7 @@ public class CafCassControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate)).thenReturn(cafCassResponse);
 
-        ResponseEntity<?> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -114,7 +114,7 @@ public class CafCassControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate)).thenReturn(cafCassResponse);
 
-        ResponseEntity<?> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -192,7 +192,7 @@ public class CafCassControllerTest {
     public void testFallback_HandlesFeignExceptionCorrectly() {
         FeignException ex = feignException(HttpStatus.BAD_REQUEST.value(), "Bad Request payload");
 
-        ResponseEntity<?> response = cafCassController.searchCasesFallback(ex);
+        ResponseEntity<Object> response = cafCassController.searchCasesFallback(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
@@ -204,7 +204,7 @@ public class CafCassControllerTest {
     public void testFallback_HandlesGenericExceptionCorrectly() {
         Exception ex = new RuntimeException("Unexpected core system error");
 
-        ResponseEntity<?> response = cafCassController.searchCasesFallback(ex);
+        ResponseEntity<Object> response = cafCassController.searchCasesFallback(ex);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
