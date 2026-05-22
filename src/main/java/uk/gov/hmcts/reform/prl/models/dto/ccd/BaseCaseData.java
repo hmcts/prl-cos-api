@@ -67,6 +67,8 @@ public class BaseCaseData {
     @JsonProperty("c8ArchivedDocuments")
     private List<Element<Document>> c8ArchivedDocuments;
 
+    private List<Element<String>> cirDocumentsRequested;
+
     /**
      * Case Type Of Application.
      */
