@@ -643,7 +643,11 @@ public class UpdatePartyDetailsService {
     public Boolean checkIfConfidentialityDetailsChangedRespondent(CaseData caseDataBefore, Element<PartyDetails> respondent) {
         List<Element<PartyDetails>> respondentList = null;
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            List<Element<PartyDetails>> respondents = caseDataBefore.getRespondents();
+            List<Element<PartyDetails>> respondents = nullSafeList(caseDataBefore.getRespondents());
+            // if we cannot find a respondent in the before case, this respondent is NEW so isChanged = true
+            if (respondents.stream().filter(oldResp -> oldResp.getId().equals(respondent.getId())).findFirst().isEmpty()) {
+                return true;
+            }
             respondentList = emptyIfNull(respondents).stream()
                 .filter(resp1 -> resp1.getId().equals(respondent.getId())
                     && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
