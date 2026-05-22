@@ -118,15 +118,21 @@ public class UpdateHearingActualsService {
                 Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId = new LinkedHashMap<>();
                 nullSafeCollection(caseData.getUpdateHearingActualTracking())
                     .forEach(e -> trackingByHearingId.put(e.getValue().getHearingId(), e));
-                hearingIds.forEach(hearingId -> processIndividualHearing(caseId, hearingId, trackingByHearingId));
+                final Map<String, Object> caseDataUpdated = new HashMap<>();
+                hearingIds.forEach(hearingId -> caseDataUpdated.putAll(processIndividualHearing(
+                    hearingId,
+                    trackingByHearingId
+                )));
+                triggerSystemEventForWorkAllocationTask(
+                    caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), caseDataUpdated);
             }
 
         };
     }
 
-    private void processIndividualHearing(String caseId, String hearingId, Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId) {
+    private Map<String, Object> processIndividualHearing(String hearingId, Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId) {
         Element<UpdateHearingActualTracking> entry = trackingByHearingId.get(hearingId);
-
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         if (isNull(entry) || isNull(entry.getValue().getLastFiredDate())) {
             LocalDate today = LocalDate.now();
             if (entry != null) {
@@ -143,17 +149,14 @@ public class UpdateHearingActualsService {
                         .build()
                 );
             }
-            Map<String, Object> caseDataUpdated = new HashMap<>();
             caseDataUpdated.put(
                 "updateHearingActualTracking",
                 new ArrayList<>(trackingByHearingId.values())
             );
-
-            triggerSystemEventForWorkAllocationTask(
-                caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), caseDataUpdated);
         } else {
             log.info("UpdateHearingActual Task has already been created for hearingId {}", hearingId);
         }
+        return caseDataUpdated;
     }
 
     /**
