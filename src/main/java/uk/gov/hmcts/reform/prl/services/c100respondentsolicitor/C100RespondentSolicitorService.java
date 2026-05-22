@@ -2324,7 +2324,7 @@ public class C100RespondentSolicitorService {
         String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData, startAllTabsUpdateDataContent.userDetails());
 
         if (StringUtils.isEmpty(languageSupportCaseNotes)) {
-            log.info("No language support case note needed for case {}", caseId);
+            log.info("No language support case note needed for case: {}", caseId);
             return;
         }
 
