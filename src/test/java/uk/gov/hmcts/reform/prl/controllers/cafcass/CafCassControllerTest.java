@@ -246,7 +246,7 @@ public class CafCassControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
         assertNotNull(body);
-        assertEquals("Search service failed: Bad Request payload", body.getMessage());
+        assertEquals(ex.getMessage(), body.getMessage());
     }
 
     @Test
