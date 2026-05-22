@@ -43,8 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
@@ -72,7 +70,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -368,37 +365,18 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
     //Updated to retrieve otherDocuments according to the new manageDocuments event
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         CaseData caseData) {
-        List<Element<QuarantineLegalDoc>>  allDocuments = new ArrayList<>();
-        if (null != caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> courtStaffUploadDocList = caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab();
-            allDocuments.addAll(courtStaffUploadDocList);
-        }
-        if (null != caseData.getReviewDocuments().getCafcassUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getCafcassUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> cafcassUploadDocList = caseData.getReviewDocuments().getCafcassUploadDocListDocTab();
-            allDocuments.addAll(cafcassUploadDocList);
-        }
-        if (null != caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> localAuthorityUploadDocList = caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab();
-            allDocuments.addAll(localAuthorityUploadDocList);
-        }
-        if (null != caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()
-            && !caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> legalProfUploadDocList = caseData.getReviewDocuments().getLegalProfUploadDocListDocTab();
-            allDocuments.addAll(legalProfUploadDocList);
-        }
-
-        if (null != caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()
-            && !caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().isEmpty()) {
-            List<Element<QuarantineLegalDoc>> citizenUploadedDocuments = caseData.getReviewDocuments().getCitizenUploadedDocListDocTab();
-            allDocuments.addAll(citizenUploadedDocuments);
+        List<Element<QuarantineLegalDoc>> allDocuments = new ArrayList<>();
+        ReviewDocuments reviewDocuments = caseData.getReviewDocuments();
+        if (null != reviewDocuments) {
+            addIfNotEmpty(allDocuments, reviewDocuments.getCourtStaffUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getCafcassUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getLocalAuthorityUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getLegalProfUploadDocListDocTab());
+            addIfNotEmpty(allDocuments, reviewDocuments.getCitizenUploadedDocListDocTab());
         }
 
         List<BundlingRequestDocument> otherBundlingDocuments = new ArrayList<>();
-        List<QuarantineLegalDoc> allDocs = ElementUtils.unwrapElements(allDocuments);
-        for (QuarantineLegalDoc doc : allDocs) {
+        for (QuarantineLegalDoc doc : ElementUtils.unwrapElements(allDocuments)) {
             BundlingRequestDocument otherDoc = mapBundlingRequestDocumentForOtherDocs(doc);
             if (null != otherDoc) {
                 log.info("otherDoc in bundle with filename: {} for case: {}", otherDoc.documentFileName, caseData.getId());
@@ -406,6 +384,12 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
             }
         }
         return ElementUtils.wrapElements(otherBundlingDocuments);
+    }
+
+    private <T> void addIfNotEmpty(List<T> target, List<T> source) {
+        if (null != source && !source.isEmpty()) {
+            target.addAll(source);
+        }
     }
 
 
@@ -578,13 +562,6 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
                 .documentGroup(BundlingDocGroupEnum.section7Report).build() : null
         );
         bundleMap.put(
-            SIXTEEN_A_RISK_ASSESSMENT,
-            Objects.nonNull(doc.getSixteenARiskAssessmentDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getSixteenARiskAssessmentDocument())
-                .documentFileName(doc.getSixteenARiskAssessmentDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.sixteenARiskAssessment).build() : null
-        );
-        bundleMap.put(
             GUARDIAN_REPORT,
             Objects.nonNull(doc.getGuardianReportDocument()) ? BundlingRequestDocument.builder()
                 .documentLink(doc.getGuardianReportDocument())
@@ -642,16 +619,6 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
             .documentLink(doc.getSection47LaDocument())
             .documentFileName(doc.getSection47LaDocument().getDocumentFileName())
             .documentGroup(BundlingDocGroupEnum.laSectionSection47EnquiryReport).build() : null);
-        bundleMap.put(CIR_EXTENSION_REQUEST_LA, Objects.nonNull(doc.getCirExtensionRequestLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCirExtensionRequestLaDocument())
-            .documentFileName(doc.getCirExtensionRequestLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionCirExtensionRequestReport).build() : null);
-
-        bundleMap.put(CIR_TRANSFER_REQUEST_LA, Objects.nonNull(doc.getCirTransferRequestLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCirTransferRequestLaDocument())
-            .documentFileName(doc.getCirTransferRequestLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionCirTransferRequestReport).build() : null);
-
 
         bundleMap.put(
             LA_OTHER_DOCS,

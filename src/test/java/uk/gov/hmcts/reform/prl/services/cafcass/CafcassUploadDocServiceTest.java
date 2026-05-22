@@ -22,11 +22,15 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,6 +40,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_S16A_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOC_UPLOADED_CATEGORY;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
 
 @ExtendWith(MockitoExtension.class)
@@ -170,6 +180,270 @@ class CafcassUploadDocServiceTest {
         assertThrows(ResponseStatusException.class, () ->
             cafcassUploadDocService.uploadDocument(authToken, fileWithNoName, "16_4_Report", TEST_CASE_ID)
         );
+    }
+
+    @Test
+    void shouldAcceptCirTransferDocumentType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper()),
+            caseData,
+            null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
+
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldAcceptCirExtensionDocumentType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        Document document = testDocument();
+        UploadResponse uploadResponse = new UploadResponse(List.of(document));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper()),
+            caseData,
+            null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
+
+        verify(allTabService, times(1)).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeForCirTransfer() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
+
+        assertEquals(DOC_TYPE_CIR_TRANSFER, ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
+        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeForCirExtension() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
+
+        assertEquals(DOC_TYPE_CIR_EXTENSION, ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
+        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeFor16aRiskAssessment() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
+
+        assertEquals("16aRiskAssessment", ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
+        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldNotCreateDuplicateTaskWhenSameUrgentDocTypeAlreadyInQuarantine() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("cirTransferRequest")
+            .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithExistingQuarantineDoc.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldNotCreateDuplicateTaskWhenSameCirExtensionTypeAlreadyInQuarantine() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("cirExtensionRequest")
+            .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithExistingQuarantineDoc.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldSetUrgentDocTypeToNullForNonUrgentDocumentType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseData, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, "16_4_Report", TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldNotCreateDuplicateTaskWhenSame16aRiskAssessmentAlreadyInQuarantine() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("16aRiskAssessment")
+            .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithExistingQuarantineDoc.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
+
+        assertNull(caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY));
+        assertNull(caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void shouldCreateTaskWhenDifferentUrgentDocTypeAlreadyInQuarantine() {
+        // cirExtensionRequest is in quarantine but we upload cirTransferRequest — different category, task must fire
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+            .categoryId("cirExtensionRequest")
+            .build());
+        CaseData caseDataWithOtherCategory = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .cafcassQuarantineDocsList(List.of(existingDoc))
+                .build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseDataWithOtherCategory.toMap(new ObjectMapper());
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithOtherCategory, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
+
+        assertEquals(DOC_TYPE_CIR_TRANSFER, ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
+        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
     }
 
     @Test
