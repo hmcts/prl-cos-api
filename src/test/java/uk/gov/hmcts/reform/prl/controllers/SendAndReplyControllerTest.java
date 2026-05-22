@@ -28,11 +28,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
-import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -84,7 +84,7 @@ public class SendAndReplyControllerTest {
     private AllTabServiceImpl allTabService;
 
     @Mock
-    private TaskUtils taskUtils;
+    private ManageOrderService manageOrderService;
 
     private CaseData replyCaseData;
     private Map<String, Object> caseDataMap;
@@ -203,7 +203,7 @@ public class SendAndReplyControllerTest {
         when(sendAndReplyService.setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth))).thenReturn(aboutToStartMap);
 
         // when
-        sendAndReplyController.handleSendOrMessageAboutToStartNextStep(auth,  null, sendCallbackRequest);
+        sendAndReplyController.handleSendOrMessageAboutToStartNextStep(auth,  sendCallbackRequest);
 
         // then
         verify(sendAndReplyService).setSenderAndGenerateMessageReplyList(any(CaseData.class), eq(auth));
@@ -511,7 +511,7 @@ public class SendAndReplyControllerTest {
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, null, callbackRequest);
+        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
         verify(sendAndReplyCommonService).sendMessages(auth, caseData, caseDataMap);
     }
 
@@ -524,7 +524,7 @@ public class SendAndReplyControllerTest {
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
-            .sendOrReplyToMessagesSubmit(auth, null, callbackRequest);
+            .sendOrReplyToMessagesSubmit(auth, callbackRequest);
 
         // then
         verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
@@ -553,17 +553,23 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandSubmittedSendAndReply() {
+        String clientContext = "";
         // given
         CallbackRequest callbackRequest = setUpHandleSubmitted();
 
-        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth))
+            .thenReturn(ok(SubmittedCallbackResponse.builder().build()));
 
         // when
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest, null);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController
+            .handleSubmittedSendAndReply(auth, callbackRequest, clientContext);
 
         // then
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
-        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest, auth);
+        verify(sendAndReplyService)
+            .sendAndReplySubmitted(callbackRequest, auth);
+        verify(manageOrderService)
+            .reCreateCirDocumentsRequestedTask(callbackRequest, clientContext);
     }
 
 
