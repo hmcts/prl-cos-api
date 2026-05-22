@@ -82,6 +82,7 @@ feature:
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
     osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
     bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
+    createRequestCirUpdateTaskEnabled: ${CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -440,8 +441,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-2868.preview.platform.hmcts.net/}
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
