@@ -11,6 +11,8 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_REFERENCE;
 
 @Slf4j
 public class EmailUtils {
@@ -51,8 +53,8 @@ public class EmailUtils {
     public static Map<String, Object> getCommonSendgridDynamicTemplateData(CaseData caseData) {
         Map<String, Object> dynamicTemplateData = new HashMap<>();
 
-        dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
-        dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
+        dynamicTemplateData.put(CASE_NAME, caseData.getApplicantCaseName());
+        dynamicTemplateData.put(CASE_REFERENCE, String.valueOf(caseData.getId()));
 
         return dynamicTemplateData;
     }

@@ -2534,7 +2534,9 @@ public class SendAndReplyServiceTest {
             .build();
 
         Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100Message);
-        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder()
+            .caseReference(String.valueOf(caseDataC100Message.getId()))
+            .toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
@@ -2638,7 +2640,9 @@ public class SendAndReplyServiceTest {
 
         Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100Message);
         dynamicData.put("name","");
-        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("test@test.com")
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder()
+            .caseReference(String.valueOf(caseDataC100Message.getId()))
+            .toEmailAddress("test@test.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
@@ -2724,7 +2728,9 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
         Map<String, Object> dynamicData = getEmailDynamicData(caseDataForFL401Message);
-        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder()
+            .caseReference(String.valueOf(caseDataForFL401Message.getId()))
+            .toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
