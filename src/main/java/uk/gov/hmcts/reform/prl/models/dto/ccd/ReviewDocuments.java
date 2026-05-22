@@ -27,6 +27,7 @@ public class ReviewDocuments {
     private YesNoNotSure reviewDecisionYesOrNo;
     private String docToBeReviewed;
     private Document reviewDoc;
+    private String documentNewName;
 
     //NOT IN USE
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListConfTab;
@@ -52,7 +53,7 @@ public class ReviewDocuments {
 
     public static String[] reviewDocTempFields() {
         return new String[]{
-            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList"
+            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList", "documentNewName"
         };
     }
 

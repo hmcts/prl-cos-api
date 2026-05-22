@@ -4,7 +4,17 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.State;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
@@ -1187,4 +1197,14 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
+    public static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
+        CHILD_IMPACT_REPORT_1_LA,
+        CHILD_IMPACT_REPORT_2_LA,
+        SECTION_7_REPORT_LA,
+        SECTION_7_ADDENDUM_REPORT_LA,
+        LOCAL_AUTHORITY_INVOLVEMENT_LA,
+        SECTION_47_LA,
+        CIR_EXTENSION_REQUEST_LA,
+        CIR_TRANSFER_REQUEST_LA
+    );
 }

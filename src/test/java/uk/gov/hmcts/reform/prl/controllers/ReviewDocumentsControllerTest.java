@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -36,6 +37,9 @@ public class ReviewDocumentsControllerTest {
 
     @Mock
     private ReviewDocumentService reviewDocumentService;
+
+    @Mock
+    private DocumentCategoryService documentCategoryService;
 
     @Mock
     private ObjectMapper objectMapper;

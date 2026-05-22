@@ -188,4 +188,6 @@ public class BaseCaseData {
         }
         return documentRemovalWrapper;
     }
+
+    private RenameDocument renameDocument;
 }

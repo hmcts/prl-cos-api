@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -47,6 +48,7 @@ public class ReviewDocumentsController {
     private final ObjectMapper objectMapper;
     private final ReviewDocumentService reviewDocumentService;
     private final SystemUserService systemUserService;
+    private final DocumentCategoryService documentCategoryService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -85,6 +87,12 @@ public class ReviewDocumentsController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
+        DynamicList documentCategories = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
+        if (nonNull(documentCategories)) {
+            documentCategories.setValue(DynamicListElement.builder().code("MIAMCertificate").label(
+                "MIAM certificate/Exemption").build());
+        }
+        caseDataUpdated.put("documentCategories", documentCategories);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
