@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
@@ -36,9 +36,8 @@ public class ViewDraftOrdersService {
     private final SystemUserService systemUserService;
     private final ObjectMapper objectMapper;
 
-    private static final String NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT = "No draft Orders outstanding";
     private static final String FILTERED_DRAFT_ORDERS_CASE_FIELD = "filteredDraftOrders";
-    private static final String NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT_CASE_FIELD = "noFilteredDraftOrdersLabelText";
+    private static final String FILTERED_DRAFT_ORDERS_PRESENT_YES_NO_FLAG_CASE_FIELD = "filteredDraftOrdersPresentYesNoFlag";
 
     private List<Element<DraftOrder>> getDraftOrdersForUser(CaseDetails caseDetails, String authorisation) {
         List<Element<DraftOrder>> filteredDraftOrders = new ArrayList<>();
@@ -89,11 +88,11 @@ public class ViewDraftOrdersService {
     public Map<String, Object> getViewDraftOrdersCaseFieldsMap(CaseDetails caseDetails, String authorisation) {
         List<Element<DraftOrder>> filteredDraftOrders = this.getDraftOrdersForUser(caseDetails, authorisation);
 
-        String noFilteredDraftOrdersLabelText = CollectionUtils.isEmpty(filteredDraftOrders)
-            ? NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT : StringUtil.EMPTY_STRING;
+        YesOrNo filteredDraftOrdersPresentFlag = CollectionUtils.isEmpty(filteredDraftOrders)
+            ? YesOrNo.No : YesOrNo.Yes;
 
         return Map.of(
             FILTERED_DRAFT_ORDERS_CASE_FIELD, filteredDraftOrders,
-            NO_FILTERED_DRAFT_ORDERS_LABEL_TEXT_CASE_FIELD, noFilteredDraftOrdersLabelText);
+            FILTERED_DRAFT_ORDERS_PRESENT_YES_NO_FLAG_CASE_FIELD, filteredDraftOrdersPresentFlag);
     }
 }

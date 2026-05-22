@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
@@ -105,7 +105,7 @@ public class ViewDraftOrdersServiceTest {
         List<Element<DraftOrder>> userDraftOrderCollection = (List<Element<DraftOrder>>)
             caseFieldsMap.get("filteredDraftOrders");
         assertTrue(userDraftOrderCollection.isEmpty());
-        assertEquals("No draft Orders outstanding", caseFieldsMap.get("noFilteredDraftOrdersLabelText"));
+        assertEquals(YesOrNo.No, caseFieldsMap.get("filteredDraftOrdersPresentYesNoFlag"));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ViewDraftOrdersServiceTest {
         List<Element<DraftOrder>> userDraftOrderCollection = (List<Element<DraftOrder>>)
             caseFieldsMap.get("filteredDraftOrders");
         assertFalse(userDraftOrderCollection.isEmpty());
-        assertEquals(StringUtils.EMPTY, caseFieldsMap.get("noFilteredDraftOrdersLabelText"));
+        assertEquals(YesOrNo.Yes, caseFieldsMap.get("filteredDraftOrdersPresentYesNoFlag"));
     }
 
     static Stream<Arguments> parameterOrgSolicitorEmails() {
@@ -149,7 +149,7 @@ public class ViewDraftOrdersServiceTest {
             Arguments.of(
                 Collections.singletonList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
                 Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0)),
-                StringUtils.EMPTY
+                YesOrNo.Yes
             ),
             Arguments.of(
                 Arrays.asList(
@@ -158,7 +158,7 @@ public class ViewDraftOrdersServiceTest {
                     ORGANISATION_SOLICITOR_EMAILS.get(1)
                 ),
                 Collections.singletonList(OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0)),
-                StringUtils.EMPTY
+                YesOrNo.Yes
             ),
             Arguments.of(
                 List.of(),
@@ -167,12 +167,12 @@ public class ViewDraftOrdersServiceTest {
                     OTHER_ORGANISATION_SOLICITOR_EMAILS.get(0),
                     OTHER_ORGANISATION_SOLICITOR_EMAILS.get(1)
                 ),
-                "No draft Orders outstanding"
+                YesOrNo.No
             ),
             Arguments.of(
                 Collections.singletonList(ORGANISATION_SOLICITOR_EMAILS.get(0)),
                 List.of(),
-                StringUtils.EMPTY
+                YesOrNo.Yes
             )
         );
     }
@@ -182,7 +182,7 @@ public class ViewDraftOrdersServiceTest {
     @DisplayName("Should ")
     public void testGetViewDraftOrdersCaseFieldsMap_WithOrg(List<String> sameOrgSolicitorEmails,
                                                             List<String> otherOrgSolicitorEmails,
-                                                            String noFilteredDraftOrdersLabelTextExpected) {
+                                                            YesOrNo filteredDraftOrdersPresentYesNoFlag) {
         // Given
         //  Setup User Organisation
         when(organisationService.findUserOrganisation(AUTH_TOKEN_WITH_ORGANISATION))
@@ -238,7 +238,7 @@ public class ViewDraftOrdersServiceTest {
         );
 
         assertEquals(userDraftOrderCollectionExpected, userDraftOrderCollection);
-        assertEquals(noFilteredDraftOrdersLabelTextExpected, caseFieldsMap.get("noFilteredDraftOrdersLabelText"));
+        assertEquals(filteredDraftOrdersPresentYesNoFlag, caseFieldsMap.get("filteredDraftOrdersPresentYesNoFlag"));
     }
 
     private static List<SolicitorUser> getUserOrgSolicitors() {
