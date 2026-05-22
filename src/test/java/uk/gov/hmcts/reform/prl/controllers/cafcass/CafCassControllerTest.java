@@ -88,7 +88,35 @@ public class CafCassControllerTest {
 
     @Test
     public void getCaseData_shouldNotFail_whenHearingTypesIsNull() throws Exception {
-        String json = "{ \"cases\": [ { \"id\": 1234567890123456, \"case_data\": { \"orderCollection\": [ { \"id\": \"00000000-0000-0000-0000-000000000000\", \"value\": { \"orderType\": \"SomeOrder\", \"manageOrderHearingDetails\": [ { \"id\": \"11111111-1111-1111-1111-111111111111\", \"value\": { \"hearingTypes\": null, \"confirmedHearingDates\": null } } ] } } ] } } ], \"total\": 1 }";
+        String json = """
+                    {
+                       "cases": [
+                         {
+                           "id": 1234567890123456,
+                           "case_data": {
+                             "orderCollection": [
+                               {
+                                 "id": "00000000-0000-0000-0000-000000000000",
+                                 "value": {
+                                   "orderType": "SomeOrder",
+                                   "manageOrderHearingDetails": [
+                                     {
+                                       "id": "11111111-1111-1111-1111-111111111111",
+                                       "value": {
+                                         "hearingTypes": null,
+                                         "confirmedHearingDates": null
+                                       }
+                                     }
+                                   ]
+                                 }
+                               }
+                             ]
+                           }
+                         }
+                       ],
+                       "total": 1
+                     }
+            """;
         ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
         mapper.registerModule(new ParameterNamesModule());
         CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
@@ -109,7 +137,50 @@ public class CafCassControllerTest {
 
     @Test
     public void getCaseData_shouldDeserializeNormally_withMultipleHearings() throws Exception {
-        String json = "{ \"cases\": [ { \"id\": 9876543210123456, \"case_data\": { \"orderCollection\": [ { \"id\": \"00000000-0000-0000-0000-000000000000\", \"value\": { \"orderType\": \"StandardOrder\", \"manageOrderHearingDetails\": [ { \"id\": \"11111111-1111-1111-1111-111111111111\", \"value\": { \"hearingTypes\": { \"value\": {\"code\": \"TYPE_A\", \"label\": \"First Hearing\"} }, \"confirmedHearingDates\": { \"value\": {\"code\": \"123\", \"label\": \"2022-01-01T10:00:00\"} } } }, { \"id\": \"22222222-2222-2222-2222-222222222222\", \"value\": { \"hearingTypes\": { \"value\": {\"code\": \"TYPE_B\", \"label\": \"Second Hearing\"} }, \"confirmedHearingDates\": { \"value\": {\"code\": \"456\", \"label\": \"2022-01-01T11:00:00\"} } } } ] } } ] } } ], \"total\": 1 }";
+        String json = """
+            {
+              "cases": [
+                {
+                  "id": 9876543210123456,
+                  "case_data": {
+                    "orderCollection": [
+                      {
+                        "id": "00000000-0000-0000-0000-000000000000",
+                        "value": {
+                          "orderType": "StandardOrder",
+                          "manageOrderHearingDetails": [
+                            {
+                              "id": "11111111-1111-1111-1111-111111111111",
+                              "value": {
+                                "hearingTypes": {
+                                  "value": {"code": "TYPE_A", "label": "First Hearing"}
+                                },
+                                "confirmedHearingDates": {
+                                  "value": {"code": "123", "label": "2022-01-01T10:00:00"}
+                                }
+                              }
+                            },
+                            {
+                              "id": "22222222-2222-2222-2222-222222222222",
+                              "value": {
+                                "hearingTypes": {
+                                  "value": {"code": "TYPE_B", "label": "Second Hearing"}
+                                },
+                                "confirmedHearingDates": {
+                                  "value": {"code": "456", "label": "2022-01-01T11:00:00"}
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "total": 1
+            }
+            """;
         ObjectMapper mapper = CcdObjectMapper.getObjectMapper();
         mapper.registerModule(new ParameterNamesModule());
         CafCassResponse cafCassResponse = mapper.readValue(json, CafCassResponse.class);
