@@ -62,7 +62,7 @@ public class CafCassController extends AbstractCallbackController {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
-    ) throws Exception, feignException, ResponseStatusException {
+    ) throws Exception, FeignException, ResponseStatusException {
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
             Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
