@@ -80,7 +80,10 @@ public class CafCassControllerTest {
         );
 
         CafCassResponse realCafCassResponse = (CafCassResponse) responseEntity.getBody();
-        assertEquals(objectMapper.writeValueAsString(expectedCafCassResponse), objectMapper.writeValueAsString(realCafCassResponse));
+        assertEquals(
+            objectMapper.writeValueAsString(expectedCafCassResponse),
+            objectMapper.writeValueAsString(realCafCassResponse)
+        );
         Assert.assertNotNull(realCafCassResponse);
         assertEquals(4, realCafCassResponse.getTotal());
         assertEquals(4, realCafCassResponse.getCases().size());
@@ -98,7 +101,12 @@ public class CafCassControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate)).thenReturn(cafCassResponse);
 
-        ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates(
+            "authorisation",
+            "Bearer serviceAuthorisation",
+            startDate,
+            endDate
+        );
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -114,7 +122,12 @@ public class CafCassControllerTest {
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(cafcassCaseDataService.getCaseData("authorisation", startDate, endDate)).thenReturn(cafCassResponse);
 
-        ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        ResponseEntity<Object> responseEntity = cafCassController.searchCasesByDates(
+            "authorisation",
+            "Bearer serviceAuthorisation",
+            startDate,
+            endDate
+        );
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
@@ -122,7 +135,12 @@ public class CafCassControllerTest {
     public void testInvalidServiceAuth_401UnAuthorized() throws Exception {
         when(authorisationService.authoriseService(any())).thenReturn(false);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.empty());
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates("authorisation", "inValidServiceAuthorisation", "startDate", "endDate");
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
+            "authorisation",
+            "inValidServiceAuthorisation",
+            "startDate",
+            "endDate"
+        );
         assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
@@ -131,7 +149,12 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "2022-08-22T10:54:43.49", "2022-08-22T11:54:43.49");
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
+            TEST_AUTHORIZATION,
+            TEST_SERVICE_AUTHORIZATION,
+            "2022-08-22T10:54:43.49",
+            "2022-08-22T11:54:43.49"
+        );
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -140,7 +163,12 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of("invalid-case-role"));
-        final ResponseEntity<Object> response = cafCassController.searchCasesByDates("authorisation", "Bearer serviceAuthorisation", startDate, endDate);
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
+            "authorisation",
+            "Bearer serviceAuthorisation",
+            startDate,
+            endDate
+        );
         assertEquals(UNAUTHORIZED, response.getStatusCode());
     }
 
@@ -154,9 +182,16 @@ public class CafCassControllerTest {
             .thenThrow(feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
 
         // Assert that the controller now propagates the FeignException directly
-        assertThrows(FeignException.class, () -> {
-            cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, startDate, endDate);
-        });
+        assertThrows(
+            FeignException.class, () -> {
+                cafCassController.searchCasesByDates(
+                    TEST_AUTHORIZATION,
+                    TEST_SERVICE_AUTHORIZATION,
+                    startDate,
+                    endDate
+                );
+            }
+        );
     }
 
     @Test
@@ -168,9 +203,16 @@ public class CafCassControllerTest {
             .thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
 
         // Assert that the controller propagates the FeignException directly
-        assertThrows(FeignException.class, () -> {
-            cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, startDate, endDate);
-        });
+        assertThrows(
+            FeignException.class, () -> {
+                cafCassController.searchCasesByDates(
+                    TEST_AUTHORIZATION,
+                    TEST_SERVICE_AUTHORIZATION,
+                    startDate,
+                    endDate
+                );
+            }
+        );
     }
 
     @Test
@@ -182,9 +224,16 @@ public class CafCassControllerTest {
             .thenThrow(new RuntimeException("Something broke inside"));
 
         // Assert that the controller propagates the raw Exception directly
-        assertThrows(RuntimeException.class, () -> {
-            cafCassController.searchCasesByDates(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, "startDate", "endDate");
-        });
+        assertThrows(
+            RuntimeException.class, () -> {
+                cafCassController.searchCasesByDates(
+                    TEST_AUTHORIZATION,
+                    TEST_SERVICE_AUTHORIZATION,
+                    "startDate",
+                    "endDate"
+                );
+            }
+        );
     }
 
     // New tests: verifying the fallback mapping methods directly
@@ -194,7 +243,8 @@ public class CafCassControllerTest {
 
         ResponseEntity<ApiError> response = cafCassController.searchCasesFallback(
             TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION,
-            startDate, endDate, ex);
+            startDate, endDate, ex
+        );
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
@@ -208,7 +258,8 @@ public class CafCassControllerTest {
 
         ResponseEntity<ApiError> response = cafCassController.searchCasesFallback(
             TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION,
-            startDate, endDate, ex);
+            startDate, endDate, ex
+        );
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
@@ -218,9 +269,11 @@ public class CafCassControllerTest {
 
     // Helper method
     public static FeignException feignException(int status, String message) {
-        return FeignException.errorStatus(message, Response.builder()
-            .status(status)
-            .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
-            .build());
+        return FeignException.errorStatus(
+            message, Response.builder()
+                .status(status)
+                .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
+                .build()
+        );
     }
 }
