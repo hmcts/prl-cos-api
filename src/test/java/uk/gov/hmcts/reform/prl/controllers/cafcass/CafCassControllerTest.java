@@ -192,7 +192,9 @@ public class CafCassControllerTest {
     public void testFallback_HandlesFeignExceptionCorrectly() {
         FeignException ex = feignException(HttpStatus.BAD_REQUEST.value(), "Bad Request payload");
 
-        ResponseEntity<Object> response = cafCassController.searchCasesFallback(ex);
+        ResponseEntity<Object> response = cafCassController.searchCasesFallback(
+            TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION,
+            startDate, endDate, ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
@@ -204,7 +206,9 @@ public class CafCassControllerTest {
     public void testFallback_HandlesGenericExceptionCorrectly() {
         Exception ex = new RuntimeException("Unexpected core system error");
 
-        ResponseEntity<Object> response = cafCassController.searchCasesFallback(ex);
+        ResponseEntity<Object> response = cafCassController.searchCasesFallback(
+            TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION,
+            startDate, endDate, ex);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         ApiError body = (ApiError) response.getBody();
