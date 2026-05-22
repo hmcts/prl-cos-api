@@ -113,6 +113,7 @@ public class ManageDocumentsControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         Mockito.doNothing().when(manageDocumentsService).appendConfidentialDocumentNameForCourtAdminAndUpdate(any(), any());
+        Mockito.when(userService.getUserDetails(any())).thenReturn(UserDetails.builder().id("userId").build());
 
         mockMvc.perform(
                 post(url)
