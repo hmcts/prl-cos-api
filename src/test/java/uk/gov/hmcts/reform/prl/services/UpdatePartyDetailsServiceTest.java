@@ -1478,7 +1478,7 @@ class UpdatePartyDetailsServiceTest {
         );
 
         // then
-        assertFalse(bool);
+        assertTrue(bool);
     }
 
     @Test
@@ -1534,6 +1534,30 @@ class UpdatePartyDetailsServiceTest {
             wrappedRespondent
         );
         assertTrue(bool);
+    }
+
+    @Test
+    void checkIfDetailsChangedRespondentWhenRespondentsDidNotExistBefore() {
+        UUID existingRespondentId = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
+        UUID newRespondentId = UUID.fromString("95edcc74-77c5-4a5b-b369-ff10fb6192e5");
+
+        PartyDetails existingRespondent = PartyDetails.builder()
+            .email("old@test.com")
+            .build();
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(element(existingRespondentId, existingRespondent)))
+            .build();
+
+        PartyDetails newRespondent = PartyDetails.builder()
+            .email("new@test.com")
+            .build();
+
+        assertThat(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
+            caseDataBefore,
+            element(newRespondentId, newRespondent)
+        )).isTrue();
     }
 
     @Test
