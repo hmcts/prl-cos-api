@@ -33,7 +33,7 @@ public class FeignRetryConfig extends FeignClientProperties.FeignClientConfigura
             // Only retry GET methods and 5xx responses
             boolean isGet = response.request().httpMethod() == feign.Request.HttpMethod.GET;
             boolean isPost = response.request().httpMethod() == feign.Request.HttpMethod.POST;
-            boolean isTargetMethod = methodKey.contains("CafcassCcdDataStoreService#searchCases")
+            boolean isTargetMethod = methodKey.contains("CafcassCcdDataStoreService#searchCases");
             int status = response.status();
 
             if (isTargetMethod && (isGet || isPost) && status >= 500 && status < 600) {
