@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
