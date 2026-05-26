@@ -217,15 +217,16 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseService(any())).thenReturn(true);
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            cafCassController.searchCasesByDates(TEST_AUTHORIZATION,
-                                                 TEST_SERVICE_AUTHORIZATION,
-                                                 "2022-08-22T10:54:43.49",
-                                                 "2022-08-22T11:54:43.49");
-        });
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
+            TEST_AUTHORIZATION,
+            TEST_SERVICE_AUTHORIZATION,
+            "2022-08-22T10:54:43.49",
+            "2022-08-22T11:54:43.49"
+        );
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("Difference between end date and start date should not be more than 15 minutes",
-                     exception.getReason());
+                     ((ApiError)response.getBody()).getMessage());
     }
 
     @Test
