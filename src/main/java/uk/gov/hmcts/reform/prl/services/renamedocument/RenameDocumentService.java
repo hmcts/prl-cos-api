@@ -95,12 +95,13 @@ public class RenameDocumentService {
         return caseDataMap;
     }
 
-    public Map<String, Object> handleAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         log.info("Entering handleAboutToSubmit for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
+
             DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
             log.info(
                 "Selected document from dynamic list: {}",
@@ -113,11 +114,20 @@ public class RenameDocumentService {
                 String documentId = codes[codes.length - 1];
 
                 String newName = caseData.getRenameDocument().getNewNameForDocument();
+                String categoryId = null;
+                if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getCategoryDocumentsList() != null) {
+                    categoryId = caseData.getRenameDocument().getCategoryDocumentsList().getValue().getCode();
+                }
 
                 if (isNotBlank(newName)) {
-                    log.info("Searching for document with ID: {}, to be rename: {}", documentId, newName);
+                    log.info(
+                        "Searching for document with ID: {} and Category ID: {} to be rename: {}",
+                        documentId,
+                        newName,
+                        categoryId
+                    );
                 }
-                findAndRenameDocument(caseDataMap, newName, documentId);
+                findAndRenameDocument(caseDataMap, newName, documentId, categoryId);
             }
         } else {
             log.warn("RenameDocument or RenameDocumentsList is null in caseData");
@@ -127,7 +137,7 @@ public class RenameDocumentService {
         return caseDataMap;
     }
 
-    private void findAndRenameDocument(Object data, String newName, String documentId) {
+    private void findAndRenameDocument(Object data, String newName, String documentId, String categoryId) {
         if (data instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) data;
 
@@ -140,18 +150,18 @@ public class RenameDocumentService {
 
                     log.info("Renaming the document");
                     map.put("document_filename", newUploadName);
+                    map.put("category_id", categoryId);
                     return;
                 }
             }
-
             for (Object value : map.values()) {
-                findAndRenameDocument(value, newName, documentId);
+                findAndRenameDocument(value, newName, documentId, categoryId);
             }
 
         } else if (data instanceof List) {
             List<?> list = (List<?>) data;
             for (Object item : list) {
-                findAndRenameDocument(item, newName, documentId);
+                findAndRenameDocument(item, newName, documentId, categoryId);
             }
         }
 

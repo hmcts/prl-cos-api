@@ -69,7 +69,7 @@ public class RenameDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
 
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataMap = renameDocumentService.handleAboutToSubmit(authorisation, callbackRequest);
+            Map<String, Object> caseDataMap = renameDocumentService.handleAboutToSubmit(callbackRequest);
             if (caseDataMap.containsKey("errors")) {
                 List<String> errorList = (List<String>) caseDataMap.get("errors");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
