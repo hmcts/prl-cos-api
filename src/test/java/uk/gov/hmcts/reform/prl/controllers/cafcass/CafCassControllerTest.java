@@ -335,6 +335,22 @@ public class CafCassControllerTest {
         assertEquals(ex.getMessage(), body.getMessage());
     }
 
+    @Test
+    public void testFallback_HandlesResponseStatusExceptionCorrectly() {
+        ResponseStatusException ex = new ResponseStatusException(HttpStatus.UNAUTHORIZED, "401 UNAUTHORIZED");
+        ResponseEntity<ApiError> response = cafCassController.searchCasesFallback(
+            TEST_AUTHORIZATION,
+            TEST_SERVICE_AUTHORIZATION,
+            "dummyStart",
+            "dummyEnd",
+            ex
+        );
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        ApiError body = (ApiError) response.getBody();
+        assertNotNull(body);
+        assertEquals(ex.getMessage(), body.getMessage());
+    }
+
     // Helper method
     public static FeignException feignException(int status, String message) {
         return FeignException.errorStatus(
