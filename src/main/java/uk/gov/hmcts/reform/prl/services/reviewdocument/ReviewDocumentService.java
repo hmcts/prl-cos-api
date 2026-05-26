@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,14 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
+import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -73,6 +76,7 @@ public class ReviewDocumentService {
     private final ManageDocumentsService manageDocumentsService;
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
+    private final DocumentCategoryService documentCategoryService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
@@ -128,6 +132,7 @@ public class ReviewDocumentService {
             + GOVUK_LIST_BULLET_LABEL;
 
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
+    public static final String QUARANTINE_INFORMATION = "quarantineInformation";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
@@ -250,11 +255,21 @@ public class ReviewDocumentService {
         return dynamicListElements;
     }
 
-    public void getReviewedDocumentDetailsNew(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public List<String> validateEvent(Map<String, Object> caseDataUpdated) {
+        String documentNewName = (String) caseDataUpdated.get("documentNewName");
+        List<String> errors = new ArrayList<>();
+        if (StringUtils.isNotBlank(documentNewName) && documentNewName.contains(".")) {
+            errors.add("Please do not add extension in the new file name");
+        }
+        return errors;
+    }
+
+    public void getReviewedDocumentDetailsNew(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
             && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
             List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = getTempQuarantineDocumentList(caseData);
+            final DynamicList documentCategories = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
 
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
@@ -263,7 +278,7 @@ public class ReviewDocumentService {
                 quarantineLegalDocElement = resetUploaderRole(quarantineLegalDocElement);
             }
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                caseDataUpdated,
+                documentCategories, caseDataUpdated,
                 legalDocElement,
                 null != legalDocElement.getValue().getUploaderRole()
                     ? legalDocElement.getValue().getUploaderRole()
@@ -326,19 +341,41 @@ public class ReviewDocumentService {
         return quarantineLegalDocElement;
     }
 
-    private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
+    private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(DynamicList documentCategories, Map<String, Object> caseDataUpdated,
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
 
-        String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
-
+        String docTobeReviewed = format(SUBMITTED_BY_LABEL, submittedBy) + "<br/>";
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+        if (nonNull(documentCategories)) {
+            documentCategories.setValue(DynamicListElement.builder()
+                                            .code(nonNull(quarantineLegalDoc) ? quarantineLegalDoc.getCategoryId() : null)
+                                            .label(nonNull(quarantineLegalDoc) ? quarantineLegalDoc.getCategoryName() : null)
+                                            .build());
+        }
+        caseDataUpdated.put("documentCategories", documentCategories);
+        String quarantineInfo = quarantineInformation(quarantineLegalDoc, submittedBy);
+        caseDataUpdated.put(QUARANTINE_INFORMATION, quarantineInfo);
         caseDataUpdated.put(DOC_LABEL, LABEL_WITH_HINT);
 
         Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
             submittedBy, quarantineLegalDoc);
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
+    }
+
+    private String quarantineInformation(QuarantineLegalDoc quarantineDoc, String submittedBy) {
+        StringBuilder quarantineDetailsBuilder = new StringBuilder();
+        //append quarantine document details for solicitor, cafcass & court staff
+        appendQuarantineDocumentDetails(quarantineDetailsBuilder, quarantineDoc, submittedBy);
+
+        //PRL-5006 bulk scan fields
+        if (BULK_SCAN.equals(submittedBy)) {
+            appendBulkScanDocumentDetails(quarantineDetailsBuilder, quarantineDoc);
+        }
+        quarantineDetailsBuilder.append("<br/>");
+        return quarantineDetailsBuilder.toString();
+
     }
 
     public void triggerAllDocsReviewedEvent(CaseData caseData) {
@@ -667,30 +704,11 @@ public class ReviewDocumentService {
             .filter(element -> element.getId().equals(uuid)).findFirst();
     }
 
-    private String formatDocumentTobeReviewed(String submittedBy,
-                                              QuarantineLegalDoc quarantineDoc) {
-        StringBuilder reviewDetailsBuilder = new StringBuilder();
-        reviewDetailsBuilder.append(format(SUBMITTED_BY_LABEL, submittedBy));
-        //append quarantine document details for solicitor, cafcass & court staff
-        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc, submittedBy);
 
-        //PRL-5006 bulk scan fields
-        if (BULK_SCAN.equals(submittedBy)) {
-            appendBulkScanDocumentDetails(reviewDetailsBuilder, quarantineDoc);
-        }
-        reviewDetailsBuilder.append("<br/>");
-        return reviewDetailsBuilder.toString();
-    }
 
     private void appendQuarantineDocumentDetails(StringBuilder reviewDetailsBuilder,
                                                  QuarantineLegalDoc quarantineDoc,
                                                  String submittedBy) {
-        if (CommonUtils.isNotEmpty(quarantineDoc.getCategoryName())) {
-            reviewDetailsBuilder.append(format(
-                DOCUMENT_CATEGORY_LABEL,
-                quarantineDoc.getCategoryName()
-            ));
-        }
         if (CommonUtils.isNotEmpty(quarantineDoc.getNotes())) {
             reviewDetailsBuilder.append(format(
                 DOCUMENT_COMMENTS_LABEL,

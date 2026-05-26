@@ -46,6 +46,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
@@ -100,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SuppressWarnings({"java:S1607"})
 public class ReviewDocumentServiceTest {
 
+    private static final String AUTHORISATION = "authorisation";
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -171,6 +173,9 @@ public class ReviewDocumentServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private DocumentCategoryService documentCategoryService;
 
     private final String authorization = "authToken";
     Element element;
@@ -458,7 +463,7 @@ public class ReviewDocumentServiceTest {
                                  ).build()).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
 
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
         Assert.assertNotNull(caseDataMap.get("reviewDoc"));
@@ -489,7 +494,7 @@ public class ReviewDocumentServiceTest {
                                  ).build()).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
 
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
         Assert.assertNotNull(caseDataMap.get("reviewDoc"));
@@ -519,7 +524,7 @@ public class ReviewDocumentServiceTest {
                                  ).build()).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
         Assert.assertNotNull(caseDataMap.get("reviewDoc"));
         Document reviewDoc = (Document) caseDataMap.get("reviewDoc");
@@ -547,7 +552,7 @@ public class ReviewDocumentServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
     }
 
@@ -575,7 +580,7 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
     }
 
@@ -1447,7 +1452,7 @@ public class ReviewDocumentServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
     }
 
@@ -1775,7 +1780,7 @@ public class ReviewDocumentServiceTest {
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
     }
 
@@ -1802,7 +1807,7 @@ public class ReviewDocumentServiceTest {
                                  ).build()).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataMap);
+        reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
 
         Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
         Assert.assertNotNull(caseDataMap.get("reviewDoc"));

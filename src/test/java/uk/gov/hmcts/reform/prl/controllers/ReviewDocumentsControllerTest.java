@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -32,14 +31,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RunWith(MockitoJUnitRunner.class)
 public class ReviewDocumentsControllerTest {
 
+    private static final String AUTHORISATION = "authorisation";
+
     @InjectMocks
     private ReviewDocumentsController reviewDocumentsController;
 
     @Mock
     private ReviewDocumentService reviewDocumentService;
-
-    @Mock
-    private DocumentCategoryService documentCategoryService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -108,7 +106,7 @@ public class ReviewDocumentsControllerTest {
     public void testHandleMidEvent() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
-        verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
+        verify(reviewDocumentService).getReviewedDocumentDetailsNew(AUTHORISATION, caseData, stringObjectMap);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 

@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -48,7 +47,6 @@ public class ReviewDocumentsController {
     private final ObjectMapper objectMapper;
     private final ReviewDocumentService reviewDocumentService;
     private final SystemUserService systemUserService;
-    private final DocumentCategoryService documentCategoryService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -86,15 +84,23 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
-        DynamicList documentCategories = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
-        if (nonNull(documentCategories)) {
-            documentCategories.setValue(DynamicListElement.builder().code("MIAMCertificate").label(
-                "MIAM certificate/Exemption").build());
-        }
-        caseDataUpdated.put("documentCategories", documentCategories);
+        reviewDocumentService.getReviewedDocumentDetailsNew(authorisation, caseData, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+
+
+    @PostMapping(path = "/review-documents/validate-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleValidateMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<String> errors = reviewDocumentService.validateEvent(caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
+    }
+
 
 
     @PostMapping(path = "/review-documents/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
