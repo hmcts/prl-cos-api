@@ -10,15 +10,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.util.Arrays;
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -43,6 +42,8 @@ import static org.mockito.Mockito.when;
 public class RemoveLocalAuthoritySolicitorServiceTest {
 
     public static final String LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE = "[LASOLICITOR]";
+    public static final String SYS_TOKEN = "sysToken";
+    public static final String AUTH_TOKEN = "svcToken";
     @InjectMocks
     public RemoveLocalAuthoritySolicitorService service;
 
@@ -52,8 +53,6 @@ public class RemoveLocalAuthoritySolicitorServiceTest {
     private SystemUserService systemUserService;
     @Mock
     private AuthTokenGenerator tokenGenerator;
-    @Mock
-    private RoleAssignmentService roleAssignmentService;
 
     private CaseData buildCaseData(long caseId, String orgId) {
         return CaseData.builder()
@@ -77,24 +76,25 @@ public class RemoveLocalAuthoritySolicitorServiceTest {
         long caseId = 1234567890123456L;
 
         // Mock role assignments: two with [LASOLICITOR], one with other role
-        RoleAssignmentResponse la1 = mock(RoleAssignmentResponse.class);
-        when(la1.getRoleName()).thenReturn(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE);
-        when(la1.getActorId()).thenReturn("user-1");
+        CaseAssignmentUserRole la1 = mock(CaseAssignmentUserRole.class);
+        when(la1.getCaseRole()).thenReturn(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE);
+        when(la1.getUserId()).thenReturn("user-1");
 
-        RoleAssignmentResponse la2 = mock(RoleAssignmentResponse.class);
-        when(la2.getRoleName()).thenReturn(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE);
-        when(la2.getActorId()).thenReturn("user-2");
+        CaseAssignmentUserRole la2 = mock(CaseAssignmentUserRole.class);
+        when(la2.getCaseRole()).thenReturn(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE);
+        when(la2.getUserId()).thenReturn("user-2");
 
-        RoleAssignmentResponse other = mock(RoleAssignmentResponse.class);
-        when(other.getRoleName()).thenReturn("[OTHERROLE]");
-
-        RoleAssignmentServiceResponse raResponse = mock(RoleAssignmentServiceResponse.class);
-        when(raResponse.getRoleAssignmentResponse()).thenReturn(Arrays.asList(la1, la2, other));
-        when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseId))).thenReturn(raResponse);
+        CaseAssignmentUserRole other = mock(CaseAssignmentUserRole.class);
+        when(other.getCaseRole()).thenReturn("[OTHERROLE]");
 
         // Tokens
-        when(systemUserService.getSysUserToken()).thenReturn("sysToken");
-        when(tokenGenerator.generate()).thenReturn("svcToken");
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(tokenGenerator.generate()).thenReturn(SYS_TOKEN);
+
+        CaseAssignmentUserRolesResource raResponse = mock(CaseAssignmentUserRolesResource.class);
+        when(raResponse.getCaseAssignmentUserRoles()).thenReturn(Arrays.asList(la1, la2, other));
+        when(caseAssignmentApi.getUserRoles(AUTH_TOKEN, SYS_TOKEN, List.of(String.valueOf(caseId))))
+            .thenReturn(raResponse);
 
         ArgumentCaptor<CaseAssignmentUserRolesRequest> requestCaptor =
             ArgumentCaptor.forClass(CaseAssignmentUserRolesRequest.class);
@@ -107,7 +107,7 @@ public class RemoveLocalAuthoritySolicitorServiceTest {
 
         // Assert: CCD API called once with tokens and correctly built request
         verify(caseAssignmentApi, times(1))
-            .removeCaseUserRoles(eq("sysToken"), eq("svcToken"), requestCaptor.capture());
+            .removeCaseUserRoles(eq(AUTH_TOKEN), eq(SYS_TOKEN), requestCaptor.capture());
 
         CaseAssignmentUserRolesRequest captured = requestCaptor.getValue();
         assertNotNull(captured, "Expected a CaseAssignmentUserRolesRequest");
@@ -129,30 +129,68 @@ public class RemoveLocalAuthoritySolicitorServiceTest {
         }
 
         // Make sure role assignment was fetched once
-        verify(roleAssignmentService, times(1)).getRoleAssignmentForCase(String.valueOf(caseId));
+        verify(caseAssignmentApi, times(1))
+            .getUserRoles(AUTH_TOKEN, SYS_TOKEN, List.of(String.valueOf(caseId)));
     }
 
     @Test
-    void removeLocalAuthoritySolicitor_whenCcdApiThrowsFeign_shouldThrowGrantCaseAccessException() {
+    void removeLocalAuthoritySolicitor_whenGetCaseRolesCcdApiThrowsFeign_shouldThrowGrantCaseAccessException() {
         // Arrange
         long caseId = 9876543210L;
 
-        // One matching LASOLICITOR actor
-        RoleAssignmentResponse la1 = mock(RoleAssignmentResponse.class);
-        when(la1.getRoleName()).thenReturn(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE);
-        when(la1.getActorId()).thenReturn("actor-77");
-
-        RoleAssignmentServiceResponse raResponse = mock(RoleAssignmentServiceResponse.class);
-        when(raResponse.getRoleAssignmentResponse()).thenReturn(Collections.singletonList(la1));
-        when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseId))).thenReturn(raResponse);
-
-        when(systemUserService.getSysUserToken()).thenReturn("sys");
-        when(tokenGenerator.generate()).thenReturn("svc");
+        when(systemUserService.getSysUserToken()).thenReturn("svc");
+        when(tokenGenerator.generate()).thenReturn("sys");
 
         // Force CCD API to throw FeignException (mock instance is fine as FeignException is a RuntimeException)
         doThrow(mock(FeignException.class))
             .when(caseAssignmentApi)
-            .removeCaseUserRoles(eq("sys"), eq("svc"), any(CaseAssignmentUserRolesRequest.class));
+            .getUserRoles(eq("svc"), eq("sys"), eq(List.of(String.valueOf(caseId))));
+
+        String orgId = "ORG-XYZ";
+        CaseData caseData = buildCaseData(caseId, orgId);
+
+        // Act + Assert
+        GrantCaseAccessException ex = assertThrows(
+            GrantCaseAccessException.class,
+            () -> service.removeLocalAuthoritySolicitor(caseData),
+            "Expected GrantCaseAccessException when FeignException occurs"
+        );
+
+        assertTrue(
+            ex.getMessage().contains(String.valueOf(caseId)),
+            String.format("Could not get case user role(s) for the case %s", caseId)
+        );
+
+        verify(caseAssignmentApi, times(1))
+            .getUserRoles(eq("svc"), eq("sys"), eq(List.of(String.valueOf(caseId))));
+    }
+
+    @Test
+    void removeLocalAuthoritySolicitor_whenRemoveCaseRolesCcdApiThrowsFeign_shouldThrowGrantCaseAccessException() {
+        // Arrange
+        long caseId = 9876543210L;
+
+        // Mock role assignments: two with [LASOLICITOR], one with other role
+        CaseAssignmentUserRole la1 = mock(CaseAssignmentUserRole.class);
+        when(la1.getCaseRole()).thenReturn(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE);
+        when(la1.getUserId()).thenReturn("la-1");
+
+        // Tokens
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(tokenGenerator.generate()).thenReturn(SYS_TOKEN);
+
+        CaseAssignmentUserRolesResource raResponse = mock(CaseAssignmentUserRolesResource.class);
+        when(raResponse.getCaseAssignmentUserRoles()).thenReturn(Arrays.asList(la1));
+        when(caseAssignmentApi.getUserRoles(AUTH_TOKEN, SYS_TOKEN, List.of(String.valueOf(caseId))))
+            .thenReturn(raResponse);
+
+        // Force CCD API to throw FeignException (mock instance is fine as FeignException is a RuntimeException)
+        ArgumentCaptor<CaseAssignmentUserRolesRequest> requestCaptor =
+            ArgumentCaptor.forClass(CaseAssignmentUserRolesRequest.class);
+
+        doThrow(mock(FeignException.class))
+            .when(caseAssignmentApi)
+            .removeCaseUserRoles(eq(AUTH_TOKEN), eq(SYS_TOKEN), requestCaptor.capture());
 
         String orgId = "ORG-XYZ";
         CaseData caseData = buildCaseData(caseId, orgId);
@@ -171,20 +209,28 @@ public class RemoveLocalAuthoritySolicitorServiceTest {
         );
 
         verify(caseAssignmentApi, times(1))
-            .removeCaseUserRoles(eq("sys"), eq("svc"), any(CaseAssignmentUserRolesRequest.class));
+            .getUserRoles(eq(AUTH_TOKEN), eq(SYS_TOKEN), eq(List.of(String.valueOf(caseId))));
+
+        verify(caseAssignmentApi, times(1))
+            .removeCaseUserRoles(eq(AUTH_TOKEN), eq(SYS_TOKEN), any(CaseAssignmentUserRolesRequest.class));
+
     }
 
     @Test
     void removeLocalAuthoritySolicitor_whenNoMatchingRoles_callsApiWithEmptyList() {
         // Arrange
+        CaseAssignmentUserRole other1 = mock(CaseAssignmentUserRole.class);
+        when(other1.getCaseRole()).thenReturn("[CITIZEN]");
 
-        RoleAssignmentResponse other1 = mock(RoleAssignmentResponse.class);
-        when(other1.getRoleName()).thenReturn("[CITIZEN]");
+        // Tokens
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(tokenGenerator.generate()).thenReturn(SYS_TOKEN);
 
-        RoleAssignmentServiceResponse raResponse = mock(RoleAssignmentServiceResponse.class);
-        when(raResponse.getRoleAssignmentResponse()).thenReturn(Collections.singletonList(other1));
+        CaseAssignmentUserRolesResource raResponse = mock(CaseAssignmentUserRolesResource.class);
+        when(raResponse.getCaseAssignmentUserRoles()).thenReturn(Collections.singletonList(other1));
         long caseId = 1122334455L;
-        when(roleAssignmentService.getRoleAssignmentForCase(String.valueOf(caseId))).thenReturn(raResponse);
+        when(caseAssignmentApi.getUserRoles(AUTH_TOKEN, SYS_TOKEN, List.of(String.valueOf(caseId))))
+            .thenReturn(raResponse);
 
         ArgumentCaptor<CaseAssignmentUserRolesRequest> requestCaptor =
             ArgumentCaptor.forClass(CaseAssignmentUserRolesRequest.class);

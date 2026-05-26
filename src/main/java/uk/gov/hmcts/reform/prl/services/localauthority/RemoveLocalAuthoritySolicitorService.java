@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRole;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
 import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesResource;
 import uk.gov.hmcts.reform.prl.exception.GrantCaseAccessException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
@@ -15,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,15 +33,14 @@ public class RemoveLocalAuthoritySolicitorService {
     private final CaseAssignmentApi caseAssignmentApi;
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator tokenGenerator;
-    private final RoleAssignmentService roleAssignmentService;
 
     public void removeLocalAuthoritySolicitor(CaseData caseData) {
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentService
-            .getRoleAssignmentForCase(String.valueOf(caseData.getId()));
 
-        Set<String> solicitors = roleAssignmentServiceResponse.getRoleAssignmentResponse().stream()
-            .filter(roleAssignment -> roleAssignment.getRoleName().equals(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE))
-            .map(RoleAssignmentResponse::getActorId)
+        CaseAssignmentUserRolesResource userRoles = getCaseAssignmentUserRoles(caseData);
+
+        Set<String> solicitors = userRoles.getCaseAssignmentUserRoles().stream()
+            .filter(userRole -> userRole.getCaseRole().equals(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE))
+            .map(CaseAssignmentUserRole::getUserId)
             .collect(Collectors.toSet());
 
         if (!solicitors.isEmpty()) {
@@ -46,6 +48,23 @@ public class RemoveLocalAuthoritySolicitorService {
             removeAmSolicitorCaseRole(caseData, solicitors);
         } else {
             log.info("No roles to remove for local authority solicitors for case id {}", caseData.getId());
+        }
+    }
+
+    private CaseAssignmentUserRolesResource getCaseAssignmentUserRoles(CaseData caseData) {
+        try {
+            return caseAssignmentApi.getUserRoles(
+                systemUserService.getSysUserToken(),
+                tokenGenerator.generate(),
+                List.of(String.valueOf(caseData.getId()))
+            );
+        } catch (FeignException ex) {
+            String message = String.format(
+                "Could not get case user role(s) for the case %s",
+                caseData.getId()
+            );
+            log.error(message, ex);
+            throw new GrantCaseAccessException(message);
         }
     }
 
