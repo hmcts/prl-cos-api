@@ -8230,7 +8230,7 @@ class ManageOrderServiceTest {
 
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         when(taskUtils.getTaskAdditionalProperties(CLIENT_CONTEXT))
-            .thenReturn(Optional.of(AdditionalProperties.builder().isCirUpdateRequested(Yes.getDisplayedValue()).build()));
+            .thenReturn(Optional.of(AdditionalProperties.builder().isCirUpdateFollowUp(Yes.getDisplayedValue()).build()));
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),

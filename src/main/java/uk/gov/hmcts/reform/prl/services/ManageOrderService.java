@@ -241,7 +241,7 @@ public class ManageOrderService {
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
 
-    private static final String IS_CIR_UPDATE_REQUESTED = "isCirUpdateRequested";
+    private static final String IS_CIR_UPDATE_FOLLOW_UP = "isCirUpdateFollowUp";
     private static final String WHEN_REPORTS_MUST_BE_FILED = "whenReportsMustBeFiled";
     private static final String WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY = "whenReportsMustBeFiledByLocalAuthority";
 
@@ -4005,8 +4005,8 @@ public class ManageOrderService {
 
     public void reCreateCirDocumentsRequestedTask(CallbackRequest callbackRequest, String clientContext) {
         Optional<Map<String, Object>> waFieldsMap = taskUtils.getTaskAdditionalProperties(clientContext)
-            .map(AdditionalProperties::getIsCirUpdateRequested)
-            .map(value -> Map.of(IS_CIR_UPDATE_REQUESTED, Yes));
+            .map(AdditionalProperties::getIsCirUpdateFollowUp)
+            .map(value -> Map.of(IS_CIR_UPDATE_FOLLOW_UP, Yes));
 
         waFieldsMap.ifPresent(waFields ->
             createCirDocumentsRequestedTask(
