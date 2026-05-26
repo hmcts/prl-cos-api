@@ -8205,7 +8205,8 @@ class ManageOrderServiceTest {
 
         assertThat(waFieldsMap)
             .containsEntry("whenReportsMustBeFiledByLocalAuthority", LocalDate.now())
-            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name());
+            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name())
+            .containsEntry("isCirUpdateFollowUp", null);
         assertThat(waFieldsMap.get("whenReportsMustBeFiled")).isNull();
     }
 
@@ -8377,7 +8378,8 @@ class ManageOrderServiceTest {
 
         assertThat(waFieldsMap)
             .containsEntry("whenReportsMustBeFiled", LocalDate.now())
-            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name());
+            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name())
+            .containsEntry("isCirUpdateFollowUp", null);
         assertThat(waFieldsMap.get("whenReportsMustBeFiledByLocalAuthority")).isNull();
     }
 

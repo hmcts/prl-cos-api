@@ -4024,6 +4024,7 @@ public class ManageOrderService {
         if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
             Map<String, Object> waFieldsMap = new HashMap<>();
             waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+            waFieldsMap.put(IS_CIR_UPDATE_FOLLOW_UP, null);
             setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
             setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
             cancelCirDocumentsRequestedTask(caseData, waFieldsMap);
