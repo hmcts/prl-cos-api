@@ -27,6 +27,7 @@ public class ReviewDocuments {
     private YesNoNotSure reviewDecisionYesOrNo;
     private String docToBeReviewed;
     private Document reviewDoc;
+    private DynamicList documentCategories;
     private String documentNewName;
 
     //NOT IN USE
@@ -53,7 +54,8 @@ public class ReviewDocuments {
 
     public static String[] reviewDocTempFields() {
         return new String[]{
-            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList", "documentNewName"
+            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList",
+            "documentNewName", "documentCategories", "quarantineInformation", "docLabel"
         };
     }
 

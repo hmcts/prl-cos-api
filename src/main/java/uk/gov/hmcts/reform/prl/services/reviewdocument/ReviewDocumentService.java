@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -519,8 +520,19 @@ public class ReviewDocumentService {
                 .build();
         }
 
+        DynamicList documentCategories = caseData.getReviewDocuments().getDocumentCategories();
+        String categoryId = null;
+        String categoryName = null;
+        if (nonNull(documentCategories)) {
+            DynamicListElement value = documentCategories.getValue();
+            if (nonNull(value)) {
+                categoryId = value.getCode();
+                categoryName = value.getLabel();
+            }
+        }
+
         String documentNewName = caseData.getReviewDocuments().getDocumentNewName();
-        tempQuarantineDoe = applyDocumentRename(tempQuarantineDoe, documentNewName);
+        tempQuarantineDoe = applyChanges(tempQuarantineDoe, documentNewName, categoryId, categoryName);
         manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             tempQuarantineDoe,
             userDetails,
@@ -530,17 +542,27 @@ public class ReviewDocumentService {
         );
     }
 
-    private QuarantineLegalDoc applyDocumentRename(QuarantineLegalDoc quarantineLegalDoc, String documentNewName) {
-        if (isNotBlank(documentNewName)) {
+    private QuarantineLegalDoc applyChanges(QuarantineLegalDoc quarantineLegalDoc, String documentNewName,
+                                            String categoryId, String categoryName) {
+
+        String categoryIdQuarantineDoc = quarantineLegalDoc.getCategoryId();
+
+        boolean sameCategory = Objects.equals(categoryIdQuarantineDoc, categoryId);
+        if (isNotBlank(documentNewName) || !sameCategory) {
             Document document = manageDocumentsService.getQuarantineDocumentForUploader(
                 quarantineLegalDoc.getUploaderRole(),
                 quarantineLegalDoc
             );
             if (nonNull(document)) {
-                Document renamedDocument = document.toBuilder()
-                    .documentFileName(determineChangedDocumentFileName(documentNewName, document))
-                    .build();
-                return updateQuarantineDocument(quarantineLegalDoc, renamedDocument);
+                Document.DocumentBuilder documentBuilder = document.toBuilder();
+                if (isNotBlank(documentNewName)) {
+                    documentBuilder.documentFileName(determineChangedDocumentFileName(documentNewName, document));
+                }
+                if (!sameCategory) {
+                    documentBuilder.categoryId(categoryId);
+                }
+                Document renamedDocument = documentBuilder.build();
+                return updateQuarantineDocument(quarantineLegalDoc, renamedDocument, sameCategory, categoryId, categoryName);
             }
         }
         return quarantineLegalDoc;
@@ -554,16 +576,22 @@ public class ReviewDocumentService {
         return newName;
     }
 
-    private QuarantineLegalDoc updateQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, Document renamedDocument) {
+    private QuarantineLegalDoc updateQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, Document renamedDocument,
+                                                        boolean sameCategory, String categoryId, String categoryName) {
+        final QuarantineLegalDoc.QuarantineLegalDocBuilder quarantineLegalDocBuilder = quarantineLegalDoc.toBuilder();
+        if (!sameCategory) {
+            quarantineLegalDocBuilder.categoryId(categoryId);
+            quarantineLegalDocBuilder.categoryName(categoryName);
+        }
         return switch (quarantineLegalDoc.getUploaderRole()) {
-            case LEGAL_PROFESSIONAL -> quarantineLegalDoc.toBuilder().document(renamedDocument).build();
-            case CAFCASS -> quarantineLegalDoc.toBuilder().cafcassQuarantineDocument(renamedDocument).build();
-            case COURT_STAFF -> quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(renamedDocument).build();
-            case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(renamedDocument).build();
+            case LEGAL_PROFESSIONAL -> quarantineLegalDocBuilder.document(renamedDocument).build();
+            case CAFCASS -> quarantineLegalDocBuilder.cafcassQuarantineDocument(renamedDocument).build();
+            case COURT_STAFF -> quarantineLegalDocBuilder.courtStaffQuarantineDocument(renamedDocument).build();
+            case BULK_SCAN -> quarantineLegalDocBuilder.url(renamedDocument).build();
             case LOCAL_AUTHORITY ->
-                quarantineLegalDoc.toBuilder().localAuthorityQuarantineDocument(renamedDocument).build();
-            case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(renamedDocument).build();
-            case COURTNAV -> quarantineLegalDoc.toBuilder().courtNavQuarantineDocument(renamedDocument).build();
+                quarantineLegalDocBuilder.localAuthorityQuarantineDocument(renamedDocument).build();
+            case CITIZEN -> quarantineLegalDocBuilder.citizenQuarantineDocument(renamedDocument).build();
+            case COURTNAV -> quarantineLegalDocBuilder.courtNavQuarantineDocument(renamedDocument).build();
             default -> quarantineLegalDoc;
         };
     }

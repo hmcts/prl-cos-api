@@ -809,6 +809,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(bulkScanQuarantineDoc);
@@ -827,7 +831,7 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
         Assert.assertEquals(1, bulkScannedDocListDocTab.size());
         Assert.assertNotNull(bulkScannedDocListDocTab.get(0).getValue().getUrl());
-        Assert.assertNull(bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
+        Assert.assertEquals(quarantineLegalDoc.getCategoryId(), bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
         Assert.assertEquals("123", bulkScannedDocListDocTab.get(0).getValue().getControlNumber());
         Assert.assertEquals("EXREF", bulkScannedDocListDocTab.get(0).getValue().getExceptionRecordReference());
     }
@@ -902,6 +906,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -950,6 +958,13 @@ public class ReviewDocumentServiceTest {
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
+
+
+
         reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
@@ -978,6 +993,10 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -1029,6 +1048,10 @@ public class ReviewDocumentServiceTest {
                 .reviewDocuments(ReviewDocuments.builder()
                                      .reviewDecisionYesOrNo(YesNoNotSure.no)
                                      .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+            DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+                .label(quarantineLegalDoc.getCategoryName()).build();
+            DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+            caseData.getReviewDocuments().setDocumentCategories(documentCategories);
             Map<String, Object> caseDataMap = new HashMap<>();
 
             doNothing().when(emailService).send(anyString(), any(), any(), any());
@@ -1082,6 +1105,10 @@ public class ReviewDocumentServiceTest {
                 .reviewDocuments(ReviewDocuments.builder()
                                      .reviewDecisionYesOrNo(YesNoNotSure.no)
                                      .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+            DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+                .label(quarantineLegalDoc.getCategoryName()).build();
+            DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+            caseData.getReviewDocuments().setDocumentCategories(documentCategories);
             Map<String, Object> caseDataMap = new HashMap<>();
 
             doNothing().when(emailService).send(anyString(), any(), any(), any());
@@ -1134,6 +1161,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -1178,6 +1209,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -1208,6 +1243,10 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .courtStaffUploadDocListDocTab(new ArrayList<>()).build()).build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineCaseDoc);
@@ -1252,6 +1291,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -1296,6 +1339,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -1332,6 +1379,12 @@ public class ReviewDocumentServiceTest {
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineCaseDoc);
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
+
+
         reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
@@ -1383,6 +1436,10 @@ public class ReviewDocumentServiceTest {
                                      .cafcassUploadDocListDocTab(new ArrayList<>())
                                      .build())
                 .build();
+            DynamicListElement dynamicListElement = DynamicListElement.builder().code(cafcassAlwaysConfidentialDoc.getCategoryId())
+                .label(cafcassAlwaysConfidentialDoc.getCategoryName()).build();
+            DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+            caseData.getReviewDocuments().setDocumentCategories(documentCategories);
             Map<String, Object> caseDataMap = new HashMap<>();
 
             reviewDocumentService.processReviewDocument(
@@ -1478,7 +1535,10 @@ public class ReviewDocumentServiceTest {
                                  .build())
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
-
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
             .thenReturn(quarantineConfidentialDoc);
 
@@ -1540,6 +1600,10 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(
             caseDataMap,
@@ -1606,7 +1670,13 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
+
+
         reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
@@ -1649,6 +1719,10 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
             .build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
@@ -1728,6 +1802,10 @@ public class ReviewDocumentServiceTest {
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build()).build();
+        DynamicListElement dynamicListElement = DynamicListElement.builder().code(quarantineLegalDoc.getCategoryId())
+            .label(quarantineLegalDoc.getCategoryName()).build();
+        DynamicList documentCategories = DynamicList.builder().value(dynamicListElement).build();
+        caseData.getReviewDocuments().setDocumentCategories(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(
             caseDataMap,
