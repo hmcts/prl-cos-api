@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Import(FeignRetryConfig.class)
 @SpringBootTest(properties = {
     "core_case_data.api.url=http://localhost:${wiremock.server.port}"
+    "launchdarkly.offline=true"
 })
 @AutoConfigureWireMock(port = 0)
 public class ExtendedCaseDataApiTest {
