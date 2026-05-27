@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Import;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCcdDataStoreService;
 import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class ExtendedCaseDataApiTest {
 
     @Autowired
-    private CoreCaseDataApi coreCaseDataApi;
+    private CafcassCcdDataStoreService cafcassCcdDataStoreService;
 
     private final String testCaseId = "123456";
     private final String caseType = "C100";
@@ -68,7 +68,7 @@ public class ExtendedCaseDataApiTest {
                                     .withBody("{ \"total\": 1, \"cases\": [{ \"id\": \"" + testCaseId
                                                   + "\", \"case_data\": { \"applicantCaseName\": \"Test Name\" } }] }")));
 
-        coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, "{}");
+        cafcassCcdDataStoreService.searchCases("userToken", "s2sToken", caseType, "{}");
 
         verify(3, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
     }
@@ -80,7 +80,7 @@ public class ExtendedCaseDataApiTest {
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
-            coreCaseDataApi.searchCases("userToken", "s2sToken", caseType, "{}");
+            cafcassCcdDataStoreService.searchCases("userToken", "s2sToken", caseType, "{}");
         });
 
         verify(1, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
