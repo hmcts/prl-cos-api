@@ -487,6 +487,8 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
 
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
 
