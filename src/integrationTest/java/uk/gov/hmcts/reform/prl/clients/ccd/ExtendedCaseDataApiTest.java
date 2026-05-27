@@ -68,7 +68,7 @@ public class ExtendedCaseDataApiTest {
                                     .withBody("{ \"total\": 1, \"cases\": [{ \"id\": \"" + testCaseId
                                                   + "\", \"case_data\": { \"applicantCaseName\": \"Test Name\" } }] }")));
 
-        cafcassCcdDataStoreService.searchCases("userToken", "s2sToken", caseType, "{}");
+        cafcassCcdDataStoreService.searchCases("userToken", "{}", "s2sToken", caseType);
 
         verify(3, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
     }
@@ -80,7 +80,7 @@ public class ExtendedCaseDataApiTest {
                     .willReturn(aResponse().withStatus(400)));
 
         assertThrows(FeignException.BadRequest.class, () -> {
-            cafcassCcdDataStoreService.searchCases("userToken", "s2sToken", caseType, "{}");
+            cafcassCcdDataStoreService.searchCases("userToken", "{}", "s2sToken", caseType);
         });
 
         verify(1, postRequestedFor(urlPathEqualTo(expectedUrl)).withQueryParam("ctid", equalTo(caseType)));
