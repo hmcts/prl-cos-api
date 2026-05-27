@@ -162,8 +162,10 @@ public class CitizenCaseUpdateService {
 
         // Find nearest court for the child post code
         ImmutablePair<CourtVenue, Court> courtCourtVenueMap = courtLocatorService.getC100NearestFamilyCourtAndVenue(citizenUpdatedCaseData);
-        String courtName = courtCourtVenueMap.getRight() != null ? courtCourtVenueMap.getRight().getCourtName() : "No Court Fetched";
-        String courtId = courtCourtVenueMap.getLeft() != null ? courtCourtVenueMap.getLeft().getCourtEpimmsId() : null;
+        String courtName = (courtCourtVenueMap != null && courtCourtVenueMap.getRight() != null)
+            ? courtCourtVenueMap.getRight().getCourtName() : "No Court Fetched";
+        String courtId = (courtCourtVenueMap != null && courtCourtVenueMap.getLeft() != null)
+            ? courtCourtVenueMap.getLeft().getCourtEpimmsId() : null;
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
             allTabService.getStartUpdateForSpecificUserEvent(
