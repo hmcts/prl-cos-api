@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -114,6 +115,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -210,6 +212,12 @@ public class SendAndReplyService {
 
     @Value("${refdata.category-id}")
     private String hearingTypeCategoryId;
+
+    @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
+    private List<String> sendAndReplyFutureHearingStatuses;
+
+    @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
+    private List<String> sendAndReplyPastHearingStatuses;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -527,13 +535,30 @@ public class SendAndReplyService {
         }
     }
 
-    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
+    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization,
+                                                        boolean includePastHearings,
+                                                        String lockToHearingId) {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
 
         DynamicList legalAdviserList = getLegalAdviserList();
+
+        // includePastHearings=true is reserved for the WA-task chase flow
+        // (waSendOrReplyToMessages), where the user may need to message about a hearing
+        // that has already occurred. Regular send-and-reply paths pass false.
+        DynamicList hearings = includePastHearings
+            ? getAllHearingsDynamicList(authorization, s2sToken, caseReference)
+            : getFutureHearingDynamicList(authorization, s2sToken, caseReference);
+
+        // lockToHearingId is set when the user opened this event from a Request Order WA
+        // task: narrow the dropdown to the hearing the task is bound to, so it appears
+        // selected and non-editable in EXUI (FPVTL-2408/2409). Falls back to the full list
+        // if the hearingId is somehow unmatched.
+        if (lockToHearingId != null) {
+            hearings = lockHearingDropdownTo(hearings, lockToHearingId);
+        }
 
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -553,11 +578,7 @@ public class SendAndReplyService {
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
-                                           .futureHearingsList(getFutureHearingDynamicList(
-                                               authorization,
-                                               s2sToken,
-                                               caseReference
-                                           ))
+                                           .futureHearingsList(hearings)
                                            .legalAdviserList(legalAdviserList)
                                            .build())
                     .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
@@ -594,9 +615,34 @@ public class SendAndReplyService {
     }
 
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
-        Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
+        return buildHearingDynamicList(authorization, s2sToken, caseId,
+            ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream()
+                .map(String::trim).distinct().toList());
+    }
 
-        if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
+    public DynamicList getAllHearingsDynamicList(String authorization, String s2sToken, String caseId) {
+        List<String> allowed = Stream.concat(
+                ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream(),
+                ofNullable(sendAndReplyPastHearingStatuses).orElse(emptyList()).stream())
+            .map(String::trim)
+            .distinct()
+            .toList();
+        return buildHearingDynamicList(authorization, s2sToken, caseId, allowed);
+    }
+
+    private DynamicList buildHearingDynamicList(String authorization, String s2sToken, String caseId,
+                                                List<String> allowedStatuses) {
+        Hearings fetched = hearingService.getHearings(authorization, caseId);
+
+        if (fetched != null && fetched.getCaseHearings() != null && !fetched.getCaseHearings().isEmpty()) {
+
+            List<CaseHearing> filteredHearings = fetched.getCaseHearings().stream()
+                .filter(h -> allowedStatuses.contains(h.getHmcStatus()))
+                .toList();
+
+            if (filteredHearings.isEmpty()) {
+                return DynamicList.builder().value(DynamicListElement.EMPTY).build();
+            }
 
             Map<String, String> refDataCategoryValueMap = getRefDataMap(
                 authorization,
@@ -605,7 +651,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
 
-            List<DynamicListElement> hearingDropdowns = futureHearings.getCaseHearings().stream()
+            List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
                 .map(caseHearing -> {
                     //get hearingId
                     String hearingId = String.valueOf(caseHearing.getHearingID());
@@ -636,6 +682,29 @@ public class SendAndReplyService {
 
     private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).toList();
+    }
+
+    /**
+     * Filters a hearings DynamicList down to the single element whose code starts with
+     * "{hearingId} - " and pre-selects it. Returns the input unchanged if no element
+     * matches
+     */
+    private DynamicList lockHearingDropdownTo(DynamicList full, String hearingId) {
+        if (full == null || full.getListItems() == null || full.getListItems().isEmpty()) {
+            return full;
+        }
+        String prefix = hearingId + " - ";
+        DynamicListElement match = full.getListItems().stream()
+            .filter(e -> e.getCode() != null && e.getCode().startsWith(prefix))
+            .findFirst()
+            .orElse(null);
+        if (match == null) {
+            return full;
+        }
+        return DynamicList.builder()
+            .value(match)
+            .listItems(List.of(match))
+            .build();
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {

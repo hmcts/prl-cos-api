@@ -177,6 +177,8 @@ public class BaseCaseData {
     @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
+    private List<Element<UpdateHearingActualTracking>> updateHearingActualTracking;
+
     private LocalAuthority localAuthority;
 
     @JsonUnwrapped
@@ -190,4 +192,7 @@ public class BaseCaseData {
         }
         return documentRemovalWrapper;
     }
+
+    private List<Element<RequestOrderHearingTracking>> requestOrderTaskTrackingByHearing;
+
 }
