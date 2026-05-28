@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,7 +40,7 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
     private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
-    private final CafcassCaseDataService cafcassCaseDataService;
+    private  final CafcassCaseDataService cafcassCaseDataService;
     private final AuthorisationService authorisationService;
 
     public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
@@ -52,7 +51,6 @@ public class CafCassController extends AbstractCallbackController {
     }
 
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Retry(name = "searchCasesRetryConfig", fallbackMethod = "searchCasesFallback")
     @Operation(description = "search case data")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search cases processed successfully",
@@ -61,56 +59,40 @@ public class CafCassController extends AbstractCallbackController {
     public ResponseEntity<Object> searchCasesByDates(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
-        @RequestParam(name = "start_date") String startDate, @RequestParam(name = "end_date") String endDate
-    ) throws Exception, FeignException, ResponseStatusException {
-        serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
-            ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
-        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
+    )  {
+        try {
+            serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
+                ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
+            Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
 
-        if (userInfo.isPresent() && Boolean.TRUE.equals(
-            authorisationService.authoriseService(serviceAuthorisation))) {
-            if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
-                log.info("processing request after authorization");
-                LocalDateTime startDateTime = LocalDateTime.parse(startDate);
-                LocalDateTime endDateTime = LocalDateTime.parse(endDate);
-                if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
-                    return status(BAD_REQUEST).body(new ApiError(
-                        "Difference between end date and start date should not be more than 15 minutes"));
+            if (userInfo.isPresent() && Boolean.TRUE.equals(
+                authorisationService.authoriseService(serviceAuthorisation))) {
+                if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
+                    log.info("processing request after authorization");
+                    LocalDateTime startDateTime = LocalDateTime.parse(startDate);
+                    LocalDateTime endDateTime = LocalDateTime.parse(endDate);
+                    if (startDateTime.isAfter(endDateTime) || startDateTime.plusMinutes(15).isBefore(endDateTime)) {
+                        return status(BAD_REQUEST).body(new ApiError(
+                            "Difference between end date and start date should not be more than 15 minutes"));
+                    }
+                    return ResponseEntity.ok(cafcassCaseDataService.getCaseData(
+                        authorisation,
+                        startDate,
+                        endDate
+                    ));
+                } else {
+                    throw new ResponseStatusException(UNAUTHORIZED);
                 }
-                return ResponseEntity.ok(cafcassCaseDataService.getCaseData(
-                    authorisation,
-                    startDate,
-                    endDate
-                ));
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);
             }
-        } else {
-            throw new ResponseStatusException(UNAUTHORIZED);
+        } catch (ResponseStatusException e) {
+            return status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
+        } catch (FeignException feignException) {
+            return status(feignException.status()).body(new ApiError(feignException.getMessage()));
+        } catch (Exception e) {
+            return status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
         }
-    }
-
-    public ResponseEntity<ApiError> searchCasesFallback(
-        String authorisation, String serviceAuthorisation,
-        String startDate, String endDate,
-        ResponseStatusException e) {
-        return ResponseEntity.status(UNAUTHORIZED).body(new ApiError(e.getMessage()));
-    }
-
-    public ResponseEntity<ApiError> searchCasesFallback(
-        String authorisation, String serviceAuthorisation,
-        String startDate, String endDate,
-        FeignException feignException) {
-        int rawStatus = feignException.status();
-        int httpStatus = rawStatus > 0 ? rawStatus : 502;
-
-        return ResponseEntity.status(httpStatus).body(new ApiError(feignException.getMessage()));
-    }
-
-    public ResponseEntity<ApiError> searchCasesFallback(
-        String authorisation, String serviceAuthorisation,
-        String startDate, String endDate,
-        Exception e) {
-        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiError(e.getMessage()));
     }
 }
