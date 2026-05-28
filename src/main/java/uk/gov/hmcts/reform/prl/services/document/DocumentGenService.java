@@ -66,8 +66,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
@@ -160,17 +163,48 @@ public class DocumentGenService {
     protected String c100C8DraftFilename;
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
+    @Value("${document.templates.common.other_c8_template}")
+    protected String otherC8Template;
+    @Value("${document.templates.common.other_c8_filename}")
+    protected String otherC8FileName;
+    @Value("${document.templates.common.other_c8_draft_filename}")
+    protected String otherC8DraftFileName;
+    @Value("${document.templates.common.other_c8_template_welsh}")
+    protected String otherC8TemplateWelsh;
+    @Value("${document.templates.common.other_c8_filename_welsh}")
+    protected String otherC8FileNameWelsh;
+    @Value("${document.templates.common.other_c8_draft_filename_welsh}")
+    protected String otherC8DraftFileNameWelsh;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template}")
     protected String fl401RespC8Template;
+    @Value("${document.templates.fl401.fl401_resp_c8_filename}")
+    protected String fl401RespC8Filename;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
     protected String fl401RespC8TemplateWelsh;
+    @Value("${document.templates.fl401.fl401_resp_c8_filename_welsh}")
+    protected String fl401RespC8FilenameWelsh;
 
     @Value("${document.templates.c100.c100_resp_c8_draft_template}")
     protected String c100RespC8DraftTemplate;
     @Value("${document.templates.c100.c100_resp_c8_filename}")
     protected String c100RespC8Filename;
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_template}")
+    protected String fl401RespC8DraftTemplate;
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_filename}")
+    protected String fl401RespC8DraftFilename;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_template_welsh}")
+    protected String fl401RespC8DraftTemplateWelsh;
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_filename_welsh}")
+    protected String fl401RespC8DraftFilenameWelsh;
+
+    @Value("${document.templates.c100.c100_resp_c8_welsh_draft_template}")
+    protected String c100RespC8DraftTemplateWelsh;
+    @Value("${document.templates.c100.c100_resp_c8_welsh_draft_filename}")
+    protected String c100RespC8DraftFilenameWelsh;
+
     @Value("${document.templates.c100.c100_resp_c8_draft_filename}")
     protected String c100RespC8DraftFilename;
     @Value("${document.templates.c100.c100_c1a_template}")
@@ -932,10 +966,22 @@ public class DocumentGenService {
                 fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
                 break;
             case C8_RESP_DRAFT_HINT:
-                fileName = c100RespC8DraftFilename;
+                fileName = !isWelsh ? c100RespC8DraftFilename : c100RespC8DraftFilenameWelsh;
                 break;
             case C8_RESP_FINAL_HINT:
                 fileName = findFinalRespondentC8FileName(isWelsh);
+                break;
+            case C8_RESP_FL401_DRAFT_HINT:
+                fileName = !isWelsh ? fl401RespC8DraftFilename : fl401RespC8DraftFilenameWelsh;
+                break;
+            case C8_RESP_FL401_FINAL_HINT:
+                fileName = !isWelsh ? fl401RespC8Filename : fl401RespC8FilenameWelsh;
+                break;
+            case C8_OTHER_FINAL_HINT:
+                fileName = !isWelsh ? otherC8FileName : otherC8FileNameWelsh;
+                break;
+            case C8_OTHER_DRAFT_HINT:
+                fileName = !isWelsh ? otherC8DraftFileName : otherC8DraftFileNameWelsh;
                 break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
@@ -1054,10 +1100,16 @@ public class DocumentGenService {
                 template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,isWelsh);
                 break;
             case C8_RESP_DRAFT_HINT:
-                template = c100RespC8DraftTemplate;
+                template = !isWelsh ? c100RespC8DraftTemplate : c100RespC8DraftTemplateWelsh;
                 break;
             case C8_RESP_FINAL_HINT:
                 template = findFinalRespondentC8Template(isWelsh);
+                break;
+            case C8_RESP_FL401_DRAFT_HINT:
+                template = !isWelsh ? fl401RespC8DraftTemplate : fl401RespC8DraftTemplateWelsh;
+                break;
+            case C8_OTHER_FINAL_HINT, C8_OTHER_DRAFT_HINT:
+                template = !isWelsh ? otherC8Template : otherC8TemplateWelsh;
                 break;
             case C8_RESP_FL401_FINAL_HINT:
                 template = findFinalDaRespondentC8Template(isWelsh);

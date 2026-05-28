@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.miampolicyupgrade.MiamExemptionsChecklistEnum;
@@ -77,6 +78,7 @@ import uk.gov.hmcts.reform.prl.rpa.mappers.C100JsonMapper;
 import uk.gov.hmcts.reform.prl.services.AmendCourtService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.C100IssueCaseService;
+import uk.gov.hmcts.reform.prl.services.C8Service;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
@@ -195,6 +197,9 @@ public class CallbackControllerTest {
 
     @Mock
     CourtSealFinderService courtSealFinderService;
+
+    @Mock
+    C8Service c8Service;
 
     @Mock
     private GatekeepingDetailsService gatekeepingDetailsService;
@@ -370,6 +375,8 @@ public class CallbackControllerTest {
         when(dfjLookupService.getDfjAreaFieldsByCourtName("Swansea Civil Justice Centre")).thenReturn(
             Map.of("dfjArea", "SWANSEA", "swanseaDFJCourt", "123")
         );
+        when(c8Service.generateOtherPartiesC8s(any(CaseData.class), any(CaseData.class), anyString()))
+            .thenReturn(Map.of());
     }
 
     @Test
@@ -3452,7 +3459,7 @@ public class CallbackControllerTest {
             .firstName("Test")
             .lastName("Name")
             .gender(female)
-            .liveInRefuge(No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .email("abc@xyz.com")
             .phoneNumber("1234567890")
             .canYouProvideEmailAddress(Yes)
@@ -3474,7 +3481,7 @@ public class CallbackControllerTest {
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd").taskListVersion(TASK_LIST_VERSION_V2)
             .caseTypeOfApplication(C100_CASE_TYPE).otherPartyInTheCaseRevised(otherPersonList).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest)).thenReturn(
+        when(updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(callbackRequest, authToken)).thenReturn(
             caseDetailsWithOtherPerson);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
