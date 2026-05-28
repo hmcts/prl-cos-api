@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -44,23 +45,15 @@ public class ConfidentialityC8RefugeService {
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
-    public void processForcePartiesConfidentialityIfLivesInRefugeForC100(
-        Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
-        Map<String, Object> updatedCaseData,
-        String party,
-        boolean cleanUpNeeded) {
+    public void processForcePartiesConfidentialityIfLivesInRefugeForC100(Optional<List<Element<PartyDetails>>> partyDetailsWrappedList,
+                                                                         Map<String, Object> updatedCaseData, String party,
+                                                                         boolean cleanUpNeeded) {
         if (partyDetailsWrappedList.isPresent() && !partyDetailsWrappedList.get().isEmpty()) {
             List<PartyDetails> partyDetailsList = partyDetailsWrappedList.get().stream().map(Element::getValue).toList();
             for (PartyDetails partyDetails : partyDetailsList) {
-                if (partyDetails.getIsCurrentAddressKnown() == null
-                    || YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())) {
-                    if (eligibleForRefuge(partyDetails)) {
-                        forceConfidentialityChangeForRefuge(party, partyDetails);
-                    } else if (cleanUpNeeded) {
-                        partyDetails.setRefugeConfidentialityC8Form(null);
-                    }
+                if (eligibleForRefuge(partyDetails)) {
+                    forceConfidentialityChangeForRefuge(party, partyDetails);
                 } else if (cleanUpNeeded) {
-                    partyDetails.setLiveInRefuge(null);
                     partyDetails.setRefugeConfidentialityC8Form(null);
                 }
             }
@@ -68,11 +61,19 @@ public class ConfidentialityC8RefugeService {
         }
     }
 
+    public void updateConfidentialityForPartiesLivingInRefuge(String party, PartyDetails partyDetails, boolean cleanUpNeeded) {
+        if (eligibleForRefuge(partyDetails)) {
+            forceConfidentialityChangeForRefuge(party, partyDetails);
+        } else if (cleanUpNeeded) {
+            partyDetails.setRefugeConfidentialityC8Form(null);
+        }
+    }
+
     private boolean eligibleForRefuge(PartyDetails partyDetails) {
-        return (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()))
+        return (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge()))
             || (null != partyDetails.getResponse()
             && null != partyDetails.getResponse().getCitizenDetails()
-            && YesOrNo.Yes.equals(partyDetails.getResponse().getCitizenDetails().getLiveInRefuge()));
+            && YesNoIDontKnowV2.Yes.equals(partyDetails.getResponse().getCitizenDetails().getLiveInRefuge()));
     }
 
     public void processForcePartiesConfidentialityIfLivesInRefugeForFL401(
@@ -250,7 +251,7 @@ public class ConfidentialityC8RefugeService {
             || refugeDocumentHandlerParameters.listHistoricalDocument) {
             findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, party);
         }
-        if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()) && refugeDocumentHandlerParameters.listDocument) {
+        if (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge()) && refugeDocumentHandlerParameters.listDocument) {
             refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                 refugeDocuments,
                 partyDetails,
@@ -317,7 +318,7 @@ public class ConfidentialityC8RefugeService {
                 || refugeDocumentHandlerParameters.listHistoricalDocument) {
                 findAndMoveToHistoricalList(refugeDocuments, historicalRefugeDocuments, partyType);
             }
-            if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge()) && refugeDocumentHandlerParameters.listDocument) {
+            if (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge()) && refugeDocumentHandlerParameters.listDocument) {
                 refugeDocuments = buildAndListRefugeDocumentsForConfidentialityTab(
                     refugeDocuments,
                     partyDetails,
@@ -481,7 +482,7 @@ public class ConfidentialityC8RefugeService {
                     partyDetailsBefore,
                     index
                 );
-            } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+            } else if (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())) {
                 RefugeDocumentHandlerParameters handler =
                     RefugeDocumentHandlerParameters.builder()
                         .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
@@ -514,8 +515,8 @@ public class ConfidentialityC8RefugeService {
         int partyIndex) {
         if ((YesOrNo.Yes.equals(partyDetailsBefore.getIsCurrentAddressKnown())
             && (YesOrNo.No.equals(partyDetails.getIsCurrentAddressKnown())))
-            || (!YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-            && YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge()))) {
+            || (!YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
+            && YesNoIDontKnowV2.Yes.equals(partyDetailsBefore.getLiveInRefuge()))) {
             RefugeDocumentHandlerParameters handler =
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
@@ -532,8 +533,8 @@ public class ConfidentialityC8RefugeService {
                 handler,
                 refugeConfidentialDocumentsRecord
             );
-        } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
-            && !YesOrNo.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
+        } else if (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
+            && !YesNoIDontKnowV2.Yes.equals(partyDetailsBefore.getLiveInRefuge())) {
             RefugeDocumentHandlerParameters handler =
                 RefugeDocumentHandlerParameters.builder()
                     .onlyForApplicant(refugeDocumentHandlerParameters.onlyForApplicant)
@@ -547,7 +548,7 @@ public class ConfidentialityC8RefugeService {
                 handler,
                 refugeConfidentialDocumentsRecord
             );
-        } else if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())) {
+        } else if (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())) {
             if (partyDetails.getRefugeConfidentialityC8Form() != null
                 && partyDetails.getRefugeConfidentialityC8Form().getDocumentFileName() != null
                 && partyDetailsBefore.getRefugeConfidentialityC8Form() != null
@@ -744,7 +745,7 @@ public class ConfidentialityC8RefugeService {
     private List<Element<RefugeConfidentialDocuments>> addToRefugeDocument(String partyType,
                                                                            List<Element<RefugeConfidentialDocuments>> refugeDocuments,
                                                                            PartyDetails partyDetails) {
-        if (YesOrNo.Yes.equals(partyDetails.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(partyDetails.getLiveInRefuge())
             && partyDetails.getRefugeConfidentialityC8Form() != null) {
             RefugeConfidentialDocuments refugeConfidentialDocuments
                 = RefugeConfidentialDocuments
