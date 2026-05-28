@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.prl.models.bundle.DocumentProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
@@ -21,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +39,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 
 @ExtendWith(MockitoExtension.class)
 class BundleCreateRequestByCategoryMapperTest {
@@ -76,12 +82,29 @@ class BundleCreateRequestByCategoryMapperTest {
         Category category = new Category("parentCategoryId", "parentCategoryName", 2, List.of(documents), List.of(subCategory));
 
         ResponseDocuments responseDocuments = ResponseDocuments.builder().citizenDocument(Document.builder().build()).build();
-
+        AdditionalApplicationsBundle additionalApplicationsBundleWithSubmittedState = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .applicationStatus(AWP_STATUS_SUBMITTED)
+                                         .finalDocument(List.of(ElementUtils.element(Document.builder().build())))
+                                         .supportingEvidenceBundle(List.of(
+                                             ElementUtils.element(SupportingEvidenceBundle.builder().document(Document.builder().build()).build())))
+                                         .build())
+            .build();
+        AdditionalApplicationsBundle additionalApplicationsBundleWithCloseState = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .applicationStatus(AWP_STATUS_CLOSED)
+                                         .finalDocument(List.of(ElementUtils.element(Document.builder().build())))
+                                         .supportingEvidenceBundle(List.of(
+                                             ElementUtils.element(SupportingEvidenceBundle.builder().document(Document.builder().build()).build())))
+                                         .build())
+            .build();
         CaseData c100CaseData = CaseData.builder()
             .id(123456789123L)
             .applicantName("ApplicantFirstNameAndLastName")
             .citizenResponseC7DocumentList(List.of(Element.<ResponseDocuments>builder().id(UUID.randomUUID())
                                                        .value(responseDocuments).build()))
+            .additionalApplicationsBundle(List.of(ElementUtils.element(additionalApplicationsBundleWithSubmittedState),
+                                                  ElementUtils.element(additionalApplicationsBundleWithCloseState)))
             .build();
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
@@ -115,7 +138,7 @@ class BundleCreateRequestByCategoryMapperTest {
             .map(Element::getValue)
             .map(BundlingRequestDocument::getDocumentFileName).toList();
 
-        assertEquals(1,allOtherDocs.size());
+        assertEquals(3,allOtherDocs.size());
 
 
     }
