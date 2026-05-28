@@ -110,6 +110,17 @@ public class ReviewDocumentsControllerTest {
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
+
+    @Test
+    public void testHandleValidateEvent() {
+        // when
+        reviewDocumentsController.handleValidateMidEvent(auth, callbackRequest);
+
+        // then
+        verify(reviewDocumentService).validateEvent(stringObjectMap);
+        verifyNoMoreInteractions(reviewDocumentService);
+    }
+
     @Test
     public void testHandleAboutToSubmit() throws Exception {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
