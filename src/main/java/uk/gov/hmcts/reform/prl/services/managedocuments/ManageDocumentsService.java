@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -67,18 +66,14 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_TRANSFER_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
@@ -91,8 +86,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
@@ -295,8 +294,8 @@ public class ManageDocumentsService {
     }
 
     private QuarantineLegalDoc updateQuarantineLegalDocForLocalAuthority(QuarantineLegalDoc quarantineLegalDoc) {
-        if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
-            || ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+        if (PrlAppsConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
+            || PrlAppsConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
             return quarantineLegalDoc.toBuilder()
                 .isConfidential(YesOrNo.Yes)
                 .categoryName(quarantineLegalDoc.getCategoryName())

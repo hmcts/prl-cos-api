@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -714,8 +713,8 @@ public class ManageDocumentsServiceTest {
     public void testCopyDocumentIfRestrictedLowPriorityTasksWithLocalAuthorityRole() {
 
         dynamicList = DynamicList.builder().value(DynamicListElement.builder()
-                                                      .code(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA)
-                                                      .label(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).build())
+                                                      .code(PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA)
+                                                      .label(PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA).build())
             .listItems(dynamicListElementList).build();
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -735,7 +734,7 @@ public class ManageDocumentsServiceTest {
         List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTabInitial = new ArrayList<>();
         manageDocumentsElement = element(manageDocuments);
         Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
+            PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA).isRestricted(YesOrNo.Yes).build());
         localAuthorityQuarantineDocsListInitial.add(element);
         caseDataMapInitial.put("localAuthorityUploadDocListDocTab",localAuthorityUploadDocListDocTabInitial);
 
@@ -771,8 +770,8 @@ public class ManageDocumentsServiceTest {
     public void testCopyDocumentIfRestrictedHighPriorityTasksWithLocalAuthorityRole() {
 
         dynamicList = DynamicList.builder().value(DynamicListElement.builder()
-                                                      .code(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA)
-                                                      .label(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA).build())
+                                                      .code(PrlAppsConstants.CIR_EXTENSION_REQUEST_LA)
+                                                      .label(PrlAppsConstants.CIR_EXTENSION_REQUEST_LA).build())
             .listItems(dynamicListElementList).build();
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -793,7 +792,7 @@ public class ManageDocumentsServiceTest {
         manageDocumentsElement = element(manageDocuments);
 
         Element<QuarantineLegalDoc> element = element(QuarantineLegalDoc.builder().categoryId(
-            ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
+            PrlAppsConstants.CIR_EXTENSION_REQUEST_LA).isRestricted(YesOrNo.Yes).build());
 
         localAuthorityQuarantineDocsListInitial.add(element);
         caseDataMapInitial.put("localAuthorityUploadDocListDocTab",localAuthorityUploadDocListDocTabInitial);

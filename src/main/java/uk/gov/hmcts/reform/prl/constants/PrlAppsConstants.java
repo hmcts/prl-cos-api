@@ -7,15 +7,6 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import java.util.Arrays;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PrlAppsConstants {
     public static final String JURISDICTION = "PRIVATELAW";
@@ -1196,6 +1187,15 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_CASE_DOCUMENTS = "documentRemovalCaseDocuments";
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
+
+    public static final String CHILD_IMPACT_REPORT_1_LA = "childImpactReport1La";
+    public static final String CHILD_IMPACT_REPORT_2_LA = "childImpactReport2La";
+    public static final String SECTION_7_REPORT_LA = "section7ReportLa";
+    public static final String SECTION_7_ADDENDUM_REPORT_LA = "section7AddendumReportLa";
+    public static final String LOCAL_AUTHORITY_INVOLVEMENT_LA = "localAuthorityInvolvementLa";
+    public static final String SECTION_47_LA = "section47La";
+    public static final String CIR_EXTENSION_REQUEST_LA = "cirExtensionRequestLa";
+    public static final String CIR_TRANSFER_REQUEST_LA = "cirTransferRequestLa";
 
     public static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
         CHILD_IMPACT_REPORT_1_LA,
