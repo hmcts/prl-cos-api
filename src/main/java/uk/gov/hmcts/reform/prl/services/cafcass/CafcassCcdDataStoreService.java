@@ -1,16 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
-import java.util.ArrayList;
-
-import feign.FeignException;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+
+import java.util.ArrayList;
 
 @Slf4j
 @Service
