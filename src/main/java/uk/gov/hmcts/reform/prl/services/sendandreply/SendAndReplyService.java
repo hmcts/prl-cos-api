@@ -160,6 +160,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
+import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDoc;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
@@ -926,7 +927,7 @@ public class SendAndReplyService {
                 getValueCode(message.getApplicationsList())
             );
         } else if (MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(message.getMessageAbout())) {
-            return List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
+            return List.of(element(getSelectedDocument(authorization, String.valueOf(caseData.getId()), message.getSubmittedDocumentsList())));
         }
         return emptyList();
     }
@@ -998,6 +999,32 @@ public class SendAndReplyService {
         return null;
     }
 
+    public uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization, String caseReference,
+                                                                                 DynamicList submittedDocumentList) {
+        if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
+            return null;
+        }
+
+        if (isNotBlank(submittedDocumentList.getValueCode())) {
+            final String[] documentPath = submittedDocumentList.getValueCode().split(ARROW_SEPARATOR);
+            final String documentId = documentPath[documentPath.length - 1];
+            final List<uk.gov.hmcts.reform.ccd.client.model.Document> documents = getDocuments(
+                authorization,
+                caseReference
+            );
+
+            uk.gov.hmcts.reform.ccd.client.model.Document document = documents.stream()
+                .filter(doc -> nonNull(doc.getDocumentURL()) && doc.getDocumentURL().contains(documentId))
+                .findFirst().orElse(null);
+
+            if (document != null) {
+                return buildFromDoc(document);
+            }
+        }
+        return null;
+
+    }
+
     public uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
                                                                                   DynamicList submittedDocumentList) {
         if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
@@ -1016,6 +1043,37 @@ public class SendAndReplyService {
             }
         }
         return null;
+    }
+
+    private List<uk.gov.hmcts.reform.ccd.client.model.Document> getDocuments(String authorization, String caseReference) {
+        final List<uk.gov.hmcts.reform.ccd.client.model.Document> documents = new ArrayList<>();
+        try {
+            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
+                authorization,
+                authTokenGenerator.generate(),
+                caseReference
+            );
+
+            if (nonNull(categoriesAndDocuments)) {
+                List<Category> categories = emptyIfNull(categoriesAndDocuments.getCategories());
+                getDocsForCategories(categories, documents);
+                documents.addAll(categoriesAndDocuments.getUncategorisedDocuments());
+            }
+
+        } catch (Exception e) {
+            log.error("Error in fetching CategoriesAndDocuments {}", e.getMessage());
+        }
+        return documents;
+    }
+
+    private void getDocsForCategories(List<Category> categories, List<uk.gov.hmcts.reform.ccd.client.model.Document> documents) {
+        categories.forEach(category -> {
+            documents.addAll(emptyIfNull(category.getDocuments()));
+            List<Category> subCategories = emptyIfNull(category.getSubCategories());
+            if (CollectionUtils.isNotEmpty(subCategories)) {
+                getDocsForCategories(subCategories, documents);
+            }
+        });
     }
 
     private List<Element<Document>> getApplicationDocument(DynamicList applicationDocumentList,

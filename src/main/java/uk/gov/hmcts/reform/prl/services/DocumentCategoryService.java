@@ -51,10 +51,13 @@ public class DocumentCategoryService {
         return isUserAllocatedRoleForCaseLA(caseId, idamId);
     }
 
+
+
     public boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
         return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
             || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());
     }
+
 
 
     public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA) {
@@ -93,4 +96,6 @@ public class DocumentCategoryService {
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
     }
+
+
 }
