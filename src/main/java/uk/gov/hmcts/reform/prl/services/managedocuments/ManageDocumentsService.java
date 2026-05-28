@@ -238,8 +238,7 @@ public class ManageDocumentsService {
             if (!userRole.equals(COURT_ADMIN)) {
                 quarantineLegalDoc = getQuarantineLegalDoc(caseData, userDetails, manageDocument, quarantineLegalDoc);
             } else if (userRole.equals(COURT_ADMIN)) {
-                quarantineLegalDoc = updateQuarantineLegalDocForCourtAdmin(
-                    quarantineLegalDoc);
+                quarantineLegalDoc = updateQuarantineLegalDocForCourtAdmin(quarantineLegalDoc);
             }
 
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
