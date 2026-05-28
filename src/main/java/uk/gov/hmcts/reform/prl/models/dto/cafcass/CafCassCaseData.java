@@ -772,6 +772,9 @@ public class CafCassCaseData {
     private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentDc8Documents;
     private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentEc8Documents;
 
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> otherPartyC8Documents;
+
+
     private uk.gov.hmcts.reform.prl.models.documents.Document specialArrangementsLetter;
     private uk.gov.hmcts.reform.prl.models.documents.Document additionalDocuments;
     private List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> additionalDocumentsList;
