@@ -1012,9 +1012,14 @@ public class SendAndReplyService {
                 .getMetadataForDocument(authorization, authTokenGenerator.generate(), UUID.fromString(documentId));
 
             if (document != null) {
-                return buildFromDocument(document);
+                uk.gov.hmcts.reform.prl.models.documents.Document prlDocument = buildFromDocument(document);
+                return prlDocument.toBuilder()
+                    .documentFileName(submittedDocumentList.getValue().getLabel())
+                    .build();
             }
+
         }
+
         return null;
     }
 
