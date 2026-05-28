@@ -22,7 +22,7 @@ import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -233,8 +233,13 @@ public class ViewDraftOrdersServiceTest {
 
         /* We expect the draft orders from the solicitors/barristers from within the sam eorganisation, but sorted. */
         List<Element<DraftOrder>> userDraftOrderCollectionExpected = new ArrayList<>(sameOrgSolicitorOrganisationsDrafts);
-        userDraftOrderCollectionExpected.sort(Comparator.<Element<DraftOrder>, LocalDate>comparing(
-            container -> container.getValue().getDateOrderMade()).reversed()
+
+        userDraftOrderCollectionExpected.sort(Comparator.<Element<DraftOrder>, LocalDateTime>comparing(
+            container -> Optional.ofNullable(container)
+                .map(Element::getValue)
+                .map(DraftOrder::getOtherDetails)
+                .map(OtherDraftOrderDetails::getDateCreated)
+                .orElse(LocalDateTime.now())).reversed()
         );
 
         assertEquals(userDraftOrderCollectionExpected, userDraftOrderCollection);
@@ -249,11 +254,10 @@ public class ViewDraftOrdersServiceTest {
 
     private static Element<DraftOrder> creatorOrderElement(int iteration, String orderCreatorEmail) {
         return Element.<DraftOrder>builder().value(DraftOrder.builder()
-                                                       .dateOrderMade(LocalDate.of(2026, 1, 1)
-                                                                          .plusDays(iteration))
                                                        .otherDetails(
                                                            OtherDraftOrderDetails.builder()
                                                                .status(OrderStatusEnum.draftedByLR.getDisplayedValue())
+                                                               .dateCreated(LocalDateTime.of(2026, 1, 12, 0, iteration))
                                                                .orderCreatedByEmailId(orderCreatorEmail)
                                                                .build()).build()).build();
     }

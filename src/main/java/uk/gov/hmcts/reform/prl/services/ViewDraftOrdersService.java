@@ -13,11 +13,12 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisations;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -70,8 +71,12 @@ public class ViewDraftOrdersService {
                 }
             }
 
-            filteredDraftOrders.sort(Comparator.<Element<DraftOrder>, LocalDate>comparing(
-                container -> container.getValue().getDateOrderMade()).reversed()
+            filteredDraftOrders.sort(Comparator.<Element<DraftOrder>, LocalDateTime>comparing(
+                container -> Optional.ofNullable(container)
+                    .map(Element::getValue)
+                    .map(DraftOrder::getOtherDetails)
+                    .map(OtherDraftOrderDetails::getDateCreated)
+                    .orElse(LocalDateTime.now())).reversed()
             );
 
         } else {
