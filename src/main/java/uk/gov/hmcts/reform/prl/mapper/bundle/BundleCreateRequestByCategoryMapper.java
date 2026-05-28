@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.reverse;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -47,6 +49,9 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private static final String DATA_ORDERS = "/data/orders";
     private static final String DATA_APPLICATIONS = "/data/applications";
     private static final String DATA_ALL_OTHER_DOCUMENTS = "/data/allOtherDocuments";
+    private static final List<String> AWP_CATEGORIES = List.of("applicationsWithinProceedings",
+                                                               "applicationsWithinProceedingsRes",
+                                                               "applicationsFromOtherProceedings");
 
     private final CategoriesAndDocumentsHelper categoriesAndDocumentsHelper;
     private final SystemUserService systemUserService;
@@ -84,26 +89,28 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             folder.getDocuments().forEach(document -> {
                 FilterProperties filterProperties = document.getFilters().getFirst();
                 if (filterProperties != null && filterProperties.getCategory() != null) {
-                    if (DATA_ORDERS.equals(document.getProperty())) {
-                        List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        ));
-                        reverse(orders);
-                        ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
-                    } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
-                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        )));
-                    } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
-                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        )));
+                    if (!AWP_CATEGORIES.contains(filterProperties.getCategory())) {
+                        if (DATA_ORDERS.equals(document.getProperty())) {
+                            List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
+                                allCategoriesToMap.get(filterProperties.getCategory()),
+                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                filterProperties
+                            ));
+                            reverse(orders);
+                            ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
+                        } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
+                            applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                                allCategoriesToMap.get(filterProperties.getCategory()),
+                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                filterProperties
+                            )));
+                        } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
+                            allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                                allCategoriesToMap.get(filterProperties.getCategory()),
+                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                filterProperties
+                            )));
+                        }
                     }
                 }
             });
@@ -115,6 +122,14 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
 
         if (!citizenUploadedC7Documents.isEmpty()) {
             applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(citizenUploadedC7Documents));
+        }
+
+        // Add all other AWP Documents
+        List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
+            caseData.getAdditionalApplicationsBundle(), FilterProperties.builder().build());
+
+        if (!otherAdditionalBundleDocs.isEmpty()) {
+            allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(otherAdditionalBundleDocs));
         }
 
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
@@ -138,6 +153,58 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             .forEach(c7CitizenResponseDocument -> c7Documents
                 .add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(), BundlingDocGroupEnum.c7Documents, filterProperties)));
         return c7Documents;
+    }
+
+    private List<BundlingRequestDocument> mapOtherAdditionalBundleFromCaseData(
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleList,
+        FilterProperties filterProperties) {
+
+        List<BundlingRequestDocument> additionalApplicationsBundle = new ArrayList<>();
+        Optional<List<Element<AdditionalApplicationsBundle>>> additionalApplicationsBundleDocs = ofNullable(additionalApplicationsBundleList);
+        if (additionalApplicationsBundleDocs.isEmpty()) {
+            return additionalApplicationsBundle;
+        }
+        // C2 AWP
+        ElementUtils.unwrapElements(additionalApplicationsBundleList).stream()
+            .filter(additionalBundle -> additionalBundle.getC2DocumentBundle() != null)
+            .filter(applicationsBundle -> AWP_STATUS_CLOSED.equals(applicationsBundle.getC2DocumentBundle().getApplicationStatus()))
+            .forEach(applicationsBundle -> {
+                additionalApplicationsBundle
+                    .addAll(mapBundlingRequestDocument(
+                        ElementUtils.unwrapElements(applicationsBundle.getC2DocumentBundle().getFinalDocument()),
+                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
+                    ));
+                if (applicationsBundle.getC2DocumentBundle().getSupportingEvidenceBundle() != null) {
+                    ElementUtils.unwrapElements(applicationsBundle.getC2DocumentBundle().getSupportingEvidenceBundle())
+                        .forEach(sp -> additionalApplicationsBundle
+                            .add(mapBundlingRequestDocument(
+                                sp.getDocument(),
+                                BundlingDocGroupEnum.applicantAWPDocuments,
+                                filterProperties
+                            )));
+                }
+            });
+        // Other AWP
+        ElementUtils.unwrapElements(additionalApplicationsBundleList).stream()
+            .filter(additionalBundle -> additionalBundle.getOtherApplicationsBundle() != null)
+            .filter(applicationsBundle -> AWP_STATUS_CLOSED.equals(applicationsBundle.getOtherApplicationsBundle().getApplicationStatus()))
+            .forEach(applicationsBundle -> {
+                additionalApplicationsBundle
+                    .addAll(mapBundlingRequestDocument(
+                        ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getFinalDocument()),
+                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
+                    ));
+                if (applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
+                    ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle())
+                        .forEach(sp -> additionalApplicationsBundle
+                            .add(mapBundlingRequestDocument(
+                                sp.getDocument(),
+                                BundlingDocGroupEnum.applicantAWPDocuments,
+                                filterProperties
+                            )));
+                }
+            });
+        return additionalApplicationsBundle;
     }
 
     private Document mapCategoryDocumentToPrlDocument(uk.gov.hmcts.reform.ccd.client.model.Document categoryDocument) {
