@@ -128,7 +128,7 @@ public class ManageDocumentsServiceTest {
 
     @Spy
     @InjectMocks
-    ManageDocumentsService manageDocumentsService;
+    private ManageDocumentsService manageDocumentsService;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -140,19 +140,19 @@ public class ManageDocumentsServiceTest {
     private CoreCaseDataApi coreCaseDataApi;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
-    SystemUserService systemUserService;
+    private SystemUserService systemUserService;
 
     @Mock
-    CaseDocumentClient caseDocumentClient;
+    private CaseDocumentClient caseDocumentClient;
 
     @Mock
     private CaseDocumentClientApi caseDocumentClientApi;
 
     @Mock
-    CaseUtils caseUtils;
+    private CaseUtils caseUtils;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -174,74 +174,72 @@ public class ManageDocumentsServiceTest {
 
     private final String auth = "auth-token";
 
-    private final String serviceAuthToken = "Bearer testServiceAuth";
+    private Element<ManageDocuments> manageDocumentsElement;
 
-    Element<ManageDocuments> manageDocumentsElement;
+    private Element<QuarantineLegalDoc> quarantineLegalDocElement;
 
-    Element<QuarantineLegalDoc> quarantineLegalDocElement;
+    private Document document;
 
-    Document document;
+    private uk.gov.hmcts.reform.prl.models.documents.Document document1;
 
-    uk.gov.hmcts.reform.prl.models.documents.Document document1;
+    private Category subCategory1;
+    private Category subCategory2;
+    private Category category;
 
-    Category subCategory1;
-    Category subCategory2;
-    Category category;
+    private CategoriesAndDocuments categoriesAndDocuments;
 
-    CategoriesAndDocuments categoriesAndDocuments;
+    private List<Category> parentCategories;
 
-    List<Category> parentCategories;
+    private List<DynamicListElement> dynamicListElementList;
 
-    List<DynamicListElement> dynamicListElementList;
+    private DynamicList dynamicList;
 
-    DynamicList dynamicList;
+    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
 
-    List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
 
-    List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
 
-    List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsList;
 
-    List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
 
-    List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
 
-    List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
 
-    List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
 
-    List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
+    private List<Element<QuarantineLegalDoc>> citizenUploadDocListDocTab;
 
-    List<Element<QuarantineLegalDoc>> citizenUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> courtNavQuarantineDocumentList;
 
-    List<Element<QuarantineLegalDoc>> courtNavQuarantineDocumentList;
+    private UserDetails userDetailsSolicitorRole;
 
-    UserDetails userDetailsSolicitorRole;
+    private UserDetails userDetailsBulScanRole;
 
-    UserDetails userDetailsBulScanRole;
+    private UserDetails userDetailsCitizenRole;
 
-    UserDetails userDetailsCitizenRole;
+    private UserDetails userDetailsCafcassRole;
 
-    UserDetails userDetailsCafcassRole;
+    private UserDetails userDetailsCourtAdminRole;
 
-    UserDetails userDetailsCourtAdminRole;
+    private UserDetails userDetailsCourtNavRole;
 
-    UserDetails userDetailsCourtNavRole;
+    private UserDetails userDetailsJudgeRole;
 
-    UserDetails userDetailsJudgeRole;
+    private UserDetails userDetailsStaff;
 
-    UserDetails userDetailsStaff;
-
-    List<String> categoriesToExclude;
+    private List<String> categoriesToExclude;
 
 
-    uk.gov.hmcts.reform.prl.models.documents.Document caseDoc;
+    private uk.gov.hmcts.reform.prl.models.documents.Document caseDoc;
 
-    uk.gov.hmcts.reform.prl.models.documents.Document confidentialDoc;
+    private uk.gov.hmcts.reform.prl.models.documents.Document confidentialDoc;
 
-    QuarantineLegalDoc quarantineConfidentialDoc;
+    private QuarantineLegalDoc quarantineConfidentialDoc;
 
-    QuarantineLegalDoc quarantineCaseDoc;
+    private QuarantineLegalDoc quarantineCaseDoc;
 
     @Mock
     private RoleAssignmentApi roleAssignmentApi;
@@ -380,15 +378,15 @@ public class ManageDocumentsServiceTest {
             .code(category.getCategoryId())
             .label(category.getCategoryName())
             .build();
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        dynamicListElementList.add(dynamicListElement);
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElements).build();
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
             true
-        )).thenReturn(dynamicList);
+        )).thenReturn(dynamicLst);
 
         // when
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
@@ -414,15 +412,15 @@ public class ManageDocumentsServiceTest {
             .code(laCategory.getCategoryId())
             .label(laCategory.getCategoryName())
             .build();
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        dynamicListElementList.add(dynamicListElement);
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElements).build();
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
             true
-        )).thenReturn(dynamicList);
+        )).thenReturn(dynamicLst);
 
         // when
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
@@ -449,15 +447,15 @@ public class ManageDocumentsServiceTest {
             .code(laCategory.getCategoryId())
             .label(laCategory.getCategoryName())
             .build();
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        dynamicListElementList.add(dynamicListElement);
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElements).build();
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
             true
-        )).thenReturn(dynamicList);
+        )).thenReturn(dynamicLst);
 
         // when
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
@@ -483,15 +481,15 @@ public class ManageDocumentsServiceTest {
             .code(laCategory.getCategoryId())
             .label(laCategory.getCategoryName())
             .build();
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        dynamicListElementList.add(dynamicListElement);
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElements).build();
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
             true
-        )).thenReturn(dynamicList);
+        )).thenReturn(dynamicLst);
 
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
 
@@ -515,15 +513,15 @@ public class ManageDocumentsServiceTest {
             .code(category.getCategoryId())
             .label(category.getCategoryName())
             .build();
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        dynamicListElementList.add(dynamicListElement);
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(dynamicListElement);
+        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElements).build();
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
             false
-        )).thenReturn(dynamicList);
+        )).thenReturn(dynamicLst);
 
         // when
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
@@ -543,14 +541,14 @@ public class ManageDocumentsServiceTest {
         // given
         CaseData caseData = CaseData.builder().id(12345L).build();
         when(documentCategoryService.isUserAllocatedRoleForCaseLA(auth, caseData)).thenReturn(true);
-        List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElementList).build();
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
+            .listItems(dynamicListElements).build();
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
             true
-        )).thenReturn(dynamicList);
+        )).thenReturn(dynamicLst);
 
         // when
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);

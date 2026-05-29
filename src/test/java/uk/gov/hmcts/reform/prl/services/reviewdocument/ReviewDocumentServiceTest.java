@@ -322,10 +322,10 @@ public class ReviewDocumentServiceTest {
         links.binary = binaryLink;
         links.self = selfLink;
 
-        uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
-        document.links = links;
-        document.originalDocumentName = "Confidential_test.pdf";
-        return document;
+        uk.gov.hmcts.reform.ccd.document.am.model.Document doc = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        doc.links = links;
+        doc.originalDocumentName = "Confidential_test.pdf";
+        return doc;
     }
 
 

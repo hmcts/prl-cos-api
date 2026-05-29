@@ -17,10 +17,18 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EXCLUDED_LA_DOCS_LIST_FOR_ADMIN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_TRANSFER_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -29,6 +37,17 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DocumentCategoryService {
+
+    public static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
+        CHILD_IMPACT_REPORT_1_LA,
+        CHILD_IMPACT_REPORT_2_LA,
+        SECTION_7_REPORT_LA,
+        SECTION_7_ADDENDUM_REPORT_LA,
+        LOCAL_AUTHORITY_INVOLVEMENT_LA,
+        SECTION_47_LA,
+        CIR_EXTENSION_REQUEST_LA,
+        CIR_TRANSFER_REQUEST_LA
+    );
 
     private final UserService userService;
     private final RoleAssignmentService roleAssignmentService;
