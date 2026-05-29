@@ -202,8 +202,6 @@ public class ManageDocumentsServiceTest {
 
     private List<Element<QuarantineLegalDoc>> localAuthorityQuarantineDocsList;
 
-    private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
-
     private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
 
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
@@ -402,7 +400,6 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testPopulateDocumentCategoriesForLaParty() {
-
         // given
         Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments",
                                            2, List.of(document), List.of(subCategory1, subCategory2));
@@ -426,74 +423,6 @@ public class ManageDocumentsServiceTest {
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
 
         // then
-        String docCode = updatedCaseData.getDocumentManagementDetails()
-            .getManageDocuments().getFirst().getValue().getDocumentCategories().getListItems()
-            .getFirst().getCode();
-        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
-            .getManageDocuments().getFirst().getValue().getDocumentParty();
-        assertEquals(laCategory.getCategoryId(), docCode);
-        assertEquals(LOCAL_AUTHORITY, laParty);
-    }
-
-    @Test
-    public void testLaPartyWithRoleSocialWorker() {
-
-        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2,
-                                           List.of(document), List.of(subCategory1, subCategory2));
-
-        CaseData caseData = CaseData.builder().id(12345L).build();
-        when(documentCategoryService.isUserAllocatedRoleForCaseLA(auth, caseData)).thenReturn(true);
-        DynamicListElement dynamicListElement = DynamicListElement.builder()
-            .code(laCategory.getCategoryId())
-            .label(laCategory.getCategoryName())
-            .build();
-        List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(dynamicListElement);
-        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElements).build();
-        when(documentCategoryService.getCategoriesSubcategories(
-            auth,
-            String.valueOf(caseData.getId()),
-            true
-        )).thenReturn(dynamicLst);
-
-        // when
-        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
-
-        // then
-        String docCode = updatedCaseData.getDocumentManagementDetails()
-            .getManageDocuments().getFirst().getValue().getDocumentCategories().getListItems()
-            .getFirst().getCode();
-        DocumentPartyEnum laParty = updatedCaseData.getDocumentManagementDetails()
-            .getManageDocuments().getFirst().getValue().getDocumentParty();
-        assertEquals(laCategory.getCategoryId(), docCode);
-        assertEquals(LOCAL_AUTHORITY, laParty);
-    }
-
-    @Test
-    public void testLaPartyWithRoleSolicitor() {
-
-        Category laCategory = new Category("localAuthorityDocuments", "localAuthorityDocuments", 2,
-                                           List.of(document), List.of(subCategory1, subCategory2));
-        CaseData caseData = CaseData.builder().id(12345L).build();
-        when(documentCategoryService.isUserAllocatedRoleForCaseLA(auth, caseData)).thenReturn(true);
-        DynamicListElement dynamicListElement = DynamicListElement.builder()
-            .code(laCategory.getCategoryId())
-            .label(laCategory.getCategoryName())
-            .build();
-        List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(dynamicListElement);
-        DynamicList dynamicLst = DynamicList.builder().value(DynamicListElement.EMPTY)
-            .listItems(dynamicListElements).build();
-        when(documentCategoryService.getCategoriesSubcategories(
-            auth,
-            String.valueOf(caseData.getId()),
-            true
-        )).thenReturn(dynamicLst);
-
-        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
-
-
         String docCode = updatedCaseData.getDocumentManagementDetails()
             .getManageDocuments().getFirst().getValue().getDocumentCategories().getListItems()
             .getFirst().getCode();

@@ -38,7 +38,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DocumentCategoryService {
 
-    public static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
+    private static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
         CHILD_IMPACT_REPORT_1_LA,
         CHILD_IMPACT_REPORT_2_LA,
         SECTION_7_REPORT_LA,
