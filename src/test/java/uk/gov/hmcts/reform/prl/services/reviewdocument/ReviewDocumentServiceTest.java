@@ -537,11 +537,16 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByCourtStaffProfessional() {
+        // given
         quarantineLegalDoc = quarantineLegalDoc.toBuilder()
             .courtStaffQuarantineDocument(document)
             .restrictedDetails("test details")
+            .notes("abc")
+            .isConfidential(YesOrNo.Yes)
+            .isRestricted(YesOrNo.Yes)
             .uploaderRole(COURT_STAFF)
             .build();
+
 
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
@@ -555,9 +560,14 @@ public class ReviewDocumentServiceTest {
                                      DynamicListElement.builder()
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build()).build()).build();
-
+        DynamicList documentCategories = Instancio.create(DynamicList.class);
+        when(documentCategoryService.retrieveDocumentCategories(AUTHORISATION, caseData)).thenReturn(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
+
+        // when
         reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
+
+        // then
         assertNotNull(caseDataMap.get("docToBeReviewed"));
         assertNotNull(caseDataMap.get("reviewDoc"));
         Document reviewDoc = (Document) caseDataMap.get("reviewDoc");
@@ -613,7 +623,11 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
+
+        // when
         reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, caseDataMap);
+
+        // then
         assertNotNull(caseDataMap.get("docToBeReviewed"));
     }
 
