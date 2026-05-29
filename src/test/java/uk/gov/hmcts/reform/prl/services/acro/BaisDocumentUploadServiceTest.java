@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +47,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 
-@Slf4j
 @ExtendWith(SpringExtension.class)
 class BaisDocumentUploadServiceTest {
 
@@ -416,7 +414,6 @@ class BaisDocumentUploadServiceTest {
             String source = (String) mapping[2];
 
             String format = String.format("%s should be mapped from %s", fieldName, source);
-            log.info(format);
             assertEquals(expected, actual, format
             );
         });
