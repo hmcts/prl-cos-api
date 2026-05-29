@@ -13,4 +13,5 @@ public class MiamPolicyUpgrade {
     private final String mediatorRegistrationNumber;
     private final String familyMediatorServiceName;
     private final String soleTraderName;
+    private final String test;
 }
