@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -66,19 +65,34 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ENFORCEMENT_ORDER_SUITABILITY_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PARENTAL_ORDER_REPORTER_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SAFEGUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SEC37_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -149,6 +163,26 @@ public class ManageDocumentsService {
         SECTION_47_LA,
         CIR_EXTENSION_REQUEST_LA,
         CIR_TRANSFER_REQUEST_LA
+    );
+
+    private static final List<String> CIR_EXTENSION_TASKS_LIST = Arrays.asList(
+        CIR_EXTENSION_REQUEST,
+        CIR_EXTENSION_REQUEST_LA
+    );
+    private static final List<String> CIR_TRANSFER_TASKS_LIST = Arrays.asList(
+        CIR_TRANSFER_REQUEST,
+        CIR_TRANSFER_REQUEST_LA
+    );
+    private static final List<String> SIXTEEN_A_ASSESSMENT_TASKS_LIST = List.of(SIXTEEN_A_RISK_ASSESSMENT);
+    private static final List<String> LOW_PRIORITY_TASKS_LIST = Arrays.asList(
+        CHILD_IMPACT_REPORT1, CHILD_IMPACT_REPORT2,
+        SAFEGUARDING_LETTER, SECTION7_REPORT,
+        SECTION_37_REPORT, GUARDIAN_REPORT,
+        SPECIAL_GUARDIANSHIP_REPORT, OTHER_DOCS,
+        ENFORCEMENT_ORDER_SUITABILITY_REPORT, PARENTAL_ORDER_REPORTER_REPORT,
+        CHILD_IMPACT_REPORT_1_LA, CHILD_IMPACT_REPORT_2_LA, SEC37_REPORT,
+        SECTION_7_REPORT_LA, SECTION_7_ADDENDUM_REPORT_LA, LOCAL_AUTHORITY_INVOLVEMENT_LA,
+        SECTION_47_LA, LA_OTHER_DOCS
     );
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
@@ -337,8 +371,8 @@ public class ManageDocumentsService {
     }
 
     private QuarantineLegalDoc updateQuarantineLegalDocForLocalAuthority(QuarantineLegalDoc quarantineLegalDoc) {
-        if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
-            || ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+        if (CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
+            || CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
             return quarantineLegalDoc.toBuilder()
                 .isConfidential(YesOrNo.Yes)
                 .categoryName(quarantineLegalDoc.getCategoryName())
@@ -545,6 +579,7 @@ public class ManageDocumentsService {
     }
 
     private boolean isNewTaskRequired(CaseData caseData, QuarantineLegalDoc quarantineLegalDoc, String userRole) {
+        boolean newTaskRequired = false;
         if (caseData.getDocumentManagementDetails() != null) {
             List<Element<QuarantineLegalDoc>> quarantineDocList = new ArrayList<>();
             if (userRole.equals(LOCAL_AUTHORITY)) {
@@ -552,18 +587,40 @@ public class ManageDocumentsService {
             } else if (userRole.equals(CAFCASS)) {
                 quarantineDocList = caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList();
             }
-            return isGivenDocumentExists(quarantineLegalDoc.getCategoryId(), quarantineDocList).isEmpty();
+
+            List<String> docsToCheck = getDocumentListByCategoryId(quarantineLegalDoc);
+
+            if (isGivenDocumentExists(quarantineDocList, isDocsExistInQuarantine(docsToCheck)).isEmpty()) {
+                newTaskRequired = true;
+            }
         }
-        return true;
+        return newTaskRequired;
     }
 
-    private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(String categoryId, List<Element<QuarantineLegalDoc>> quarantineDocList) {
-        if (quarantineDocList == null) {
+    private List<String> getDocumentListByCategoryId(QuarantineLegalDoc quarantineLegalDoc) {
+        List<String> docsToCheck = List.of();
+        if (CIR_EXTENSION_TASKS_LIST.contains(quarantineLegalDoc.getCategoryId())) {
+            docsToCheck = CIR_EXTENSION_TASKS_LIST;
+        } else if (CIR_TRANSFER_TASKS_LIST.contains(quarantineLegalDoc.getCategoryId())) {
+            docsToCheck = CIR_TRANSFER_TASKS_LIST;
+        } else if (SIXTEEN_A_ASSESSMENT_TASKS_LIST.contains(quarantineLegalDoc.getCategoryId())) {
+            docsToCheck = SIXTEEN_A_ASSESSMENT_TASKS_LIST;
+        } else if (LOW_PRIORITY_TASKS_LIST.contains(quarantineLegalDoc.getCategoryId())) {
+            docsToCheck = LOW_PRIORITY_TASKS_LIST;
+        }
+        return docsToCheck;
+    }
+
+    private Optional<Element<QuarantineLegalDoc>> isGivenDocumentExists(List<Element<QuarantineLegalDoc>> quarantineDocList,
+                                                                        Predicate<Element<QuarantineLegalDoc>> predicate) {
+        if (quarantineDocList == null || quarantineDocList.isEmpty()) {
             return Optional.empty();
         }
-        return quarantineDocList.stream()
-            .filter(each -> each.getValue().getCategoryId()
-                .equals(categoryId)).findAny();
+        return quarantineDocList.stream().filter(predicate).findAny();
+    }
+
+    private Predicate<Element<QuarantineLegalDoc>> isDocsExistInQuarantine(List<String> existingList) {
+        return document -> existingList.contains(document.getValue().getCategoryId());
     }
 
     public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
