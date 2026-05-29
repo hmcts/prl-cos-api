@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.instancio.Instancio;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -103,8 +104,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ReviewDocumentServiceTest {
 
     private static final String AUTHORISATION = "authorisation";
-    public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
-    public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
+    private static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
+    private static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
         + System.lineSeparator()
         + "This document can only be seen by court staff and the judiciary. "
@@ -131,26 +132,26 @@ public class ReviewDocumentServiceTest {
     private final UUID testUuid = UUID.fromString(TEST_UUID);
 
     @InjectMocks
-    ReviewDocumentService reviewDocumentService;
+    private ReviewDocumentService reviewDocumentService;
 
     @Mock
-    AuthTokenGenerator authTokenGenerator;
+    private AuthTokenGenerator authTokenGenerator;
     @Mock
-    SystemUserService systemUserService;
+    private SystemUserService systemUserService;
     @Mock
-    CaseDocumentClient caseDocumentClient;
+    private CaseDocumentClient caseDocumentClient;
 
     @Mock
-    AllTabsService allTabsService;
+    private AllTabsService allTabsService;
 
     @Mock
-    AllTabServiceImpl allTabServiceImpl;
+    private AllTabServiceImpl allTabServiceImpl;
 
     @Mock
-    ManageDocumentsService manageDocumentsService;
+    private ManageDocumentsService manageDocumentsService;
 
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Mock
     private EmailService emailService;
@@ -179,21 +180,21 @@ public class ReviewDocumentServiceTest {
     private DocumentCategoryService documentCategoryService;
 
     private final String authorization = "authToken";
-    Element element;
-    Document document;
-    QuarantineLegalDoc quarantineLegalDoc;
+    private Element element;
+    private Document document;
+    private QuarantineLegalDoc quarantineLegalDoc;
     private String authToken;
     private String s2sToken;
 
-    Document caseDoc;
+    private Document caseDoc;
 
-    Document confidentialDoc;
+    private Document confidentialDoc;
 
-    QuarantineLegalDoc quarantineConfidentialDoc;
+    private QuarantineLegalDoc quarantineConfidentialDoc;
 
-    QuarantineLegalDoc quarantineCaseDoc;
+    private QuarantineLegalDoc quarantineCaseDoc;
 
-    QuarantineLegalDoc bulkScanQuarantineDoc;
+    private QuarantineLegalDoc bulkScanQuarantineDoc;
 
     @Before
     public void init() {
@@ -344,7 +345,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentLegalProfQuarantineDocsList() {
-        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(DocumentManagementDetails.builder()
                                            .legalProfQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder().uploaderRole(
@@ -362,7 +362,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCafcassQuarantineDocsList() {
-        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
@@ -384,7 +383,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForBulkscanDocuments() {
-        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(DocumentManagementDetails.builder().build())
             .scannedDocuments(List.of(element(
@@ -407,7 +405,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCourtStaffQuarantineDocsList() {
-        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
@@ -425,6 +422,27 @@ public class ReviewDocumentServiceTest {
 
         Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
     }
+
+    @Test
+    public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForLocalAuthorityQuarantineDocsList() {
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(
+                DocumentManagementDetails.builder()
+                    .localAuthorityQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder().uploaderRole("LASOLICITOR")
+                                                                      .documentUploadedDate(LocalDateTime.now())
+                                                                      .document(Document.builder().build())
+                                                                      .courtStaffQuarantineDocument(Document.builder()
+                                                                                                        .documentFileName(
+                                                                                                            "filename")
+                                                                                                        .build())
+                                                                      .build())))
+                    .build()
+            )
+            .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
+
+        Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData).isEmpty());
+    }
+
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCitizenQuarantineDocsList() {
@@ -845,10 +863,10 @@ public class ReviewDocumentServiceTest {
 
         assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
         Assert.assertEquals(1, bulkScannedDocListDocTab.size());
-        assertNotNull(bulkScannedDocListDocTab.get(0).getValue().getUrl());
-        Assert.assertEquals(quarantineLegalDoc.getCategoryId(), bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
-        Assert.assertEquals("123", bulkScannedDocListDocTab.get(0).getValue().getControlNumber());
-        Assert.assertEquals("EXREF", bulkScannedDocListDocTab.get(0).getValue().getExceptionRecordReference());
+        assertNotNull(bulkScannedDocListDocTab.getFirst().getValue().getUrl());
+        Assert.assertEquals(quarantineLegalDoc.getCategoryId(), bulkScannedDocListDocTab.getFirst().getValue().getCategoryId());
+        Assert.assertEquals("123", bulkScannedDocListDocTab.getFirst().getValue().getControlNumber());
+        Assert.assertEquals("EXREF", bulkScannedDocListDocTab.getFirst().getValue().getExceptionRecordReference());
     }
 
     @Test
@@ -2001,4 +2019,46 @@ public class ReviewDocumentServiceTest {
 
         verifyNoInteractions(manageDocumentsService);
     }
+
+
+    @Test
+    public void testTriggerAllDocsReviewedEvent() {
+        // given
+        CaseData caseData = Instancio.create(CaseData.class);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = Instancio.create(StartAllTabsUpdateDataContent.class);
+        DocumentManagementDetails documentManagementDetails = caseData.getDocumentManagementDetails();
+        documentManagementDetails.setLegalProfQuarantineDocsList(new ArrayList<>());
+        documentManagementDetails.setCourtStaffQuarantineDocsList(new ArrayList<>());
+        documentManagementDetails.setCitizenQuarantineDocsList(new ArrayList<>());
+        documentManagementDetails.setLocalAuthorityQuarantineDocsList(new ArrayList<>());
+        documentManagementDetails.setCafcassQuarantineDocsList(new ArrayList<>());
+        documentManagementDetails.setCourtNavQuarantineDocumentList(new ArrayList<>());
+        caseData.setScannedDocuments(new ArrayList<>());
+        when(allTabServiceImpl.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+
+        // when
+        reviewDocumentService.triggerAllDocsReviewedEvent(caseData);
+
+        // then
+        verify(allTabServiceImpl).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabServiceImpl).submitAllTabsUpdate(anyString(), anyString(), any(StartEventResponse.class), any(
+            EventRequestData.class), any(Map.class));
+    }
+
+
+    @Test
+    public void testRemoveReviewDocumentWithMissingDocument() {
+        // given
+        CaseData caseData = Instancio.create(CaseData.class);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        // when
+        reviewDocumentService.removeReviewDocumentWithMissingDocument(caseData, caseDataUpdated);
+
+        // then
+        assertNotNull(caseDataUpdated);
+    }
+
+
 }
