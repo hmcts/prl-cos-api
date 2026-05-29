@@ -575,6 +575,8 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_UPLOADED_CATEGORY,
                                 listOfTasks);
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole.toUpperCase());
+        } else {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
         }
     }
 

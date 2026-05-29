@@ -962,6 +962,14 @@
                   "label": "Special guardianship report"
                 },
                 {
+                  "code": "enforcementOrderSuitabilityReport",
+                  "label": "Enforcement Order Suitability Report"
+                },
+                {
+                  "code": "parentalOrderReporterReport",
+                  "label": "Parental Order Reporter Report"
+                },
+                {
                   "code": "otherDocs",
                   "label": "Other documents"
                 },

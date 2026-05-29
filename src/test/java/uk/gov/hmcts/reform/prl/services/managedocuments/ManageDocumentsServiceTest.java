@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.enums.Roles.LOCAL_AUTHORITY_STAFF;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_UPLOADED_CATEGORY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -3211,5 +3212,83 @@ public class ManageDocumentsServiceTest {
 
         verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
         verify(allTabService, never()).submitAllTabsUpdate(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void setFlagsForCirWaTaskWhenLaUploadsDocNotInQuarantineCreatesNewTask() {
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder()
+            .localAuthorityQuarantineDocsList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(documentManagementDetails)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST)
+            .build();
+
+        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, "LOCAL_AUTHORITY", quarantineLegalDoc);
+
+        assertNotNull(caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
+    }
+
+    @Test
+    public void setFlagsForCirWaTaskWhenLaUploadsDocAlreadyInQuarantineNoNewTaskCreated() {
+        QuarantineLegalDoc existingDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1)
+            .build();
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder()
+            .localAuthorityQuarantineDocsList(List.of(element(existingDoc)))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(documentManagementDetails)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1)
+            .build();
+
+        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, "LOCAL_AUTHORITY", quarantineLegalDoc);
+
+        assertNull(caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
+    }
+
+    @Test
+    public void setFlagsForCirWaTaskWhenCafcassUploadsDocNotInQuarantineCreatesNewTask() {
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder()
+            .cafcassQuarantineDocsList(new ArrayList<>())
+            .build();
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(documentManagementDetails)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST)
+            .build();
+
+        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, "Cafcass", quarantineLegalDoc);
+
+        assertNotNull(caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
+    }
+
+    @Test
+    public void setFlagsForCirWaTaskWhenCafcassUploadsDocAlreadyInQuarantineNoNewTaskCreated() {
+        QuarantineLegalDoc existingDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST)
+            .build();
+        DocumentManagementDetails documentManagementDetails = DocumentManagementDetails.builder()
+            .cafcassQuarantineDocsList(List.of(element(existingDoc)))
+            .build();
+        CaseData caseData = CaseData.builder()
+            .documentManagementDetails(documentManagementDetails)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .categoryId(ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST)
+            .build();
+
+        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, "Cafcass", quarantineLegalDoc);
+
+        assertNull(caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY));
     }
 }

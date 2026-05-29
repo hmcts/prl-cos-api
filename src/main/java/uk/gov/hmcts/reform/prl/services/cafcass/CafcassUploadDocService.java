@@ -39,8 +39,6 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVA
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkTypeOfDocument;
-import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -52,6 +50,8 @@ public class CafcassUploadDocService {
     public static final String DOC_TYPE_CIR_TRANSFER = "cirTransferRequest";
     public static final String DOC_TYPE_CIR_EXTENSION = "cirExtensionRequest";
     public static final String DOC_TYPE_S16A_RISK_ASSESSMENT = "S_16A_Risk_Assessment";
+    public static final String ENFORCEMENT_ORDER_SUITABILITY_REPORT = "Enforcement_Order_Suitability_Report";
+    public static final String PARENTAL_ORDER_REPORTER_REPORT = "Parental_Order_Reporter_Report";
 
     public static final List<String> URGENT_CAFCASS_DOC_TYPES = List.of(
         DOC_TYPE_CIR_TRANSFER, DOC_TYPE_CIR_EXTENSION, DOC_TYPE_S16A_RISK_ASSESSMENT
@@ -75,7 +75,7 @@ public class CafcassUploadDocService {
         "Safeguarding_Letter_Returner", "Safeguarding_Letter_Shorter_Template",
         "Safeguarding_Letter_Update", "Second_Gatekeeping_Safeguarding_Letter",
         "Section7_Addendum_Report", "Section7_Report_Child_Impact_Analysis", "Suitability_report",
-        "Enforcement_Order_Suitability_Report", "Parental_Order_Reporter_Report"
+        ENFORCEMENT_ORDER_SUITABILITY_REPORT, PARENTAL_ORDER_REPORTER_REPORT
     );
 
     private static final Map<String, CafcassReportAndGuardianEnum> DOCUMENT_TYPE_CATEGORY_MAP = createDocumentTypeMap();
@@ -123,32 +123,14 @@ public class CafcassUploadDocService {
             uploadResponse.getDocuments().get(0)
         );
 
+        caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);
+
         manageDocumentsService.setFlagsForWaTask(
             startAllTabsUpdateDataContent.caseData(),
             caseDataUpdated,
             CAFCASS,
             quarantineLegalDoc
         );
-
-        if (URGENT_CAFCASS_DOC_TYPES.contains(typeOfDocument)) {
-            boolean isDuplicate = hasCafcassQuarantineDocOfSameCategory(
-                startAllTabsUpdateDataContent.caseData(),
-                quarantineLegalDoc.getCategoryId()
-            );
-            log.info("Cafcass urgent doc upload caseId={} type={} categoryId={} isDuplicate={}",
-                     caseId, typeOfDocument, quarantineLegalDoc.getCategoryId(), isDuplicate);
-            if (!isDuplicate) {
-                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY,
-                                    List.of(element(quarantineLegalDoc.getCategoryId()))
-                );
-            } else {
-                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
-                caseDataUpdated.put(MANAGE_DOC_UPLOADED_CATEGORY, null);
-            }
-        } else {
-            caseDataUpdated.putIfAbsent(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
-        }
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
             quarantineLegalDoc,
@@ -263,8 +245,8 @@ public class CafcassUploadDocService {
         map.put("Re_W_Report", CafcassReportAndGuardianEnum.otherDocs);
         map.put("S_11H_Monitoring", CafcassReportAndGuardianEnum.otherDocs);
         map.put(DOC_TYPE_S16A_RISK_ASSESSMENT, CafcassReportAndGuardianEnum.riskAssessment);
-        map.put("Enforcement_Order_Suitability_Report", CafcassReportAndGuardianEnum.enforcementOrderSuitabilityReport);
-        map.put("Parental_Order_Reporter_Report", CafcassReportAndGuardianEnum.parentalOrderReporterReport);
+        map.put(ENFORCEMENT_ORDER_SUITABILITY_REPORT, CafcassReportAndGuardianEnum.enforcementOrderSuitabilityReport);
+        map.put(PARENTAL_ORDER_REPORTER_REPORT, CafcassReportAndGuardianEnum.parentalOrderReporterReport);
         map.put("Safeguarding_Letter", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Returner", CafcassReportAndGuardianEnum.safeguardingLetter);
         map.put("Safeguarding_Letter_Shorter_Template", CafcassReportAndGuardianEnum.safeguardingLetter);

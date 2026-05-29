@@ -43,7 +43,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_S16A_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.ENFORCEMENT_ORDER_SUITABILITY_REPORT;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.MANAGE_DOC_UPLOADED_CATEGORY;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.PARENTAL_ORDER_REPORTER_REPORT;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_CASE_ID;
@@ -248,12 +250,11 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_TRANSFER, ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
-        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(manageDocumentsService).setFlagsForWaTask(any(), any(), any(), any());
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void shouldSetUrgentDocTypeForCirExtension() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
@@ -270,8 +271,8 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_EXTENSION, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_EXTENSION, ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
-        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(manageDocumentsService).setFlagsForWaTask(any(), any(), any(), any());
     }
 
     @Test
@@ -292,8 +293,8 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_S16A_RISK_ASSESSMENT, TEST_CASE_ID);
 
-        assertEquals("16aRiskAssessment", ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
-        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(manageDocumentsService).setFlagsForWaTask(any(), any(), any(), any());
     }
 
     @Test
@@ -442,8 +443,8 @@ class CafcassUploadDocServiceTest {
 
         cafcassUploadDocService.uploadDocument(authToken, file, DOC_TYPE_CIR_TRANSFER, TEST_CASE_ID);
 
-        assertEquals(DOC_TYPE_CIR_TRANSFER, ((List<Element<String>>) caseDataMap.get(MANAGE_DOC_UPLOADED_CATEGORY)).get(0).getValue());
-        assertEquals("CAFCASS", caseDataMap.get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(manageDocumentsService).setFlagsForWaTask(any(), any(), any(), any());
     }
 
     @Test
@@ -463,6 +464,70 @@ class CafcassUploadDocServiceTest {
         );
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     }
+
+    @Test
+    void shouldAcceptEnforcementOrderSuitabilityReportType() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+                                                              .categoryId(ENFORCEMENT_ORDER_SUITABILITY_REPORT)
+                                                              .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .cafcassQuarantineDocsList(List.of(existingDoc))
+                                           .build())
+            .build();
+
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, ENFORCEMENT_ORDER_SUITABILITY_REPORT, TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(manageDocumentsService).setFlagsForWaTask(any(), any(), any(), any());
+    }
+
+    @Test
+    void shouldAcceptParentalOrderReporterReportTypeAndUploadDocument() {
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        UploadResponse uploadResponse = new UploadResponse(List.of(testDocument()));
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.parseLong(TEST_CASE_ID)).build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        Element<QuarantineLegalDoc> existingDoc = element(QuarantineLegalDoc.builder()
+                                                              .categoryId(PARENTAL_ORDER_REPORTER_REPORT)
+                                                              .build());
+        CaseData caseDataWithExistingQuarantineDoc = caseData.toBuilder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .cafcassQuarantineDocsList(List.of(existingDoc))
+                                           .build())
+            .build();
+
+        StartAllTabsUpdateDataContent updateData = new StartAllTabsUpdateDataContent(
+            authToken, EventRequestData.builder().build(), StartEventResponse.builder().build(),
+            caseDataMap, caseDataWithExistingQuarantineDoc, null
+        );
+
+        when(coreCaseDataApi.getCase(authToken, s2sToken, TEST_CASE_ID)).thenReturn(caseDetails);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any())).thenReturn(uploadResponse);
+        when(allTabService.getStartUpdateForSpecificEvent(anyString(), anyString())).thenReturn(updateData);
+
+        cafcassUploadDocService.uploadDocument(authToken, file, PARENTAL_ORDER_REPORTER_REPORT, TEST_CASE_ID);
+
+        verify(allTabService).submitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(manageDocumentsService).setFlagsForWaTask(any(), any(), any(), any());
+
+    }
+
 
     @Test
     void shouldNotUploadDocumentForInvalidCaseScenario2() {
