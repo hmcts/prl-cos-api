@@ -79,7 +79,7 @@ public class AcroZipService {
             Mail mail = new Mail(
                 new Email(fromEmail),
                 subject,
-                new Email("poojitha.nagappa2@hmcts.net"),
+                new Email("dharmendra.kumar1@hmcts.net"),
                 content
             );
             mail.addAttachments(attachments);
