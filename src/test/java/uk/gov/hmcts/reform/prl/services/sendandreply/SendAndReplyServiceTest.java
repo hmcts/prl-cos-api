@@ -985,19 +985,17 @@ public class SendAndReplyServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
-        CategoriesAndDocuments categoriesAndDocuments = Instancio.create(CategoriesAndDocuments.class);
-        when(coreCaseDataApi.getCategoriesAndDocuments(anyString(), anyString(), anyString())).thenReturn(categoriesAndDocuments);
-
-        // when
+        when(caseDocumentClient
+            .getMetadataForDocument(anyString(),anyString(),any(UUID.class)))
+            .thenReturn(testDocument());
         Message message = sendAndReplyService.buildSendReplyMessage(data,
             data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
-        // then
         assertEquals("some message while sending",message.getMessageContent());
     }
 
     @Test
-    public void testBuildSendMessageWithMessageForNoRolesInUserDetails() {
+    public void testBuildSendMessageWithMessageForNoRolesinUserDetails() {
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
             .chooseSendOrReply(SendOrReply.SEND)
