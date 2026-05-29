@@ -62,18 +62,18 @@ public class ViewDraftOrdersService {
                 .collect(Collectors.groupingBy(e -> e.getValue().getOtherDetails().getOrderCreatedByEmailId()));
 
             /* Get the list of emails of the current user's organisation and iterate though to find which of the lists
-             * to include in the result. (Adding in the current user as that can sometimes be excluded from
-             * organisationService.getOrganisationSolicitorDetails. */
+             * to include in the result. */
             String currentUserOrganisationId = currentUserOrganisationsOpt.get().getOrganisationIdentifier();
             String systemAuthorisation = systemUserService.getSysUserToken();
 
             Set<String> orgSolicitorEmails = new HashSet<>();
+            /* Adding in the current user as that can sometimes be excluded from
+             * organisationService.getOrganisationSolicitorDetails. */
             orgSolicitorEmails.add(currentUserEmail);
             orgSolicitorEmails.addAll(organisationService.getOrganisationSolicitorDetails(
-                    systemAuthorisation,
-                    currentUserOrganisationId
-                )
-                                          .getUsers().stream().map(SolicitorUser::getEmail).collect(Collectors.toSet()));
+                systemAuthorisation,
+                currentUserOrganisationId
+            ).getUsers().stream().map(SolicitorUser::getEmail).collect(Collectors.toSet()));
 
             for (String orgSolicitorEmail : orgSolicitorEmails) {
                 List<Element<DraftOrder>> userDraftOrders = createdEmailToDraftOrderMap.remove(orgSolicitorEmail);
