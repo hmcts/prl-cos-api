@@ -413,9 +413,7 @@ class BaisDocumentUploadServiceTest {
             Object actual = mapping[1];
             String source = (String) mapping[2];
 
-            String format = String.format("%s should be mapped from %s", fieldName, source);
-            assertEquals(expected, actual, format
-            );
+            assertEquals(expected, actual, String.format("%s should be mapped from %s", fieldName, source));
         });
     }
 
