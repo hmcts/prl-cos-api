@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
@@ -21,7 +21,7 @@ public class CitizenDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
     private final String placeOfBirth;
-    private final YesOrNo liveInRefuge;
+    private final YesNoIDontKnowV2 liveInRefuge;
     private Document refugeConfidentialityC8Form;
     private final Address address;
     private AddressHistory addressHistory;
