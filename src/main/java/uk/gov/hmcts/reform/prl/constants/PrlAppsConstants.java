@@ -1187,4 +1187,5 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
+    public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
 }

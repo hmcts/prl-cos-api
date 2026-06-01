@@ -150,6 +150,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIF
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_REPLY_DYNAMIC_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED_WITH_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -1645,6 +1646,7 @@ public class SendAndReplyService {
             }
 
             String judgeIdamId = getSendReplyJudgeIdamId(caseData);
+            caseDataMap.put(TASK_ASSIGNEE_IDAM_ID, judgeIdamId);
 
             if (isNotBlank(judgeIdamId)) {
                 //Check if the Judge is already allocated to any of the message

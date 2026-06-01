@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.AssignRoleRequest;
 import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.LegalAdviserRoleAllocator;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,8 +39,9 @@ public class LegalAdviserMessageHandler implements MessageHandler {
 
     @Override
     public void handle(MessageRequest messageRequest) {
+        String idamId = getSelectedLegalAdviserIdamId(messageRequest.getCaseData());
         AssignRoleRequest assignRoleRequest = createAssignRoleRequest(
-            messageRequest, getSelectedLegalAdviserIdamId(messageRequest.getCaseData()));
+            messageRequest, idamId);
         legalAdviserRoleAllocator.handleRequest(assignRoleRequest);
 
         Message message = messageRequest.getMessage();
@@ -47,6 +50,8 @@ public class LegalAdviserMessageHandler implements MessageHandler {
             .convertFromDynamicListElement(selectedElement);
         message.setLegalAdviserEmail(selectedLegalAdviser.getEmail());
         message.setLegalAdviserName(selectedLegalAdviser.getFullName());
+
+        messageRequest.getCaseDataMap().put(TASK_ASSIGNEE_IDAM_ID, idamId);
     }
 
     private AssignRoleRequest createAssignRoleRequest(MessageRequest messageRequest, String idamId) {
