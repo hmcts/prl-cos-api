@@ -5,19 +5,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.models.Element;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-
-import java.util.List;
-
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RenameDocument {
 
-    @JsonProperty("renameDocumentsList")
-    private List<Element<DynamicList>> renameDocumentsList;
+    private String newNameForDocument;
 
+    @JsonProperty("renameDocumentsList")
+    private DynamicList renameDocumentsList;
+
+    @JsonProperty("categoryDocumentsList")
+    private DynamicList categoryDocumentsList;
 }
