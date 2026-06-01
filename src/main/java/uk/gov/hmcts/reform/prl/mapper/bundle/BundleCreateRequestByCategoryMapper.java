@@ -89,33 +89,48 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         bundleCategoryConfig.getFolders().forEach(folder -> {
             folder.getDocuments().forEach(document -> {
                 FilterProperties filterProperties = document.getFilters().getFirst();
-                if (filterProperties != null && filterProperties.getCategory() != null) {
-                    if (!AWP_CATEGORIES.contains(filterProperties.getCategory())) {
-                        if (DATA_ORDERS.equals(document.getProperty())) {
-                            List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
-                                allCategoriesToMap.get(filterProperties.getCategory()),
-                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                                filterProperties
-                            ));
-                            reverse(orders);
-                            ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
-                        } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
-                            applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                                allCategoriesToMap.get(filterProperties.getCategory()),
-                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                                filterProperties
-                            )));
-                        } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
-                            allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                                allCategoriesToMap.get(filterProperties.getCategory()),
-                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                                filterProperties
-                            )));
-                        }
+                if (filterProperties != null && filterProperties.getCategory() != null
+                    && !AWP_CATEGORIES.contains(filterProperties.getCategory())) {
+                    if (DATA_ORDERS.equals(document.getProperty())) {
+                        List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
+                            allCategoriesToMap.get(filterProperties.getCategory()),
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
+                        ));
+                        reverse(orders);
+                        ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
+                    } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
+                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                            allCategoriesToMap.get(filterProperties.getCategory()),
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
+                        )));
+                    } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
+                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                            allCategoriesToMap.get(filterProperties.getCategory()),
+                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                            filterProperties
+                        )));
                     }
                 }
             });
         });
+
+        specialCategories(caseData, applicationDocumentFromCategory, allOtherDocumentsFromCategory);
+
+        return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
+                bundleConfigFileName)
+            .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
+                      .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
+                      .applications(applicationDocumentFromCategory)
+                      .orders(ordersFromCategory)
+                      .allOtherDocuments(allOtherDocumentsFromCategory).build()).build();
+
+    }
+
+    private void specialCategories(CaseData caseData,
+                                   List<Element<BundlingRequestDocument>> applicationDocumentFromCategory,
+                                   List<Element<BundlingRequestDocument>> allOtherDocumentsFromCategory) {
 
         Map<String, FilterProperties> bundleAllCategoriesMap = new HashMap<>();
         bundleCategoryConfig.getFolders().forEach(folder -> folder.getDocuments()
@@ -139,15 +154,6 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         if (!otherAdditionalBundleDocs.isEmpty()) {
             allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(otherAdditionalBundleDocs));
         }
-
-        return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
-                bundleConfigFileName)
-            .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                      .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
-                      .applications(applicationDocumentFromCategory)
-                      .orders(ordersFromCategory)
-                      .allOtherDocuments(allOtherDocumentsFromCategory).build()).build();
-
     }
 
     private List<BundlingRequestDocument> mapC7DocumentsFromCaseData(List<Element<ResponseDocuments>> citizenResponseC7DocumentList,
@@ -242,7 +248,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                                                                BundlingDocGroupEnum applicationsDocGroup,
                                                                FilterProperties filterProperties) {
         // don't include redacted documents and draft documents
-        if (isRedactedDocument(document) || isDraftDocument(document, filterProperties) || isConfidentialDocument(document)) {
+        if (isRedactedDocument(document) || isDraftDocument(document) || isConfidentialDocument(document)) {
             return null;
         }
 
@@ -289,7 +295,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             && (document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME));
     }
 
-    private boolean isDraftDocument(Document document, FilterProperties filterProperties) {
+    private boolean isDraftDocument(Document document) {
         if (document != null
             && document.getDocumentFileName() != null) {
             return document.getDocumentFileName().contains("Draft");
