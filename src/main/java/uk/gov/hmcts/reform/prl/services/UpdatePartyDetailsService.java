@@ -41,7 +41,6 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,7 +70,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HISTORICAL_REFUGE_DOCUMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REFUGE_DOCUMENTS;
@@ -93,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.c
 import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfEmailConfidentialityHasChanged;
 import static uk.gov.hmcts.reform.prl.services.ConfidentialDetailsChangeHelper.checkIfPhoneConfidentialityHasChanged;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getC8FileName;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
@@ -105,7 +104,6 @@ public class UpdatePartyDetailsService {
     private static final List<State> SEALED_STATES = List.of(CASE_ISSUED, JUDICIAL_REVIEW, PREPARE_FOR_HEARING_CONDUCT_HEARING, DECISION_OUTCOME);
     protected static final String[] HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS = {CaseEvent.AMEND_APPLICANTS_DETAILS.getValue(),
         CaseEvent.AMEND_RESPONDENTS_DETAILS.getValue(), CaseEvent.AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED.getValue()};
-    public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
@@ -786,12 +784,9 @@ public class UpdatePartyDetailsService {
                                                                        Element<PartyDetails> respondent) {
         Document c8FinalDocument;
         Document c8FinalWelshDocument = null;
-        String partyName = respondent.getValue().getLabelForDynamicList();
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             if (isDetailsChanged) {
-                String fileName = C_8_OF + partyName
-                    + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
-                dataMap.put("dynamic_fileName", fileName + ".pdf");
+                dataMap.put("dynamic_fileName", getC8FileName(respondent.getValue(), false));
                 c8FinalDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
@@ -799,7 +794,7 @@ public class UpdatePartyDetailsService {
                         false,
                         dataMap
                 );
-                dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
+                dataMap.put("dynamic_fileName", getC8FileName(respondent.getValue(), true));
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 if (documentLanguage.isGenWelsh()) {
                     c8FinalWelshDocument = documentGenService.generateSingleDocument(

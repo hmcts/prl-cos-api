@@ -59,6 +59,7 @@ import java.util.stream.IntStream;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
@@ -136,6 +137,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.JUDICIAL_REVIEW;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getC8FileName;
 
 @Slf4j
 @Service
@@ -960,7 +962,7 @@ public class DocumentGenService {
 
         switch (docGenFor) {
             case C8_HINT:
-                fileName = findC8Filename(isWelsh, caseTypeOfApp);
+                fileName = findC8Filename(isWelsh, caseTypeOfApp, caseData);
                 break;
             case C8_DRAFT_HINT:
                 fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
@@ -1075,12 +1077,21 @@ public class DocumentGenService {
         return fileName;
     }
 
-    private String findC8Filename(boolean isWelsh, String caseTypeOfApp) {
+    private String findC8Filename(boolean isWelsh, String caseTypeOfApp, CaseData caseData) {
         String fileName;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
-            fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
+            if (isNotEmpty(caseData.getApplicants())) {
+                Element<PartyDetails> party = caseData.getApplicants().getFirst();
+                fileName = getC8FileName(party.getValue(), isWelsh);
+            } else {
+                fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
+            }
         } else {
-            fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
+            if (isNotEmpty(caseData.getApplicantsFL401())) {
+                fileName = getC8FileName(caseData.getApplicantsFL401(), isWelsh);
+            } else {
+                fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
+            }
         }
         return fileName;
     }

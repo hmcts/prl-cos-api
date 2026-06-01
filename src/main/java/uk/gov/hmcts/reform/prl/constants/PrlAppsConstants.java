@@ -1187,4 +1187,5 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
+    public static final String C_8_FILENAME_PATTERN = "Confidential_C8 of %s %s%s.pdf";
 }
