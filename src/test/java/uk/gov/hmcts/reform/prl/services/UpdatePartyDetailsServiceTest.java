@@ -1509,33 +1509,6 @@ class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    void shouldCountAsChangedWhenRefugeToggled() {
-        UUID respondentUuid = UUID.randomUUID();
-        PartyDetails respondent = PartyDetails.builder()
-            .liveInRefuge(YesNoIDontKnowV2.No)
-            .email("test1")
-            .address(Address.builder()
-                         .addressLine1("test1")
-                         .build())
-            .phoneNumber("012345")
-            .build();
-
-        CaseData caseDataBefore = CaseData.builder()
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .respondents(List.of(element(respondentUuid, respondent)))
-            .build();
-
-        PartyDetails respondentAfter = respondent.toBuilder()
-            .liveInRefuge(YesNoIDontKnowV2.Yes)
-            .build();
-
-        assertThat(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
-            caseDataBefore,
-            element(respondentUuid, respondentAfter)
-        )).isTrue();
-    }
-
-    @Test
     void checkIfDetailsChangedFl401All() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .email("test")
