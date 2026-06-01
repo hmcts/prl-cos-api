@@ -458,6 +458,123 @@
     "overrideAll": true
   },
   {
+    "email": "DJ.Angel.Morgan@ejudiciary.net",
+    "id": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+    "roleAssignments": [
+      {
+        "id": "b11fa747-7f7e-4df1-846e-59b584f773ad",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "circuit-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-07-04T07:10:43.608533Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "177463",
+          "jurisdiction": "PRIVATELAW",
+          "region": "2",
+          "workTypes": "hearing_work,decision_making_work,applications,routine_work"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "9f89aa09-aaa0-467e-8cea-bed669c6f753",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-07-04T07:10:43.608659Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "177463",
+          "jurisdiction": "PRIVATELAW",
+          "region": "2",
+          "workTypes": "hearing_work,decision_making_work,applications,routine_work"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "7c26f47a-b068-44a9-be18-45090567f537",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-judiciary",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "JUDICIAL",
+        "readOnly": true,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-06-20T07:08:29.223551Z",
+        "attributes": {
+          "substantive": "N",
+          "contractType": "Salaried"
+        }
+      },
+      {
+        "id": "481a0a14-d9f7-4f00-be8d-9ae8b978a7c9",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-06-20T07:08:29.22373Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "177463",
+          "jurisdiction": "PRIVATELAW"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "6298a6c4-a595-489c-8a62-753183b9f222",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-judiciary",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "JUDICIAL",
+        "readOnly": true,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-06-20T07:08:29.223786Z",
+        "attributes": {
+          "substantive": "N"
+        }
+      }
+    ]
+  },
+  {
     "email": "prl_aat_am_swansea_hca@justice.gov.uk",
     "id": "930a5478-3b1d-4fed-bf9d-fdfb2f9e9eaf",
     "roleAssignments": [
