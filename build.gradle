@@ -303,7 +303,7 @@ dependencies {
   annotationProcessor("org.projectlombok:lombok:${versions.lombok}")
   implementation 'org.mapstruct:mapstruct:1.6.3'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
-  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.8'
+  implementation group: 'com.sun.xml.bind', name: 'jaxb-osgi', version: '4.0.9'
   implementation group: 'com.github.kirviq', name: 'dumbster', version: versions.dumbster
   implementation group: 'com.puppycrawl.tools', name: 'checkstyle', version: versions.puppyCrawl
   implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
