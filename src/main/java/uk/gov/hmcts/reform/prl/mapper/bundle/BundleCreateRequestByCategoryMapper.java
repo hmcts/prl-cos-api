@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -116,6 +117,13 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             });
         });
 
+        Map<String, FilterProperties> bundleAllCategoriesMap = new HashMap<>();
+        bundleCategoryConfig.getFolders().forEach(folder -> folder.getDocuments()
+            .forEach(document -> document.getFilters().stream()
+                .filter(f -> f.getCategory() != null)
+                .forEach(f -> bundleAllCategoriesMap.put(f.getCategory(), f))));
+
+
         // C7 documents
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(
             caseData.getCitizenResponseC7DocumentList(), FilterProperties.builder().build());
@@ -126,7 +134,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
 
         // Add all other AWP Documents
         List<BundlingRequestDocument> otherAdditionalBundleDocs = mapOtherAdditionalBundleFromCaseData(
-            caseData.getAdditionalApplicationsBundle(), FilterProperties.builder().build());
+            caseData.getAdditionalApplicationsBundle(), bundleAllCategoriesMap);
 
         if (!otherAdditionalBundleDocs.isEmpty()) {
             allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(otherAdditionalBundleDocs));
@@ -157,7 +165,7 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
 
     private List<BundlingRequestDocument> mapOtherAdditionalBundleFromCaseData(
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundleList,
-        FilterProperties filterProperties) {
+        Map<String, FilterProperties> bundleAllCategoriesMap) {
 
         List<BundlingRequestDocument> additionalApplicationsBundle = new ArrayList<>();
         Optional<List<Element<AdditionalApplicationsBundle>>> additionalApplicationsBundleDocs = ofNullable(additionalApplicationsBundleList);
@@ -170,18 +178,23 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             .filter(applicationsBundle -> AWP_STATUS_CLOSED.equals(applicationsBundle.getC2DocumentBundle().getApplicationStatus()))
             .forEach(applicationsBundle -> {
                 additionalApplicationsBundle
-                    .addAll(mapBundlingRequestDocument(
-                        ElementUtils.unwrapElements(applicationsBundle.getC2DocumentBundle().getFinalDocument()),
-                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
+                    .addAll(mapBundlingRequestDocumentAwp(
+                        ElementUtils.unwrapElements(applicationsBundle.getC2DocumentBundle().getFinalDocument()), bundleAllCategoriesMap
                     ));
                 if (applicationsBundle.getC2DocumentBundle().getSupportingEvidenceBundle() != null) {
                     ElementUtils.unwrapElements(applicationsBundle.getC2DocumentBundle().getSupportingEvidenceBundle())
-                        .forEach(sp -> additionalApplicationsBundle
-                            .add(mapBundlingRequestDocument(
-                                sp.getDocument(),
-                                BundlingDocGroupEnum.applicantAWPDocuments,
-                                filterProperties
-                            )));
+                        .stream().filter(sp -> sp.getDocument() != null
+                            && bundleAllCategoriesMap.get(sp.getDocument().getCategoryId()) != null)
+                        .forEach(sp -> {
+                            FilterProperties filterProperties = bundleAllCategoriesMap.get(sp.getDocument().getCategoryId());
+                            if (filterProperties != null) {
+                                additionalApplicationsBundle.add(mapBundlingRequestDocument(
+                                    sp.getDocument(),
+                                    BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                    filterProperties
+                                ));
+                            }
+                        });
                 }
             });
         // Other AWP
@@ -190,18 +203,24 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
             .filter(applicationsBundle -> AWP_STATUS_CLOSED.equals(applicationsBundle.getOtherApplicationsBundle().getApplicationStatus()))
             .forEach(applicationsBundle -> {
                 additionalApplicationsBundle
-                    .addAll(mapBundlingRequestDocument(
+                    .addAll(mapBundlingRequestDocumentAwp(
                         ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getFinalDocument()),
-                        BundlingDocGroupEnum.applicantAWPDocuments, filterProperties
+                        bundleAllCategoriesMap
                     ));
                 if (applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle() != null) {
                     ElementUtils.unwrapElements(applicationsBundle.getOtherApplicationsBundle().getSupportingEvidenceBundle())
-                        .forEach(sp -> additionalApplicationsBundle
-                            .add(mapBundlingRequestDocument(
-                                sp.getDocument(),
-                                BundlingDocGroupEnum.applicantAWPDocuments,
-                                filterProperties
-                            )));
+                        .stream().filter(sp -> sp.getDocument() != null
+                            && bundleAllCategoriesMap.get(sp.getDocument().getCategoryId()) != null)
+                        .forEach(sp -> {
+                            FilterProperties filterProperties = bundleAllCategoriesMap.get(sp.getDocument().getCategoryId());
+                            if (filterProperties != null) {
+                                additionalApplicationsBundle.add(mapBundlingRequestDocument(
+                                    sp.getDocument(),
+                                    BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                    filterProperties
+                                ));
+                            }
+                        });
                 }
             });
         return additionalApplicationsBundle;
@@ -231,12 +250,31 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                     .documentGroup(applicationsDocGroup).build();
     }
 
+
     private List<BundlingRequestDocument> mapBundlingRequestDocument(List<Document> documents,
                                                                      BundlingDocGroupEnum applicationsDocGroup,
                                                                      FilterProperties filterProperties) {
         if (null != documents) {
             return documents.stream().map(d -> mapBundlingRequestDocument(d, applicationsDocGroup, filterProperties))
                 .filter(Objects::nonNull).toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<BundlingRequestDocument> mapBundlingRequestDocumentAwp(List<Document> documents,
+                                                                     Map<String, FilterProperties> bundleAllCategoriesMap) {
+        if (null != documents) {
+            return documents.stream().map(d -> {
+                FilterProperties filterProperties = bundleAllCategoriesMap.get(d.getCategoryId());
+                if (null != filterProperties) {
+                    return mapBundlingRequestDocument(d,
+                                               BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                               filterProperties);
+                }
+
+                return null;
+
+            }).filter(Objects::nonNull).toList();
         }
         return Collections.emptyList();
     }

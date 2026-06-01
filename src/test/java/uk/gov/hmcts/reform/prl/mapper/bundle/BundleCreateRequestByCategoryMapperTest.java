@@ -37,10 +37,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL;
 
 @ExtendWith(MockitoExtension.class)
 class BundleCreateRequestByCategoryMapperTest {
@@ -75,27 +77,35 @@ class BundleCreateRequestByCategoryMapperTest {
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
 
+        Document awpDocument = Document.builder().categoryId(APPLICATIONS_WITHIN_PROCEEDINGS).build();
+
         Category subCategory = new Category(FM5_STATEMENTS, FM5_STATEMENTS, 3, List.of(documents), new ArrayList<>());
         Category applicantApplicationCategory = new Category(APPLICANT_APPLICATION, APPLICANT_APPLICATION, 4, List.of(documents), new ArrayList<>());
         Category orderCategory = new Category(ORDERS_SUBMITTED_WITH_APPLICATION, ORDERS_SUBMITTED_WITH_APPLICATION,
                                               5, List.of(documents), new ArrayList<>());
+        Category awpCategory = new Category(APPLICATIONS_WITHIN_PROCEEDINGS, APPLICATIONS_WITHIN_PROCEEDINGS,
+                                              6, List.of(documents), new ArrayList<>());
         Category category = new Category("parentCategoryId", "parentCategoryName", 2, List.of(documents), List.of(subCategory));
+
+
 
         ResponseDocuments responseDocuments = ResponseDocuments.builder().citizenDocument(Document.builder().build()).build();
         AdditionalApplicationsBundle additionalApplicationsBundleWithSubmittedState = AdditionalApplicationsBundle.builder()
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicationStatus(AWP_STATUS_SUBMITTED)
-                                         .finalDocument(List.of(ElementUtils.element(Document.builder().build())))
+                                         .finalDocument(List.of(ElementUtils.element(awpDocument)))
                                          .supportingEvidenceBundle(List.of(
-                                             ElementUtils.element(SupportingEvidenceBundle.builder().document(Document.builder().build()).build())))
+                                             ElementUtils.element(SupportingEvidenceBundle.builder()
+                                                                      .document(awpDocument).build())))
                                          .build())
             .build();
         AdditionalApplicationsBundle additionalApplicationsBundleWithCloseState = AdditionalApplicationsBundle.builder()
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicationStatus(AWP_STATUS_CLOSED)
-                                         .finalDocument(List.of(ElementUtils.element(Document.builder().build())))
+                                         .finalDocument(List.of(ElementUtils.element(awpDocument)))
                                          .supportingEvidenceBundle(List.of(
-                                             ElementUtils.element(SupportingEvidenceBundle.builder().document(Document.builder().build()).build())))
+                                             ElementUtils.element(SupportingEvidenceBundle.builder()
+                                                                      .document(awpDocument).build())))
                                          .build())
             .build();
         CaseData c100CaseData = CaseData.builder()
@@ -109,12 +119,14 @@ class BundleCreateRequestByCategoryMapperTest {
 
         when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
         when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
-            .thenReturn(List.of(category, subCategory, applicantApplicationCategory, orderCategory));
+            .thenReturn(List.of(category, subCategory, applicantApplicationCategory, orderCategory, awpCategory));
 
         FilterProperties fm5StatementsFilterProperties = FilterProperties.builder().value(FM5_STATEMENTS)
             .category(FM5_STATEMENTS).build();
+        FilterProperties awpFilterProperties = FilterProperties.builder().value("applicantAWPDocuments")
+            .category(APPLICATIONS_WITHIN_PROCEEDINGS).build();
         DocumentProperties documentProperties = DocumentProperties.builder().property("/data/allOtherDocuments")
-            .filters(List.of(fm5StatementsFilterProperties)).build();
+            .filters(List.of(fm5StatementsFilterProperties, awpFilterProperties)).build();
         FilterProperties applicantApplicationFilterProperties = FilterProperties.builder().value(APPLICANT_APPLICATION)
             .category(APPLICANT_APPLICATION).build();
         DocumentProperties applicationsDocumentProperties = DocumentProperties.builder().property("/data/applications")
@@ -140,6 +152,89 @@ class BundleCreateRequestByCategoryMapperTest {
 
         assertEquals(3,allOtherDocs.size());
 
+
+    }
+
+    @Test
+    void mapCaseDataToBundleCreateRequestWhenAwpInNonBundleCategory() {
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+
+        Document awpDocument = Document.builder().categoryId(CONFIDENTIAL).build();
+
+        Category subCategory = new Category(FM5_STATEMENTS, FM5_STATEMENTS, 3, List.of(documents), new ArrayList<>());
+        Category applicantApplicationCategory = new Category(APPLICANT_APPLICATION, APPLICANT_APPLICATION, 4, List.of(documents), new ArrayList<>());
+        Category orderCategory = new Category(ORDERS_SUBMITTED_WITH_APPLICATION, ORDERS_SUBMITTED_WITH_APPLICATION,
+                                              5, List.of(documents), new ArrayList<>());
+        Category awpCategory = new Category(APPLICATIONS_WITHIN_PROCEEDINGS, APPLICATIONS_WITHIN_PROCEEDINGS,
+                                            6, List.of(documents), new ArrayList<>());
+        Category category = new Category("parentCategoryId", "parentCategoryName", 2, List.of(documents), List.of(subCategory));
+
+
+
+        ResponseDocuments responseDocuments = ResponseDocuments.builder().citizenDocument(Document.builder().build()).build();
+        AdditionalApplicationsBundle additionalApplicationsBundleWithSubmittedState = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .applicationStatus(AWP_STATUS_SUBMITTED)
+                                         .finalDocument(List.of(ElementUtils.element(awpDocument)))
+                                         .supportingEvidenceBundle(List.of(
+                                             ElementUtils.element(SupportingEvidenceBundle.builder()
+                                                                      .document(awpDocument).build())))
+                                         .build())
+            .build();
+        AdditionalApplicationsBundle additionalApplicationsBundleWithCloseState = AdditionalApplicationsBundle.builder()
+            .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                         .applicationStatus(AWP_STATUS_CLOSED)
+                                         .finalDocument(List.of(ElementUtils.element(awpDocument)))
+                                         .supportingEvidenceBundle(List.of(
+                                             ElementUtils.element(SupportingEvidenceBundle.builder()
+                                                                      .document(awpDocument).build())))
+                                         .build())
+            .build();
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .applicantName("ApplicantFirstNameAndLastName")
+            .citizenResponseC7DocumentList(List.of(Element.<ResponseDocuments>builder().id(UUID.randomUUID())
+                                                       .value(responseDocuments).build()))
+            .additionalApplicationsBundle(List.of(ElementUtils.element(additionalApplicationsBundleWithSubmittedState),
+                                                  ElementUtils.element(additionalApplicationsBundleWithCloseState)))
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+        when(categoriesAndDocumentsHelper.getCategoriesAndDocuments(AUTH_TOKEN, c100CaseData))
+            .thenReturn(List.of(category, subCategory, applicantApplicationCategory, orderCategory, awpCategory));
+
+        FilterProperties fm5StatementsFilterProperties = FilterProperties.builder().value(FM5_STATEMENTS)
+            .category(FM5_STATEMENTS).build();
+        FilterProperties awpFilterProperties = FilterProperties.builder().value("applicantAWPDocuments")
+            .category(APPLICATIONS_WITHIN_PROCEEDINGS).build();
+        DocumentProperties documentProperties = DocumentProperties.builder().property("/data/allOtherDocuments")
+            .filters(List.of(fm5StatementsFilterProperties, awpFilterProperties)).build();
+        FilterProperties applicantApplicationFilterProperties = FilterProperties.builder().value(APPLICANT_APPLICATION)
+            .category(APPLICANT_APPLICATION).build();
+        DocumentProperties applicationsDocumentProperties = DocumentProperties.builder().property("/data/applications")
+            .filters(List.of(applicantApplicationFilterProperties)).build();
+        FilterProperties ordersFilterProperties = FilterProperties.builder().value(ORDERS_SUBMITTED_WITH_APPLICATION)
+            .category(ORDERS_SUBMITTED_WITH_APPLICATION).build();
+        DocumentProperties ordersDocumentProperties = DocumentProperties.builder().property("/data/orders")
+            .filters(List.of(ordersFilterProperties)).build();
+
+
+        FolderProperties folderProperties = FolderProperties.builder().name("folder1")
+            .documents(List.of(documentProperties, applicationsDocumentProperties, ordersDocumentProperties)).build();
+        when(bundleCategoryConfig.getFolders()).thenReturn(List.of(folderProperties));
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestByCategoryMapper
+            .mapCaseDataToBundleCreateRequest(c100CaseData, "eventI",
+                                              Hearings.hearingsWith().build(), "sample.yaml");
+
+        assertNotNull(bundleCreateRequest);
+        List<String> allOtherDocs = bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
+            .map(Element::getValue)
+            .map(BundlingRequestDocument::getDocumentFileName).toList();
+
+        assertEquals(1,allOtherDocs.size());
 
     }
 
