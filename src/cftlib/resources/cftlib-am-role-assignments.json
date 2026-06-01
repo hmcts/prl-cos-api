@@ -462,6 +462,62 @@
     "id": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
     "roleAssignments": [
       {
+        "id": "0868a82f-fadf-4a5a-89cb-7960d6fb8991",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "circuit-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "created": "2025-11-28T09:31:00.058396Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "177463",
+          "jurisdiction": "CIVIL",
+          "workTypes": "hearing_work,decision_making_work,applications"
+        }
+      },
+      {
+        "id": "7a4a17d9-2ab1-4435-9b09-33930aa0c841",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "created": "2025-11-28T09:30:58.581555Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "177463",
+          "jurisdiction": "CIVIL"
+        }
+      },
+      {
+        "id": "737abb93-8cf9-46f0-a002-8150c81aa154",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "created": "2025-11-28T09:30:59.348582Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "177463",
+          "jurisdiction": "CIVIL",
+          "workTypes": "hearing_work,decision_making_work,applications"
+        },
+        "authorisations": [
+          "294"
+        ]
+      },
+      {
         "id": "b11fa747-7f7e-4df1-846e-59b584f773ad",
         "actorIdType": "IDAM",
         "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
@@ -516,6 +572,60 @@
         ]
       },
       {
+        "id": "55010fdf-5749-4908-a15f-b4d715d28bb1",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2026-05-14T07:11:02.945639Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "177463",
+          "jurisdiction": "PCS",
+          "region": "2",
+          "workTypes": "hearing_work,routine_work,decision_making_work,applications"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "28453b18-7135-46eb-93ae-022c3c401bc8",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "circuit-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2026-05-14T07:11:02.945849Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "177463",
+          "jurisdiction": "PCS",
+          "region": "2",
+          "workTypes": "appeals"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      },
+      {
         "id": "7c26f47a-b068-44a9-be18-45090567f537",
         "actorIdType": "IDAM",
         "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
@@ -531,6 +641,33 @@
           "substantive": "N",
           "contractType": "Salaried"
         }
+      },
+      {
+        "id": "bff8601d-1428-4287-b8d9-342823078ee7",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-06-20T07:08:29.223707Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "177463",
+          "jurisdiction": "CIVIL",
+          "region": "2",
+          "workTypes": "decision_making_work,applications"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
       },
       {
         "id": "481a0a14-d9f7-4f00-be8d-9ae8b978a7c9",
@@ -557,6 +694,33 @@
         ]
       },
       {
+        "id": "e895a325-3785-45d1-a4cf-6e9c4841e1ea",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "circuit-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-06-20T07:08:29.223749Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "177463",
+          "jurisdiction": "CIVIL",
+          "region": "2",
+          "workTypes": "decision_making_work,applications,multi_track_decision_making_work,intermediate_track_decision_making_work"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      },
+      {
         "id": "6298a6c4-a595-489c-8a62-753183b9f222",
         "actorIdType": "IDAM",
         "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
@@ -571,6 +735,245 @@
         "attributes": {
           "substantive": "N"
         }
+      },
+      {
+        "id": "51895362-d77a-4d4a-a7df-06cb504f4a20",
+        "actorIdType": "IDAM",
+        "actorId": "05e5c732-1df4-47e5-bf4f-f9158e52098e",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2023-11-13T00:00:00Z",
+        "created": "2025-06-20T07:08:29.223796Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "177463",
+          "jurisdiction": "CIVIL"
+        },
+        "authorisations": [
+          "294",
+          "409",
+          "315",
+          "410"
+        ]
+      }
+    ]
+  },
+  {
+    "email": "DJ.Linda.Mckee@ejudiciary.net",
+    "id": "6cdce845-87b1-41df-9aee-c725ac95b589",
+    "roleAssignments": [
+      {
+        "id": "0f14b5e4-bb41-4515-ab4b-9450b107e101",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2025-07-04T07:09:25.550468Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "427519",
+          "jurisdiction": "PRIVATELAW",
+          "region": "3",
+          "workTypes": "hearing_work,decision_making_work,applications,routine_work"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "6dcad884-f533-4a34-9f93-50eb34a35dba",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-judiciary",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "JUDICIAL",
+        "readOnly": true,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2024-01-16T14:33:16.661366Z",
+        "attributes": {
+          "substantive": "N",
+          "contractType": "Salaried"
+        }
+      },
+      {
+        "id": "ffa422c8-76a1-4af0-91f9-a0e4fb1d5285",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "fl401-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2025-07-31T07:08:02.310602Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "427519",
+          "jurisdiction": "PRIVATELAW",
+          "region": "3",
+          "workTypes": "hearing_work,decision_making_work,applications,routine_work"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "e3bbe204-1670-4bfa-99ac-12dc98777e7c",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-judiciary",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "JUDICIAL",
+        "readOnly": true,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2024-01-16T14:33:16.661356Z",
+        "attributes": {
+          "substantive": "N"
+        }
+      },
+      {
+        "id": "aa6c963b-a3dd-4417-852e-fd3f4cda58ff",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2026-05-14T07:09:31.070472Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "427519",
+          "jurisdiction": "PCS",
+          "region": "3",
+          "workTypes": "hearing_work,routine_work,decision_making_work,applications"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "44d47b28-835b-41ae-9bd4-ccbf87c8399e",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2024-10-15T12:18:50.233318Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "427519",
+          "jurisdiction": "CIVIL"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "ae3c5132-e659-46fd-8d0c-64b8de198a28",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2024-10-15T12:18:50.23336Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "427519",
+          "jurisdiction": "PRIVATELAW"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "1ac1a05d-5744-4607-b7ab-652166c7cd9f",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2025-02-17T15:35:33.191429Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "427519",
+          "jurisdiction": "CIVIL",
+          "region": "3",
+          "workTypes": "decision_making_work,applications"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
+      },
+      {
+        "id": "5d46d889-efb0-4b29-99ff-57e33c5b7910",
+        "actorIdType": "IDAM",
+        "actorId": "6cdce845-87b1-41df-9aee-c725ac95b589",
+        "roleType": "ORGANISATION",
+        "roleName": "district-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-04-01T00:00:00Z",
+        "created": "2025-02-17T15:35:33.191446Z",
+        "attributes": {
+          "substantive": "Y",
+          "contractType": "Salaried",
+          "primaryLocation": "427519",
+          "jurisdiction": "CIVIL",
+          "region": "3",
+          "workTypes": "decision_making_work,applications,multi_track_decision_making_work,intermediate_track_decision_making_work"
+        },
+        "authorisations": [
+          "294",
+          "315",
+          "410"
+        ]
       }
     ]
   },
