@@ -70,8 +70,6 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_EXTENSION_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_TRANSFER_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -86,12 +84,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
@@ -135,16 +129,6 @@ public class ManageDocumentsService {
     public static final String DETAILS_ERROR_MESSAGE_WELSH
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
     private static final String PREFIX_CHILD_IMPACT_REPORT = "childImpactReport";
-    private static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
-        CHILD_IMPACT_REPORT_1_LA,
-        CHILD_IMPACT_REPORT_2_LA,
-        SECTION_7_REPORT_LA,
-        SECTION_7_ADDENDUM_REPORT_LA,
-        LOCAL_AUTHORITY_INVOLVEMENT_LA,
-        SECTION_47_LA,
-        CIR_EXTENSION_REQUEST_LA,
-        CIR_TRANSFER_REQUEST_LA
-    );
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
         boolean isUserRoleLA = documentCategoryService.isUserAllocatedRoleForCaseLA(authorization, caseData);
