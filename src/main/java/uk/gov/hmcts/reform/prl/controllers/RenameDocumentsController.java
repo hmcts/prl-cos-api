@@ -57,6 +57,24 @@ public class RenameDocumentsController {
         }
     }
 
+    @PostMapping(path = "/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "mid event callback for rename documents")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public AboutToStartOrSubmitCallbackResponse handleMidEvent(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataMap = renameDocumentService.handleMidEvent(authorisation, callbackRequest);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to submit callback for rename documents")
     @ApiResponses(value = {
