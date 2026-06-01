@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.bundle.FilterProperties;
 import uk.gov.hmcts.reform.prl.models.bundle.FolderProperties;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.SupportingEvidenceBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -100,6 +101,13 @@ class BundleCreateRequestByCategoryMapperTest {
                                          .build())
             .build();
         AdditionalApplicationsBundle additionalApplicationsBundleWithCloseState = AdditionalApplicationsBundle.builder()
+            .c2DocumentBundle(C2DocumentBundle.builder()
+                                  .applicationStatus(AWP_STATUS_CLOSED)
+                                  .finalDocument(List.of(ElementUtils.element(awpDocument)))
+                                  .supportingEvidenceBundle(List.of(
+                                      ElementUtils.element(SupportingEvidenceBundle.builder()
+                                                               .document(awpDocument).build())))
+                                  .build())
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicationStatus(AWP_STATUS_CLOSED)
                                          .finalDocument(List.of(ElementUtils.element(awpDocument)))
@@ -150,7 +158,7 @@ class BundleCreateRequestByCategoryMapperTest {
             .map(Element::getValue)
             .map(BundlingRequestDocument::getDocumentFileName).toList();
 
-        assertEquals(3,allOtherDocs.size());
+        assertEquals(5,allOtherDocs.size());
 
 
     }
@@ -184,6 +192,13 @@ class BundleCreateRequestByCategoryMapperTest {
                                          .build())
             .build();
         AdditionalApplicationsBundle additionalApplicationsBundleWithCloseState = AdditionalApplicationsBundle.builder()
+            .c2DocumentBundle(C2DocumentBundle.builder()
+                                  .applicationStatus(AWP_STATUS_CLOSED)
+                                  .finalDocument(List.of(ElementUtils.element(awpDocument)))
+                                  .supportingEvidenceBundle(List.of(
+                                      ElementUtils.element(SupportingEvidenceBundle.builder()
+                                                               .document(awpDocument).build())))
+                                  .build())
             .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                          .applicationStatus(AWP_STATUS_CLOSED)
                                          .finalDocument(List.of(ElementUtils.element(awpDocument)))
