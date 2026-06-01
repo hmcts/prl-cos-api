@@ -187,10 +187,13 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                             && bundleAllCategoriesMap.get(sp.getDocument().getCategoryId()) != null)
                         .forEach(sp -> {
                             FilterProperties filterProperties = bundleAllCategoriesMap.get(sp.getDocument().getCategoryId());
-                            additionalApplicationsBundle.add(mapBundlingRequestDocument(
+                            if (filterProperties != null) {
+                                additionalApplicationsBundle.add(mapBundlingRequestDocument(
                                     sp.getDocument(),
                                     BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                                    filterProperties));
+                                    filterProperties
+                                ));
+                            }
                         });
                 }
             });
@@ -210,11 +213,13 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                             && bundleAllCategoriesMap.get(sp.getDocument().getCategoryId()) != null)
                         .forEach(sp -> {
                             FilterProperties filterProperties = bundleAllCategoriesMap.get(sp.getDocument().getCategoryId());
-                            additionalApplicationsBundle.add(mapBundlingRequestDocument(
-                                sp.getDocument(),
-                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                                filterProperties
-                            ));
+                            if (filterProperties != null) {
+                                additionalApplicationsBundle.add(mapBundlingRequestDocument(
+                                    sp.getDocument(),
+                                    BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                                    filterProperties
+                                ));
+                            }
                         });
                 }
             });
