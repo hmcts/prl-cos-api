@@ -40,6 +40,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -547,7 +548,7 @@ public class ReviewDocumentService {
 
         String categoryIdQuarantineDoc = quarantineLegalDoc.getCategoryId();
 
-        boolean sameCategory = Objects.equals(categoryIdQuarantineDoc, categoryId);
+        boolean sameCategory = isNull(categoryId) || Objects.equals(categoryIdQuarantineDoc, categoryId);
         if (isNotBlank(documentNewName) || !sameCategory) {
             Document document = manageDocumentsService.getQuarantineDocumentForUploader(
                 quarantineLegalDoc.getUploaderRole(),
