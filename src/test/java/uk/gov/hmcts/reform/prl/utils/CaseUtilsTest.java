@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
@@ -63,6 +64,26 @@ class CaseUtilsTest {
     @MethodSource
     void testIsC100CaseIssued(CaseData caseData, boolean expected) {
         assertThat(CaseUtils.isC100CaseIssued(caseData)).isEqualTo(expected);
+    }
+
+    @Test
+    void testGetC8FileName() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .build();
+
+        String c8FileName = CaseUtils.getC8FileName(partyDetails, false);
+        assertThat(c8FileName)
+            .startsWith("Confidential_C8 of John Doe ")
+            .endsWith(".pdf")
+            .matches("^Confidential_C8 of John Doe .+\\.pdf$");
+
+        String welshC8FileName = CaseUtils.getC8FileName(partyDetails, true);
+        assertThat(welshC8FileName)
+            .startsWith("Confidential_C8 of John Doe ")
+            .endsWith(" welsh.pdf")
+            .matches("^Confidential_C8 of John Doe .+ welsh\\.pdf$");
     }
 
     private static Stream<Arguments> testIsC100CaseIssued() {
