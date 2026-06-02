@@ -26,24 +26,11 @@ public class CafcassCcdDataStoreService {
      * @param  caseType e.g. PRLAPPS
      * @return SearchResult object.
      */
-    @Retry(name = "searchCasesRetryConfig", fallbackMethod = "searchCasesFallback")
-    public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation, String caseType) {
-
-        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, caseType,
-                                           searchString);
-
-    }
-
-    public SearchResult searchCasesFallback(String authorisation,
-                                            String searchString,
-                                            String serviceAuthorisation,
-                                            String caseType, Exception ex) {
-        log.error("CCD Search failed completely after retries. Returning empty SearchResult. Error: {}",
-                  ex.getMessage());
-
-        return SearchResult.builder()
-            .cases(new ArrayList<>())
-            .total(0)
-            .build();
+    @Retry(name = "searchCasesRetryConfig")
+    public SearchResult searchCases(String authorisation,
+                                    String searchString,
+                                    String serviceAuthorisation,
+                                    String caseType) {
+        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, caseType, searchString);
     }
 }

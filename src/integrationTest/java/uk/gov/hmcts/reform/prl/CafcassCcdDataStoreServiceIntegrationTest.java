@@ -14,7 +14,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(properties = {
     "core_case_data.api.url=http://localhost:${wiremock.server.port}",
@@ -32,15 +32,15 @@ public class CafcassCcdDataStoreServiceIntegrationTest {
     }
 
     @Test
-    public void shouldRetry3TimesAndReturnEmptyFallbackOn502() {
+    public void shouldRetry3TimesAndThrowExceptionOn502() {
         stubFor(post(urlPathEqualTo("/searchCases"))
                     .willReturn(aResponse()
                                     .withStatus(502)
                                     .withHeader("Content-Type", "application/json")));
 
-        SearchResult result = cafcassCcdDataStoreService.searchCases("userToken", "{}", "s2sToken", "PRLAPPS");
-
-        assertEquals(0, result.getTotal());
+        assertThrows(feign.FeignException.class, () -> {
+            cafcassCcdDataStoreService.searchCases("userToken", "{}", "s2sToken", "PRLAPPS");
+        });
 
         WireMock.verify(3, postRequestedFor(urlPathEqualTo("/searchCases")));
     }
