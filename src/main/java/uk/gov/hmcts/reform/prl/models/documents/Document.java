@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Value
@@ -50,6 +51,17 @@ public class Document {
         this.documentCreatedOn = documentCreatedOn;
         this.uploadTimeStamp = uploadTimeStamp;
     }
+
+    public static Document buildFromDoc(uk.gov.hmcts.reform.ccd.client.model.Document document) {
+        return Document.builder()
+            .documentUrl(document.getDocumentURL())
+            .documentBinaryUrl(document.getDocumentBinaryURL())
+            .documentFileName(document.getDocumentFilename())
+            .documentCreatedOn(Date.from(document.getUploadTimestamp().atZone(ZoneId.of("UTC")).toInstant()))
+            .uploadTimeStamp(document.getUploadTimestamp())
+            .build();
+    }
+
 
     public static Document buildFromDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
         return Document.builder()

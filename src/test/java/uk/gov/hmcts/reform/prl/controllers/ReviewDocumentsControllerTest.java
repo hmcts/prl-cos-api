@@ -31,6 +31,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RunWith(MockitoJUnitRunner.class)
 public class ReviewDocumentsControllerTest {
 
+    private static final String AUTHORISATION = "authorisation";
+
     @InjectMocks
     private ReviewDocumentsController reviewDocumentsController;
 
@@ -104,7 +106,18 @@ public class ReviewDocumentsControllerTest {
     public void testHandleMidEvent() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
-        verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
+        verify(reviewDocumentService).getReviewedDocumentDetailsNew(AUTHORISATION, caseData, stringObjectMap);
+        verifyNoMoreInteractions(reviewDocumentService);
+    }
+
+
+    @Test
+    public void testHandleValidateEvent() {
+        // when
+        reviewDocumentsController.handleValidateMidEvent(auth, callbackRequest);
+
+        // then
+        verify(reviewDocumentService).validateEvent(stringObjectMap);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 

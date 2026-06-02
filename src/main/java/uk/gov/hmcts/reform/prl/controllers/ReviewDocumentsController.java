@@ -84,9 +84,23 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
+        reviewDocumentService.getReviewedDocumentDetailsNew(authorisation, caseData, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+
+
+    @PostMapping(path = "/review-documents/validate-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleValidateMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<String> errors = reviewDocumentService.validateEvent(caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
+    }
+
 
 
     @PostMapping(path = "/review-documents/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
