@@ -146,6 +146,7 @@ public class BaisDocumentUploadService {
             .id(caseData.getId())
             .caseTypeOfApplication(caseData.getCaseTypeOfApplication())
             .applicant(applicant.toBuilder()
+                           .dateOfBirth(null)
                            .isAddressConfidential(ofNullable(applicant.getIsAddressConfidential()).orElse(YesOrNo.No))
                            .isPhoneNumberConfidential(ofNullable(applicant.getIsPhoneNumberConfidential())
                                                           .orElse(YesOrNo.No))
