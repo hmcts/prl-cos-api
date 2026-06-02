@@ -12,7 +12,7 @@ plugins {
   id 'application'
   id 'checkstyle'
   id 'com.github.ben-manes.versions' version '0.54.0'
-  // id 'info.solidsoft.pitest' version '1.19.0-rc.3'
+   id 'info.solidsoft.pitest' version '1.19.0-rc.3'
   id 'io.spring.dependency-management' version '1.1.7'
   id 'jacoco'
   id 'org.owasp.dependencycheck' version '11.1.1'
@@ -412,7 +412,7 @@ dependencies {
   testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
   testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
   testImplementation group: 'org.pitest', name: 'pitest', version: versions.pitest
-  // testImplementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
+  testImplementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
   testImplementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
   testImplementation group:'org.instancio', name:'instancio-core', version:'5.5.1'
 
