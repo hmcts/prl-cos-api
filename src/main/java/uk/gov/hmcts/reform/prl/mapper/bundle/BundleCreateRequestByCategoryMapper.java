@@ -86,35 +86,33 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         List<Element<BundlingRequestDocument>> applicationDocumentFromCategory = new ArrayList<>();
         List<Element<BundlingRequestDocument>> ordersFromCategory = new ArrayList<>();
 
-        bundleCategoryConfig.getFolders().forEach(folder -> {
-            folder.getDocuments().forEach(document -> {
-                FilterProperties filterProperties = document.getFilters().getFirst();
-                if (filterProperties != null && filterProperties.getCategory() != null
-                    && !AWP_CATEGORIES.contains(filterProperties.getCategory())) {
-                    if (DATA_ORDERS.equals(document.getProperty())) {
-                        List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        ));
-                        reverse(orders);
-                        ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
-                    } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
-                        applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        )));
-                    } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
-                        allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
-                            allCategoriesToMap.get(filterProperties.getCategory()),
-                            BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                            filterProperties
-                        )));
-                    }
+        bundleCategoryConfig.getFolders().forEach(folder -> folder.getDocuments().forEach(document -> {
+            FilterProperties filterProperties = document.getFilters().getFirst();
+            if (filterProperties != null && filterProperties.getCategory() != null
+                && !AWP_CATEGORIES.contains(filterProperties.getCategory())) {
+                if (DATA_ORDERS.equals(document.getProperty())) {
+                    List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
+                        allCategoriesToMap.get(filterProperties.getCategory()),
+                        BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                        filterProperties
+                    ));
+                    reverse(orders);
+                    ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
+                } else if (DATA_APPLICATIONS.equals(document.getProperty())) {
+                    applicationDocumentFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                        allCategoriesToMap.get(filterProperties.getCategory()),
+                        BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                        filterProperties
+                    )));
+                } else if (DATA_ALL_OTHER_DOCUMENTS.equals(document.getProperty())) {
+                    allOtherDocumentsFromCategory.addAll(ElementUtils.wrapElements(mapBundlingRequestDocument(
+                        allCategoriesToMap.get(filterProperties.getCategory()),
+                        BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
+                        filterProperties
+                    )));
                 }
-            });
-        });
+            }
+        }));
 
         specialCategories(caseData, applicationDocumentFromCategory, allOtherDocumentsFromCategory);
 
