@@ -395,7 +395,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "Any application for transfer should be made to the Court in writing within 5 working days of receipt of these directions.";
     public static final String DIO_APPLICATION_TO_APPLY_PERMISSION = " Any party intending at the FHDRA to apply for permission"
-        + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
+         + " to instruct an expert must first comply fully with the requirements of Practice Direction 25C of the Family Procedure Rules.";
     public static final String DIO_PARTICIPATION_DIRECTION = "If they have not already done so, any party who considers that specific "
         + "measures need to be taken to enable a party or witness to understand the proceedings and their "
         + "role in them when in court, put their views to the court, instruct their representatives before, "
@@ -962,7 +962,7 @@ public class PrlAppsConstants {
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
-        "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+            "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
 
     public static final String MANDATORY_JUDGE_WELSH =
         "Mae enw llawn Cynghorydd Cyfreithiol yr Ynadon yn orfodol pan fydd Cynghorydd Cyfreithiol yr Ynadon yn cael ei ddewis fel teitl y Barnwr";
@@ -977,7 +977,7 @@ public class PrlAppsConstants {
 
     public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
-        + " Magistrates";
+            + " Magistrates";
     public static final String MANDATORY_MAGISTRATE_WELSH = "Mae enw llawn yr Ynad yn orfodol pan fydd Ynadon yn cael ei ddewis fel teitl y Barnwr";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
@@ -1142,13 +1142,10 @@ public class PrlAppsConstants {
 
     public static final String CASE_STATUS = "caseStatus";
 
-    public static final String REQUEST_FURTHER_INFORMATION_DETAILS = "requestFurtherInformationDetails";
-
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
     public static final String ENGLISH = "en";
     public static final String WELSH = "cy";
-    public static final String EXIT_AWAITING_INFORMATION_DETAILS = "exitAwaitingInformationDetails";
 
 
     public static final String MIAM_ERROR_WELSH = "Ni allwch wneud y cais hwn oni bai bod y ceisydd naill ai wedi mynychu"
@@ -1190,12 +1187,4 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
-    public static final String CHILD_IMPACT_REPORT_1_LA = "childImpactReport1La";
-    public static final String CHILD_IMPACT_REPORT_2_LA = "childImpactReport2La";
-    public static final String SECTION_7_REPORT_LA = "section7ReportLa";
-    public static final String SECTION_7_ADDENDUM_REPORT_LA = "section7AddendumReportLa";
-    public static final String LOCAL_AUTHORITY_INVOLVEMENT_LA = "localAuthorityInvolvementLa";
-    public static final String SECTION_47_LA = "section47La";
-    public static final String CIR_EXTENSION_REQUEST_LA = "cirExtensionRequestLa";
-    public static final String CIR_TRANSFER_REQUEST_LA = "cirTransferRequestLa";
 }

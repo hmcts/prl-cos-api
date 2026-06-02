@@ -197,7 +197,4 @@ public class BaseCaseData {
 
     private List<Element<ResponseDocuments>> otherPartyC8Documents;
     private List<Element<ResponseDocuments>> otherPartyC8DocumentsArchived;
-
-    @JsonUnwrapped
-    private RenameDocument renameDocument;
 }
