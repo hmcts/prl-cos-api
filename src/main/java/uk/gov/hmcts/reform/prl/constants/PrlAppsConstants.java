@@ -123,6 +123,9 @@ public class PrlAppsConstants {
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
     public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
     public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
+    public static final String C8_RESP_FL401_DRAFT_HINT = "C8_RESPONDENT_FL401_DRAFT";
+    public static final String C8_OTHER_FINAL_HINT = "C8_OTHER_FINAL";
+    public static final String C8_OTHER_DRAFT_HINT = "C8_OTHER_DRAFT";
     public static final String C8_RESP_FL401_FINAL_HINT = "C8_RESPONDENT_FL401_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
@@ -1143,10 +1146,13 @@ public class PrlAppsConstants {
 
     public static final String CASE_STATUS = "caseStatus";
 
+    public static final String REQUEST_FURTHER_INFORMATION_DETAILS = "requestFurtherInformationDetails";
+
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
     public static final String ENGLISH = "en";
     public static final String WELSH = "cy";
+    public static final String EXIT_AWAITING_INFORMATION_DETAILS = "exitAwaitingInformationDetails";
 
 
     public static final String MIAM_ERROR_WELSH = "Ni allwch wneud y cais hwn oni bai bod y ceisydd naill ai wedi mynychu"
@@ -1175,6 +1181,7 @@ public class PrlAppsConstants {
 
     public static final String APPLICANTS_CONFIDENTIAL_DETAILS = "applicantsConfidentialDetails";
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
+    public static final String OTHER_PEOPLE_CONFIDENTIAL_DETAILS = "otherPeopleConfidentialDetails";
     public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
     public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
     public static final String DOCUMENT_URL = "document_url";

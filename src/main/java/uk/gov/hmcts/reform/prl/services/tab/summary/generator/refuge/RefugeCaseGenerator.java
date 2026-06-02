@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -24,32 +25,45 @@ public class RefugeCaseGenerator implements FieldGenerator {
     public CaseSummary generate(CaseData caseData) {
         YesOrNo isRefugeCase = YesOrNo.No;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getApplicants());
-
-            if (YesOrNo.No.equals(isRefugeCase)) {
-                isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getRespondents());
-            }
-            if (YesOrNo.No.equals(isRefugeCase)) {
-                isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getOtherPartyInTheCaseRevised());
-            }
+            isRefugeCase = isC100RefugeCase(caseData);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            if (caseData.getApplicantsFL401() != null) {
-                isRefugeCase = caseData.getApplicantsFL401().getLiveInRefuge();
-            }
-            if (YesOrNo.No.equals(isRefugeCase) && (caseData.getRespondentsFL401() != null)) {
-                isRefugeCase = caseData.getRespondentsFL401().getLiveInRefuge();
-            }
+            isRefugeCase = isFl401RefugeCase(caseData);
         }
         return CaseSummary.builder().refugeCase(RefugeCase.builder().isRefugeCase(isRefugeCase).build()).build();
     }
 
-    private static YesOrNo findIfC100PartyLivesInRefuge(List<Element<PartyDetails>> partyDetailsList) {
+    private YesOrNo isC100RefugeCase(CaseData caseData) {
+        YesOrNo isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getApplicants());
+
+        if (YesOrNo.No.equals(isRefugeCase)) {
+            isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getRespondents());
+        }
+        if (YesOrNo.No.equals(isRefugeCase)) {
+            isRefugeCase = findIfC100PartyLivesInRefuge(caseData.getOtherPartyInTheCaseRevised());
+        }
+        return isRefugeCase;
+    }
+
+    private YesOrNo isFl401RefugeCase(CaseData caseData) {
+        YesOrNo isRefugeCase = YesOrNo.No;
+        if (caseData.getApplicantsFL401() != null) {
+            isRefugeCase = YesNoIDontKnowV2.Yes.equals(caseData.getApplicantsFL401().getLiveInRefuge())
+                ? YesOrNo.Yes : YesOrNo.No;
+        }
+        if (YesOrNo.No.equals(isRefugeCase) && (caseData.getRespondentsFL401() != null)) {
+            isRefugeCase = YesNoIDontKnowV2.Yes.equals(caseData.getRespondentsFL401().getLiveInRefuge())
+                ? YesOrNo.Yes : YesOrNo.No;
+        }
+        return isRefugeCase;
+    }
+
+    private YesOrNo findIfC100PartyLivesInRefuge(List<Element<PartyDetails>> partyDetailsList) {
         Optional<Element<PartyDetails>> refugeParty = Optional.empty();
         if (partyDetailsList != null) {
             refugeParty
                 = partyDetailsList
                 .stream()
-                .filter(x -> YesOrNo.Yes.equals(x.getValue().getLiveInRefuge()))
+                .filter(x -> YesNoIDontKnowV2.Yes.equals(x.getValue().getLiveInRefuge()))
                 .findFirst();
         }
         return refugeParty.isPresent() ? YesOrNo.Yes : YesOrNo.No;
