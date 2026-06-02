@@ -226,21 +226,6 @@ public class ApplicationsTabServiceHelper {
         return currentApplicants;
     }
 
-    public List<PartyDetails> maskOtherPeopleConfidentialDetails(List<PartyDetails> currentApplicants) {
-        for (PartyDetails applicantDetails : currentApplicants) {
-            if ((YesOrNo.Yes).equals(applicantDetails.getIsPhoneNumberConfidential())) {
-                applicantDetails.setPhoneNumber(THIS_INFORMATION_IS_CONFIDENTIAL);
-            }
-            if ((YesOrNo.Yes).equals(applicantDetails.getIsEmailAddressConfidential())) {
-                applicantDetails.setEmail(THIS_INFORMATION_IS_CONFIDENTIAL);
-            }
-            if ((YesOrNo.Yes).equals(applicantDetails.getIsAddressConfidential())) {
-                applicantDetails.setAddress(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build());
-            }
-        }
-        return currentApplicants;
-    }
-
     public List<Element<OtherChildrenNotInTheCase>> getOtherChildNotInTheCaseTable(CaseData caseData) {
         log.info("getOtherChildNotInTheCaseTable()--->start");
         Optional<List<Element<uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase>>> otherPeopleCheck =
