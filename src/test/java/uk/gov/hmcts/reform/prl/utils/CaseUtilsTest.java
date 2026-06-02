@@ -82,8 +82,8 @@ class CaseUtilsTest {
         String welshC8FileName = CaseUtils.getC8FileName(partyDetails, true, false);
         assertThat(welshC8FileName)
             .startsWith("Confidential_C8 of John Doe ")
-            .endsWith(" welsh.pdf")
-            .matches("^Confidential_C8 of John Doe .+ welsh\\.pdf$");
+            .endsWith("Welsh.pdf")
+            .matches("^Confidential_C8 of John Doe .+ Welsh\\.pdf$");
     }
 
     @Test
@@ -96,14 +96,14 @@ class CaseUtilsTest {
         String c8FileName = CaseUtils.getC8FileName(partyDetails, false, true);
         assertThat(c8FileName)
             .startsWith("Confidential_C8 of John Doe ")
-            .endsWith("_draft.pdf")
-            .matches("^Confidential_C8 of John Doe .+_draft\\.pdf$");
+            .endsWith("Draft.pdf")
+            .matches("^Confidential_C8 of John Doe .+ Draft\\.pdf$");
 
         String welshC8FileName = CaseUtils.getC8FileName(partyDetails, true, true);
         assertThat(welshC8FileName)
             .startsWith("Confidential_C8 of John Doe ")
-            .endsWith(" welsh_draft.pdf")
-            .matches("^Confidential_C8 of John Doe .+ welsh_draft\\.pdf$");
+            .endsWith(" Welsh Draft.pdf")
+            .matches("^Confidential_C8 of John Doe .+ Welsh Draft\\.pdf$");
     }
 
     private static Stream<Arguments> testIsC100CaseIssued() {

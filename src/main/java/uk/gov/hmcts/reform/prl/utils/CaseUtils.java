@@ -164,8 +164,8 @@ public class CaseUtils {
         return C_8_FILENAME_PATTERN.formatted(
             partyDetails.getLabelForDynamicList(),
             LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter),
-            welsh ? " welsh" : "",
-            draft ? "_draft" : ""
+            welsh ? " Welsh" : "",
+            draft ? " Draft" : ""
         );
     }
 
