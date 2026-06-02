@@ -160,11 +160,12 @@ public class CaseUtils {
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
 
-    public static String getC8FileName(PartyDetails partyDetails, boolean welsh) {
+    public static String getC8FileName(PartyDetails partyDetails, boolean welsh, boolean draft) {
         return C_8_FILENAME_PATTERN.formatted(
             partyDetails.getLabelForDynamicList(),
             LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter),
-            welsh ? " welsh" : ""
+            welsh ? " welsh" : "",
+            draft ? "_draft" : ""
         );
     }
 

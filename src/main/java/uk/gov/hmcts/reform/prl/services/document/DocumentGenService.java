@@ -962,10 +962,10 @@ public class DocumentGenService {
 
         switch (docGenFor) {
             case C8_HINT:
-                fileName = findC8Filename(isWelsh, caseTypeOfApp, caseData);
+                fileName = findC8Filename(isWelsh, caseTypeOfApp, caseData, false);
                 break;
             case C8_DRAFT_HINT:
-                fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
+                fileName = findC8Filename(isWelsh, caseTypeOfApp, caseData, true);
                 break;
             case C8_RESP_DRAFT_HINT:
                 fileName = !isWelsh ? c100RespC8DraftFilename : c100RespC8DraftFilenameWelsh;
@@ -1077,18 +1077,22 @@ public class DocumentGenService {
         return fileName;
     }
 
-    private String findC8Filename(boolean isWelsh, String caseTypeOfApp, CaseData caseData) {
+    private String findC8Filename(boolean isWelsh, String caseTypeOfApp, CaseData caseData, boolean draft) {
         String fileName;
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApp)) {
             if (isNotEmpty(caseData.getApplicants())) {
                 Element<PartyDetails> party = caseData.getApplicants().getFirst();
-                fileName = getC8FileName(party.getValue(), isWelsh);
+                fileName = getC8FileName(party.getValue(), isWelsh, draft);
+            } else if (draft){
+                fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
             } else {
                 fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;
             }
         } else {
             if (isNotEmpty(caseData.getApplicantsFL401())) {
-                fileName = getC8FileName(caseData.getApplicantsFL401(), isWelsh);
+                fileName = getC8FileName(caseData.getApplicantsFL401(), isWelsh, draft);
+            } else if (draft) {
+                fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
             } else {
                 fileName = !isWelsh ? fl401C8Filename : fl401C8WelshFilename;
             }

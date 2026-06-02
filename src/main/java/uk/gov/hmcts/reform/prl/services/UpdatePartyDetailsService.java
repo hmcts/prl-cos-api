@@ -786,7 +786,8 @@ public class UpdatePartyDetailsService {
         Document c8FinalWelshDocument = null;
         if (dataMap.containsKey(IS_CONFIDENTIAL_DATA_PRESENT)) {
             if (isDetailsChanged) {
-                dataMap.put("dynamic_fileName", getC8FileName(respondent.getValue(), false));
+                boolean draft = !SEALED_STATES.contains(caseData.getState());
+                dataMap.put("dynamic_fileName", getC8FileName(respondent.getValue(), false, draft));
                 c8FinalDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
@@ -794,7 +795,7 @@ public class UpdatePartyDetailsService {
                         false,
                         dataMap
                 );
-                dataMap.put("dynamic_fileName", getC8FileName(respondent.getValue(), true));
+                dataMap.put("dynamic_fileName", getC8FileName(respondent.getValue(), true, draft));
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 if (documentLanguage.isGenWelsh()) {
                     c8FinalWelshDocument = documentGenService.generateSingleDocument(
