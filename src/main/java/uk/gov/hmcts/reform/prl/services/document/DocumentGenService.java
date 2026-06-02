@@ -1083,7 +1083,7 @@ public class DocumentGenService {
             if (isNotEmpty(caseData.getApplicants())) {
                 Element<PartyDetails> party = caseData.getApplicants().getFirst();
                 fileName = getC8FileName(party.getValue(), isWelsh, draft);
-            } else if (draft){
+            } else if (draft) {
                 fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
             } else {
                 fileName = !isWelsh ? c100C8Filename : c100C8WelshFilename;

@@ -66,6 +66,15 @@ class CaseUtilsTest {
         assertThat(CaseUtils.isC100CaseIssued(caseData)).isEqualTo(expected);
     }
 
+    private static Stream<Arguments> testIsC100CaseIssued() {
+        return Stream.of(
+            Arguments.of(caseData(C100_CASE_TYPE, null), false),
+            Arguments.of(caseData(C100_CASE_TYPE, LocalDate.now()), true),
+            Arguments.of(caseData(FL401_CASE_TYPE, null), false),
+            Arguments.of(caseData(FL401_CASE_TYPE, LocalDate.now()), false)
+        );
+    }
+
     @Test
     void testGetC8FileName() {
         PartyDetails partyDetails = PartyDetails.builder()
@@ -104,15 +113,6 @@ class CaseUtilsTest {
             .startsWith("Confidential_C8 of John Doe ")
             .endsWith(" Welsh Draft.pdf")
             .matches("^Confidential_C8 of John Doe .+ Welsh Draft\\.pdf$");
-    }
-
-    private static Stream<Arguments> testIsC100CaseIssued() {
-        return Stream.of(
-            Arguments.of(caseData(C100_CASE_TYPE, null), false),
-            Arguments.of(caseData(C100_CASE_TYPE, LocalDate.now()), true),
-            Arguments.of(caseData(FL401_CASE_TYPE, null), false),
-            Arguments.of(caseData(FL401_CASE_TYPE, LocalDate.now()), false)
-        );
     }
 
     private static CaseData caseData(String caseType, LocalDate issueDate) {
