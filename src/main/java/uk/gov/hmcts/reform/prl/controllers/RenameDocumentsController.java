@@ -76,7 +76,7 @@ public class RenameDocumentsController {
     }
 
     @PostMapping(path = "/validate-rename-field", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to amend order mid-event")
+    @Operation(description = "Callback to validate the new document name")
     public AboutToStartOrSubmitCallbackResponse handleValidateMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {

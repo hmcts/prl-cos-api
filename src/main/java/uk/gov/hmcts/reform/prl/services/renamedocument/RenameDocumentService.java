@@ -38,7 +38,7 @@ public class RenameDocumentService {
 
     public Map<String, Object> handleAboutToStart(String authorisation,
                                                   CallbackRequest callbackRequest) {
-        log.info("Entering handleAboutToStart for case: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Entering RenameDocument Event handleAboutToStart for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -59,7 +59,7 @@ public class RenameDocumentService {
 
     public Map<String, Object> handleMidEvent(String authorisation,
                                               CallbackRequest callbackRequest) {
-        log.info("Entering handleMidEvent for case: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Entering RenameDocument Event handleMidEvent for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -78,7 +78,6 @@ public class RenameDocumentService {
 
                 if (codes.length >= 2) {
                     String categoryIdFromCode = codes[codes.length - 2];
-                    log.info("Extracted category ID from code hierarchy: {}", categoryIdFromCode);
 
                     categoriesAndDocumentsList.getListItems().stream()
                         .filter(element -> element.getCode().equals(categoryIdFromCode))
@@ -91,12 +90,11 @@ public class RenameDocumentService {
             }
         }
         caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
-        log.info("Updated categoryDocumentsList in caseDataMap during handleMidEvent with pre-selected category");
         return caseDataMap;
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
-        log.info("Entering handleAboutToSubmit for case: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Entering RenameDocument Event handleAboutToSubmit for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
