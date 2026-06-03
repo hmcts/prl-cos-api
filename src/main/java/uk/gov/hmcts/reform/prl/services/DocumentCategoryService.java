@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_EXTENSION_REQUEST_LA;
@@ -57,12 +59,14 @@ public class DocumentCategoryService {
 
     public DynamicList retrieveDocumentCategories(String authorization, CaseData caseData) {
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(authorization, caseData);
+        Predicate<Category> parentCategoriesFilter = category -> category.getCategoryId().equalsIgnoreCase("confidential");
         return getCategoriesSubcategories(
             authorization,
             String.valueOf(caseData.getId()),
             isUserRoleLA,
             Arrays.stream(QuarantineLegalDoc.allQuarantineCategoriesToRemove())
-                .collect(Collectors.toCollection(ArrayList::new))
+                .collect(Collectors.toCollection(ArrayList::new)),
+            parentCategoriesFilter
         );
     }
 
@@ -81,8 +85,13 @@ public class DocumentCategoryService {
     }
 
 
-
     public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA, List<String> docsToExclude) {
+        return getCategoriesSubcategories(authorisation, caseReference, isUserRoleLA, docsToExclude, null);
+    }
+
+
+    public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA,
+                                                  List<String> docsToExclude, Predicate<Category> parentCategoriesFilter) {
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
@@ -101,6 +110,13 @@ public class DocumentCategoryService {
                 }
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
+
+                if (nonNull(parentCategoriesFilter)) {
+                    parentCategories.stream().filter(parentCategoriesFilter).forEach(parent -> dynamicListElementList.add(
+                        DynamicListElement.builder().code(parent.getCategoryId()).label(parent.getCategoryName()).build()
+                    ));
+                }
+
                 CaseUtils.createCategorySubCategoryDynamicList(
                     parentCategories,
                     dynamicListElementList,
@@ -108,8 +124,11 @@ public class DocumentCategoryService {
                 );
                 docsToExclude.clear();
 
+                List<DynamicListElement> sortedCategories = dynamicListElementList.stream()
+                    .sorted(Comparator.comparing(DynamicListElement::getLabel))
+                    .toList();
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
-                    .listItems(dynamicListElementList).build();
+                    .listItems(sortedCategories).build();
             }
         } catch (Exception e) {
             log.error("Error in getCategoriesAndDocuments method", e);
