@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -46,51 +47,7 @@ public class RenameDocumentService {
             String.valueOf(caseData.getId())
         );
 
-        List<uk.gov.hmcts.reform.prl.models.documents.Document> allDocuments = documentExtractor.getCaseDocuments(caseData);
-
-        List<uk.gov.hmcts.reform.prl.models.documents.Document> quarantineDocuments = documentExtractor.getCaseDocuments(
-            CaseData.builder()
-                .documentManagementDetails(caseData.getDocumentManagementDetails())
-                .reviewDocuments(caseData.getReviewDocuments())
-                .scannedDocuments(caseData.getScannedDocuments())
-                .build()
-        );
-
-        List<String> quarantineDocumentIds = quarantineDocuments.stream()
-            .map(uk.gov.hmcts.reform.prl.models.documents.Document::getDocumentId)
-            .toList();
-
-        List<String> existingDocumentIds = documentsList.getListItems().stream()
-            .map(item -> {
-                String[] codes = item.getCode().split(ARROW_SEPARATOR);
-                return codes[codes.length - 1];
-            })
-            .toList();
-
-        List<DynamicListElement> extraDocuments = allDocuments.stream()
-            .filter(doc -> !quarantineDocumentIds.contains(doc.getDocumentId()))
-            .filter(doc -> !existingDocumentIds.contains(doc.getDocumentId()))
-            .map(doc -> DynamicListElement.builder()
-                .code(doc.getDocumentId())
-                .label(doc.getDocumentFileName())
-                .build())
-            .toList();
-
-        List<DynamicListElement> allListItems = new ArrayList<>();
-        if (documentsList.getListItems() != null) {
-            allListItems.addAll(documentsList.getListItems());
-        }
-        allListItems.addAll(extraDocuments);
-
-        documentsList = documentsList.toBuilder()
-            .listItems(allListItems)
-            .build()
-            .withSortedListItemsByLabel();
-
-        log.info(
-            "Found {} documents for dynamic list",
-            documentsList.getListItems() != null ? documentsList.getListItems().size() : 0
-        );
+        documentsList = createDynamicListForRenameDocuments(caseData, documentsList);
         caseDataMap.put("renameDocumentsList", documentsList);
 
 
@@ -201,11 +158,68 @@ public class RenameDocumentService {
     }
 
     public List<String> validateRenamedField(Map<String, Object> caseDataUpdated) {
-        String documentNewName = (String) caseDataUpdated.get("newNameForDocument");
+        String newNameForDocument = (String) caseDataUpdated.get("newNameForDocument");
         List<String> errors = new ArrayList<>();
-        if (StringUtils.isNotBlank(documentNewName) && documentNewName.contains(".")) {
+        if (StringUtils.isNotBlank(newNameForDocument) && newNameForDocument.contains(".")) {
             errors.add("Please do not add extension in the new file name");
         }
+        String renameListDocSelected = (String) caseDataUpdated.get("renameListDocSelected");
+        if (StringUtils.isNotBlank(renameListDocSelected)
+            && renameListDocSelected.startsWith("Confidential_")
+            && StringUtils.isNotBlank(newNameForDocument)
+            && !newNameForDocument.startsWith("Confidential_")) {
+            errors.add("Please keep the prefix Confidential_ in the new file name");
+        }
         return errors;
+    }
+
+    private @NonNull DynamicList createDynamicListForRenameDocuments(CaseData caseData, DynamicList documentsList) {
+        List<uk.gov.hmcts.reform.prl.models.documents.Document> allDocuments = documentExtractor.getCaseDocuments(
+            caseData);
+
+        List<uk.gov.hmcts.reform.prl.models.documents.Document> quarantineDocuments = documentExtractor.getCaseDocuments(
+            CaseData.builder()
+                .documentManagementDetails(caseData.getDocumentManagementDetails())
+                .reviewDocuments(caseData.getReviewDocuments())
+                .scannedDocuments(caseData.getScannedDocuments())
+                .build()
+        );
+
+        List<String> quarantineDocumentIds = quarantineDocuments.stream()
+            .map(uk.gov.hmcts.reform.prl.models.documents.Document::getDocumentId)
+            .toList();
+
+        List<String> existingDocumentIds = documentsList.getListItems().stream()
+            .map(item -> {
+                String[] codes = item.getCode().split(ARROW_SEPARATOR);
+                return codes[codes.length - 1];
+            })
+            .toList();
+
+        List<DynamicListElement> extraDocuments = allDocuments.stream()
+            .filter(doc -> !quarantineDocumentIds.contains(doc.getDocumentId()))
+            .filter(doc -> !existingDocumentIds.contains(doc.getDocumentId()))
+            .map(doc -> DynamicListElement.builder()
+                .code(doc.getDocumentId())
+                .label(doc.getDocumentFileName())
+                .build())
+            .toList();
+
+        List<DynamicListElement> allListItems = new ArrayList<>();
+        if (documentsList.getListItems() != null) {
+            allListItems.addAll(documentsList.getListItems());
+        }
+        allListItems.addAll(extraDocuments);
+
+        documentsList = documentsList.toBuilder()
+            .listItems(allListItems)
+            .build()
+            .withSortedListItemsByLabel();
+
+        log.info(
+            "Found {} documents for dynamic list",
+            documentsList.getListItems() != null ? documentsList.getListItems().size() : 0
+        );
+        return documentsList;
     }
 }
