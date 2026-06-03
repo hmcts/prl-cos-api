@@ -7,12 +7,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Value
+@Data
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -60,6 +60,20 @@ public class Document {
             .build();
     }
 
+    public static Document withoutCategory(Document document) {
+        if (document == null) {
+            return null;
+        }
+        return Document.builder()
+            .documentUrl(document.documentUrl)
+            .documentBinaryUrl(document.documentBinaryUrl)
+            .documentFileName(document.documentFileName)
+            .documentCreatedOn(document.documentCreatedOn)
+            .documentHash(document.documentHash)
+            .uploadTimeStamp(document.uploadTimeStamp)
+            .build();
+    }
+  
     @JsonIgnore
     public String getDocumentId() {
         String[] urlParts = documentUrl.split("/");

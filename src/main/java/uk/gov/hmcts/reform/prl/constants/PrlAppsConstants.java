@@ -1037,6 +1037,7 @@ public class PrlAppsConstants {
     public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
     public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
     public static final String MISSING_ADDRESS_WARNING_TEXT = "missingAddressWarningText";
+    public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
@@ -1142,10 +1143,13 @@ public class PrlAppsConstants {
 
     public static final String CASE_STATUS = "caseStatus";
 
+    public static final String REQUEST_FURTHER_INFORMATION_DETAILS = "requestFurtherInformationDetails";
+
     public static final String FETCH_FEE_INVALID_APPLICATION_TYPE = "Invalid application type to fetch fee details: ";
     public static final String FETCH_FEE_ERROR = "Error while fetching fee details for application type: ";
     public static final String ENGLISH = "en";
     public static final String WELSH = "cy";
+    public static final String EXIT_AWAITING_INFORMATION_DETAILS = "exitAwaitingInformationDetails";
 
 
     public static final String MIAM_ERROR_WELSH = "Ni allwch wneud y cais hwn oni bai bod y ceisydd naill ai wedi mynychu"
