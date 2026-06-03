@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -40,7 +39,6 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -106,7 +104,7 @@ public class ManageDocumentsService {
         + "(form FM5) cannot contain confidential information or be restricted.";
     public static final String FM5_ERROR_WELSH = "Ni all y datganiad safbwynt ar ddatrys anghydfod y tu allan i’r llys "
         + "(ffurflen FM5) gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.";
-    private final CoreCaseDataApi coreCaseDataApi;
+
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -116,7 +114,6 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final NotificationService notificationService;
-    private final RoleAssignmentService roleAssignmentService;
     private final FeatureToggleService featureToggleService;
     private final DocumentCategoryService documentCategoryService;
 
