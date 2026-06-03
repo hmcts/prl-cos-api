@@ -3053,7 +3053,7 @@ public class ManageDocumentsServiceTest {
             .build();
         CaseData caseData = CaseData.builder()
             .cirDocumentsRequested(List.of(element(doc.getCategoryId())))
-                                 .build();
+            .build();
 
         assertTrue(manageDocumentsService.hasCirRequestedDocsUploaded(
             caseData,

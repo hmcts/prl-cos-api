@@ -1007,8 +1007,8 @@ public class ManageDocumentsService {
 
             List<String> amRoles = Optional.ofNullable(roleAssignmentServiceResponse).isPresent()
                 ? roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                  .stream()
-                  .map(RoleAssignmentResponse::getRoleName).toList()
+                .stream()
+                .map(RoleAssignmentResponse::getRoleName).toList()
                 : List.of();
 
             boolean isSolicitor = roles.contains(Roles.SOLICITOR.getValue());

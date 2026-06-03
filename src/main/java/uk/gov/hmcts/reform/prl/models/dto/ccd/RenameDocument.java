@@ -22,4 +22,8 @@ public class RenameDocument {
 
     @JsonProperty("categoryDocumentsList")
     private DynamicList categoryDocumentsList;
+
+    @JsonProperty("renameListDocSelected")
+    private String renameListDocSelected;
+
 }
