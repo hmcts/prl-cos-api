@@ -137,7 +137,9 @@ public class ManageDocumentsService {
             .documentCategories(documentCategoryService.getCategoriesSubcategories(
                 authorization,
                 String.valueOf(caseData.getId()),
-                isUserRoleLA
+                isUserRoleLA,
+                Arrays.stream(QuarantineLegalDoc.quarantineCategoriesToRemove())
+                    .collect(Collectors.toCollection(ArrayList::new))
             ))
             .documentParty(setDefaultDocumentParty(isUserRoleLA))
             .build();
