@@ -14,10 +14,14 @@ import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -109,7 +113,8 @@ public class DocumentCategoryServiceTest {
         DynamicList result = documentCategoryService.getCategoriesSubcategories(
             AUTHORIZATION,
             "caseReferenceValue",
-            false
+            false,
+            new ArrayList<>()
         );
 
         //then
@@ -134,7 +139,9 @@ public class DocumentCategoryServiceTest {
         DynamicList result = documentCategoryService.getCategoriesSubcategories(
             AUTHORIZATION,
             "caseReferenceValue",
-            true
+            true,
+            Arrays.stream(QuarantineLegalDoc.allQuarantineCategoriesToRemove())
+                .collect(Collectors.toCollection(ArrayList::new))
         );
 
         //then

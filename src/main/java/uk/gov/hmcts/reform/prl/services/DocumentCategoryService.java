@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
@@ -29,7 +31,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 
@@ -59,7 +60,9 @@ public class DocumentCategoryService {
         return getCategoriesSubcategories(
             authorization,
             String.valueOf(caseData.getId()),
-            isUserRoleLA
+            isUserRoleLA,
+            Arrays.stream(QuarantineLegalDoc.allQuarantineCategoriesToRemove())
+                .collect(Collectors.toCollection(ArrayList::new))
         );
     }
 
@@ -79,7 +82,7 @@ public class DocumentCategoryService {
 
 
 
-    public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA) {
+    public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA, List<String> docsToExclude) {
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
@@ -93,7 +96,6 @@ public class DocumentCategoryService {
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .toList();
 
-                List<String> docsToExclude = new ArrayList<>(List.of(quarantineCategoriesToRemove()));
                 if (!isUserRoleLA) {
                     docsToExclude.addAll(EXCLUDED_LA_DOCS_LIST_FOR_ADMIN);
                 }

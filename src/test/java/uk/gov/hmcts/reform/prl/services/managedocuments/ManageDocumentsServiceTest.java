@@ -68,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -383,7 +384,9 @@ public class ManageDocumentsServiceTest {
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
-            true
+            true,
+            Arrays.stream(QuarantineLegalDoc.quarantineCategoriesToRemove())
+                .collect(Collectors.toCollection(ArrayList::new))
         )).thenReturn(dynamicLst);
 
         // when
@@ -416,7 +419,9 @@ public class ManageDocumentsServiceTest {
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
-            true
+            true,
+            Arrays.stream(QuarantineLegalDoc.quarantineCategoriesToRemove())
+                .collect(Collectors.toCollection(ArrayList::new))
         )).thenReturn(dynamicLst);
 
         // when
@@ -449,7 +454,9 @@ public class ManageDocumentsServiceTest {
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
-            false
+            false,
+            Arrays.stream(QuarantineLegalDoc.quarantineCategoriesToRemove())
+                .collect(Collectors.toCollection(ArrayList::new))
         )).thenReturn(dynamicLst);
 
         // when
@@ -476,7 +483,9 @@ public class ManageDocumentsServiceTest {
         when(documentCategoryService.getCategoriesSubcategories(
             auth,
             String.valueOf(caseData.getId()),
-            true
+            true,
+            Arrays.stream(QuarantineLegalDoc.quarantineCategoriesToRemove())
+                .collect(Collectors.toCollection(ArrayList::new))
         )).thenReturn(dynamicLst);
 
         // when
