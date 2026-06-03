@@ -1177,7 +1177,8 @@ public class SendAndReplyServiceTest {
                                                                     data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1248,7 +1249,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals("some message while sending",message.getMessageContent());
         assertEquals(3, message.getInternalMessageAttachDocs().size());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1312,7 +1313,7 @@ public class SendAndReplyServiceTest {
                                                                     data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1389,7 +1390,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals("some message while sending",message.getMessageContent());
         assertEquals(4, message.getInternalMessageAttachDocs().size());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -2532,7 +2533,9 @@ public class SendAndReplyServiceTest {
             .build();
 
         Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100Message);
-        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder()
+            .caseReference(String.valueOf(caseDataC100Message.getId()))
+            .toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
@@ -2636,7 +2639,9 @@ public class SendAndReplyServiceTest {
 
         Map<String, Object> dynamicData = getEmailDynamicData(caseDataC100Message);
         dynamicData.put("name","");
-        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("test@test.com")
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder()
+            .caseReference(String.valueOf(caseDataC100Message.getId()))
+            .toEmailAddress("test@test.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
@@ -2722,7 +2727,9 @@ public class SendAndReplyServiceTest {
                     .build())
             .build();
         Map<String, Object> dynamicData = getEmailDynamicData(caseDataForFL401Message);
-        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().toEmailAddress("testSolicitor@xyz.com")
+        SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder()
+            .caseReference(String.valueOf(caseDataForFL401Message.getId()))
+            .toEmailAddress("testSolicitor@xyz.com")
             .dynamicTemplateData(dynamicData)
             .listOfAttachments(new ArrayList<>())
             .languagePreference(LanguagePreference.english)
@@ -3123,11 +3130,13 @@ public class SendAndReplyServiceTest {
 
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
-        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
+        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime)
+            .document(internalMessageDoc).build();
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(uk.gov.hmcts.reform.prl.models.documents.Document.withoutCategory(expectedSendReplyTempDocument.getDocument()),
+                     updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue().getDocument());
         assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
@@ -3183,7 +3192,9 @@ public class SendAndReplyServiceTest {
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(
+            uk.gov.hmcts.reform.prl.models.documents.Document.withoutCategory(expectedSendReplyTempDocument.getDocument()),
+            updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue().getDocument());
         assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
@@ -3817,6 +3828,16 @@ public class SendAndReplyServiceTest {
         List<uk.gov.hmcts.reform.prl.models.documents.Document> capturedDocs = documentsCaptor.getValue();
         assertNotNull(capturedDocs.get(0).getDocumentFileName());
         assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
+    }
+
+    private void assertInternalMessageAttachDocs(Message message) {
+        uk.gov.hmcts.reform.prl.models.documents.Document actualDocument = message.getInternalMessageAttachDocs().get(0).getValue();
+        assertEquals(internalMessageDoc.getDocumentUrl(), actualDocument.getDocumentUrl());
+        assertEquals(internalMessageDoc.getDocumentBinaryUrl(), actualDocument.getDocumentBinaryUrl());
+        assertEquals(internalMessageDoc.getDocumentFileName(), actualDocument.getDocumentFileName());
+        assertEquals(internalMessageDoc.getDocumentHash(), actualDocument.getDocumentHash());
+        assertEquals(internalMessageDoc.getDocumentCreatedOn(), actualDocument.getDocumentCreatedOn());
+        assertNull(actualDocument.getCategoryId());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {

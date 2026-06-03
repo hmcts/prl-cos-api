@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
@@ -93,8 +94,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
@@ -165,6 +168,7 @@ public class DocumentGenServiceTest {
     private UploadDocumentService uploadService;
     @Mock
     private Time dateTime;
+    @SuppressWarnings("unused")
     @Mock
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
@@ -435,7 +439,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetails(any(CaseData.class))).thenReturn(c100CaseDataFinal);
         when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataFinal);
-
+        c100CaseDataFinal.setState(State.JUDICIAL_REVIEW);
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, c100CaseDataFinal);
 
         // Verify that if a case is issued then only C8 documents are updated and not C100 or C1A
@@ -474,6 +478,7 @@ public class DocumentGenServiceTest {
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
+        fl401CaseData.setState(State.SUBMITTED_PAID);
         Map<String, Object> stringObjectMap = documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
 
         verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C8,
@@ -1100,8 +1105,12 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        fl401CaseData.setState(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
+        // when
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
+
+        // then
         verify(dgsService).generateWelshDocument(
             Mockito.anyString(),
             any(CaseDetails.class),
@@ -1111,7 +1120,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSingleDocGenerationWithMap() throws Exception {
+    public void testSingleDocGenerationWithMap() {
         Map<String, Object> respondentDetails = new HashMap<>();
         documentGenService.generateSingleDocument(
             "auth",
@@ -1218,7 +1227,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForEnglish() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForCitizenSubmissionForEnglish() {
 
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -1307,7 +1316,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateC8DocumentForRespondent() throws Exception {
+    public void testGenerateC8DocumentForRespondent() {
         Map<String, Object> respondentDetails = new HashMap<>();
         respondentDetails.put("dynamic_fileName", "test.pdf");
         documentGenService.generateSingleDocument(
@@ -1773,7 +1782,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100Test() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100Test() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -1811,7 +1820,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestFinalDoc() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestFinalDoc() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -1849,7 +1858,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithOrganisation() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithOrganisation() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -1889,7 +1898,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestWithC1A() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForC100TestWithC1A() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -1929,7 +1938,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401Test() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401Test() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -1968,7 +1977,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() throws Exception {
+    public void createUpdatedCaseDataWithDocumentsForTestingSupportForFL401TestWithChildConfidentialInfo() {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
@@ -2008,7 +2017,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8Formgenerationbasedconconfidentiality2() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2106,7 +2115,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testSupportC8ConfidentialityNoOrders() throws Exception {
+    public void testSupportC8ConfidentialityNoOrders() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2200,7 +2209,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportC8FormGenerationBasedcOnConfidentiality_() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2278,7 +2287,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenAbsent() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenAbsent() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2342,7 +2351,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenEnglishNotWesh() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2402,7 +2411,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() throws Exception {
+    public void testCreateUpdatedCaseDataWithDocumentsForTestingSupportDocsNullValueWhenWelshNotenglish() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2684,6 +2693,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateAndUploadDocument() {
         //Given
+        ReflectionTestUtils.setField(documentGenService, "prlCitizenUploadTemplate", "FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2701,20 +2711,21 @@ public class DocumentGenServiceTest {
             .build();
 
         //When
-        doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
+        doReturn(List.of(generatedDocumentInfo)).when(dgsService).generateCitizenDocument(
             Mockito.anyString(),
             Mockito.any(DocumentRequest.class),
-            Mockito.any()
+            Mockito.any(),
+            any(DocumentCategory.class)
         );
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         //Action
-        DocumentResponse documentResponse = documentGenService.generateAndUploadDocument(AUTH_TOKEN, documentRequest);
+        List<DocumentResponse> documentResponses = documentGenService.generateAndUploadDocument(AUTH_TOKEN, documentRequest);
 
         //Then
-        assertNotNull(documentResponse);
-        assertNotNull(documentResponse.getDocument());
-        assertEquals(SUCCESS, documentResponse.getStatus());
+        assertNotNull(documentResponses);
+        assertNotNull(documentResponses.getFirst().getDocument());
+        assertEquals(SUCCESS, documentResponses.getFirst().getStatus());
     }
 
     @Test
@@ -2740,7 +2751,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDraftDocumentsForCaseResubmissionTest1() throws Exception {
+    public void testGenerateDraftDocumentsForCaseResubmissionTest1() {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2772,7 +2783,7 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testGenerateDraftDocumentsForCaseResubmissionTest2() throws Exception {
+    public void testGenerateDraftDocumentsForCaseResubmissionTest2() {
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
@@ -2878,6 +2889,36 @@ public class DocumentGenServiceTest {
 
         assertNotNull(template);
         assertEquals("fl401_resp_c8_letter_wel", template);
+    }
+
+    @Test
+    public void testC8RespFL401DraftHintEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8DraftTemplate", "draft_c8_template");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_DRAFT_HINT, false);
+
+        assertEquals("draft_c8_template", template);
+    }
+
+    @Test
+    public void testC8RespFL401DraftHintWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8DraftTemplateWelsh", "draft_welsh");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_DRAFT_HINT, true);
+
+        assertEquals("draft_welsh", template);
+    }
+
+    @Test
+    public void testC8OtherHintEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "otherC8Template", "template_id");
+        String template = documentGenService.getTemplate(c100CaseData, C8_OTHER_FINAL_HINT, false);
+        assertEquals("template_id", template);
+    }
+
+    @Test
+    public void testC8OtherHintWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "otherC8TemplateWelsh", "welsh_template_id");
+        String template = documentGenService.getTemplate(c100CaseData, C8_OTHER_FINAL_HINT, true);
+        assertEquals("welsh_template_id", template);
     }
 
     @Test
