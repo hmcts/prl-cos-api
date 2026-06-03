@@ -210,7 +210,9 @@ public class RenameDocumentService {
 
         List<DynamicListElement> allListItems = new ArrayList<>();
         if (documentsList.getListItems() != null) {
-            allListItems.addAll(documentsList.getListItems());
+            allListItems.addAll(documentsList.getListItems().stream()
+                                   .filter(item -> !item.getLabel().startsWith("Documents to be reviewed"))
+                                   .toList());
         }
         allListItems.addAll(extraDocuments);
 
