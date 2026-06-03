@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -2953,7 +2954,8 @@ public class C100RespondentSolicitorServiceTest {
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
         CaseData caseData = CaseData.builder()
             .respondentSolicitorData(RespondentSolicitorData.builder()
-                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(No).build())
+                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(
+                                             YesNoIDontKnowV2.No).build())
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)
@@ -2992,7 +2994,9 @@ public class C100RespondentSolicitorServiceTest {
 
         CaseData caseData = CaseData.builder()
             .respondentSolicitorData(RespondentSolicitorData.builder()
-                                         .resSolConfirmEditContactDetails(CitizenDetails.builder().liveInRefuge(Yes).build())
+                                         .resSolConfirmEditContactDetails(CitizenDetails.builder()
+                                                                              .liveInRefuge(YesNoIDontKnowV2.Yes)
+                                                                              .build())
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)

@@ -266,6 +266,7 @@ public class CafcassCaseDataService {
                 .respondentCc8Documents(null)
                 .respondentDc8Documents(null)
                 .respondentEc8Documents(null)
+                .otherPartyC8Documents(null)
                 .c8FormDocumentsUploaded(null)
                 .bundleInformation(null)
                 .otherDocumentsUploaded(null)
@@ -540,6 +541,16 @@ public class CafcassCaseDataService {
                     CONFIDENTIAL,
                     otherDocsList
                 ));
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getOtherPartyC8Documents())) {
+            caseData.getOtherPartyC8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
         }
     }
 
@@ -901,6 +912,7 @@ public class CafcassCaseDataService {
             "data.respondentCc8Documents",
             "data.respondentDc8Documents",
             "data.respondentEc8Documents",
+            "data.otherPartyC8Documents",
             "data.c8FormDocumentsUploaded",
             "data.bundleInformation",
             "data.otherDocumentsUploaded",

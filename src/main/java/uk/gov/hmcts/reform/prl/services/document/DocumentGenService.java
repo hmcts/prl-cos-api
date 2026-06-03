@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.document;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,12 +47,15 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -62,8 +66,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
@@ -156,17 +163,48 @@ public class DocumentGenService {
     protected String c100C8DraftFilename;
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
+    @Value("${document.templates.common.other_c8_template}")
+    protected String otherC8Template;
+    @Value("${document.templates.common.other_c8_filename}")
+    protected String otherC8FileName;
+    @Value("${document.templates.common.other_c8_draft_filename}")
+    protected String otherC8DraftFileName;
+    @Value("${document.templates.common.other_c8_template_welsh}")
+    protected String otherC8TemplateWelsh;
+    @Value("${document.templates.common.other_c8_filename_welsh}")
+    protected String otherC8FileNameWelsh;
+    @Value("${document.templates.common.other_c8_draft_filename_welsh}")
+    protected String otherC8DraftFileNameWelsh;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template}")
     protected String fl401RespC8Template;
+    @Value("${document.templates.fl401.fl401_resp_c8_filename}")
+    protected String fl401RespC8Filename;
 
     @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
     protected String fl401RespC8TemplateWelsh;
+    @Value("${document.templates.fl401.fl401_resp_c8_filename_welsh}")
+    protected String fl401RespC8FilenameWelsh;
 
     @Value("${document.templates.c100.c100_resp_c8_draft_template}")
     protected String c100RespC8DraftTemplate;
     @Value("${document.templates.c100.c100_resp_c8_filename}")
     protected String c100RespC8Filename;
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_template}")
+    protected String fl401RespC8DraftTemplate;
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_filename}")
+    protected String fl401RespC8DraftFilename;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_template_welsh}")
+    protected String fl401RespC8DraftTemplateWelsh;
+    @Value("${document.templates.fl401.fl401_resp_c8_draft_filename_welsh}")
+    protected String fl401RespC8DraftFilenameWelsh;
+
+    @Value("${document.templates.c100.c100_resp_c8_welsh_draft_template}")
+    protected String c100RespC8DraftTemplateWelsh;
+    @Value("${document.templates.c100.c100_resp_c8_welsh_draft_filename}")
+    protected String c100RespC8DraftFilenameWelsh;
+
     @Value("${document.templates.c100.c100_resp_c8_draft_filename}")
     protected String c100RespC8DraftFilename;
     @Value("${document.templates.c100.c100_c1a_template}")
@@ -283,6 +321,10 @@ public class DocumentGenService {
     protected String privacyNoticeFilename;
     @Value("${document.templates.citizen.prl_citizen_upload_template}")
     protected String prlCitizenUploadTemplate;
+    @Value("${document.templates.citizen.prl_citizen_witness_statement_template}")
+    protected String prlCitizenWitnessStatementTemplate;
+    @Value("${document.templates.citizen.prl_citizen_witness_statement_welsh_template}")
+    protected String prlCitizenWitnessStatementWelshTemplate;
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
@@ -736,17 +778,19 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
-    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest) {
+    private String getCitizenUploadedStatementFileName(DocumentRequest documentRequest, DocumentCategory documentCategory, String language) {
         StringBuilder fileNameBuilder = new StringBuilder();
 
         if (null != documentRequest.getPartyName()) {
             fileNameBuilder.append(documentRequest.getPartyName().replace(EMPTY_SPACE_STRING, UNDERSCORE));
             fileNameBuilder.append(UNDERSCORE);
         }
-        if (null != documentRequest.getCategoryId()) {
-            fileNameBuilder.append(DocumentCategory.getValue(documentRequest.getCategoryId()).getFileNamePrefix());
+        if (nonNull(documentCategory)) {
+            fileNameBuilder.append(documentCategory.getFileNamePrefix());
             fileNameBuilder.append(UNDERSCORE);
         }
+        fileNameBuilder.append(language);
+        fileNameBuilder.append(UNDERSCORE);
         fileNameBuilder.append(dateTime.now().format(DateTimeFormatter.ofPattern("dd-MMM-yyyy-hh-mm-ss-a", Locale.UK)));
         fileNameBuilder.append(UNDERSCORE);
         fileNameBuilder.append(SUBMITTED_PDF);
@@ -922,10 +966,22 @@ public class DocumentGenService {
                 fileName = !isWelsh ? c100C8DraftFilename : c100C8DraftWelshFilename;
                 break;
             case C8_RESP_DRAFT_HINT:
-                fileName = c100RespC8DraftFilename;
+                fileName = !isWelsh ? c100RespC8DraftFilename : c100RespC8DraftFilenameWelsh;
                 break;
             case C8_RESP_FINAL_HINT:
                 fileName = findFinalRespondentC8FileName(isWelsh);
+                break;
+            case C8_RESP_FL401_DRAFT_HINT:
+                fileName = !isWelsh ? fl401RespC8DraftFilename : fl401RespC8DraftFilenameWelsh;
+                break;
+            case C8_RESP_FL401_FINAL_HINT:
+                fileName = !isWelsh ? fl401RespC8Filename : fl401RespC8FilenameWelsh;
+                break;
+            case C8_OTHER_FINAL_HINT:
+                fileName = !isWelsh ? otherC8FileName : otherC8FileNameWelsh;
+                break;
+            case C8_OTHER_DRAFT_HINT:
+                fileName = !isWelsh ? otherC8DraftFileName : otherC8DraftFileNameWelsh;
                 break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
@@ -1044,10 +1100,16 @@ public class DocumentGenService {
                 template = c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(caseData,isWelsh);
                 break;
             case C8_RESP_DRAFT_HINT:
-                template = c100RespC8DraftTemplate;
+                template = !isWelsh ? c100RespC8DraftTemplate : c100RespC8DraftTemplateWelsh;
                 break;
             case C8_RESP_FINAL_HINT:
                 template = findFinalRespondentC8Template(isWelsh);
+                break;
+            case C8_RESP_FL401_DRAFT_HINT:
+                template = !isWelsh ? fl401RespC8DraftTemplate : fl401RespC8DraftTemplateWelsh;
+                break;
+            case C8_OTHER_FINAL_HINT, C8_OTHER_DRAFT_HINT:
+                template = !isWelsh ? otherC8Template : otherC8TemplateWelsh;
                 break;
             case C8_RESP_FL401_FINAL_HINT:
                 template = findFinalDaRespondentC8Template(isWelsh);
@@ -1577,26 +1639,45 @@ public class DocumentGenService {
         return document;
     }
 
-    public DocumentResponse generateAndUploadDocument(String authorisation,
+    public List<DocumentResponse> generateAndUploadDocument(String authorisation,
                                                       DocumentRequest documentRequest) throws DocumentGenerationException {
-        //generate file name
-        String fileName = getCitizenUploadedStatementFileName(documentRequest);
-        log.info("fileName {}", fileName);
+        String categoryId = documentRequest.getCategoryId();
+        DocumentCategory documentCategory = nonNull(categoryId) ? DocumentCategory.getValue(categoryId) : null;
 
-        GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateCitizenDocument(
+
+        List<String> citizenUploadTemplates = nonNull(documentCategory) && documentCategory.isWitnessStatement()
+            ? List.of(prlCitizenWitnessStatementTemplate, prlCitizenWitnessStatementWelshTemplate) : List.of(prlCitizenUploadTemplate);
+
+
+        List<GeneratedDocumentInfo> generatedDocumentInfos = dgsService.generateCitizenDocument(
             authorisation,
             documentRequest,
-            prlCitizenUploadTemplate
+            citizenUploadTemplates,
+            documentCategory
         );
-        log.info("generatedDocumentInfo {}", generatedDocumentInfo);
-        if (null != generatedDocumentInfo) {
+
+        log.info("generatedDocumentInfo {}", generatedDocumentInfos);
+
+        List<String> languages = List.of("ENG", "WELSH");
+        List<DocumentResponse> documentResponses = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(generatedDocumentInfos)) {
+            documentResponses = IntStream.range(0, generatedDocumentInfos.size())
+                .mapToObj(buildDocumentResponse(documentRequest, documentCategory, languages, generatedDocumentInfos))
+                .toList();
+        }
+        return documentResponses;
+    }
+
+    private IntFunction<DocumentResponse> buildDocumentResponse(DocumentRequest documentRequest, DocumentCategory documentCategory,
+                                                                List<String> languages, List<GeneratedDocumentInfo> generatedDocumentInfos) {
+        return i -> {
+            String fileName = getCitizenUploadedStatementFileName(documentRequest, documentCategory, languages.get(i));
+            log.info("fileName {}", fileName);
             return DocumentResponse.builder()
                 .status(SUCCESS)
-                .document(generateDocumentField(fileName, generatedDocumentInfo))
+                .document(generateDocumentField(fileName, generatedDocumentInfos.get(i)))
                 .build();
-        }
-
-        return null;
+        };
     }
 
     private boolean isCaseNotLocked(DocumentUpdateContext documentUpdateContext) {

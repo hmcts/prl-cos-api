@@ -920,11 +920,12 @@ public class SendAndReplyService {
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
         if (MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())) {
-            return getApplicationDocument(
-                message.getApplicationsList(),
-                caseData,
-                getValueCode(message.getApplicationsList())
-            );
+            List<Element<Document>> applicationDocuments = getApplicationDocument(message.getApplicationsList(),
+                                                                                  caseData, getValueCode(message.getApplicationsList()));
+            List<Document> updatedApplicationDocuments = ElementUtils.unwrapElements(applicationDocuments).stream()
+                .map(Document::withoutCategory).toList();
+            return ElementUtils.wrapElements(updatedApplicationDocuments);
+
         } else if (MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(message.getMessageAbout())) {
             return List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
         }
@@ -1799,7 +1800,7 @@ public class SendAndReplyService {
                 .forEach(document -> sendReplyTempDocs.add(
                     element(SendReplyTempDoc.builder()
                                 .attachedTime(message.getUpdatedTime())
-                                .document(document).build())));
+                                .document(Document.withoutCategory(document)).build())));
         }
 
         //documents from message history
@@ -1814,7 +1815,7 @@ public class SendAndReplyService {
                             .forEach(document -> sendReplyTempDocs.add(
                                 element(SendReplyTempDoc.builder()
                                             .attachedTime(attachedTime)
-                                            .document(document).build())));
+                                            .document(Document.withoutCategory(document)).build())));
                     }
                 });
         }
@@ -1955,6 +1956,7 @@ public class SendAndReplyService {
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorization,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                .caseReference(String.valueOf(caseData.getId()))
                 .dynamicTemplateData(dynamicDataForEmail)
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
@@ -1962,8 +1964,6 @@ public class SendAndReplyService {
     }
 
     private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, List<String> emails, String authorization) {
-
-
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -1977,6 +1977,7 @@ public class SendAndReplyService {
                         SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
                         authorization,
                         SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                            .caseReference(String.valueOf(caseData.getId()))
                             .dynamicTemplateData(dynamicData)
                             .listOfAttachments(allSelectedDocuments)
                             .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
@@ -2027,7 +2028,7 @@ public class SendAndReplyService {
                 .documentCreatedOn(new Date())
                 .build();
         } catch (Exception e) {
-            log.error("Failed to generate message document {}", e);
+            log.error("Failed to generate message document", e);
         }
         return null;
     }

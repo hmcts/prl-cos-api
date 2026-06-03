@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.enums.serveorder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -28,6 +29,10 @@ public enum CafcassCymruDocumentsEnum {
     updateToSafeGuardingLetter("updateToSafeGuardingLetter", "Update to safeguarding letter"),
     @JsonProperty("s16RiskAssessment")
     s16RiskAssessment("s16RiskAssessment", "S16A risk assessment"),
+    @JsonProperty("cirTransferRequest")
+    cirTransferRequest("cirTransferRequest", "CIR Transfer Request"),
+    @JsonProperty("cirExtensionRequest")
+    cirExtensionRequest("cirExtensionRequest", "CIR Extension Request"),
     @JsonProperty("otherReports")
     otherReports("otherReports", "Other reports");
 
@@ -38,6 +43,11 @@ public enum CafcassCymruDocumentsEnum {
     @JsonValue
     public String getDisplayedValue() {
         return displayedValue;
+    }
+
+    @JsonIgnore
+    public String getId() {
+        return id;
     }
 
     @JsonCreator

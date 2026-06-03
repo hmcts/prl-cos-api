@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -28,8 +29,8 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
-import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +100,7 @@ public class CafCassControllerFunctionalTest {
     @Ignore
     @Test
     public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
-        String cafcassResponseStr = TestResourceUtil.readFileFrom(CREATE_SERVICE_RESPONSE);
+        String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");

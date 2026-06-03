@@ -32,6 +32,7 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getWaMapper;
@@ -270,5 +271,16 @@ public class CommonUtils {
                 .getTaskData()
                 .getAdditionalProperties()
                 .getMessageIdentifier()).orElse(null);
+    }
+
+    public static String getBundleDateTime(LocalDateTime bundleDateTime) {
+        StringBuilder newBundleDateTime = new StringBuilder();
+        LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
+
+        return newBundleDateTime
+            .append(bundleDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
+            .append(EMPTY_SPACE_STRING)
+            .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
+            .toString();
     }
 }
