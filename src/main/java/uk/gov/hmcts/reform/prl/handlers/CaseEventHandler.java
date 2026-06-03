@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.refuge.RefugeCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.refuge.RefugeCaseGenerator;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ public class CaseEventHandler {
     public static final String C100_RESPONDENT_TASK_LIST_D = "respondentTaskListD";
     public static final String C100_RESPONDENT_TASK_LIST_E = "respondentTaskListE";
     public static final String C100_RESPONDENT_TASK_LIST = "respondentTaskList";
+    public static final String REFUGE_CASE = "refugeCase";
     public static final String TASK_LIST = "taskList";
     public static final String ID = "id";
 
@@ -58,6 +61,7 @@ public class CaseEventHandler {
     private final TaskErrorService taskErrorService;
     private final RespondentTaskErrorService respondentTaskErrorService;
     private final AllTabServiceImpl allTabService;
+    private final RefugeCaseGenerator refugeCaseGenerator;
 
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
@@ -70,6 +74,7 @@ public class CaseEventHandler {
         final String respondentTaskListC = getRespondentTaskList(startAllTabsUpdateDataContent.caseData(), C100_RESPONDENT_EVENTS_C);
         final String respondentTaskListD = getRespondentTaskList(startAllTabsUpdateDataContent.caseData(), C100_RESPONDENT_EVENTS_D);
         final String respondentTaskListE = getRespondentTaskList(startAllTabsUpdateDataContent.caseData(), C100_RESPONDENT_EVENTS_E);
+        final RefugeCase refugeCase = refugeCaseGenerator.generate(startAllTabsUpdateDataContent.caseData()).getRefugeCase();
         Map<String, Object> combinedFieldsMap = Map.of(
                 TASK_LIST,
                 taskList,
@@ -86,7 +91,9 @@ public class CaseEventHandler {
                 C100_RESPONDENT_TASK_LIST_E,
                 respondentTaskListE,
                 ID,
-                caseId
+                caseId,
+                REFUGE_CASE,
+                refugeCase
         );
         allTabService.submitAllTabsUpdate(startAllTabsUpdateDataContent.authorisation(),
                 caseId,
