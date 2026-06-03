@@ -82,6 +82,8 @@ feature:
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
     osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
     bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
+    awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
+    exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
     createRequestCirUpdateTaskEnabled: ${CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED:false}
 
 xui:
