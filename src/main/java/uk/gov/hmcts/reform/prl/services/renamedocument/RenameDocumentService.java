@@ -164,11 +164,14 @@ public class RenameDocumentService {
             errors.add("Please do not add extension in the new file name");
         }
         String renameListDocSelected = (String) caseDataUpdated.get("renameListDocSelected");
-        if (StringUtils.isNotBlank(renameListDocSelected)
-            && renameListDocSelected.startsWith("Confidential_")
-            && StringUtils.isNotBlank(newNameForDocument)
-            && !newNameForDocument.startsWith("Confidential_")) {
-            errors.add("Please keep the prefix Confidential_ in the new file name");
+        if (StringUtils.isNotBlank(renameListDocSelected)) {
+            String[] parts = renameListDocSelected.split(ARROW_SEPARATOR);
+            String documentName = parts[parts.length - 1].trim();
+            if (documentName.startsWith("Confidential_")
+                && StringUtils.isNotBlank(newNameForDocument)
+                && !newNameForDocument.startsWith("Confidential_")) {
+                errors.add("Please keep the prefix Confidential_ in the new file name");
+            }
         }
         return errors;
     }
