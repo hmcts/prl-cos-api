@@ -52,5 +52,6 @@ public class ManageDocumentsCategoryConstants {
     public static final String OTHER_WITNESS_STATEMENTS = "otherWitnessStatements";
     public static final String CASE_SUMMARY = "caseSummary";
     public static final String FM5_STATEMENTS = "fm5Statements";
+    public static final String ORDERS_SUBMITTED_WITH_APPLICATION = "ordersSubmittedWithApplication";
 
 }
