@@ -87,9 +87,11 @@ public class RequestOrderTaskService {
             ));
 
         searchResult.ifPresent(result -> {
-            log.info("Processing initial record count of {}",
+            log.info("Processing total record count of {}",
                      result.getTotal());
             if (result.getTotal() > 0) {
+                    log.info("Processing initial record count of {}",
+                             result.getCases().size());
                     List<CaseDetails> cases = result.getCases();
                     process(cases);
 
@@ -106,16 +108,23 @@ public class RequestOrderTaskService {
                             ));
 
                         keepSearching = subsequentSearchResult
-                            .map(subsequentResult -> subsequentResult.getTotal() > 0)
+                            .map(subsequentResult -> !subsequentResult.getCases().isEmpty())
                             .orElse(false);
 
                         if (keepSearching) {
                             log.info("Processing subsequent record count of {}",
-                                     subsequentSearchResult.map(SearchResult::getTotal));
+                                     subsequentSearchResult.map(records -> records.getCases().size()));
                             subsequentSearchResult
                                 .map(SearchResult::getCases)
                                 .ifPresent(this::process);
-                            searchAfterValue = cases.getLast().getId().toString();
+
+                            searchAfterValue = subsequentSearchResult
+                                .map(SearchResult::getCases)
+                                .map(List::getLast)
+                                .map(CaseDetails::getId)
+                                .map(Object::toString)
+                                .orElse("");
+
                             log.info("search after value {}", searchAfterValue);
                         }
                     } while (keepSearching);

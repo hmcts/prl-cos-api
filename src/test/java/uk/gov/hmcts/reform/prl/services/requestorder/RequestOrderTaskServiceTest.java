@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -405,8 +406,11 @@ class RequestOrderTaskServiceTest {
             .id(caseData.getId())
             .data(caseData.toMap(objectMapper))
             .build();
-        SearchResult firstSearchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
-        SearchResult secondSearchResult = SearchResult.builder().total(0).build();
+        SearchResult firstSearchResult = SearchResult.builder().total(2).cases(List.of(caseDetails)).build();
+        SearchResult secondSearchResult = SearchResult.builder()
+            .total(2)
+            .cases(Collections.EMPTY_LIST)
+            .build();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
             .thenReturn(firstSearchResult)
             .thenReturn(secondSearchResult);
@@ -422,9 +426,12 @@ class RequestOrderTaskServiceTest {
             .id(caseData.getId())
             .data(caseData.toMap(objectMapper))
             .build();
-        SearchResult firstSearchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
-        SearchResult secondSearchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
-        SearchResult thirdSearchResult = SearchResult.builder().total(0).build();
+        SearchResult firstSearchResult = SearchResult.builder().total(3).cases(List.of(caseDetails)).build();
+        SearchResult secondSearchResult = SearchResult.builder().total(3).cases(List.of(caseDetails)).build();
+        SearchResult thirdSearchResult = SearchResult.builder()
+            .total(3)
+            .cases(Collections.EMPTY_LIST)
+            .build();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
             .thenReturn(firstSearchResult)
             .thenReturn(secondSearchResult)
@@ -443,7 +450,10 @@ class RequestOrderTaskServiceTest {
             .map(c -> CaseDetails.builder().id(c.getId()).data(c.toMap(objectMapper)).build())
             .toList();
         SearchResult firstSearchResult = SearchResult.builder().total(details.size()).cases(details).build();
-        SearchResult secondSearchResult = SearchResult.builder().total(0).build();
+        SearchResult secondSearchResult = SearchResult.builder()
+            .total(details.size())
+            .cases(Collections.EMPTY_LIST)
+            .build();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
             .thenReturn(firstSearchResult)
             .thenReturn(secondSearchResult);
