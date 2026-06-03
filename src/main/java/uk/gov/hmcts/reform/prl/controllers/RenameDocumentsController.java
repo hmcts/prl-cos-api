@@ -75,6 +75,16 @@ public class RenameDocumentsController {
         }
     }
 
+    @PostMapping(path = "/validate-rename-field", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    public AboutToStartOrSubmitCallbackResponse handleValidateMidEvent(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<String> errors = renameDocumentService.validateRenamedField(caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
+    }
+
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to submit callback for rename documents")
     @ApiResponses(value = {

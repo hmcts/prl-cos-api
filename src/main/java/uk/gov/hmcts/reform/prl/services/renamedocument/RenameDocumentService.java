@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -110,6 +111,10 @@ public class RenameDocumentService {
         if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
             DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
             if (null != selectedList.getValue() && isNotBlank(selectedList.getValue().getCode())) {
+
+                String documentName = selectedList.getValue().getLabel();
+                caseDataMap.put("renameListDocSelected", documentName);
+
                 String documentCode = selectedList.getValue().getCode();
                 log.info("Selected document code: {}", documentCode);
                 String[] codes = documentCode.split("\\s*->\\s*");
@@ -161,6 +166,7 @@ public class RenameDocumentService {
         caseDataMap.remove("renameDocumentsList");
         caseDataMap.remove("categoryDocumentsList");
         caseDataMap.remove("newNameForDocument");
+        caseDataMap.remove("renameListDocSelected");
         caseDataMap.remove("renameDocument");
         return caseDataMap;
     }
@@ -192,5 +198,14 @@ public class RenameDocumentService {
                 findAndRenameDocument(item, newName, documentId, categoryId);
             }
         }
+    }
+
+    public List<String> validateRenamedField(Map<String, Object> caseDataUpdated) {
+        String documentNewName = (String) caseDataUpdated.get("newNameForDocument");
+        List<String> errors = new ArrayList<>();
+        if (StringUtils.isNotBlank(documentNewName) && documentNewName.contains(".")) {
+            errors.add("Please do not add extension in the new file name");
+        }
+        return errors;
     }
 }
