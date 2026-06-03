@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,11 +20,9 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -49,6 +49,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -90,30 +92,45 @@ class RequestOrderTaskServiceTest {
             hearingService, allTabService, chasePolicy, objectMapper);
     }
 
-    @Test
-    void firesForFl401OneWorkingDayAfterHearingEnd() {
-        CaseData caseData = baseCaseBuilder("FL401").build();
+    @ParameterizedTest
+    @CsvSource({
+        "FL401, 1",
+        "C100, 3"
+    })
+    void firesAfterHearingEnd(String caseType, int delay) {
+        CaseData caseData = baseCaseBuilder(caseType).build();
         stubSearchReturning(caseData);
         stubHearings(completedHearingEndingDaysAgo(1));
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(delay);
 
         service.processRequestOrderTasks();
 
         verify(allTabService, times(1)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
     }
 
     @Test
-    void firesForC100ThreeWorkingDaysAfterHearingEnd() {
+    void firesSearch3Times() {
         CaseData caseData = baseCaseBuilder("C100").build();
-        stubSearchReturning(caseData);
-        stubHearings(completedHearingEndingDaysAgo(3));
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3);
+        stub3SearchReturning(caseData);
+        stubHearings(completedHearingEndingDaysAgo(1));
+        when(workingDayIndicator.workingDaysBetween(
+            any(),
+            any()))
+            .thenReturn(3);
 
         service.processRequestOrderTasks();
 
-        verify(allTabService, times(1)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+        verify(allTabService, times(2))
+            .getStartUpdateForSpecificEvent(
+                CASE_ID,
+                ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(coreCaseDataApi, times(3))
+            .searchCases(
+                anyString(),
+                anyString(),
+                eq(CASE_TYPE),
+                any());
     }
 
     @Test
@@ -259,7 +276,7 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService, times(3)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
         verify(allTabService, times(3))
@@ -295,7 +312,7 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService, times(2)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
         verify(allTabService, times(2))
@@ -388,11 +405,36 @@ class RequestOrderTaskServiceTest {
             .id(caseData.getId())
             .data(caseData.toMap(objectMapper))
             .build();
-        SearchResult searchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
-        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE_CONSTANT), any()))
-            .thenReturn(searchResult);
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class))
-            .thenReturn(SearchResultResponse.builder().total(1).cases(List.of(caseDetails)).build());
+        SearchResult firstSearchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
+        SearchResult secondSearchResult = SearchResult.builder().total(0).build();
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
+            .thenReturn(firstSearchResult)
+            .thenReturn(secondSearchResult);
+        when(objectMapper.convertValue(firstSearchResult, SearchResult.class))
+            .thenReturn(firstSearchResult);
+        when(objectMapper.convertValue(secondSearchResult, SearchResult.class))
+            .thenReturn(secondSearchResult);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+    }
+
+    private void stub3SearchReturning(CaseData caseData) {
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(caseData.toMap(objectMapper))
+            .build();
+        SearchResult firstSearchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
+        SearchResult secondSearchResult = SearchResult.builder().total(1).cases(List.of(caseDetails)).build();
+        SearchResult thirdSearchResult = SearchResult.builder().total(0).build();
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
+            .thenReturn(firstSearchResult)
+            .thenReturn(secondSearchResult)
+            .thenReturn(thirdSearchResult);
+        when(objectMapper.convertValue(firstSearchResult, SearchResult.class))
+            .thenReturn(firstSearchResult);
+        when(objectMapper.convertValue(secondSearchResult, SearchResult.class))
+            .thenReturn(secondSearchResult);
+        when(objectMapper.convertValue(thirdSearchResult, SearchResult.class))
+            .thenReturn(thirdSearchResult);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
     }
 
@@ -400,11 +442,15 @@ class RequestOrderTaskServiceTest {
         List<CaseDetails> details = java.util.Arrays.stream(caseDataValues)
             .map(c -> CaseDetails.builder().id(c.getId()).data(c.toMap(objectMapper)).build())
             .toList();
-        SearchResult searchResult = SearchResult.builder().total(details.size()).cases(details).build();
-        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE_CONSTANT), any()))
-            .thenReturn(searchResult);
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class))
-            .thenReturn(SearchResultResponse.builder().total(details.size()).cases(details).build());
+        SearchResult firstSearchResult = SearchResult.builder().total(details.size()).cases(details).build();
+        SearchResult secondSearchResult = SearchResult.builder().total(0).build();
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
+            .thenReturn(firstSearchResult)
+            .thenReturn(secondSearchResult);
+        when(objectMapper.convertValue(firstSearchResult, SearchResult.class))
+            .thenReturn(firstSearchResult);
+        when(objectMapper.convertValue(secondSearchResult, SearchResult.class))
+            .thenReturn(secondSearchResult);
         for (int i = 0; i < details.size(); i++) {
             when(objectMapper.convertValue(details.get(i).getData(), CaseData.class))
                 .thenReturn(caseDataValues[i]);
@@ -413,11 +459,9 @@ class RequestOrderTaskServiceTest {
 
     private void stubSearchReturningEmpty() {
         SearchResult searchResult = SearchResult.builder().total(0).cases(List.of()).build();
-        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE_CONSTANT), any()))
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
             .thenReturn(searchResult);
-        when(objectMapper.convertValue(searchResult, SearchResultResponse.class))
-            .thenReturn(SearchResultResponse.builder().total(0).cases(List.of()).build());
+        when(objectMapper.convertValue(searchResult, SearchResult.class))
+            .thenReturn(SearchResult.builder().total(0).cases(List.of()).build());
     }
-
-    private static final String CASE_TYPE_CONSTANT = uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 }

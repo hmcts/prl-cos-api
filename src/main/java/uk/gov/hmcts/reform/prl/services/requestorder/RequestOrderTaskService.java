@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.SearchResultResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
@@ -22,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Sort;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -32,13 +32,15 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 /**
@@ -51,8 +53,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class RequestOrderTaskService {
 
     private static final ZoneId UK_ZONE = ZoneId.of("Europe/London");
-    private static final String C100 = "C100";
-    private static final String FL401 = "FL401";
     private static final String ES_PAGE_SIZE = "100";
     private static final String CURRENT_HEARING_ID = "currentHearingId";
     private static final String TRACKING_FIELD = "requestOrderTaskTrackingByHearing";
@@ -67,11 +67,98 @@ public class RequestOrderTaskService {
 
     public void processRequestOrderTasks() {
         log.info("Running Request Order task cron job...");
-        List<CaseDetails> candidates = retrieveCandidateCases(buildQueryParam());
-        if (!isNotEmpty(candidates)) {
-            return;
+
+        QueryParam.QueryParamBuilder queryParamBuilder = QueryParam.builder()
+            .size(ES_PAGE_SIZE)
+            .dataToReturn(List.of(
+                "reference",
+                "data.caseTypeOfApplication",
+                "data.draftOrderCollection",
+                "data.orderCollection",
+                "data.requestOrderTaskTrackingByHearing"
+            ));
+
+        // Initial query
+        Optional<SearchResult> searchResult = executeQuery(
+            buildQuery(
+                startAfter -> queryParamBuilder,
+                ""
+            ));
+
+        searchResult.ifPresent(result -> {
+            log.info("Processing initial record count of {}",
+                     result.getTotal());
+            if (result.getTotal() > 0) {
+                    List<CaseDetails> cases = result.getCases();
+                    process(cases);
+
+                    String searchAfterValue = cases.getLast().getId().toString();
+                    log.info("search after value {}", searchAfterValue);
+                    boolean keepSearching;
+                    do {
+                        // Subsequent query
+                        Optional<SearchResult> subsequentSearchResult = executeQuery(
+                            buildQuery(
+                                startAfter -> queryParamBuilder
+                                    .searchAfter(List.of(startAfter)),
+                                searchAfterValue
+                            ));
+
+                        keepSearching = subsequentSearchResult
+                            .map(subsequentResult -> subsequentResult.getTotal() > 0)
+                            .orElse(false);
+
+                        if (keepSearching) {
+                            log.info("Processing subsequent record count of {}",
+                                     subsequentSearchResult.map(SearchResult::getTotal));
+                            subsequentSearchResult
+                                .map(SearchResult::getCases)
+                                .ifPresent(this::process);
+                            searchAfterValue = cases.getLast().getId().toString();
+                            log.info("search after value {}", searchAfterValue);
+                        }
+                    } while (keepSearching);
+                }
+            }
+        );
+    }
+
+    /**
+     * Matches C100/FL401 cases in one of the three hearing states.
+     */
+    private QueryParam buildQuery(Function<String, QueryParam.QueryParamBuilder> queryParamFunction, String searchAfter) {
+        List<Should> caseTypes = List.of(
+            Should.builder().match(Match.builder().caseTypeOfApplication(C100_CASE_TYPE).build()).build(),
+            Should.builder().match(Match.builder().caseTypeOfApplication(FL401_CASE_TYPE).build()).build());
+
+        StateFilter stateFilter = StateFilter.builder().should(List.of(
+            Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
+            Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
+            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
+        )).build();
+
+        Bool filter = Bool.builder()
+            .should(caseTypes)
+            .minimumShouldMatch(1)
+            .must(Must.builder().stateFilter(stateFilter).build())
+            .build();
+
+        QueryParam queryParam = queryParamFunction.apply(searchAfter)
+            .query(Query.builder().bool(filter).build())
+            .sort(List.of(Sort.builder().referenceKeyword("asc").build()))
+            .build();
+
+        try {
+            log.info("json query {}", objectMapper.writeValueAsString(queryParam));
+        } catch (JsonProcessingException e) {
+            log.error("Error processing", e);
         }
-        candidates.forEach(caseDetails -> {
+
+        return queryParam;
+    }
+
+    private void process(List<CaseDetails> cases) {
+        cases.forEach(caseDetails -> {
             try {
                 processCase(caseDetails);
             } catch (Exception e) {
@@ -141,38 +228,7 @@ public class RequestOrderTaskService {
             caseDataUpdated);
     }
 
-    /**
-     * Matches C100/FL401 cases in one of the three hearing states.
-     */
-    private QueryParam buildQueryParam() {
-        List<Should> caseTypes = List.of(
-            Should.builder().match(Match.builder().caseTypeOfApplication(C100).build()).build(),
-            Should.builder().match(Match.builder().caseTypeOfApplication(FL401).build()).build());
-
-        StateFilter stateFilter = StateFilter.builder().should(List.of(
-            Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
-        )).build();
-
-        Bool filter = Bool.builder()
-            .should(caseTypes)
-            .minimumShouldMatch(1)
-            .must(Must.builder().stateFilter(stateFilter).build())
-            .build();
-
-        return QueryParam.builder()
-            .query(Query.builder().bool(filter).build())
-            .size(ES_PAGE_SIZE)
-            .dataToReturn(List.of(
-                "data.caseTypeOfApplication",
-                "data.draftOrderCollection",
-                "data.orderCollection",
-                "data.requestOrderTaskTrackingByHearing"))
-            .build();
-    }
-
-    private List<CaseDetails> retrieveCandidateCases(QueryParam queryParam) {
+    private Optional<SearchResult> executeQuery(QueryParam queryParam) {
         try {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
@@ -181,16 +237,12 @@ public class RequestOrderTaskService {
             SearchResult searchResult = coreCaseDataApi.searchCases(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
-                CASE_TYPE, searchString);
-            SearchResultResponse response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
-            if (response == null) {
-                return Collections.emptyList();
-            }
-            log.info("Request Order: total candidate cases retrieved {}", response.getTotal());
-            return response.getCases();
+                CASE_TYPE,
+                searchString);
+            return Optional.ofNullable(objectMapper.convertValue(searchResult, SearchResult.class));
         } catch (JsonProcessingException e) {
             log.error("Request Order: exception parsing query param", e);
-            return Collections.emptyList();
         }
+        return Optional.empty();
     }
 }
