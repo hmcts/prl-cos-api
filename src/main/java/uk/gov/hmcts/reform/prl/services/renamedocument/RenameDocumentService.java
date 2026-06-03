@@ -92,6 +92,7 @@ public class RenameDocumentService {
         );
         caseDataMap.put("renameDocumentsList", documentsList);
 
+
         DynamicList categoriesAndDocumentsList = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
         caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
 
