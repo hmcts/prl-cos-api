@@ -7,17 +7,21 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
@@ -79,6 +83,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -118,18 +123,24 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISABILITY_PRESENT_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERMEDIARY_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_ARRANGEMENTS_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.RESPONSE_ALREADY_SUBMITTED_ERROR;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.TECH_ERROR;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.LANG_SUPPORT_NEED_SUBJECT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -201,6 +212,9 @@ public class C100RespondentSolicitorServiceTest {
     ManageDocumentsService manageDocumentsService;
     @Mock
     UserService userService;
+
+    @Mock
+    AddCaseNoteService addCaseNoteService;
 
     @Mock
     OrganisationService organisationService;
@@ -3018,5 +3032,158 @@ public class C100RespondentSolicitorServiceTest {
 
         assertNotNull(responseRefuge);
         assertEquals(Yes, responseRefuge.getKeepDetailsPrivate().getConfidentiality());
+    }
+
+    @Test
+    public void testAddLanguageSupportCaseNotesNoteContentAllYes() {
+        UserDetails userDetails = UserDetails.builder()
+            .email("solicitor@example.com")
+            .build();
+
+        StartAllTabsUpdateDataContent allTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(
+                TEST_AUTH_TOKEN,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                new HashMap<>(),
+                caseData,
+                userDetails
+            );
+        AttendToCourt attendToCourt = AttendToCourt.builder()
+            .haveAnyDisability(YesOrNo.Yes)
+            .disabilityNeeds("Wheelchair access")
+            .respondentSpecialArrangements(YesOrNo.Yes)
+            .respondentSpecialArrangementDetails("Screen needed")
+            .respondentIntermediaryNeeds(YesOrNo.Yes)
+            .respondentIntermediaryNeedDetails("Intermediary needed")
+            .build();
+        respondent = PartyDetails.builder()
+            .solicitorEmail("solicitor@example.com")
+            .response(Response.builder().attendToCourt(attendToCourt).build())
+            .build();
+        CaseData caseDataWithRespondent = caseData.toBuilder()
+            .respondents(List.of(element(respondent)))
+            .build();
+
+        when(allTabService.getStartUpdateForSpecificUserEvent(any(), any(), any()))
+            .thenReturn(allTabsUpdateDataContent);
+        when(addCaseNoteService.getCurrentCaseNoteDetails(any(), any(), any()))
+            .thenReturn(CaseNoteDetails.builder().build());
+        when(addCaseNoteService.getCaseNoteDetails(any(), any()))
+            .thenReturn(List.of());
+
+        respondentSolicitorService.addLanguageSupportCaseNotes(TEST_AUTH_TOKEN, caseDataWithRespondent);
+
+        ArgumentCaptor<String> noteCaptor = ArgumentCaptor.forClass(String.class);
+        verify(addCaseNoteService).getCurrentCaseNoteDetails(
+            eq(LANG_SUPPORT_NEED_SUBJECT),
+            noteCaptor.capture(),
+            eq(userDetails)
+        );
+
+        String expectedNote = DISABILITY_PRESENT_TEXT + "\nYes\nWheelchair access"
+            + "\n\n"
+            + SPECIAL_ARRANGEMENTS_REQUIRED_TEXT + "\nYes\nScreen needed"
+            + "\n\n"
+            + INTERMEDIARY_REQUIRED_TEXT + "\nYes\nIntermediary needed";
+
+        assertEquals(expectedNote, noteCaptor.getValue());
+    }
+
+    @Test
+    public void testAddLanguageSupportCaseNotesNoteContentAllNo() {
+        UserDetails userDetails = UserDetails.builder()
+            .email("solicitor@example.com")
+            .build();
+        StartAllTabsUpdateDataContent allTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(
+                TEST_AUTH_TOKEN,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                new HashMap<>(),
+                caseData,
+                userDetails
+            );
+        AttendToCourt attendToCourt = AttendToCourt.builder()
+            .haveAnyDisability(YesOrNo.No)
+            .respondentSpecialArrangements(YesOrNo.No)
+            .respondentIntermediaryNeeds(YesOrNo.No)
+            .build();
+        respondent = PartyDetails.builder()
+            .solicitorEmail("solicitor@example.com")
+            .response(Response.builder().attendToCourt(attendToCourt).build())
+            .build();
+        CaseData caseDataWithRespondent = caseData.toBuilder()
+            .respondents(List.of(element(respondent)))
+            .build();
+
+        when(allTabService.getStartUpdateForSpecificUserEvent(any(), any(), any()))
+            .thenReturn(allTabsUpdateDataContent);
+        when(addCaseNoteService.getCurrentCaseNoteDetails(any(), any(), any()))
+            .thenReturn(CaseNoteDetails.builder().build());
+        when(addCaseNoteService.getCaseNoteDetails(any(), any()))
+            .thenReturn(List.of());
+
+        respondentSolicitorService.addLanguageSupportCaseNotes(TEST_AUTH_TOKEN, caseDataWithRespondent);
+
+        ArgumentCaptor<String> noteCaptor = ArgumentCaptor.forClass(String.class);
+        verify(addCaseNoteService).getCurrentCaseNoteDetails(
+            eq(LANG_SUPPORT_NEED_SUBJECT),
+            noteCaptor.capture(),
+            eq(userDetails)
+        );
+
+        String expectedNote = DISABILITY_PRESENT_TEXT + "\nNo"
+            + "\n\n"
+            + SPECIAL_ARRANGEMENTS_REQUIRED_TEXT + "\nNo"
+            + "\n\n"
+            + INTERMEDIARY_REQUIRED_TEXT + "\nNo";
+
+        assertEquals(expectedNote, noteCaptor.getValue());
+    }
+
+    @Test
+    public void testAddLanguageSupportCaseNotesNoMatchingRespondent() {
+        UserDetails userDetails = UserDetails.builder()
+            .email("different@example.com")
+            .build();
+        StartAllTabsUpdateDataContent allTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(
+                TEST_AUTH_TOKEN,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                new HashMap<>(),
+                caseData,
+                userDetails
+            );
+
+        respondent = PartyDetails.builder()
+            .solicitorEmail("solicitor@example.com")
+            .response(Response.builder()
+                          .attendToCourt(AttendToCourt.builder().build())
+                          .build())
+            .build();
+
+        CaseData caseDataWithRespondent = caseData.toBuilder()
+            .respondents(List.of(element(respondent)))
+            .build();
+
+        CaseNoteDetails currentCaseNoteDetails = CaseNoteDetails.builder().build();
+        List<Element<CaseNoteDetails>> caseNoteDetailsList = List.of(
+            element(currentCaseNoteDetails)
+        );
+
+        when(allTabService.getStartUpdateForSpecificUserEvent(any(), any(), any()))
+            .thenReturn(allTabsUpdateDataContent);
+        when(addCaseNoteService.getCurrentCaseNoteDetails(any(), eq(""), any()))
+            .thenReturn(currentCaseNoteDetails);
+        when(addCaseNoteService.getCaseNoteDetails(any(), any()))
+            .thenReturn(caseNoteDetailsList);
+
+        respondentSolicitorService.addLanguageSupportCaseNotes(TEST_AUTH_TOKEN, caseDataWithRespondent);
+
+        verify(addCaseNoteService, never()).getCurrentCaseNoteDetails(any(), any(), any());
+        verify(addCaseNoteService, never()).getCaseNoteDetails(any(), any());
+        verify(allTabService, never()).submitUpdateForSpecificUserEvent(any(), any(), any(), any(), any(), any());
     }
 }
