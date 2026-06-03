@@ -74,10 +74,10 @@ public class RenameDocumentService {
 
                 String documentCode = selectedList.getValue().getCode();
                 log.info("Selected document code: {}", documentCode);
-                String[] codes = documentCode.split("\\s*->\\s*");
+                String[] codes = documentCode.split(ARROW_SEPARATOR);
 
                 if (codes.length >= 2) {
-                    String categoryIdFromCode = codes[codes.length - 2];
+                    String categoryIdFromCode = codes[codes.length - 2].trim();
 
                     categoriesAndDocumentsList.getListItems().stream()
                         .filter(element -> element.getCode().equals(categoryIdFromCode))
@@ -102,8 +102,8 @@ public class RenameDocumentService {
             DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
             if (null != selectedList.getValue() && isNotBlank(selectedList.getValue().getCode())) {
                 String documentCode = selectedList.getValue().getCode();
-                String[] codes = documentCode.split("\\s*->\\s*");
-                String documentId = codes[codes.length - 1];
+                String[] codes = documentCode.split(ARROW_SEPARATOR);
+                String documentId = codes[codes.length - 1].trim();
 
                 String newName = caseData.getRenameDocument().getNewNameForDocument();
                 String categoryId = null;
