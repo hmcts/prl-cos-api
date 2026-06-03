@@ -4871,6 +4871,72 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
+    public void finalizeOrderSubmissionAndSendNotifications_staleCustomOrderDoc_shouldNotTriggerCustomOrderFlow() throws Exception {
+        // Test that stale customOrderDoc from a previous custom order does NOT trigger custom order flow.
+        // Only customOrderNameOption in callback data should trigger it.
+        // This prevents upload orders from being incorrectly treated as custom orders.
+
+        Document staleCustomOrderDoc = Document.builder()
+            .documentUrl("http://test.url/stale-custom-order.docx")
+            .documentBinaryUrl("http://test.url/binary/stale-custom-order.docx")
+            .documentFileName("stale-custom-order.docx")
+            .build();
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+
+        // Callback data - has stale customOrderDoc but NO customOrderNameOption
+        // This simulates an upload order where customOrderDoc persisted from a previous custom order
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("id", 12345L);
+        callbackDataMap.put("manageOrdersOptions", "uploadAnOrder");
+        callbackDataMap.put("customOrderDoc", staleCustomOrderDoc);  // Stale from previous order
+        // NO customOrderNameOption - this is NOT a custom order flow
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        // Verify combineAndFinalizeCustomOrder was NOT called - stale customOrderDoc should be ignored
+        verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
     public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyAllFieldsFromCallbackData() throws Exception {
         // Test that all custom order fields are copied from callback data to caseDataUpdated
 
@@ -5872,6 +5938,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         // No amendOrderSelectCheckOptions in map
 
         Map<String, Object> caseDataUpdatedMap = new HashMap<>();
@@ -5946,6 +6013,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -6028,6 +6096,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -6115,6 +6184,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
         ManageOrders manageOrders = ManageOrders.builder()
