@@ -113,20 +113,19 @@ class UploadAdditionalApplicationServiceTest {
     PartyDetails party;
     PartyDetails partyC2;
 
-    // reflect: private String categoryForParty(String)
-    private Method categoryForParty;
-
     // reflect: private static Document withCategory(Document, String)
     private Method withCategory;
 
-    // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime, String partyName)
+    // reflect: private C2DocumentBundle getC2DocumentBundle(CaseData caseData, String author, String currentDateTime,
+    // String partyName)
     private Method getC2DocumentBundle;
+
+    // reflect: private OtherApplicationsBundle getOtherApplicationsBundle(CaseData caseData, String author,
+    // String currentDateTime, String partyName)
+    private Method getOtherApplicationsBundle;
 
     @BeforeEach
     public void setUp() throws Exception {
-
-        categoryForParty = UploadAdditionalApplicationService.class.getDeclaredMethod("categoryForParty", String.class);
-        categoryForParty.setAccessible(true);
 
         withCategory = UploadAdditionalApplicationService.class
             .getDeclaredMethod("withCategory", Document.class, String.class);
@@ -135,6 +134,10 @@ class UploadAdditionalApplicationServiceTest {
         getC2DocumentBundle = UploadAdditionalApplicationService.class
             .getDeclaredMethod("getC2DocumentBundle", CaseData.class, String.class, String.class, String.class);
         getC2DocumentBundle.setAccessible(true);
+
+        getOtherApplicationsBundle = UploadAdditionalApplicationService.class
+            .getDeclaredMethod("getOtherApplicationsBundle", CaseData.class, String.class, String.class, String.class);
+        getOtherApplicationsBundle.setAccessible(true);
 
         List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
         DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
@@ -194,7 +197,7 @@ class UploadAdditionalApplicationServiceTest {
             )
             .typeOfC2Application(C2ApplicationTypeEnum.applicationWithNotice)
             .temporaryC2Document(C2DocumentBundle.builder().build())
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().document(Document.builder().build()).build())
             .representedPartyType(CA_APPLICANT)
             .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
@@ -469,7 +472,7 @@ class UploadAdditionalApplicationServiceTest {
                                                                     .build());
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().document(Document.builder().build()).build())
             .additionalApplicantsList(partyDynamicMultiSelectList)
             .build();
         CaseData caseData = CaseData.builder()
@@ -602,11 +605,16 @@ class UploadAdditionalApplicationServiceTest {
             .supportingEvidenceBundle(List.of(element(SupportingEvidenceBundle.builder().build())))
             .build();
 
+        OtherApplicationsBundle otherApplicationsBundle = OtherApplicationsBundle.builder()
+            .document(Document.builder().build())
+            .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
+            .build();
+
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
             .additionalApplicationFeesToPay("£232.00")
             .temporaryC2Document(c2DocumentBundle)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS).build())
+            .temporaryOtherApplicationsBundle(otherApplicationsBundle)
             .build();
         CaseData caseData = CaseData.builder()
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
@@ -790,90 +798,57 @@ class UploadAdditionalApplicationServiceTest {
 
     @Test
     void applicantParty_setsApplicantCategoryOnDocs() throws Exception {
-        String party = "applicant";
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
+
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
+                                                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                       .document(Document.builder()
+                                                                                                     .documentFileName("other.pdf").build())
+                                                                                       .build())
+                                                 .build())
             .build();
 
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
+        OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "applicant partyName");
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("applicationsWithinProceedings", result.getCategoryId());
-        // sanity: other fields preserved
-        Assertions.assertEquals("c2.pdf", result.getDocumentFileName());
+        Assertions.assertEquals("applicationsWithinProceedings", result.getFinalDocument().get(0).getValue().getCategoryId());
     }
 
     @Test
     void respondentParty_setsRespondentCategoryOnDocs() throws Exception {
-        String party = "respondent";
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, party);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
+                                                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                       .document(Document.builder()
+                                                                                                     .documentFileName("other.pdf").build())
+                                                                                       .build())
+                                                 .build())
             .build();
 
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
+        OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "respondent partyName");
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("applicationsWithinProceedingsRes", result.getCategoryId());
+        Assertions.assertEquals("applicationsWithinProceedingsRes", result.getFinalDocument().get(0).getValue().getCategoryId());
     }
 
     @Test
-    void unknownParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "some-random-party");
-        Assertions.assertEquals("undefined", category);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
+    void otherParty_setsRespondentCategoryOnDocs() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .uploadAdditionalApplicationData(UploadAdditionalApplicationData.builder()
+                                                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                       .document(Document.builder()
+                                                                                                     .documentFileName("other.pdf").build())
+                                                                                       .build())
+                                                 .build())
             .build();
 
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
+        OtherApplicationsBundle result = (OtherApplicationsBundle) getOtherApplicationsBundle
+            .invoke(uploadAdditionalApplicationService, caseData, "author", "today", "other partyName");
 
         Assertions.assertNotNull(result);
-        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is unknown");
-    }
-
-    @Test
-    void undefinedParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(uploadAdditionalApplicationService, "undefined");
-        Assertions.assertEquals("undefined", category);
-        Document inputDoc = Document.builder()
-            .documentUrl("doc-url")
-            .documentBinaryUrl("bin-url")
-            .documentFileName("c2.pdf")
-            .build();
-
-        @SuppressWarnings("unchecked")
-        Document result =
-            (Document) withCategory.invoke(null, inputDoc, category);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertNull(result.getCategoryId(), "Category must not be defaulted when party is null");
-    }
-
-    @Test
-    void nullDocument_leavesCategoryUnset() {
-        String category = "lalalalalala";
-        Document result = null;
-        try {
-            result =
-                (Document) withCategory.invoke(uploadAdditionalApplicationService, null, category);
-        } catch (Exception e) {
-            Assertions.assertNull(e.getMessage(), "null exception");// expected for null party
-        }
-
-        Assertions.assertNull(result, "Document must not be null");
+        Assertions.assertEquals("applicationsFromOtherProceedings", result.getFinalDocument().get(0).getValue().getCategoryId());
     }
 
     @Test
@@ -897,7 +872,7 @@ class UploadAdditionalApplicationServiceTest {
                                      .applicantName("Elise Lynn (respondent)")
                                      .document(inputDoc)
                                      .build())
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().document(Document.builder().build()).build())
             .representedPartyType(CA_APPLICANT)
             .build();
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
@@ -927,7 +902,7 @@ class UploadAdditionalApplicationServiceTest {
 
         C2DocumentBundle result = null;
         try {
-            //CaseData caseData, String author, String currentDateTime, String partyName
+            //CaseData caseData, String author, String currentDateTime, String partyName, PartyEnum partyType
             result =
                 (C2DocumentBundle) getC2DocumentBundle.invoke(uploadAdditionalApplicationService, caseData, "An Author",
                     "2024-01-01", "Elise Lynn (respondent)");
