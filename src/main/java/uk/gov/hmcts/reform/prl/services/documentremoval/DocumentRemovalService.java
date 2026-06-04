@@ -113,7 +113,24 @@ public class DocumentRemovalService {
 
         Map<String, Object> updatedCaseData = documentRemover.removeDocument(caseDetails.getData(), documentIdToRemove);
 
-        // update the map using the field names
+        updateDocumentCollections(updatedCaseData, docMgmt, reviewDocs, documentIdToRemove);
+
+        updatedCaseData.remove(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE);
+        updatedCaseData.remove(DOCUMENT_REMOVAL_CONFIRM_OPTIONS);
+        // Cannot remove DOCUMENT_REMOVAL_CASE_DOCUMENTS as the selected document id is needed in the
+        // submitted callback to delete the document from cdam
+
+        caseDetails.setData(updatedCaseData);
+        CaseData caseDataUpdated = CaseUtils.getCaseData(caseDetails, objectMapper);
+        aboutToSubmitActions.forEach(action -> action.onAboutToSubmit(caseDataUpdated, updatedCaseData));
+
+        return updatedCaseData;
+    }
+
+    private void updateDocumentCollections(Map<String, Object> updatedCaseData,
+                                           DocumentManagementDetails docMgmt,
+                                           ReviewDocuments reviewDocs,
+                                           String documentIdToRemove) {
         updatedCaseData.put(
             LEGAL_PROF_QUARANTINE_DOC_LIST,
             removeById(docMgmt.getLegalProfQuarantineDocsList(), documentIdToRemove)
@@ -168,17 +185,6 @@ public class DocumentRemovalService {
             CONFIDENTIAL_DOCUMENTS,
             removeById(reviewDocs.getConfidentialDocuments(), documentIdToRemove)
         );
-
-        updatedCaseData.remove(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE);
-        updatedCaseData.remove(DOCUMENT_REMOVAL_CONFIRM_OPTIONS);
-        // Cannot remove DOCUMENT_REMOVAL_CASE_DOCUMENTS as the selected document id is needed in the
-        // submitted callback to delete the document from cdam
-
-        caseDetails.setData(updatedCaseData);
-        CaseData caseDataUpdated = CaseUtils.getCaseData(caseDetails, objectMapper);
-        aboutToSubmitActions.forEach(action -> action.onAboutToSubmit(caseDataUpdated, updatedCaseData));
-
-        return updatedCaseData;
     }
 
     private List<Element<QuarantineLegalDoc>> removeById(List<Element<QuarantineLegalDoc>> source, String toRemove) {
