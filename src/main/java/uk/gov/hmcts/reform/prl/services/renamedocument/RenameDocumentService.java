@@ -159,7 +159,7 @@ public class RenameDocumentService {
         String newNameForDocument = (String) caseDataUpdated.get("newNameForDocument");
         List<String> errors = new ArrayList<>();
         if (StringUtils.isNotBlank(newNameForDocument) && newNameForDocument.contains(".")) {
-            errors.add("Please do not add extension in the new file name");
+            errors.add("Document name must not include the file type");
         }
         String renameListDocSelected = (String) caseDataUpdated.get("renameListDocSelected");
         if (StringUtils.isNotBlank(renameListDocSelected)) {
