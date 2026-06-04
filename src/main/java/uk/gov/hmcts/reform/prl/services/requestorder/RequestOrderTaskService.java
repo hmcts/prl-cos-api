@@ -115,6 +115,7 @@ public class RequestOrderTaskService {
                         if (keepSearching) {
                             log.info("Processing subsequent record count of {}",
                                      subsequentSearchResult.map(records -> records.getCases().size()));
+
                             subsequentSearchResult
                                 .map(SearchResult::getCases)
                                 .ifPresent(this::process);
@@ -154,18 +155,10 @@ public class RequestOrderTaskService {
             .must(Must.builder().stateFilter(stateFilter).build())
             .build();
 
-        QueryParam queryParam = queryParamFunction.apply(searchAfter)
+        return queryParamFunction.apply(searchAfter)
             .query(Query.builder().bool(filter).build())
             .sort(List.of(Sort.builder().referenceKeyword("asc").build()))
             .build();
-
-        try {
-            log.info("json query {}", objectMapper.writeValueAsString(queryParam));
-        } catch (JsonProcessingException e) {
-            log.error("Error processing", e);
-        }
-
-        return queryParam;
     }
 
     private void process(List<CaseDetails> cases) {
@@ -245,12 +238,13 @@ public class RequestOrderTaskService {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(queryParam);
+            log.info("json query {}",searchString);
             SearchResult searchResult = coreCaseDataApi.searchCases(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
                 CASE_TYPE,
                 searchString);
-            return Optional.ofNullable(objectMapper.convertValue(searchResult, SearchResult.class));
+            return Optional.ofNullable(searchResult);
         } catch (JsonProcessingException e) {
             log.error("Request Order: exception parsing query param", e);
         }
