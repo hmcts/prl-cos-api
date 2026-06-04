@@ -409,7 +409,6 @@ class RequestOrderTaskServiceTest {
         SearchResult firstSearchResult = SearchResult.builder().total(2).cases(List.of(caseDetails)).build();
         SearchResult secondSearchResult = SearchResult.builder()
             .total(2)
-            .cases(Collections.EMPTY_LIST)
             .build();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
             .thenReturn(firstSearchResult)
@@ -430,7 +429,6 @@ class RequestOrderTaskServiceTest {
         SearchResult secondSearchResult = SearchResult.builder().total(3).cases(List.of(caseDetails)).build();
         SearchResult thirdSearchResult = SearchResult.builder()
             .total(3)
-            .cases(Collections.EMPTY_LIST)
             .build();
         when(coreCaseDataApi.searchCases(anyString(), anyString(), eq(CASE_TYPE), any()))
             .thenReturn(firstSearchResult)

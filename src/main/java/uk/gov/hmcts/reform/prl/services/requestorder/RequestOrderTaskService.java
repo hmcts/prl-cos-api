@@ -108,7 +108,8 @@ public class RequestOrderTaskService {
                             ));
 
                         keepSearching = subsequentSearchResult
-                            .map(subsequentResult -> !subsequentResult.getCases().isEmpty())
+                            .map(SearchResult::getCases)
+                            .map(records -> !records.isEmpty())
                             .orElse(false);
 
                         if (keepSearching) {
