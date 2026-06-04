@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -77,7 +76,6 @@ public class ReviewDocumentService {
     private final AllTabServiceImpl allTabService;
     private final ManageDocumentsService manageDocumentsService;
     private final ObjectMapper objectMapper;
-    private final SystemUserService systemUserService;
     private final DocumentCategoryService documentCategoryService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
@@ -99,9 +97,6 @@ public class ReviewDocumentService {
     public static final String GOVUK_LIST_BULLET_LABEL = "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String SUBMITTED_BY_LABEL =
         "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>"
-            + GOVUK_LIST_BULLET_LABEL;
-    public static final String DOCUMENT_CATEGORY_LABEL =
-        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'>"

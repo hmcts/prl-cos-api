@@ -262,12 +262,9 @@ public class SendAndReplyService {
     public static final String DOCUMENT = "Document";
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
-    public static final String APPLICATION_LINK = "#Other%20applications";
     public static final String HEARINGS_LINK = "/hearings";
-    public static final String OTHER_APPLICATION = "Other application";
     public static final String HEARINGS = "Hearings";
     public static final String ANCHOR_HREF_START = "<a href='";
-    public static final String OTHER_APPLICATION_ANCHOR_END = "'>Other application</a>";
     public static final String HEARINGS_ANCHOR_END = "'>Hearings</a>";
     public static final String ARROW_SEPARATOR = "->";
 
@@ -677,7 +674,7 @@ public class SendAndReplyService {
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
             List<DynamicListElement> dynamicListElements = new ArrayList<>();
             additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
-            additionalApplicationElements.stream().forEach(additionalApplicationsBundleElement -> {
+            additionalApplicationElements.forEach(additionalApplicationsBundleElement -> {
                 AdditionalApplicationsBundle additionalApplicationsBundle = additionalApplicationsBundleElement.getValue();
 
                 getOtherApplicationBundleDynamicList(
@@ -920,11 +917,12 @@ public class SendAndReplyService {
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
         if (MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())) {
-            return getApplicationDocument(
-                message.getApplicationsList(),
-                caseData,
-                getValueCode(message.getApplicationsList())
-            );
+            List<Element<Document>> applicationDocuments = getApplicationDocument(message.getApplicationsList(),
+                                                                                  caseData, getValueCode(message.getApplicationsList()));
+            List<Document> updatedApplicationDocuments = ElementUtils.unwrapElements(applicationDocuments).stream()
+                .map(Document::withoutCategory).toList();
+            return ElementUtils.wrapElements(updatedApplicationDocuments);
+
         } else if (MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(message.getMessageAbout())) {
             return List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
         }
@@ -1070,8 +1068,7 @@ public class SendAndReplyService {
     }
 
     private static List<Element<Document>> getOtherApplicationDocuments(OtherApplicationsBundle otherApplicationsBundle) {
-        List<Element<Document>> otherApplicationDocuments = new ArrayList<>();
-        otherApplicationDocuments.addAll(otherApplicationsBundle.getFinalDocument());
+        List<Element<Document>> otherApplicationDocuments = new ArrayList<>(otherApplicationsBundle.getFinalDocument());
 
         if (otherApplicationsBundle.getSupportingEvidenceBundle() != null) {
             otherApplicationDocuments.addAll(
@@ -1088,8 +1085,7 @@ public class SendAndReplyService {
     }
 
     private static List<Element<Document>> getC2ApplicationDocuments(C2DocumentBundle c2DocumentBundle) {
-        List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
-        c2ApplicationDocuments.addAll(c2DocumentBundle.getFinalDocument());
+        List<Element<Document>> c2ApplicationDocuments = new ArrayList<>(c2DocumentBundle.getFinalDocument());
 
         if (c2DocumentBundle.getSupportingEvidenceBundle() != null) {
             c2ApplicationDocuments.addAll(
@@ -1741,7 +1737,7 @@ public class SendAndReplyService {
         return roleAssignmentResponseList.stream()
             .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
                 ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId))).toList().get(0).getId();
+                String.valueOf(caseId))).toList().getFirst().getId();
     }
 
     private Optional<AllocatedJudgeForSendAndReply> retreiveExistingJudgeAllocationFromSendAndReply(
@@ -1808,7 +1804,7 @@ public class SendAndReplyService {
                 .forEach(document -> sendReplyTempDocs.add(
                     element(SendReplyTempDoc.builder()
                                 .attachedTime(message.getUpdatedTime())
-                                .document(document).build())));
+                                .document(Document.withoutCategory(document)).build())));
         }
 
         //documents from message history
@@ -1823,7 +1819,7 @@ public class SendAndReplyService {
                             .forEach(document -> sendReplyTempDocs.add(
                                 element(SendReplyTempDoc.builder()
                                             .attachedTime(attachedTime)
-                                            .document(document).build())));
+                                            .document(Document.withoutCategory(document)).build())));
                     }
                 });
         }

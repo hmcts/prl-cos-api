@@ -7,13 +7,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 
-@Value
+@Data
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -52,16 +51,6 @@ public class Document {
         this.uploadTimeStamp = uploadTimeStamp;
     }
 
-    public static Document buildFromDoc(uk.gov.hmcts.reform.ccd.client.model.Document document) {
-        return Document.builder()
-            .documentUrl(document.getDocumentURL())
-            .documentBinaryUrl(document.getDocumentBinaryURL())
-            .documentFileName(document.getDocumentFilename())
-            .documentCreatedOn(Date.from(document.getUploadTimestamp().atZone(ZoneId.of("UTC")).toInstant()))
-            .uploadTimeStamp(document.getUploadTimestamp())
-            .build();
-    }
-
 
     public static Document buildFromDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
         return Document.builder()
@@ -72,6 +61,20 @@ public class Document {
             .build();
     }
 
+    public static Document withoutCategory(Document document) {
+        if (document == null) {
+            return null;
+        }
+        return Document.builder()
+            .documentUrl(document.documentUrl)
+            .documentBinaryUrl(document.documentBinaryUrl)
+            .documentFileName(document.documentFileName)
+            .documentCreatedOn(document.documentCreatedOn)
+            .documentHash(document.documentHash)
+            .uploadTimeStamp(document.uploadTimeStamp)
+            .build();
+    }
+  
     @JsonIgnore
     public String getDocumentId() {
         String[] urlParts = documentUrl.split("/");
