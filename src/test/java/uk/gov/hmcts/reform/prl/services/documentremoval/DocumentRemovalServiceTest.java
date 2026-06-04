@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.documentremoval;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -61,6 +63,7 @@ class DocumentRemovalServiceTest {
 
     private Document document;
     private CaseData caseData;
+    private Map<String, Object> courtStaffUploadDoc;
 
     @BeforeEach
     void setUp() {
@@ -98,6 +101,17 @@ class DocumentRemovalServiceTest {
                         )))
                     .build())
             .build();
+
+        courtStaffUploadDoc = Map.of(
+            "id", "1",
+            "value", Map.of(
+                    "categoryId", "respondentStatements",
+                    "respondentStatementsDocument", Map.of(
+                        "document_url", "http://someserver/doc1",
+                        "document_filename", "file1.pdf"
+                    )
+            )
+        );
     }
 
     @Test
@@ -147,6 +161,11 @@ class DocumentRemovalServiceTest {
     @Test
     void testRemoveDocumentFromCaseData() throws IOException {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
+        when(objectMapper.convertValue(
+            any(QuarantineLegalDoc.class),
+            ArgumentMatchers.<TypeReference<Map<String, Object>>>any()
+        )).thenReturn(courtStaffUploadDoc);
         when(documentRemover.removeDocument(anyMap(), eq("doc1"))).thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
 
         Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
@@ -161,6 +180,11 @@ class DocumentRemovalServiceTest {
     @Test
     void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollection() throws IOException {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
+        when(objectMapper.convertValue(
+            any(QuarantineLegalDoc.class),
+            ArgumentMatchers.<TypeReference<Map<String, Object>>>any()
+        )).thenReturn(courtStaffUploadDoc);
         when(documentRemover.removeDocument(anyMap(), eq("doc1"))).thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
 
         Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
