@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.documentremoval;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +21,13 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.documentremoval.postabouttosubmitaction.DocumentRemovalAboutToSubmitAction;
 import uk.gov.hmcts.reform.prl.services.documentremoval.submittedaction.DocumentRemovalSubmittedAction;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REMOVAL_CASE_DOCUMENTS;
@@ -44,6 +47,20 @@ public class DocumentRemovalService {
     private final List<DocumentRemovalSubmittedAction> submittedActions;
 
     private static final DateTimeFormatter UPLOAD_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
+    private static final String LEGAL_PROF_QUARANTINE_DOC_LIST = "legalProfQuarantineDocsList";
+    private static final String COURT_STAFF_QUARANTINE_DOC_LIST = "courtStaffQuarantineDocsList";
+    private static final String CAFCASS_QUARANTINE_DOC_LIST = "cafcassQuarantineDocsList";
+    private static final String CITIZEN_QUARANTINE_DOC_LIST = "citizenQuarantineDocsList";
+    private static final String COURT_NAV_QUARANTINE_DOCUMENT_LIST = "courtNavQuarantineDocumentList";
+    private static final String LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB = "legalProfUploadDocListDocTab";
+    private static final String CAFCASS_UPLOAD_DOC_LIST_DOC_TAB = "cafcassUploadDocListDocTab";
+    private static final String LOCAL_AUTHORITY_UPLOAD_DOC_LIST_DOC_TAB = "localAuthorityUploadDocListDocTab";
+    private static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
+    private static final String BULK_SCANNED_DOC_LIST_DOC_TAB = "bulkScannedDocListDocTab";
+    private static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
+    private static final String COURT_NAV_UPLOADED_DOC_LIST_DOC_TAB = "courtNavUploadedDocListDocTab";
+    private static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
+    private static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
 
     /**
      * Gets a list of all documents on the case.
@@ -98,57 +115,57 @@ public class DocumentRemovalService {
 
         // update the map using the field names
         updatedCaseData.put(
-            "legalProfQuarantineDocsList",
+            LEGAL_PROF_QUARANTINE_DOC_LIST,
             removeById(docMgmt.getLegalProfQuarantineDocsList(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "courtStaffQuarantineDocsList",
+            COURT_STAFF_QUARANTINE_DOC_LIST,
             removeById(docMgmt.getCourtStaffQuarantineDocsList(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "cafcassQuarantineDocsList",
+            CAFCASS_QUARANTINE_DOC_LIST,
             removeById(docMgmt.getCafcassQuarantineDocsList(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "citizenQuarantineDocsList",
+            CITIZEN_QUARANTINE_DOC_LIST,
             removeById(docMgmt.getCitizenQuarantineDocsList(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "courtNavQuarantineDocumentList",
+            COURT_NAV_QUARANTINE_DOCUMENT_LIST,
             removeById(docMgmt.getCourtNavQuarantineDocumentList(), documentIdToRemove)
         );
 
         updatedCaseData.put(
-            "legalProfUploadDocListDocTab",
+            LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getLegalProfUploadDocListDocTab(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "cafcassUploadDocListDocTab",
+            CAFCASS_UPLOAD_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getCafcassUploadDocListDocTab(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "localAuthorityUploadDocListDocTab",
+            LOCAL_AUTHORITY_UPLOAD_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getLocalAuthorityUploadDocListDocTab(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "courtStaffUploadDocListDocTab",
+            COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getCourtStaffUploadDocListDocTab(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "bulkScannedDocListDocTab",
+            BULK_SCANNED_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getBulkScannedDocListDocTab(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "citizenUploadedDocListDocTab",
+            CITIZEN_UPLOADED_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getCitizenUploadedDocListDocTab(), documentIdToRemove)
         );
         updatedCaseData.put(
-            "courtNavUploadedDocListDocTab",
+            COURT_NAV_UPLOADED_DOC_LIST_DOC_TAB,
             removeById(reviewDocs.getCourtNavUploadedDocListDocTab(), documentIdToRemove)
         );
-        updatedCaseData.put("restrictedDocuments", removeById(reviewDocs.getRestrictedDocuments(), documentIdToRemove));
+        updatedCaseData.put(RESTRICTED_DOCUMENTS, removeById(reviewDocs.getRestrictedDocuments(), documentIdToRemove));
         updatedCaseData.put(
-            "confidentialDocuments",
+            CONFIDENTIAL_DOCUMENTS,
             removeById(reviewDocs.getConfidentialDocuments(), documentIdToRemove)
         );
 
@@ -172,8 +189,31 @@ public class DocumentRemovalService {
         log.info("Removing document {} from document collection", toRemove);
 
         return source.stream()
-            .filter(doc -> !doc.getValue().toString().contains(toRemove))
+            .filter(doc -> !Objects.requireNonNull(getDocumentFieldFromCollection(doc))
+                .getDocumentId().equals(toRemove))
             .toList();
+    }
+
+    Document getDocumentFieldFromCollection(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
+        QuarantineLegalDoc quarantineLegalDoc = quarantineLegalDocElement.getValue();
+
+        Map<String, Object> docObject = objectMapper.convertValue(quarantineLegalDoc, new TypeReference<>() {});
+
+        String documentFieldName = DocumentUtils.populateAttributeNameFromCategoryId(
+            quarantineLegalDoc.getCategoryId(),
+            null
+        );
+
+        Document document;
+
+        try {
+            document = objectMapper.convertValue(docObject.get(documentFieldName), Document.class);
+        } catch (NullPointerException e) {
+            log.error("Field {} did not exist in QuarantineLegalDoc", documentFieldName, e);
+            return null;
+        }
+
+        return document;
     }
 
     public void deleteDocument(CaseDetails caseDetails) throws IOException {
