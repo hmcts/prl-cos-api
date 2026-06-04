@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.BundleApiClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
+import uk.gov.hmcts.reform.prl.mapper.bundle.IBundleCreateRequestMapper;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundlingService {
     private final BundleApiClient bundleApiClient;
-    private final BundleCreateRequestMapper bundleCreateRequestMapper;
+    private final IBundleCreateRequestMapper bundleCreateRequestMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingService hearingService;
 
