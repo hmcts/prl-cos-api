@@ -921,11 +921,12 @@ public class SendAndReplyService {
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
         if (MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())) {
-            return getApplicationDocument(
-                message.getApplicationsList(),
-                caseData,
-                getValueCode(message.getApplicationsList())
-            );
+            List<Element<Document>> applicationDocuments = getApplicationDocument(message.getApplicationsList(),
+                                                                                  caseData, getValueCode(message.getApplicationsList()));
+            List<Document> updatedApplicationDocuments = ElementUtils.unwrapElements(applicationDocuments).stream()
+                .map(Document::withoutCategory).toList();
+            return ElementUtils.wrapElements(updatedApplicationDocuments);
+
         } else if (MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(message.getMessageAbout())) {
             return List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
         }
@@ -1801,7 +1802,7 @@ public class SendAndReplyService {
                 .forEach(document -> sendReplyTempDocs.add(
                     element(SendReplyTempDoc.builder()
                                 .attachedTime(message.getUpdatedTime())
-                                .document(document).build())));
+                                .document(Document.withoutCategory(document)).build())));
         }
 
         //documents from message history
@@ -1816,7 +1817,7 @@ public class SendAndReplyService {
                             .forEach(document -> sendReplyTempDocs.add(
                                 element(SendReplyTempDoc.builder()
                                             .attachedTime(attachedTime)
-                                            .document(document).build())));
+                                            .document(Document.withoutCategory(document)).build())));
                     }
                 });
         }

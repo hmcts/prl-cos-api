@@ -140,7 +140,9 @@ public class SealAuditService {
 
                         String orderType = order.getOrderTypeId();
                         String firstServedDateTime = getFirstServedDateTime(order);
-                        String orderUploadTimestamp = orderDoc.getUploadTimeStamp() != null ? orderDoc.getUploadTimeStamp().toString() : null;
+                        String orderUploadTimestamp = orderDoc.getUploadTimeStamp() != null
+                            ? orderDoc.getUploadTimeStamp().toString()
+                            : firstServedDateTime;
                         String orderFilename = orderDoc.getDocumentFileName();
                         String dateOrderMade = order.getOtherDetails() != null
                             ? order.getOtherDetails().getOrderMadeDate() : null;

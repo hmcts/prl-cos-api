@@ -1037,6 +1037,7 @@ public class PrlAppsConstants {
     public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
     public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
     public static final String MISSING_ADDRESS_WARNING_TEXT = "missingAddressWarningText";
+    public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
