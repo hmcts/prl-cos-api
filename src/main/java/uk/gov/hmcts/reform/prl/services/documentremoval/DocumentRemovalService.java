@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_REMOVAL_CASE_DOCUMENTS;
@@ -195,7 +194,7 @@ public class DocumentRemovalService {
         log.info("Removing document {} from document collection", toRemove);
 
         return source.stream()
-            .filter(doc -> !Objects.requireNonNull(getDocumentFieldFromCollection(doc))
+            .filter(doc -> getDocumentFieldFromCollection(doc) == null || !getDocumentFieldFromCollection(doc)
                 .getDocumentId().equals(toRemove))
             .toList();
     }
