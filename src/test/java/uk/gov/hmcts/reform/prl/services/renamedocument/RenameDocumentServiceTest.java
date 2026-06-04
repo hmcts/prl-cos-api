@@ -85,7 +85,7 @@ class RenameDocumentServiceTest {
     void testHandleMidEvent() {
         DynamicListElement element = DynamicListElement.builder().code("cat1 -> doc1").label("catName -> docName").build();
         DynamicList selectedList = DynamicList.builder().value(element).listItems(List.of(element)).build();
-        
+
         RenameDocument renameDocument = RenameDocument.builder()
             .renameDocumentsList(selectedList)
             .build();
@@ -110,7 +110,7 @@ class RenameDocumentServiceTest {
     void testHandleAboutToSubmit() {
         DynamicListElement selectedDoc = DynamicListElement.builder().code("cat1 -> docId1").build();
         DynamicListElement selectedCat = DynamicListElement.builder().code("newCatId").build();
-        
+
         RenameDocument renameDocument = RenameDocument.builder()
             .renameDocumentsList(DynamicList.builder().value(selectedDoc).build())
             .categoryDocumentsList(DynamicList.builder().value(selectedCat).build())
@@ -165,13 +165,13 @@ class RenameDocumentServiceTest {
     @Test
     void testCreateDynamicListForRenameDocumentsFiltersReviewDocuments() {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
-        
+
         List<DynamicListElement> listItems = new ArrayList<>();
         listItems.add(DynamicListElement.builder().code("1").label("Standard Document.pdf").build());
         listItems.add(DynamicListElement.builder().code("2").label("Documents to be reviewed -> test.pdf").build());
-        
+
         DynamicList documentsList = DynamicList.builder().listItems(listItems).build();
-        
+
         when(sendAndReplyService.getCategoriesAndDocuments(any(), any())).thenReturn(documentsList);
         when(documentExtractor.getCaseDocuments(any())).thenReturn(Collections.emptyList());
         when(documentCategoryService.retrieveDocumentCategories(anyString(), any())).thenReturn(DynamicList.builder().build());
@@ -179,7 +179,7 @@ class RenameDocumentServiceTest {
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
 
         DynamicList filteredList = (DynamicList) result.get("renameDocumentsList");
-        
+
         assertEquals(1, filteredList.getListItems().size());
         assertEquals("Standard Document.pdf", filteredList.getListItems().get(0).getLabel());
     }
@@ -188,13 +188,13 @@ class RenameDocumentServiceTest {
     void testCreateDynamicListAddsExtraDocuments() {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(sendAndReplyService.getCategoriesAndDocuments(any(), any())).thenReturn(DynamicList.builder().listItems(new ArrayList<>()).build());
-        
+
         Document doc = Document.builder().documentFileName("extra.pdf").documentUrl("http://doc/uuid1").build();
         // First call for allDocuments, second for quarantineDocuments
         when(documentExtractor.getCaseDocuments(any(CaseData.class)))
             .thenReturn(List.of(doc))
             .thenReturn(Collections.emptyList());
-        
+
         when(documentCategoryService.retrieveDocumentCategories(anyString(), any())).thenReturn(DynamicList.builder().build());
 
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
@@ -211,7 +211,7 @@ class RenameDocumentServiceTest {
         List<String> errors = renameDocumentService.validateRenamedField(caseDataUpdated);
 
         assertEquals(1, errors.size());
-        assertEquals("Please do not add extension in the new file name", errors.get(0));
+        assertEquals("Document name must not include the file type", errors.get(0));
     }
 
     @Test

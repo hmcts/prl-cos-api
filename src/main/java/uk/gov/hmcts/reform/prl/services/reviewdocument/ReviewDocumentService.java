@@ -256,7 +256,7 @@ public class ReviewDocumentService {
         String documentNewName = (String) caseDataUpdated.get("documentNewName");
         List<String> errors = new ArrayList<>();
         if (StringUtils.isNotBlank(documentNewName) && documentNewName.contains(".")) {
-            errors.add("Please do not add extension in the new file name");
+            errors.add("Document name must not include the file type");
         }
         return errors;
     }
