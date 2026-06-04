@@ -596,7 +596,7 @@ public class PrlAppsConstants {
 
     public static final String DISABILITY_PRESENT_TEXT = "Does the respondent, or anyone else attending court have a disability?";
     public static final String SPECIAL_ARRANGEMENTS_REQUIRED_TEXT =
-        "Will the court need to make special arrangements for the applicant, or any child involved in the case?";
+        "Will the court need to make special arrangements for the respondent, or any child involved in the case?";
     public static final String INTERMEDIARY_REQUIRED_TEXT = "Do you know if an intermediary will be required?";
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
