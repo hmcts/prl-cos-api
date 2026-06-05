@@ -130,67 +130,44 @@ public class DocumentRemovalService {
                                            DocumentManagementDetails docMgmt,
                                            ReviewDocuments reviewDocs,
                                            String documentIdToRemove) {
-        updatedCaseData.put(
-            LEGAL_PROF_QUARANTINE_DOC_LIST,
-            removeById(docMgmt.getLegalProfQuarantineDocsList(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            COURT_STAFF_QUARANTINE_DOC_LIST,
-            removeById(docMgmt.getCourtStaffQuarantineDocsList(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            CAFCASS_QUARANTINE_DOC_LIST,
-            removeById(docMgmt.getCafcassQuarantineDocsList(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            CITIZEN_QUARANTINE_DOC_LIST,
-            removeById(docMgmt.getCitizenQuarantineDocsList(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            COURT_NAV_QUARANTINE_DOCUMENT_LIST,
-            removeById(docMgmt.getCourtNavQuarantineDocumentList(), documentIdToRemove)
-        );
+        putIfNotNull(updatedCaseData, LEGAL_PROF_QUARANTINE_DOC_LIST,
+                     docMgmt.getLegalProfQuarantineDocsList(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, COURT_STAFF_QUARANTINE_DOC_LIST,
+                     docMgmt.getCourtStaffQuarantineDocsList(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, CAFCASS_QUARANTINE_DOC_LIST,
+                     docMgmt.getCafcassQuarantineDocsList(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, CITIZEN_QUARANTINE_DOC_LIST,
+                     docMgmt.getCitizenQuarantineDocsList(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, COURT_NAV_QUARANTINE_DOCUMENT_LIST,
+                     docMgmt.getCourtNavQuarantineDocumentList(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB,
+                     reviewDocs.getLegalProfUploadDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, CAFCASS_UPLOAD_DOC_LIST_DOC_TAB,
+                     reviewDocs.getCafcassUploadDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, LOCAL_AUTHORITY_UPLOAD_DOC_LIST_DOC_TAB,
+                     reviewDocs.getLocalAuthorityUploadDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
+                     reviewDocs.getCourtStaffUploadDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, BULK_SCANNED_DOC_LIST_DOC_TAB,
+                     reviewDocs.getBulkScannedDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, CITIZEN_UPLOADED_DOC_LIST_DOC_TAB,
+                     reviewDocs.getCitizenUploadedDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, COURT_NAV_UPLOADED_DOC_LIST_DOC_TAB,
+                     reviewDocs.getCourtNavUploadedDocListDocTab(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, RESTRICTED_DOCUMENTS,
+                     reviewDocs.getRestrictedDocuments(), documentIdToRemove);
+        putIfNotNull(updatedCaseData, CONFIDENTIAL_DOCUMENTS,
+                     reviewDocs.getConfidentialDocuments(), documentIdToRemove);
+    }
 
-        updatedCaseData.put(
-            LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getLegalProfUploadDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            CAFCASS_UPLOAD_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getCafcassUploadDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            LOCAL_AUTHORITY_UPLOAD_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getLocalAuthorityUploadDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getCourtStaffUploadDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            BULK_SCANNED_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getBulkScannedDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            CITIZEN_UPLOADED_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getCitizenUploadedDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(
-            COURT_NAV_UPLOADED_DOC_LIST_DOC_TAB,
-            removeById(reviewDocs.getCourtNavUploadedDocListDocTab(), documentIdToRemove)
-        );
-        updatedCaseData.put(RESTRICTED_DOCUMENTS, removeById(reviewDocs.getRestrictedDocuments(), documentIdToRemove));
-        updatedCaseData.put(
-            CONFIDENTIAL_DOCUMENTS,
-            removeById(reviewDocs.getConfidentialDocuments(), documentIdToRemove)
-        );
+    private void putIfNotNull(Map<String, Object> data, String key,
+                          List<Element<QuarantineLegalDoc>> source, String documentIdToRemove) {
+        if (source != null) {
+            data.put(key, removeById(source, documentIdToRemove));
+        }
     }
 
     private List<Element<QuarantineLegalDoc>> removeById(List<Element<QuarantineLegalDoc>> source, String toRemove) {
-        if (source == null) {
-            return null;
-        }
-
         log.info("Removing document {} from document collection", toRemove);
 
         return source.stream()
