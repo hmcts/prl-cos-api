@@ -360,7 +360,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
     }
 
     @Test
@@ -385,12 +385,62 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, callbackRequest);
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, null, callbackRequest);
 
         // then
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
         verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
 
+    }
+
+    @Test
+    public void midEventTaskForSendWithoutClientContextEnablesPastHearingsButLocksToNothing() {
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(SendOrReplyMessage.builder().respondToMessage(YesOrNo.No).messages(messages).build())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, null, callbackRequest);
+
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData, auth, true, null);
+    }
+
+    @Test
+    public void midEventTaskForSendWithClientContextHearingIdLocksDropdownToThatHearing() throws Exception {
+        String clientContextJson = """
+            {
+              "client_context": {
+                "user_task": {
+                  "task_data": {
+                    "additional_properties": {
+                      "hearingId": "999"
+                    }
+                  }
+                }
+              }
+            }
+            """;
+        ObjectMapper realMapper = new ObjectMapper();
+        realMapper.findAndRegisterModules();
+        uk.gov.hmcts.reform.prl.models.wa.WaMapper waMapper =
+            realMapper.readValue(clientContextJson, uk.gov.hmcts.reform.prl.models.wa.WaMapper.class);
+        String encodedClientContext = uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode(waMapper, realMapper);
+
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(SendOrReplyMessage.builder().respondToMessage(YesOrNo.No).messages(messages).build())
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        sendAndReplyController.sendOrReplyToMessagesMidEventTask(auth, encodedClientContext, callbackRequest);
+
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData, auth, true, "999");
     }
 
 
@@ -508,7 +558,7 @@ public class SendAndReplyControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
-        verify(sendAndReplyCommonService).sendMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, null);
     }
 
     @Test
@@ -517,12 +567,16 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap, null))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
 
         // then
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, null);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
@@ -533,14 +587,58 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        // No client-context header → controller passes null hearingId; processAboutToSubmit
+        // skips the request-order tracking update. Header-decoding is covered by the
+        // mid-event-task tests.
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData(), null))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
 
         // when
         AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
-            .sendOrReplyToMessagesSubmitTask(auth, callbackRequest);
+            .sendOrReplyToMessagesSubmitTask(auth, null, callbackRequest);
 
         // verify
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
-        verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDetails.getData());
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData(), null);
+        Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
+    }
+
+    @Test
+    public void submitTaskWithClientContextHearingIdForwardsHearingIdToProcessAboutToSubmit() throws Exception {
+        String clientContextJson = """
+            {
+              "client_context": {
+                "user_task": {
+                  "task_data": {
+                    "additional_properties": {
+                      "hearingId": "999"
+                    }
+                  }
+                }
+              }
+            }
+            """;
+        ObjectMapper realMapper = new ObjectMapper();
+        realMapper.findAndRegisterModules();
+        uk.gov.hmcts.reform.prl.models.wa.WaMapper waMapper =
+            realMapper.readValue(clientContextJson, uk.gov.hmcts.reform.prl.models.wa.WaMapper.class);
+        String encodedClientContext = uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode(waMapper, realMapper);
+
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = getCaseDataForSubmitted(caseDetails);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData(), "999"))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
+
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
+            .sendOrReplyToMessagesSubmitTask(auth, encodedClientContext, callbackRequest);
+
+        verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData(), "999");
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
