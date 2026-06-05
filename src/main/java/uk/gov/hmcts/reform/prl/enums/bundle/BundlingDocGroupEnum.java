@@ -189,7 +189,13 @@ public enum BundlingDocGroupEnum {
     fm5Statements("fm5Statements", "fm5Statements"),
 
     @JsonProperty("notRequiredGroup")
-    notRequiredGroup("notRequiredGroup", "notRequiredGroup");
+    notRequiredGroup("notRequiredGroup", "notRequiredGroup"),
+
+    @JsonProperty("applicantAWPDocuments")
+    applicantAWPDocuments("applicantAWPDocuments", "applicantAWPDocuments"),
+
+    @JsonProperty("respondentAWPDocuments")
+    respondentAWPDocuments("respondentAWPDocuments", "respondentAWPDocuments");
 
     private final String id;
     private final String displayedValue;
