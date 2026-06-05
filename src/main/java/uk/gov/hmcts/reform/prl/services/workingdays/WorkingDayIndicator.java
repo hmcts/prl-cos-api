@@ -25,7 +25,7 @@ public class WorkingDayIndicator {
     }
 
     private boolean isWeekend(LocalDate date) {
-        return date.getDayOfWeek() == SATURDAY || date.getDayOfWeek() == SUNDAY;
+        return date.getDayOfWeek().equals(SATURDAY) || date.getDayOfWeek().equals(SUNDAY);
     }
 
     private boolean isPublicHoliday(LocalDate date) {
