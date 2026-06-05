@@ -1208,4 +1208,22 @@ public class ManageOrdersController {
         caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS_OPTIONS);
         log.info("Cleaned up custom order fields after processing");
     }
+
+    @PostMapping(path = "/manage-order/testTaskCreate/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse testTaskCreate(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: testTaskCreate");
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("LR debug DateOrderMade: {}", caseData.getDateOrderMade());
+            log.info("LR debug JudgeOrMagistratesLastName: {}", caseData.getJudgeOrMagistratesLastName());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
