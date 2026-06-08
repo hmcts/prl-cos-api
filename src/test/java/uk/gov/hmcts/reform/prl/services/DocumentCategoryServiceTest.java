@@ -171,7 +171,7 @@ public class DocumentCategoryServiceTest {
 
 
         // when
-        DynamicList result = documentCategoryService.retrieveDocumentCategories(AUTHORIZATION, caseData);
+        DynamicList result = documentCategoryService.retrieveDocumentCategories(AUTHORIZATION, caseData, null);
 
         // then
         assertNotNull(result);

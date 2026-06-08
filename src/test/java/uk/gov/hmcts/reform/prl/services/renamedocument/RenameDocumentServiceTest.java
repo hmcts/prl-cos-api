@@ -71,7 +71,7 @@ class RenameDocumentServiceTest {
         DynamicList documentsList = DynamicList.builder().listItems(new ArrayList<>()).build();
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(sendAndReplyService.getCategoriesAndDocuments(AUTH, "123")).thenReturn(documentsList);
-        when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData)).thenReturn(DynamicList.builder().build());
+        when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData, null)).thenReturn(DynamicList.builder().build());
         when(documentExtractor.getCaseDocuments(any())).thenReturn(Collections.emptyList());
 
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
@@ -96,7 +96,7 @@ class RenameDocumentServiceTest {
             .build();
 
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
-        when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData)).thenReturn(categoriesAndDocumentsList);
+        when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData, null)).thenReturn(categoriesAndDocumentsList);
 
         Map<String, Object> result = renameDocumentService.handleMidEvent(AUTH, callbackRequest);
 
@@ -174,7 +174,7 @@ class RenameDocumentServiceTest {
 
         when(sendAndReplyService.getCategoriesAndDocuments(any(), any())).thenReturn(documentsList);
         when(documentExtractor.getCaseDocuments(any())).thenReturn(Collections.emptyList());
-        when(documentCategoryService.retrieveDocumentCategories(anyString(), any())).thenReturn(DynamicList.builder().build());
+        when(documentCategoryService.retrieveDocumentCategories(anyString(), any(), any())).thenReturn(DynamicList.builder().build());
 
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
 
@@ -194,6 +194,8 @@ class RenameDocumentServiceTest {
         when(documentExtractor.getCaseDocuments(any(CaseData.class)))
             .thenReturn(List.of(doc))
             .thenReturn(Collections.emptyList());
+
+        when(documentCategoryService.retrieveDocumentCategories(anyString(), any(), any())).thenReturn(DynamicList.builder().build());
 
         when(documentCategoryService.retrieveDocumentCategories(anyString(), any())).thenReturn(DynamicList.builder().build());
 
@@ -229,7 +231,7 @@ class RenameDocumentServiceTest {
     @Test
     void testHandleMidEventWithNullRenameDocument() {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
-        when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData)).thenReturn(DynamicList.builder().build());
+        when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData, null)).thenReturn(DynamicList.builder().build());
 
         Map<String, Object> result = renameDocumentService.handleMidEvent(AUTH, callbackRequest);
 

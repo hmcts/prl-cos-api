@@ -51,7 +51,7 @@ public class RenameDocumentService {
         caseDataMap.put("renameDocumentsList", documentsList);
 
 
-        DynamicList categoriesAndDocumentsList = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
+        DynamicList categoriesAndDocumentsList = documentCategoryService.retrieveDocumentCategories(authorisation, caseData, null);
         caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
 
         return caseDataMap;
@@ -63,7 +63,7 @@ public class RenameDocumentService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        DynamicList categoriesAndDocumentsList = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
+        DynamicList categoriesAndDocumentsList = documentCategoryService.retrieveDocumentCategories(authorisation, caseData, null);
 
         if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
             DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
