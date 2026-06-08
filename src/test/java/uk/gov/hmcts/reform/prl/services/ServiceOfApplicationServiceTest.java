@@ -5899,6 +5899,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testAssignAccessWithMissingSolicitorEmail() {
+        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
         PartyDetails party = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorEmail("")
@@ -5915,6 +5916,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testAssignAccessWithMissingSolicitorOrgId() {
+        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
         PartyDetails party = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorEmail("solicitor@example.com")
@@ -5931,6 +5933,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testAssignAccessWithNoLegalRepresentation() {
+        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
         PartyDetails party = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .solicitorEmail("solicitor@example.com")
@@ -5948,6 +5951,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testAssignAccessWithValidSolicitorDetails() {
+        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
         PartyDetails party = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .solicitorEmail("solicitor@example.com")
@@ -5968,6 +5972,7 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testAssignAccessWhenOrganisationServiceReturnsEmpty() {
+        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
 
         PartyDetails party = PartyDetails.builder()
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)

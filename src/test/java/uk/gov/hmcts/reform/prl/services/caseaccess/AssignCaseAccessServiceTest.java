@@ -133,8 +133,7 @@ public class AssignCaseAccessServiceTest {
     }
 
     @Test
-    public void testAssignCaseAccessToUserWithRole_featureEnabled() {
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+    public void testAssignCaseAccessToUserWithRole() {
         when(authTokenGenerator.generate()).thenReturn("service-token");
         when(systemUserService.getSysUserToken()).thenReturn("sysToken");
 
@@ -143,16 +142,6 @@ public class AssignCaseAccessServiceTest {
 
         verify(caseAssignmentApi, times(1))
             .addCaseUserRoles(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.any(CaseAssignmentUserRolesRequest.class));
-    }
-
-    @Test
-    public void testAssignCaseAccessToUserWithRole_featureDisabled() {
-        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
-
-        assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "ORG123");
-
-        verifyNoInteractions(caseAssignmentApi);
     }
 
 }

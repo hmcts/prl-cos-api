@@ -86,11 +86,6 @@ public class AssignCaseAccessService {
         String caseRole,
         String organisationId
     ) {
-        if (!launchDarklyClient.isFeatureEnabled("share-a-case")) {
-            log.info("share-a-case flag disabled; skipping access assignment");
-            return;
-        }
-
         log.info("Assigning case {} to user {} with role {}", caseId, assigneeUserId, caseRole);
 
         try {

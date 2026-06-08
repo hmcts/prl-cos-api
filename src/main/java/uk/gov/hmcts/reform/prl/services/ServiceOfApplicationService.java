@@ -4533,6 +4533,10 @@ public class ServiceOfApplicationService {
     Map<String, Object> assignRespondentSolicitorsAccess(String invokingAuth, Map<String, Object> caseDataMap,
                                                   CaseData caseData) {
 
+        if (!launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")) {
+            return caseDataMap;
+        }
+
         if (caseData.getRespondents() == null) {
             log.warn("No respondents on case id {}", caseData.getId());
             return caseDataMap;
