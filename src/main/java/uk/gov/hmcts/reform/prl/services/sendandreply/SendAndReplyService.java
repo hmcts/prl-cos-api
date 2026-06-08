@@ -63,8 +63,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -124,12 +122,10 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHOOSE_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -143,7 +139,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIFIER;
@@ -155,7 +150,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -1653,66 +1647,6 @@ public class SendAndReplyService {
             return caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getIdamId();
         }
         return null;
-    }
-
-    private String createRoleAssignmentAndRetrieveId(String authorisation, long caseId, String judgeIdamId) {
-        RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-            .judicialUser(JudicialUser.builder()
-                              .idamId(judgeIdamId)
-                              .build())
-            .build();
-
-        roleAssignmentService.createRoleAssignment(
-            authorisation,
-            CaseDetails.builder()
-                .jurisdiction(JURISDICTION)
-                .caseTypeId(CASE_TYPE)
-                .id(caseId)
-                .build(),
-            roleAssignmentDto,
-            ALLOCATED_JUDGE.getName(),
-            false,
-            ALLOCATE_JUDGE_ROLE
-        );
-        List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            judgeIdamId
-        );
-        return roleAssignmentResponseList.stream()
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId))).toList().get(0).getId();
-    }
-
-    private Optional<AllocatedJudgeForSendAndReply> retreiveExistingJudgeAllocationFromSendAndReply(
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
-        String idamId) {
-
-        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).toList()
-            .stream().filter(i -> i.getJudgeIdamId().equals(idamId)).findAny();
-    }
-
-    private boolean checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
-        String idamId,
-        String messageIdentifier) {
-
-        return allocatedJudgeForSendAndReply.stream()
-            .map(Element::getValue)
-            .anyMatch(i -> i.getJudgeIdamId().equals(idamId)
-                && i.getMessageIdentifier().equals(messageIdentifier));
-    }
-
-    private RoleAssignmentResponse checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
-        List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            judgeIdamId
-        );
-        return roleAssignmentResponseList.stream()
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                ALLOCATE_JUDGE_ROLE))
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId)))
-            .findFirst()
-            .orElse(null);
     }
 
     public String fetchAdditionalApplicationCodeIfExist(CaseData caseData, SendOrReply sendOrReply) {
