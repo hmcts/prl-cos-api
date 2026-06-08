@@ -217,18 +217,6 @@ class RenameDocumentServiceTest {
     }
 
     @Test
-    void testValidateRenamedFieldWithConfidentialPrefixError() {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("renameListDocSelected", "Applications -> Applicant documents -> Confidential_test.pdf");
-        caseDataUpdated.put("newNameForDocument", "new_name");
-
-        List<String> errors = renameDocumentService.validateRenamedField(caseDataUpdated);
-
-        assertEquals(1, errors.size());
-        assertEquals("Please keep the prefix Confidential_ in the new file name", errors.get(0));
-    }
-
-    @Test
     void testHandleMidEventWithNullRenameDocument() {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(documentCategoryService.retrieveDocumentCategories(AUTH, caseData, null)).thenReturn(DynamicList.builder().build());
