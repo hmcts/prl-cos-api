@@ -5954,17 +5954,16 @@ public class ServiceOfApplicationServiceTest {
             .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
             .build();
         Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
-        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
+        CaseData caseData = CaseData.builder().id(123L).caseTypeOfApplication("C100").respondents(List.of(respondent)).build();
 
         when(organisationService.findUserByEmail("solicitor@example.com")).thenReturn(Optional.of("userId"));
-        when(maskEmail.mask("solicitor@example.com")).thenReturn("masked@example.com");
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(RESPONDENTS, caseData.getRespondents());
         serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseDataMap, caseData);
 
         verify(assignCaseAccessService).assignCaseAccessToUserWithRole(
-            any(), eq("userId"));
+            any(), eq("userId"), eq("[C100RESPONDENTSOLICITOR1]"), eq("ORG123"));
     }
 
     @Test

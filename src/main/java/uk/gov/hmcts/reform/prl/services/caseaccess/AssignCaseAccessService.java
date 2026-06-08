@@ -1,9 +1,13 @@
 package uk.gov.hmcts.reform.prl.services.caseaccess;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRoleWithOrganisation;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -33,6 +37,7 @@ public class AssignCaseAccessService {
 
     private final RoleAssignmentApi roleAssignmentApi;
     private final SystemUserService systemUserService;
+    private final CaseAssignmentApi caseAssignmentApi;
 
 
     public void assignCaseAccess(String caseId, String authorisation) {
@@ -77,32 +82,37 @@ public class AssignCaseAccessService {
 
     public void assignCaseAccessToUserWithRole(
         String caseId,
-        String assigneeUserId
+        String assigneeUserId,
+        String caseRole,
+        String organisationId
     ) {
-        if (!launchDarklyClient.isFeatureEnabled("share-a-case")
-        ) {
+        if (!launchDarklyClient.isFeatureEnabled("share-a-case")) {
             log.info("share-a-case flag disabled; skipping access assignment");
             return;
         }
 
-        String serviceToken = authTokenGenerator.generate();
+        log.info("Assigning case {} to user {} with role {}", caseId, assigneeUserId, caseRole);
 
-        AssignCaseAccessRequest request = AssignCaseAccessRequest.builder()
-            .caseId(caseId)
-            .assigneeId(assigneeUserId)
-            .caseTypeId(CASE_TYPE)
-            .build();
+        try {
+            CaseAssignmentUserRolesRequest request = CaseAssignmentUserRolesRequest.builder()
+                .caseAssignmentUserRolesWithOrganisation(List.of(
+                    CaseAssignmentUserRoleWithOrganisation.builder()
+                        .caseDataId(caseId)
+                        .userId(assigneeUserId)
+                        .caseRole(caseRole)
+                        .organisationId(organisationId)
+                        .build()
+                ))
+                .build();
 
-        log.info("Assigning case {} to user {}", caseId, assigneeUserId);
-
-
-        String sysUserToken = systemUserService.getSysUserToken();
-        assignCaseAccessClient.assignCaseAccess(
-            sysUserToken,  // sysuser
-            serviceToken,
-            false,
-            request
-        );
+            caseAssignmentApi.addCaseUserRoles(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                request
+            );
+        } catch (FeignException ex) {
+            log.error("Failed to assign role {} to user {} on case {}", caseRole, assigneeUserId, caseId, ex);
+        }
     }
 
 

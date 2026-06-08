@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseAssignmentUserRolesRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -22,6 +24,7 @@ import java.util.List;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -52,6 +55,9 @@ public class AssignCaseAccessServiceTest {
 
     @Mock
     private SystemUserService systemUserService;
+
+    @Mock
+    private CaseAssignmentApi caseAssignmentApi;
 
     @Test
     public void testAssignCaseAccess() {
@@ -132,14 +138,11 @@ public class AssignCaseAccessServiceTest {
         when(authTokenGenerator.generate()).thenReturn("service-token");
         when(systemUserService.getSysUserToken()).thenReturn("sysToken");
 
-        doNothing().when(assignCaseAccessClient)
-            .assignCaseAccess(Mockito.anyString(), Mockito.anyString(), Mockito.anyBoolean(), Mockito.any());
-
         assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id");
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "ORG123");
 
-        verify(assignCaseAccessClient, times(1))
-            .assignCaseAccess(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.eq(false), Mockito.any());
+        verify(caseAssignmentApi, times(1))
+            .addCaseUserRoles(Mockito.eq("sysToken"), Mockito.eq("service-token"), Mockito.any(CaseAssignmentUserRolesRequest.class));
     }
 
     @Test
@@ -147,9 +150,9 @@ public class AssignCaseAccessServiceTest {
         when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(false);
 
         assignCaseAccessService.assignCaseAccessToUserWithRole(
-            "42", "user-id");
+            "42", "user-id", "[C100RESPONDENTSOLICITOR1]", "ORG123");
 
-        verifyNoMoreInteractions(assignCaseAccessClient);
+        verifyNoInteractions(caseAssignmentApi);
     }
 
 }

@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -4536,6 +4537,9 @@ public class ServiceOfApplicationService {
             log.warn("No respondents on case id {}", caseData.getId());
             return caseDataMap;
         }
+
+        boolean isC100 = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData));
+
         for (int i = 0; i < caseData.getRespondents().size(); i++) {
             PartyDetails party = caseData.getRespondents().get(i).getValue();
 
@@ -4547,29 +4551,42 @@ public class ServiceOfApplicationService {
             String solicitorOrgId = solicitorOrgObj != null ? solicitorOrgObj.getOrganisationID() : null;
             String solicitorEmail = party.getSolicitorEmail();
 
-            Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
-
             String caseId = String.valueOf(caseData.getId());
 
-            if (isSolicitorEmailValid(solicitorEmail, caseId, i)
-                && isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
+            if (!isSolicitorEmailValid(solicitorEmail, caseId, i)
+                || !isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
+                continue;
+            }
 
-                if (userIdOpt.isPresent()) {
+            Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
 
-                    String assigneeUserId = userIdOpt.get();
-                    assignCaseAccessService.assignCaseAccessToUserWithRole(
-                        caseId,
-                        assigneeUserId
-                    );
-                } else {
-                    log.warn(
-                        "Unable to resolve IDAM user for respondent sol {} on case {}",
-                        maskEmail.mask(solicitorEmail), caseId
-                    );
-                }
+            if (userIdOpt.isPresent()) {
+                String caseRole = resolveRespondentSolicitorRole(isC100, i);
+                assignCaseAccessService.assignCaseAccessToUserWithRole(
+                    caseId,
+                    userIdOpt.get(),
+                    caseRole,
+                    solicitorOrgId
+                );
+            } else {
+                log.warn(
+                    "Unable to resolve IDAM user for respondent sol {} on case {}",
+                    maskEmail.mask(solicitorEmail), caseId
+                );
             }
         }
         return caseDataMap;
+    }
+
+    private String resolveRespondentSolicitorRole(boolean isC100, int respondentIndex) {
+        if (isC100) {
+            return SolicitorRole.fromRepresentingAndIndex(
+                SolicitorRole.Representing.CARESPONDENT, respondentIndex + 1
+            ).map(SolicitorRole::getCaseRoleLabel)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "No solicitor role found for C100 respondent index " + respondentIndex));
+        }
+        return SolicitorRole.FL401RESPONDENTSOLICITOR.getCaseRoleLabel();
     }
 
     private boolean isSolicitorEmailValid(String email, String caseId, int index) {
