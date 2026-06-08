@@ -588,7 +588,7 @@ public class ServiceOfDocumentsServiceTest {
 
         List<Document> capturedDocs = documentsCaptor.getValue();
         assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
-        assertEquals("coverSheet.pdf", capturedDocs.get(capturedDocs.size() - 1).getDocumentFileName());
+        assertEquals("coverSheet.pdf", capturedDocs.get(1).getDocumentFileName());
     }
 
     @Test
