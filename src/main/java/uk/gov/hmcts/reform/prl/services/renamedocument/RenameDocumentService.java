@@ -135,7 +135,19 @@ public class RenameDocumentService {
                 if (url.contains(documentId)) {
                     String currentName = (String) map.get("document_filename");
                     String extension = FilenameUtils.getExtension(currentName);
-                    String newUploadName = isNotBlank(extension) ? newName + "." + extension : newName;
+                    String newUploadName;
+                    if (currentName.startsWith("Confidential_")) {
+                        String confidentialPrefix = "Confidential_";
+                        String nameWithoutPrefix = newName.startsWith(confidentialPrefix)
+                            ? newName.substring(confidentialPrefix.length())
+                            : newName;
+
+                        newUploadName = isNotBlank(extension)
+                            ? confidentialPrefix + nameWithoutPrefix + "." + extension
+                            : confidentialPrefix + nameWithoutPrefix;
+                    } else {
+                        newUploadName = isNotBlank(extension) ? newName + "." + extension : newName;
+                    }
 
                     log.info("Renaming the document");
                     map.put("document_filename", newUploadName);
@@ -160,16 +172,6 @@ public class RenameDocumentService {
         List<String> errors = new ArrayList<>();
         if (StringUtils.isNotBlank(newNameForDocument) && newNameForDocument.contains(".")) {
             errors.add("Document name must not include the file type");
-        }
-        String renameListDocSelected = (String) caseDataUpdated.get("renameListDocSelected");
-        if (StringUtils.isNotBlank(renameListDocSelected)) {
-            String[] parts = renameListDocSelected.split(ARROW_SEPARATOR);
-            String documentName = parts[parts.length - 1].trim();
-            if (documentName.startsWith("Confidential_")
-                && StringUtils.isNotBlank(newNameForDocument)
-                && !newNameForDocument.startsWith("Confidential_")) {
-                errors.add("Please keep the prefix Confidential_ in the new file name");
-            }
         }
         return errors;
     }
