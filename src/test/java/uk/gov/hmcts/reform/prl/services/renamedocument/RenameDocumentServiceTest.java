@@ -197,7 +197,7 @@ class RenameDocumentServiceTest {
 
         when(documentCategoryService.retrieveDocumentCategories(anyString(), any(), any())).thenReturn(DynamicList.builder().build());
 
-        when(documentCategoryService.retrieveDocumentCategories(anyString(), any())).thenReturn(DynamicList.builder().build());
+        when(documentCategoryService.retrieveDocumentCategories(anyString(), any(), any())).thenReturn(DynamicList.builder().build());
 
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
 
