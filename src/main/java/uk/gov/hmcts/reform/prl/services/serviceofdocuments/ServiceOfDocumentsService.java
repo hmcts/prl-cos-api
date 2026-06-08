@@ -666,7 +666,6 @@ public class ServiceOfDocumentsService {
                                                   String servedParty) throws Exception {
         List<Document> documents = new ArrayList<>();
         documents.addAll(documentGenService.generateCoverLetter(authorisation, caseData, name, address));
-        documents.addAll(unwrapElements(docs));
         documents.addAll(serviceOfApplicationPostService
                              .getCoverSheets(
                                  caseData,
@@ -675,7 +674,7 @@ public class ServiceOfDocumentsService {
                                  name,
                                  DOCUMENT_COVER_SHEET_HINT
                              ));
-
+        documents.addAll(unwrapElements(docs));
         UUID bulkPrintId = bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
