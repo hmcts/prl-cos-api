@@ -63,6 +63,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocu
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -117,6 +118,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISABILITY_PRESENT_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERMEDIARY_REQUIRED_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERPRETER_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
@@ -2382,6 +2384,10 @@ public class C100RespondentSolicitorService {
     private String generateAttendToCourtNote(AttendToCourt attendToCourt) {
         List<String> sections = new ArrayList<>();
 
+        if (attendToCourt.getIsRespondentNeededInterpreter() != null) {
+            sections.add(generateInterpreterSection(attendToCourt));
+        }
+
         if (attendToCourt.getHaveAnyDisability() != null) {
             sections.add(generateCaseNoteSection(
                 DISABILITY_PRESENT_TEXT,
@@ -2389,6 +2395,7 @@ public class C100RespondentSolicitorService {
                 attendToCourt.getDisabilityNeeds())
             );
         }
+
         if (attendToCourt.getRespondentSpecialArrangements() != null) {
             sections.add(generateCaseNoteSection(
                 SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
@@ -2396,6 +2403,7 @@ public class C100RespondentSolicitorService {
                 attendToCourt.getRespondentSpecialArrangementDetails())
             );
         }
+
         if (attendToCourt.getRespondentIntermediaryNeeds() != null) {
             sections.add(generateCaseNoteSection(
                 INTERMEDIARY_REQUIRED_TEXT,
@@ -2403,8 +2411,31 @@ public class C100RespondentSolicitorService {
                 attendToCourt.getRespondentIntermediaryNeedDetails())
             );
         }
-
         return String.join("\n\n", sections);
+    }
+
+    private String generateInterpreterSection(AttendToCourt attendToCourt) {
+        StringBuilder interpreterSection = new StringBuilder(generateCaseNoteSection(
+            INTERPRETER_REQUIRED_TEXT,
+            attendToCourt.getIsRespondentNeededInterpreter().getDisplayedValue(),
+            null)
+        );
+
+        if (attendToCourt.getRespondentInterpreterNeeds() != null
+            && !attendToCourt.getRespondentInterpreterNeeds().isEmpty()) {
+            for (Element<RespondentInterpreterNeeds> interpreterNeed : attendToCourt.getRespondentInterpreterNeeds()) {
+                appendIfNotEmpty(interpreterSection, interpreterNeed.getValue().getRelationName());
+                appendIfNotEmpty(interpreterSection, interpreterNeed.getValue().getRequiredLanguage());
+                appendIfNotEmpty(interpreterSection, interpreterNeed.getValue().getRespondentOtherAssistance());
+            }
+        }
+        return interpreterSection.toString();
+    }
+
+    private void appendIfNotEmpty(StringBuilder stringBuilder, String value) {
+        if (!StringUtils.isEmpty(value)) {
+            stringBuilder.append("\n").append(value);
+        }
     }
 
     private String generateCaseNoteSection(String heading, String field, String subfield) {
