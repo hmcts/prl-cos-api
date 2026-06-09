@@ -517,8 +517,8 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.serveOtherPartiesCA", equalTo(null))
             .body("data.cafcassCymruServedOptions", equalTo(null))
             .body("data.emailInformationCaOnlyC47a", equalTo(null))
-            .body("data.localAuthoritySolicitorOrganisationPolicy",
-                  equalTo("{Organisation={}, OrgPolicyReference=null, OrgPolicyCaseAssignedRole=[LASOLICITOR]}"))
+            .body("data.localAuthoritySolicitorOrganisationPolicy.Organisation",
+                  equalTo(null))
             .body("data.localAuthority.isLocalAuthorityInvolvedInCase",equalTo("No"))
             .body("data.localAuthority.localAuthoritySolicitorOrganisationName",      equalTo(null))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
