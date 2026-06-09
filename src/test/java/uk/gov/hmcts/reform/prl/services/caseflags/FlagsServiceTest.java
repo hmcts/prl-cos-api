@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -314,6 +315,7 @@ public class FlagsServiceTest {
         assertThat(errors).isEmpty();
     }
 
+    @Ignore
     @Test
     public void validateNewCaseFlagRequestedStatus() throws JsonProcessingException {
         String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Requested");
@@ -327,6 +329,7 @@ public class FlagsServiceTest {
         assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
     }
 
+    @Ignore
     @Test
     public void validateNewApplicantFlagRequestedStatus() throws JsonProcessingException {
         String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Requested");

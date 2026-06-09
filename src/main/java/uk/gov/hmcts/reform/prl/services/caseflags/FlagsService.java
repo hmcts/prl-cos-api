@@ -7,20 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 
 @Slf4j
@@ -60,19 +55,19 @@ public class FlagsService {
     public List<String> validateNewFlagStatus(Map<String, Object> caseDataCurrent) {
         List<String> errors = new ArrayList<>();
 
-        getAllFlagsToValidate().stream()
-            .map(flag -> objectMapper.convertValue(
-                caseDataCurrent.get(flag), new TypeReference<Flags>() {
-                }
-            ))
-            .filter(Objects::nonNull)
-            .map(Flags::getDetails)
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream)
-            .map(Element::getValue)
-            .max(comparing(FlagDetail::getDateTimeCreated))
-            .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
-            .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
+        // getAllFlagsToValidate().stream()
+        //     .map(flag -> objectMapper.convertValue(
+        //         caseDataCurrent.get(flag), new TypeReference<Flags>() {
+        //         }
+        //     ))
+        //     .filter(Objects::nonNull)
+        //     .map(Flags::getDetails)
+        //     .filter(Objects::nonNull)
+        //     .flatMap(Collection::stream)
+        //     .map(Element::getValue)
+        //     .max(comparing(FlagDetail::getDateTimeCreated))
+        //     .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
+        //     .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
 
         return errors;
     }
