@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.dto.docmosis.DocmosisRenderRequest;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 
 import java.time.Clock;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class DocmosisRenderService {
         log.info("Case ID {}: Generating document {}", generateDocumentRequest.getCaseId(), templateFilename);
 
         Map<String, Object> placeholders = generateDocumentRequest.getValues();
-        placeholders.put(CURRENT_DATE_KEY, dateTimeFormatter.format(clock.instant().atZone(ZoneId.systemDefault())));
+        placeholders.put(CURRENT_DATE_KEY, dateTimeFormatter.format(ZonedDateTime.now(clock)));
 
         DocmosisRenderRequest request = DocmosisRenderRequest.builder()
             .data(placeholders)

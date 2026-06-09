@@ -42,7 +42,7 @@ class DocmosisRenderServiceTest {
 
     @BeforeEach
     void setUp() {
-        Clock clock = Clock.fixed(Instant.parse("2026-05-02T10:15:30.00Z"), ZoneId.of("UTC"));
+        Clock clock = Clock.fixed(Instant.parse("2026-05-02T10:15:30.00Z"), ZoneId.of("Europe/London"));
         docmosisRenderService = new DocmosisRenderService(
             docmosisClient,
             templatesConfig,
