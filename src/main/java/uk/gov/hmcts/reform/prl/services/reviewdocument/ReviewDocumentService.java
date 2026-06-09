@@ -42,6 +42,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -265,8 +266,9 @@ public class ReviewDocumentService {
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
             && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = getTempQuarantineDocumentList(caseData);
-            final DynamicList documentCategories = documentCategoryService.retrieveDocumentCategories(authorisation, caseData);
+            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = emptyIfNull(getTempQuarantineDocumentList(caseData));
+            String uploaderRole = getUploaderRole(tempQuarantineDocumentList, uuid);
+            final DynamicList documentCategories = documentCategoryService.retrieveDocumentCategories(authorisation, caseData, uploaderRole);
 
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
@@ -283,6 +285,8 @@ public class ReviewDocumentService {
             ));
         }
     }
+
+
 
     private List<Element<QuarantineLegalDoc>> getTempQuarantineDocumentList(CaseData caseData) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -865,6 +869,19 @@ public class ReviewDocumentService {
                     caseDataUpdated.put(reviewDocument.quarantineDocList, quarantineLegalDocs);
                 }
             });
+    }
+
+
+    private String getUploaderRole(List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList, UUID uuid) {
+        Element<QuarantineLegalDoc> documentElement = tempQuarantineDocumentList.stream()
+            .filter(element -> uuid.equals(element.getId()))
+            .findFirst().orElse(null);
+        String uploaderRole = null;
+        if (nonNull(documentElement)) {
+            QuarantineLegalDoc doc = documentElement.getValue();
+            uploaderRole = nonNull(doc) ? doc.getUploaderRole() : null;
+        }
+        return uploaderRole;
     }
 
     private List<ReviewDocument> createReviewDocumentList(CaseData caseData) {

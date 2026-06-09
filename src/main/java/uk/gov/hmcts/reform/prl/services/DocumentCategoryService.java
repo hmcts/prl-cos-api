@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_RE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_EXTENSION_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_TRANSFER_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
@@ -57,7 +59,7 @@ public class DocumentCategoryService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
 
-    public DynamicList retrieveDocumentCategories(String authorization, CaseData caseData) {
+    public DynamicList retrieveDocumentCategories(String authorization, CaseData caseData, String uploaderRole) {
         boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(authorization, caseData);
         Predicate<Category> parentCategoriesFilter = category -> category.getCategoryId().equalsIgnoreCase("confidential");
         return getCategoriesSubcategories(
@@ -66,7 +68,8 @@ public class DocumentCategoryService {
             isUserRoleLA,
             Arrays.stream(QuarantineLegalDoc.allQuarantineCategoriesToRemove())
                 .collect(Collectors.toCollection(ArrayList::new)),
-            parentCategoriesFilter
+            parentCategoriesFilter,
+            uploaderRole
         );
     }
 
@@ -86,12 +89,12 @@ public class DocumentCategoryService {
 
 
     public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA, List<String> docsToExclude) {
-        return getCategoriesSubcategories(authorisation, caseReference, isUserRoleLA, docsToExclude, null);
+        return getCategoriesSubcategories(authorisation, caseReference, isUserRoleLA, docsToExclude, null, null);
     }
 
 
     public DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA,
-                                                  List<String> docsToExclude, Predicate<Category> parentCategoriesFilter) {
+                                                  List<String> docsToExclude, Predicate<Category> parentCategoriesFilter, String uploaderRole) {
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
@@ -101,11 +104,11 @@ public class DocumentCategoryService {
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
-                    .filter(category -> !isUserRoleLA || category.getCategoryId().equals("localAuthorityDocuments"))
+                    .filter(getPredicate(isUserRoleLA, uploaderRole))
                     .sorted(Comparator.comparing(Category::getCategoryName))
                     .toList();
 
-                if (!isUserRoleLA) {
+                if (!isUserRoleLA && !LOCAL_AUTHORITY.equalsIgnoreCase(uploaderRole)) {
                     docsToExclude.addAll(EXCLUDED_LA_DOCS_LIST_FOR_ADMIN);
                 }
 
@@ -135,6 +138,16 @@ public class DocumentCategoryService {
         }
         return DynamicList.builder()
             .value(DynamicListElement.EMPTY).build();
+    }
+
+    private static @NonNull Predicate<Category> getPredicate(boolean isUserRoleLA, String uploaderRole) {
+        return category ->  {
+            if (LOCAL_AUTHORITY.equalsIgnoreCase(uploaderRole)) {
+                return category.getCategoryId().equals("localAuthorityDocuments");
+            }
+
+            return !isUserRoleLA || category.getCategoryId().equals("localAuthorityDocuments");
+        };
     }
 
 

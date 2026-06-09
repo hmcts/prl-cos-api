@@ -561,7 +561,7 @@ public class ReviewDocumentServiceTest {
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build()).build()).build();
         DynamicList documentCategories = Instancio.create(DynamicList.class);
-        when(documentCategoryService.retrieveDocumentCategories(AUTHORISATION, caseData)).thenReturn(documentCategories);
+        when(documentCategoryService.retrieveDocumentCategories(AUTHORISATION, caseData, null)).thenReturn(documentCategories);
         Map<String, Object> caseDataMap = new HashMap<>();
 
         // when
