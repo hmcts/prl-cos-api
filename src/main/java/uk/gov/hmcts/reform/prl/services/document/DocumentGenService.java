@@ -508,26 +508,70 @@ public class DocumentGenService {
                                        new C8DocumentDetails(DOCUMENT_FIELD_C8, DOCUMENT_FIELD_DRAFT_C8, false));
     }
 
+    private Optional<String> getApplicantC8Filename(CaseData caseData,
+                                                    boolean isWelsh,
+                                                    boolean isDraft) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && !isNotEmpty(caseData.getApplicants())) {
+            return Optional.of(getC8FileName(
+                caseData.getApplicants().getFirst().getValue(),
+                isWelsh,
+                isDraft
+            ));
+
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+            && !isNotEmpty(caseData.getApplicantsFL401())) {
+            return Optional.of(getC8FileName(
+                caseData.getApplicantsFL401(),
+                isWelsh,
+                isDraft
+            ));
+        }
+        return Optional.empty();
+    }
+
     private void addC8DocumentToUpdatedCaseData(String authorisation,
                                                 CaseData caseData,
                                                 Map<String, Object> updatedCaseData,
                                                 C8DocumentDetails documentDetails) {
+        Optional<String> filename;
         if (isAnyC100ApplicantInfoConfidential(caseData)) {
             if (CASE_ISSUED.equals(caseData.getState())
                 || JUDICIAL_REVIEW.equals(caseData.getState())
                 || PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())
                 || DECISION_OUTCOME.equals(caseData.getState())
                 || SUBMITTED_PAID.equals(caseData.getState())) {
-                updatedCaseData.put(documentDetails.documentFieldName, getDocument(authorisation, caseData, C8_HINT, documentDetails.isWelsh));
+                // set dynamic filename
+                filename = getApplicantC8Filename(caseData, documentDetails.isWelsh, false);
+                updatedCaseData.put(documentDetails.documentFieldName,
+                                    getDocumentWithFilename(
+                                        authorisation,
+                                        caseData,
+                                        C8_HINT,
+                                        documentDetails.isWelsh,
+                                        filename
+                                    )
+                );
             } else {
+                // set dynamic filename
+                filename = getApplicantC8Filename(caseData, documentDetails.isWelsh, true);
                 updatedCaseData.put(
                     documentDetails.documentFieldDraftName,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, documentDetails.isWelsh)
+                    getDocumentWithFilename(authorisation, caseData, C8_DRAFT_HINT, documentDetails.isWelsh, filename)
                 );
             }
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && isApplicantOrChildDetailsConfidential(caseData)) {
-            updatedCaseData.put(documentDetails.documentFieldName, getDocument(authorisation, caseData, C8_HINT, documentDetails.isWelsh));
+            filename = getApplicantC8Filename(caseData, documentDetails.isWelsh, false);
+            updatedCaseData.put(documentDetails.documentFieldName,
+                                getDocumentWithFilename(
+                                    authorisation,
+                                    caseData,
+                                    C8_HINT,
+                                    documentDetails.isWelsh,
+                                    filename
+                                )
+            );
         } else {
             updatedCaseData.put(documentDetails.documentFieldName, null);
         }
@@ -739,7 +783,7 @@ public class DocumentGenService {
 
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh,
                                  Map<String, Object> respondentDetails) {
-        String filename = "";
+        String filename;
         if (respondentDetails.containsKey("dynamic_fileName")) {
             filename = String.valueOf(respondentDetails.get("dynamic_fileName"));
         } else {
@@ -757,6 +801,20 @@ public class DocumentGenService {
             generateDocument(authorisation, getTemplate(caseData, hint, isWelsh), caseData, isWelsh)
         );
     }
+
+    private Document getDocumentWithFilename(String authorisation, CaseData caseData, String hint, boolean isWelsh,
+                                             Optional<String> dynamicFilename) {
+        return generateDocumentField(
+            getFileName(caseData, hint, isWelsh),
+            generateDocument(
+                authorisation, getTemplate(caseData, hint, isWelsh),
+                caseData,
+                isWelsh,
+                dynamicFilename
+            )
+        );
+    }
+
 
     private UploadedDocuments getDocument(String authorisation,
                                           GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
@@ -932,6 +990,11 @@ public class DocumentGenService {
 
     private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
                                                    boolean isWelsh) {
+        return generateDocument(authorisation, template, caseData, isWelsh, Optional.empty());
+    }
+
+    private GeneratedDocumentInfo generateDocument(String authorisation, String template, CaseData caseData,
+                                                   boolean isWelsh, Optional<String> dynamicFilename) {
         log.info(GENERATED_THE_DOCUMENT_FOR_CASE_ID, template, caseData.getId());
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
@@ -946,7 +1009,8 @@ public class DocumentGenService {
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                template
+                template,
+                dynamicFilename
             );
         }
         if (null != generatedDocumentInfo) {
@@ -958,7 +1022,7 @@ public class DocumentGenService {
 
     private String getFileName(CaseData caseData, String docGenFor, boolean isWelsh) {
         String caseTypeOfApp = CaseUtils.getCaseTypeOfApplication(caseData);
-        String fileName = "";
+        String fileName;
 
         switch (docGenFor) {
             case C8_HINT:
