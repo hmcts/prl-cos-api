@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.awp;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 class CitizenAwpMapperTest {
@@ -79,9 +77,9 @@ class CitizenAwpMapperTest {
     }
 
     @Test
-    void unknownParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(mapper, "some-random-party");
-        Assertions.assertEquals("undefined", category);
+    void unknownParty_setsRespondentCategoryOnDocs() throws Exception {
+        String party = "some-random-party";
+        String category = (String) categoryForParty.invoke(mapper, party);
         Document inputDoc = Document.builder()
             .documentUrl("doc-url")
             .documentBinaryUrl("bin-url")
@@ -94,13 +92,13 @@ class CitizenAwpMapperTest {
 
         Document mapped = result.get(0).getValue();
         assertNotNull(mapped);
-        assertNull(mapped.getCategoryId(), "Category must not be defaulted when party is unknown");
+        assertEquals("applicationsFromOtherProceedings", mapped.getCategoryId());
     }
 
     @Test
-    void undefinedParty_leavesCategoryUnset() throws Exception {
-        String category = (String) categoryForParty.invoke(mapper, "undefined");
-        Assertions.assertEquals("undefined", category);
+    void undefinedParty_setsRespondentCategoryOnDocs() throws Exception {
+        String party = "undefined";
+        String category = (String) categoryForParty.invoke(mapper, party);
         Document inputDoc = Document.builder()
             .documentUrl("doc-url")
             .documentBinaryUrl("bin-url")
@@ -113,6 +111,6 @@ class CitizenAwpMapperTest {
 
         Document mapped = result.get(0).getValue();
         assertNotNull(mapped);
-        assertNull(mapped.getCategoryId(), "Category must not be defaulted when party is undefined");
+        assertEquals("applicationsFromOtherProceedings", mapped.getCategoryId());
     }
 }

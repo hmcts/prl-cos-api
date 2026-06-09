@@ -92,8 +92,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_OTHER_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
@@ -2885,6 +2887,36 @@ public class DocumentGenServiceTest {
 
         assertNotNull(template);
         assertEquals("fl401_resp_c8_letter_wel", template);
+    }
+
+    @Test
+    public void testC8RespFL401DraftHintEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8DraftTemplate", "draft_c8_template");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_DRAFT_HINT, false);
+
+        assertEquals("draft_c8_template", template);
+    }
+
+    @Test
+    public void testC8RespFL401DraftHintWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "fl401RespC8DraftTemplateWelsh", "draft_welsh");
+        String template = documentGenService.getTemplate(c100CaseData, C8_RESP_FL401_DRAFT_HINT, true);
+
+        assertEquals("draft_welsh", template);
+    }
+
+    @Test
+    public void testC8OtherHintEnglish() {
+        ReflectionTestUtils.setField(documentGenService, "otherC8Template", "template_id");
+        String template = documentGenService.getTemplate(c100CaseData, C8_OTHER_FINAL_HINT, false);
+        assertEquals("template_id", template);
+    }
+
+    @Test
+    public void testC8OtherHintWelsh() {
+        ReflectionTestUtils.setField(documentGenService, "otherC8TemplateWelsh", "welsh_template_id");
+        String template = documentGenService.getTemplate(c100CaseData, C8_OTHER_FINAL_HINT, true);
+        assertEquals("welsh_template_id", template);
     }
 
     @Test
