@@ -210,10 +210,6 @@
                   "label": "Any other documents"
                 },
                 {
-                  "code": "pathfinder",
-                  "label": "Pathfinder"
-                },
-                {
                   "code": "positionStatements",
                   "label": "Position statements"
                 },
