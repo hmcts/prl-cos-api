@@ -2210,9 +2210,11 @@ public class SendAndReplyService {
     }
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
-        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
-        return nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && nonNull(
-            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        return nonNull(message) && nonNull(message.getApplicationsList())
+            && message.getApplicationsList().getListItems().size() == 1 && nonNull(
+            message.getApplicationsList().getValue())
+            && StringUtils.isNotEmpty(message.getApplicationsList().getValue().getCode());
     }
 
     public boolean atLeastOnePartySelectedForExternalMessage(Message message) {
