@@ -33,6 +33,8 @@ import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -518,7 +520,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.cafcassCymruServedOptions", equalTo(null))
             .body("data.emailInformationCaOnlyC47a", equalTo(null))
             .body("data.localAuthoritySolicitorOrganisationPolicy.Organisation",
-                  equalTo(null))
+                  emptyOrNullString())
             .body("data.localAuthority.isLocalAuthorityInvolvedInCase",equalTo("No"))
             .body("data.localAuthority.localAuthoritySolicitorOrganisationName",      equalTo(null))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
