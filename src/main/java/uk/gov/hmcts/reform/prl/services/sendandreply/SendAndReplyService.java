@@ -130,6 +130,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHOOSE_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -1175,6 +1176,7 @@ public class SendAndReplyService {
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
                 data.put(MESSAGE_IDENTIFIER, messageIdentifier);
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
+                data.put(CHOOSE_SEND_OR_REPLY, REPLY.name());
                 data.put(OPTION_SEND_OR_REPLY, REPLY.name());
             } else {
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
