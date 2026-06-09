@@ -131,6 +131,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISABILITY_PRESENT_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERMEDIARY_REQUIRED_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERPRETER_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
@@ -3041,6 +3042,15 @@ public class C100RespondentSolicitorServiceTest {
         UserDetails userDetails = UserDetails.builder()
             .email("solicitor@example.com")
             .build();
+        List<PartyEnum> party = new ArrayList<>();
+
+        RespondentInterpreterNeeds interpreterNeeds = RespondentInterpreterNeeds.builder()
+            .party(party)
+            .relationName("Test")
+            .requiredLanguage("Cornish")
+            .build();
+        Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder().value(interpreterNeeds).build();
+        List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
 
         StartAllTabsUpdateDataContent allTabsUpdateDataContent =
             new StartAllTabsUpdateDataContent(
@@ -3052,6 +3062,8 @@ public class C100RespondentSolicitorServiceTest {
                 userDetails
             );
         AttendToCourt attendToCourt = AttendToCourt.builder()
+            .isRespondentNeededInterpreter(YesOrNo.Yes)
+            .respondentInterpreterNeeds(interpreterList)
             .haveAnyDisability(YesOrNo.Yes)
             .disabilityNeeds("Wheelchair access")
             .respondentSpecialArrangements(YesOrNo.Yes)
@@ -3083,7 +3095,9 @@ public class C100RespondentSolicitorServiceTest {
             eq(userDetails)
         );
 
-        String expectedNote = DISABILITY_PRESENT_TEXT + "\nYes\nWheelchair access"
+        String expectedNote = INTERPRETER_REQUIRED_TEXT + "\nYes\nTest\nCornish"
+            + "\n\n"
+            + DISABILITY_PRESENT_TEXT + "\nYes\nWheelchair access"
             + "\n\n"
             + SPECIAL_ARRANGEMENTS_REQUIRED_TEXT + "\nYes\nScreen needed"
             + "\n\n"
@@ -3107,6 +3121,7 @@ public class C100RespondentSolicitorServiceTest {
                 userDetails
             );
         AttendToCourt attendToCourt = AttendToCourt.builder()
+            .isRespondentNeededInterpreter(YesOrNo.No)
             .haveAnyDisability(YesOrNo.No)
             .respondentSpecialArrangements(YesOrNo.No)
             .respondentIntermediaryNeeds(YesOrNo.No)
@@ -3135,7 +3150,9 @@ public class C100RespondentSolicitorServiceTest {
             eq(userDetails)
         );
 
-        String expectedNote = DISABILITY_PRESENT_TEXT + "\nNo"
+        String expectedNote = INTERPRETER_REQUIRED_TEXT + "\nNo"
+            + "\n\n"
+            + DISABILITY_PRESENT_TEXT + "\nNo"
             + "\n\n"
             + SPECIAL_ARRANGEMENTS_REQUIRED_TEXT + "\nNo"
             + "\n\n"
