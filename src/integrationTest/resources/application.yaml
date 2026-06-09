@@ -827,3 +827,6 @@ acro:
     remote-directory: /
     password: some_password
 
+docmosis:
+  url: ${DOCMOSIS_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  access-key: ${DOCMOSIS_ACCESS_KEY:replace_me}
