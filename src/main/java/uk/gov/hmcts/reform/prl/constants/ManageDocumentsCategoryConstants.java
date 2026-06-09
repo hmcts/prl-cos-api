@@ -25,6 +25,8 @@ public class ManageDocumentsCategoryConstants {
     public static final String SECTION7_REPORT = "section7Report";
     public static final String SECTION_37_REPORT = "section37Report";
     public static final String SIXTEEN_A_RISK_ASSESSMENT = "16aRiskAssessment";
+    public static final String CIR_EXTENSION_REQUEST = "cirExtensionRequest";
+    public static final String CIR_TRANSFER_REQUEST = "cirTransferRequest";
     public static final String GUARDIAN_REPORT = "guardianReport";
     public static final String SPECIAL_GUARDIANSHIP_REPORT = "specialGuardianshipReport";
     public static final String OTHER_DOCS = "otherDocs";

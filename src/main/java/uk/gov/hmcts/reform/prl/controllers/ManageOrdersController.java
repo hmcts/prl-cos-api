@@ -473,6 +473,13 @@ public class ManageOrdersController {
                 }
             }
 
+            // Clean up custom order fields BEFORE persisting - these fields are transient for the order journey
+            // and shouldn't persist to affect subsequent order creations.
+            // Note: This is a submitted callback using submitAllTabsUpdate, so the response is not used by CCD.
+            if (isCustomOrder) {
+                cleanupCustomOrderFields(caseDataUpdated);
+            }
+
             allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
@@ -480,13 +487,10 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
 
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
-
-            // Clean up custom order fields to prevent them affecting subsequent order creations
-            if (isCustomOrder) {
-                cleanupCustomOrderFields(caseDataUpdated);
-            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -613,6 +617,16 @@ public class ManageOrdersController {
             } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
+            if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                String effectiveOrderName = customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
+                caseData.setNameOfOrder(effectiveOrderName);
+                caseDataUpdated.put(NAME_OF_ORDER, effectiveOrderName);
+            }
+            log.info("Custom order naming before save: customOrderNameOption={}, nameOfOrder={}, customOrderDoc={}",
+                     caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION),
+                     caseData.getNameOfOrder(),
+                     caseDataUpdated.get(CUSTOM_ORDER_DOC));
+
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData,
@@ -827,6 +841,7 @@ public class ManageOrdersController {
                 // Clear custom order fields when a different option is selected
                 // This prevents stale data from a cancelled custom order flow affecting other flows
                 caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+                caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -1044,8 +1059,11 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order - customOrderDoc being present is the indicator
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_DOC) != null;
+        // Check if this is a custom order by looking at customOrderNameOption in the callback data.
+        // This field is only set during the custom order flow and is cleaned up at the end of submitted callback.
+        // We can't use manageOrdersOptions because it gets cleaned up in about-to-submit.
+        // We can't use customOrderDoc because it was sticky (persisted from previous orders) - that's the bug we fixed.
+        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_NAME_OPTION) != null;
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);

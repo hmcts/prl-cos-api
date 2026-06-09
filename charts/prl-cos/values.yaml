@@ -101,5 +101,7 @@ java:
           alias: ACRO_SFTP_USER
         - name: acro-sftp-user-password
           alias: ACRO_SFTP_USER_PASSWORD
+        - name: seal-audit-email-to
+          alias: SEAL_AUDIT_EMAIL_TO
         - name: docmosis-api-key
           alias: DOCMOSIS_ACCESS_KEY

@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -338,11 +339,13 @@ class BaisDocumentUploadServiceTest {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("John")
             .lastName("Doe")
+            .dateOfBirth(LocalDate.of(2010, 1, 1))
             .build();
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("Jane")
             .lastName("Smith")
+            .dateOfBirth(LocalDate.of(2010, 1, 1))
             .build();
 
         AcroCaseData caseData = AcroCaseData.builder()
@@ -383,11 +386,13 @@ class BaisDocumentUploadServiceTest {
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
             "Applicant", new Object[]{caseData.getApplicant().toBuilder()
+                .dateOfBirth(null)
                 .isAddressConfidential(YesOrNo.No)
                 .isPhoneNumberConfidential(YesOrNo.No)
                 .isEmailAddressConfidential(YesOrNo.No).build(),
                 capturedData.getApplicant(), "caseData.getApplicant()"},
             "Respondent", new Object[]{caseData.getRespondent().toBuilder()
+                .dateOfBirth(LocalDate.of(2010, 1, 1))
                 .isAddressConfidential(YesOrNo.No)
                 .isPhoneNumberConfidential(YesOrNo.No)
                 .isEmailAddressConfidential(YesOrNo.No).build(),
@@ -407,8 +412,8 @@ class BaisDocumentUploadServiceTest {
             Object expected = mapping[0];
             Object actual = mapping[1];
             String source = (String) mapping[2];
-            assertEquals(expected, actual,
-                String.format("%s should be mapped from %s", fieldName, source));
+
+            assertEquals(expected, actual, String.format("%s should be mapped from %s", fieldName, source));
         });
     }
 

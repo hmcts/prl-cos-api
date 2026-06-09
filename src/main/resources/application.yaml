@@ -78,6 +78,10 @@ feature:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
     osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
+    bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
+    awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
+    exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
+    createRequestCirUpdateTaskEnabled: ${CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -436,8 +440,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-2868.preview.platform.hmcts.net/}
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
@@ -542,6 +545,8 @@ document:
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
       c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
       c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_resp_c8_welsh_draft_template: FL-PRL-GOR-WEL-RES-C8-DRAFT.docx
+      c100_resp_c8_welsh_draft_filename: C8Document_Welsh_Draft.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
@@ -566,7 +571,11 @@ document:
       fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename: C8Document.pdf
       fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
-      fl401_resp_c8_filename_welsh: C8Document.pdf
+      fl401_resp_c8_filename_welsh: C8Document_Welsh.pdf
+      fl401_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename: C8Document_Draft.pdf
+      fl401_resp_c8_draft_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     common:
       doc_cover_sheet_template: FL-PRL-APP-ENG-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: FL-PRL-APP-WEL-COVER-SHEET.docx
@@ -725,7 +734,15 @@ document:
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
+      other_c8_template: FL-PRL-GOR-ENG-OTHER-C8.docx
+      other_c8_filename: C8Document.pdf
+      other_c8_draft_filename: C8Document_Draft.pdf
+      other_c8_template_welsh: FL-PRL-GOR-WEL-OTHER-C8.docx
+      other_c8_filename_welsh: C8Document_Welsh.pdf
+      other_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     citizen:
+      prl_citizen_witness_statement_welsh_template: FL-PRL-GOR-WEL-Citizen-Witness-Statement.docx
+      prl_citizen_witness_statement_template: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
     fl401listonnotice:
@@ -821,6 +838,19 @@ acro:
     allow-unknown-keys: true
     remote-directory: /
     password: ${ACRO_SFTP_USER_PASSWORD:test_password}
+
+seal-audit:
+  enabled: ${SEAL_AUDIT_ENABLED:true}
+  size: ${SEAL_AUDIT_SIZE:100}
+  search-case-type-id: PRLAPPS
+  batch-size: ${SEAL_AUDIT_BATCH_SIZE:100}
+  batch-delay-seconds: ${SEAL_AUDIT_BATCH_DELAY_SECONDS:5}
+  from-date: ${SEAL_AUDIT_FROM_DATE:2024-04-01}
+  to-date: ${SEAL_AUDIT_TO_DATE:}
+  email:
+    enabled: ${SEAL_AUDIT_EMAIL_ENABLED:false}
+    to: ${SEAL_AUDIT_EMAIL_TO:}
+    template-id: ${SEAL_AUDIT_EMAIL_TEMPLATE_ID:c5a62471-7538-4b05-a2f5-2c4188573087}
 
 hwf-update-case-state-task:
   last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}

@@ -23,7 +23,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
@@ -82,6 +82,7 @@ public class ServiceOfApplicationEmailService {
                 template,
                 authorization,
                 SendgridEmailConfig.builder()
+                    .caseReference(String.valueOf(dynamicData.get(CASE_REFERENCE)))
                     .toEmailAddress(email)
                     .dynamicTemplateData(dynamicData)
                     .listOfAttachments(docs).languagePreference(LanguagePreference.english).build()
@@ -106,9 +107,7 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
                                                                           String email,
                                                                           List<Document> docs,String servedParty) {
-        Map<String, Object> combinedMap = new HashMap<>();
-        combinedMap.put("caseName", caseData.getApplicantCaseName());
-        combinedMap.put("caseReference", String.valueOf(caseData.getId()));
+        Map<String, Object> combinedMap = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         combinedMap.put("localAuthorityName", servedParty);
         combinedMap.putAll(EmailUtils.getCommonEmailProps());
 
@@ -116,10 +115,13 @@ public class ServiceOfApplicationEmailService {
             boolean emailSentSuccessfully = sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SOA_CA_LOCAL_AUTHORITY,
                 authorization,
-                SendgridEmailConfig.builder().toEmailAddress(
-                    email).dynamicTemplateData(
-                    combinedMap).listOfAttachments(
-                    docs).languagePreference(LanguagePreference.english).build()
+                SendgridEmailConfig.builder()
+                    .caseReference(String.valueOf(caseData.getId()))
+                    .toEmailAddress(email)
+                    .dynamicTemplateData(combinedMap)
+                    .listOfAttachments(docs)
+                    .languagePreference(LanguagePreference.english)
+                    .build()
             );
             if (emailSentSuccessfully) {
                 return EmailNotificationDetails.builder()
