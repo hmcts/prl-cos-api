@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -12,12 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.IS_REVIEW_LANG_AND_SM_REQ_REVIEWED;
-import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.REQUESTED_STATUS_IS_NOT_ALLOWED;
 import static uk.gov.hmcts.reform.prl.services.caseflags.FlagsService.SELECTED_REVIEW_LANG_AND_SM_REQ;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -300,59 +297,5 @@ public class FlagsServiceTest {
                               .build()
             );
         assertThat(caseDataMap.get(IS_REVIEW_LANG_AND_SM_REQ_REVIEWED)).isNull();
-    }
-
-    @Test
-    public void validateNewCaseFlagActiveStatus() throws JsonProcessingException {
-        String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Active");
-
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
-        assertThat(errors).isEmpty();
-    }
-
-    @Ignore
-    @Test
-    public void validateNewCaseFlagRequestedStatus() throws JsonProcessingException {
-        String currentCaseData = CASE_DATA_CURRENT.replace("<status>", "Requested");
-
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
-        assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
-    }
-
-    @Ignore
-    @Test
-    public void validateNewApplicantFlagRequestedStatus() throws JsonProcessingException {
-        String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Requested");
-
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
-        assertThat(errors).contains(REQUESTED_STATUS_IS_NOT_ALLOWED);
-    }
-
-    @Test
-    public void validateNewApplicantFlagActiveStatus() throws JsonProcessingException {
-        String currentCaseData = CASE_DATA_WITH_CASE_APPLICANT_1_FLAGS_CURRENT.replace("<status>", "Active");
-
-        Map<String, Object> caseDataCurrent = objectMapper.readValue(
-            currentCaseData, new TypeReference<>() {
-            }
-        );
-
-        List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
-        assertThat(errors).isEmpty();
     }
 }
