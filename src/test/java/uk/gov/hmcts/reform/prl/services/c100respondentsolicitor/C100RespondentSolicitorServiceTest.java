@@ -3119,6 +3119,7 @@ public class C100RespondentSolicitorServiceTest {
                 userDetails
             );
         AttendToCourt attendToCourt = AttendToCourt.builder()
+            .isRespondentNeededInterpreter(YesOrNo.No)
             .haveAnyDisability(YesOrNo.No)
             .respondentSpecialArrangements(YesOrNo.No)
             .respondentIntermediaryNeeds(YesOrNo.No)
@@ -3147,7 +3148,9 @@ public class C100RespondentSolicitorServiceTest {
             eq(userDetails)
         );
 
-        String expectedNote = DISABILITY_PRESENT_TEXT + "\nNo"
+        String expectedNote = INTERPRETER_REQUIRED_TEXT + "\nNo"
+            + "\n\n"
+            + DISABILITY_PRESENT_TEXT + "\nNo"
             + "\n\n"
             + SPECIAL_ARRANGEMENTS_REQUIRED_TEXT + "\nNo"
             + "\n\n"
