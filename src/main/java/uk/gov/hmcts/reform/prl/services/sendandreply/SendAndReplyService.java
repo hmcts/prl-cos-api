@@ -132,7 +132,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHOOSE_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -1249,7 +1248,6 @@ public class SendAndReplyService {
                 data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
                 data.put(MESSAGE_IDENTIFIER, messageIdentifier);
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
-                data.put(CHOOSE_SEND_OR_REPLY, REPLY.name());
                 data.put(OPTION_SEND_OR_REPLY, REPLY.name());
             } else {
                 data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
@@ -2307,15 +2305,25 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
 
-        if (REPLY.equals(caseData.getChooseSendOrReply())
+    }
+
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return sendAndReplySubmittedForChoice(caseData, caseData.getOptionSendOrReply(), authorisation);
+    }
+
+    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
+            String sendOrReplyChoice, String authorisation) {
+        if (REPLY.name().equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
 
-        if (SEND.equals(caseData.getChooseSendOrReply())) {
+        if (SEND.name().equals(sendOrReplyChoice)) {
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
@@ -2333,19 +2341,6 @@ public class SendAndReplyService {
         }
 
         closeAwPTask(caseData);
-
-        return ok(SubmittedCallbackResponse.builder().build());
-    }
-
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String optionSendOrReply = caseData.getOptionSendOrReply();
-        if ((REPLY.name().equalsIgnoreCase(optionSendOrReply) || REPLY.equals(caseData.getChooseSendOrReply()))
-            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                REPLY_AND_CLOSE_MESSAGE
-            ).build());
-        }
 
         return ok(SubmittedCallbackResponse.builder().build());
     }
