@@ -2377,8 +2377,8 @@ public class SendAndReplyService {
                 caseData.getMessageIdentifier()
             );
             caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
-        } else {
-            caseData.setOptionSendOrReply(EMPTY_VALUE);
+        } if (SEND.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
+            caseData.setChooseSendOrReply(SEND);
         }
     }
 }
