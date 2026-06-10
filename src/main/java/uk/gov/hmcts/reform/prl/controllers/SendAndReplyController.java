@@ -269,6 +269,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         // is in the client-context header, lock the dropdown to that hearing
         // (FPVTL-2408/2409).
         String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        log.info("hearingId Associated with the task {}", lockToHearingId);
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
 
