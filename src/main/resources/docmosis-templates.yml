@@ -114,6 +114,10 @@ docmosis:
       filename: Power_of_arrest.pdf
     - templateName: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       filename: Citizen_Uploaded_Statement.pdf
+    - templateName: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx
+      filename: Citizen_Witness_Statement.pdf
+    - templateName: FL-PRL-GOR-WEL-Citizen-Witness-Statement.docx
+      filename: Citizen_Witness_Statement_Welsh.pdf
     - templateName: FL-PRL-GOR-ENG-LIP-C7R-DRAFT.docx
       filename: C7_Draft_Document.pdf
     - templateName: FL-PRL-GOR-WEL-LIP-C7R-DRAFT.docx
@@ -212,6 +216,12 @@ docmosis:
       filename: C8DocumentDraft.pdf
     - templateName: FL-PRL-GOR-ENG-RES-C8-FINAL.docx
       filename: C8Document.pdf
+    - templateName: FL-PRL-GOR-ENG-RES-C8-FL401-DRAFT.docx
+      filename: C8Document_Draft.pdf
+    - templateName: FL-PRL-GOR-WEL-RES-C8-FL401-DRAFT.docx
+      filename: C8Document_Welsh_Draft.pdf
+    - templateName: FL-PRL-GOR-WEL-RES-C8-DRAFT.docx
+      filename: C8Document_Welsh_Draft.pdf
     - templateName: PRL-ENG-ANNEX-Y.docx
       filename: Anexure-y.pdf
     - templateName: PRL-ENG-ANNEX-Z.docx
@@ -329,4 +339,8 @@ docmosis:
     - templateName: PRL-LET-WEL-C100-RE6.docx
       filename: cover_letter_welsh_re6.pdf
     - templateName: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
+      filename: C8Document_Welsh.pdf
+    - templateName: FL-PRL-GOR-ENG-OTHER-C8.docx
+      filename: C8Document.pdf
+    - templateName: FL-PRL-GOR-WEL-OTHER-C8.docx
       filename: C8Document_Welsh.pdf
