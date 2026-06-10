@@ -142,6 +142,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: populatePreviewOrderWhenOrderUploaded");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -199,6 +200,7 @@ public class ManageOrdersController {
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
+        log.info("LR debug: prepopulateCaseDetails");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -239,6 +241,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
+        log.info("LR debug: populateHeader");
         return getAboutToStartOrSubmitCallbackResponse(
             callbackRequest,
             authorisation,
@@ -295,6 +298,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
+        log.info("LR debug: populateHeaderTask");
         return getAboutToStartOrSubmitCallbackResponse(callbackRequest,
                                                        authorisation,
                                                        s2sToken,
@@ -315,6 +319,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
+        log.info("LR debug: populateFromHearing");
         log.info("populateFromHearing callback triggered for case: {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -397,6 +402,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
+        log.info("LR debug: finalizeOrderSubmissionAndSendNotifications");
         log.info(">>> Submitted callback (case-order-email-notification) called for case id {}", callbackRequest.getCaseDetails().getId());
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
@@ -508,6 +514,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: saveOrderDetails");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Inside about-to-submit callback --------->>>>>>");
             manageOrderService.resetChildOptions(callbackRequest);
@@ -682,6 +689,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: showPreviewOrderWhenOrderCreated");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -722,6 +730,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: populateOrderToAmendDownloadLink");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -748,6 +757,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: whenToServeOrder");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
@@ -819,6 +829,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: manageOrderMidEvent");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
@@ -857,6 +868,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: serveOrderMidEvent");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.serveOrderMidEvent(
                 callbackRequest)).build();
@@ -873,6 +885,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: prePopulateJudgeOrLegalAdviser");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
@@ -922,6 +935,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: validateAndPopulateHearingData");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = new ArrayList<>();
@@ -972,6 +986,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: validateRespondentAndOtherPersonAddress");
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             if (C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
                 List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
@@ -997,6 +1012,7 @@ public class ManageOrdersController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: validateAdditionalPartiesForServingOrder");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             List<String> errorList = new ArrayList<>();
             errorList.addAll(manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest));
@@ -1191,5 +1207,23 @@ public class ManageOrdersController {
         caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS);
         caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS_OPTIONS);
         log.info("Cleaned up custom order fields after processing");
+    }
+
+    @PostMapping(path = "/manage-order/testTaskCreate/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse testTaskCreate(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("LR debug: testTaskCreate");
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("LR debug DateOrderMade: {}", caseData.getDateOrderMade());
+            log.info("LR debug JudgeOrMagistratesLastName: {}", caseData.getJudgeOrMagistratesLastName());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 }
