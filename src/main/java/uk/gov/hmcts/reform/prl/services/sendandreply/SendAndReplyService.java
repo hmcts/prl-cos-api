@@ -692,7 +692,7 @@ public class SendAndReplyService {
         }
         String prefix = hearingId + " - ";
         DynamicListElement match = full.getListItems().stream()
-            .filter(e -> e.getCode() != null && e.getCode().startsWith(prefix))
+            .filter(e -> e.getCode() != null && e.getCode().contains(prefix))
             .findFirst()
             .orElse(null);
         if (match == null) {
