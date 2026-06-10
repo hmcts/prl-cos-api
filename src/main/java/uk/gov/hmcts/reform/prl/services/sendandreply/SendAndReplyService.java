@@ -1435,6 +1435,7 @@ public class SendAndReplyService {
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
+            log.info("message.getRecipientEmailAddresses()={} for case={}", message.getRecipientEmailAddresses(), caseData.getId());
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
             if (recipientEmailAddresses.length > 0) {
@@ -2300,11 +2301,12 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, caseData.getOptionSendOrReply(), authorisation);
+        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
     }
 
     private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
             String sendOrReplyChoice, String authorisation) {
+        log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
         if (REPLY.name().equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
@@ -2313,6 +2315,7 @@ public class SendAndReplyService {
         }
 
         if (SEND.name().equals(sendOrReplyChoice)) {
+            log.info("in SEND for case={}", sendOrReplyChoice, caseData.getId());
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
