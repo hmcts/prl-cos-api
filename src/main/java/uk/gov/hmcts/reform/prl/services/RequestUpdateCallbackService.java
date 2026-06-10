@@ -66,11 +66,16 @@ public class RequestUpdateCallbackService {
 
         CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (isDuplicatePayment(caseDetails, serviceRequestUpdateDto)) {
+            String incomingPaymentRef = "N/A";
+            if (serviceRequestUpdateDto != null && serviceRequestUpdateDto.getPayment() != null
+                && serviceRequestUpdateDto.getPayment().getPaymentReference() != null) {
+                incomingPaymentRef = serviceRequestUpdateDto.getPayment().getPaymentReference();
+            }
             log.info(
                 "Payment already processed for case {} with service request reference {}, and incoming payment reference {}, skipping update.",
-                serviceRequestUpdateDto.getCcdCaseNumber(),
-                currentCaseData.getPaymentServiceRequestReferenceNumber(),
-                serviceRequestUpdateDto.getPayment().getPaymentReference()
+                serviceRequestUpdateDto != null ? serviceRequestUpdateDto.getCcdCaseNumber() : "N/A",
+                currentCaseData != null ? currentCaseData.getPaymentServiceRequestReferenceNumber() : "N/A",
+                incomingPaymentRef
             );
             return;
         }
