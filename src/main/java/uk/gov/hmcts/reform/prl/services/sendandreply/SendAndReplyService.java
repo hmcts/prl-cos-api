@@ -2362,6 +2362,9 @@ public class SendAndReplyService {
 
 
     public void checkTaskAssociatedWithMessage(CaseData caseData) {
+        log.info("checkTaskAssociatedWithMessage==>");
+        log.info("checkTaskAssociatedWithMessage==>caseData.getOptionSendOrReply() {}", caseData.getOptionSendOrReply());
+        log.info("checkTaskAssociatedWithMessage==>caseData.getOptionSendOrReply() {}", caseData.getOptionSendOrReply());
         if (REPLY.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
             caseData.setChooseSendOrReply(REPLY);
             DynamicList dynamicMessagesListAssociatedWithTask = getDynamicMessagesListAssociatedWithTask(
