@@ -13,11 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
-import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
@@ -25,7 +22,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
-import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -33,8 +29,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.amroles.InternalCaseworkerAmRolesEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -43,8 +37,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.notifications.NotificationService;
@@ -70,18 +64,12 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_EXTENSION_REQUEST_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIR_TRANSFER_REQUEST_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
@@ -100,12 +88,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_F
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
-import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_EXTENSION;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService.DOC_TYPE_CIR_TRANSFER;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.findElement;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 
 @Slf4j
@@ -118,7 +104,7 @@ public class ManageDocumentsService {
         + "(form FM5) cannot contain confidential information or be restricted.";
     public static final String FM5_ERROR_WELSH = "Ni all y datganiad safbwynt ar ddatrys anghydfod y tu allan i’r llys "
         + "(ffurflen FM5) gynnwys gwybodaeth gyfrinachol neu wybodaeth gyfyngedig.";
-    private final CoreCaseDataApi coreCaseDataApi;
+
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -128,8 +114,8 @@ public class ManageDocumentsService {
     private final LaunchDarklyClient launchDarklyClient;
     private final RoleAssignmentApi roleAssignmentApi;
     private final NotificationService notificationService;
-    private final RoleAssignmentService roleAssignmentService;
     private final FeatureToggleService featureToggleService;
+    private final DocumentCategoryService documentCategoryService;
 
     public static final String CONFIDENTIAL = "Confidential_";
 
@@ -140,26 +126,17 @@ public class ManageDocumentsService {
     public static final String DETAILS_ERROR_MESSAGE_WELSH
         = "Mae’n rhaid i chi roi rheswm pam na ddylai rhai pobl weld y ddogfen";
     private static final String PREFIX_CHILD_IMPACT_REPORT = "childImpactReport";
-    private static final List<String> EXCLUDED_LA_DOCS_LIST_FOR_ADMIN = Arrays.asList(
-        CHILD_IMPACT_REPORT_1_LA,
-        CHILD_IMPACT_REPORT_2_LA,
-        SECTION_7_REPORT_LA,
-        SECTION_7_ADDENDUM_REPORT_LA,
-        LOCAL_AUTHORITY_INVOLVEMENT_LA,
-        SECTION_47_LA,
-        CIR_EXTENSION_REQUEST_LA,
-        CIR_TRANSFER_REQUEST_LA
-    );
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
-        UserDetails userDetails = userService.getUserDetails(authorization);
-        boolean isUserRoleLA = isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId());
+        boolean isUserRoleLA = documentCategoryService.isUserAllocatedRoleForCaseLA(authorization, caseData);
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentCategories(getCategoriesSubcategories(
+            .documentCategories(documentCategoryService.getCategoriesSubcategories(
                 authorization,
                 String.valueOf(caseData.getId()),
-                isUserRoleLA
+                isUserRoleLA,
+                Arrays.stream(QuarantineLegalDoc.quarantineCategoriesToRemove())
+                    .collect(Collectors.toCollection(ArrayList::new))
             ))
             .documentParty(setDefaultDocumentParty(isUserRoleLA))
             .build();
@@ -170,43 +147,6 @@ public class ManageDocumentsService {
                                            .manageDocuments(Arrays.asList(element(manageDocuments)))
                                            .build())
             .build();
-    }
-
-    private DynamicList getCategoriesSubcategories(String authorisation, String caseReference, boolean isUserRoleLA) {
-        try {
-            CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
-                authorisation,
-                authTokenGenerator.generate(),
-                caseReference
-            );
-            if (null != categoriesAndDocuments) {
-                List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
-                    .stream()
-                    .filter(category -> !isUserRoleLA || category.getCategoryId().equals("localAuthorityDocuments"))
-                    .sorted(Comparator.comparing(Category::getCategoryName))
-                    .toList();
-
-                List<String> docsToExclude = new ArrayList<>(List.of(quarantineCategoriesToRemove()));
-                if (!isUserRoleLA) {
-                    docsToExclude.addAll(EXCLUDED_LA_DOCS_LIST_FOR_ADMIN);
-                }
-
-                List<DynamicListElement> dynamicListElementList = new ArrayList<>();
-                CaseUtils.createCategorySubCategoryDynamicList(
-                    parentCategories,
-                    dynamicListElementList,
-                    docsToExclude
-                );
-                docsToExclude.clear();
-
-                return DynamicList.builder().value(DynamicListElement.EMPTY)
-                    .listItems(dynamicListElementList).build();
-            }
-        } catch (Exception e) {
-            log.error("Error in getCategoriesAndDocuments method", e);
-        }
-        return DynamicList.builder()
-            .value(DynamicListElement.EMPTY).build();
     }
 
     public List<String> validateRestrictedReason(CallbackRequest callbackRequest,
@@ -281,8 +221,7 @@ public class ManageDocumentsService {
             if (!userRole.equals(COURT_ADMIN)) {
                 quarantineLegalDoc = getQuarantineLegalDoc(caseData, userDetails, manageDocument, quarantineLegalDoc);
             } else if (userRole.equals(COURT_ADMIN)) {
-                quarantineLegalDoc = updateQuarantineLegalDocForCourtAdmin(
-                    quarantineLegalDoc);
+                quarantineLegalDoc = updateQuarantineLegalDocForCourtAdmin(quarantineLegalDoc);
             }
 
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
@@ -319,7 +258,7 @@ public class ManageDocumentsService {
             quarantineLegalDoc = updateQuarantineLegalDocForCafcass(
                 quarantineLegalDoc
             );
-        } else if (isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId())
+        } else if (documentCategoryService.isUserAllocatedRoleForCaseLA(String.valueOf(caseData.getId()), userDetails.getId())
             && quarantineLegalDoc != null) {
             quarantineLegalDoc = updateQuarantineLegalDocForLocalAuthority(
                 quarantineLegalDoc
@@ -337,8 +276,8 @@ public class ManageDocumentsService {
     }
 
     private QuarantineLegalDoc updateQuarantineLegalDocForLocalAuthority(QuarantineLegalDoc quarantineLegalDoc) {
-        if (ManageDocumentsCategoryConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
-            || ManageDocumentsCategoryConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
+        if (PrlAppsConstants.CIR_EXTENSION_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())
+            || PrlAppsConstants.CIR_TRANSFER_REQUEST_LA.equals(quarantineLegalDoc.getCategoryId())) {
             return quarantineLegalDoc.toBuilder()
                 .isConfidential(YesOrNo.Yes)
                 .categoryName(quarantineLegalDoc.getCategoryName())
@@ -1067,8 +1006,8 @@ public class ManageDocumentsService {
 
             List<String> amRoles = Optional.ofNullable(roleAssignmentServiceResponse).isPresent()
                 ? roleAssignmentServiceResponse.getRoleAssignmentResponse()
-                  .stream()
-                  .map(RoleAssignmentResponse::getRoleName).toList()
+                .stream()
+                .map(RoleAssignmentResponse::getRoleName).toList()
                 : List.of();
 
             boolean isSolicitor = roles.contains(Roles.SOLICITOR.getValue());
@@ -1142,10 +1081,5 @@ public class ManageDocumentsService {
 
     private DocumentPartyEnum setDefaultDocumentParty(boolean isUserRoleLA) {
         return isUserRoleLA ? DocumentPartyEnum.LOCAL_AUTHORITY :  null;
-    }
-
-    private boolean isUserAllocatedRoleForCaseLA(String caseId, String idamId) {
-        return roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_STAFF.getValue())
-            || roleAssignmentService.isUserAllocatedRoleForCase(caseId, idamId, Roles.LOCAL_AUTHORITY_SOLICITOR.getValue());
     }
 }
