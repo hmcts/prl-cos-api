@@ -802,6 +802,17 @@ public class DocumentGenService {
         );
     }
 
+    private UploadedDocuments getDocument(String authorisation,
+                                          GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
+                                          String fileName)
+        throws Exception {
+        return generateCitizenUploadDocument(
+            fileName,
+            generateCitizenUploadedDocument(authorisation, prlCitizenUploadTemplate, generateAndUploadDocumentRequest),
+            generateAndUploadDocumentRequest
+        );
+    }
+
     private Document getDocumentWithFilename(String authorisation, CaseData caseData, String hint, boolean isWelsh,
                                              Optional<String> dynamicFilename) {
         return generateDocumentField(
@@ -812,18 +823,6 @@ public class DocumentGenService {
                 isWelsh,
                 dynamicFilename
             )
-        );
-    }
-
-
-    private UploadedDocuments getDocument(String authorisation,
-                                          GenerateAndUploadDocumentRequest generateAndUploadDocumentRequest,
-                                          String fileName)
-        throws Exception {
-        return generateCitizenUploadDocument(
-            fileName,
-            generateCitizenUploadedDocument(authorisation, prlCitizenUploadTemplate, generateAndUploadDocumentRequest),
-            generateAndUploadDocumentRequest
         );
     }
 
