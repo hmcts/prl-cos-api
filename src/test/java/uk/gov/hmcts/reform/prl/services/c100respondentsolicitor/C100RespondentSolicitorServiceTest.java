@@ -147,6 +147,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class C100RespondentSolicitorServiceTest {
 
+    private static final String AUTHORISATION = "authorisation";
+
     @InjectMocks
     C100RespondentSolicitorService respondentSolicitorService;
 
@@ -2495,7 +2497,7 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
             Map<String, Object> stringObjectMap = new HashMap<>();
-            reviewDocumentService.getReviewedDocumentDetailsNew(caseData, stringObjectMap);
+            reviewDocumentService.getReviewedDocumentDetailsNew(AUTHORISATION, caseData, stringObjectMap);
 
             when(objectMapper.convertValue(any(Map.class), eq(CaseData.class)))
                 .thenAnswer(invocation -> caseData);
