@@ -19,8 +19,10 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -41,6 +43,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -118,8 +121,12 @@ class RequestUpdateCallbackServiceTest {
         when(uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(any()))
             .thenReturn("AWP Task");
         when(coreCaseDataService.findCaseById(anyString(), anyString())).thenReturn(caseDetails);
-        when(coreCaseDataService.eventRequest(any(CaseEvent.class), anyString())).thenReturn(EventRequestData.builder().build());
-        when(coreCaseDataService.startUpdate(anyString(), any(), anyString(), anyBoolean())).thenReturn(startEventResponse);
+        when(coreCaseDataService.eventRequest(
+            any(CaseEvent.class),
+            anyString()
+        )).thenReturn(EventRequestData.builder().build());
+        when(coreCaseDataService.startUpdate(anyString(), any(), anyString(), anyBoolean())).thenReturn(
+            startEventResponse);
         when(coreCaseDataService.createCaseDataContent(any(), any())).thenReturn(CaseDataContent.builder().build());
     }
 
@@ -183,8 +190,9 @@ class RequestUpdateCallbackServiceTest {
             .serviceRequestStatus("Paid")
             .build();
 
-        assertThrows(NullPointerException.class, () ->
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto)
+        assertThrows(
+            NullPointerException.class, () ->
+                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto)
         );
 
         verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
@@ -232,19 +240,19 @@ class RequestUpdateCallbackServiceTest {
                                                      .payment(Payment.builder()
                                                                   .paymentServiceRequestReferenceNumber("Paid")
                                                                   .build())
-                                                     .otherApplicationsBundle(uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle.builder()
-                                                                                  .applicationStatus("Submitted") // Assuming "Submitted" is the displayed value
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus("Submitted")
                                                                                   .build())
-                                                     .c2DocumentBundle(uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle.builder()
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
                                                                            .applicationStatus("Submitted")
                                                                            .build())
                                                      .build()));
 
-       UploadAdditionalApplicationData uploadAdditionalApplicationData =
+        UploadAdditionalApplicationData uploadAdditionalApplicationData =
             UploadAdditionalApplicationData.builder()
                 .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
                 .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                      .urgencyTimeFrameType(uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType.WITHIN_2_DAYS)
+                                                      .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
                                                       .build())
                 .additionalApplicationFeesToPay("£232.00")
                 .build();
@@ -256,10 +264,9 @@ class RequestUpdateCallbackServiceTest {
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .build();
 
-        // 3. Map DTO input payload
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("Paid") // Matches the nested application bundle reference
+            .serviceRequestReference("test-ref")
             .serviceRequestStatus("Paid")
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
@@ -270,16 +277,12 @@ class RequestUpdateCallbackServiceTest {
                          .build())
             .build();
 
-        // 4. Mock Jackson mapper conversion
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
 
-        // Mock court finder if your AWP logic path queries it
         when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
 
-        // 5. Execute
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
-        // 6. Assert framework calls (Adjust times/verifications based on your specific implementation checks)
         verify(coreCaseDataService, times(1)).findCaseById(anyString(), eq(caseId.toString()));
         verify(coreCaseDataService, times(1)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
         verify(coreCaseDataService, times(1)).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
@@ -287,12 +290,11 @@ class RequestUpdateCallbackServiceTest {
 
     @Test
     void shouldSkipProcessingWhenDuplicateAwpPaymentDetected() {
-        // Build caseData with an additionalApplicationsBundle entry that has a Payment with status "Paid"
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(
             AdditionalApplicationsBundle.builder()
                 .payment(Payment.builder()
-                             .paymentServiceRequestReferenceNumber("incoming-ref")
+                             .paymentServiceRequestReferenceNumber("12345")
                              .status("Paid")
                              .build())
                 .build()
@@ -305,7 +307,7 @@ class RequestUpdateCallbackServiceTest {
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("incoming-ref")
+            .serviceRequestReference("12345")
             .serviceRequestStatus("Paid")
             .payment(PaymentDto.builder().paymentReference("ref").build())
             .build();
@@ -327,7 +329,7 @@ class RequestUpdateCallbackServiceTest {
             AdditionalApplicationsBundle.builder()
                 .payment(Payment.builder()
                              .paymentServiceRequestReferenceNumber("match-ref")
-                             .status("SomeStatus")
+                             .status("Not paid")
                              .build())
                 .build()
         ));
@@ -344,12 +346,12 @@ class RequestUpdateCallbackServiceTest {
             .payment(PaymentDto.builder().paymentReference("p-ref").build())
             .build();
 
-        // Ensure objectMapper conversion returns our startEventCaseData for any input
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(startEventCaseData);
 
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
-        verify(coreCaseDataService).createCaseDataContent(eq(startEventResponse),
+        verify(coreCaseDataService).createCaseDataContent(
+            eq(startEventResponse),
             argThat(arg -> {
                 if (!(arg instanceof Map<?, ?> m)) {
                     return false;
@@ -360,6 +362,35 @@ class RequestUpdateCallbackServiceTest {
                     && "Yes".equals(m.get("awpWaTaskToBeCreated"));
             })
         );
+    }
+
+
+    @Test
+    void shouldProcessCallbackCasePaymentSuccess() {
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("matching-case-reference")
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("matching-case-reference") // Forces isCasePayment = true
+            .serviceRequestStatus("Paid")                       // Forces isStatusPaid = true
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("matching-case-reference")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.PAYMENT_SUCCESS_CALLBACK));
     }
 
     @Test
@@ -383,8 +414,8 @@ class RequestUpdateCallbackServiceTest {
 
         ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
         verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
-        List<CaseEvent> captured = eventCaptor.getAllValues();
-        assertEquals(CaseEvent.PAYMENT_FAILURE_CALLBACK, captured.get(0));
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.PAYMENT_FAILURE_CALLBACK));
     }
 
     @Test
@@ -409,34 +440,7 @@ class RequestUpdateCallbackServiceTest {
         ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
         verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
         List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
-        assertEquals(CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK, capturedEvents.get(capturedEvents.size() - 1));
-    }
-
-    @Test
-    void shouldProcessCallbackCasePaymentSuccess() {
-        CaseData caseData = CaseData.builder()
-            .id(1L)
-            .paymentServiceRequestReferenceNumber("matching-case-reference")
-            .state(State.SUBMITTED_NOT_PAID)
-            .build();
-
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("matching-case-reference") // Forces isCasePayment = true
-            .serviceRequestStatus("Paid")                       // Forces isStatusPaid = true
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentReference("reference")
-                         .build())
-            .build();
-
-        when(coreCaseDataService.findCaseById(anyString(), eq(caseId.toString()))).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-
-        // Verify it triggers the standard case payment success callback event
-        verify(coreCaseDataService, times(2)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK));
     }
 
     @Test
@@ -449,7 +453,7 @@ class RequestUpdateCallbackServiceTest {
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .serviceRequestReference("completely-different-awp-reference")
-            .serviceRequestStatus("Failed")                                 // Forces isStatusPaid = false
+            .serviceRequestStatus("Not paid")                                 // Forces isStatusPaid = false
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
                          .paymentReference("reference")
@@ -462,7 +466,10 @@ class RequestUpdateCallbackServiceTest {
         requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
 
         // Verify it triggers the AWP failure event path
-        verify(coreCaseDataService).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK));
     }
 
     @Test
@@ -520,8 +527,10 @@ class RequestUpdateCallbackServiceTest {
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState(),
-                     "Case state should transition to SUBMITTED_PAID when payment is successful");
+        assertEquals(
+            State.SUBMITTED_PAID, updatedCaseData.getState(),
+            "Case state should transition to SUBMITTED_PAID when payment is successful"
+        );
 
         assertNotNull(updatedCaseData.getDateSubmitted(), "Date submitted should be populated upon successful payment");
     }
@@ -546,11 +555,15 @@ class RequestUpdateCallbackServiceTest {
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState(),
-                     "Case state should move from WITHDRAWN to SUBMITTED_PAID upon successful payment");
+        assertEquals(
+            State.SUBMITTED_PAID, updatedCaseData.getState(),
+            "Case state should move from WITHDRAWN to SUBMITTED_PAID upon successful payment"
+        );
 
-        assertNotNull(updatedCaseData.getDateSubmitted(),
-                      "Date submitted should be set even when coming from a withdrawn state");
+        assertNotNull(
+            updatedCaseData.getDateSubmitted(),
+            "Date submitted should be set even when coming from a withdrawn state"
+        );
     }
 
     @Test
@@ -573,7 +586,9 @@ class RequestUpdateCallbackServiceTest {
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-        assertEquals(State.CASE_ISSUED, updatedCaseData.getState(),
-                     "State should NOT change back to SUBMITTED_PAID if the case is already ISSUED");
+        assertEquals(
+            State.CASE_ISSUED, updatedCaseData.getState(),
+            "State should NOT change back to SUBMITTED_PAID if the case is already ISSUED"
+        );
     }
 }

@@ -66,10 +66,12 @@ public class RequestUpdateCallbackService {
 
         CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (isDuplicatePayment(caseDetails, serviceRequestUpdateDto)) {
-            log.info("Payment already processed for case {} with service request reference {}, and incoming payment reference {}, skipping update.",
-                     serviceRequestUpdateDto.getCcdCaseNumber(),
-                     currentCaseData.getPaymentServiceRequestReferenceNumber(),
-                     serviceRequestUpdateDto.getPayment().getPaymentReference());
+            log.info(
+                "Payment already processed for case {} with service request reference {}, and incoming payment reference {}, skipping update.",
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                currentCaseData.getPaymentServiceRequestReferenceNumber(),
+                serviceRequestUpdateDto.getPayment().getPaymentReference()
+            );
             return;
         }
 
@@ -176,15 +178,17 @@ public class RequestUpdateCallbackService {
     private boolean isRootServiceRequest(CaseDetails caseDetails, String serviceRequestReference) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         return !StringUtils.isEmpty(serviceRequestReference)
-                && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+            && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
     private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (caseData == null || paymentUpdateDto == null || paymentUpdateDto.getPayment() == null) {
-            log.warn("Invalid payment update payload or missing CaseData. Aborting update. CaseData present: {}, DTO present: {}",
-                     caseData != null, paymentUpdateDto != null);
+            log.warn(
+                "Invalid payment update payload or missing CaseData. Aborting update. CaseData present: {}, DTO present: {}",
+                caseData != null, paymentUpdateDto != null
+            );
             return true;
         }
 
@@ -201,22 +205,22 @@ public class RequestUpdateCallbackService {
                 && PAID.equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestStatus());
         }
 
-                if (caseData.getAdditionalApplicationsBundle() != null) {
-                    return caseData.getAdditionalApplicationsBundle().stream()
-                        .filter(Objects::nonNull)
-                        .map(Element::getValue)
-                        .filter(Objects::nonNull)
-                        .map(AdditionalApplicationsBundle::getPayment)
-                        .filter(Objects::nonNull)
-                        .anyMatch(existingPayment -> PAID.equalsIgnoreCase(existingPayment.getStatus())
-                            && incomingRef.equalsIgnoreCase(existingPayment.getPaymentServiceRequestReferenceNumber()));
-                }
+        if (caseData.getAdditionalApplicationsBundle() != null) {
+            return caseData.getAdditionalApplicationsBundle().stream()
+                .filter(Objects::nonNull)
+                .map(Element::getValue)
+                .filter(Objects::nonNull)
+                .map(AdditionalApplicationsBundle::getPayment)
+                .filter(Objects::nonNull)
+                .anyMatch(existingPayment -> PAID.equalsIgnoreCase(existingPayment.getStatus())
+                    && incomingRef.equalsIgnoreCase(existingPayment.getPaymentServiceRequestReferenceNumber()));
+        }
 
-                return false;
+        return false;
     }
 
     public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
-                                                          CaseData caseData) {
+                                                         CaseData caseData) {
         try {
             Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
             if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
@@ -285,7 +289,7 @@ public class RequestUpdateCallbackService {
                         ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .otherApplicationsBundle(null != additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
                                                  ? additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
-                        .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
+                                                   .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .build();
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
@@ -300,11 +304,19 @@ public class RequestUpdateCallbackService {
                             )
                         );
                 }
-                caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, additionalApplicationsBundleElement.get().getId());
-                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    WA_ADDITIONAL_APPLICATION_COLLECTION_ID,
+                    additionalApplicationsBundleElement.get().getId()
+                );
+                caseDataUpdated.put(
+                    "additionalApplicationsBundle",
+                    startEventResponseData.getAdditionalApplicationsBundle()
+                );
                 caseDataUpdated.put(
                     AWP_WA_TASK_NAME,
-                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(updatedAdditionalApplicationsBundleElement));
+                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(
+                        updatedAdditionalApplicationsBundleElement)
+                );
                 caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, YES);
             }
         }
