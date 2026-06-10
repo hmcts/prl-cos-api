@@ -34,6 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
@@ -63,20 +64,22 @@ public class RequestUpdateCallbackService {
         CaseDetails caseDetails
             = coreCaseDataService.findCaseById(systemAuthorisation, serviceRequestUpdateDto.getCcdCaseNumber());
 
-        boolean isCasePayment = verifyCaseCreationPaymentReference(
+        CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (isDuplicatePayment(caseDetails, serviceRequestUpdateDto)) {
+            log.info("Payment already processed for case {} with service request reference {}, and incoming payment reference {}, skipping update.",
+                     serviceRequestUpdateDto.getCcdCaseNumber(),
+                     currentCaseData.getPaymentServiceRequestReferenceNumber(),
+                     serviceRequestUpdateDto.getPayment().getPaymentReference());
+            return;
+        }
+
+        boolean isCasePayment = isRootServiceRequest(
             caseDetails,
             serviceRequestUpdateDto.getServiceRequestReference()
         );
-        CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
         CaseEvent caseEvent;
         if (isCasePayment) {
-            if (isDuplicatePayment(currentCaseData)) {
-                log.info("Payment already processed for case {} with service request reference {}, and payment reference {}, skipping update.",
-                         serviceRequestUpdateDto.getCcdCaseNumber(),
-                         currentCaseData.getPaymentServiceRequestReferenceNumber(),
-                         serviceRequestUpdateDto.getPayment().getPaymentReference());
-                return;
-            }
             caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
                 ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
         } else {
@@ -170,17 +173,46 @@ public class RequestUpdateCallbackService {
         }
     }
 
-    private boolean verifyCaseCreationPaymentReference(CaseDetails caseDetails, String serviceRequestReference) {
+    private boolean isRootServiceRequest(CaseDetails caseDetails, String serviceRequestReference) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         return !StringUtils.isEmpty(serviceRequestReference)
                 && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
-    private boolean isDuplicatePayment(CaseData caseData) {
-        return Optional.ofNullable(caseData)
-            .map(CaseData::getPaymentCallbackServiceRequestUpdate)
-            .map(paymentStatus -> PAID.equalsIgnoreCase(paymentStatus.getServiceRequestStatus()))
-            .orElse(false);
+    private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        if (caseData == null || paymentUpdateDto == null || paymentUpdateDto.getPayment() == null) {
+            log.warn("Invalid payment update payload or missing CaseData. Aborting update. CaseData present: {}, DTO present: {}",
+                     caseData != null, paymentUpdateDto != null);
+            return true;
+        }
+
+        String incomingRef = paymentUpdateDto.getServiceRequestReference();
+        if (StringUtils.isEmpty(incomingRef)) {
+            log.warn("Incoming payment update is missing a service request reference.");
+            return true;
+        }
+
+        // Root Case Payment Request
+        if (isRootServiceRequest(caseDetails, incomingRef)) {
+            // If the database already shows a recorded callback and it was successful, it's a duplicate
+            return caseData.getPaymentCallbackServiceRequestUpdate() != null
+                && PAID.equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestStatus());
+        }
+
+                if (caseData.getAdditionalApplicationsBundle() != null) {
+                    return caseData.getAdditionalApplicationsBundle().stream()
+                        .filter(Objects::nonNull)
+                        .map(Element::getValue)
+                        .filter(Objects::nonNull)
+                        .map(AdditionalApplicationsBundle::getPayment)
+                        .filter(Objects::nonNull)
+                        .anyMatch(existingPayment -> PAID.equalsIgnoreCase(existingPayment.getStatus())
+                            && incomingRef.equalsIgnoreCase(existingPayment.getPaymentServiceRequestReferenceNumber()));
+                }
+
+                return false;
     }
 
     public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
