@@ -35,17 +35,7 @@ public class PrlAppsConstants {
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMiam";
 
     // Fee and Pay related constants
-    public static final String FEE_VERSION = "1";
-    public static final Integer FEE_VOLUME = 1;
     public static final String PAYMENT_ACTION = "payment";
-
-    public static final String BAIL_DETAILS = "bailDetails";
-    public static final String APPLICANT_HAS_BAIL_END_DATE = "isRespondentAlreadyInBailCondition";
-    public static final String APPLICANT_BAIL_END_DATE = "bailConditionEndDate";
-    public static final String NOT_KNOWN_BAIL_END_DATE = "dontKnowBailEndDate";
-
-    public static final String YES_SMALL = "yes";
-    public static final String NO_SMALL = "no";
 
     public static final String DOCUMENT_FIELD_C1A = "c1ADocument";
     public static final String DOCUMENT_FIELD_DRAFT_C1A = "c1ADraftDocument";
@@ -61,8 +51,6 @@ public class PrlAppsConstants {
 
     public static final String DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD = "submitAndPayDownloadApplicationWelshLink";
 
-    public static final String C7_FINAL_ENGLISH = "c7FinalEng";
-
     public static final String C7_FINAL_WELSH = "c7FinalWelsh";
 
     public static final String COURT_NAME_FIELD = "courtName";
@@ -70,7 +58,6 @@ public class PrlAppsConstants {
     public static final String TRANSFERRED_COURT_FROM = "transferredCourtFrom";
     public static final String COURT_ID_FIELD = "courtId";
     public static final String COURT_EMAIL_ADDRESS_FIELD = "courtEmailAddress";
-    public static final String FINAL_DOCUMENT_FIELD = "finalDocument";
     public static final String ISSUE_DATE_FIELD = "issueDate";
     public static final String DATE_SUBMITTED_FIELD = "dateSubmitted";
     public static final String CASE_DATE_AND_TIME_SUBMITTED_FIELD = "caseSubmittedTimeStamp";
@@ -85,8 +72,6 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
     public  static final String SERVED_PARTY_LOCAL_AUTHORITY = "Local Authority";
     public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
-    public static final String DOCUMENT_FIELD_C7 = "c7Document";
-    public static final String C7_HINT = "C7";
 
     public static final String THIS_INFORMATION_IS_CONFIDENTIAL = "This information is to be kept confidential";
 
@@ -108,13 +93,9 @@ public class PrlAppsConstants {
     public static final String WITHOUT_NOTICE = "Without notice";
 
     public static final String WITH_NOTICE = "With notice";
-
-    public static final String DRAFT_STATE = State.AWAITING_SUBMISSION_TO_HMCTS.getValue();
-    public static final String RETURN_STATE = State.AWAITING_RESUBMISSION_TO_HMCTS.getValue();
     public static final String WITHDRAWN_STATE = State.CASE_WITHDRAWN.getValue();
     public static final String READY_FOR_DELETION_STATE = State.READY_FOR_DELETION.getValue();
     public static final String SUBMITTED_STATE = State.SUBMITTED_PAID.getValue();
-    public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
     public static final String JUDICIAL_REVIEW_STATE = State.JUDICIAL_REVIEW.getValue();
 
@@ -154,8 +135,6 @@ public class PrlAppsConstants {
     public static final String URL_STRING = "/";
     public static final String D_MMM_YYYY = "d MMM yyyy";
 
-    public static final String APPOINTED_GUARDIAN_FULL_NAME = "appointedGuardianFullName";
-
     public static final String APPLICANT_SOLICITOR = " (Applicant's Solicitor)";
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
     public static final String COURT_NAME = "courtName";
@@ -181,17 +160,11 @@ public class PrlAppsConstants {
 
     public static final String APPLICANT_SOLICITOR_EMAIL_ADDRESS = "applicantSolicitorEmailAddress";
     public static final String YOUR_POSITION_STATEMENTS = "Your position statements";
-    public static final String POSITION_STATEMENTS = "Position statements";
     public static final String YOUR_WITNESS_STATEMENTS = "Your witness statements";
     public static final String OTHER_WITNESS_STATEMENTS = "Other people's witness statements";
 
-    public static final String OTHER_WITNESS_STATEMENTS_DOCUMENT = "Other witness statements";
     public static final String MAIL_SCREENSHOTS_MEDIA_FILES = "Emails, screenshots, images and other media files";
     public static final String MEDICAL_RECORDS = "Medical records";
-
-    public static final String MEDICAL_RECORDS_DOCUMENT = "Medical Records";
-
-    public static final String  RESPONSE_TO_REQUEST_FOR_CA = "Reponse To Request For CA";
 
     public static final String LETTERS_FROM_SCHOOL = "Letters from school";
     public static final String TENANCY_MORTGAGE_AGREEMENTS = "Tenancy and mortgage agreements";
@@ -200,29 +173,22 @@ public class PrlAppsConstants {
     public static final String PATERNITY_TEST_REPORTS = "Paternity test reports";
     public static final String DRUG_AND_ALCOHOL_TESTS = "Drug and alcohol tests (toxicology)";
 
-    public static final String DRUG_AND_ALCOHOL_TESTS_DOCUMENT = "Drug and alcohol test (toxicology)";
     public static final String RESULTS_OF_HAIR_STRAND_BLOOD_TESTS = "Results of hair strand/blood tests";
     public static final String DNA_REPORTS = "DNA reports";
     public static final String POLICE_REPORTS = "Police reports";
     public static final String POLICE_DISCLOSURES = "Police disclosures";
-
-    public static final String POLICE_REPORT_DOCUMENT = "Police report";
     public static final String OTHER_DOCUMENTS = "Other documents";
 
     public static final String CASE_ID = "caseId";
     public static final String DOCUMENT_TYPE = "documentType";
     public static final String PARTY_NAME = "partyName";
     public static final String PARTY_TYPE = "partyType";
-    public static final String DOCUMENT_ID = "documentId";
     public static final String SUBMITTED_PDF = "_submitted.pdf";
     public static final String PARENT_DOCUMENT_TYPE = "parentDocumentType";
     public static final String PARTY_ID = "partyId";
     public static final String IS_APPLICANT = "isApplicant";
     public static final String DOCUMENT_REQUEST = "documentRequestedByCourt";
 
-    public static final String CITIZEN_UPLOAD_DOC_DATE_FORMAT = "dd-MMM-yyyy";
-
-    public static final String CITIZEN_PRL_CREATE_EVENT = "citizenCreate";
     public static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     public static final String CITIZEN_ROLE = "citizen";
 
@@ -464,10 +430,6 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "c)  a risk assessment in respect of ((party’s / parties’ names separated by commas))";
 
-    public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "CAFCASS Cymru must send a safeguarding enquiries report "
-        + "to the court and to the parties [and their solicitors if details are available], unless considered inappropriate by "
-        + "CAFCASS Cymru, by no later than 6 weeks after receipt of this order.";
-
     public static final String SECTION7_EDIT_CONTENT = "a)  with whom the ((child or children)) should live"
         + System.lineSeparator()
         + "b)  whether the ((child or children)) should see the other parent [or ((name of guardian))"
@@ -493,36 +455,6 @@ public class PrlAppsConstants {
         + "(( name of other party))"
         + System.lineSeparator()
         + "k)  whether the local authority should be requested to report under section 37 of the Children Act 1989";
-
-    public static final String SECTION7_INTERIM_ORDERS_FACTS = "With regard to the allegations of domestic abuse if proved"
-        + System.lineSeparator()
-        + "a)  the impact on the ((child or children)) and on the care given by the ((parent OR guardian)) making the "
-        + "allegation of domestic abuse, if a contact order is made"
-        + System.lineSeparator()
-        + "b)  the risk of harm if a contact order is made - whether physical, emotional or psychological"
-        + System.lineSeparator()
-        + "c)  whether contact between the ((child or children)) and the ((mother or father)) can take place safely "
-        + "(physically, emotionally and psychologically) for the child and the parent with whom the child is living"
-        + System.lineSeparator()
-        + "d)  whether contact should be supervised or supported and, if so, where and by whom and the availability of "
-        + "resources for that purpose"
-        + System.lineSeparator()
-        + "e)  if direct contact is not appropriate, whether there should be indirect contact and, if so, in what form";
-
-    public static final String SECTION7_DA_OCCURED = "With regard to the findings of fact made as set out in the schedule to "
-        + "((this order / the order made on)) ((date that the order was made)):"
-        + System.lineSeparator()
-        + "a)  any harm suffered by the ((child or children)) and the parent with whom the ((child or children)) are "
-        + "living as a consequence of the domestic abuse found"
-        + System.lineSeparator()
-        + "b)  any harm which the ((child or children)) and the parent with whom the ((child or children)) are living is"
-        + " at risk of suffering if a contact order is made"
-        + System.lineSeparator()
-        + "c)  information about the facilities available locally (including domestic abuse support services) to assist"
-        + " any party or the ((child or children))"
-        + System.lineSeparator()
-        + "d) recommendations in respect of arrangements for the ((child or children)) including stepped arrangements "
-        + "with a view to a final order if possible";
 
 
     public static final String CROSS_EXAMINATION_PROHIBITION = "a)  Section 31R the vulnerable party is the victim of a"
@@ -602,11 +534,7 @@ public class PrlAppsConstants {
 
     public static final String CAFCASS_REPORTS = "Cafcass reports";
     public static final String EXPERT_REPORTS = "Expert reports";
-    public static final String APPLICANTS_STATEMENTS = "Applicant's statements";
-    public static final String RESPONDENTS_STATEMENTS = "Respondent's statements";
     public static final String APPLICANT_C1A_RESPONSE = "Applicant C1A response";
-    public static final String CITIZEN_RESPONDENT_APPLCATION = "Respondent application";
-    public static final String CITIZEN_RESPONDENT_C1A_APPLCATION = "Respondent C1A application";
     public static final String SOLICITOR_RESPONDENT_APPLCATION = "Respondent Application";
     public static final String SOLICITOR_RESPONDENT_APPLICATION_CATEGORY_ID = "respondentApplication";
     public static final String SOLICITOR_RESPONDENT_C1A_APPLCATION = "Respondent C1A Application";
@@ -617,7 +545,6 @@ public class PrlAppsConstants {
     public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
     public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
     public static final String SECTION_37_REPORT = "Section 37 report";
-    public static final String SIXTEENA_RISK_ASSESSMENT = "16a risk assessment";
     public static final String GUARDIAN_REPORT = "Guardian report";
     public static final String SPECIAL_GUARDIANSHIP_REPORT = "Special guardianship report";
     public static final String CAFCASS_OTHER_DOCUMENTS = "Cafcass/Cafcass Cymru other documents";
@@ -626,16 +553,11 @@ public class PrlAppsConstants {
     public static final String PREVIOUS_ORDERS = "Orders from other proceedings";
     public static final String ANY_OTHER_DOCUMENTS = "Any other documents";
 
-    public static final String APPLICANT_STATMENT =
-        "Applicant statement - for example photographic evidence, witness statement, mobile phone screenshot";
-
     public static final String IS_ENG_DOC_GEN = "isEngDocGen";
 
     public static final String IS_WELSH_DOC_GEN = "isWelshDocGen";
 
     public static final String INVALID_CLIENT = "Invalid Client";
-
-    public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
     public static final String AWAITING_HEARING_DETAILS = "AWAITING_ACTUALS";
     public static final String CANCELLED = "CANCELLED";
@@ -644,7 +566,6 @@ public class PrlAppsConstants {
     public static final String COMPLETED = "COMPLETED";
 
     public static final String COURTNAV = "CourtNav";
-    public static final String NA_COURTNAV = "NA_COURTNAV";
 
     public static final String DISTRICT_JUDGE = "districtJudge";
 
@@ -704,11 +625,9 @@ public class PrlAppsConstants {
 
     public static final String CASE_NAME_HMCTS_INTERNAL = "caseNameHmctsInternal";
     //C100 default court details
-    public static final String C100_DEFAULT_COURT_NAME = "STOKE ON TRENT TRIBUNAL HEARING CENTRE";
+
     public static final String SOLICITOR_C7_DRAFT_DOCUMENT = "SOLICITOR_C7_DRAFT";
     public static final String SOLICITOR_C7_FINAL_DOCUMENT = "SOLICITOR_C7_FINAL";
-    public static final String SOLICITOR_C7_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C7_WELSH_DRAFT";
-    public static final String SOLICITOR_C7_WELSH_FINAL_DOCUMENT = "SOLICITOR_C7_WELSH_FINAL";
     public static final String SOLICITOR_C1A_DRAFT_DOCUMENT = "SOLICITOR_C1A_DRAFT";
     public static final String SOLICITOR_C1A_FINAL_DOCUMENT = "SOLICITOR_C1A_FINAL";
     public static final String SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C1A_WELSH_DRAFT";
@@ -724,11 +643,7 @@ public class PrlAppsConstants {
     public static final String CASE_DATA_ID = "id";
 
     public static final String LISTWITHOUTNOTICE_HEARINGDETAILS = "listWithoutNoticeHearingDetails";
-    public static final String FL401_LISTONNOTICE_HEARINGDETAILS = "fl401ListOnNoticeHearingDetails";
-    public static final String LINKED_CASES_LIST = "linkedCaCasesList";
-    public static final String LEGAL_ADVISER_LIST = "legalAdviserList";
     public static final String FL401_CASE_WITHOUT_NOTICE = "isFl401CaseCreatedForWithOutNotice";
-    public static final String FL401_LIST_ON_NOTICE_DOCUMENT = "fl401ListOnNoticeDocument";
 
     public static final String DATE_CONFIRMED_IN_HEARINGS_TAB = "dateConfirmedInHearingsTab";
     public static final String HEARING_DATE_CONFIRM_OPTION_ENUM = "hearingDateConfirmOptionEnum";
@@ -759,8 +674,6 @@ public class PrlAppsConstants {
     public static final String FIRST_DATE_OF_THE_HEARING = "firstDateOfTheHearing";
     public static final String HEARING_MUST_TAKE_PLACE_AT_HOUR = "hearingMustTakePlaceAtHour";
     public static final String HEARING_MUST_TAKE_PLACE_AT_MINUTE = "hearingMustTakePlaceAtMinute";
-    public static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
-    public static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
 
     public static final String EARLIEST_HEARING_DATE = "earliestHearingDate";
     public static final String LATEST_HEARING_DATE = "latestHearingDate";
@@ -771,7 +684,6 @@ public class PrlAppsConstants {
 
     public static final String SELECTED_AND_ADDITIONAL_REASONS = "selectedAndAdditionalReasons";
     public static final String SUBJECT = "subject";
-    public static final String CASE_NOTE = "caseNote";
 
     public static final String REASONS_SELECTED_FOR_LIST_ON_NOTICE = "List without notice";
 
@@ -818,15 +730,11 @@ public class PrlAppsConstants {
     public static final String COMMA = ",";
     public static final String EMPTY_STRING = "";
 
-    public static final String CITIZEN_HOME = "/citizen-home";
-
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
 
     public static final String CURRENCY_SIGN_POUND = "£";
 
     public static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
-
-    public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
 
     public static final String A = "A";
 
@@ -840,7 +748,6 @@ public class PrlAppsConstants {
 
     public static final String F = "F";
 
-    public static final String G = "G";
     public static final String H = "H";
     public static final String I = "I";
     public static final String J = "J";
@@ -872,7 +779,6 @@ public class PrlAppsConstants {
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
 
-    public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
     public static final String ENG_STATIC_DOCS_PATH = "staticdocs/";
 
@@ -894,12 +800,10 @@ public class PrlAppsConstants {
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";
     public static final String SOA_C9_PERSONAL_SERVICE_FILENAME = "C9_personal_service.pdf";
     public static final String SOA_FL415_FILENAME = "FL415.pdf";
-    public static final String SOA_FL416_FILENAME = "FL416.pdf";
+
 
     public static final String SOA_MULTIPART_FILE = "files";
     public static final String SOA_CITIZEN = "CITIZEN";
-    public static final String SOA_SOLICITOR = "SOLICITOR";
-    public static final String COURT_BAILIFF = "Court bailiff";
     public static final String COURT_ADMIN = "Court admin";
     public static final String JUDICIARY = "Judiciary";
     public static final String LEGAL_ADVISER = "Legal adviser";
@@ -938,13 +842,11 @@ public class PrlAppsConstants {
     public static final String  SEXUAL_ABUSE = "sexualAbuse";
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
-    //Soa letter types
-    public static final String SOA_RES_LET_RE5 = "RE5";
 
     public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
     public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
     public static final String DD_MMM_YYYY_HH_MM_SS_AM_PM = "d-MMM-yyyy hh:mm:ss a";
-    public static final String OTHER_PERSON = "otherPerson";
+
     public static final String UNDERSCORE = "_";
     public static final String AWP_STATUS_SUBMITTED = "Submitted";
     public static final String AWP_STATUS_IN_REVIEW = "In review";
@@ -979,10 +881,9 @@ public class PrlAppsConstants {
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
     public static final String MANDATORY_MAGISTRATE_WELSH = "Mae enw llawn yr Ynad yn orfodol pan fydd Ynadon yn cael ei ddewis fel teitl y Barnwr";
-    public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
-    public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401_WELSH = "Nid yw’r gorchymyn hwn ar gael i’w greu ar gyfer achosion FL401";
 
@@ -997,7 +898,6 @@ public class PrlAppsConstants {
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
-    public static final String WA_ORDER_NAME = "orderNameForWA";
     public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
 
     public static final String AWP_WA_TASK_NAME = "awpWaTaskName";
@@ -1014,7 +914,6 @@ public class PrlAppsConstants {
     public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
     public static final String HEARING_JUDGE_ROLE = "hearing-judge";
     public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
-    public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
 
     // PRL-5025
     public static final String WA_IS_ORDER_APPROVED = "isOrderApproved";
@@ -1045,8 +944,6 @@ public class PrlAppsConstants {
     public static final String STAFF = "STAFF";
     public static final String TRUE = "True";
     public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
-    public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
-    public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
     public static final String WA_IS_APPLICANT_REPRESENTED = "isApplicantRepresented";
     public static final String WA_PRODUCT_HEARING_BUNDLE_ON = "productHearingBundleOn";
@@ -1089,11 +986,7 @@ public class PrlAppsConstants {
     public static final String SOA_BY_EMAIL_AND_POST = "By email and post";
     public static final String SOA_BY_POST = "By post";
 
-    //Citizen dashboard notifications
-    public static final String CAN_10_FM5 = "CAN_10";
-
     public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
-    public static final String WA_TASK_ADDITIONAL_PROP_KEY_ORDER_ID = "orderId";
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
@@ -1109,7 +1002,6 @@ public class PrlAppsConstants {
     public static final String CUSTOM_ORDER_DATE_ENDS_OPTIONS = "customOrderDateEndsOptions";
     public static final String CUSTOM_C43_ORDER_DETAILS = "customC43OrderDetails";
     public static final String CUSTOM_C21_ORDER_DETAILS = "customC21OrderDetails";
-    public static final String DD_MM_YYYY_DATE_FORMAT = "dd/MM/yyyy";
     public static final String LOGGED_IN_USER_TYPE = "loggedInUserType";
 
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
@@ -1182,13 +1074,19 @@ public class PrlAppsConstants {
     public static final String C100_CHILDREN_CONFIDENTIAL_DETAILS = "childrenConfidentialDetails";
     public static final String FL401_CHILDREN_CONFIDENTIAL_DETAILS = "fl401ChildrenConfidentialDetails";
     public static final String DOCUMENT_URL = "document_url";
-    public static final String DOCUMENT_FILENAME = "document_filename";
-    public static final String DOCUMENT_BINARY_URL = "document_binary_url";
-    public static final String DOCUMENT_UPLOAD_TIMESTAMP = "upload_timestamp";
 
     // Document Removal event
     public static final String DOCUMENT_REMOVAL_CASE_DOCUMENTS = "documentRemovalCaseDocuments";
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
+
+    public static final String CHILD_IMPACT_REPORT_1_LA = "childImpactReport1La";
+    public static final String CHILD_IMPACT_REPORT_2_LA = "childImpactReport2La";
+    public static final String SECTION_7_REPORT_LA = "section7ReportLa";
+    public static final String SECTION_7_ADDENDUM_REPORT_LA = "section7AddendumReportLa";
+    public static final String LOCAL_AUTHORITY_INVOLVEMENT_LA = "localAuthorityInvolvementLa";
+    public static final String SECTION_47_LA = "section47La";
+    public static final String CIR_EXTENSION_REQUEST_LA = "cirExtensionRequestLa";
+    public static final String CIR_TRANSFER_REQUEST_LA = "cirTransferRequestLa";
 
 }
