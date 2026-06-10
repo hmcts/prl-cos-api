@@ -690,9 +690,12 @@ public class SendAndReplyService {
         if (full == null || full.getListItems() == null || full.getListItems().isEmpty()) {
             return full;
         }
-        String prefix = hearingId + " - ";
+        log.info("hearingId associated with task ==>{}", hearingId);
         DynamicListElement match = full.getListItems().stream()
-            .filter(e -> e.getCode() != null && e.getCode().contains(prefix))
+            .filter(e -> {
+                log.info("hearing code => {}", e.getCode());
+                return e.getCode() != null && e.getCode().contains(hearingId);
+            })
             .findFirst()
             .orElse(null);
         if (match == null) {

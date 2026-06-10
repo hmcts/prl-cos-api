@@ -348,6 +348,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData,
                                                         boolean includePastHearings,
                                                         String lockToHearingId) {
+        log.info("processing Mid Event");
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
