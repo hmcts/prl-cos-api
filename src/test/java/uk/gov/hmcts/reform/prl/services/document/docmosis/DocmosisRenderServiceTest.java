@@ -36,6 +36,8 @@ class DocmosisRenderServiceTest {
     @Mock
     private DocmosisTemplatesConfig templatesConfig;
     @Mock
+    private TemplateDataMapper templateDataMapper;
+    @Mock
     private UploadDocumentService uploadDocumentService;
 
     private DocmosisRenderService docmosisRenderService;
@@ -43,9 +45,11 @@ class DocmosisRenderServiceTest {
     @BeforeEach
     void setUp() {
         Clock clock = Clock.fixed(Instant.parse("2026-05-02T10:15:30.00Z"), ZoneId.of("Europe/London"));
+
         docmosisRenderService = new DocmosisRenderService(
             docmosisClient,
             templatesConfig,
+            templateDataMapper,
             uploadDocumentService,
             clock
         );

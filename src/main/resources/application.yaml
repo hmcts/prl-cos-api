@@ -861,3 +861,10 @@ prepare-hearing-bundle:
 docmosis:
   url: ${DOCMOSIS_BASE_URL:https://docmosis.aat.platform.hmcts.net}
   access-key: ${DOCMOSIS_ACCESS_KEY:replace_me}
+  pdf:
+    familyCourtImgKey: "familycourt"
+    familyCourtImgVal: "[userImage:familycourt.png]"
+    hmctsImgKey: "hmcts"
+    hmctsImgVal: "[userImage:hmcts.png]"
+    displayTemplateKey: "displayTemplateOnly"
+    displayTemplateVal: "1"

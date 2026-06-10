@@ -27,6 +27,7 @@ public class DocmosisRenderService {
 
     private final DocmosisClient docmosisClient;
     private final DocmosisTemplatesConfig templatesConfig;
+    private final TemplateDataMapper templateDataMapper;
     private final UploadDocumentService uploadDocumentService;
     private final Clock clock;
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -41,7 +42,7 @@ public class DocmosisRenderService {
         String templateFilename = getTemplateFilename(generateDocumentRequest);
         log.info("Case ID {}: Generating document {}", generateDocumentRequest.getCaseId(), templateFilename);
 
-        Map<String, Object> placeholders = generateDocumentRequest.getValues();
+        Map<String, Object> placeholders = templateDataMapper.map(generateDocumentRequest.getValues());
         placeholders.put(CURRENT_DATE_KEY, dateTimeFormatter.format(ZonedDateTime.now(clock)));
 
         DocmosisRenderRequest request = DocmosisRenderRequest.builder()
