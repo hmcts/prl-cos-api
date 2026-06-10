@@ -71,7 +71,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -80,7 +79,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -417,6 +415,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -456,6 +455,7 @@ public class DocumentGenServiceTest {
         verify(dgsService).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -495,6 +495,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -553,6 +554,7 @@ public class DocumentGenServiceTest {
         verify(dgsService).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -593,6 +595,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -630,6 +633,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -663,11 +667,12 @@ public class DocumentGenServiceTest {
             anyString(),
             any(CaseDetails.class),
             any(),
-            eq(Optional.empty())
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -767,6 +772,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -862,6 +868,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -941,6 +948,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -1006,6 +1014,7 @@ public class DocumentGenServiceTest {
         verify(dgsService).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -1126,6 +1135,7 @@ public class DocumentGenServiceTest {
         verify(dgsService).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -1484,6 +1494,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -1936,6 +1947,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(6)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -1975,6 +1987,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(4)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2016,6 +2029,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2057,6 +2071,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(6)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2097,6 +2112,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2138,6 +2154,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2237,6 +2254,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2332,6 +2350,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2411,6 +2430,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2476,6 +2496,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2593,6 +2614,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(2)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -2992,7 +3014,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
-        verify(dgsService).generateWelshDocument(anyString(), any(CaseDetails.class), any());
+        verify(dgsService).generateWelshDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
 
@@ -3190,6 +3212,7 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -3212,7 +3235,7 @@ public class DocumentGenServiceTest {
 
     private Document generateSingleC8Document(CaseData caseData, boolean isWelsh, boolean draft) throws Exception {
         when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any(), any())).thenReturn(generatedDocumentInfo);
-        when(dgsService.generateWelshDocument(anyString(), any(CaseDetails.class), any())).thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(anyString(), any(CaseDetails.class), any(), any())).thenReturn(generatedDocumentInfo);
         when(c100DocumentTemplateFinderService.findC8DocumentTemplate(any(CaseData.class), Mockito.anyBoolean()))
             .thenReturn("c8-template");
         when(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(any(CaseData.class), Mockito.anyBoolean()))

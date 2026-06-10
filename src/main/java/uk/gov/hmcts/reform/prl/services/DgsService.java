@@ -144,6 +144,13 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName)
         throws DocumentGenerationException {
 
+        return generateWelshDocument(authorisation, caseDetails, templateName, Optional.empty());
+    }
+
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName,
+                                                       Optional<String> dynamicFilename)
+        throws DocumentGenerationException {
+
 
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -171,6 +178,8 @@ public class DgsService {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
+
+        dynamicFilename.ifPresent(s -> tempCaseDetails.put("dynamic_fileName", s));
         GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =

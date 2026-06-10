@@ -512,7 +512,7 @@ public class DocumentGenService {
                                                     boolean isWelsh,
                                                     boolean isDraft) {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && !isNotEmpty(caseData.getApplicants())) {
+            && isNotEmpty(caseData.getApplicants())) {
             return Optional.of(getC8FileName(
                 caseData.getApplicants().getFirst().getValue(),
                 isWelsh,
@@ -520,7 +520,7 @@ public class DocumentGenService {
             ));
 
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-            && !isNotEmpty(caseData.getApplicantsFL401())) {
+            && isNotEmpty(caseData.getApplicantsFL401())) {
             return Optional.of(getC8FileName(
                 caseData.getApplicantsFL401(),
                 isWelsh,
@@ -1001,7 +1001,8 @@ public class DocumentGenService {
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
-                template
+                template,
+                dynamicFilename
             );
         } else {
             log.info("Generating document for {} ", template);
