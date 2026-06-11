@@ -133,18 +133,7 @@ tasks.register("testWithCoverage") {
         }
       }
 
-      // Filter targets down to missing ones, then safely ignore them if they live in src/test/java
-      def missingTargets = targets.findAll { t ->
-        !foundTargets.any { f -> f.equalsIgnoreCase(t) }
-      }.findAll { missing ->
-        // Check if the missing class exists anywhere under the test directory tree
-        def testFileTree = project.fileTree(dir: "src/test/java")
-        def isTestFile = !testFileTree.filter { it.name == "${missing}.java" }.isEmpty()
-
-        // It is only a genuine missing target error if it's NOT a test file
-        return !isTestFile
-      }
-
+      def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
       if (!checkAll && !missingTargets.isEmpty()) {
         logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
         missingTargets.each { missing ->
