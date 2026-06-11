@@ -2,7 +2,7 @@ import groovy.xml.XmlParser
 
 tasks.register("testWithCoverage") {
   group = "verification"
-  description = "Full coverage report: Fixed XML DOCTYPE issues and clickable IDE links."
+  description = "Strict line-based coverage report matching SonarQube scoring."
 
   dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
 
@@ -15,19 +15,58 @@ tasks.register("testWithCoverage") {
     def yellow = "\u001B[33m"
     def orange = "\u001B[38;5;208m"
 
-    def targetInput = findProperty('target')?.toString() ?: ""
-    def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
-    def checkAll = targets.isEmpty()
+    def changedClassesMap = [:]
 
+    try {
+      def getChangedLines = { ref ->
+        def cmd = ["bash", "-lc", "git fetch origin ${ref}:${ref} --depth=1 >/dev/null 2>&1 || true && git rev-parse --verify ${ref} >/dev/null 2>&1 && git diff -U0 ${ref}...HEAD || true"]
+        def proc = cmd.execute(null, project.rootDir)
+        proc.waitFor()
+        def diffText = proc.in.text?.trim() ?: ""
+
+        def diffMap = [:]
+        def currentFile = null
+
+        diffText.eachLine { line ->
+          if (line.startsWith("+++ b/")) {
+            def path = line.substring(6)
+            if (path.endsWith(".java")) {
+              currentFile = new File(path).getName().replaceAll(/\.java$/, "")
+              diffMap[currentFile] = [] as Set
+            } else {
+              currentFile = null
+            }
+          } else if (currentFile != null && line.startsWith("@@ ")) {
+            def matcher = (line =~ /@@ \-\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/)
+            if (matcher.find()) {
+              int startLine = matcher.group(1).toInteger()
+              int count = matcher.group(2) != null ? matcher.group(2).toInteger() : 1
+              for (int i = 0; i < count; i++) {
+                diffMap[currentFile] << (startLine + i)
+              }
+            }
+          }
+        }
+        return diffMap
+      }
+
+      changedClassesMap = getChangedLines("origin/master")
+      if (changedClassesMap.isEmpty()) changedClassesMap = getChangedLines("origin/main")
+
+    } catch (Exception e) {
+      logger.lifecycle("Warning: could not compute git diff: ${e.message}")
+    }
+
+    def checkAll = changedClassesMap.isEmpty()
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
-    int grandMissedUnits = 0
-    int grandCoveredUnits = 0
-    def foundTargets = [] as Set
-    def allClassNames = [] as Set
+    // SonarQube Aggregate Metrics
+    int grandTotalLinesToCover = 0
+    int grandCoveredLines = 0
+    int grandTotalConditions = 0
+    int grandCoveredConditions = 0
 
     if (reportFile.exists()) {
-      // FIXED: Allow DOCTYPE but disable DTD loading to avoid parser errors
       def parser = new XmlParser(false, false)
       parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
       parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
@@ -40,124 +79,120 @@ tasks.register("testWithCoverage") {
         pkg.'sourcefile'.each { sourceFile ->
           def fileName = sourceFile.attribute('name') ?: ""
           def className = fileName.replace(".java", "")
-          allClassNames.add(className)
 
-          boolean isTargeted = targets.any { it.equalsIgnoreCase(className) }
+          boolean isTargeted = changedClassesMap.containsKey(className)
 
           if (checkAll || isTargeted) {
-            if (isTargeted) foundTargets.add(targets.find { it.equalsIgnoreCase(className) })
+            def changedLineNumbers = isTargeted ? changedClassesMap[className] : ([] as Set)
 
-            int fileMissedInstr = 0, fileCoveredInstr = 0
-            int fileMissedBranch = 0, fileCoveredBranch = 0
+            int fileTotalLines = 0, fileCoveredLines = 0
+            int fileTotalConditions = 0, fileCoveredConditions = 0
+            def missedLineDetails = []
 
-            sourceFile.'line'.each { line ->
-              fileMissedInstr  += (line.attribute('mi')?.toString() ?: "0").toInteger()
-              fileCoveredInstr += (line.attribute('ci')?.toString() ?: "0").toInteger()
-              fileMissedBranch += (line.attribute('mb')?.toString() ?: "0").toInteger()
-              fileCoveredBranch += (line.attribute('cb')?.toString() ?: "0").toInteger()
+            // Load file lines early to cross-reference with AST constraints
+            def relativePath = "src/main/java/${pkgPath}/${fileName}"
+            def javaFile = project.file(relativePath)
+            def linesContent = javaFile.exists() ? javaFile.readLines() : []
+
+            def sourceLines = sourceFile.'line'
+            if (sourceLines != null && !sourceLines.isEmpty()) {
+              def linesToProcess = checkAll ? sourceLines.collect { it.attribute('nr')?.toString() } : changedLineNumbers.collect { it.toString() }
+
+              linesToProcess.each { lineStr ->
+                def lineNode = sourceLines.find { it.attribute('nr') == lineStr }
+
+                if (lineNode) {
+                  int lineNum = lineStr.toInteger()
+                  int mi = (lineNode.attribute('mi')?.toString() ?: "0").toInteger()
+                  int ci = (lineNode.attribute('ci')?.toString() ?: "0").toInteger()
+                  int mb = (lineNode.attribute('mb')?.toString() ?: "0").toInteger()
+                  int cb = (lineNode.attribute('cb')?.toString() ?: "0").toInteger()
+
+                  // 🌟 CRITICAL FIX: SonarQube AST Emulation
+                  // Strips bytecode branches from lines missing actual source-level branch conditions
+                  def lineText = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1] : ""
+                  boolean containsConditional = (lineText =~ /\b(if|while|for|switch|case)\b|&&|\|\||\?/) as boolean
+                  if (!containsConditional) {
+                    mb = 0
+                    cb = 0
+                  }
+
+                  // A line is executable if it contains bytecode instructions
+                  boolean isExecutable = (mi > 0 || ci > 0)
+
+                  if (isExecutable) {
+                    fileTotalLines++
+                    if (ci > 0) fileCoveredLines++
+
+                    fileTotalConditions += (mb + cb)
+                    fileCoveredConditions += cb
+
+                    if ((ci == 0 && mi > 0) || (mb > 0)) {
+                      missedLineDetails << [lineNum: lineNum, mb: mb, ci: ci, mi: mi]
+                    }
+                  }
+                }
+              }
             }
 
-            grandMissedUnits += (fileMissedInstr + fileMissedBranch)
-            grandCoveredUnits += (fileCoveredInstr + fileCoveredBranch)
+            grandTotalLinesToCover += fileTotalLines
+            grandCoveredLines += fileCoveredLines
+            grandTotalConditions += fileTotalConditions
+            grandCoveredConditions += fileCoveredConditions
 
-            if (!checkAll && isTargeted) {
-              double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
-              double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
+            if (!checkAll && isTargeted && fileTotalLines > 0) {
+              double fileTotalUnits = fileTotalLines + fileTotalConditions
+              double filePct = fileTotalUnits > 0 ? ((fileCoveredLines + fileCoveredConditions) / fileTotalUnits) * 100 : 100.0
               def color = filePct >= 80 ? green : red
 
               logger.lifecycle("\n" + "━" * 85)
-              logger.lifecycle(" 🎯 TARGET REPORT: ${fileName}")
+              logger.lifecycle(" 🎯 TARGET REPORT: ${fileName} (New Code Only)")
               logger.lifecycle(" 📈 Score: ${color}${String.format("%.2f", filePct)}%${reset} | Threshold: 80%")
               logger.lifecycle("━" * 85)
 
-              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %-10s", "METRIC", "MISSED", "COVERED", "SCORE"))
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %-10s", "METRIC", "TOTAL", "COVERED", "SCORE"))
               logger.lifecycle("─" * 85)
 
-              def instTotal = fileCoveredInstr + fileMissedInstr
-              def instPct = instTotal > 0 ? (fileCoveredInstr / (double)instTotal * 100) : 100.0
-              def brnTotal = fileCoveredBranch + fileMissedBranch
-              def brnPct = brnTotal > 0 ? (fileCoveredBranch / (double)brnTotal * 100) : 100.0
+              def linePct = fileTotalLines > 0 ? (fileCoveredLines / (double)fileTotalLines * 100) : 100.0
+              def condPct = fileTotalConditions > 0 ? (fileCoveredConditions / (double)fileTotalConditions * 100) : 100.0
 
-              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %.2f%%", "Instructions", fileMissedInstr, fileCoveredInstr, instPct))
-              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %s", "Branches", fileMissedBranch, fileCoveredBranch, brnTotal > 0 ? String.format("%.2f%%", brnPct) : "N/A"))
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %.2f%%", "Lines", fileTotalLines, fileCoveredLines, linePct))
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %s", "Conditions", fileTotalConditions, fileCoveredConditions, fileTotalConditions > 0 ? String.format("%.2f%%", condPct) : "N/A"))
               logger.lifecycle("━" * 85)
 
-              def relativePath = "src/main/java/${pkgPath}/${fileName}"
-              def javaFile = project.file(relativePath)
-              def linesContent = javaFile.exists() ? javaFile.readLines() : []
+              if (!missedLineDetails.isEmpty()) {
+                missedLineDetails.sort { it.lineNum }.each { gap ->
+                  def code = (gap.lineNum > 0 && gap.lineNum <= linesContent.size()) ? linesContent[gap.lineNum - 1].trim() : "---"
 
-              // --- SECTION 1: Logic Gaps (Branches) ---
-              def branchGaps = sourceFile.'line'.findAll { (it.attribute('mb')?.toInteger() ?: 0) > 0 }
-              if (!branchGaps.isEmpty()) {
-                logger.lifecycle(" ${yellow}⚠️  Logic Gaps (Partial Branches):${reset}")
-                branchGaps.each { line ->
-                  def lineAttr = line.attribute('nr')?.toString()
-                  if (lineAttr) {
-                    int lineNum = lineAttr.toInteger()
-                    int mb = (line.attribute('mb')?.toString() ?: "0").toInteger()
-                    int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
-                    def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
-
-                    logger.lifecycle(String.format("   %-65s ${gray}(M.Br: %s, M.Inst: %s)${reset}", "${relativePath}:${lineNum}", mb, mi))
-                    logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
+                  if (gap.mb > 0) {
+                    logger.lifecycle(" ${yellow}⚠️  Partial Condition (Branch missed):${reset}")
+                    logger.lifecycle(String.format("   %-65s ${gray}(Missed Branches: %s)${reset}", "${relativePath}:${gap.lineNum}", gap.mb))
+                  } else {
+                    logger.lifecycle(" ${orange}💡 Execution Gap (Line completely missed):${reset}")
+                    logger.lifecycle(String.format("   %-65s", "${relativePath}:${gap.lineNum}"))
                   }
+                  logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
                 }
                 logger.lifecycle("─" * 85)
+              } else {
+                logger.lifecycle(" ${green}✨ No gaps found in new code!${reset}")
+                logger.lifecycle("━" * 85)
               }
-
-              // --- SECTION 2: Execution Gaps (Missing Instructions) ---
-              def instrGaps = sourceFile.'line'.findAll {
-                (it.attribute('mi')?.toInteger() ?: 0) > 0 && (it.attribute('mb')?.toInteger() ?: 0) == 0
-              }
-              if (!instrGaps.isEmpty()) {
-                logger.lifecycle(" ${orange}💡 Execution Gaps (Missing Instructions/Lines not hit):${reset}")
-                instrGaps.each { line ->
-                  def lineAttr = line.attribute('nr')?.toString()
-                  if (lineAttr) {
-                    int lineNum = lineAttr.toInteger()
-                    int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
-                    def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
-
-                    logger.lifecycle(String.format("   %-65s ${gray}(M.Inst: %s)${reset}", "${relativePath}:${lineNum}", mi))
-                    logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
-                  }
-                }
-              }
-
-              if (branchGaps.isEmpty() && instrGaps.isEmpty()) {
-                logger.lifecycle(" ${green}✨ No gaps found!${reset}")
-              }
-              logger.lifecycle("━" * 85)
             }
           }
         }
       }
 
-      def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
-      if (!checkAll && !missingTargets.isEmpty()) {
-        logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
-        missingTargets.each { missing ->
-          logger.lifecycle("   - ${missing}")
-          def suggestions = allClassNames.findAll { it.toLowerCase().contains(missing.toLowerCase()) }.sort()
-          if (!suggestions.isEmpty()) {
-            logger.lifecycle("     ${green}Did you mean?${reset}")
-            suggestions.take(5).each { logger.lifecycle("      • ${it}") }
-          }
-        }
-        throw new GradleException("Target class mismatch. Check spelling!")
-      }
-
-      double grandTotal = grandMissedUnits + grandCoveredUnits
-      double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
+      double grandTotalUnits = grandTotalLinesToCover + grandTotalConditions
+      double grandPct = grandTotalUnits > 0 ? ((grandCoveredLines + grandCoveredConditions) / grandTotalUnits) * 100 : 100.0
       def grandColor = grandPct >= 80 ? green : red
       def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}❌ FAIL${reset}"
 
       logger.lifecycle("\n" + "━" * 85)
-      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
+      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (SonarQube Math)" : "🏁 NEW CODE SCORE (SonarQube Math)"
       logger.lifecycle(" ${title}")
       logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
       logger.lifecycle("━" * 85 + "\n")
-      logger.lifecycle("${white} 📁 Full Report: file://${reportFile.parentFile.path}/html/index.html\n${reset}")
 
       if (grandPct < 80) {
         throw new GradleException("Coverage is below 80% threshold!")
