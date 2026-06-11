@@ -210,7 +210,8 @@ public class UpdateHearingActualsService {
 
         return QueryParam.builder()
                 .query(Query.builder().bool(finalFilter).build())
-                .size("100")
+                //.size("100") @TODO below change is just for demo env, dont change in prod
+                .size("1000")
             .dataToReturn(fetchFieldsRequiredForHearingActualTask())
                 .build();
     }
