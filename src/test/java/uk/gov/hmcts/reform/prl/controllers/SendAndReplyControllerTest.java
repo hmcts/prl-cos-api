@@ -665,7 +665,7 @@ public class SendAndReplyControllerTest {
         // given
         CallbackRequest callbackRequest = setUpHandleSubmitted();
         CaseData caseData = setUpHandleSubmittedCaseData();
-        when(sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, auth,null)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+        when(sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
 
         // when
         ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReplyTask(auth, callbackRequest, null);
@@ -673,7 +673,7 @@ public class SendAndReplyControllerTest {
         // then
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
-        verify(sendAndReplyService).sendAndReplySubmittedTask(callbackRequest, auth, null);
+        verify(sendAndReplyService).sendAndReplySubmittedTask(callbackRequest, auth);
     }
 
 

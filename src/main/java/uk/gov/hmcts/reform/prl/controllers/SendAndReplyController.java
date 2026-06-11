@@ -341,9 +341,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                     @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        String taskTriggeredBy = extractTaskTriggeredByFromClientContext(clientContext);
-        log.info("taskTriggeredBy==> {}", taskTriggeredBy);
-        return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation, taskTriggeredBy);
+        return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation);
     }
 
 
