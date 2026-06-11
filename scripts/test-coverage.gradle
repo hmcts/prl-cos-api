@@ -60,7 +60,6 @@ tasks.register("testWithCoverage") {
     def checkAll = changedClassesMap.isEmpty()
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
-    // SonarQube Aggregate Metrics
     int grandTotalLinesToCover = 0
     int grandCoveredLines = 0
     int grandTotalConditions = 0
@@ -89,7 +88,6 @@ tasks.register("testWithCoverage") {
             int fileTotalConditions = 0, fileCoveredConditions = 0
             def missedLineDetails = []
 
-            // Load file lines early to cross-reference with AST constraints
             def relativePath = "src/main/java/${pkgPath}/${fileName}"
             def javaFile = project.file(relativePath)
             def linesContent = javaFile.exists() ? javaFile.readLines() : []
@@ -99,36 +97,76 @@ tasks.register("testWithCoverage") {
               def linesToProcess = checkAll ? sourceLines.collect { it.attribute('nr')?.toString() } : changedLineNumbers.collect { it.toString() }
 
               linesToProcess.each { lineStr ->
+                // Safe line element lookup with fallback handling
                 def lineNode = sourceLines.find { it.attribute('nr') == lineStr }
 
                 if (lineNode) {
                   int lineNum = lineStr.toInteger()
+                  def lineText = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1] : ""
+                  def trimmed = lineText.trim()
+
                   int mi = (lineNode.attribute('mi')?.toString() ?: "0").toInteger()
                   int ci = (lineNode.attribute('ci')?.toString() ?: "0").toInteger()
                   int mb = (lineNode.attribute('mb')?.toString() ?: "0").toInteger()
                   int cb = (lineNode.attribute('cb')?.toString() ?: "0").toInteger()
 
-                  // 🌟 CRITICAL FIX: SonarQube AST Emulation
-                  // Strips bytecode branches from lines missing actual source-level branch conditions
-                  def lineText = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1] : ""
-                  boolean containsConditional = (lineText =~ /\b(if|while|for|switch|case)\b|&&|\|\||\?/) as boolean
-                  if (!containsConditional) {
-                    mb = 0
-                    cb = 0
-                  }
-
-                  // A line is executable if it contains bytecode instructions
                   boolean isExecutable = (mi > 0 || ci > 0)
 
                   if (isExecutable) {
-                    fileTotalLines++
-                    if (ci > 0) fileCoveredLines++
+                    boolean isSonarExecutable = true
 
-                    fileTotalConditions += (mb + cb)
-                    fileCoveredConditions += cb
+                    if (trimmed.isEmpty() ||
+                      trimmed.startsWith("//") ||
+                      trimmed.startsWith("/*") ||
+                      trimmed.startsWith("*") ||
+                      trimmed.startsWith("@") ||
+                      trimmed.startsWith("package ") ||
+                      trimmed.startsWith("import ") ||
+                      trimmed.contains("class ") ||
+                      trimmed.contains("interface ") ||
+                      trimmed.contains("enum ")) {
+                      isSonarExecutable = false
+                    } else {
+                      def structuralClean = trimmed.replaceAll(/[\{\}\(\);]/, "").replaceAll(/\b(else|try|finally)\b/, "").trim()
+                      if (structuralClean.isEmpty()) {
+                        isSonarExecutable = false
+                      }
+                      else if (trimmed.endsWith(",")) {
+                        isSonarExecutable = false
+                      }
+                    }
 
-                    if ((ci == 0 && mi > 0) || (mb > 0)) {
-                      missedLineDetails << [lineNum: lineNum, mb: mb, ci: ci, mi: mi]
+                    if (isSonarExecutable) {
+                      boolean isContinuation = trimmed.startsWith("&&") || trimmed.startsWith("||")
+
+                      if (isContinuation && mb > 0) {
+                        ci = 0
+                      }
+
+                      fileTotalLines++
+                      if (ci > 0) fileCoveredLines++
+
+                      int lineTotalConditions = mb + cb
+                      int lineCoveredConditions = cb
+
+                      if (mb == 0 && lineTotalConditions == 2 && !trimmed.startsWith("if") && !trimmed.contains("?")) {
+                        lineTotalConditions = 0
+                        lineCoveredConditions = 0
+                      }
+
+                      if (ci == 0 && (trimmed.contains("&&") || trimmed.contains("||"))) {
+                        lineTotalConditions = 2
+                        lineCoveredConditions = 0
+                        // Re-align missed branch totals if it's completely unexecuted text logic
+                        if (mb == 0) mb = 2
+                      }
+
+                      fileTotalConditions += lineTotalConditions
+                      fileCoveredConditions += lineCoveredConditions
+
+                      if ((ci == 0 && mi > 0) || (mb > 0)) {
+                        missedLineDetails << [lineNum: lineNum, mb: mb, ci: ci, mi: mi]
+                      }
                     }
                   }
                 }
@@ -161,16 +199,20 @@ tasks.register("testWithCoverage") {
               logger.lifecycle("━" * 85)
 
               if (!missedLineDetails.isEmpty()) {
-                missedLineDetails.sort { it.lineNum }.each { gap ->
+                missedLineDetails.unique { it.lineNum }.sort { it.lineNum }.each { gap ->
                   def code = (gap.lineNum > 0 && gap.lineNum <= linesContent.size()) ? linesContent[gap.lineNum - 1].trim() : "---"
+
+                  // 🛠️ FIXED OUTPUT LOOP: Process execution gap and missed branch independently
+                  if (gap.ci == 0 && gap.mi > 0) {
+                    logger.lifecycle(" ${orange}💡 Execution Gap (Line completely missed):${reset}")
+                    logger.lifecycle(String.format("   %-65s", "${relativePath}:${gap.lineNum}"))
+                  }
 
                   if (gap.mb > 0) {
                     logger.lifecycle(" ${yellow}⚠️  Partial Condition (Branch missed):${reset}")
                     logger.lifecycle(String.format("   %-65s ${gray}(Missed Branches: %s)${reset}", "${relativePath}:${gap.lineNum}", gap.mb))
-                  } else {
-                    logger.lifecycle(" ${orange}💡 Execution Gap (Line completely missed):${reset}")
-                    logger.lifecycle(String.format("   %-65s", "${relativePath}:${gap.lineNum}"))
                   }
+
                   logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
                 }
                 logger.lifecycle("─" * 85)
