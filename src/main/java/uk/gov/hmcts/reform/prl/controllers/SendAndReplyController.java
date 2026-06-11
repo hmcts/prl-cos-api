@@ -249,6 +249,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest);
         // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
         // exclusively for the WA chase flow). No task context, so no hearing lock.
+        log.info("Not Triggered By Task==>");
         return processSendOrReplyMidEvent(authorisation, caseData, false, null);
     }
 
@@ -269,7 +270,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         // is in the client-context header, lock the dropdown to that hearing
         // (FPVTL-2408/2409).
         String lockToHearingId = extractHearingIdFromClientContext(clientContext);
-        log.info("hearingId Associated with the task {}", lockToHearingId);
+        log.info("hearingId Associated with the task==> {}", lockToHearingId);
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
 
@@ -327,7 +328,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                   @Parameter(hidden = true) String authorisation,
                   @RequestBody CallbackRequest callbackRequest,
                   @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
-
+        log.info("Not Triggered By Task==>");
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
@@ -341,7 +342,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         String taskTriggeredBy = extractTaskTriggeredByFromClientContext(clientContext);
-        log.info("taskTriggeredBy {}", taskTriggeredBy);
+        log.info("taskTriggeredBy==> {}", taskTriggeredBy);
         return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation, taskTriggeredBy);
     }
 
