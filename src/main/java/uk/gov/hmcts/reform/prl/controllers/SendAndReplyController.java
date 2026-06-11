@@ -281,6 +281,14 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
 
+    private static String extractTaskTriggeredByFromClientContext(String clientContext) {
+        if (clientContext == null || clientContext.isBlank()) {
+            return null;
+        }
+        return CaseUtils.getTaskTriggeredBy(CaseUtils.getWaMapper(clientContext));
+    }
+
+
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
@@ -332,7 +340,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                     @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation);
+        String taskTriggeredBy = extractTaskTriggeredByFromClientContext(clientContext);
+        return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation, taskTriggeredBy);
     }
 
 

@@ -153,6 +153,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_REPLY_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED_WITH_MESSAGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
@@ -2306,9 +2307,11 @@ public class SendAndReplyService {
 
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest,
+                                                                               String authorisation, String taskTriggeredBy) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
+        SendOrReply sendOrReplyChoice = nonNull(taskTriggeredBy) && TASK_TRIGGERED_BY.equalsIgnoreCase(taskTriggeredBy) ? SEND : REPLY;
+        return sendAndReplySubmittedForChoice(caseData, sendOrReplyChoice.name(), authorisation);
     }
 
     private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
