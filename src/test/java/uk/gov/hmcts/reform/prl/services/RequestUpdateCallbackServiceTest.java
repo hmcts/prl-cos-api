@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -442,69 +441,6 @@ class RequestUpdateCallbackServiceTest {
         verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
         List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
         assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK));
-    }
-
-    @Test
-    void shouldSkipProcessingWhenPaymentObjectIsNullInDto() {
-        CaseData caseData = CaseData.builder()
-            .id(caseId)
-            .paymentServiceRequestReferenceNumber("some-ref")
-            .build();
-        // DTO with null payment - call the private method directly to avoid processCallback's unguarded logging
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("some-ref")
-            .serviceRequestStatus("Paid")
-            .payment(null)
-            .build();
-
-        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-
-        // Duplicate check should return true and prevent startUpdate
-        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
-    }
-
-    @Test
-    void shouldSkipProcessingWhenServiceRequestReferenceMissing() {
-        CaseData caseData = CaseData.builder()
-            .id(caseId)
-            .paymentServiceRequestReferenceNumber("some-ref")
-            .build();
-        // DTO with empty serviceRequestReference - call the private method directly
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("")
-            .serviceRequestStatus("Paid")
-            .payment(PaymentDto.builder().paymentReference("p").paymentAmount("1").build())
-            .build();
-
-        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-
-        // Duplicate check should return true and prevent startUpdate
-        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
-    }
-
-    @Test
-    void shouldSkipProcessingWhenCaseDataIsNull() {
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("ref")
-            .serviceRequestStatus("Paid")
-            .payment(PaymentDto.builder().paymentReference("p").paymentAmount("1").build())
-            .build();
-
-        try (org.mockito.MockedStatic<CaseUtils> caseUtilsMock = org.mockito.Mockito.mockStatic(CaseUtils.class)) {
-            caseUtilsMock.when(() -> CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(null);
-
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-
-            // Duplicate check should return true and prevent startUpdate
-            verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
-        }
     }
 
     @Test

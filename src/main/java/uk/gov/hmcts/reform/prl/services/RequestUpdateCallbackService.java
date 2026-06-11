@@ -66,16 +66,11 @@ public class RequestUpdateCallbackService {
 
         CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (isDuplicatePayment(caseDetails, serviceRequestUpdateDto)) {
-            String incomingPaymentRef = "N/A";
-            if (serviceRequestUpdateDto != null && serviceRequestUpdateDto.getPayment() != null
-                && serviceRequestUpdateDto.getPayment().getPaymentReference() != null) {
-                incomingPaymentRef = serviceRequestUpdateDto.getPayment().getPaymentReference();
-            }
             log.info(
                 "Payment already processed for case {} with service request reference {}, and incoming payment reference {}, skipping update.",
-                serviceRequestUpdateDto != null ? serviceRequestUpdateDto.getCcdCaseNumber() : "N/A",
-                currentCaseData != null ? currentCaseData.getPaymentServiceRequestReferenceNumber() : "N/A",
-                incomingPaymentRef
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                currentCaseData.getPaymentServiceRequestReferenceNumber(),
+                serviceRequestUpdateDto.getPayment().getPaymentReference()
             );
             return;
         }
@@ -189,22 +184,10 @@ public class RequestUpdateCallbackService {
     private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        if (caseData == null || paymentUpdateDto == null || paymentUpdateDto.getPayment() == null) {
-            log.warn(
-                "Invalid payment update payload or missing CaseData. Aborting update. CaseData present: {}, DTO present: {}",
-                caseData != null, paymentUpdateDto != null
-            );
-            return true;
-        }
-
         String incomingRef = paymentUpdateDto.getServiceRequestReference();
-        if (StringUtils.isEmpty(incomingRef)) {
-            log.warn("Incoming payment update is missing a service request reference.");
-            return true;
-        }
 
         // Root Case Payment Request
-        if (isRootServiceRequest(caseDetails, incomingRef)) {
+        if (isRootServiceRequest(caseDetails, paymentUpdateDto.getServiceRequestReference())) {
             // If the database already shows a recorded callback and it was successful, it's a duplicate
             return caseData.getPaymentCallbackServiceRequestUpdate() != null
                 && PAID.equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestStatus());
