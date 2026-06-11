@@ -135,4 +135,12 @@ public class QuarantineLegalDoc {
             "courtnavQuarantine", "c8ArchivedDocuments", "bulkScanQuarantine", "draftOrders", "localAuthorityQuarantine"
         };
     }
+
+
+    public static String[] allQuarantineCategoriesToRemove() {
+        return new String [] {
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine",
+            "courtnavQuarantine", "bulkScanQuarantine", "localAuthorityQuarantine"
+        };
+    }
 }
