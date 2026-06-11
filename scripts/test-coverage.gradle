@@ -189,7 +189,7 @@ tasks.register("testWithCoverage") {
       def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}❌ FAIL${reset}"
 
       logger.lifecycle("\n" + "━" * 85)
-      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (SonarQube Math)" : "🏁 NEW CODE SCORE (SonarQube Math)"
+      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE" : "🏁 NEW CODE SCORE (Only Changed Lines for this PR)"
       logger.lifecycle(" ${title}")
       logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
       logger.lifecycle("━" * 85 + "\n")

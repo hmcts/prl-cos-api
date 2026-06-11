@@ -184,6 +184,9 @@ public class RequestUpdateCallbackService {
     private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
+        if (paymentUpdateDto == null) {
+            return false;
+        }
         String incomingRef = paymentUpdateDto.getServiceRequestReference();
 
         // Root Case Payment Request
