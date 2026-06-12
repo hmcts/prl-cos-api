@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
@@ -41,11 +42,13 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -141,17 +144,20 @@ public class CafcassDateTimeUpdateHelper {
         if (caseManagementLocation == null) {
             return null;
         }
-        if (caseManagementLocation.getRegionId() != null
-            && Integer.parseInt(caseManagementLocation.getRegionId()) < 7) {
-            caseIdWithRegionIdMap.put(cafCassCaseDetail.getId().toString(), caseManagementLocation.getRegionId()
-                + "-" + caseManagementLocation.getBaseLocationId());
-            cafCassCaseDetail.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocationId());
-        } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
-            caseIdWithRegionIdMap.put(
-                String.valueOf(cafCassCaseDetail.getId()),
-                caseManagementLocation.getRegion() + "-" + caseManagementLocation.getBaseLocation()
+        if (isCafcassCymruRegion(caseManagementLocation.getRegionId())) {
+            addCaseRegionMapping(
+                caseIdWithRegionIdMap,
+                cafCassCaseDetail,
+                caseManagementLocation.getRegionId(),
+                caseManagementLocation.getBaseLocationId()
             );
-            cafCassCaseDetail.getCaseData().setCourtEpimsId(caseManagementLocation.getBaseLocation());
+        } else if (caseManagementLocation.getRegion() != null && Integer.parseInt(caseManagementLocation.getRegion()) < 7) {
+            addCaseRegionMapping(
+                caseIdWithRegionIdMap,
+                cafCassCaseDetail,
+                caseManagementLocation.getRegion(),
+                caseManagementLocation.getBaseLocation()
+            );
             cafCassCaseDetail.getCaseData().setCafcassUploadedDocs(null);
         } else {
             return null;
@@ -164,6 +170,18 @@ public class CafcassDateTimeUpdateHelper {
         filterCancelledHearingsBeforeListing(listOfHearingDetails);
         updateHearingDataCafcass(cafCassCaseDetail, listOfHearingDetails);
         return cafCassCaseDetail;
+    }
+
+    private boolean isCafcassCymruRegion(String region) {
+        return region != null && Integer.parseInt(region) < 7;
+    }
+
+    private void addCaseRegionMapping(Map<String, String> caseIdWithRegionIdMap,
+                                      CafCassCaseDetail cafCassCaseDetail,
+                                      String region,
+                                      String baseLocation) {
+        caseIdWithRegionIdMap.put(String.valueOf(cafCassCaseDetail.getId()), region + "-" + baseLocation);
+        cafCassCaseDetail.getCaseData().setCourtEpimsId(baseLocation);
     }
 
     private void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
@@ -275,18 +293,16 @@ public class CafcassDateTimeUpdateHelper {
     }
 
     private void populateAnyOtherDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        if (CollectionUtils.isNotEmpty(caseData.getOtherDocumentsUploaded())) {
-            caseData.getOtherDocumentsUploaded().forEach(document -> addInOtherDocuments(
-                ANY_OTHER_DOC,
-                document,
-                otherDocsList
-            ));
-        }
-        if (null != caseData.getUploadOrderDoc()) {
-            addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
-        }
+        addCaseDocuments(ANY_OTHER_DOC, caseData.getOtherDocumentsUploaded(), otherDocsList);
+        addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
         populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
         populateStatementOfServiceDocs(caseData, otherDocsList);
+    }
+
+    private void addCaseDocuments(String category,
+                                  List<uk.gov.hmcts.reform.prl.models.documents.Document> documents,
+                                  List<Element<OtherDocuments>> otherDocsList) {
+        nullSafeList(documents).forEach(document -> addInOtherDocuments(category, document, otherDocsList));
     }
 
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
@@ -313,17 +329,9 @@ public class CafcassDateTimeUpdateHelper {
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        if (null != caseData.getSpecialArrangementsLetter()) {
-            addInOtherDocuments(ANY_OTHER_DOC, caseData.getSpecialArrangementsLetter(), otherDocsList);
-        }
-        if (null != caseData.getAdditionalDocuments()) {
-            addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(), otherDocsList);
-        }
-        if (CollectionUtils.isNotEmpty(caseData.getAdditionalDocumentsList())) {
-            caseData.getAdditionalDocumentsList().forEach(
-                documentElement -> addInOtherDocuments(ANY_OTHER_DOC, documentElement.getValue(), otherDocsList)
-            );
-        }
+        addInOtherDocuments(ANY_OTHER_DOC, caseData.getSpecialArrangementsLetter(), otherDocsList);
+        addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(), otherDocsList);
+        addDocumentElements(ANY_OTHER_DOC, caseData.getAdditionalDocumentsList(), otherDocsList);
 
         if (ObjectUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             caseData.getFinalServedApplicationDetailsList().forEach(
@@ -342,16 +350,29 @@ public class CafcassDateTimeUpdateHelper {
         }
     }
 
+    private void addDocumentElements(
+        String category,
+        List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> documents,
+        List<Element<OtherDocuments>> otherDocsList
+    ) {
+        nullSafeList(documents).forEach(documentElement -> addInOtherDocuments(category, documentElement.getValue(), otherDocsList));
+    }
+
     private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
                                                           List<Element<OtherDocuments>> otherDocsList) {
-        bulkPrintDetails.getPrintDocs().forEach(
-            docElement -> addOtherDocumentIfMissing(docElement.getValue(), otherDocsList)
-        );
+        addDocumentElementsIfMissing(bulkPrintDetails.getPrintDocs(), otherDocsList);
     }
 
     private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
                                                         List<Element<OtherDocuments>> otherDocsList) {
-        nullSafeList(emailNotificationDetails.getDocs()).forEach(
+        addDocumentElementsIfMissing(emailNotificationDetails.getDocs(), otherDocsList);
+    }
+
+    private void addDocumentElementsIfMissing(
+        List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> documents,
+        List<Element<OtherDocuments>> otherDocsList
+    ) {
+        nullSafeList(documents).forEach(
             docElement -> addOtherDocumentIfMissing(docElement.getValue(), otherDocsList)
         );
     }
@@ -383,27 +404,34 @@ public class CafcassDateTimeUpdateHelper {
             && null != caseData.getBundleInformation().getCaseBundles()
             && CollectionUtils.isNotEmpty(caseData.getBundleInformation().getCaseBundles())) {
             caseData.getBundleInformation().getCaseBundles().forEach(bundle -> {
-                if (isNotEmpty(bundle.getValue().getStitchedDocument())) {
-                    uk.gov.hmcts.reform.prl.models.documents.Document document =
-                        uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-                            .documentFileName(bundle.getValue().getStitchedDocument().getDocumentFilename())
-                            .documentUrl(bundle.getValue().getStitchedDocument().getDocumentUrl())
-                            .build();
-                    addInOtherDocuments("courtBundle", document, otherDocsList);
-                }
+                DocumentLink stitchedDocument = bundle.getValue().getStitchedDocument();
+                addBundleDocument(stitchedDocument, otherDocsList);
             });
         }
     }
 
     private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getCourtStaffUploadDocListDocTab());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getLegalProfUploadDocListDocTab());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getCafcassUploadDocListDocTab());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getLocalAuthorityUploadDocListDocTab());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getCitizenUploadedDocListDocTab());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getConfidentialDocuments());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getBulkScannedDocListDocTab());
-        parseQuarantineLegalDocsIfPresent(otherDocsList, caseData.getRestrictedDocuments());
+        Arrays.asList(
+            caseData.getCourtStaffUploadDocListDocTab(),
+            caseData.getLegalProfUploadDocListDocTab(),
+            caseData.getCafcassUploadDocListDocTab(),
+            caseData.getLocalAuthorityUploadDocListDocTab(),
+            caseData.getCitizenUploadedDocListDocTab(),
+            caseData.getConfidentialDocuments(),
+            caseData.getBulkScannedDocListDocTab(),
+            caseData.getRestrictedDocuments()
+        ).forEach(quarantineLegalDocs -> parseQuarantineLegalDocsIfPresent(otherDocsList, quarantineLegalDocs));
+    }
+
+    private void addBundleDocument(DocumentLink stitchedDocument, List<Element<OtherDocuments>> otherDocsList) {
+        if (isNotEmpty(stitchedDocument)) {
+            uk.gov.hmcts.reform.prl.models.documents.Document document =
+                uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentFileName(stitchedDocument.getDocumentFilename())
+                    .documentUrl(stitchedDocument.getDocumentUrl())
+                    .build();
+            addInOtherDocuments("courtBundle", document, otherDocsList);
+        }
     }
 
     private void parseQuarantineLegalDocsIfPresent(
@@ -416,15 +444,14 @@ public class CafcassDateTimeUpdateHelper {
     }
 
     private void populateConfidentialDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        populateRespondentC8Documents(caseData.getRespondentAc8Documents(), otherDocsList);
-        populateRespondentC8Documents(caseData.getRespondentBc8Documents(), otherDocsList);
-        populateRespondentC8Documents(caseData.getRespondentCc8Documents(), otherDocsList);
-        populateRespondentC8Documents(caseData.getRespondentDc8Documents(), otherDocsList);
-        populateRespondentC8Documents(caseData.getRespondentEc8Documents(), otherDocsList);
-        if (CollectionUtils.isNotEmpty(caseData.getC8FormDocumentsUploaded())) {
-            caseData.getC8FormDocumentsUploaded().forEach(c8FormDocumentsUploaded ->
-                populateRespondentDocument(c8FormDocumentsUploaded, null, CONFIDENTIAL, otherDocsList));
-        }
+        Arrays.asList(
+            caseData.getRespondentAc8Documents(),
+            caseData.getRespondentBc8Documents(),
+            caseData.getRespondentCc8Documents(),
+            caseData.getRespondentDc8Documents(),
+            caseData.getRespondentEc8Documents()
+        ).forEach(responseDocuments -> populateRespondentC8Documents(responseDocuments, otherDocsList));
+        addCaseDocuments(CONFIDENTIAL, caseData.getC8FormDocumentsUploaded(), otherDocsList);
     }
 
     private void populateRespondentC8Documents(List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> responseDocuments,
@@ -581,21 +608,25 @@ public class CafcassDateTimeUpdateHelper {
 
     private void removeRedactedDocumentsFromResponse(CafCassCaseDetail cafCassCaseDetail) {
         CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
-        if (caseData != null && CollectionUtils.isNotEmpty(caseData.getOtherDocuments())) {
-            caseData.setOtherDocuments(caseData.getOtherDocuments().stream()
-                                       .filter(element -> isNotRedactedDocument(element, this::getOtherDocumentId))
-                                       .toList());
-        }
-        if (caseData != null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
+        if (caseData != null) {
+            caseData.setOtherDocuments(removeRedactedDocuments(caseData.getOtherDocuments(), this::getOtherDocumentId));
             cafCassCaseDetail.setCaseData(caseData.toBuilder()
-                                              .orderCollection(caseData.getOrderCollection().stream()
-                                                                   .filter(element -> isNotRedactedDocument(
-                                                                       element,
-                                                                       this::getOrderDocumentId
-                                                                   ))
-                                                                   .toList())
+                                              .orderCollection(removeRedactedDocuments(
+                                                  caseData.getOrderCollection(),
+                                                  this::getOrderDocumentId
+                                              ))
                                               .build());
         }
+    }
+
+    private <T> List<Element<T>> removeRedactedDocuments(List<Element<T>> documentElements,
+                                                         Function<T, String> documentIdResolver) {
+        if (CollectionUtils.isEmpty(documentElements)) {
+            return documentElements;
+        }
+        return documentElements.stream()
+            .filter(element -> isNotRedactedDocument(element, documentIdResolver))
+            .toList();
     }
 
     private <T> boolean isNotRedactedDocument(Element<T> documentElement, Function<T, String> documentIdResolver) {
@@ -614,22 +645,19 @@ public class CafcassDateTimeUpdateHelper {
     }
 
     private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
-        if (!CollectionUtils.isEmpty(orderCollection)) {
-            orderCollection.forEach(order -> {
-                if (null != order.getValue()) {
-                    order.getValue().setServeOrderDetails(null);
-                }
-            });
-        }
-        return orderCollection;
+        return updateElementValues(orderCollection, order -> order.setServeOrderDetails(null));
     }
 
     private List<Element<ApplicantDetails>> removeResponse(List<Element<ApplicantDetails>> partyDetails) {
-        partyDetails.forEach(partyDetail -> {
-            if (null != partyDetail.getValue()) {
-                partyDetail.getValue().setResponse(null);
+        return updateElementValues(partyDetails, partyDetail -> partyDetail.setResponse(null));
+    }
+
+    private <T> List<Element<T>> updateElementValues(List<Element<T>> elements, Consumer<T> valueUpdater) {
+        nullSafeList(elements).forEach(element -> {
+            if (null != element.getValue()) {
+                valueUpdater.accept(element.getValue());
             }
         });
-        return partyDetails;
+        return elements;
     }
 }
