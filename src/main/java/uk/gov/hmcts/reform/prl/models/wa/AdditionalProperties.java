@@ -29,4 +29,6 @@ public class AdditionalProperties {
     private String hearingId;
     @JsonProperty("messageIdentifier")
     private String messageIdentifier;
+    @JsonProperty("isCirUpdateFollowUp")
+    private String isCirUpdateFollowUp;
 }

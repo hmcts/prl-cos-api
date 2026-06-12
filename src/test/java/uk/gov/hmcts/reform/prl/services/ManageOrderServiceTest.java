@@ -120,6 +120,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
@@ -127,6 +128,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -137,6 +139,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -273,6 +276,9 @@ class ManageOrderServiceTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private TaskUtils taskUtils;
 
     @Captor
     private ArgumentCaptor<String> eventIdCaptor;
@@ -8199,8 +8205,109 @@ class ManageOrderServiceTest {
 
         assertThat(waFieldsMap)
             .containsEntry("whenReportsMustBeFiledByLocalAuthority", LocalDate.now())
-            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name());
+            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name())
+            .containsEntry("isCirUpdateFollowUp", null);
         assertThat(waFieldsMap.get("whenReportsMustBeFiled")).isNull();
+    }
+
+    @Test
+    void testReCreateCirDocumentsRequestedTaskWhenCirUpdateRequestedPresent() {
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .build();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+
+        Map<String, Object> caseDataMap = caseData.toMap(mapper);
+        caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(taskUtils.getTaskAdditionalProperties(CLIENT_CONTEXT))
+            .thenReturn(Optional.of(AdditionalProperties.builder().isCirUpdateFollowUp(Yes.getDisplayedValue()).build()));
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            new HashMap<String, Object>(),
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), CREATE_REQUEST_CIR_UPDATE_TASK.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+
+        manageOrderService.reCreateCirDocumentsRequestedTask(callbackRequest, CLIENT_CONTEXT);
+
+        verify(allTabService)
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+        assertThat(eventIdCaptor.getValue())
+            .isEqualTo(CREATE_REQUEST_CIR_UPDATE_TASK.getValue());
+
+        verify(allTabService)
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
+    }
+
+    @Test
+    void testReCreateCirDocumentsRequestedTaskWhenCirUpdateRequestedIsNotPresent() {
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .build();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+
+        Map<String, Object> caseDataMap = caseData.toMap(mapper);
+        caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(taskUtils.getTaskAdditionalProperties(CLIENT_CONTEXT))
+            .thenReturn(Optional.of(AdditionalProperties.builder().build()));
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            new HashMap<String, Object>(),
+            caseData,
+            null
+        );
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), CREATE_REQUEST_CIR_UPDATE_TASK.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.getStartUpdateForSpecificEvent(valueOf(caseData.getId()), UPDATE_ALL_TABS.getValue()))
+            .thenReturn(startAllTabsUpdateDataContent);
+
+
+        manageOrderService.reCreateCirDocumentsRequestedTask(callbackRequest, CLIENT_CONTEXT);
+
+        verify(allTabService, never())
+            .getStartUpdateForSpecificEvent(eq(valueOf(caseData.getId())), eventIdCaptor.capture());
+
+        verify(allTabService, never())
+            .submitAllTabsUpdate(anyString(),
+                                 eq(valueOf(caseData.getId())),
+                                 any(StartEventResponse.class),
+                                 any(EventRequestData.class),
+                                 caseDataMapCaptor.capture());
     }
 
     @ParameterizedTest(name = "Testing Cafcass CIR document: {0}")
@@ -8271,7 +8378,8 @@ class ManageOrderServiceTest {
 
         assertThat(waFieldsMap)
             .containsEntry("whenReportsMustBeFiled", LocalDate.now())
-            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name());
+            .containsEntry("performingUser", UserRoles.COURT_ADMIN.name())
+            .containsEntry("isCirUpdateFollowUp", null);
         assertThat(waFieldsMap.get("whenReportsMustBeFiledByLocalAuthority")).isNull();
     }
 
