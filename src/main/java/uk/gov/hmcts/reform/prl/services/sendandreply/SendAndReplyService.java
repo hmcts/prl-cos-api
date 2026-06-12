@@ -997,7 +997,7 @@ public class SendAndReplyService {
     }
 
     public uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
-                                                                                  DynamicList submittedDocumentList) {
+                                                                                 DynamicList submittedDocumentList) {
         if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
             return null;
         }
@@ -2110,13 +2110,24 @@ public class SendAndReplyService {
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
-            log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+
+            List<Document> documents = new ArrayList<>();
+
+            documents.addAll(documentGenService.generateCoverLetter(
+                authorisation,
+                caseData,
+                partyDetails.getLabelForDynamicList(),
+                partyDetails.getAddress()
+            ));
+            documents.addAll(docs);
+
+            log.info("*** number of files in the pack *** {}", documents.size());
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs,
+                documents,
                 partyDetails.getLabelForDynamicList()
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
