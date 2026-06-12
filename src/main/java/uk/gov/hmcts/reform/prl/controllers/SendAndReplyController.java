@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
 import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.getOpenMessages;
+import static uk.gov.hmcts.reform.prl.utils.ClientContextUtils.extractHearingIdFromClientContext;
 
 
 @Slf4j
@@ -274,31 +275,21 @@ public class SendAndReplyController extends AbstractCallbackController {
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
 
-    private static String extractHearingIdFromClientContext(String clientContext) {
-        if (clientContext == null || clientContext.isBlank()) {
-            return null;
-        }
-        return CaseUtils.getHearingId(CaseUtils.getWaMapper(clientContext));
-    }
 
-
-    private static String extractTaskTriggeredByFromClientContext(String clientContext) {
-        if (clientContext == null || clientContext.isBlank()) {
-            return null;
-        }
-        return CaseUtils.getTaskTriggeredBy(CaseUtils.getWaMapper(clientContext));
-    }
 
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
-                                                                            @RequestBody CallbackRequest callbackRequest) {
+                                                                            @RequestBody CallbackRequest callbackRequest,
+                                                                            @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
+                                                                                required = false) String clientContext) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         // Regular event does not close request-order tasks (FPVTL-2408/2409) — null hearingId
         // tells processAboutToSubmit to skip the tracking update.
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, null);
+        String chasedHearingId = extractHearingIdFromClientContext(clientContext);
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
     }
 
 
