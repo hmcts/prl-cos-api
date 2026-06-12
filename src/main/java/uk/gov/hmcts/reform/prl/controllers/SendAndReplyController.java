@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -245,13 +246,16 @@ public class SendAndReplyController extends AbstractCallbackController {
     @PostMapping("/send-or-reply-to-messages/mid-event")
     public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
                                                                @Parameter(hidden = true) String authorisation,
-                                                          @RequestBody CallbackRequest callbackRequest) {
+                                                          @RequestBody CallbackRequest callbackRequest,
+                                                          @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
+                                                              required = false) String clientContext) {
 
         CaseData caseData = getCaseData(callbackRequest);
         // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
         // exclusively for the WA chase flow). No task context, so no hearing lock.
-        log.info("Not Triggered By Task==>");
-        return processSendOrReplyMidEvent(authorisation, caseData, false, null);
+        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        log.info("hearingId Associated with the task==> {}", lockToHearingId);
+        return processSendOrReplyMidEvent(authorisation, caseData, !StringUtils.isBlank(lockToHearingId), null);
     }
 
 
