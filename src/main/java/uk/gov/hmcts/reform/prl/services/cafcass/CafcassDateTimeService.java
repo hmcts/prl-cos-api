@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 
 import java.time.ZoneId;
@@ -21,6 +22,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_DATE_TI
 public class CafcassDateTimeService {
 
     private final FeatureToggleService featureToggleService;
+    private final CafcassDateTimeUpdateHelper cafcassDateTimeUpdateHelper;
 
     @Value("#{'${cafcaas.caseState}'.split(',')}")
     private List<String> caseStateList;
@@ -32,16 +34,22 @@ public class CafcassDateTimeService {
     private List<String> excludedEventList;
 
     public Map<String, Object> updateCafcassDateTime(CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
 
-        return updateCafcassDateTime(callbackRequest.getCaseDetails().getData(),
-                                     callbackRequest.getCaseDetails().getState(),
+        return updateCafcassDateTime(caseDetails,
+                                     caseDetailsBefore,
                                      callbackRequest.getEventId());
     }
 
-    private Map<String, Object> updateCafcassDateTime(Map<String, Object> caseDataMap, String state, String eventId) {
+    private Map<String, Object> updateCafcassDateTime(CaseDetails caseDetails,
+                                                      CaseDetails caseDetailsBefore,
+                                                      String eventId) {
+        Map<String, Object> caseDataMap = caseDetails.getData();
         if (featureToggleService.isCafcassDateTimeFeatureEnabled()
             && !excludedEventList.contains(eventId)
-            && caseStateList.contains(state)) {
+            && caseStateList.contains(caseDetails.getState())
+            && cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore)) {
             caseDataMap.put(CAFCASS_DATE_TIME, ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime());
         }
 
