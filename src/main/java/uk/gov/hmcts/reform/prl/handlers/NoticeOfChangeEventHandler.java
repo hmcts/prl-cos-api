@@ -358,10 +358,11 @@ public class NoticeOfChangeEventHandler {
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
             List<Document> documents = new ArrayList<>();
-            //generate cover sheets & add to documents
-            generateCoverSheets(caseData, party.getValue(), documents);
             //generate cover letter with access code & add to documents
             generateCoverLetter(caseData, party, documents, accessCode);
+
+            //generate cover sheets & add to documents
+            generateCoverSheets(caseData, party.getValue(), documents);
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
