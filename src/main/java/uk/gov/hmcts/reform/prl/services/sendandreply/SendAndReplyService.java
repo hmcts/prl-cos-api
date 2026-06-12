@@ -2214,9 +2214,11 @@ public class SendAndReplyService {
     }
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
-        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
-        return nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && nonNull(
-            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
+        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+        return nonNull(message) && nonNull(message.getApplicationsList())
+            && message.getApplicationsList().getListItems().size() == 1 && nonNull(
+            message.getApplicationsList().getValue())
+            && StringUtils.isNotEmpty(message.getApplicationsList().getValue().getCode());
     }
 
     public boolean atLeastOnePartySelectedForExternalMessage(Message message) {
@@ -2227,15 +2229,25 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
 
-        if (REPLY.equals(caseData.getChooseSendOrReply())
+    }
+
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return sendAndReplySubmittedForChoice(caseData, caseData.getOptionSendOrReply(), authorisation);
+    }
+
+    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
+            String sendOrReplyChoice, String authorisation) {
+        if (REPLY.name().equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
 
-        if (SEND.equals(caseData.getChooseSendOrReply())) {
+        if (SEND.name().equals(sendOrReplyChoice)) {
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
@@ -2253,19 +2265,6 @@ public class SendAndReplyService {
         }
 
         closeAwPTask(caseData);
-
-        return ok(SubmittedCallbackResponse.builder().build());
-    }
-
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        String optionSendOrReply = caseData.getOptionSendOrReply();
-        if ((REPLY.name().equalsIgnoreCase(optionSendOrReply) || REPLY.equals(caseData.getChooseSendOrReply()))
-            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
-            return ok(SubmittedCallbackResponse.builder().confirmationBody(
-                REPLY_AND_CLOSE_MESSAGE
-            ).build());
-        }
 
         return ok(SubmittedCallbackResponse.builder().build());
     }
@@ -2298,8 +2297,8 @@ public class SendAndReplyService {
                 caseData.getMessageIdentifier()
             );
             caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
-        } else {
-            caseData.setOptionSendOrReply(EMPTY_VALUE);
+        } else if (SEND.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
+            caseData.setChooseSendOrReply(SEND);
         }
     }
 }
