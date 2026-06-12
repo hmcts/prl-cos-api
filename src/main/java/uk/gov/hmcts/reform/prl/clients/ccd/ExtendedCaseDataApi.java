@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 import uk.gov.hmcts.reform.prl.models.extendedcasedetails.ExtendedCaseDetails;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -12,7 +13,8 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @FeignClient(
     name = "core-case-data-api",
     primary = false,
-    url = "${core_case_data.api.url}"
+    url = "${core_case_data.api.url}",
+    configuration = FeignRetryConfig.class
 )
 public interface ExtendedCaseDataApi {
     String SERVICE_AUTHORIZATION = "ServiceAuthorization";
