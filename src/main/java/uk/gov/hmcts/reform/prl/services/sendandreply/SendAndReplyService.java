@@ -685,9 +685,12 @@ public class SendAndReplyService {
         if (full == null || full.getListItems() == null || full.getListItems().isEmpty()) {
             return full;
         }
-        String prefix = hearingId + " - ";
+        log.info("hearingId associated with task ==>{}", hearingId);
         DynamicListElement match = full.getListItems().stream()
-            .filter(e -> e.getCode() != null && e.getCode().startsWith(prefix))
+            .filter(e -> {
+                log.info("hearing code => {}", e.getCode());
+                return e.getCode() != null && e.getCode().contains(hearingId);
+            })
             .findFirst()
             .orElse(null);
         if (match == null) {
@@ -1434,6 +1437,7 @@ public class SendAndReplyService {
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
+            log.info("message.getRecipientEmailAddresses()={} for case={}", message.getRecipientEmailAddresses(), caseData.getId());
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
             if (recipientEmailAddresses.length > 0) {
@@ -2194,13 +2198,15 @@ public class SendAndReplyService {
 
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest,
+                                                                               String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, caseData.getOptionSendOrReply(), authorisation);
+        return sendAndReplySubmittedForChoice(caseData, REPLY.name(), authorisation);
     }
 
     private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
             String sendOrReplyChoice, String authorisation) {
+        log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
         if (REPLY.name().equals(sendOrReplyChoice)
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
@@ -2209,6 +2215,7 @@ public class SendAndReplyService {
         }
 
         if (SEND.name().equals(sendOrReplyChoice)) {
+            log.info("in SEND for case={}", sendOrReplyChoice, caseData.getId());
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
@@ -2251,6 +2258,9 @@ public class SendAndReplyService {
 
 
     public void checkTaskAssociatedWithMessage(CaseData caseData) {
+        log.info("checkTaskAssociatedWithMessage==>");
+        log.info("checkTaskAssociatedWithMessage==>caseData.getChooseSendOrReply() {}", caseData.getChooseSendOrReply());
+        log.info("checkTaskAssociatedWithMessage==>caseData.getOptionSendOrReply() {}", caseData.getOptionSendOrReply());
         if (REPLY.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
             caseData.setChooseSendOrReply(REPLY);
             DynamicList dynamicMessagesListAssociatedWithTask = getDynamicMessagesListAssociatedWithTask(

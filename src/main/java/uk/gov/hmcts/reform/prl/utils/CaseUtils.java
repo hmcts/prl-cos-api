@@ -977,6 +977,15 @@ public class CaseUtils {
         return taskHearingId;
     }
 
+    public static String getTaskTriggeredBy(WaMapper waMapper) {
+        if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
+            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getTaskTriggeredBy();
+            }
+        }
+        return null;
+    }
+
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {
         if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
             return draftOrderCollection.stream()

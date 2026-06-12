@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
 import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.getOpenMessages;
+import static uk.gov.hmcts.reform.prl.utils.ClientContextUtils.extractHearingIdFromClientContext;
 
 
 @Slf4j
@@ -238,22 +240,21 @@ public class SendAndReplyController extends AbstractCallbackController {
             .build();
     }
 
-
-
-
     @PostMapping("/send-or-reply-to-messages/mid-event")
     public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
                                                                @Parameter(hidden = true) String authorisation,
+                                                          @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
+                                                              required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest);
         // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
         // exclusively for the WA chase flow). No task context, so no hearing lock.
-        return processSendOrReplyMidEvent(authorisation, caseData, false, null);
+        log.info("In simple midevent");
+        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        log.info("simple: hearingId Associated with the task==> {}", lockToHearingId);
+        return processSendOrReplyMidEvent(authorisation, caseData, !StringUtils.isBlank(lockToHearingId), lockToHearingId);
     }
-
-
-
 
     @PostMapping("/send-or-reply-to-messages/mid-event-task")
     public CallbackResponse sendOrReplyToMessagesMidEventTask(@RequestHeader("Authorization")
@@ -262,6 +263,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                          required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
+        log.info("In task midevent");
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         // WA-task chase flow: include past hearings so the user can message about a
@@ -269,29 +271,23 @@ public class SendAndReplyController extends AbstractCallbackController {
         // is in the client-context header, lock the dropdown to that hearing
         // (FPVTL-2408/2409).
         String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        log.info("task: hearingId Associated with the task==> {}", lockToHearingId);
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
-
-    private static String extractHearingIdFromClientContext(String clientContext) {
-        if (clientContext == null || clientContext.isBlank()) {
-            return null;
-        }
-        return CaseUtils.getHearingId(CaseUtils.getWaMapper(clientContext));
-    }
-
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
-                                                                            @RequestBody CallbackRequest callbackRequest) {
+                                                                            @RequestBody CallbackRequest callbackRequest,
+                                                                            @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
+                                                                                required = false) String clientContext) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         // Regular event does not close request-order tasks (FPVTL-2408/2409) — null hearingId
         // tells processAboutToSubmit to skip the tracking update.
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, null);
+        String chasedHearingId = extractHearingIdFromClientContext(clientContext);
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
     }
-
-
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit-task")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmitTask(@RequestHeader("Authorization")
@@ -310,19 +306,14 @@ public class SendAndReplyController extends AbstractCallbackController {
         return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
     }
 
-
-
-
     @PostMapping("/send-or-reply-to-messages/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                   @Parameter(hidden = true) String authorisation,
                   @RequestBody CallbackRequest callbackRequest,
                   @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
-
+        log.info("Not Triggered By Task==>");
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
-
-
 
     @PostMapping("/send-or-reply-to-messages/submitted-task")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReplyTask(@RequestHeader("Authorization")
@@ -344,10 +335,10 @@ public class SendAndReplyController extends AbstractCallbackController {
         return sendAndReplyService.clearDynamicLists(callbackRequest);
     }
 
-
     private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData,
                                                         boolean includePastHearings,
                                                         String lockToHearingId) {
+        log.info("processing Mid Event");
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -364,11 +355,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
-
     private CaseData getCaseData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         return CaseUtils.getCaseData(caseDetails, objectMapper);
     }
-
-
 }

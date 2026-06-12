@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.jspecify.annotations.NonNull;
@@ -340,7 +341,26 @@ public class SendAndReplyControllerTest {
     }
 
     @Test
-    public void testSendOrReplyToMessagesMidEventForSend() {
+    public void testSendOrReplyToMessagesMidEventForSend() throws JsonProcessingException {
+        String clientContextJson = """
+            {
+              "client_context": {
+                "user_task": {
+                  "task_data": {
+                    "additional_properties": {
+                      "hearingId": "999"
+                    }
+                  }
+                }
+              }
+            }
+            """;
+        ObjectMapper realMapper = new ObjectMapper();
+        realMapper.findAndRegisterModules();
+        uk.gov.hmcts.reform.prl.models.wa.WaMapper waMapper =
+            realMapper.readValue(clientContextJson, uk.gov.hmcts.reform.prl.models.wa.WaMapper.class);
+        String encodedClientContext = uk.gov.hmcts.reform.prl.utils.CaseUtils.base64Encode(waMapper, realMapper);
+
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).build();
         Message message = Message.builder().isReplying(YesOrNo.No).build();
         CaseData caseData = CaseData.builder().id(12345L)
@@ -359,8 +379,12 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, false, null);
+
+        // when
+        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, encodedClientContext, callbackRequest);
+
+        // then
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, true, "999");
     }
 
     @Test
@@ -370,7 +394,7 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
+        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, null, callbackRequest);
         // then
         verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
 
@@ -557,7 +581,7 @@ public class SendAndReplyControllerTest {
             .build();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest, null);
         verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, null);
     }
 
@@ -573,7 +597,7 @@ public class SendAndReplyControllerTest {
                 .build());
 
         // when
-        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest, null);
 
         // then
         verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, null);
@@ -712,7 +736,7 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest);
+        CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, null, callbackRequest);
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
         Assert.assertEquals("There are no messages to respond to.",
