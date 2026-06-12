@@ -12,17 +12,21 @@ public enum CafcassReportAndGuardianEnum {
 
     safeguardingLetter("safeguardingLetter", "Safeguarding letter/Safeguarding Enquiries Report (SER)"),
 
-    section7Report("section7Report", "Section 7 report/Child Impact Analysis"),
+    section7Report("section7Report", "Section 7 report"),
 
     section37Report("section37Report", "Section 37 report"),
 
-    riskAssessment("16aRiskAssessment", "16a risk assessment"),
+    riskAssessment("16aRiskAssessment", "Section 16A risk assessment"),
+
+    enforcementOrderSuitabilityReport("enforcementOrderSuitabilityReport", "Enforcement Order Suitability Report"),
+
+    parentalOrderReporterReport("parentalOrderReporterReport", "Parental Order Reporter Report"),
 
     cirTransferRequest("cirTransferRequest", "CIR Transfer Request"),
 
     cirExtensionRequest("cirExtensionRequest", "CIR Extension Request"),
 
-    guardianReport("guardianReport", "Guardian report"),
+    guardianReport("guardianReport", "Section 16.4 Guardian Report"),
 
     specialGuardianshipReport("specialGuardianshipReport", "Special guardianship report"),
 
