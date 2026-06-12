@@ -5,6 +5,7 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -517,8 +518,8 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.serveOtherPartiesCA", equalTo(null))
             .body("data.cafcassCymruServedOptions", equalTo(null))
             .body("data.emailInformationCaOnlyC47a", equalTo(null))
-            .body("data.localAuthoritySolicitorOrganisationPolicy",
-                  equalTo(null))
+            .body("data.localAuthoritySolicitorOrganisationPolicy.Organisation",
+                  equalTo(new JSONObject("{}")))
             .body("data.localAuthority.isLocalAuthorityInvolvedInCase",equalTo("No"))
             .body("data.localAuthority.localAuthoritySolicitorOrganisationName",      equalTo(null))
             .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
