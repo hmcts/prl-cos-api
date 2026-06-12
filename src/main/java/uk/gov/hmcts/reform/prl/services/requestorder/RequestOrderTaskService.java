@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import java.util.function.Function;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.services.requestorder.HearingChasePolicy.hearingIdOf;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 /**
@@ -180,24 +182,62 @@ public class RequestOrderTaskService {
         }
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        for (CaseHearing hearing : hearings.getCaseHearings()) {
-            evaluateHearing(caseId, caseData, hearing);
+        if (hearings.getCaseHearings().size() == 1) {
+            evaluateHearing(caseData, hearings.getCaseHearings().getFirst());
+        } else {
+            Iterator<CaseHearing> caseHearingIterator = hearings.getCaseHearings().iterator();
+            evaluateHearing(caseData, caseHearingIterator.next());
+            evaluateMultipleHearing(caseHearingIterator, caseId);
         }
     }
 
-    private void evaluateHearing(String caseId,
-                                 CaseData caseData,
-                                 CaseHearing hearing) {
-        String hearingId = HearingChasePolicy.hearingIdOf(hearing);
-        LocalDate today = LocalDate.now(UK_ZONE);
-        HearingTrackingLedger ledger = HearingTrackingLedger.from(caseData);
-        ChaseDecision decision = chasePolicy.decide(hearing, caseData, ledger, today);
-        log.info("Request Order: caseId={} hearingId={} {}", caseId, hearingId, decision.description());
-        if (!decision.shouldFire()) {
-            return;
+    private void evaluateMultipleHearing(Iterator<CaseHearing> caseHearingIterator, String caseId) {
+        while (caseHearingIterator.hasNext()) {
+            CaseHearing hearing = caseHearingIterator.next();
+            StartAllTabsUpdateDataContent start = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+
+            evaluateDecision(start.caseData(), hearing)
+                .ifPresent(ledger -> {
+
+                    String hearingId = hearingIdOf(hearing);
+                    ledger.recordFired(hearingId, LocalDate.now(UK_ZONE));
+
+                    Map<String, Object> caseDataUpdated = new HashMap<>();
+                    caseDataUpdated.put(CURRENT_HEARING_ID, hearingId);
+                    caseDataUpdated.put(TRACKING_FIELD, ledger.asCollection());
+
+                    allTabService.submitAllTabsUpdate(
+                        start.authorisation(),
+                        caseId,
+                        start.startEventResponse(),
+                        start.eventRequestData(),
+                        caseDataUpdated);
+                });
         }
-        ledger.recordFired(hearingId, today);
-        fireRequestOrderEvent(caseId, hearingId, ledger);
+    }
+
+    private Optional<HearingTrackingLedger> evaluateDecision(CaseData caseData,
+                                                             CaseHearing hearing) {
+        String hearingId = hearingIdOf(hearing);
+        HearingTrackingLedger ledger = HearingTrackingLedger.from(caseData);
+        ChaseDecision decision = chasePolicy.decide(hearing, caseData, ledger, LocalDate.now(UK_ZONE));
+        log.info("Request Order: caseId={} hearingId={} {}", caseData.getId(), hearingId, decision.description());
+        if (decision.shouldFire()) {
+            return Optional.of(ledger);
+        }
+        return Optional.empty();
+    }
+
+    private void evaluateHearing(CaseData caseData,
+                                 CaseHearing hearing) {
+        evaluateDecision(caseData, hearing)
+            .ifPresent(ledger -> {
+                String hearingId = hearingIdOf(hearing);
+                ledger.recordFired(hearingId, LocalDate.now(UK_ZONE));
+                fireRequestOrderEvent(String.valueOf(caseData.getId()), hearingId, ledger);
+            });
     }
 
     private Hearings fetchHearings(String caseId) {

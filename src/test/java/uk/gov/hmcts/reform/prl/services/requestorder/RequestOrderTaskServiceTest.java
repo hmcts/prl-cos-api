@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -273,6 +274,17 @@ class RequestOrderTaskServiceTest {
                     hearing("COMPLETED", "30", TODAY.minusDays(2))))
                 .build());
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
+        when(allTabService
+                 .getStartUpdateForSpecificEvent(
+                     CASE_ID,
+                     CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()))
+            .thenReturn(new StartAllTabsUpdateDataContent(
+                "s2sToken",
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                null,
+                caseData,
+                null));
 
         service.processRequestOrderTasks();
 
