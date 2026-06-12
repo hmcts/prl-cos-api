@@ -19,8 +19,7 @@ public class TimeConfig {
     }
 
     @Bean
-    @Lazy
     public Clock clock() {
-        return Clock.systemDefaultZone();
+        return Clock.system(ZoneId.of("Europe/London"));
     }
 }
