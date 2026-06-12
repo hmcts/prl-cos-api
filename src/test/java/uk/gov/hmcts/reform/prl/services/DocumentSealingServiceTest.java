@@ -11,13 +11,12 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationRequest;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.utils.ResourceReader;
 
 import java.io.UncheckedIOException;
@@ -27,32 +26,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentSealingServiceTest {
-
-
     @Mock
-    private DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
     @Mock
     private DocumentGenService documentGenService;
     @Mock
     private AuthTokenGenerator authTokenGenerator;
-
     @Captor
-    private ArgumentCaptor<GenerateDocumentRequest> actualDocumentRequest;
+    private ArgumentCaptor<PdfGenerationRequest> actualDocumentRequest;
 
     @InjectMocks
     DocumentSealingService documentSealingService;
 
     private final String newFileName = "test.pdf";
-
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
@@ -71,8 +63,6 @@ public class DocumentSealingServiceTest {
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
         Document inputDocumentPdf = Document.builder()
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
-        GeneratedDocumentInfo documentInfo = GeneratedDocumentInfo.builder().url("/test").docName(newFileName).binaryUrl(
-            "/test/binary").build();
 
         when(authTokenGenerator.generate()).thenReturn("s2s token");
         when(documentGenService.getDocumentBytes(
@@ -80,7 +70,14 @@ public class DocumentSealingServiceTest {
             "testAuth",
             "s2s token"
         )).thenReturn(inputDocumentBinaries);
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
+
+        Document outputDocument = Document.builder()
+            .documentUrl("/test")
+            .documentBinaryUrl("/test/binary")
+            .documentFileName("test.pdf")
+            .build();
+        when(pdfGenerationService.generateAndStore(actualDocumentRequest.capture())).thenReturn(outputDocument);
+
         MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
         mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal.png")).thenReturn(sealBinaries);
         CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal.png]")
@@ -97,9 +94,8 @@ public class DocumentSealingServiceTest {
         final Document actualSealedDocumentReference = documentSealingService
             .sealDocument(inputDocument, caseData, "testAuth");
 
-        verify(dgsApiClient).convertDocToPdf(eq(newFileName), eq("testAuth"), actualDocumentRequest.capture());
         assertThat(actualSealedDocumentReference).isEqualTo(sealedDocument);
-        assertThat(inputDocumentBinaries).isNotEqualTo(actualDocumentRequest.getValue().getValues().get("fileName"));
+        assertThat(inputDocumentBinaries).isNotEqualTo(actualDocumentRequest.getValue().getFileContent());
         mockResourceReader.close();
     }
 
@@ -114,8 +110,6 @@ public class DocumentSealingServiceTest {
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.doc").build();
         Document inputDocumentPdf = Document.builder()
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
-        GeneratedDocumentInfo documentInfo = GeneratedDocumentInfo.builder().url("/test").docName(newFileName).binaryUrl(
-            "/test/binary").build();
 
         when(documentGenService.checkFileFormat("test.doc")).thenReturn(true);
         when(documentGenService.convertToPdf("testAuth", inputDocument))
@@ -126,7 +120,13 @@ public class DocumentSealingServiceTest {
             "testAuth",
             "s2s token"
         )).thenReturn(inputDocumentBinaries);
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
+
+        Document outputDocument = Document.builder()
+            .documentUrl("/test")
+            .documentBinaryUrl("/test/binary")
+            .documentFileName("test.pdf")
+            .build();
+        when(pdfGenerationService.generateAndStore(actualDocumentRequest.capture())).thenReturn(outputDocument);
 
         MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class);
         mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal-bilingual.png")).thenReturn(
@@ -146,9 +146,8 @@ public class DocumentSealingServiceTest {
         final Document actualSealedDocumentReference = documentSealingService
             .sealDocument(inputDocument, caseData, "testAuth");
 
-        verify(dgsApiClient).convertDocToPdf(eq(newFileName), eq("testAuth"), actualDocumentRequest.capture());
         assertThat(actualSealedDocumentReference).isEqualTo(sealedDocument);
-        assertThat(inputDocumentBinaries).isNotEqualTo(actualDocumentRequest.getValue().getValues().get("fileName"));
+        assertThat(inputDocumentBinaries).isNotEqualTo(actualDocumentRequest.getValue().getFileContent());
         mockResourceReader.close();
     }
 
@@ -238,19 +237,19 @@ public class DocumentSealingServiceTest {
             .documentFileName("test.pdf")
             .build();
 
-        GeneratedDocumentInfo documentInfo = GeneratedDocumentInfo.builder()
-            .url("/test")
-            .docName("test.pdf")
-            .binaryUrl("/test/binary")
-            .build();
-
         when(authTokenGenerator.generate()).thenReturn("s2s token");
         when(documentGenService.getDocumentBytes(
             inputDocument.getDocumentUrl(),
             "testAuth",
             "s2s token"
         )).thenReturn(inputDocumentBinaries);
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any())).thenReturn(documentInfo);
+
+        Document outputDocument = Document.builder()
+            .documentUrl("/test")
+            .documentBinaryUrl("/test/binary")
+            .documentFileName("test.pdf")
+            .build();
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class))).thenReturn(outputDocument);
 
         try (MockedStatic<ResourceReader> mockResourceReader = mockStatic(ResourceReader.class)) {
             mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal.png"))
@@ -264,7 +263,6 @@ public class DocumentSealingServiceTest {
             Document result = documentSealingService.sealDocument(inputDocument, caseData, "testAuth");
 
             assertNotNull(result);
-            verify(dgsApiClient).convertDocToPdf(eq("test.pdf"), eq("testAuth"), actualDocumentRequest.capture());
         }
     }
 }
