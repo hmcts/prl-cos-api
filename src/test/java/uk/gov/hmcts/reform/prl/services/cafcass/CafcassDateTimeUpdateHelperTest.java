@@ -320,6 +320,131 @@ class CafcassDateTimeUpdateHelperTest {
         ));
     }
 
+    @Test
+    void shouldReturnTrueWhenBundleUploadOrderAndAdditionalOrderDocumentsAreAdded() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("uploadOrderDoc", caseDocument(
+            "http://dm-store/documents/99999999-9999-9999-9999-999999999999",
+            "uploaded-order.pdf"
+        ));
+        caseData.put("bundleInformation", Map.of("caseBundles", List.of(Map.of("value", Map.of(
+            "stitchedDocument", documentLink(
+                "http://dm-store/documents/10101010-1010-1010-1010-101010101010",
+                "court-bundle.pdf"
+            )
+        )))));
+        caseData.put("additionalOrderDocuments", List.of(element(Map.of(
+            "additionalDocuments", List.of(element(caseDocument(
+                "http://dm-store/documents/20202020-2020-2020-2020-202020202020",
+                "additional-order.pdf"
+            )))
+        ))));
+
+        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetailsWithLocation(caseManagementLocation())
+        ));
+    }
+
+    @Test
+    void shouldReturnTrueWhenAllStatementOfServiceDocumentListsAreAdded() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("stmtOfServiceForApplication", List.of(element(Map.of(
+            "stmtOfServiceDocument",
+            caseDocument("http://dm-store/documents/30303030-3030-3030-3030-303030303030", "statement-application.pdf")
+        ))));
+        caseData.put("stmtOfServiceAddRecipient", List.of(element(Map.of(
+            "stmtOfServiceDocument",
+            caseDocument("http://dm-store/documents/40404040-4040-4040-4040-404040404040", "statement-recipient.pdf")
+        ))));
+
+        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetailsWithLocation(caseManagementLocation())
+        ));
+    }
+
+    @Test
+    void shouldReturnTrueWhenReviewRespondentAndConfidentialDocumentsAreAdded() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("respondents", List.of(element(
+            "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            Map.of(
+                "firstName", "Taylor",
+                "response", Map.of("responseToAllegationsOfHarm", Map.of(
+                    "responseToAllegationsOfHarmDocument",
+                    caseDocument("http://dm-store/documents/50505050-5050-5050-5050-505050505050", "c1a-response.pdf"),
+                    "responseToAllegationsOfHarmWelshDocument",
+                    caseDocument("http://dm-store/documents/60606060-6060-6060-6060-606060606060", "c1a-response-welsh.pdf")
+                ))
+            )
+        )));
+        caseData.put("legalProfUploadDocListDocTab", List.of(quarantineDocument(
+            "policeReport",
+            "policeReportDocument",
+            "http://dm-store/documents/70707070-7070-7070-7070-707070707070",
+            "police-report.pdf"
+        )));
+        caseData.put("cafcassUploadDocListDocTab", List.of(quarantineDocument(
+            "section7Report",
+            "section7ReportDocument",
+            "http://dm-store/documents/80808080-8080-8080-8080-808080808080",
+            "section-7.pdf"
+        )));
+        caseData.put("localAuthorityUploadDocListDocTab", List.of(quarantineDocument(
+            "sec37Report",
+            "sec37ReportDocument",
+            "http://dm-store/documents/90909090-9090-9090-9090-909090909090",
+            "section-37-la.pdf"
+        )));
+        caseData.put("citizenUploadedDocListDocTab", List.of(quarantineDocument(
+            "medicalReports",
+            "medicalReportsDocument",
+            "http://dm-store/documents/12121212-1212-1212-1212-121212121212",
+            "medical-report.pdf"
+        )));
+        caseData.put("confidentialDocuments", List.of(quarantineDocument(
+            "confidential",
+            "confidentialDocument",
+            "http://dm-store/documents/13131313-1313-1313-1313-131313131313",
+            "confidential.pdf"
+        )));
+        caseData.put("restrictedDocuments", List.of(quarantineDocument(
+            "caseSummary",
+            "caseSummaryDocument",
+            "http://dm-store/documents/14141414-1414-1414-1414-141414141414",
+            "case-summary.pdf"
+        )));
+        caseData.put("c8FormDocumentsUploaded", List.of(caseDocument(
+            "http://dm-store/documents/15151515-1515-1515-1515-151515151515",
+            "c8-form.pdf"
+        )));
+        caseData.put("respondentBc8Documents", List.of(responseDocuments(
+            "http://dm-store/documents/16161616-1616-1616-1616-161616161616",
+            "respondent-b-c8.pdf"
+        )));
+        caseData.put("respondentCc8Documents", List.of(responseDocuments(
+            "http://dm-store/documents/17171717-1717-1717-1717-171717171717",
+            "respondent-c-c8.pdf"
+        )));
+        caseData.put("respondentDc8Documents", List.of(responseDocuments(
+            "http://dm-store/documents/18181818-1818-1818-1818-181818181818",
+            "respondent-d-c8.pdf"
+        )));
+        caseData.put("respondentEc8Documents", List.of(responseDocuments(
+            "http://dm-store/documents/19191919-1919-1919-1919-191919191919",
+            "respondent-e-c8.pdf"
+        )));
+
+        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetailsWithLocation(caseManagementLocation())
+        ));
+    }
+
     private Map<String, Object> caseManagementLocation() {
         Map<String, Object> caseManagementLocation = new HashMap<>();
         caseManagementLocation.put("regionId", "1");
@@ -384,6 +509,31 @@ class CafcassDateTimeUpdateHelperTest {
         document.put("document_binary_url", documentUrl + "/binary");
         document.put("document_filename", documentName);
         return document;
+    }
+
+    private Map<String, Object> documentLink(String documentUrl, String documentName) {
+        Map<String, Object> document = new HashMap<>();
+        document.put("document_url", documentUrl);
+        document.put("document_binary_url", documentUrl + "/binary");
+        document.put("document_filename", documentName);
+        return document;
+    }
+
+    private Map<String, Object> quarantineDocument(String categoryId,
+                                                   String documentField,
+                                                   String documentUrl,
+                                                   String documentName) {
+        Map<String, Object> value = new HashMap<>();
+        value.put("categoryId", categoryId);
+        value.put(documentField, caseDocument(documentUrl, documentName));
+        return element(value);
+    }
+
+    private Map<String, Object> responseDocuments(String documentUrl, String documentName) {
+        return element(Map.of(
+            "respondentC8Document", caseDocument(documentUrl, documentName),
+            "respondentC8DocumentWelsh", caseDocument(documentUrl + "-welsh", "welsh-" + documentName)
+        ));
     }
 
     private Map<String, Object> element(Object value) {
