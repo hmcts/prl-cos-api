@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -92,10 +93,11 @@ public class UpdateHearingActualsService {
         log.info("Case Id's {}", caseIds);
         caseIds.forEach((caseId, hearingId) -> caseDetailsList.stream().filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(
             caseId)).forEach(caseDetails -> {
-                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                Map<String, Object> data = caseDetails.getData();
+                CaseData caseData = nonNull(data) ? CaseUtils.getCaseData(caseDetails, objectMapper) : null;
                 log.info("Hearing id {}", hearingId);
                 triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), new HashMap<>());
-                if (!checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
+                if (nonNull(caseData) && !checkIfHearingIdIsMappedInOrders(caseData, hearingId)) {
                     log.info("Hearing id is not mapped in orders");
                     triggerSystemEventForWorkAllocationTask(caseId, CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue(), new HashMap<>());
                 }
