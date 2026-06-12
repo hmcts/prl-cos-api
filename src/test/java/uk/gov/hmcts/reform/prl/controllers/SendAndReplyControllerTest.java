@@ -381,7 +381,7 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest, encodedClientContext);
+        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, encodedClientContext, callbackRequest);
 
         // then
         verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, true, null);
@@ -394,7 +394,7 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest,null);
+        sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, null, callbackRequest);
         // then
         verify(sendAndReplyService).populateMessageReplyFields(caseData, auth);
 
@@ -736,7 +736,7 @@ public class SendAndReplyControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, callbackRequest, null);
+        CallbackResponse response = sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, null, callbackRequest);
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
         Assert.assertEquals("There are no messages to respond to.",
