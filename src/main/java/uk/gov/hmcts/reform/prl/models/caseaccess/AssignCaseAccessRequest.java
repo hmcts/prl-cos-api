@@ -17,4 +17,5 @@ public class AssignCaseAccessRequest {
 
     @JsonProperty("case_type_id")
     private String caseTypeId;
+
 }
