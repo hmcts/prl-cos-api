@@ -384,7 +384,7 @@ public class SendAndReplyControllerTest {
         sendAndReplyController.sendOrReplyToMessagesMidEvent(auth, encodedClientContext, callbackRequest);
 
         // then
-        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, true, null);
+        verify(sendAndReplyService).populateDynamicListsForSendAndReply(caseData,auth, true, "999");
     }
 
     @Test
