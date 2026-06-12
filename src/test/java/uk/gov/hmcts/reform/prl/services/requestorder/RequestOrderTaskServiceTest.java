@@ -322,6 +322,19 @@ class RequestOrderTaskServiceTest {
                 .build());
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
+        when(allTabService
+                 .getStartUpdateForSpecificEvent(
+                     CASE_ID,
+                     CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()))
+            .thenReturn(new StartAllTabsUpdateDataContent(
+                "s2sToken",
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                null,
+                caseData,
+                null));
+
+
         service.processRequestOrderTasks();
 
         verify(allTabService, times(2)).getStartUpdateForSpecificEvent(
