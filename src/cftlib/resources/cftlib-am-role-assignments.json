@@ -1863,5 +1863,319 @@
         ]
       }
     ]
+  },
+  {
+    "email": "prl-chelmsford-hca@justice.gov.uk",
+    "id": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+    "roleAssignments": [
+      {
+        "id": "65530252-5db3-4a5a-9f7d-4e970936cc37",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236771Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "6acedc1b-d5f0-4e51-a850-7df291ab159f",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-centre-team-leader",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236811Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW",
+          "region": "5",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "c8be7efa-bb3e-495c-81b5-0af1f0d8ae07",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-manager",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236844Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "1d63b818-f212-496f-88c3-2679cca0ef58",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "specific-access-approver-admin",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236851Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW",
+          "region": "5",
+          "workTypes": "access_requests"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "b7a686ef-e6ab-452e-aa0e-12c0ed21802a",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-centre-admin",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236864Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW",
+          "region": "5",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "198fdfa1-9967-4585-a12f-fa6297732b89",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-admin",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "ADMIN",
+        "readOnly": true,
+        "created": "2025-06-23T12:29:29.236877Z",
+        "attributes": {
+          "substantive": "N"
+        }
+      }
+    ]
+  },
+  {
+    "email": "prl-chelmsford-hca@justice.gov.uk",
+    "id": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+    "roleAssignments": [
+      {
+        "id": "65530252-5db3-4a5a-9f7d-4e970936cc37",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236771Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "6acedc1b-d5f0-4e51-a850-7df291ab159f",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-centre-team-leader",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236811Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW",
+          "region": "5",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "c8be7efa-bb3e-495c-81b5-0af1f0d8ae07",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-manager",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236844Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW"
+        }
+      },
+      {
+        "id": "1d63b818-f212-496f-88c3-2679cca0ef58",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "specific-access-approver-admin",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236851Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW",
+          "region": "5",
+          "workTypes": "access_requests"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "b7a686ef-e6ab-452e-aa0e-12c0ed21802a",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-centre-admin",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "ADMIN",
+        "readOnly": false,
+        "created": "2025-06-23T12:29:29.236864Z",
+        "attributes": {
+          "substantive": "Y",
+          "primaryLocation": "816875",
+          "jurisdiction": "PRIVATELAW",
+          "region": "5",
+          "workTypes": "routine_work,hearing_work,applications"
+        },
+        "authorisations": [
+          "SKILL:ABA5:CHECKAPPLICATIONC100",
+          "SKILL:ABA5:SERVEAPPLICATIONC100",
+          "SKILL:ABA5:HEARINGMANAGEMENTC100",
+          "SKILL:ABA5:ORDERMANAGEMENTC100",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEC100",
+          "SKILL:ABA5:CHECKAPPLICATIONFL401",
+          "SKILL:ABA5:SERVEAPPLICATIONFL401",
+          "SKILL:ABA5:HEARINGMANAGEMENTFL401",
+          "SKILL:ABA5:ORDERMANAGEMENTFL401",
+          "SKILL:ABA5:REVIEWCORRESPONDENCEFL401",
+          "SKILL:ABA5:GATEKEEPING",
+          "SKILL:ABA5:GATEKEEPINGC100",
+          "SKILL:ABA5:GATEKEEPINGFL401"
+        ]
+      },
+      {
+        "id": "198fdfa1-9967-4585-a12f-fa6297732b89",
+        "actorIdType": "IDAM",
+        "actorId": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-admin",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "ADMIN",
+        "readOnly": true,
+        "created": "2025-06-23T12:29:29.236877Z",
+        "attributes": {
+          "substantive": "N"
+        }
+      }
+    ]
   }
 ]
