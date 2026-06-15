@@ -37,7 +37,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -81,7 +83,7 @@ public class RequestOrderTaskService {
                 "data.requestOrderTaskTrackingByHearing"
             ));
 
-
+        var semaphore = new Semaphore(50);
         // Initial query
         Optional<SearchResult> searchResult = executeQuery(
             buildQuery(
@@ -97,7 +99,7 @@ public class RequestOrderTaskService {
                         log.info("Processing initial record count of {}",
                                  result.getCases().size());
                         List<CaseDetails> cases = result.getCases();
-                        executor.submit(() -> process(cases));
+                        process(executor, semaphore, cases);
 
                         String searchAfterValue = cases.getLast().getId().toString();
                         log.info("search after value {}", searchAfterValue);
@@ -123,7 +125,7 @@ public class RequestOrderTaskService {
                                 subsequentSearchResult
                                     .map(SearchResult::getCases)
                                     .ifPresent(subSequentCases ->
-                                                   executor.submit(() -> process(subSequentCases)));
+                                                   process(executor, semaphore, subSequentCases));
 
                                 searchAfterValue = subsequentSearchResult
                                     .map(SearchResult::getCases)
@@ -167,14 +169,19 @@ public class RequestOrderTaskService {
             .build();
     }
 
-    private void process(List<CaseDetails> cases) {
-        cases.forEach(caseDetails -> {
-            try {
-                processCase(caseDetails);
-            } catch (Exception e) {
-                log.error("Error while processing Request Order task for case {}", caseDetails.getId(), e);
-            }
-        });
+    private void process(ExecutorService executor, Semaphore semaphore, List<CaseDetails> cases) {
+        cases.forEach(caseDetails ->
+            executor.submit(() -> {
+                log.info("Semaphore count {}", semaphore.availablePermits());
+                try {
+                    semaphore.acquire();
+                    processCase(caseDetails);
+                } catch (Exception e) {
+                    log.error("Error while processing Request Order task for case {}", caseDetails.getId(), e);
+                } finally {
+                    semaphore.release();
+                }
+            }));
     }
 
     private void processCase(CaseDetails caseDetails) {
