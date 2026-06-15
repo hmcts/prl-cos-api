@@ -519,7 +519,7 @@ public class ManageDocumentsService {
                                               String userRole,
                                               QuarantineLegalDoc quarantineLegalDoc) {
         if (isNewTaskRequired(caseData, quarantineLegalDoc, userRole)) {
-            caseDataUpdated.put(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS, true);
+            caseDataUpdated.put(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS, YesOrNo.Yes);
             ArrayList<Element<String>> listOfTasks = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
                 ? (ArrayList<Element<String>>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
             listOfTasks.add(element(quarantineLegalDoc.getCategoryId()));
@@ -527,9 +527,9 @@ public class ManageDocumentsService {
                                 listOfTasks);
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole.toUpperCase());
         } else {
-            Boolean newTaskRequiredForUploadedDocs = nonNull(caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS))
-                ? (Boolean) caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS) : null;
-            if (isNull(newTaskRequiredForUploadedDocs) || !newTaskRequiredForUploadedDocs) {
+            YesOrNo newTaskRequiredForUploadedDocs = nonNull(caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS))
+                ? (YesOrNo) caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS) : null;
+            if (isNull(newTaskRequiredForUploadedDocs) || !YesOrNo.Yes.equals(newTaskRequiredForUploadedDocs)) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
             }
         }
