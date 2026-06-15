@@ -948,6 +948,7 @@ public class CaseUtils {
     public static String getHearingId(WaMapper waMapper) {
         if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                log.info("getting hearingId for taskId={}", waMapper.getClientContext().getUserTask().getTaskData().getId());
                 return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getHearingId();
             }
         }

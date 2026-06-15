@@ -252,7 +252,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         // exclusively for the WA chase flow). No task context, so no hearing lock.
         log.info("In simple midevent");
         String lockToHearingId = extractHearingIdFromClientContext(clientContext);
-        log.info("simple: hearingId Associated with the task==> {}", lockToHearingId);
+        log.info("simple: hearingId Associated with the task={} for case={}", lockToHearingId, caseData.getId());
         return processSendOrReplyMidEvent(authorisation, caseData, !StringUtils.isBlank(lockToHearingId), lockToHearingId);
     }
 
@@ -271,7 +271,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         // is in the client-context header, lock the dropdown to that hearing
         // (FPVTL-2408/2409).
         String lockToHearingId = extractHearingIdFromClientContext(clientContext);
-        log.info("task: hearingId Associated with the task==> {}", lockToHearingId);
+        log.info("task: hearingId Associated with the task={} for case={}", lockToHearingId, caseData.getId());
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
 
