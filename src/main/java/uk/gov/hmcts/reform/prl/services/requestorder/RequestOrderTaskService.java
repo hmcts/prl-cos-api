@@ -97,7 +97,7 @@ public class RequestOrderTaskService {
                         log.info("Processing initial record count of {}",
                                  result.getCases().size());
                         List<CaseDetails> cases = result.getCases();
-                        process(cases);
+                        executor.submit(() -> process(cases));
 
                         String searchAfterValue = cases.getLast().getId().toString();
                         log.info("search after value {}", searchAfterValue);
@@ -122,7 +122,8 @@ public class RequestOrderTaskService {
 
                                 subsequentSearchResult
                                     .map(SearchResult::getCases)
-                                    .ifPresent(this::process);
+                                    .ifPresent(subSequentCases ->
+                                                   executor.submit(() -> process(subSequentCases)));
 
                                 searchAfterValue = subsequentSearchResult
                                     .map(SearchResult::getCases)
