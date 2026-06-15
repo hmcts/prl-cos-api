@@ -91,55 +91,53 @@ public class RequestOrderTaskService {
 
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             searchResult.ifPresent(result -> {
-                                       log.info("Processing total record count of {}",
-                                                result.getTotal());
-                                       if (result.getTotal() > 0) {
-                                           log.info("Processing initial record count of {}",
-                                                    result.getCases().size());
-                                           List<CaseDetails> cases = result.getCases();
-                                           executor.submit(() -> process(cases));
+                log.info("Processing total record count of {}",
+                         result.getTotal());
+                if (result.getTotal() > 0) {
+                        log.info("Processing initial record count of {}",
+                                 result.getCases().size());
+                        List<CaseDetails> cases = result.getCases();
+                        process(cases);
 
-                                           String searchAfterValue = cases.getLast().getId().toString();
-                                           log.info("search after value {}", searchAfterValue);
-                                           boolean keepSearching;
-                                           do {
-                                               // Subsequent query
-                                               Optional<SearchResult> subsequentSearchResult = executeQuery(
-                                                   buildQuery(
-                                                       startAfter -> queryParamBuilder
-                                                           .searchAfter(List.of(startAfter)),
-                                                       searchAfterValue
-                                                   ));
+                        String searchAfterValue = cases.getLast().getId().toString();
+                        log.info("search after value {}", searchAfterValue);
+                        boolean keepSearching;
+                        do {
+                            // Subsequent query
+                            Optional<SearchResult> subsequentSearchResult = executeQuery(
+                                buildQuery(
+                                    startAfter -> queryParamBuilder
+                                        .searchAfter(List.of(startAfter)),
+                                    searchAfterValue
+                                ));
 
-                                               keepSearching = subsequentSearchResult
-                                                   .map(SearchResult::getCases)
-                                                   .map(records -> !records.isEmpty())
-                                                   .orElse(false);
+                            keepSearching = subsequentSearchResult
+                                .map(SearchResult::getCases)
+                                .map(records -> !records.isEmpty())
+                                .orElse(false);
 
-                                               if (keepSearching) {
-                                                   log.info("Processing subsequent record count of {}",
-                                                            subsequentSearchResult.map(records -> records.getCases().size()));
+                            if (keepSearching) {
+                                log.info("Processing subsequent record count of {}",
+                                         subsequentSearchResult.map(records -> records.getCases().size()));
 
-                                                   subsequentSearchResult
-                                                       .map(SearchResult::getCases)
-                                                       .ifPresent(subSequentCases ->
-                                                                      executor.submit(() -> process(subSequentCases)));
+                                subsequentSearchResult
+                                    .map(SearchResult::getCases)
+                                    .ifPresent(this::process);
 
-                                                   searchAfterValue = subsequentSearchResult
-                                                       .map(SearchResult::getCases)
-                                                       .map(List::getLast)
-                                                       .map(CaseDetails::getId)
-                                                       .map(Object::toString)
-                                                       .orElse("");
+                                searchAfterValue = subsequentSearchResult
+                                    .map(SearchResult::getCases)
+                                    .map(List::getLast)
+                                    .map(CaseDetails::getId)
+                                    .map(Object::toString)
+                                    .orElse("");
 
-                                                   log.info("search after value {}", searchAfterValue);
-                                               }
-                                           } while (keepSearching);
-                                       }
-                                   }
+                                log.info("search after value {}", searchAfterValue);
+                            }
+                        } while (keepSearching);
+                    }
+                }
             );
         }
-
     }
 
     /**
