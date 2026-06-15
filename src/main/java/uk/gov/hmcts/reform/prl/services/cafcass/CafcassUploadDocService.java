@@ -35,6 +35,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.INVALID_DOCUMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassServiceUtil.checkFileFormat;
@@ -131,6 +132,7 @@ public class CafcassUploadDocService {
             CAFCASS,
             quarantineLegalDoc
         );
+        caseDataUpdated.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
 
         manageDocumentsService.moveDocumentsToQuarantineTab(
             quarantineLegalDoc,
