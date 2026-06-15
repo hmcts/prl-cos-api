@@ -257,7 +257,6 @@ public class ManageDocumentsService {
             Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
                 .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
-        caseData.setNewTaskRequiredForUploadedDocs(false);
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             ManageDocuments manageDocument = element.getValue();
@@ -528,7 +527,7 @@ public class ManageDocumentsService {
                                 listOfTasks);
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole.toUpperCase());
         } else {
-            Boolean newTaskRequiredForUploadedDocs = nonNull(caseDataUpdated.get("newTaskRequiredForUploadedDocs"))
+            Boolean newTaskRequiredForUploadedDocs = nonNull(caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS))
                 ? (Boolean) caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS) : null;
             if (isNull(newTaskRequiredForUploadedDocs) || !newTaskRequiredForUploadedDocs) {
                 caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
