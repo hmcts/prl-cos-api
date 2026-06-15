@@ -184,7 +184,7 @@ public class RequestOrderTaskService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Iterator<CaseHearing> caseHearingIterator = hearings.getCaseHearings().iterator();
 
-        if(caseHearingIterator.hasNext()) {
+        if (caseHearingIterator.hasNext()) {
             evaluateHearing(caseData, caseHearingIterator.next());
             evaluateMultipleHearing(caseHearingIterator, caseId);
         }
