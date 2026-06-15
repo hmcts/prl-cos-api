@@ -83,7 +83,7 @@ public class RequestOrderTaskService {
                 "data.requestOrderTaskTrackingByHearing"
             ));
 
-        var semaphore = new Semaphore(50);
+        Semaphore semaphore = new Semaphore(50);
         // Initial query
         Optional<SearchResult> searchResult = executeQuery(
             buildQuery(
@@ -91,7 +91,7 @@ public class RequestOrderTaskService {
                 ""
             ));
 
-        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
             searchResult.ifPresent(result -> {
                 log.info("Processing total record count of {}",
                          result.getTotal());
@@ -169,19 +169,26 @@ public class RequestOrderTaskService {
             .build();
     }
 
-    private void process(ExecutorService executor, Semaphore semaphore, List<CaseDetails> cases) {
-        cases.forEach(caseDetails ->
-            executor.submit(() -> {
-                log.info("Semaphore count {}", semaphore.availablePermits());
-                try {
-                    semaphore.acquire();
-                    processCase(caseDetails);
-                } catch (Exception e) {
-                    log.error("Error while processing Request Order task for case {}", caseDetails.getId(), e);
-                } finally {
-                    semaphore.release();
-                }
-            }));
+    private void process(ExecutorService executor,
+                         Semaphore semaphore,
+                         List<CaseDetails> cases) {
+        cases.forEach(caseDetails -> {
+            try {
+                semaphore.acquire();
+                executor.submit(() -> {
+                    try {
+                        processCase(caseDetails);
+                    } catch (Exception e) {
+                        log.error("Error while processing Request Order task for case {}", caseDetails.getId(), e);
+                    } finally {
+                        semaphore.release();
+                    }
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // restore interrupt status
+                log.error("Interrupted while processing case {}", caseDetails.getId(), e);
+            }
+        });
     }
 
     private void processCase(CaseDetails caseDetails) {
