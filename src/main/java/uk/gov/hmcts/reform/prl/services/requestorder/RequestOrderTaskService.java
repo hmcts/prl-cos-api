@@ -88,6 +88,7 @@ public class RequestOrderTaskService {
                 startAfter -> queryParamBuilder,
                 ""
             ));
+
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             searchResult.ifPresent(result -> {
                                        log.info("Processing total record count of {}",
