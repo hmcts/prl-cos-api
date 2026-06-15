@@ -111,3 +111,4 @@ java:
     BUNDLE_BY_CATEGORY_ENABLED: true
     CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED: true
     APP_ENV: "preview"
+    DUMMY_ENV: true
