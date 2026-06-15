@@ -195,6 +195,9 @@ public class BaseCaseData {
         return documentRemovalWrapper;
     }
 
+    @JsonIgnore
+    private Boolean newTaskRequiredForUploadedDocs;
+
     private List<Element<ApplicantConfidentialityDetails>> otherPeopleConfidentialDetails;
 
     private List<Element<ResponseDocuments>> otherPartyC8Documents;

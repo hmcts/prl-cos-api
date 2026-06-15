@@ -63,6 +63,8 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
@@ -101,6 +103,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
@@ -254,6 +257,7 @@ public class ManageDocumentsService {
             Optional.ofNullable(caseData.getDocumentManagementDetails().getManageDocuments())
                 .orElse(Collections.emptyList());
         boolean isWaTaskSetForFirstDocumentIteration = false;
+        caseData.setNewTaskRequiredForUploadedDocs(false);
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             ManageDocuments manageDocument = element.getValue();
@@ -287,6 +291,7 @@ public class ManageDocumentsService {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
+        caseDataUpdated.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
     }
 
     private QuarantineLegalDoc getQuarantineLegalDoc(CaseData caseData,
@@ -515,6 +520,7 @@ public class ManageDocumentsService {
                                               String userRole,
                                               QuarantineLegalDoc quarantineLegalDoc) {
         if (isNewTaskRequired(caseData, quarantineLegalDoc, userRole)) {
+            caseDataUpdated.put(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS, true);
             ArrayList<Element<String>> listOfTasks = caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) != null
                 ? (ArrayList<Element<String>>) caseDataUpdated.get(MANAGE_DOCUMENTS_UPLOADED_CATEGORY) : new ArrayList<>();
             listOfTasks.add(element(quarantineLegalDoc.getCategoryId()));
@@ -522,7 +528,11 @@ public class ManageDocumentsService {
                                 listOfTasks);
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, userRole.toUpperCase());
         } else {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+            Boolean newTaskRequiredForUploadedDocs = nonNull(caseDataUpdated.get("newTaskRequiredForUploadedDocs"))
+                ? (Boolean) caseDataUpdated.get(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS) : null;
+            if (isNull(newTaskRequiredForUploadedDocs) || !newTaskRequiredForUploadedDocs) {
+                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+            }
         }
     }
 
