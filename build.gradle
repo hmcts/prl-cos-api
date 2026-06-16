@@ -372,7 +372,7 @@ dependencies {
     exclude group: 'commons-collections', module: 'commons-collections'
   }
   implementation 'com.deepoove:poi-tl:1.12.2'
-  implementation 'org.springframework.integration:spring-integration-sftp:6.5.8'
+  implementation 'org.springframework.integration:spring-integration-sftp:6.5.9'
 
   runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation group: 'org.awaitility', name: 'awaitility', version: versions.awaitility
