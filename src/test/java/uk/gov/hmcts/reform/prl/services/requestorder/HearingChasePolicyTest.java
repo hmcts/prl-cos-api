@@ -374,7 +374,7 @@ class HearingChasePolicyTest {
         String formattedDate = hearingDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         return Element.<OrderDetails>builder().value(
             OrderDetails.builder()
-                .selectedHearingType("Allocation - "+formattedDate+" 09:00:00")
+                .selectedHearingType("Allocation - " + formattedDate + " 09:00:00")
                 .finalisationDetails(FinalisationDetails.builder().build())
                 .build()
         ).build();
