@@ -859,7 +859,7 @@ prepare-hearing-bundle:
   calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
 
 docmosis:
-  url: ${DOCMOSIS_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
   access-key: ${DOCMOSIS_ACCESS_KEY:replace_me}
   pdf:
     familyCourtImgKey: "familycourt"

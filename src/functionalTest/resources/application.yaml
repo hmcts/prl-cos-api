@@ -695,5 +695,5 @@ acro:
     password: ${ACRO_SFTP_USER_PASSWORD:some_password}
 
 docmosis:
-  url: ${DOCMOSIS_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
   access-key: ${DOCMOSIS_ACCESS_KEY:replace_me}
