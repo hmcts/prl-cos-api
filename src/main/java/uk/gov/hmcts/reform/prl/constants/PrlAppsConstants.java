@@ -526,6 +526,12 @@ public class PrlAppsConstants {
         + "they will give to the court about the disputed facts, attaching any documents they wish to use to support their evidence. Copies of the"
         + " statements and any documents must be sent with the lists.";
 
+    public static final String INTERPRETER_REQUIRED_TEXT =
+        "Do you know if an interpreter will be needed in the court to explain information in a certain language?";
+    public static final String DISABILITY_PRESENT_TEXT = "Does the respondent, or anyone else attending court have a disability?";
+    public static final String SPECIAL_ARRANGEMENTS_REQUIRED_TEXT =
+        "Will the court need to make special arrangements for the respondent, or any child involved in the case?";
+    public static final String INTERMEDIARY_REQUIRED_TEXT = "Do you know if an intermediary will be required?";
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
