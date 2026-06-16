@@ -16,9 +16,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -272,6 +274,30 @@ class HearingChasePolicyTest {
         verify(workingDayIndicator).workingDaysBetween(eq(lastCompleted), eq(TODAY));
     }
 
+    @Test
+    void decideSkipsWhenHearingMappedToFinalisedOrder() {
+        LocalDate hearingDate = TODAY.minusDays(2);
+        CaseData caseData = fl401Case()
+            .orderCollection(List.of(finalisedOrder(hearingDate)))
+            .build();
+        CaseHearing hearingWithType = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf(HEARING_ID))
+            .hmcStatus("COMPLETED")
+            .hearingTypeValue("Allocation")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                            .hearingStartDateTime(hearingDate.atTime(9, 0))
+                                            .hearingEndDateTime(hearingDate.atTime(16, 0))
+                                            .build()))
+            .build();
+
+
+        ChaseDecision decision = policy.decide(
+            hearingWithType, caseData, emptyLedger(), TODAY);
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
+    }
+
     private static CaseData.CaseDataBuilder<?, ?> fl401Case() {
         return CaseData.builder().caseTypeOfApplication("FL401");
     }
@@ -340,6 +366,16 @@ class HearingChasePolicyTest {
                                 .build())
                             .build()
                     ).build()))
+                .build()
+        ).build();
+    }
+
+    private static Element<OrderDetails> finalisedOrder(LocalDate hearingDate) {
+        String formattedDate = hearingDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        return Element.<OrderDetails>builder().value(
+            OrderDetails.builder()
+                .selectedHearingType("Allocation - "+formattedDate+" 09:00:00")
+                .finalisationDetails(FinalisationDetails.builder().build())
                 .build()
         ).build();
     }

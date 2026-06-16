@@ -133,7 +133,9 @@ class HearingChasePolicy {
             || isHearingReferencedByManageOrderHearingDetails(caseData.getOrderCollection(),
                                                               OrderDetails::getManageOrderHearingDetails, hearingId)
             || isDraftOrderReferencedByHearingsType(
-                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes);
+                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes)
+
+            || isFinalisedOrderReferencedByHearingsType(caseData.getOrderCollection(), hearingLabels);
     }
 
     private static <T> boolean isHearingReferencedByManageOrderHearingDetails(
@@ -175,5 +177,18 @@ class HearingChasePolicy {
             .filter(Objects::nonNull)
             .anyMatch(code -> hearingLabels.contains(code)
                 || hearingDateSuffixes.contains(HearingLabelUtils.extractDateSuffix(code)));
+    }
+
+    private static boolean isFinalisedOrderReferencedByHearingsType(List<Element<OrderDetails>> orderDetails,
+                                                                Set<String> hearingLabels) {
+        if (hearingLabels.isEmpty()) {
+            return false;
+        }
+        return nullSafeCollection(orderDetails).stream()
+            .map(Element::getValue)
+            .filter(order -> order.getFinalisationDetails() != null)
+            .map(OrderDetails::getSelectedHearingType)
+            .filter(Objects::nonNull)
+            .anyMatch(code -> hearingLabels.contains(code));
     }
 }
