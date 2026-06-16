@@ -83,7 +83,7 @@ class RenameDocumentServiceTest {
 
     @Test
     void testHandleMidEvent() {
-        DynamicListElement element = DynamicListElement.builder().code("cat1 -> doc1").label("catName -> docName").build();
+        DynamicListElement element = DynamicListElement.builder().code("categoryCode -> documentId").label("categoryName -> documentName").build();
         DynamicList selectedList = DynamicList.builder().value(element).listItems(List.of(element)).build();
 
         RenameDocument renameDocument = RenameDocument.builder()
@@ -92,7 +92,7 @@ class RenameDocumentServiceTest {
         caseData = caseData.toBuilder().renameDocument(renameDocument).build();
 
         DynamicList categoriesAndDocumentsList = DynamicList.builder()
-            .listItems(List.of(DynamicListElement.builder().code("cat1").label("Category 1").build()))
+            .listItems(List.of(DynamicListElement.builder().code("categoryCode").label("Category 1").build()))
             .build();
 
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
@@ -101,28 +101,26 @@ class RenameDocumentServiceTest {
         Map<String, Object> result = renameDocumentService.handleMidEvent(AUTH, callbackRequest);
 
         assertNotNull(result);
-        assertEquals("catName -> docName", result.get("renameListDocSelected"));
+        assertEquals("categoryName -> documentName", result.get("renameListDocSelected"));
         DynamicList updatedCategories = (DynamicList) result.get("categoryDocumentsList");
-        assertEquals("cat1", updatedCategories.getValue().getCode());
+        assertEquals("categoryCode", updatedCategories.getValue().getCode());
     }
 
     @Test
     void testHandleAboutToSubmit() {
-        DynamicListElement selectedDoc = DynamicListElement.builder().code("cat1 -> docId1").build();
-        DynamicListElement selectedCat = DynamicListElement.builder().code("newCatId").build();
+        DynamicListElement selectedDoc = DynamicListElement.builder().code("categoryCode -> documentId1").build();
+        DynamicListElement selectedCategory = DynamicListElement.builder().code("newCategoryId").build();
 
         RenameDocument renameDocument = RenameDocument.builder()
             .renameDocumentsList(DynamicList.builder().value(selectedDoc).build())
-            .categoryDocumentsList(DynamicList.builder().value(selectedCat).build())
+            .categoryDocumentsList(DynamicList.builder().value(selectedCategory).build())
             .newNameForDocument("New Name")
             .build();
         caseData = caseData.toBuilder().renameDocument(renameDocument).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        Map<String, Object> docMap = new HashMap<>();
-        docMap.put("document_url", "http://dm-store/docId1");
-        docMap.put("document_filename", "old_name.pdf");
-        caseDataMap.put("someDocument", docMap);
+        Map<String, Object> documentMap = createDocumentMap("documentId1", "old_name.pdf");
+        caseDataMap.put("someDocument", documentMap);
 
         callbackRequest.getCaseDetails().setData(caseDataMap);
 
@@ -132,13 +130,13 @@ class RenameDocumentServiceTest {
 
         assertNotNull(result);
         assertEquals("New Name.pdf", ((Map<String, Object>)result.get("someDocument")).get("document_filename"));
-        assertEquals("newCatId", ((Map<String, Object>)result.get("someDocument")).get("category_id"));
+        assertEquals("newCategoryId", ((Map<String, Object>)result.get("someDocument")).get("category_id"));
         assertFalse(result.containsKey("renameDocument"));
     }
 
     @Test
     void testHandleAboutToSubmitInList() {
-        DynamicListElement selectedDoc = DynamicListElement.builder().code("docId1").build();
+        DynamicListElement selectedDoc = DynamicListElement.builder().code("documentId1").build();
         RenameDocument renameDocument = RenameDocument.builder()
             .renameDocumentsList(DynamicList.builder().value(selectedDoc).build())
             .newNameForDocument("New Name")
@@ -146,19 +144,17 @@ class RenameDocumentServiceTest {
         caseData = caseData.toBuilder().renameDocument(renameDocument).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
-        List<Map<String, Object>> list = new ArrayList<>();
-        Map<String, Object> docMap = new HashMap<>();
-        docMap.put("document_url", "http://dm-store/docId1");
-        docMap.put("document_filename", "old_name.pdf");
-        list.add(Map.of("value", docMap));
-        caseDataMap.put("docList", list);
+        List<Map<String, Object>> documentList = new ArrayList<>();
+        Map<String, Object> documentMap = createDocumentMap("documentId1", "old_name.pdf");
+        documentList.add(Map.of("value", documentMap));
+        caseDataMap.put("docList", documentList);
 
         callbackRequest.getCaseDetails().setData(caseDataMap);
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
 
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        Map<String, Object> updatedDoc = (Map<String, Object>) ((Map<String, Object>)list.get(0)).get("value");
+        Map<String, Object> updatedDoc = (Map<String, Object>) ((Map<String, Object>)documentList.get(0)).get("value");
         assertEquals("New Name.pdf", updatedDoc.get("document_filename"));
     }
 
@@ -190,7 +186,6 @@ class RenameDocumentServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(any(), any())).thenReturn(DynamicList.builder().listItems(new ArrayList<>()).build());
 
         Document doc = Document.builder().documentFileName("extra.pdf").documentUrl("http://doc/uuid1").build();
-        // First call for allDocuments, second for quarantineDocuments
         when(documentExtractor.getCaseDocuments(any(CaseData.class)))
             .thenReturn(List.of(doc))
             .thenReturn(Collections.emptyList());
@@ -297,12 +292,13 @@ class RenameDocumentServiceTest {
 
     @Test
     void testHandleAboutToSubmitWithUncategorizedAndCategorized() {
-        DynamicListElement selectedDoc = DynamicListElement.builder().code("docId1").build();
-        DynamicListElement selectedCat = DynamicListElement.builder().code("newCatId").build();
+        String documentId = "docId1";
+        DynamicListElement selectedDoc = DynamicListElement.builder().code(documentId).build();
+        DynamicListElement selectedCategory = DynamicListElement.builder().code("newCategoryId").build();
 
         RenameDocument renameDocument = RenameDocument.builder()
             .renameDocumentsList(DynamicList.builder().value(selectedDoc).build())
-            .categoryDocumentsList(DynamicList.builder().value(selectedCat).build())
+            .categoryDocumentsList(DynamicList.builder().value(selectedCategory).build())
             .newNameForDocument("New Name")
             .build();
         caseData = caseData.toBuilder().renameDocument(renameDocument).build();
@@ -310,22 +306,12 @@ class RenameDocumentServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
 
         // Categorized instance
-        Map<String, Object> catDocMap = new HashMap<>();
-        catDocMap.put("document_url", "http://dm-store/docId1");
-        catDocMap.put("document_filename", "cat_old_name.pdf");
-        List<Map<String, Object>> catList = new ArrayList<>();
-        catList.add(new HashMap<>(Map.of("value", catDocMap)));
-        caseDataMap.put("scannedDocuments", catList);
+        Map<String, Object> categorisedDocumentMap = createDocumentMap(documentId, "categorised_old_name.pdf");
+        addCategorisedDocument(caseDataMap, categorisedDocumentMap);
 
         // Uncategorized instance
-        Map<String, Object> uncatDocMap = new HashMap<>();
-        uncatDocMap.put("document_url", "http://dm-store/docId1");
-        uncatDocMap.put("document_filename", "uncat_old_name.pdf");
-        Map<String, Object> packMap = new HashMap<>();
-        List<Map<String, Object>> packList = new ArrayList<>();
-        packList.add(new HashMap<>(Map.of("value", uncatDocMap)));
-        packMap.put("packDocument", packList);
-        caseDataMap.put("unServedApplicantPack", packMap);
+        Map<String, Object> uncategorisedDocumentMap = createDocumentMap(documentId, "uncategorisedDocument_old_name.pdf");
+        addUncategorisedDocument(caseDataMap, uncategorisedDocumentMap);
 
         callbackRequest.getCaseDetails().setData(caseDataMap);
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
@@ -333,47 +319,59 @@ class RenameDocumentServiceTest {
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
         // Both should be renamed
-        assertEquals("New Name.pdf", catDocMap.get("document_filename"));
-        assertEquals("New Name.pdf", uncatDocMap.get("document_filename"));
+        assertEquals("New Name.pdf", categorisedDocumentMap.get("document_filename"));
+        assertEquals("New Name.pdf", uncategorisedDocumentMap.get("document_filename"));
 
         // Only categorized should be moved
-        assertEquals("newCatId", catDocMap.get("category_id"));
-        assertFalse(uncatDocMap.containsKey("category_id"));
+        assertEquals("newCategoryId", categorisedDocumentMap.get("category_id"));
+        assertFalse(uncategorisedDocumentMap.containsKey("category_id"));
     }
 
     @Test
     void testHandleAboutToSubmitWithOnlyUncategorized() {
-        DynamicListElement selectedDoc = DynamicListElement.builder().code("docId1").build();
-        DynamicListElement selectedCat = DynamicListElement.builder().code("newCatId").build();
+        String documentId = "docId1";
+        DynamicListElement selectedDoc = DynamicListElement.builder().code(documentId).build();
+        DynamicListElement selectedCategory = DynamicListElement.builder().code("newCategoryId").build();
 
         RenameDocument renameDocument = RenameDocument.builder()
             .renameDocumentsList(DynamicList.builder().value(selectedDoc).build())
-            .categoryDocumentsList(DynamicList.builder().value(selectedCat).build())
+            .categoryDocumentsList(DynamicList.builder().value(selectedCategory).build())
             .newNameForDocument("New Name")
             .build();
         caseData = caseData.toBuilder().renameDocument(renameDocument).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
 
-        // Uncategorized instance only
-        Map<String, Object> uncatDocMap = new HashMap<>();
-        uncatDocMap.put("document_url", "http://dm-store/docId1");
-        uncatDocMap.put("document_filename", "uncat_old_name.pdf");
-        Map<String, Object> packMap = new HashMap<>();
-        List<Map<String, Object>> packList = new ArrayList<>();
-        packList.add(new HashMap<>(Map.of("value", uncatDocMap)));
-        packMap.put("packDocument", packList);
-        caseDataMap.put("unServedApplicantPack", packMap);
+        Map<String, Object> uncategorisedDocumentMap = createDocumentMap(documentId, "uncat_old_name.pdf");
+        addUncategorisedDocument(caseDataMap, uncategorisedDocumentMap);
 
         callbackRequest.getCaseDetails().setData(caseDataMap);
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
 
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        // Should be renamed
-        assertEquals("New Name.pdf", uncatDocMap.get("document_filename"));
+        assertEquals("New Name.pdf", uncategorisedDocumentMap.get("document_filename"));
+        assertEquals("newCategoryId", uncategorisedDocumentMap.get("category_id"));
+    }
 
-        // Should be moved because it's ONLY in uncategorized
-        assertEquals("newCatId", uncatDocMap.get("category_id"));
+    private Map<String, Object> createDocumentMap(String documentId, String fileName) {
+        Map<String, Object> docMap = new HashMap<>();
+        docMap.put("document_url", "http://dm-store/" + documentId);
+        docMap.put("document_filename", fileName);
+        return docMap;
+    }
+
+    private void addCategorisedDocument(Map<String, Object> caseDataMap, Map<String, Object> documentMap) {
+        List<Map<String, Object>> documentList = new ArrayList<>();
+        documentList.add(new HashMap<>(Map.of("value", documentMap)));
+        caseDataMap.put("scannedDocuments", documentList);
+    }
+
+    private void addUncategorisedDocument(Map<String, Object> caseDataMap, Map<String, Object> documentMap) {
+        Map<String, Object> packMap = new HashMap<>();
+        List<Map<String, Object>> packList = new ArrayList<>();
+        packList.add(new HashMap<>(Map.of("value", documentMap)));
+        packMap.put("packDocument", packList);
+        caseDataMap.put("unServedApplicantPack", packMap);
     }
 }
