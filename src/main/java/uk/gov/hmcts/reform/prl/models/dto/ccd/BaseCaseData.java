@@ -182,6 +182,8 @@ public class BaseCaseData {
     private LocalAuthority localAuthority;
 
     @JsonUnwrapped
+    private RenameDocument renameDocument;
+    @JsonUnwrapped
     @Getter(AccessLevel.NONE)
     private DocumentRemovalWrapper documentRemovalWrapper;
 
