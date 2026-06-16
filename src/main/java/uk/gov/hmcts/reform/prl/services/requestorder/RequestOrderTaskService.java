@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -59,6 +60,8 @@ public class RequestOrderTaskService {
 
     private static final ZoneId UK_ZONE = ZoneId.of("Europe/London");
     private static final String ES_PAGE_SIZE = "100";
+    @Value("${request-order-task.concurrent-request}")
+    private int concurrentRequest;
     private static final String CURRENT_HEARING_ID = "currentHearingId";
     private static final String TRACKING_FIELD = "requestOrderTaskTrackingByHearing";
 
@@ -83,7 +86,7 @@ public class RequestOrderTaskService {
                 "data.requestOrderTaskTrackingByHearing"
             ));
 
-        Semaphore semaphore = new Semaphore(50);
+        Semaphore semaphore = new Semaphore(concurrentRequest);
         // Initial query
         Optional<SearchResult> searchResult = executeQuery(
             buildQuery(
@@ -174,6 +177,7 @@ public class RequestOrderTaskService {
                          List<CaseDetails> cases) {
         cases.forEach(caseDetails -> {
             try {
+                log.info("semaphore permit count {}", semaphore.availablePermits());
                 semaphore.acquire();
                 executor.submit(() -> {
                     try {

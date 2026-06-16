@@ -92,6 +92,7 @@ class RequestOrderTaskServiceTest {
         service = new RequestOrderTaskService(
             systemUserService, authTokenGenerator, coreCaseDataApi,
             hearingService, allTabService, chasePolicy, objectMapper);
+        ReflectionTestUtils.setField(service, "concurrentRequest", 5);
     }
 
     @ParameterizedTest
