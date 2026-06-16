@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,14 @@ import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RenameDocumentService {
+
+    public static final List<String> IGNORED_FIELDS = Arrays.asList(
+        "finalServedApplicationDetailsList",
+        "internalMessageAttachDocsList",
+        "externalMessageAttachDocsList",
+        "unServedApplicantPack",
+        "unServedRespondentPack"
+    );
 
     private final ObjectMapper objectMapper;
     private final SendAndReplyService sendAndReplyService;
@@ -113,7 +122,8 @@ public class RenameDocumentService {
                 }
 
                 if (isNotBlank(newName)) {
-                    findAndRenameDocument(caseDataMap, newName, documentId, categoryId);
+                    boolean isAnyCategorisedPresent = isAnyCategorisedDocumentPresent(caseDataMap, documentId, false);
+                    findAndRenameDocument(caseDataMap, null, false, newName, documentId, categoryId, isAnyCategorisedPresent);
                 }
             }
         }
@@ -126,7 +136,9 @@ public class RenameDocumentService {
         return caseDataMap;
     }
 
-    private void findAndRenameDocument(Object data, String newName, String documentId, String categoryId) {
+    private void findAndRenameDocument(Object data, String rootFieldName, boolean isUnderUncategorisedField,
+                                       String newName, String documentId, String categoryId,
+                                       boolean isAnyCategorisedPresent) {
         if (data instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) data;
 
@@ -149,22 +161,55 @@ public class RenameDocumentService {
                         newUploadName = isNotBlank(extension) ? newName + "." + extension : newName;
                     }
 
-                    log.info("Renaming the document");
+                    log.info("Renaming the document in field: {}", rootFieldName);
                     map.put("document_filename", newUploadName);
-                    map.put("category_id", categoryId);
+                    if (!isUnderUncategorisedField || !isAnyCategorisedPresent) {
+                        log.info("About to add the category id for rootField: {}", rootFieldName);
+                        map.put("category_id", categoryId);
+                    }
                     return;
                 }
             }
-            for (Object value : map.values()) {
-                findAndRenameDocument(value, newName, documentId, categoryId);
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                String currentRootField = (rootFieldName == null) ? key : rootFieldName;
+                boolean nextIsUnder = isUnderUncategorisedField || IGNORED_FIELDS.contains(key);
+                findAndRenameDocument(entry.getValue(), currentRootField, nextIsUnder, newName, documentId, categoryId, isAnyCategorisedPresent);
             }
 
         } else if (data instanceof List) {
             List<?> list = (List<?>) data;
             for (Object item : list) {
-                findAndRenameDocument(item, newName, documentId, categoryId);
+                findAndRenameDocument(item, rootFieldName, isUnderUncategorisedField, newName, documentId, categoryId, isAnyCategorisedPresent);
             }
         }
+    }
+
+    private boolean isAnyCategorisedDocumentPresent(Object data, String documentId, boolean isUnderUncategorisedField) {
+        if (data instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) data;
+
+            if (map.containsKey("document_url") && map.get("document_url") instanceof String) {
+                String url = (String) map.get("document_url");
+                if (url.contains(documentId)) {
+                    return !isUnderUncategorisedField;
+                }
+            }
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                boolean nextIsUnder = isUnderUncategorisedField || IGNORED_FIELDS.contains(entry.getKey());
+                if (isAnyCategorisedDocumentPresent(entry.getValue(), documentId, nextIsUnder)) {
+                    return true;
+                }
+            }
+        } else if (data instanceof List) {
+            List<?> list = (List<?>) data;
+            for (Object item : list) {
+                if (isAnyCategorisedDocumentPresent(item, documentId, isUnderUncategorisedField)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public List<String> validateRenamedField(Map<String, Object> caseDataUpdated) {
