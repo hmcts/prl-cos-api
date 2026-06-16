@@ -693,3 +693,9 @@ acro:
 bankHolidays:
   api:
     url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
+
+request-order-task:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+  cadence-working-days:
+    c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
+    fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
