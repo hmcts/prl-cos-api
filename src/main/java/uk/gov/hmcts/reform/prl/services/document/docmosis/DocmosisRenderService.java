@@ -21,7 +21,7 @@ import java.util.Optional;
 @Slf4j
 public class DocmosisRenderService {
 
-    public static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
+    static final String DYNAMIC_FILE_NAME = "dynamic_fileName";
     private static final String CURRENT_DATE_KEY = "current_date";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'hh:mm:ss.SSS";
 
