@@ -41,10 +41,10 @@ class HearingChasePolicy {
 
     private final WorkingDayIndicator workingDayIndicator;
 
-    @Value("${request-order-task.cadence-working-days.c100:3}")
+    @Value("${request-order-task.cadence-working-days.c100}")
     private int c100CadenceWorkingDays;
 
-    @Value("${request-order-task.cadence-working-days.fl401:1}")
+    @Value("${request-order-task.cadence-working-days.fl401}")
     private int fl401CadenceWorkingDays;
 
     @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
