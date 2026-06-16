@@ -839,3 +839,5 @@ bankHolidays:
   api:
     url: https://www.gov.uk
 
+request-order-task:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
