@@ -11,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.dto.docmosis.DocmosisRenderRequest;
 
 @Component
@@ -32,14 +34,17 @@ public class DocmosisClient {
 
         HttpEntity<DocmosisRenderRequest> entity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(
-            docmosisUrl + "/rs/render",
-            HttpMethod.POST,
-            entity,
-            byte[].class
-        );
-
-        return response.getBody();
+        try {
+            ResponseEntity<byte[]> response = restTemplate.exchange(
+                docmosisUrl + "/rs/render",
+                HttpMethod.POST,
+                entity,
+                byte[].class
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new DocumentGenerationException("Error while rendering Docmosis template " + request.getTemplateName(), e);
+        }
     }
 
     public byte[] convert(byte[] fileBytes, String sourceFilename, String outputFilename) {
@@ -60,13 +65,16 @@ public class DocmosisClient {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(
-            docmosisUrl + "/rs/convert",
-            HttpMethod.POST,
-            requestEntity,
-            byte[].class
-        );
-
-        return response.getBody();
+        try {
+            ResponseEntity<byte[]> response = restTemplate.exchange(
+                docmosisUrl + "/rs/convert",
+                HttpMethod.POST,
+                requestEntity,
+                byte[].class
+            );
+            return response.getBody();
+        } catch (RestClientException e) {
+            throw new DocumentGenerationException("Error during Docmosis conversion: " + e.getMessage(), e);
+        }
     }
 }

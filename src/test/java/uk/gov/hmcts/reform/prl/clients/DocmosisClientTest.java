@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.dto.docmosis.DocmosisRenderRequest;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -73,6 +76,26 @@ class DocmosisClientTest {
     }
 
     @Test
+    void render_shouldThrowDocumentGenerationExceptionWhenRestClientExceptionOccurs() {
+        DocmosisRenderRequest request = DocmosisRenderRequest.builder()
+            .templateName("test-template")
+            .build();
+        RestClientException cause = new RestClientException("docmosis unavailable");
+
+        when(restTemplate.exchange(
+            anyString(),
+            eq(HttpMethod.POST),
+            any(HttpEntity.class),
+            eq(byte[].class)
+        )).thenThrow(cause);
+
+        assertThatThrownBy(() -> docmosisClient.render(request))
+            .isInstanceOf(DocumentGenerationException.class)
+            .hasMessage("Error while rendering Docmosis template test-template")
+            .hasCause(cause);
+    }
+
+    @Test
     void convert_shouldSetHeadersAndCallRestTemplate() {
         byte[] expectedResponse = "result".getBytes();
 
@@ -110,5 +133,23 @@ class DocmosisClientTest {
 
         HttpHeaders headers = entity.getHeaders();
         assertThat(headers.getContentType()).isEqualTo(MediaType.MULTIPART_FORM_DATA);
+    }
+
+    @Test
+    void convert_shouldThrowDocumentGenerationExceptionWhenRestClientExceptionOccurs() {
+        RestClientException cause = new RestClientException("conversion failed");
+
+        when(restTemplate.exchange(
+            anyString(),
+            eq(HttpMethod.POST),
+            any(HttpEntity.class),
+            eq(byte[].class)
+        )).thenThrow(cause);
+        byte[] content = "file content".getBytes();
+
+        assertThatThrownBy(() -> docmosisClient.convert(content, "source.docx", "output.pdf"))
+            .isInstanceOf(DocumentGenerationException.class)
+            .hasMessage("Error during Docmosis conversion: conversion failed")
+            .hasCause(cause);
     }
 }
