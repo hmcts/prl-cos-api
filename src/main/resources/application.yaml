@@ -868,3 +868,7 @@ docmosis:
     hmctsImgVal: "[userImage:hmcts.png]"
     displayTemplateKey: "displayTemplateOnly"
     displayTemplateVal: "1"
+
+http:
+  connect-timeout: 10s
+  read-timeout: 60s
