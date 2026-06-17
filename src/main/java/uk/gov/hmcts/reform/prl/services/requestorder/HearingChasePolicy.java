@@ -25,6 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -111,6 +112,7 @@ class HearingChasePolicy {
     private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
+        log.info("hearingLabels for hearingId={}: {}", hearingId, hearingLabels.stream().collect(Collectors.toList()));
         boolean hearingTypeLookupFailed = hearing.getHearingTypeValue() == null
             || hearing.getHearingTypeValue().isBlank();
         Set<String> hearingDateSuffixes = hearingTypeLookupFailed
@@ -133,13 +135,16 @@ class HearingChasePolicy {
             || isHearingReferencedByManageOrderHearingDetails(caseData.getOrderCollection(),
                                                               OrderDetails::getManageOrderHearingDetails, hearingId)
             || isDraftOrderReferencedByHearingsType(
-                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes);
+                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes)
+
+            || isFinalisedOrderReferencedByHearingsType(caseData.getOrderCollection(), hearingLabels);
     }
 
     private static <T> boolean isHearingReferencedByManageOrderHearingDetails(
             List<Element<T>> orders,
             Function<T, List<Element<HearingData>>> hearingDetailsExtractor,
             String hearingId) {
+        log.info("trying isHearingReferencedByManageOrderHearingDetails for {}", hearingId);
         return nullSafeCollection(orders).stream()
             .map(Element::getValue)
             .anyMatch(order -> orderReferencesHearing(order, hearingDetailsExtractor, hearingId));
@@ -162,6 +167,7 @@ class HearingChasePolicy {
     private static boolean isDraftOrderReferencedByHearingsType(List<Element<DraftOrder>> draftOrders,
                                                                  Set<String> hearingLabels,
                                                                  Set<String> hearingDateSuffixes) {
+        log.info("trying isDraftOrderReferencedByHearingsType");
         if (hearingLabels.isEmpty() && hearingDateSuffixes.isEmpty()) {
             return false;
         }
@@ -175,5 +181,19 @@ class HearingChasePolicy {
             .filter(Objects::nonNull)
             .anyMatch(code -> hearingLabels.contains(code)
                 || hearingDateSuffixes.contains(HearingLabelUtils.extractDateSuffix(code)));
+    }
+
+    private static boolean isFinalisedOrderReferencedByHearingsType(List<Element<OrderDetails>> orderDetails,
+                                                                Set<String> hearingLabels) {
+        log.info("trying isFinalisedOrderReferencedByHearingsType");
+        if (hearingLabels.isEmpty()) {
+            return false;
+        }
+        return nullSafeCollection(orderDetails).stream()
+            .map(Element::getValue)
+            .filter(order -> order.getFinalisationDetails() != null)
+            .map(OrderDetails::getSelectedHearingType)
+            .filter(Objects::nonNull)
+            .anyMatch(code -> hearingLabels.contains(code));
     }
 }
