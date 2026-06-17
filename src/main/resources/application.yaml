@@ -870,5 +870,5 @@ docmosis:
     displayTemplateVal: "1"
 
 http:
-  connect-timeout: 10s
+  connect-timeout: 60s
   read-timeout: 60s
