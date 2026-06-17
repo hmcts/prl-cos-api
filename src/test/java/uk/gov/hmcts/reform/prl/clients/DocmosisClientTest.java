@@ -152,4 +152,38 @@ class DocmosisClientTest {
             .hasMessage("Error during Docmosis conversion: conversion failed")
             .hasCause(cause);
     }
+
+    @Test
+    void render_shouldThrowDocumentGenerationExceptionWhenResponseBodyIsNull() {
+        DocmosisRenderRequest request = DocmosisRenderRequest.builder()
+            .templateName("test-template")
+            .build();
+
+        when(restTemplate.exchange(
+            anyString(),
+            eq(HttpMethod.POST),
+            any(HttpEntity.class),
+            eq(byte[].class)
+        )).thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+
+        assertThatThrownBy(() -> docmosisClient.render(request))
+            .isInstanceOf(DocumentGenerationException.class)
+            .hasMessage("Error while rendering Docmosis template test-template: empty response body");
+    }
+
+    @Test
+    void convert_shouldThrowDocumentGenerationExceptionWhenResponseBodyIsNull() {
+        when(restTemplate.exchange(
+            anyString(),
+            eq(HttpMethod.POST),
+            any(HttpEntity.class),
+            eq(byte[].class)
+        )).thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+
+        byte[] content = "file content".getBytes();
+
+        assertThatThrownBy(() -> docmosisClient.convert(content, "source.docx", "output.pdf"))
+            .isInstanceOf(DocumentGenerationException.class)
+            .hasMessage("Error during Docmosis conversion: empty response body");
+    }
 }

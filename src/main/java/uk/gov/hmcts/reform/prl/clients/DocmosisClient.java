@@ -41,7 +41,8 @@ public class DocmosisClient {
                 entity,
                 byte[].class
             );
-            return response.getBody();
+            return requireBody(response,
+                               "Error while rendering Docmosis template " + request.getTemplateName() + ": empty response body");
         } catch (RestClientException e) {
             throw new DocumentGenerationException("Error while rendering Docmosis template " + request.getTemplateName(), e);
         }
@@ -72,9 +73,17 @@ public class DocmosisClient {
                 requestEntity,
                 byte[].class
             );
-            return response.getBody();
+            return requireBody(response, "Error during Docmosis conversion: empty response body");
         } catch (RestClientException e) {
             throw new DocumentGenerationException("Error during Docmosis conversion: " + e.getMessage(), e);
         }
+    }
+
+    private byte[] requireBody(ResponseEntity<byte[]> response, String message) {
+        byte[] body = response.getBody();
+        if (body == null) {
+            throw new DocumentGenerationException(message);
+        }
+        return body;
     }
 }
