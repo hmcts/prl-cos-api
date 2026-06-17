@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 @ConfigurationProperties(prefix = "docmosis")
 public class DocmosisTemplatesConfig {
 
-    private List<Template> templates;
+    private List<Template> templates = new ArrayList<>();
 
     @Getter
     @Setter
@@ -23,7 +24,7 @@ public class DocmosisTemplatesConfig {
 
     public Optional<String> getFilenameByTemplateName(String templateName) {
         return templates.stream()
-            .filter(t -> t.getTemplateName().equals(templateName))
+            .filter(t -> t.getTemplateName().equalsIgnoreCase(templateName))
             .map(Template::getFilename)
             .findFirst();
     }
