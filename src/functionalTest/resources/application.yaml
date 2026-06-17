@@ -696,4 +696,4 @@ acro:
 
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
-  access-key: ${DOCMOSIS_ACCESS_KEY:replace_me}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
