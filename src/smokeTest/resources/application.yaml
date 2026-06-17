@@ -678,7 +678,7 @@ acro:
     user: some_user
     azure-deployment: true
     private-key: /mnt/secrets/private-law/bais-xerox-key
-    private-key-pass-phrase: ""
+    private-key-pass-phrase: ""Rem
     session-wait-timeout: 10000
     pool-size: 10
     allow-unknown-keys: true
@@ -686,4 +686,4 @@ acro:
 
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
-  access-key: ${DOCMOSIS_ACCESS_KEY:replace_me}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
