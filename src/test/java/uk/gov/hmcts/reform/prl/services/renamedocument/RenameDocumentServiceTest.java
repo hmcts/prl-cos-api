@@ -305,11 +305,9 @@ class RenameDocumentServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
 
-        // Categorized instance
         Map<String, Object> categorisedDocumentMap = createDocumentMap(documentId, "categorised_old_name.pdf");
         addCategorisedDocument(caseDataMap, categorisedDocumentMap);
 
-        // Uncategorized instance
         Map<String, Object> uncategorisedDocumentMap = createDocumentMap(documentId, "uncategorisedDocument_old_name.pdf");
         addUncategorisedDocument(caseDataMap, uncategorisedDocumentMap);
 
@@ -318,11 +316,9 @@ class RenameDocumentServiceTest {
 
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        // Both should be renamed
         assertEquals("New Name.pdf", categorisedDocumentMap.get("document_filename"));
         assertEquals("New Name.pdf", uncategorisedDocumentMap.get("document_filename"));
 
-        // Only categorized should be moved
         assertEquals("newCategoryId", categorisedDocumentMap.get("category_id"));
         assertFalse(uncategorisedDocumentMap.containsKey("category_id"));
     }

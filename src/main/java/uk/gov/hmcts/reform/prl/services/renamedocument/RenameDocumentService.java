@@ -37,8 +37,8 @@ public class RenameDocumentService {
 
     private static final List<String> FIELDS_FOR_UNCATEGORISED_DOCUMENTS = List.of(
         "finalServedApplicationDetailsList",
-        "internalMessageAttachDocsList",
-        "externalMessageAttachDocsList",
+        "internalMessageAttachDocs",
+        "externalMessageAttachDocs",
         "unServedApplicantPack",
         "unServedRespondentPack"
     );
@@ -144,47 +144,48 @@ public class RenameDocumentService {
         return codes[codes.length - 1].trim();
     }
 
-    private void findAndRenameDocument(Object data, String rootFieldName, boolean isUncategorisedField,
+    private void findAndRenameDocument(Object data, String rootFieldName, boolean isDocInstanceInUncategorisedDocs,
                                        String newName, String documentId, String categoryId,
-                                       boolean isCategorisedInstancePresent) {
+                                       boolean isAnyCategorisedDocInstancePresent) {
         if (data instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) data;
-
 
             if (map.containsKey("document_url") && map.get("document_url") instanceof String) {
                 String url = (String) map.get("document_url");
                 if (url.contains(documentId)) {
-                    updateDocumentMetadata(map, rootFieldName, isUncategorisedField, newName, categoryId, isCategorisedInstancePresent);
+                    updateDocumentMetadata(map, rootFieldName, isDocInstanceInUncategorisedDocs,
+                                           newName, categoryId, isAnyCategorisedDocInstancePresent);
                     return;
                 }
             }
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String currentRootField = (rootFieldName == null) ? key : rootFieldName;
-                boolean nextIsUncategorisedField = isUncategorisedField || FIELDS_FOR_UNCATEGORISED_DOCUMENTS.contains(key);
+                boolean nextDocInstanceInUncategorisedDocs = isDocInstanceInUncategorisedDocs || FIELDS_FOR_UNCATEGORISED_DOCUMENTS.contains(key);
                 findAndRenameDocument(entry.getValue(),
                                       currentRootField,
-                                      nextIsUncategorisedField,
+                                      nextDocInstanceInUncategorisedDocs,
                                       newName,
                                       documentId,
                                       categoryId,
-                                      isCategorisedInstancePresent);
+                                      isAnyCategorisedDocInstancePresent);
             }
 
         } else if (data instanceof List) {
             List<?> list = (List<?>) data;
             for (Object item : list) {
-                findAndRenameDocument(item, rootFieldName, isUncategorisedField, newName, documentId, categoryId, isCategorisedInstancePresent);
+                findAndRenameDocument(item, rootFieldName, isDocInstanceInUncategorisedDocs,
+                                      newName, documentId, categoryId, isAnyCategorisedDocInstancePresent);
             }
         }
     }
 
     private void updateDocumentMetadata(Map<String, Object> documentMap,
                                      String rootFieldName,
-                                     boolean isUncategorisedField,
+                                     boolean isDocInstanceInUncategorisedDocs,
                                      String newName,
                                      String categoryId,
-                                     boolean isCategorisedInstancePresent) {
+                                     boolean isAnyCategorisedDocInstancePresent) {
         String currentName = (String) documentMap.get("document_filename");
         String extension = FilenameUtils.getExtension(currentName);
         String newUploadName = checkForConfidentialPrefix(newName, currentName, extension);
@@ -192,7 +193,7 @@ public class RenameDocumentService {
         log.info("Renaming the document in field: {}", rootFieldName);
         documentMap.put("document_filename", newUploadName);
 
-        if (!isUncategorisedField || !isCategorisedInstancePresent) {
+        if (!isDocInstanceInUncategorisedDocs || !isAnyCategorisedDocInstancePresent) {
             log.info("About to add the category id for rootField: {}", rootFieldName);
             documentMap.put("category_id", categoryId);
         }
