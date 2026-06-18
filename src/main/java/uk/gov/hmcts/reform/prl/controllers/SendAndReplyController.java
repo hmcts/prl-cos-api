@@ -20,9 +20,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
@@ -34,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -285,7 +289,18 @@ public class SendAndReplyController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         // Regular event does not close request-order tasks (FPVTL-2408/2409) — null hearingId
         // tells processAboutToSubmit to skip the tracking update.
+        Optional<String> code = Optional.ofNullable(caseData.getSendOrReplyMessage())
+            .map(SendOrReplyMessage::getSendMessageObject)
+            .map(Message::getFutureHearingsList)
+            .map(DynamicList::getValue)
+            .map(DynamicListElement::getCode);
+
+        log.info("Selected code {}", code);
+
         String chasedHearingId = extractHearingIdFromClientContext(clientContext);
+
+        log.info("context hearing id {}", chasedHearingId);
+
         return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
     }
 
