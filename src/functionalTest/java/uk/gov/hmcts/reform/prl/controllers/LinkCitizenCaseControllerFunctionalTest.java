@@ -4,19 +4,15 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
@@ -28,10 +24,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class LinkCitizenCaseControllerFunctionalTest {
 
     @Autowired
@@ -59,7 +52,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
 
     private MockMvc mockMvc;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -69,7 +62,6 @@ public class LinkCitizenCaseControllerFunctionalTest {
 
     private static final String CITIZEN_REQUEST_BODY1
         = "requests/link-citizen-case-access-code1.json";
-
 
     @Test
     public void createCcdTestCase() throws Exception {
@@ -87,9 +79,8 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails1);
-        Assert.assertNotNull(caseDetails1.getId());
-
+        Assertions.assertNotNull(caseDetails1);
+        Assertions.assertNotNull(caseDetails1.getId());
 
     }
 
@@ -109,8 +100,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseDataWithHearingResponse.class);
-        Assert.assertNotNull(response);
-
+        Assertions.assertNotNull(response);
 
     }
 
@@ -151,8 +141,8 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .then()
             .extract()
             .asString();
-        Assert.assertNotNull(response);
-        Assert.assertEquals("Duplicate",response);
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals("Duplicate",response);
     }
 
     @Test
@@ -170,8 +160,8 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails3);
-        Assert.assertNotNull(caseDetails3.getId());
+        Assertions.assertNotNull(caseDetails3);
+        Assertions.assertNotNull(caseDetails3.getId());
 
         String requestBody1 = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY1);
         String requestBodyRevised = requestBody1
@@ -186,9 +176,8 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .then()
             .extract()
             .asString();
-        Assert.assertNotNull(response);
-        Assert.assertEquals("Valid",response);
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals("Valid",response);
     }
-
 
 }

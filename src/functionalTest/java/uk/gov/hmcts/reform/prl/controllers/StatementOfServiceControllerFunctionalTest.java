@@ -4,18 +4,14 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -29,10 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class StatementOfServiceControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
@@ -73,10 +66,10 @@ public class StatementOfServiceControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails);
         List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = (List<Element<StmtOfServiceAddRecipient>>) caseDetails.getData().get(
             "stmtOfServiceAddRecipient");
-        Assert.assertEquals(1, stmtOfServiceAddRecipient.size());
+        Assertions.assertEquals(1, stmtOfServiceAddRecipient.size());
     }
 
     @Test
@@ -95,8 +88,8 @@ public class StatementOfServiceControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(caseData);
-        Assert.assertNull(caseData.getStatementOfService().getStmtOfServiceWhatWasServed());
+        Assertions.assertNotNull(caseData);
+        Assertions.assertNull(caseData.getStatementOfService().getStmtOfServiceWhatWasServed());
     }
 
     @Test
@@ -114,7 +107,7 @@ public class StatementOfServiceControllerFunctionalTest {
             .then()
             .extract()
             .as(SubmittedCallbackResponse.class);
-        Assert.assertEquals("# Cais wedi’i gyflwyno<br/>Application was served", response.getConfirmationHeader());
+        Assertions.assertEquals("# Cais wedi’i gyflwyno<br/>Application was served", response.getConfirmationHeader());
     }
 
     @Test
@@ -153,7 +146,7 @@ public class StatementOfServiceControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
     }
 }
