@@ -678,7 +678,7 @@ acro:
     user: some_user
     azure-deployment: true
     private-key: /mnt/secrets/private-law/bais-xerox-key
-    private-key-pass-phrase: ""Rem
+    private-key-pass-phrase: ""
     session-wait-timeout: 10000
     pool-size: 10
     allow-unknown-keys: true
