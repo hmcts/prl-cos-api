@@ -10,7 +10,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
@@ -38,10 +37,7 @@ class DocmosisClientTest {
     @BeforeEach
     void setUp() {
         restTemplate = mock(RestTemplate.class);
-        docmosisClient = new DocmosisClient(restTemplate);
-
-        ReflectionTestUtils.setField(docmosisClient, "docmosisUrl", "http://localhost:1234");
-        ReflectionTestUtils.setField(docmosisClient, "accessKey", "test-access-key");
+        docmosisClient = new DocmosisClient("http://localhost:1234", "test-access-key", restTemplate);
     }
 
     @Test

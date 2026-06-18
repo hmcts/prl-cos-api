@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.clients;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
@@ -17,15 +16,21 @@ import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.dto.docmosis.DocmosisRenderRequest;
 
 @Component
-@RequiredArgsConstructor
 public class DocmosisClient {
 
-    @Value("${docmosis.url}")
-    private String docmosisUrl;
-    @Value("${docmosis.access-key}")
-    private String accessKey;
+    private final String docmosisUrl;
+    private final String accessKey;
 
     private final RestTemplate restTemplate;
+
+    public DocmosisClient(
+        @Value("${docmosis.url}") String docmosisUrl,
+        @Value("${docmosis.access-key}") String accessKey,
+        RestTemplate restTemplate) {
+        this.docmosisUrl = docmosisUrl;
+        this.accessKey = accessKey;
+        this.restTemplate = restTemplate;
+    }
 
     public byte[] render(DocmosisRenderRequest request) {
         HttpHeaders headers = new HttpHeaders();
