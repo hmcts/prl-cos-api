@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.UnsupportedFileFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -31,7 +33,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocxCombineUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -43,7 +44,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C21_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C43_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
@@ -76,6 +76,14 @@ public class CustomOrderService {
     private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+
+    /**
+     * Error message shown to the user when their uploaded custom order document
+     * is not a valid .docx file (e.g. a PDF renamed to .docx).
+     */
+    public static final String INVALID_DOCX_ERROR =
+        "The uploaded file is not a valid Word (.docx) document. "
+            + "Please remove the file and upload a valid .docx file.";
 
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
@@ -1732,12 +1740,53 @@ public class CustomOrderService {
      * Combines the header template with user's uploaded content.
      * Delegates to DocxCombineUtils for the actual document manipulation.
      *
+     * <p>If the user content is not a valid OOXML (.docx) file (e.g. a PDF
+     * renamed to .docx, an old binary .doc, or a corrupt zip), POI throws
+     * either {@link UnsupportedFileFormatException} (covers
+     * {@code NotOfficeXmlFileException}, {@code OldFileFormatException},
+     * etc.) or {@link org.apache.poi.ooxml.POIXMLException} (covers
+     * {@code InvalidFormatException} wrappers such as
+     * "Package should contain a content type part"). Both are translated
+     * into {@link InvalidCustomOrderDocumentException} so callers can surface
+     * a user-friendly error and stop the event.</p>
+     *
      * @param headerBytes Rendered header document bytes
      * @param userContentBytes User's uploaded document bytes
      * @return Combined document bytes
      */
     public byte[] combineHeaderAndContent(byte[] headerBytes, byte[] userContentBytes) throws IOException {
-        return DocxCombineUtils.combineDocuments(headerBytes, userContentBytes);
+        try {
+            return DocxCombineUtils.combineDocuments(headerBytes, userContentBytes);
+        } catch (UnsupportedFileFormatException | org.apache.poi.ooxml.POIXMLException e) {
+            log.warn("Custom order combine failed - uploaded content is not a valid .docx: {}", e.getMessage());
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR, e);
+        }
+    }
+
+    /**
+     * Validates that the supplied bytes look like a real OOXML (.docx) file by
+     * checking the file magic numbers. Catches the common case where a user has
+     * renamed a PDF (or another non-Office format) to .docx before uploading.
+     *
+     * @param bytes Raw bytes of the uploaded document
+     * @throws InvalidCustomOrderDocumentException if the bytes are not a valid OOXML container
+     */
+    void validateDocxContent(byte[] bytes) {
+        if (bytes == null || bytes.length < 4) {
+            log.warn("Custom order upload rejected: empty or too small ({} bytes)",
+                bytes == null ? 0 : bytes.length);
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
+        }
+        // %PDF
+        boolean isPdf = bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46;
+        // PK\x03\x04 (ZIP/OOXML container)
+        boolean isZip = bytes[0] == 0x50 && bytes[1] == 0x4B
+            && (bytes[2] == 0x03 || bytes[2] == 0x05 || bytes[2] == 0x07)
+            && (bytes[3] == 0x04 || bytes[3] == 0x06 || bytes[3] == 0x08);
+        if (isPdf || !isZip) {
+            log.warn("Custom order upload rejected: not a valid OOXML file (isPdf={}, isZip={})", isPdf, isZip);
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
+        }
     }
 
     /**
@@ -1776,6 +1825,11 @@ public class CustomOrderService {
         log.info("Downloading user content from URL: {}", userDocUrl);
         byte[] userContentBytes = documentGenService.getDocumentBytes(userDocUrl, systemAuth, s2sToken);
         log.info("Downloaded user content: {} bytes", userContentBytes.length);
+
+        // 2a. Fail fast if the upload is not a real .docx (e.g. PDF renamed to .docx).
+        // This throws InvalidCustomOrderDocumentException, which combineAndFinalizeCustomOrder
+        // will catch in order to clear customOrderDoc and stop the event.
+        validateDocxContent(userContentBytes);
 
         // 3. Combine header + user content
         byte[] combinedBytes = combineHeaderAndContent(headerBytes, userContentBytes);
@@ -2139,9 +2193,33 @@ public class CustomOrderService {
             caseDataUpdated.put("previewOrderDoc", null);
             caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
 
+        } catch (InvalidCustomOrderDocumentException e) {
+            // Bad upload (e.g. PDF renamed to .docx). Wipe the offending doc so
+            // the user can retry cleanly, and propagate so the controller can
+            // return an error to CCD and abort the event before notifications run.
+            log.error("Invalid custom order document for case {}: {}", caseData.getId(), e.getMessage());
+            clearCustomOrderDocState(caseDataUpdated);
+            throw e;
         } catch (Exception e) {
-            log.error("Failed to process custom order in submitted callback", e);
+            log.error("Failed to process custom order in submitted callback for case {}", caseData.getId(), e);
+            clearCustomOrderDocState(caseDataUpdated);
+            throw new InvalidCustomOrderDocumentException(
+                "Failed to process the uploaded custom order document. Please re-upload and try again.", e);
         }
+    }
+
+    /**
+     * Clears state related to the uploaded custom order document so that a
+     * failed upload does not get persisted or reused on retry.
+     */
+    void clearCustomOrderDocState(Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated == null) {
+            return;
+        }
+        caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+        caseDataUpdated.put("previewOrderDoc", null);
+        caseDataUpdated.put(CUSTOM_ORDER_USED_CDAM_ASSOCIATION, null);
+        log.info("Cleared customOrderDoc / previewOrderDoc / customOrderUsedCdamAssociation after failure");
     }
 
     void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,

@@ -4897,8 +4897,8 @@ public class ManageOrdersControllerTest {
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("id", 12345L);
 
-        // Callback data - has stale customOrderDoc but NO customOrderNameOption
-        // This simulates an upload order where customOrderDoc persisted from a previous custom order
+        // Callback data - has stale customOrderDoc but NO customOrderNameOption.
+        // This simulates an upload order where customOrderDoc persisted from a previous custom order.
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("id", 12345L);
         callbackDataMap.put("manageOrdersOptions", "uploadAnOrder");
@@ -4933,6 +4933,149 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(response);
         // Verify combineAndFinalizeCustomOrder was NOT called - stale customOrderDoc should be ignored
+        verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void saveOrderDetails_nonCustomOrderEvent_stripsStaleCustomOrderFields() throws Exception {
+        // Regression test for legacy cases that hit the original combine-failure bug:
+        // customOrderDoc and customOrderNameOption were left on the case from a previously-failed
+        // custom-order event. When the user runs ANY non-custom-order event (uploadAnOrder /
+        // createAnOrder / etc.), the about-to-submit must wipe those stale fields so they
+        // can't carry into the persisted case state or mis-trigger the submitted-callback
+        // custom-order flow.
+        Document staleCustomDoc = Document.builder()
+            .documentUrl("http://test.url/stale-custom.docx")
+            .documentBinaryUrl("http://test.url/binary/stale-custom.docx")
+            .documentFileName("stale-custom.docx")
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("id", 12345L);
+        caseDataMap.put("manageOrdersOptions", "uploadAnOrder");      // user's choice for THIS event
+        caseDataMap.put("customOrderDoc", staleCustomDoc);            // stale
+        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections"); // stale
+        caseDataMap.put("customOrderDateEnds", "2025-06-30T14:00:00.000");  // stale
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("manageOrders")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(caseDataMap)
+                .build())
+            .build();
+
+        manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
+
+        // Stale custom-order transient fields must have been wiped.
+        assertNull(caseDataMap.get("customOrderDoc"));
+        assertNull(caseDataMap.get("customOrderNameOption"));
+        assertNull(caseDataMap.get("customOrderDateEnds"));
+    }
+
+    @Test
+    public void saveOrderDetails_customOrderEvent_preservesCustomOrderFields() throws Exception {
+        // Inverse of the above: when the user IS doing a custom-order event, the about-to-submit
+        // must NOT strip the in-flight custom-order fields - they're needed by the mid-event /
+        // submitted callback to combine the header preview with the user's uploaded content.
+        Document customDoc = Document.builder()
+            .documentUrl("http://test.url/custom.docx")
+            .documentBinaryUrl("http://test.url/binary/custom.docx")
+            .documentFileName("custom.docx")
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("id", 12345L);
+        caseDataMap.put("manageOrdersOptions", "createCustomOrder");
+        caseDataMap.put("customOrderDoc", customDoc);
+        caseDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder().build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("manageOrders")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(caseDataMap)
+                .build())
+            .build();
+
+        manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
+
+        // In-flight custom-order fields must NOT have been stripped.
+        assertNotNull(caseDataMap.get("customOrderDoc"));
+        assertNotNull(caseDataMap.get("customOrderNameOption"));
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_staleCustomOrderDoc_isWipedOnNonCustomEvent() throws Exception {
+        // Backstop test for the submitted callback: if a non-custom-order event somehow still
+        // arrives with stale custom-order transient fields (e.g. coming via a code path that
+        // bypassed saveOrderDetails), the submitted callback must wipe them from the persisted
+        // map so they can't survive to the next event.
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        // DB-loaded map carries the stale state from the original combine-failure bug
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("customOrderDoc", Document.builder().documentFileName("stale.docx").build());
+
+        // Callback view from CCD - no customOrderNameOption => NOT a custom-order event
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "uploadAnOrder");
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        // Stale customOrderDoc wiped from persisted map.
+        assertNull(databaseMap.get("customOrderDoc"));
         verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
     }
 
@@ -5076,6 +5219,11 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build());
         callbackDataMap.put("customOrderNameOption", "nonMolestation");
         callbackDataMap.put("customOrderDateEndsOptions", "specifiedDateAndTime");
         callbackDataMap.put("customOrderDateEnds", "2025-06-30T14:00:00.000");
@@ -5938,6 +6086,11 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build());
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         // No amendOrderSelectCheckOptions in map
 
@@ -6013,6 +6166,11 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build());
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
@@ -6096,6 +6254,11 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build());
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 
@@ -6184,6 +6347,11 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
+        callbackDataMap.put("previewOrderDoc", Document.builder()
+            .documentUrl("http://test.url/preview.pdf")
+            .documentBinaryUrl("http://test.url/binary/preview.pdf")
+            .documentFileName("preview.pdf")
+            .build());
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
 

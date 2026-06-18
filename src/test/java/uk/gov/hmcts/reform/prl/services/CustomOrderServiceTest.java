@@ -63,6 +63,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -2108,12 +2109,18 @@ class CustomOrderServiceTest {
             .id(123L)
             .build();
 
-        // Act - will fail at processCustomOrderOnSubmitted due to missing mocks, but we verify docs are read
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        // Act - downstream call will NPE due to missing mocks; the service now
+        // wraps any failure during combining as InvalidCustomOrderDocumentException
+        // and clears the transient state.
+        assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
+            customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
 
         // Assert - verify objectMapper was called to convert both documents
         verify(objectMapper).convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
         verify(objectMapper).convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
+        // And the bad upload state was cleared on failure
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
     @Test
@@ -2144,11 +2151,13 @@ class CustomOrderServiceTest {
             .previewOrderDoc(previewDoc)  // Fallback source
             .build();
 
-        // Act
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        // Act - downstream NPE is wrapped; fallback path is still exercised
+        assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
+            customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
 
-        // Assert - the method should have used caseData.getPreviewOrderDoc() as fallback
-        // Since previewDoc has a valid binaryUrl, processing would have continued
+        // Assert - the method should have used caseData.getPreviewOrderDoc() as fallback.
+        // Since previewDoc had a valid binaryUrl, processing continued past the early
+        // return and the customDoc was converted.
         verify(objectMapper).convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
     }
 
@@ -2178,8 +2187,10 @@ class CustomOrderServiceTest {
 
         CaseData caseData = CaseData.builder().id(123L).build();
 
-        // Act - will attempt processing (may fail due to incomplete mocking, but that's ok)
-        customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+        // Act - processing will fail downstream (no document bytes mocked);
+        // failure is now wrapped as InvalidCustomOrderDocumentException.
+        assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
+            customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
 
         // Assert - verify the method attempted to get tokens for document download
         verify(systemUserService).getSysUserToken();
@@ -4581,5 +4592,196 @@ class CustomOrderServiceTest {
         );
 
         assertEquals("Notice of proceedings", result);
+    }
+
+    // ========== Tests for invalid custom-order document handling (FPET) ==========
+
+    @Test
+    void testValidateDocxContent_nullBytes_throwsInvalidCustomOrderDocumentException() {
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.validateDocxContent(null)
+        );
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+    }
+
+    @Test
+    void testValidateDocxContent_tooShort_throwsInvalidCustomOrderDocumentException() {
+        assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.validateDocxContent(new byte[]{0x50, 0x4B})
+        );
+    }
+
+    @Test
+    void testValidateDocxContent_pdfMagicNumber_throwsInvalidCustomOrderDocumentException() {
+        // "%PDF" prefix - the exact scenario reported in the bug (user renamed PDF to .docx)
+        byte[] pdfBytes = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31};
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.validateDocxContent(pdfBytes)
+        );
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+    }
+
+    @Test
+    void testValidateDocxContent_nonZipBytes_throwsInvalidCustomOrderDocumentException() {
+        // Random bytes that are neither PDF nor a ZIP/OOXML container
+        byte[] random = new byte[]{0x01, 0x02, 0x03, 0x04, 0x05};
+        assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.validateDocxContent(random)
+        );
+    }
+
+    @Test
+    void testValidateDocxContent_validZipMagicNumber_doesNotThrow() {
+        // PK\x03\x04 is the standard local file header for ZIP/OOXML
+        byte[] zipBytes = new byte[]{0x50, 0x4B, 0x03, 0x04, 0x14, 0x00};
+        customOrderService.validateDocxContent(zipBytes); // should not throw
+    }
+
+    @Test
+    void testCombineHeaderAndContent_wrapsUnsupportedFileFormatExceptionAsInvalidCustomOrderDocument() {
+        // Headers are arbitrary; user content is %PDF..., so POI throws an
+        // UnsupportedFileFormatException subclass (NotOfficeXmlFileException).
+        byte[] header = makeMinimalDocxLikeBytes();
+        byte[] userContentPdf = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31};
+
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.combineHeaderAndContent(header, userContentPdf)
+        );
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+        assertNotNull(ex.getCause(), "Underlying POI cause should be preserved");
+    }
+
+    @Test
+    void testClearCustomOrderDocState_clearsTransientFields() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", "something");
+        caseDataUpdated.put("previewOrderDoc", "something");
+        caseDataUpdated.put("customOrderUsedCdamAssociation", "Yes");
+        caseDataUpdated.put("unrelated", "keep-me");
+
+        customOrderService.clearCustomOrderDocState(caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+        assertNull(caseDataUpdated.get("customOrderUsedCdamAssociation"));
+        assertEquals("keep-me", caseDataUpdated.get("unrelated"));
+    }
+
+    @Test
+    void testClearCustomOrderDocState_nullMapIsNoOp() {
+        // Should not throw
+        customOrderService.clearCustomOrderDocState(null);
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_invalidUploadIsRethrownAndStateCleared() throws Exception {
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentFileName("not-really-a.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+        caseDataUpdated.put("customOrderUsedCdamAssociation", "Yes");
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CaseData caseData = CaseData.builder().id(123L).build();
+
+        // Spy so we can simulate the validator inside processCustomOrderOnSubmitted throwing
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doThrow(new uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException(
+            CustomOrderService.INVALID_DOCX_ERROR))
+            .when(spyService).processCustomOrderOnSubmitted(
+                anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
+
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true)
+        );
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+
+        // Transient state cleared so the bad doc doesn't get persisted / reused on retry
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+        assertNull(caseDataUpdated.get("customOrderUsedCdamAssociation"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_unexpectedExceptionIsWrappedAndStateCleared() throws Exception {
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentFileName("custom.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CaseData caseData = CaseData.builder().id(123L).build();
+
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doThrow(new RuntimeException("boom"))
+            .when(spyService).processCustomOrderOnSubmitted(
+                anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
+
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false)
+        );
+        assertNotNull(ex.getCause(), "Original failure should be preserved as the cause");
+        assertEquals("boom", ex.getCause().getMessage());
+
+        // Transient state still cleared on unexpected failure
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+    }
+
+    /**
+     * Returns a tiny ZIP container so POI's OOXML parser progresses past the magic-number
+     * check and instead reports a different parse failure (e.g. missing OOXML parts).
+     * Used by tests that want to trigger POI's parsing branch rather than the early
+     * ZIP-header rejection.
+     */
+    private static byte[] makeMinimalDocxLikeBytes() {
+        try {
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(baos)) {
+                zos.putNextEntry(new java.util.zip.ZipEntry("placeholder.txt"));
+                zos.write("ignored".getBytes());
+                zos.closeEntry();
+            }
+            return baos.toByteArray();
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException("Failed to build test zip bytes", e);
+        }
     }
 }

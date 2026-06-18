@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.deepoove.poi.xwpf.NiceXWPFDocument;
+import org.apache.poi.UnsupportedFileFormatException;
+import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFFooter;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DocxCombineUtilsTest {
@@ -293,6 +296,40 @@ class DocxCombineUtilsTest {
             assertTrue(footerText.contains("Line 1"), "Should contain first line");
             assertTrue(footerText.contains("Line 2"), "Should contain second line");
         }
+    }
+
+    @Test
+    void testCombineDocuments_userContentIsNonOoxml_propagatesAsPoiException() throws IOException {
+        // Regression: a renamed PDF (or any non-OOXML payload) used to be wrapped in a
+        // generic IOException with message "Failed to merge documents...". The new catch
+        // for UnsupportedFileFormatException / POIXMLException now propagates them so
+        // callers can surface a user-friendly error instead.
+        byte[] headerBytes = createSimpleDocx("Header content");
+        byte[] userBytes = "%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\nfake pdf bytes".getBytes();
+
+        Throwable thrown = assertThrows(Throwable.class,
+            () -> DocxCombineUtils.combineDocuments(headerBytes, userBytes));
+        assertTrue(
+            thrown instanceof UnsupportedFileFormatException || thrown instanceof POIXMLException,
+            "Expected UnsupportedFileFormatException or POIXMLException for non-OOXML input, got "
+                + thrown.getClass().getName()
+        );
+    }
+
+    @Test
+    void testCombineDocuments_headerIsNonOoxml_propagatesAsPoiException() throws IOException {
+        // Same path, but ensure header bytes that aren't OOXML also propagate cleanly
+        // rather than being buried in a generic IOException.
+        byte[] headerBytes = "not a real docx".getBytes();
+        byte[] userBytes = createSimpleDocx("User content");
+
+        Throwable thrown = assertThrows(Throwable.class,
+            () -> DocxCombineUtils.combineDocuments(headerBytes, userBytes));
+        assertTrue(
+            thrown instanceof UnsupportedFileFormatException || thrown instanceof POIXMLException,
+            "Expected UnsupportedFileFormatException or POIXMLException for non-OOXML input, got "
+                + thrown.getClass().getName()
+        );
     }
 
     // Helper methods
