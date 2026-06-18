@@ -32,6 +32,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CATEGORY_DOCUMENTS_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_URL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_NAME_FOR_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RENAME_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RENAME_DOCUMENTS_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RENAME_LIST_DOC_SELECTED;
 
 @ExtendWith(MockitoExtension.class)
 class RenameDocumentServiceTest {
@@ -77,8 +84,8 @@ class RenameDocumentServiceTest {
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
 
         assertNotNull(result);
-        assertTrue(result.containsKey("renameDocumentsList"));
-        assertTrue(result.containsKey("categoryDocumentsList"));
+        assertTrue(result.containsKey(RENAME_DOCUMENTS_LIST));
+        assertTrue(result.containsKey(CATEGORY_DOCUMENTS_LIST));
     }
 
     @Test
@@ -101,8 +108,8 @@ class RenameDocumentServiceTest {
         Map<String, Object> result = renameDocumentService.handleMidEvent(AUTH, callbackRequest);
 
         assertNotNull(result);
-        assertEquals("categoryName -> documentName", result.get("renameListDocSelected"));
-        DynamicList updatedCategories = (DynamicList) result.get("categoryDocumentsList");
+        assertEquals("categoryName -> documentName", result.get(RENAME_LIST_DOC_SELECTED));
+        DynamicList updatedCategories = (DynamicList) result.get(CATEGORY_DOCUMENTS_LIST);
         assertEquals("categoryCode", updatedCategories.getValue().getCode());
     }
 
@@ -129,9 +136,9 @@ class RenameDocumentServiceTest {
         Map<String, Object> result = renameDocumentService.handleAboutToSubmit(callbackRequest);
 
         assertNotNull(result);
-        assertEquals("New Name.pdf", ((Map<String, Object>)result.get("someDocument")).get("document_filename"));
+        assertEquals("New Name.pdf", ((Map<String, Object>)result.get("someDocument")).get(DOCUMENT_FILENAME));
         assertEquals("newCategoryId", ((Map<String, Object>)result.get("someDocument")).get("category_id"));
-        assertFalse(result.containsKey("renameDocument"));
+        assertFalse(result.containsKey(RENAME_DOCUMENT));
     }
 
     @Test
@@ -155,7 +162,7 @@ class RenameDocumentServiceTest {
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
         Map<String, Object> updatedDoc = (Map<String, Object>) ((Map<String, Object>)documentList.get(0)).get("value");
-        assertEquals("New Name.pdf", updatedDoc.get("document_filename"));
+        assertEquals("New Name.pdf", updatedDoc.get(DOCUMENT_FILENAME));
     }
 
     @Test
@@ -174,7 +181,7 @@ class RenameDocumentServiceTest {
 
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
 
-        DynamicList filteredList = (DynamicList) result.get("renameDocumentsList");
+        DynamicList filteredList = (DynamicList) result.get(RENAME_DOCUMENTS_LIST);
 
         assertEquals(1, filteredList.getListItems().size());
         assertEquals("Standard Document.pdf", filteredList.getListItems().get(0).getLabel());
@@ -196,14 +203,14 @@ class RenameDocumentServiceTest {
 
         Map<String, Object> result = renameDocumentService.handleAboutToStart(AUTH, callbackRequest);
 
-        DynamicList filteredList = (DynamicList) result.get("renameDocumentsList");
+        DynamicList filteredList = (DynamicList) result.get(RENAME_DOCUMENTS_LIST);
         assertTrue(filteredList.getListItems().stream().anyMatch(item -> item.getLabel().equals("extra.pdf")));
     }
 
     @Test
     void testValidateRenamedFieldWithExtensionError() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("newNameForDocument", "test.pdf");
+        caseDataUpdated.put(NEW_NAME_FOR_DOCUMENT, "test.pdf");
 
         List<String> errors = renameDocumentService.validateRenamedField(caseDataUpdated);
 
@@ -219,7 +226,7 @@ class RenameDocumentServiceTest {
         Map<String, Object> result = renameDocumentService.handleMidEvent(AUTH, callbackRequest);
 
         assertNotNull(result);
-        assertTrue(result.containsKey("categoryDocumentsList"));
+        assertTrue(result.containsKey(CATEGORY_DOCUMENTS_LIST));
     }
 
     @Test
@@ -233,8 +240,8 @@ class RenameDocumentServiceTest {
 
         Map<String, Object> caseDataMap = new HashMap<>();
         Map<String, Object> docMap = new HashMap<>();
-        docMap.put("document_url", "http://dm-store/otherDocId");
-        docMap.put("document_filename", "old_name.pdf");
+        docMap.put(DOCUMENT_URL, "http://dm-store/otherDocId");
+        docMap.put(DOCUMENT_FILENAME, "old_name.pdf");
         caseDataMap.put("someDocument", docMap);
 
         callbackRequest.getCaseDetails().setData(caseDataMap);
@@ -242,7 +249,7 @@ class RenameDocumentServiceTest {
 
         Map<String, Object> result = renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        assertEquals("old_name.pdf", ((Map<String, Object>)result.get("someDocument")).get("document_filename"));
+        assertEquals("old_name.pdf", ((Map<String, Object>)result.get("someDocument")).get(DOCUMENT_FILENAME));
     }
 
     @Test
@@ -257,8 +264,8 @@ class RenameDocumentServiceTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         Map<String, Object> outerMap = new HashMap<>();
         Map<String, Object> innerMap = new HashMap<>();
-        innerMap.put("document_url", "http://dm-store/docId1");
-        innerMap.put("document_filename", "old_name.pdf");
+        innerMap.put(DOCUMENT_URL, "http://dm-store/docId1");
+        innerMap.put(DOCUMENT_FILENAME, "old_name.pdf");
         outerMap.put("inner", innerMap);
         caseDataMap.put("outer", outerMap);
 
@@ -267,7 +274,7 @@ class RenameDocumentServiceTest {
 
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        assertEquals("New Name.pdf", ((Map<String, Object>)outerMap.get("inner")).get("document_filename"));
+        assertEquals("New Name.pdf", ((Map<String, Object>)outerMap.get("inner")).get(DOCUMENT_FILENAME));
     }
 
     @Test
@@ -283,7 +290,7 @@ class RenameDocumentServiceTest {
     @Test
     void testValidateRenamedFieldWithConfidentialPrefixAndNoNewName() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("renameListDocSelected", "Applications -> Applicant documents -> Confidential_test.pdf");
+        caseDataUpdated.put(RENAME_LIST_DOC_SELECTED, "Applications -> Applicant documents -> Confidential_test.pdf");
 
         List<String> errors = renameDocumentService.validateRenamedField(caseDataUpdated);
 
@@ -316,8 +323,8 @@ class RenameDocumentServiceTest {
 
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        assertEquals("New Name.pdf", categorisedDocumentMap.get("document_filename"));
-        assertEquals("New Name.pdf", uncategorisedDocumentMap.get("document_filename"));
+        assertEquals("New Name.pdf", categorisedDocumentMap.get(DOCUMENT_FILENAME));
+        assertEquals("New Name.pdf", uncategorisedDocumentMap.get(DOCUMENT_FILENAME));
 
         assertEquals("newCategoryId", categorisedDocumentMap.get("category_id"));
         assertFalse(uncategorisedDocumentMap.containsKey("category_id"));
@@ -346,14 +353,14 @@ class RenameDocumentServiceTest {
 
         renameDocumentService.handleAboutToSubmit(callbackRequest);
 
-        assertEquals("New Name.pdf", uncategorisedDocumentMap.get("document_filename"));
+        assertEquals("New Name.pdf", uncategorisedDocumentMap.get(DOCUMENT_FILENAME));
         assertEquals("newCategoryId", uncategorisedDocumentMap.get("category_id"));
     }
 
     private Map<String, Object> createDocumentMap(String documentId, String fileName) {
         Map<String, Object> docMap = new HashMap<>();
-        docMap.put("document_url", "http://dm-store/" + documentId);
-        docMap.put("document_filename", fileName);
+        docMap.put(DOCUMENT_URL, "http://dm-store/" + documentId);
+        docMap.put(DOCUMENT_FILENAME, fileName);
         return docMap;
     }
 
