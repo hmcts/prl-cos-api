@@ -182,7 +182,7 @@ public class HearingService {
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
         try {
-            log.info("Johnny Calling refDataMap with serviceCode {}" , serviceCode);
+            log.info("Johnny Calling refDataMap with serviceCode {}", serviceCode);
             return refDataService.getRefDataCategoryValueMap(
                 authorization,
                 s2sToken,
