@@ -62,6 +62,7 @@ public class HearingService {
 
         Hearings hearings = null;
         try {
+            log.info("Johnny Inside getHearings: Getting hearings for case reference number {}", caseReferenceNumber);
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             if (hearings != null) {
                 Map<String, String> refDataCategoryValueMap = getRefDataMap(
@@ -105,6 +106,7 @@ public class HearingService {
     public NextHearingDetails getNextHearingDate(String userToken, String caseReferenceNumber) {
 
         try {
+            log.info("Johnny Getting next hearing date for case {}", caseReferenceNumber);
             return hearingApiClient.getNextHearingDate(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
             log.error("Error in getNextHearingDate {}", e.getMessage());
@@ -115,6 +117,7 @@ public class HearingService {
     public Hearings getFutureHearings(String userToken, String caseReferenceNumber) {
 
         try {
+            log.info("Johnny Getting future hearing date for case {}", caseReferenceNumber);
             return hearingApiClient.getFutureHearings(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
             log.error("Error in getFutureHearings ----> {}", e.getMessage());
@@ -179,6 +182,7 @@ public class HearingService {
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
         try {
+            log.info("Johnny Calling refDataMap with serviceCode {}" , serviceCode);
             return refDataService.getRefDataCategoryValueMap(
                 authorization,
                 s2sToken,
