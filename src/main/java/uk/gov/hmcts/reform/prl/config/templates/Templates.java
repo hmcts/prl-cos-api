@@ -45,7 +45,7 @@ public class Templates {
     public static final String PRL_LET_WEL_C100_RE7 = "FL-PRL-LET-WEL-C100-RE7.docx";
     public static final String PRL_LET_WEL_FL401_RE8 = "FL-PRL-LET-WEL-FL401-RE8.docx";
 
-    public static final String PRL_LTR_ENG_C100_FM5 = "FL-PRL-LTR-ENG-C100-FM5.docx";
+    public static final String PRL_LTR_ENG_C100_FM5 = "FL-PRL-LET-ENG-C100-FM5.docx";
 
     public static final String PRL_LET_ENG_LIST_WITHOUT_NOTICE = "FL-PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx";
 
