@@ -64,6 +64,7 @@ public class DgsServiceTest {
     private static final String PARTY_TYPE = "applicant";
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
     private static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
+    private static final String EXPECTED_EXCEPTION_MESSAGE = "Error generating and storing document for case 123: null";
 
     @InjectMocks
     private DgsService dgsService;
@@ -90,6 +91,7 @@ public class DgsServiceTest {
     @Before
     public void setUp() {
         caseData = CaseData.builder()
+            .id(Long.parseLong(CASE_ID))
             .manageOrders(ManageOrders.builder()
                               .ordersHearingDetails(
                                   List.of(Element.<HearingData>builder()
@@ -460,7 +462,7 @@ public class DgsServiceTest {
 
         when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateCitizenDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, TEMPLATE),
-                                DocumentGenerationException.class, null);
+                                DocumentGenerationException.class, EXPECTED_EXCEPTION_MESSAGE);
     }
 
     @Test
@@ -473,7 +475,7 @@ public class DgsServiceTest {
 
         when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateCitizenDocument(AUTH_TOKEN, documentRequest, List.of(TEMPLATE), null),
-                                DocumentGenerationException.class, null);
+                                DocumentGenerationException.class, EXPECTED_EXCEPTION_MESSAGE);
     }
 
 
@@ -490,7 +492,7 @@ public class DgsServiceTest {
         when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateCoverLetterDocument(AUTH_TOKEN, dataMap, PRL_DRAFT_TEMPLATE,
                                                                              CASE_ID
-        ), DocumentGenerationException.class, null);
+        ), DocumentGenerationException.class, EXPECTED_EXCEPTION_MESSAGE);
 
     }
 
@@ -504,7 +506,7 @@ public class DgsServiceTest {
 
         when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateWelshDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE),
-                                DocumentGenerationException.class, null);
+                                DocumentGenerationException.class, EXPECTED_EXCEPTION_MESSAGE);
     }
 
     @Test
@@ -519,7 +521,7 @@ public class DgsServiceTest {
 
         when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateDocument(AUTH_TOKEN, caseDetails, PRL_DRAFT_TEMPLATE),
-                                DocumentGenerationException.class, null);
+                                DocumentGenerationException.class, EXPECTED_EXCEPTION_MESSAGE);
     }
 
     @Test
@@ -533,8 +535,7 @@ public class DgsServiceTest {
 
         when(docmosisRenderService.renderAndStoreDocument(any(),any())).thenThrow(FeignException.class);
         assertExpectedException(() -> dgsService.generateDocument(AUTH_TOKEN, null, PRL_DRAFT_TEMPLATE, respondentDetails),
-                                DocumentGenerationException.class, null);
-
+                                DocumentGenerationException.class, "Error generating and storing document for case null: null");
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
