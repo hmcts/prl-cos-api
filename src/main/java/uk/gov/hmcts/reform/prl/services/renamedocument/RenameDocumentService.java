@@ -48,6 +48,8 @@ public class RenameDocumentService {
         "finalServedApplicationDetailsList",
         "internalMessageAttachDocs",
         "externalMessageAttachDocs",
+        "servedDocumentsDetailsList",
+        "sodUnServedPack",
         "unServedApplicantPack",
         "unServedRespondentPack"
     );
