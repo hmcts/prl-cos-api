@@ -114,6 +114,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MIAM_ERROR_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -878,6 +879,7 @@ public class CallbackController {
                 COURT_STAFF,
                 quarantineLegalDocForBulkScannedDocument
             );
+            caseDataUpdated.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
