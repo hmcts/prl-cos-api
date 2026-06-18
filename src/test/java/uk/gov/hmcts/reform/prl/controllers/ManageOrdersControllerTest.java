@@ -19,6 +19,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -56,7 +57,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -81,7 +81,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -93,7 +92,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -152,6 +150,8 @@ public class ManageOrdersControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
+    private static final String TEST_CASE_ID = "12345678";
+    private static final String APPLICANT_NAME = "Trader Joe";
     private static final String CLIENT_CONTEXT = """
         {
           "client_context": {
@@ -6992,5 +6992,288 @@ public class ManageOrdersControllerTest {
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(1, response.getErrors().size());
+    }
+
+    @Test
+    public void testManageOrderMidEvent_forNonCustomOrder_shouldClearCustomOrderFields() {
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDataMap.put("customOrderDoc", Document.builder().documentFileName("stale.docx").build());
+        caseDataMap.put("customOrderNameOption", "other");
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(Long.parseLong(TEST_CASE_ID))
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populateHeader(any(CaseData.class))).thenReturn(caseDataMap);
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.manageOrderMidEvent(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
+        assertNotNull(response);
+        assertNull(response.getData().get("customOrderDoc"));
+        assertNull(response.getData().get("customOrderNameOption"));
+        verify(manageOrderService, never()).populateHearingsDropdown(anyString(), any(CaseData.class));
+    }
+
+    @Test
+    public void testPopulateFromHearing_shouldInitialiseMagistrateLastNameWhenEmpty() {
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .magistrateLastName(null)
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        caseDataMap.put("customOrderWasApprovedAtHearing", "Yes");
+        caseDataMap.put("customOrderHearingsType", "hearingTypeValue");
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(Long.parseLong(TEST_CASE_ID))
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        assertNotNull(response);
+        assertNotNull(response.getData().get("magistrateLastName"));
+        verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
+    }
+
+    @Test
+    public void testValidateAdditionalPartiesForServingOrder_shouldAggregateAllErrors() {
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(Long.parseLong(TEST_CASE_ID))
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(manageOrderService.validateAdditionalPartiesForServingOrder(callbackRequest))
+            .thenReturn(List.of("Invalid additional party email"));
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest))
+            .thenReturn(List.of("Respondent address is missing"));
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.validateAdditionalPartiesForServingOrder(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        assertEquals(2, response.getErrors().size());
+        assertEquals("Invalid additional party email", response.getErrors().get(0));
+        assertEquals("Respondent address is missing", response.getErrors().get(1));
+    }
+
+    @Test
+    public void testPopulateHeaderForC100InDecisionOutcome_shouldSetInHearingStateYes() {
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .isCafcass(Yes)
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(Long.parseLong(TEST_CASE_ID))
+                             .data(caseDataMap)
+                             .state(State.DECISION_OUTCOME.getValue())
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserTypeDetails(authToken))
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
+            callbackRequest,
+            authToken,
+            s2sToken
+        );
+
+        assertNotNull(response);
+        assertEquals(Yes, response.getData().get("isInHearingState"));
+        assertEquals(Yes, response.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void finalizeOrderSubmission_customOrder_shouldMergeNewDraftOrderIntoExistingDraftCollection() {
+        String existingDraftId = UUID.randomUUID().toString();
+        Map<String, Object> existingDraft = new HashMap<>();
+        existingDraft.put("id", existingDraftId);
+        existingDraft.put("value", Map.of("orderType", "Existing Draft"));
+
+        List<Map<String, Object>> dbDraftCollection = new ArrayList<>();
+        dbDraftCollection.add(existingDraft);
+
+        String newDraftId = UUID.randomUUID().toString();
+        Map<String, Object> newDraft = new HashMap<>();
+        newDraft.put("id", newDraftId);
+        newDraft.put("value", Map.of("orderType", "New Custom Draft"));
+
+        List<Map<String, Object>> callbackDraftCollection = new ArrayList<>();
+        callbackDraftCollection.add(newDraft);
+        callbackDraftCollection.add(existingDraft);
+
+        CaseData callbackCaseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        Map<String, Object> callbackDataMap = callbackCaseData.toMap(new ObjectMapper());
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("customOrderDoc", Document.builder().documentFileName("custom.docx").build());
+        callbackDataMap.put("previewOrderDoc", Document.builder().documentFileName("preview.pdf").build());
+        callbackDataMap.put("draftOrderCollection", callbackDraftCollection);
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .manageOrders(ManageOrders.builder()
+                              .markedToServeEmailNotification(No)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
+                              .build())
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("draftOrderCollection", dbDraftCollection);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(Long.parseLong(TEST_CASE_ID))
+                             .data(callbackDataMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        Map<String, Object> capturedMap = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            Map<String, Object> mapArg = invocation.getArgument(2);
+            capturedMap.put("draftOrderCollection", mapArg.get("draftOrderCollection"));
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        List<Map<String, Object>> resultDrafts =
+            (List<Map<String, Object>>) capturedMap.get("draftOrderCollection");
+
+        assertNotNull(resultDrafts);
+        assertEquals(2, resultDrafts.size());
+        assertEquals(newDraftId, resultDrafts.get(0).get("id"));
+        assertEquals(existingDraftId, resultDrafts.get(1).get("id"));
+    }
+
+    @Test
+    public void finalizeOrderSubmission_customOrder_withNonFl404Type_shouldNotCreateFl404CustomFields() {
+        CaseData callbackCaseData = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        Map<String, Object> callbackDataMap = callbackCaseData.toMap(new ObjectMapper());
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        callbackDataMap.put("customOrderDateEndsOptions", "specifiedDateAndTime");
+        callbackDataMap.put("customOrderDateEnds", "2025-06-30T14:00:00.000");
+        callbackDataMap.put("customOrderDoc", Document.builder().documentFileName("custom.docx").build());
+        callbackDataMap.put("previewOrderDoc", Document.builder().documentFileName("preview.pdf").build());
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(Long.parseLong(TEST_CASE_ID))
+            .applicantCaseName(APPLICANT_NAME)
+            .caseTypeOfApplication("C100")
+            .manageOrders(ManageOrders.builder()
+                              .markedToServeEmailNotification(No)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .build())
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            new HashMap<>(),
+            caseDataFromDb,
+            null
+        );
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(Long.parseLong(TEST_CASE_ID))
+                             .data(callbackDataMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+
+        Map<String, Object> capturedMap = new HashMap<>();
+        Mockito.doAnswer(invocation -> {
+            capturedMap.putAll(invocation.getArgument(2));
+            return null;
+        }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        assertNull(capturedMap.get("fl404CustomFields"));
     }
 }

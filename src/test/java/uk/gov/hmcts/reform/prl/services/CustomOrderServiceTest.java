@@ -4784,4 +4784,315 @@ class CustomOrderServiceTest {
             throw new IllegalStateException("Failed to build test zip bytes", e);
         }
     }
+
+    @Test
+    void testProcessCustomOrderOnSubmitted_draftOrder_uploadsCombinedDocWithoutSealing() throws Exception {
+        String authorisation = "auth-token";
+        Long caseId = 123L;
+        String userDocUrl = "http://user-doc";
+        String headerDocUrl = "http://header-doc";
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .nameOfOrder("Draft Custom Order")
+            .build();
+
+        byte[] headerBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] userBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] combinedBytes = new byte[]{9, 8, 7};
+
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+        when(documentGenService.getDocumentBytes(headerDocUrl, "system-token", "s2s-token")).thenReturn(headerBytes);
+        when(documentGenService.getDocumentBytes(userDocUrl, "system-token", "s2s-token")).thenReturn(userBytes);
+
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doReturn(combinedBytes).when(spyService).combineHeaderAndContent(headerBytes, userBytes);
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link self =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binary =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+
+        self.href = "http://uploaded-self";
+        binary.href = "http://uploaded-binary";
+        links.self = self;
+        links.binary = binary;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded =
+            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        uploaded.links = links;
+        uploaded.originalDocumentName = "Draft Custom Order_123.docx";
+
+        when(uploadService.uploadDocument(
+            eq(combinedBytes),
+            eq("Draft Custom Order_123.docx"),
+            anyString(),
+            eq(authorisation)
+        )).thenReturn(uploaded);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document result =
+            spyService.processCustomOrderOnSubmitted(
+                authorisation,
+                caseId,
+                caseData,
+                userDocUrl,
+                headerDocUrl,
+                new HashMap<>(),
+                true
+            );
+
+        assertEquals("http://uploaded-self", result.getDocumentUrl());
+        assertEquals("http://uploaded-binary", result.getDocumentBinaryUrl());
+        assertEquals("Draft Custom Order_123.docx", result.getDocumentFileName());
+        verify(documentSealingService, never()).sealDocument(any(), any(), anyString());
+    }
+
+    @Test
+    void testProcessCustomOrderOnSubmitted_finalOrder_sealsUploadedDocument() throws Exception {
+        String authorisation = "auth-token";
+        Long caseId = 123L;
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .nameOfOrder("Final Custom Order")
+            .build();
+
+        byte[] headerBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] userBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] combinedBytes = new byte[]{1, 2, 3};
+
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+        when(documentGenService.getDocumentBytes(anyString(), anyString(), anyString()))
+            .thenReturn(headerBytes)
+            .thenReturn(userBytes);
+
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doReturn(combinedBytes).when(spyService).combineHeaderAndContent(headerBytes, userBytes);
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link self =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binary =
+            new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+
+        self.href = "http://uploaded-self";
+        binary.href = "http://uploaded-binary";
+        links.self = self;
+        links.binary = binary;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document uploaded =
+            uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        uploaded.links = links;
+        uploaded.originalDocumentName = "Final Custom Order_123.docx";
+
+        when(uploadService.uploadDocument(any(), any(), any(), eq(authorisation))).thenReturn(uploaded);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document sealed =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("sealed-final.pdf")
+                .documentUrl("http://sealed")
+                .build();
+
+        when(documentSealingService.sealDocument(any(), eq(caseData), eq(authorisation))).thenReturn(sealed);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document result =
+            spyService.processCustomOrderOnSubmitted(
+                authorisation,
+                caseId,
+                caseData,
+                "http://user-doc",
+                "http://header-doc",
+                new HashMap<>(),
+                false
+            );
+
+        assertEquals(sealed, result);
+        verify(documentSealingService).sealDocument(any(), eq(caseData), eq(authorisation));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_successDraft_updatesDraftCollectionAndCleansTransientDocs() throws Exception {
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentFileName("custom.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("combined.docx")
+                .documentUrl("http://combined")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.DraftOrder draftOrder =
+            uk.gov.hmcts.reform.prl.models.DraftOrder.builder()
+                .orderTypeId("old")
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .nameOfOrder("Custom Draft Name")
+            .draftOrderCollection(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.DraftOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(draftOrder)
+                    .build()
+            ))
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
+            anyString(), anyLong(), any(), anyString(), anyString(), any(), eq(true)
+        );
+
+        spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true);
+
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> updatedDrafts =
+            (List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
+
+        assertNotNull(updatedDrafts);
+        assertEquals(finalDoc, updatedDrafts.getFirst().getValue().getOrderDocument());
+        assertEquals("Custom Draft Name", updatedDrafts.getFirst().getValue().getOrderTypeId());
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_successFinal_updatesOrderCollectionAndCleansTransientDocs() throws Exception {
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentFileName("custom.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentFileName("combined-sealed.pdf")
+                .documentUrl("http://combined")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails =
+            uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+                .orderTypeId("old")
+                .doesOrderDocumentNeedSeal(YesOrNo.Yes)
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .nameOfOrder("Custom Final Name")
+            .orderCollection(List.of(
+                Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+                    .id(UUID.randomUUID())
+                    .value(orderDetails)
+                    .build()
+            ))
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CustomOrderService spyService = Mockito.spy(customOrderService);
+        doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
+            anyString(), anyLong(), any(), anyString(), anyString(), any(), eq(false)
+        );
+
+        spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
+
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedOrders =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+
+        assertNotNull(updatedOrders);
+        assertEquals(finalDoc, updatedOrders.getFirst().getValue().getOrderDocument());
+        assertEquals("Custom Final Name", updatedOrders.getFirst().getValue().getOrderTypeId());
+        assertEquals(YesOrNo.No, updatedOrders.getFirst().getValue().getDoesOrderDocumentNeedSeal());
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+    }
+
+    @Test
+    void testResolveCourtName_withNullCaseDataMap_returnsNullWhenCaseDataHasNoCourt() {
+        CaseData caseData = CaseData.builder().build();
+
+        String result = customOrderService.resolveCourtName(caseData, null);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testGetDisplayOrderNameForC21OtherUsesNameOfOrderWhenProvided() {
+        CaseData caseData = CaseData.builder()
+            .nameOfOrder("My bespoke C21 order")
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("customC21OrderDetails", Map.of("orderOptions", "c21other"));
+
+        String result = customOrderService.getDisplayOrderName(
+            caseData,
+            caseDataMap,
+            CustomOrderNameOptionsEnum.blankOrderOrDirections,
+            "Blank order or directions (C21): Other"
+        );
+
+        assertEquals("My bespoke C21 order", result);
+    }
+
+    @Test
+    void testExtractOrderDate_withInvalidDateString_returnsOriginalValue() {
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("dateOrderMade", "not-a-date");
+
+        String result = customOrderService.extractOrderDate(caseData, caseDataMap);
+
+        assertEquals("not-a-date", result);
+    }
+
+    @Test
+    void testValidateDocxContent_zipCentralDirectoryMagicNumber_doesNotThrow() {
+        byte[] zipEndRecord = new byte[]{0x50, 0x4B, 0x05, 0x06, 0x00, 0x00};
+
+        customOrderService.validateDocxContent(zipEndRecord);
+    }
+
+    @Test
+    void testValidateDocxContent_zipSpannedMagicNumber_doesNotThrow() {
+        byte[] zipSpanned = new byte[]{0x50, 0x4B, 0x07, 0x08, 0x00, 0x00};
+
+        customOrderService.validateDocxContent(zipSpanned);
+    }
 }
