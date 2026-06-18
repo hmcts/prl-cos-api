@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
+import uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -106,6 +107,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -6517,5 +6519,478 @@ public class ManageOrdersControllerTest {
         assertNull(response.getData().get("wasTheOrderApprovedAtHearing"));
         assertNull(response.getData().get("hearingsType"));
         verify(manageOrderService).populateFieldsFromSelectedHearing(eq(authToken), any(CaseData.class), anyMap());
+    }
+
+    // ========== Tests for handleCustomOrderFailure / removePlaceholderCustomOrderFromCollections ==========
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByBinaryUrl() {
+        // Bad upload (e.g. PDF renamed to .docx) - controller must:
+        //  (a) return errors on the response (user-facing message)
+        //  (b) remove the matching placeholder entry from orderCollection
+        //  (c) cleanup transient custom-order fields
+        //  (d) NOT call notifications / AHM / CIR docs task
+        String customDocBinaryUrl = "http://test.url/binary/bad-upload.docx";
+        Map<String, Object> customDocMap = new HashMap<>();
+        customDocMap.put("document_binary_url", customDocBinaryUrl);
+        customDocMap.put("document_url", "http://test.url/bad-upload.docx");
+        customDocMap.put("document_filename", "bad-upload.docx");
+
+        // Placeholder order entry that references the bad upload by binary url
+        Map<String, Object> placeholderOrderDoc = new HashMap<>();
+        placeholderOrderDoc.put("document_binary_url", customDocBinaryUrl);
+        Map<String, Object> placeholderOrderValue = new HashMap<>();
+        placeholderOrderValue.put("orderDocument", placeholderOrderDoc);
+        Map<String, Object> placeholderOrderEntry = new HashMap<>();
+        placeholderOrderEntry.put("id", "11111111-1111-1111-1111-111111111111");
+        placeholderOrderEntry.put("value", placeholderOrderValue);
+
+        // An unrelated existing order that must NOT be removed
+        Map<String, Object> existingOrderDoc = new HashMap<>();
+        existingOrderDoc.put("document_binary_url", "http://test.url/binary/existing.docx");
+        Map<String, Object> existingOrderValue = new HashMap<>();
+        existingOrderValue.put("orderDocument", existingOrderDoc);
+        Map<String, Object> existingOrderEntry = new HashMap<>();
+        existingOrderEntry.put("id", "22222222-2222-2222-2222-222222222222");
+        existingOrderEntry.put("value", existingOrderValue);
+
+        List<Object> orderCollection = new ArrayList<>();
+        orderCollection.add(placeholderOrderEntry);
+        orderCollection.add(existingOrderEntry);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+        databaseMap.put("orderCollection", orderCollection);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customDocMap);
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("orderCollection", orderCollection);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        doThrow(new InvalidCustomOrderDocumentException("The uploaded file is not a valid .docx document."))
+            .when(customOrderService).combineAndFinalizeCustomOrder(
+                anyString(), any(CaseData.class), anyMap(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        // (a) user-facing error returned
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
+        assertTrue(response.getErrors().get(0).contains("not a valid"));
+
+        // (b) the matching placeholder entry has been removed, the unrelated one survives
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
+        assertEquals(1, resultingOrders.size());
+        assertEquals("22222222-2222-2222-2222-222222222222", resultingOrders.get(0).get("id"));
+
+        // (c) the persisted state was written (cleanup persisted)
+        verify(allTabService).submitAllTabsUpdate(
+            anyString(), eq("12345"), any(StartEventResponse.class), any(EventRequestData.class), anyMap());
+
+        // (d) no notifications / AHM / CIR docs task on failure
+        verify(manageOrderEmailService, never()).sendEmailWhenOrderIsServed(anyString(), any(CaseData.class), anyMap());
+        verify(manageOrderService, never()).orchestrateCirDocumentsRequestedTask(any(CaseData.class), anyString());
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByDocUrl() {
+        // Same as above but the placeholder entry only carries the self/document_url (not binary).
+        // Also exercises the camelCase fallback (documentBinaryUrl / documentUrl) in docUrlMatches.
+        String customDocSelfUrl = "http://test.url/bad-upload.docx";
+        Map<String, Object> customDocMap = new HashMap<>();
+        customDocMap.put("documentBinaryUrl", "http://test.url/binary/bad-upload.docx");
+        customDocMap.put("documentUrl", customDocSelfUrl);
+
+        // Placeholder draft order entry, matching via documentUrl (camelCase, not the snake_case)
+        Map<String, Object> placeholderDoc = new HashMap<>();
+        placeholderDoc.put("documentUrl", "http://test.url/binary/bad-upload.docx");
+        Map<String, Object> placeholderDraftValue = new HashMap<>();
+        placeholderDraftValue.put("orderDocument", placeholderDoc);
+        Map<String, Object> placeholderDraftEntry = new HashMap<>();
+        placeholderDraftEntry.put("id", "33333333-3333-3333-3333-333333333333");
+        placeholderDraftEntry.put("value", placeholderDraftValue);
+
+        List<Object> draftCollection = new ArrayList<>();
+        draftCollection.add(placeholderDraftEntry);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+        databaseMap.put("draftOrderCollection", draftCollection);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customDocMap);
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("draftOrderCollection", draftCollection);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck) // draft path
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        doThrow(new InvalidCustomOrderDocumentException("Bad doc"))
+            .when(customOrderService).combineAndFinalizeCustomOrder(
+                anyString(), any(CaseData.class), anyMap(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        // Placeholder draft entry was removed (matched via documentUrl camelCase fallback)
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> resultingDrafts =
+            (List<Map<String, Object>>) databaseMap.get("draftOrderCollection");
+        assertTrue(resultingDrafts.isEmpty());
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_noUrl_fallsBackToRemovingFirst() {
+        // No customOrderDoc on the callback - extractCustomOrderDocBinaryUrl returns null,
+        // so removeMatchingEntry falls back to removing the most recently added (index 0)
+        // entry from each collection.
+        Map<String, Object> firstEntry = new HashMap<>();
+        firstEntry.put("id", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        firstEntry.put("value", new HashMap<>());
+        Map<String, Object> secondEntry = new HashMap<>();
+        secondEntry.put("id", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        secondEntry.put("value", new HashMap<>());
+        List<Object> orderCollection = new ArrayList<>();
+        orderCollection.add(firstEntry);
+        orderCollection.add(secondEntry);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+        databaseMap.put("orderCollection", orderCollection);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderNameOption", "other");
+        // NOTE: no customOrderDoc, so extractCustomOrderDocBinaryUrl returns null
+        callbackDataMap.put("orderCollection", orderCollection);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        doThrow(new InvalidCustomOrderDocumentException("Bad doc"))
+            .when(customOrderService).combineAndFinalizeCustomOrder(
+                anyString(), any(CaseData.class), anyMap(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        // Fallback path removed index 0 (the most recently added entry)
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
+        assertEquals(1, resultingOrders.size());
+        assertEquals("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", resultingOrders.get(0).get("id"));
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_noMatchingEntry_leavesCollectionAlone() {
+        // customOrderDoc has a binary url that does NOT match any entry in the collection.
+        // The collection must be left untouched (the early-return branch in removeMatchingEntry).
+        String customDocBinaryUrl = "http://test.url/binary/unmatched.docx";
+        Map<String, Object> customDocMap = new HashMap<>();
+        customDocMap.put("document_binary_url", customDocBinaryUrl);
+
+        Map<String, Object> unrelatedOrderDoc = new HashMap<>();
+        unrelatedOrderDoc.put("document_binary_url", "http://test.url/binary/something-else.docx");
+        Map<String, Object> unrelatedOrderValue = new HashMap<>();
+        unrelatedOrderValue.put("orderDocument", unrelatedOrderDoc);
+        Map<String, Object> unrelatedOrderEntry = new HashMap<>();
+        unrelatedOrderEntry.put("id", "cccccccc-cccc-cccc-cccc-cccccccccccc");
+        unrelatedOrderEntry.put("value", unrelatedOrderValue);
+
+        List<Object> orderCollection = new ArrayList<>();
+        orderCollection.add(unrelatedOrderEntry);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+        databaseMap.put("orderCollection", orderCollection);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customDocMap);
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("orderCollection", orderCollection);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        doThrow(new InvalidCustomOrderDocumentException("Bad doc"))
+            .when(customOrderService).combineAndFinalizeCustomOrder(
+                anyString(), any(CaseData.class), anyMap(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        // Unrelated entry untouched, collection unchanged
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
+        assertEquals(1, resultingOrders.size());
+        assertEquals("cccccccc-cccc-cccc-cccc-cccccccccccc", resultingOrders.get(0).get("id"));
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_matchesOrderDocumentWelsh() {
+        // The bad upload's URL only matches via the orderDocumentWelsh field on the entry,
+        // exercising the second branch of entryReferencesDoc.
+        String customDocBinaryUrl = "http://test.url/binary/welsh-bad.docx";
+        Map<String, Object> customDocMap = new HashMap<>();
+        customDocMap.put("document_binary_url", customDocBinaryUrl);
+
+        Map<String, Object> welshDoc = new HashMap<>();
+        welshDoc.put("document_binary_url", customDocBinaryUrl);
+        Map<String, Object> placeholderValue = new HashMap<>();
+        // orderDocument is a non-matching map; orderDocumentWelsh is the match
+        Map<String, Object> englishDoc = new HashMap<>();
+        englishDoc.put("document_binary_url", "http://test.url/binary/unrelated.docx");
+        placeholderValue.put("orderDocument", englishDoc);
+        placeholderValue.put("orderDocumentWelsh", welshDoc);
+        Map<String, Object> placeholderEntry = new HashMap<>();
+        placeholderEntry.put("id", "dddddddd-dddd-dddd-dddd-dddddddddddd");
+        placeholderEntry.put("value", placeholderValue);
+
+        List<Object> orderCollection = new ArrayList<>();
+        orderCollection.add(placeholderEntry);
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+        databaseMap.put("orderCollection", orderCollection);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customDocMap);
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("orderCollection", orderCollection);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        doThrow(new InvalidCustomOrderDocumentException("Bad doc"))
+            .when(customOrderService).combineAndFinalizeCustomOrder(
+                anyString(), any(CaseData.class), anyMap(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        // Entry that matched via orderDocumentWelsh was removed
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
+        assertTrue(resultingOrders.isEmpty());
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_emptyCollection_isNoOp() {
+        // Collection is present but empty - removeMatchingEntry returns early without
+        // mutating it. Verifies we don't blow up on the empty-list early-return branch.
+        Map<String, Object> customDocMap = new HashMap<>();
+        customDocMap.put("document_binary_url", "http://test.url/binary/bad.docx");
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+        databaseMap.put("orderCollection", new ArrayList<>());
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderDoc", customDocMap);
+        callbackDataMap.put("customOrderNameOption", "other");
+        callbackDataMap.put("orderCollection", new ArrayList<>());
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .build();
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        doThrow(new InvalidCustomOrderDocumentException("Bad doc"))
+            .when(customOrderService).combineAndFinalizeCustomOrder(
+                anyString(), any(CaseData.class), anyMap(), anyBoolean());
+
+        AboutToStartOrSubmitCallbackResponse response =
+            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
     }
 }
