@@ -57,7 +57,7 @@ public class DgsService {
     private final CaseService caseService;
     private final ObjectMapper objectMapper;
 
-    private static final String ERROR_MESSAGE = "Error generating and storing document for case {}";
+    private static final String ERROR_MESSAGE = "Error generating and storing document for case %s: %s";
 
     public GeneratedDocumentInfo generateDocument(String authorisation, String caseId, String templateName,
                                                   Map<String, Object> dataMap) throws DocumentGenerationException {
@@ -69,8 +69,8 @@ public class DgsService {
                     .build();
             return docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseId);
-            throw new DocumentGenerationException(ex.getMessage(), ex);
+            String errorMessage = String.format(ERROR_MESSAGE, caseId, ex.getMessage());
+            throw new DocumentGenerationException(errorMessage, ex);
         }
     }
 
@@ -102,8 +102,8 @@ public class DgsService {
                 .build();
             return docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
-            throw new DocumentGenerationException(ex.getMessage(), ex);
+            String errorMessage = String.format(ERROR_MESSAGE, caseDetails.getCaseData().getId(), ex.getMessage());
+            throw new DocumentGenerationException(errorMessage, ex);
         }
     }
 
@@ -163,8 +163,8 @@ public class DgsService {
                 .build();
             return docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseDetails.getCaseId());
-            throw new DocumentGenerationException(ex.getMessage(), ex);
+            String errorMessage = String.format(ERROR_MESSAGE, caseDetails.getCaseData().getId(), ex.getMessage());
+            throw new DocumentGenerationException(errorMessage, ex);
         }
     }
 
@@ -195,8 +195,8 @@ public class DgsService {
                 .build();
             return docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseId);
-            throw new DocumentGenerationException(ex.getMessage(), ex);
+            String errorMessage = String.format(ERROR_MESSAGE, caseId, ex.getMessage());
+            throw new DocumentGenerationException(errorMessage, ex);
         }
     }
 
@@ -260,8 +260,8 @@ public class DgsService {
             try {
                 return docmosisRenderService.renderAndStoreDocument(authorisation, request);
             } catch (Exception ex) {
-                log.error(ERROR_MESSAGE, caseId, ex);
-                throw new DocumentGenerationException(ex.getMessage(), ex);
+                String errorMessage = String.format(ERROR_MESSAGE, caseId, ex.getMessage());
+                throw new DocumentGenerationException(errorMessage, ex);
             }
         };
     }
@@ -276,8 +276,8 @@ public class DgsService {
                 .build();
             return docmosisRenderService.renderAndStoreDocument(authorisation, request);
         } catch (Exception ex) {
-            log.error(ERROR_MESSAGE, caseId);
-            throw new DocumentGenerationException(ex.getMessage(), ex);
+            String errorMessage = String.format(ERROR_MESSAGE, caseId, ex.getMessage());
+            throw new DocumentGenerationException(errorMessage, ex);
         }
     }
 
