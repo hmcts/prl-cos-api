@@ -33,7 +33,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DocumentGenerationException.class)
     public ResponseEntity<ErrorResponse> handleDocumentGenerationException(DocumentGenerationException ex) {
-        log.error("Exception occurred while document generation", ex);
+        log.error("Exception occurred when generating document", ex);
         ErrorResponse error = ErrorResponse.builder(ex, ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500),
                                                                                          ex.getMessage())).build();
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
