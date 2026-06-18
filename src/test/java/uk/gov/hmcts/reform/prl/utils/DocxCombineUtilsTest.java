@@ -305,7 +305,11 @@ class DocxCombineUtilsTest {
         // for UnsupportedFileFormatException / POIXMLException now propagates them so
         // callers can surface a user-friendly error instead.
         byte[] headerBytes = createSimpleDocx("Header content");
-        byte[] userBytes = "%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\nfake pdf bytes".getBytes();
+        // %PDF magic bytes (0x25 0x50 0x44 0x46) plus arbitrary trailing bytes.
+        byte[] userBytes = new byte[]{
+            0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34,
+            0x0A, 0x66, 0x61, 0x6B, 0x65, 0x20, 0x70, 0x64, 0x66
+        };
 
         Throwable thrown = assertThrows(Throwable.class,
             () -> DocxCombineUtils.combineDocuments(headerBytes, userBytes));
