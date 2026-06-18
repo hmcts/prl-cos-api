@@ -320,7 +320,7 @@ dependencies {
   implementation group: 'org.apache.httpcomponents', name: 'fluent-hc', version: versions.httpComponents
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-loadbalancer', version: versions.springCloud
   implementation group: 'org.springframework.retry', name: 'spring-retry', version: '2.0.13'
-  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.7.2'
+  implementation group: 'com.github.hmcts', name: 'ccd-config-generator', version: '6.10.0'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: versions.ccdClient
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformsJavaLogging
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.25.4'
@@ -336,7 +336,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.13.4'
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.14.0'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '9.3.4'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
   implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
@@ -410,7 +410,7 @@ dependencies {
   testImplementation group: 'org.pitest', name: 'pitest', version: versions.pitest
   testImplementation group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
   testImplementation group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
-  testImplementation group:'org.instancio', name:'instancio-core', version:'5.5.1'
+  testImplementation group:'org.instancio', name:'instancio-core', version:'5.6.0'
 
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestImplementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: versions.jacksonDatatypeJsr
