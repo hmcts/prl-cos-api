@@ -4787,24 +4787,16 @@ class CustomOrderServiceTest {
 
     @Test
     void testProcessCustomOrderOnSubmitted_draftOrder_uploadsCombinedDocWithoutSealing() throws Exception {
-        String authorisation = "auth-token";
-        Long caseId = 123L;
-        String userDocUrl = "http://user-doc";
-        String headerDocUrl = "http://header-doc";
-
-        CaseData caseData = CaseData.builder()
-            .id(caseId)
-            .nameOfOrder("Draft Custom Order")
-            .build();
-
         byte[] headerBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
         byte[] userBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
         byte[] combinedBytes = new byte[]{9, 8, 7};
 
         when(systemUserService.getSysUserToken()).thenReturn("system-token");
         when(authTokenGenerator.generate()).thenReturn("s2s-token");
-        when(documentGenService.getDocumentBytes(headerDocUrl, "system-token", "s2s-token")).thenReturn(headerBytes);
-        when(documentGenService.getDocumentBytes(userDocUrl, "system-token", "s2s-token")).thenReturn(userBytes);
+        when(documentGenService.getDocumentBytes("http://header-doc", "system-token", "s2s-token"))
+            .thenReturn(headerBytes);
+        when(documentGenService.getDocumentBytes("http://user-doc", "system-token", "s2s-token"))
+            .thenReturn(userBytes);
 
         CustomOrderService spyService = Mockito.spy(customOrderService);
         doReturn(combinedBytes).when(spyService).combineHeaderAndContent(headerBytes, userBytes);
@@ -4815,7 +4807,6 @@ class CustomOrderServiceTest {
             new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binary =
             new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-
         self.href = "http://uploaded-self";
         binary.href = "http://uploaded-binary";
         links.self = self;
@@ -4825,6 +4816,12 @@ class CustomOrderServiceTest {
             uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
         uploaded.links = links;
         uploaded.originalDocumentName = "Draft Custom Order_123.docx";
+
+        String authorisation = "auth-token";
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .nameOfOrder("Draft Custom Order")
+            .build();
 
         when(uploadService.uploadDocument(
             eq(combinedBytes),
@@ -4836,10 +4833,10 @@ class CustomOrderServiceTest {
         uk.gov.hmcts.reform.prl.models.documents.Document result =
             spyService.processCustomOrderOnSubmitted(
                 authorisation,
-                caseId,
+                123L,
                 caseData,
-                userDocUrl,
-                headerDocUrl,
+                "http://user-doc",
+                "http://header-doc",
                 new HashMap<>(),
                 true
             );
@@ -4852,14 +4849,6 @@ class CustomOrderServiceTest {
 
     @Test
     void testProcessCustomOrderOnSubmitted_finalOrder_sealsUploadedDocument() throws Exception {
-        String authorisation = "auth-token";
-        Long caseId = 123L;
-
-        CaseData caseData = CaseData.builder()
-            .id(caseId)
-            .nameOfOrder("Final Custom Order")
-            .build();
-
         byte[] headerBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
         byte[] userBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
         byte[] combinedBytes = new byte[]{1, 2, 3};
@@ -4879,7 +4868,6 @@ class CustomOrderServiceTest {
             new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binary =
             new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
-
         self.href = "http://uploaded-self";
         binary.href = "http://uploaded-binary";
         links.self = self;
@@ -4890,20 +4878,25 @@ class CustomOrderServiceTest {
         uploaded.links = links;
         uploaded.originalDocumentName = "Final Custom Order_123.docx";
 
-        when(uploadService.uploadDocument(any(), any(), any(), eq(authorisation))).thenReturn(uploaded);
-
         uk.gov.hmcts.reform.prl.models.documents.Document sealed =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                 .documentFileName("sealed-final.pdf")
                 .documentUrl("http://sealed")
                 .build();
 
+        String authorisation = "auth-token";
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .nameOfOrder("Final Custom Order")
+            .build();
+
+        when(uploadService.uploadDocument(any(), any(), any(), eq(authorisation))).thenReturn(uploaded);
         when(documentSealingService.sealDocument(any(), eq(caseData), eq(authorisation))).thenReturn(sealed);
 
         uk.gov.hmcts.reform.prl.models.documents.Document result =
             spyService.processCustomOrderOnSubmitted(
                 authorisation,
-                caseId,
+                123L,
                 caseData,
                 "http://user-doc",
                 "http://header-doc",
