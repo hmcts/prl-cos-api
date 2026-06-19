@@ -44,8 +44,9 @@ public class DocumentSealingService {
     private final PdfGenerationService pdfGenerationService;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
+        String caseId = String.valueOf(caseData.getId());
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
-            document = documentGenService.convertToPdf(authorisation, document);
+            document = documentGenService.convertToPdf(caseId, authorisation, document);
         }
 
         String s2sToken = authTokenGenerator.generate();
@@ -61,6 +62,7 @@ public class DocumentSealingService {
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
 
         PdfGenerationRequest pdfGenerationRequest = PdfGenerationRequest.builder()
+            .caseId(caseId)
             .authToken(authorisation)
             .fileContent(sealedDocument)
             .sourceFilename(document.getDocumentFileName())

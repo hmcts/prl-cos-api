@@ -44,6 +44,7 @@ public class DocumentSealingServiceTest {
     @InjectMocks
     DocumentSealingService documentSealingService;
 
+    private static final String CASE_ID = "4534758712128976";
     private final String newFileName = "test.pdf";
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
@@ -112,7 +113,7 @@ public class DocumentSealingServiceTest {
             .documentUrl("/test").documentBinaryUrl("/test/binary").documentFileName("test.pdf").build();
 
         when(documentGenService.checkFileFormat("test.doc")).thenReturn(true);
-        when(documentGenService.convertToPdf("testAuth", inputDocument))
+        when(documentGenService.convertToPdf(CASE_ID, "testAuth", inputDocument))
             .thenReturn(inputDocumentPdf);
         when(authTokenGenerator.generate()).thenReturn("s2s token");
         when(documentGenService.getDocumentBytes(
@@ -132,7 +133,9 @@ public class DocumentSealingServiceTest {
         mockResourceReader.when(() -> ResourceReader.readBytes("familycourtseal-bilingual.png")).thenReturn(
             sealBinaries);
 
-        CaseData caseData = CaseData.builder().courtSeal("[userImage:familycourtseal-bilingual.png]")
+        CaseData caseData = CaseData.builder()
+            .id(Long.parseLong(CASE_ID))
+            .courtSeal("[userImage:familycourtseal-bilingual.png]")
             .caseManagementLocation(CaseManagementLocation.builder()
                                         .region("7")
                                         .regionId(null)

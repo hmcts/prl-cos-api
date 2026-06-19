@@ -25,7 +25,8 @@ public class PdfGenerationService {
                                      pdfGenerationRequest.getFileContent());
             return storeDocument(pdf, pdfGenerationRequest.getAuthToken(), outputFilename);
         } catch (Exception e) {
-            throw new PdfConversionException("Failed to generate and store PDF", e);
+            throw new PdfConversionException("Case ID " + pdfGenerationRequest.getCaseId()
+                                                 + ": Failed to generate and store PDF", e);
         }
     }
 

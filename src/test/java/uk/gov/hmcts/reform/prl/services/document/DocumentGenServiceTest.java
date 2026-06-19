@@ -173,6 +173,7 @@ public class DocumentGenServiceTest {
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
+    private static final String CASE_ID = "1234345678934523";
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
     private GeneratedDocumentInfo generatedDocumentInfo;
     private CaseData c100CaseData;
@@ -1138,7 +1139,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoName() {
-        documentGenService.convertToPdf("auth", Document.builder().build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -1146,7 +1147,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoPeriods() {
-        documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().documentFileName("i").build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -2550,7 +2551,7 @@ public class DocumentGenServiceTest {
             .build();
         when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class))).thenReturn(document);
 
-        Document result = documentGenService.convertToPdf(AUTH_TOKEN, document);
+        Document result = documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document);
         assertEquals(document, result);
 
         verify(caseDocumentClient).getDocumentBinary(
@@ -2581,7 +2582,8 @@ public class DocumentGenServiceTest {
             .build();
 
         assertExpectedException(() -> documentGenService
-            .convertToPdf(AUTH_TOKEN, document), InvalidResourceException.class, "Doc name FL401-Final.docx");
+            .convertToPdf(CASE_ID, AUTH_TOKEN, document), InvalidResourceException.class,
+                                "Case ID 1234345678934523: Doc name FL401-Final.docx");
         verifyNoInteractions(pdfGenerationService);
     }
 
@@ -2610,7 +2612,7 @@ public class DocumentGenServiceTest {
         when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class)))
             .thenThrow(new PdfConversionException("Failed to generate and store PDF"));
 
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
+        assertExpectedException(() -> documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document), PdfConversionException.class,
                                 "Failed to generate and store PDF");
     }
 

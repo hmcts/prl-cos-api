@@ -108,6 +108,7 @@ class PdfGenerationServiceTest {
     @Test
     void shouldWrapExceptionsWithPdfConversionException() {
         PdfGenerationRequest request = PdfGenerationRequest.builder()
+            .caseId("246")
             .sourceFilename("my-input.docx")
             .fileContent(new byte[]{1})
             .authToken("auth-token")
@@ -121,7 +122,7 @@ class PdfGenerationServiceTest {
             () -> pdfGenerationService.generateAndStore(request)
         );
 
-        assertEquals("Failed to generate and store PDF", exception.getMessage());
+        assertEquals("Case ID 246: Failed to generate and store PDF", exception.getMessage());
         assertSame(rootCause, exception.getCause());
     }
 

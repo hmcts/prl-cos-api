@@ -1587,7 +1587,7 @@ public class DocumentGenService {
         }
     }
 
-    public Document convertToPdf(String authorisation, Document document) {
+    public Document convertToPdf(String caseId, String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
@@ -1601,12 +1601,13 @@ public class DocumentGenService {
                     try {
                         return resource.getInputStream().readAllBytes();
                     } catch (IOException e) {
-                        throw new InvalidResourceException("Doc name " + filename, e);
+                        throw new InvalidResourceException("Case ID " + caseId + ": Doc name " + filename, e);
                     }
                 })
-                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
+                .orElseThrow(() -> new InvalidResourceException("Case ID " + caseId + ": Resource is invalid " + filename));
 
             PdfGenerationRequest pdfGenerationRequest = PdfGenerationRequest.builder()
+                .caseId(caseId)
                 .authToken(authorisation)
                 .fileContent(docInBytes)
                 .sourceFilename(document.getDocumentFileName())
