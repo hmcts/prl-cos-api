@@ -138,7 +138,7 @@ public class CafCassControllerFunctionalTest {
         );
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
         String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));
