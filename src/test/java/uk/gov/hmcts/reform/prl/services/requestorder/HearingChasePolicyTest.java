@@ -222,10 +222,10 @@ class HearingChasePolicyTest {
                 .hearingId(HEARING_ID)
                 .lastFiredDate(TODAY.minusDays(1))
                 .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(5)), fl401Case().build(), ledger, TODAY);
+            hearing("COMPLETED", TODAY.minusDays(1)), fl401Case().build(), ledger, TODAY);
 
         assertThat(decision.shouldFire()).isTrue();
         assertThat(decision.description()).isEqualTo("cadence met - firing");

@@ -73,7 +73,7 @@ class HearingChasePolicy {
 
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
-        if (tracking.map(t -> needsToBeSkippedInFlight(t, workingDayIndicator, cadence, today)).orElse(false)) {
+        if (tracking.map(t -> needsToBeSkippedInFlightForLastFired(t, workingDayIndicator, cadence, today)).orElse(false)) {
             return ChaseDecision.skipInFlight();
         }
 
@@ -88,10 +88,13 @@ class HearingChasePolicy {
         return ChaseDecision.fire();
     }
 
-    private static boolean needsToBeSkippedInFlight(RequestOrderHearingTracking t,
-                                                    WorkingDayIndicator workingDayIndicator,
-                                                    int cadence, LocalDate today) {
+    private static boolean needsToBeSkippedInFlightForLastFired(RequestOrderHearingTracking t,
+                                                                WorkingDayIndicator workingDayIndicator,
+                                                                int cadence, LocalDate today) {
         if (t.getLastFiredDate() != null) {
+            if (t.getLastFiredDate().equals(today)) {
+                return true;
+            }
             int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(t.getLastFiredDate(), today);
             return workingDaysSinceAnchor < cadence;
         }
@@ -124,7 +127,8 @@ class HearingChasePolicy {
     private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
-        log.info("hearingLabels for hearingId={}: {}", hearingId, hearingLabels.stream().collect(Collectors.toList()));
+        log.info("hearingLabels for caseId={}, hearingId={}: {}", caseData.getId(),
+                 hearingId, hearingLabels.stream().collect(Collectors.toList()));
         boolean hearingTypeLookupFailed = hearing.getHearingTypeValue() == null
             || hearing.getHearingTypeValue().isBlank();
         Set<String> hearingDateSuffixes = hearingTypeLookupFailed
