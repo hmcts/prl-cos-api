@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,12 +27,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -62,6 +65,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final ElementUtils elementUtils;
     private final AllTabServiceImpl allTabService;
     private final SendAndReplyCommonService sendAndReplyCommonService;
+    private final TaskUtils taskUtils;
 
     @Autowired
     public SendAndReplyController(ObjectMapper objectMapper,
@@ -69,12 +73,14 @@ public class SendAndReplyController extends AbstractCallbackController {
                                   SendAndReplyService sendAndReplyService,
                                   ElementUtils elementUtils,
                                   AllTabServiceImpl allTabService,
-                                  SendAndReplyCommonService sendAndReplyCommonService) {
+                                  SendAndReplyCommonService sendAndReplyCommonService,
+                                  TaskUtils taskUtils) {
         super(objectMapper, eventPublisher);
         this.sendAndReplyService = sendAndReplyService;
         this.elementUtils = elementUtils;
         this.allTabService = allTabService;
         this.sendAndReplyCommonService = sendAndReplyCommonService;
+        this.taskUtils = taskUtils;
     }
 
     @PostMapping("/about-to-start")
@@ -280,28 +286,49 @@ public class SendAndReplyController extends AbstractCallbackController {
     }
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
-    public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest,
                                                                             @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
                                                                                 required = false) String clientContext) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+
         // Regular event does not close request-order tasks (FPVTL-2408/2409) — null hearingId
         // tells processAboutToSubmit to skip the tracking update.
-        Optional<String> code = Optional.ofNullable(caseData.getSendOrReplyMessage())
-            .map(SendOrReplyMessage::getSendMessageObject)
-            .map(Message::getFutureHearingsList)
-            .map(DynamicList::getValue)
-            .map(DynamicListElement::getCode);
+        Optional<AdditionalProperties> taskAdditionalProperties = taskUtils.getTaskAdditionalProperties(clientContext);
 
-        log.info("Selected code {}", code);
+        Optional<String> chasedHearingId = taskAdditionalProperties
+            .map(AdditionalProperties::getHearingId);
 
-        String chasedHearingId = extractHearingIdFromClientContext(clientContext);
+        ResponseEntity.BodyBuilder responseBuilder =  ResponseEntity.status(HttpStatus.OK);
 
-        log.info("context hearing id {}", chasedHearingId);
+        if (chasedHearingId.isPresent()) {
+            log.info("context hearing id {}", chasedHearingId);
+            String encodedClientContext = taskUtils.setTaskCompletion(
+                clientContext,
+                caseData,
+                data ->
+                    ofNullable(data.getSendOrReplyMessage())
+                        .map(SendOrReplyMessage::getSendMessageObject)
+                        .map(Message::getFutureHearingsList)
+                        .map(DynamicList::getValue)
+                        .map(DynamicListElement::getCode)
+                        .filter(hearingCode -> hearingCode.contains(chasedHearingId.get()))
+                        .isPresent()
+            );
+            responseBuilder = ofNullable(encodedClientContext)
+                .map(value -> ResponseEntity.ok()
+                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
+                .orElseGet(ResponseEntity::ok);
+        }
 
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
+        return responseBuilder.body(sendAndReplyCommonService.processAboutToSubmit(
+            authorisation,
+            caseData,
+            caseDataMap,
+            chasedHearingId.orElse(null)
+        ));
     }
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit-task")
@@ -313,12 +340,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        // WA-task variant closes the request-order task. The chased hearingId comes from the WA
-        // client-context header (the same source used by mid-event-task to lock the dropdown),
-        // so submit-time and mid-event-time agree on which hearing this chase is for
-        // regardless of what's in the message dropdown (FPVTL-2408/2409).
-        String chasedHearingId = extractHearingIdFromClientContext(clientContext);
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
+        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, null);
     }
 
     @PostMapping("/send-or-reply-to-messages/submitted")
