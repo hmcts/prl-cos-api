@@ -60,6 +60,10 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKE
 public class CafCassControllerFunctionalTest {
 
     private static final String USER_TOKEN = "Bearer testToken";
+    private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
+    private static final String REDACTED_DOCUMENTS_RESPONSE =
+        "classpath:response/cafcass-search-response-redacted-documents.json";
+    private static final String VALID_DOCUMENT_UUID = "11111111-1111-1111-1111-111111111111";
 
     private MockMvc mockMvc;
 
@@ -92,7 +96,49 @@ public class CafCassControllerFunctionalTest {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Disabled
+    @Test
+    public void givenRedactedDocumentsWhenGetRequestToSearchCasesThenRedactedDocumentsAreExcluded() throws Exception {
+        String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(REDACTED_DOCUMENTS_RESPONSE).toPath()));
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
+
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        Mockito.when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
+
+        MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                        .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                        .queryParam(CAFCASS_START_DATE_PARAM, "2022-08-22T10:54:43.49")
+                        .queryParam(CAFCASS_END_DATE_PARAM, "2022-08-22T11:00:43.49")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        CafCassResponse actualCafcassResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsString(),
+            CafCassResponse.class
+        );
+
+        assertEquals(1, actualCafcassResponse.getTotal());
+        assertEquals(1, actualCafcassResponse.getCases().getFirst().getCaseData().getOtherDocuments().size());
+        assertEquals(
+            VALID_DOCUMENT_UUID,
+            actualCafcassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst()
+                .getValue().getDocumentOther().getDocumentId()
+        );
+        assertEquals(
+            "valid-document.pdf",
+            actualCafcassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst()
+                .getValue().getDocumentName()
+        );
+    }
+
+    @Ignore
     @Test
     public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
         String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));

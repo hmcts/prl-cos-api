@@ -204,12 +204,9 @@ public class CaseFlagsController extends AbstractCallbackController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataCurrent = callbackRequest.getCaseDetails().getData();
-            List<String> errors = flagsService.validateNewFlagStatus(caseDataCurrent);
-            if (errors.isEmpty()) {
-                CaseData caseData = checkIfNewFlagRequireToCreateWaTask(callbackRequest);
-                caseDataCurrent.put(WA_IS_CASE_FLAG_TASK_CREATED, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
-            }
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).errors(errors).build();
+            CaseData caseData = checkIfNewFlagRequireToCreateWaTask(callbackRequest);
+            caseDataCurrent.put(WA_IS_CASE_FLAG_TASK_CREATED, caseData.getReviewRaRequestWrapper().getIsCaseFlagsTaskCreated());
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataCurrent).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
