@@ -16,6 +16,6 @@ import java.time.LocalDate;
 public class RequestOrderHearingTracking {
 
     private String hearingId;
-    private LocalDate lastFiredDate; //this is the taskCreationDate
+    private LocalDate lastFiredDate;
     private LocalDate lastCompletedDate;
 }

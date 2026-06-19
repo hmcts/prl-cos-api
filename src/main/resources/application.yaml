@@ -818,7 +818,7 @@ ccd:
 
 refdata:
   api:
-    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+    url: ${REFDATA_API_URL:http://rd-commondata-api-aat.service.core-compute-aat.internal}
   category-id: HearingType
 
 welsh:
