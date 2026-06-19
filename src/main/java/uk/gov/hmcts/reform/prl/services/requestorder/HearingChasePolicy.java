@@ -42,10 +42,10 @@ class HearingChasePolicy {
 
     private final WorkingDayIndicator workingDayIndicator;
 
-    @Value("${request-order-task.cadence-working-days.c100}")
+    @Value("${request-order-task.cadence-working-days.c100:3}")
     private int c100CadenceWorkingDays;
 
-    @Value("${request-order-task.cadence-working-days.fl401}")
+    @Value("${request-order-task.cadence-working-days.fl401:1}")
     private int fl401CadenceWorkingDays;
 
     @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
@@ -71,20 +71,35 @@ class HearingChasePolicy {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
+        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
-        if (tracking.map(t -> t.getLastFiredDate() != null).orElse(false)) {
+        if (tracking.map(t -> needsToBeSkippedInFlightForLastFired(t, workingDayIndicator, cadence, today)).orElse(false)) {
             return ChaseDecision.skipInFlight();
         }
 
         LocalDate anchor = tracking
             .map(RequestOrderHearingTracking::getLastCompletedDate)
             .orElse(hearingEndDate);
-        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
+
         int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(anchor, today);
         if (workingDaysSinceAnchor < cadence) {
             return ChaseDecision.skipBeforeCadence(workingDaysSinceAnchor, anchor, cadence);
         }
         return ChaseDecision.fire();
+    }
+
+    private static boolean needsToBeSkippedInFlightForLastFired(RequestOrderHearingTracking t,
+                                                                WorkingDayIndicator workingDayIndicator,
+                                                                int cadence, LocalDate today) {
+        if (t.getLastFiredDate() != null) {
+            if (t.getLastFiredDate().equals(today)) {
+                return true;
+            }
+            int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(t.getLastFiredDate(), today);
+            return workingDaysSinceAnchor < cadence;
+        }
+
+        return false;
     }
 
     private List<String> allowedStatuses() {
@@ -112,7 +127,8 @@ class HearingChasePolicy {
     private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
-        log.info("hearingLabels for hearingId={}: {}", hearingId, hearingLabels.stream().collect(Collectors.toList()));
+        log.info("hearingLabels for caseId={}, hearingId={}: {}", caseData.getId(),
+                 hearingId, hearingLabels.stream().collect(Collectors.toList()));
         boolean hearingTypeLookupFailed = hearing.getHearingTypeValue() == null
             || hearing.getHearingTypeValue().isBlank();
         Set<String> hearingDateSuffixes = hearingTypeLookupFailed
