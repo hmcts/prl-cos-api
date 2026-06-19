@@ -45,7 +45,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class NoticeOfChangeEventHandler {
-    public static final String PRL_LEGAL_REP_COVER_LETTER_TEMPLATE = "PRL-LEG-REP-REMOVED.docx";
+    public static final String PRL_LEGAL_REP_COVER_LETTER_TEMPLATE = "FL-PRL-LET-ENG-REP-REMOVED.docx";
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
     private final LaunchDarklyClient launchDarklyClient;
