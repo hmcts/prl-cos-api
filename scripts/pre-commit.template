@@ -13,11 +13,7 @@ if [ -f "$GATE_FLAG" ]; then
     # JaCoCo report, so feeding them into -Ptarget causes a spurious
     # "TARGETS NOT FOUND" gate failure. The production class they cover
     # is gated separately whenever it's part of the commit.
-    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR \
-        | grep '^src/main/.*\.java$' \
-        | xargs -I {} basename {} .java \
-        | sort -u \
-        | paste -sd "," -)
+    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR | grep '^src/main/.*\.java$' | xargs -I {} basename {} .java | sort -u | paste -sd "," -)
 
     # 2. If no production Java files are staged, just proceed
     if [ -z "$STAGED_CLASSES" ]; then
