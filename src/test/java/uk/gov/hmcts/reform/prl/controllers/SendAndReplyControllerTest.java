@@ -780,13 +780,13 @@ public class SendAndReplyControllerTest {
     @Test
     public void testSendOrReplyToMessagesSubmitWithClientContextWithoutTask() {
         String clientContext = """
-        {
-          "client_context": {
-              "userLanguage" : "English"
+            {
+              "client_context": {
+                  "userLanguage" : "English"
+                }
+              }
             }
-          }
-        }
-        """;
+            """;
 
         String encodedClientContext = Base64.getEncoder().encodeToString(clientContext.getBytes());
         Message message = Message.builder()
