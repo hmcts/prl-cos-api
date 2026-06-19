@@ -27,7 +27,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -201,19 +200,35 @@ class HearingChasePolicyTest {
     }
 
     @Test
-    void decideSkipsWhenPreviousFireAwaitsCompletion() {
+    void decideSkipsWhenPreviousFireAwaitsCompletionSmallerThanCadence() {
         HearingTrackingLedger ledger = ledgerWith(
             RequestOrderHearingTracking.builder()
                 .hearingId(HEARING_ID)
                 .lastFiredDate(TODAY.minusDays(1))
                 .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(0);
 
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", TODAY.minusDays(5)), fl401Case().build(), ledger, TODAY);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - previous fire awaiting completion");
-        verify(workingDayIndicator, never()).workingDaysBetween(any(), any());
+    }
+
+    @Test
+    void decideFireWhenLastFiredAwaitsCompletionOnCadence() {
+        HearingTrackingLedger ledger = ledgerWith(
+            RequestOrderHearingTracking.builder()
+                .hearingId(HEARING_ID)
+                .lastFiredDate(TODAY.minusDays(1))
+                .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+
+        ChaseDecision decision = policy.decide(
+            hearing("COMPLETED", TODAY.minusDays(5)), fl401Case().build(), ledger, TODAY);
+
+        assertThat(decision.shouldFire()).isTrue();
+        assertThat(decision.description()).isEqualTo("cadence met - firing");
     }
 
     @Test
@@ -269,9 +284,9 @@ class HearingChasePolicyTest {
                 .build());
         when(workingDayIndicator.workingDaysBetween(eq(lastCompleted), eq(TODAY))).thenReturn(2);
 
-        policy.decide(hearing("COMPLETED", TODAY.minusDays(20)), fl401Case().build(), ledger, TODAY);
+        ChaseDecision decision = policy.decide(hearing("COMPLETED", TODAY.minusDays(20)), fl401Case().build(), ledger, TODAY);
 
-        verify(workingDayIndicator).workingDaysBetween(eq(lastCompleted), eq(TODAY));
+        assertThat(decision.shouldFire()).isTrue();
     }
 
     @Test

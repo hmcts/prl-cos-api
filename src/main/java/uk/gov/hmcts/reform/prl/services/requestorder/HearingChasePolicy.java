@@ -71,20 +71,32 @@ class HearingChasePolicy {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
+        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
-        if (tracking.map(t -> t.getLastFiredDate() != null).orElse(false)) {
+        if (tracking.map(t -> needsToBeSkippedInFlight(t, workingDayIndicator, cadence, today)).orElse(false)) {
             return ChaseDecision.skipInFlight();
         }
 
         LocalDate anchor = tracking
             .map(RequestOrderHearingTracking::getLastCompletedDate)
             .orElse(hearingEndDate);
-        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
+
         int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(anchor, today);
         if (workingDaysSinceAnchor < cadence) {
             return ChaseDecision.skipBeforeCadence(workingDaysSinceAnchor, anchor, cadence);
         }
         return ChaseDecision.fire();
+    }
+
+    private static boolean needsToBeSkippedInFlight(RequestOrderHearingTracking t,
+                                                    WorkingDayIndicator workingDayIndicator,
+                                                    int cadence, LocalDate today) {
+        if (t.getLastFiredDate() != null) {
+            int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(t.getLastFiredDate(), today);
+            return workingDaysSinceAnchor < cadence;
+        }
+
+        return false;
     }
 
     private List<String> allowedStatuses() {
