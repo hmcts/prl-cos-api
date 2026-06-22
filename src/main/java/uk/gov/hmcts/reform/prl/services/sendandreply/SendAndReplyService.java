@@ -702,7 +702,6 @@ public class SendAndReplyService {
             return full;
         }
         return DynamicList.builder()
-            .value(match)
             .listItems(List.of(match))
             .build();
     }
