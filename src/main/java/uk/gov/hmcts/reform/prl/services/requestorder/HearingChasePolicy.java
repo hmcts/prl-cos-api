@@ -112,7 +112,8 @@ class HearingChasePolicy {
     private static boolean isHearingMappedToOrder(CaseData caseData, CaseHearing hearing) {
         String hearingId = hearingIdOf(hearing);
         Set<String> hearingLabels = HearingLabelUtils.buildHearingsTypeLabels(hearing);
-        log.info("hearingLabels for hearingId={}: {}", hearingId, hearingLabels.stream().collect(Collectors.toList()));
+        log.info("hearingLabels for caseId={}, hearingId={}: {}", caseData.getId(),
+                 hearingId, hearingLabels.stream().collect(Collectors.toList()));
         boolean hearingTypeLookupFailed = hearing.getHearingTypeValue() == null
             || hearing.getHearingTypeValue().isBlank();
         Set<String> hearingDateSuffixes = hearingTypeLookupFailed

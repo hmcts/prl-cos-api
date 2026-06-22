@@ -263,6 +263,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         String lockToHearingId = taskUtils.getTaskAdditionalProperties(clientContext)
             .map(AdditionalProperties::getHearingId)
             .orElse(null);
+
         log.info("simple: hearingId Associated with the task==> {}", lockToHearingId);
         return processSendOrReplyMidEvent(authorisation, caseData, !StringUtils.isBlank(lockToHearingId), lockToHearingId);
     }
@@ -274,7 +275,6 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                          required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("In task midevent");
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         // WA-task chase flow: include past hearings so the user can message about a
@@ -295,6 +295,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                             @RequestBody CallbackRequest callbackRequest,
                                                                             @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
                                                                                 required = false) String clientContext) {
+        //Called from RequestOrderTask OR NextSteps dropdpown
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
 
@@ -397,7 +398,6 @@ public class SendAndReplyController extends AbstractCallbackController {
     private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData,
                                                         boolean includePastHearings,
                                                         String lockToHearingId) {
-        log.info("processing Mid Event");
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
