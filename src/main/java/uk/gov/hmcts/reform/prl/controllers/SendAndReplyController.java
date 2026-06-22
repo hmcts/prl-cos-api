@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +36,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,6 @@ import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
 import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.getOpenMessages;
-import static uk.gov.hmcts.reform.prl.utils.ClientContextUtils.extractHearingIdFromClientContext;
 
 
 @Slf4j
@@ -261,7 +260,9 @@ public class SendAndReplyController extends AbstractCallbackController {
         // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
         // exclusively for the WA chase flow). No task context, so no hearing lock.
         log.info("In simple midevent");
-        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        String lockToHearingId = taskUtils.getTaskAdditionalProperties(clientContext)
+            .map(AdditionalProperties::getHearingId)
+            .orElse(null);
         log.info("simple: hearingId Associated with the task==> {}", lockToHearingId);
         return processSendOrReplyMidEvent(authorisation, caseData, !StringUtils.isBlank(lockToHearingId), lockToHearingId);
     }
@@ -280,7 +281,10 @@ public class SendAndReplyController extends AbstractCallbackController {
         // hearing that has already occurred. If the task's additionalProperties.hearingId
         // is in the client-context header, lock the dropdown to that hearing
         // (FPVTL-2408/2409).
-        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
+        String lockToHearingId = taskUtils.getTaskAdditionalProperties(clientContext)
+            .map(AdditionalProperties::getHearingId)
+            .orElse(null);
+
         log.info("task: hearingId Associated with the task==> {}", lockToHearingId);
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
@@ -301,10 +305,16 @@ public class SendAndReplyController extends AbstractCallbackController {
         Optional<String> chasedHearingId = taskAdditionalProperties
             .map(AdditionalProperties::getHearingId);
 
-        ResponseEntity.BodyBuilder responseBuilder =  ResponseEntity.status(HttpStatus.OK);
+        ResponseEntity.BodyBuilder responseBuilder =  ResponseEntity.ok();
 
         if (chasedHearingId.isPresent()) {
             log.info("context hearing id {}", chasedHearingId);
+            log.info("selected hearing id {}",ofNullable(caseData.getSendOrReplyMessage())
+                .map(SendOrReplyMessage::getSendMessageObject)
+                .map(Message::getFutureHearingsList)
+                .map(DynamicList::getValue)
+                .map(DynamicListElement::getCode));
+
             String encodedClientContext = taskUtils.setTaskCompletion(
                 clientContext,
                 caseData,
@@ -317,18 +327,27 @@ public class SendAndReplyController extends AbstractCallbackController {
                         .filter(hearingCode -> hearingCode.contains(chasedHearingId.get()))
                         .isPresent()
             );
-            responseBuilder = ofNullable(encodedClientContext)
-                .map(value -> ResponseEntity.ok()
-                    .header(CLIENT_CONTEXT_HEADER_PARAMETER, value))
-                .orElseGet(ResponseEntity::ok);
+            ofNullable(encodedClientContext)
+                .ifPresent(value -> {
+                    log.info("Updated context {}", new String(Base64.getDecoder().decode(value)));
+                    responseBuilder.header(CLIENT_CONTEXT_HEADER_PARAMETER, value);
+                });
         }
-
-        return responseBuilder.body(sendAndReplyCommonService.processAboutToSubmit(
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = responseBuilder.body(sendAndReplyCommonService.processAboutToSubmit(
             authorisation,
             caseData,
             caseDataMap,
-            chasedHearingId.orElse(null)
-        ));
+            chasedHearingId.orElse(null)));
+        response.getHeaders().forEach(
+            (name, values) -> {
+                if (CLIENT_CONTEXT_HEADER_PARAMETER.equals(name)) {
+                    log.info("decoded {}={}", name,
+                             List.of(new String(Base64.getDecoder().decode(values.getFirst()))));
+                }
+                log.info("{}={}", name, values);
+            });
+
+        return response;
     }
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit-task")
