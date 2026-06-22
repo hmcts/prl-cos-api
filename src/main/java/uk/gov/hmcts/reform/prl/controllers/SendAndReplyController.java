@@ -368,8 +368,8 @@ public class SendAndReplyController extends AbstractCallbackController {
                   @RequestBody CallbackRequest callbackRequest,
                   @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
         log.info("Not Triggered By Task==>");
-        Optional.ofNullable(clientContext).ifPresent( value ->
-            log.info("Submitted client context {}", new String(Base64.getDecoder().decode(value))));
+        Optional.ofNullable(clientContext)
+            .ifPresent( value -> log.info("Submitted client context {}", new String(Base64.getDecoder().decode(value))));
 
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
