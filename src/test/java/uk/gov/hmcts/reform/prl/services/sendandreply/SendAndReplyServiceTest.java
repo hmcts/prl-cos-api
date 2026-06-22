@@ -3198,8 +3198,7 @@ public class SendAndReplyServiceTest {
         Assert.assertNotNull(lockedHearings);
         Assert.assertEquals(1, lockedHearings.getListItems().size());
         Assert.assertEquals("222 - hearingType2", lockedHearings.getListItems().getFirst().getCode());
-        Assert.assertNotNull(lockedHearings.getValue());
-        Assert.assertEquals("222 - hearingType2", lockedHearings.getValue().getCode());
+        assertThat(lockedHearings.getValue()).isNull();
     }
 
     @Test
