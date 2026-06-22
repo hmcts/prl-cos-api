@@ -321,7 +321,7 @@ class RequestOrderTaskServiceTest {
                     hearing("COMPLETED", "20", TODAY.minusDays(2)),
                     hearing("COMPLETED", "30", TODAY.minusDays(2))))
                 .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(0).thenReturn(2).thenReturn(2);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
         when(allTabService
                  .getStartUpdateForSpecificEvent(

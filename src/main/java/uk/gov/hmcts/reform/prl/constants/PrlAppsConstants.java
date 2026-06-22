@@ -1095,7 +1095,5 @@ public class PrlAppsConstants {
     public static final String SECTION_47_LA = "section47La";
     public static final String CIR_EXTENSION_REQUEST_LA = "cirExtensionRequestLa";
     public static final String CIR_TRANSFER_REQUEST_LA = "cirTransferRequestLa";
-
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
-    public static final String TASK_TRIGGERED_BY = "RequestOrder";
 }
