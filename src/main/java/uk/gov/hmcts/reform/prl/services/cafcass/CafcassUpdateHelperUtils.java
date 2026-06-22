@@ -76,7 +76,7 @@ final class CafcassUpdateHelperUtils {
                                                  .build())
                                       .build());
             }
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | IllegalArgumentException e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
         }
     }
@@ -136,6 +136,7 @@ final class CafcassUpdateHelperUtils {
             .respondentCc8Documents(null)
             .respondentDc8Documents(null)
             .respondentEc8Documents(null)
+            .otherPartyC8Documents(null)
             .c8FormDocumentsUploaded(null)
             .bundleInformation(null)
             .otherDocumentsUploaded(null)
@@ -157,7 +158,7 @@ final class CafcassUpdateHelperUtils {
             return otherDocsList.stream().anyMatch(el -> {
                 try {
                     return el.getValue().getDocumentOther().equals(buildFromCaseDocument(caseDocument));
-                } catch (MalformedURLException e) {
+                } catch (MalformedURLException | IllegalArgumentException e) {
                     log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
                 }
                 return false;

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.ApplicantDetails;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
@@ -42,11 +43,11 @@ import java.util.function.Consumer;
 import static uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum.applicantApplication;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.addInOtherDocuments;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.buildCaseDataWithProcessedDocumentsCleared;
-import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.filterCancelledHearingsBeforeListing;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isCafcassCymruRegion;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isDocumentPresent;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.parseQuarantineLegalDocs;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.removeRedactedDocuments;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.shouldExcludeDocument;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.updateCaseWithHearingData;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
@@ -93,6 +94,67 @@ public class CafcassDateTimeUpdateHelper {
         cafCassCaseDetail = removeUnnecessaryFieldsFromResponse(cafCassCaseDetail);
         removeRedactedDocumentsFromResponse(cafCassCaseDetail);
         return cafCassCaseDetail;
+    }
+
+    public CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
+        CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
+            .cases(new ArrayList<>())
+            .build();
+        Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
+
+        cafCassResponse.getCases().forEach(caseDetails -> {
+            CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
+            if (caseManagementLocation != null) {
+                if (isCafcassCymruRegion(caseManagementLocation.getRegionId())) {
+                    addCaseRegionMapping(
+                        caseIdWithRegionIdMap,
+                        caseDetails,
+                        caseManagementLocation.getRegionId(),
+                        caseManagementLocation.getBaseLocationId()
+                    );
+                    filteredCafcassResponse.getCases().add(caseDetails);
+                } else if (isCafcassCymruRegion(caseManagementLocation.getRegion())) {
+                    addCaseRegionMapping(
+                        caseIdWithRegionIdMap,
+                        caseDetails,
+                        caseManagementLocation.getRegion(),
+                        caseManagementLocation.getBaseLocation()
+                    );
+                    caseDetails.getCaseData().setCafcassUploadedDocs(null);
+                    filteredCafcassResponse.getCases().add(caseDetails);
+                }
+            }
+        });
+
+        List<Hearings> listOfHearingDetails = hearingService.getHearingsForAllCases(
+            authorisation,
+            caseIdWithRegionIdMap
+        );
+        filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+
+        return filteredCafcassResponse;
+    }
+
+    public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
+        CafcassUpdateHelperUtils.filterCancelledHearingsBeforeListing(listOfHearingDetails);
+    }
+
+    public void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
+        cafCassResponse.getCases().forEach(this::addSpecificDocumentsFromCaseFileViewBasedOnCategories);
+    }
+
+    public CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(this::removeUnnecessaryFieldsFromResponse);
+        return filteredCafcassData;
+    }
+
+    public void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(this::removeRedactedDocumentsFromResponse);
+    }
+
+    public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
+        return shouldExcludeDocument(excludedDocumentList, documentFilename);
     }
 
     private CafCassCaseDetail convertToCafcassCaseDetail(CaseDetails caseData) {
@@ -183,6 +245,13 @@ public class CafcassDateTimeUpdateHelper {
                 updateCaseWithHearingData(cafCassCaseDetail, filteredHearing);
             }
         }
+    }
+
+    private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
+        filteredCafcassResponse.getCases().forEach(cafCassCaseDetail -> updateHearingDataCafcass(
+            cafCassCaseDetail,
+            listOfHearingDetails
+        ));
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassCaseDetail cafCassCaseDetail) {
@@ -356,7 +425,8 @@ public class CafcassDateTimeUpdateHelper {
             caseData.getRespondentBc8Documents(),
             caseData.getRespondentCc8Documents(),
             caseData.getRespondentDc8Documents(),
-            caseData.getRespondentEc8Documents()
+            caseData.getRespondentEc8Documents(),
+            caseData.getOtherPartyC8Documents()
         ).forEach(responseDocuments -> populateRespondentC8Documents(responseDocuments, otherDocsList));
         addCaseDocuments(CONFIDENTIAL, caseData.getC8FormDocumentsUploaded(), otherDocsList);
     }

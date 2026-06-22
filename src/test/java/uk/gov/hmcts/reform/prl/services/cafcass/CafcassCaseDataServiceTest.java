@@ -112,6 +112,8 @@ class CafcassCaseDataServiceTest {
     @InjectMocks
     private CafcassCaseDataService cafcassCaseDataService;
 
+    private CafcassDateTimeUpdateHelper cafcassDateTimeUpdateHelper;
+
     @Mock
     SystemUserService systemUserService;
 
@@ -133,6 +135,17 @@ class CafcassCaseDataServiceTest {
     @BeforeEach
     void setUp() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        cafcassDateTimeUpdateHelper = new CafcassDateTimeUpdateHelper(
+            cafCassFilter,
+            hearingService,
+            systemUserService,
+            objMapper
+        );
+        ReflectionTestUtils.setField(
+            cafcassCaseDataService,
+            "cafcassDateTimeUpdateHelper",
+            cafcassDateTimeUpdateHelper
+        );
     }
 
     @Nested
@@ -361,10 +374,13 @@ class CafcassCaseDataServiceTest {
         List<String> excludedDocumentCategoryList = new ArrayList<>();
         excludedDocumentCategoryList.add("draftOrders");
         ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
+        ReflectionTestUtils.setField(cafcassDateTimeUpdateHelper, "excludedDocumentCategoryList", excludedDocumentCategoryList);
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
         ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(cafcassDateTimeUpdateHelper, "excludedDocumentList", excludedDocumentList);
         ReflectionTestUtils.setField(cafcassCaseDataService, "objMapper", objectMapper);
+        ReflectionTestUtils.setField(cafcassDateTimeUpdateHelper, "objMapper", objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
