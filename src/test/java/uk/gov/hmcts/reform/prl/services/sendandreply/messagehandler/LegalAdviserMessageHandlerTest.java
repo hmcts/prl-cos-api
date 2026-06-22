@@ -12,17 +12,13 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
-import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.AssignRoleRequest;
-import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.LegalAdviserRoleAllocator;
 
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum.LEGAL_ADVISER;
@@ -37,7 +33,7 @@ class LegalAdviserMessageHandlerTest {
     @ParameterizedTest
     @MethodSource
     void testCanHandle(MessageRequest messageRequest, boolean expectedCanHandle) {
-        LegalAdviserMessageHandler handler = new LegalAdviserMessageHandler(null, null);
+        LegalAdviserMessageHandler handler = new LegalAdviserMessageHandler(null);
         assertThat(handler.canHandle(messageRequest)).isEqualTo(expectedCanHandle);
     }
 
@@ -73,9 +69,8 @@ class LegalAdviserMessageHandlerTest {
     @ParameterizedTest
     @EnumSource(value = SendOrReply.class)
     void testHandle(SendOrReply sendOrReply) {
-        LegalAdviserRoleAllocator roleAllocator = mock(LegalAdviserRoleAllocator.class);
         LegalAdviserDynamicListElementBiConverter converter = new LegalAdviserDynamicListElementBiConverter();
-        LegalAdviserMessageHandler handler = new LegalAdviserMessageHandler(roleAllocator, converter);
+        LegalAdviserMessageHandler handler = new LegalAdviserMessageHandler(converter);
 
         MessageRequest messageRequest = messageRequest(sendOrReply, LEGAL_ADVISER, true, true);
         handler.handle(messageRequest);
@@ -83,7 +78,7 @@ class LegalAdviserMessageHandlerTest {
         Message message = messageRequest.getMessage();
         assertThat(message.getLegalAdviserName()).isEqualTo("Legal Advisor Name");
         assertThat(message.getLegalAdviserEmail()).isEqualTo("legaladviser@justice.gov.uk");
-        verify(roleAllocator).handleRequest(any(AssignRoleRequest.class));
+        assertThat(messageRequest.getCaseDataMap()).containsEntry(TASK_ASSIGNEE_IDAM_ID, SELECTED_LEGAL_ADVISER_IDAM_ID);
     }
 
     private static MessageRequest messageRequest(SendOrReply sendOrReply, InternalMessageWhoToSendToEnum whoToSendTo,
