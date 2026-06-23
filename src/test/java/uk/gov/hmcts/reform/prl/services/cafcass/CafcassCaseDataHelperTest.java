@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CafcassDateTimeUpdateHelperTest {
+class CafcassCaseDataHelperTest {
 
     @Mock
     private HearingService hearingService;
@@ -40,11 +40,11 @@ class CafcassDateTimeUpdateHelperTest {
     @Mock
     private SystemUserService systemUserService;
 
-    private CafcassDateTimeUpdateHelper cafcassDateTimeUpdateHelper;
+    private CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @BeforeEach
     void setUp() {
-        cafcassDateTimeUpdateHelper = new CafcassDateTimeUpdateHelper(
+        cafcassCaseDataHelper = new CafcassCaseDataHelper(
             new CafCassFilter(),
             hearingService,
             systemUserService,
@@ -76,7 +76,7 @@ class CafcassDateTimeUpdateHelperTest {
             .data(caseDataBefore)
             .build();
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
     }
 
     @Test
@@ -98,17 +98,18 @@ class CafcassDateTimeUpdateHelperTest {
             .data(caseDataBefore)
             .build();
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
     }
 
     @Test
     void shouldReturnFalseWhenBothCaseDetailsAreNull() {
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(null, null));
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(null, null));
     }
 
     @Test
     void shouldReturnTrueWhenOnlyOneCaseDetailsIsNull() {
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(caseDetailsWithLocation(caseManagementLocation()), null));
+        assertTrue(
+            cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetailsWithLocation(caseManagementLocation()), null));
     }
 
     @Test
@@ -116,7 +117,7 @@ class CafcassDateTimeUpdateHelperTest {
         CaseDetails caseDetails = caseDetails(Map.of("caseTypeOfApplication", "FL401"));
         CaseDetails caseDetailsBefore = caseDetails(Map.of("caseTypeOfApplication", "C100"));
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore));
     }
 
     @Test
@@ -133,7 +134,7 @@ class CafcassDateTimeUpdateHelperTest {
         caseDataBefore.put("caseManagementLocation", unsupportedLocation);
         caseDataBefore.put("caseTypeOfApplication", "C100");
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore)
         ));
@@ -145,7 +146,7 @@ class CafcassDateTimeUpdateHelperTest {
         legacyLocation.put("region", "2");
         legacyLocation.put("baseLocation", "654321");
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetailsWithLocation(legacyLocation),
             caseDetailsWithLocation(legacyLocation)
         ));
@@ -161,7 +162,7 @@ class CafcassDateTimeUpdateHelperTest {
             .thenReturn(List.of(hearingWithListedAndCancelledHearing()))
             .thenReturn(Collections.emptyList());
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetailsWithLocation(caseManagementLocation()),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -173,7 +174,7 @@ class CafcassDateTimeUpdateHelperTest {
             .thenReturn(List.of(hearingWithCancelledBeforeListingOnly()))
             .thenReturn(Collections.emptyList());
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetailsWithLocation(caseManagementLocation()),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -189,7 +190,7 @@ class CafcassDateTimeUpdateHelperTest {
         caseData.put("caseManagementLocation", caseManagementLocation());
         caseData.put("otherDocumentsUploaded", List.of(caseDocument(documentUrl, documentName)));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -204,7 +205,7 @@ class CafcassDateTimeUpdateHelperTest {
             "documentOther", Map.of("document_id", "00000000-0000-0000-0000-000000000000")
         ))));
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -245,7 +246,7 @@ class CafcassDateTimeUpdateHelperTest {
             Map.of("firstName", "Robin", "lastName", "Brown")
         )));
 
-        assertFalse(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore)
         ));
@@ -261,7 +262,7 @@ class CafcassDateTimeUpdateHelperTest {
             "applicantStatementsDocument", caseDocument(documentUrl, "applicant-statement.pdf")
         ))));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -277,7 +278,7 @@ class CafcassDateTimeUpdateHelperTest {
             "respondentC8DocumentWelsh", caseDocument(documentUrl + "-welsh", "respondent-c8-welsh.pdf")
         ))));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -314,7 +315,7 @@ class CafcassDateTimeUpdateHelperTest {
             "emailNotificationDetails", List.of(element(Map.of("docs", List.of(element(emailedDocument)))))
         ))));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -341,7 +342,7 @@ class CafcassDateTimeUpdateHelperTest {
             )))
         ))));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -360,7 +361,7 @@ class CafcassDateTimeUpdateHelperTest {
             caseDocument("http://dm-store/documents/40404040-4040-4040-4040-404040404040", "statement-recipient.pdf")
         ))));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));
@@ -439,7 +440,7 @@ class CafcassDateTimeUpdateHelperTest {
             "respondent-e-c8.pdf"
         )));
 
-        assertTrue(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetailsWithLocation(caseManagementLocation())
         ));

@@ -54,7 +54,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CafcassDateTimeUpdateHelper {
+public class CafcassCaseDataHelper {
 
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
@@ -138,19 +138,6 @@ public class CafcassDateTimeUpdateHelper {
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
         CafcassUpdateHelperUtils.filterCancelledHearingsBeforeListing(listOfHearingDetails);
-    }
-
-    public void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
-        cafCassResponse.getCases().forEach(this::addSpecificDocumentsFromCaseFileViewBasedOnCategories);
-    }
-
-    public CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
-        filteredCafcassData.getCases().forEach(this::removeUnnecessaryFieldsFromResponse);
-        return filteredCafcassData;
-    }
-
-    public void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
-        filteredCafcassData.getCases().forEach(this::removeRedactedDocumentsFromResponse);
     }
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
@@ -252,6 +239,10 @@ public class CafcassDateTimeUpdateHelper {
             cafCassCaseDetail,
             listOfHearingDetails
         ));
+    }
+
+    public void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
+        cafCassResponse.getCases().forEach(this::addSpecificDocumentsFromCaseFileViewBasedOnCategories);
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassCaseDetail cafCassCaseDetail) {
@@ -472,6 +463,11 @@ public class CafcassDateTimeUpdateHelper {
         }
     }
 
+    public CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(this::removeUnnecessaryFieldsFromResponse);
+        return filteredCafcassData;
+    }
+
     private CafCassCaseDetail removeUnnecessaryFieldsFromResponse(CafCassCaseDetail cafCassCaseDetail) {
         CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
         if (caseData.getOrderCollection() != null) {
@@ -495,6 +491,10 @@ public class CafcassDateTimeUpdateHelper {
             .build();
         cafCassCaseDetail.setCaseData(caseData);
         return cafCassCaseDetail;
+    }
+
+    public void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(this::removeRedactedDocumentsFromResponse);
     }
 
     private void removeRedactedDocumentsFromResponse(CafCassCaseDetail cafCassCaseDetail) {

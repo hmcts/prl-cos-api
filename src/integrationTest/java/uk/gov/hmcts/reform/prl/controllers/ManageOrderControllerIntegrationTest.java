@@ -41,7 +41,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
-import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeUpdateHelper;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataHelper;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -124,7 +124,7 @@ public class ManageOrderControllerIntegrationTest {
     FeatureToggleService featureToggleService;
 
     @MockBean
-    CafcassDateTimeUpdateHelper cafcassDateTimeUpdateHelper;
+    CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -255,7 +255,7 @@ public class ManageOrderControllerIntegrationTest {
     public void testManageOrdersAboutToSubmitUpdatesCafcassDateTimeWhenCafcassDataChanged() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
-        when(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
 
         mockMvc.perform(
@@ -274,7 +274,7 @@ public class ManageOrderControllerIntegrationTest {
     public void testManageOrdersAboutToSubmitDoesNotUpdateCafcassDateTimeWhenCafcassDataUnchanged() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
-        when(cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(false);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(false);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
 
         mockMvc.perform(

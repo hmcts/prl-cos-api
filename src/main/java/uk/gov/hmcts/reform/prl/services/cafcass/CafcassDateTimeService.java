@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_DATE_TI
 public class CafcassDateTimeService {
 
     private final FeatureToggleService featureToggleService;
-    private final CafcassDateTimeUpdateHelper cafcassDateTimeUpdateHelper;
+    private final CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @Value("#{'${cafcaas.caseState}'.split(',')}")
     private List<String> caseStateList;
@@ -49,7 +49,7 @@ public class CafcassDateTimeService {
         if (featureToggleService.isCafcassDateTimeFeatureEnabled()
             && !excludedEventList.contains(eventId)
             && caseStateList.contains(caseDetails.getState())
-            && cafcassDateTimeUpdateHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore)) {
+            && cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetailsBefore)) {
             caseDataMap.put(CAFCASS_DATE_TIME, ZonedDateTime.now(ZoneId.of("UTC")).toLocalDateTime());
         }
 

@@ -41,8 +41,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassCaseDataService {
-    public static final String CONFIDENTIAL = "confidential";
-    public static final String ANY_OTHER_DOC = "anyOtherDoc";
+
     @Value("${cafcaas.search-case-type-id}")
     private String cafCassSearchCaseTypeId;
 
@@ -79,7 +78,7 @@ public class CafcassCaseDataService {
 
     private final FeatureToggleService featureToggleService;
 
-    private final CafcassDateTimeUpdateHelper cafcassDateTimeUpdateHelper;
+    private final CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @Value("#{'${cafcaas.excludedDocumentCategories}'.split(',')}")
     private List<String> excludedDocumentCategoryList;
@@ -158,19 +157,19 @@ public class CafcassCaseDataService {
     }
 
     private CafCassResponse removeUnnecessaryFieldsFromResponse(CafCassResponse filteredCafcassData) {
-        return cafcassDateTimeUpdateHelper.removeUnnecessaryFieldsFromResponse(filteredCafcassData);
+        return cafcassCaseDataHelper.removeUnnecessaryFieldsFromResponse(filteredCafcassData);
     }
 
     private void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
-        cafcassDateTimeUpdateHelper.removeRedactedDocumentsFromResponse(filteredCafcassData);
+        cafcassCaseDataHelper.removeRedactedDocumentsFromResponse(filteredCafcassData);
     }
 
     private void addSpecificDocumentsFromCaseFileViewBasedOnCategories(CafCassResponse cafCassResponse) {
-        cafcassDateTimeUpdateHelper.addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
+        cafcassCaseDataHelper.addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassResponse);
     }
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
-        return cafcassDateTimeUpdateHelper.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename);
+        return cafcassCaseDataHelper.checkIfDocumentsNeedToExclude(excludedDocumentList, documentFilename);
     }
 
     private QueryParam buildCcdQueryParam(String startDate, String endDate) {
@@ -221,11 +220,11 @@ public class CafcassCaseDataService {
     }
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
-        return cafcassDateTimeUpdateHelper.getHearingDetailsForAllCases(authorisation, cafCassResponse);
+        return cafcassCaseDataHelper.getHearingDetailsForAllCases(authorisation, cafCassResponse);
     }
 
     public void filterCancelledHearingsBeforeListing(List<Hearings> listOfHearingDetails) {
-        cafcassDateTimeUpdateHelper.filterCancelledHearingsBeforeListing(listOfHearingDetails);
+        cafcassCaseDataHelper.filterCancelledHearingsBeforeListing(listOfHearingDetails);
     }
 
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
