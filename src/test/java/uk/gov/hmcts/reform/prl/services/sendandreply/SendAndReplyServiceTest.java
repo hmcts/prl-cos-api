@@ -143,6 +143,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -1173,7 +1174,8 @@ public class SendAndReplyServiceTest {
                                                                     data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1244,7 +1246,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals("some message while sending",message.getMessageContent());
         assertEquals(3, message.getInternalMessageAttachDocs().size());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1308,7 +1310,7 @@ public class SendAndReplyServiceTest {
                                                                     data.getSendOrReplyMessage().getSendMessageObject(), auth);
 
         assertEquals("some message while sending",message.getMessageContent());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1385,7 +1387,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals("some message while sending",message.getMessageContent());
         assertEquals(4, message.getInternalMessageAttachDocs().size());
-        assertEquals(internalMessageDoc, message.getInternalMessageAttachDocs().get(0).getValue());
+        assertInternalMessageAttachDocs(message);
     }
 
     @Test
@@ -1589,6 +1591,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData3, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
+        assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -1638,6 +1641,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData4, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
+        assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -1692,6 +1696,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData5, auth, caseDataMap);
 
         assertEquals(2, updatedMessageList.size());
+        assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -2013,6 +2018,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals(1, msgList.get(0).getValue().getReplyHistory().size());
         verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
+        assertEquals("testIdam", caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -3125,11 +3131,13 @@ public class SendAndReplyServiceTest {
 
         CaseData updatedCaseData = sendAndReplyService.populateMessageReplyFields(data, auth);
 
-        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime).document(internalMessageDoc).build();
+        SendReplyTempDoc expectedSendReplyTempDocument = SendReplyTempDoc.builder().attachedTime(dateTime)
+            .document(internalMessageDoc).build();
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(uk.gov.hmcts.reform.prl.models.documents.Document.withoutCategory(expectedSendReplyTempDocument.getDocument()),
+                     updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue().getDocument());
         assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
@@ -3185,7 +3193,9 @@ public class SendAndReplyServiceTest {
 
         assertEquals("testRecipient1@email.com", updatedCaseData.getSendOrReplyMessage().getMessages()
             .get(0).getValue().getReplyHistory().get(0).getValue().getMessageTo());
-        assertEquals(expectedSendReplyTempDocument, updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue());
+        assertEquals(
+            uk.gov.hmcts.reform.prl.models.documents.Document.withoutCategory(expectedSendReplyTempDocument.getDocument()),
+            updatedCaseData.getSendOrReplyMessage().getInternalMessageAttachDocsList().get(0).getValue().getDocument());
         assertEquals(legalAdviserList, updatedCaseData.getSendOrReplyMessage().getReplyMessageObject().getLegalAdviserList());
     }
 
@@ -3729,6 +3739,16 @@ public class SendAndReplyServiceTest {
 
         // then
         assertNull(caseData.getSendOrReplyMessage().getMessageReplyDynamicList());
+    }
+
+    private void assertInternalMessageAttachDocs(Message message) {
+        uk.gov.hmcts.reform.prl.models.documents.Document actualDocument = message.getInternalMessageAttachDocs().get(0).getValue();
+        assertEquals(internalMessageDoc.getDocumentUrl(), actualDocument.getDocumentUrl());
+        assertEquals(internalMessageDoc.getDocumentBinaryUrl(), actualDocument.getDocumentBinaryUrl());
+        assertEquals(internalMessageDoc.getDocumentFileName(), actualDocument.getDocumentFileName());
+        assertEquals(internalMessageDoc.getDocumentHash(), actualDocument.getDocumentHash());
+        assertEquals(internalMessageDoc.getDocumentCreatedOn(), actualDocument.getDocumentCreatedOn());
+        assertNull(actualDocument.getCategoryId());
     }
 
     public static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {

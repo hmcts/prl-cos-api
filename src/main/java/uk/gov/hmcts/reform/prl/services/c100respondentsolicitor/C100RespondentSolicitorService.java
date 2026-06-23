@@ -7,12 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.AttendingToCourtEnum;
@@ -57,12 +63,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.refuge.RefugeConfidentialDocu
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityC8RefugeService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
@@ -74,6 +83,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -98,13 +108,17 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISABILITY_PRESENT_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERMEDIARY_REQUIRED_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERPRETER_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
@@ -117,9 +131,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_W
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_ARRANGEMENTS_REQUIRED_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_CASE_NOTE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -135,6 +151,7 @@ import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.no
 import static uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum.travellinghelp;
 import static uk.gov.hmcts.reform.prl.enums.citizen.SafetyArrangementsEnum.noSafetyrequirements;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.services.citizen.CitizenCaseUpdateService.LANG_SUPPORT_NEED_SUBJECT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -169,6 +186,8 @@ public class C100RespondentSolicitorService {
     private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
+    private final AddCaseNoteService addCaseNoteService;
+    private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
     private final ConfidentialityC8RefugeService confidentialityC8RefugeService;
 
@@ -714,6 +733,7 @@ public class C100RespondentSolicitorService {
                                                  Response buildResponseForRespondent,
                                                  Element<PartyDetails> respondent) {
         CitizenDetails citizenDetails = caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails();
+        YesNoIDontKnowV2 liveInRefuge = isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null;
         buildResponseForRespondent = buildResponseForRespondent
             .toBuilder().citizenDetails(
                 buildResponseForRespondent.getCitizenDetails()
@@ -724,7 +744,7 @@ public class C100RespondentSolicitorService {
                     .previousName(isNotEmpty(citizenDetails) ? citizenDetails.getPreviousName() : null)
                     .placeOfBirth(isNotEmpty(citizenDetails) ? citizenDetails.getPlaceOfBirth() : null)
                     .liveInRefuge(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
-                    .refugeConfidentialityC8Form(YesOrNo.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)
+                    .refugeConfidentialityC8Form(YesNoIDontKnowV2.Yes.equals(liveInRefuge)
                                                      ? citizenDetails.getRefugeConfidentialityC8Form() : null)
                     .address(isNotEmpty(citizenDetails) ? citizenDetails.getAddress() : null)
                     .addressHistory(isNotEmpty(citizenDetails) ? citizenDetails.getAddressHistory() : null)
@@ -732,7 +752,7 @@ public class C100RespondentSolicitorService {
                     .build())
             .build();
 
-        if (YesOrNo.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)) {
+        if (YesNoIDontKnowV2.Yes.equals(isNotEmpty(citizenDetails) ? citizenDetails.getLiveInRefuge() : null)) {
             buildResponseForRespondent = buildResponseForRespondent
                 .toBuilder().keepDetailsPrivate(buildResponseForRespondent.getKeepDetailsPrivate().toBuilder()
                                                     .confidentiality(Yes)
@@ -750,8 +770,9 @@ public class C100RespondentSolicitorService {
 
     private Response buildKeepYourDetailsPrivateResponse(CaseData caseData, Response buildResponseForRespondent,
                                                          Element<PartyDetails> respondent) {
-        if (null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
-            && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
+        RespondentSolicitorData  respondentSolicitorData = caseData.getRespondentSolicitorData();
+        if (null != respondentSolicitorData.getResSolConfirmEditContactDetails()
+            && YesNoIDontKnowV2.Yes.equals(respondentSolicitorData.getResSolConfirmEditContactDetails().getLiveInRefuge())) {
             buildResponseForRespondent = buildKeepDetailsPrivateForRefuge(caseData, buildResponseForRespondent, respondent);
         } else {
             buildResponseForRespondent = buildKeepDetailsPrivateForNonRefuge(caseData, buildResponseForRespondent, respondent);
@@ -807,7 +828,7 @@ public class C100RespondentSolicitorService {
     private static void setRespondentConfidentiality(CaseData caseData,
                                                                       Element<PartyDetails> respondent) {
         if (isNotEmpty(caseData.getRespondentSolicitorData()) && null != caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails()
-            && Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
+            && YesNoIDontKnowV2.Yes.equals(caseData.getRespondentSolicitorData().getResSolConfirmEditContactDetails().getLiveInRefuge())) {
             respondent.getValue().setIsAddressConfidential(Yes);
             respondent.getValue().setIsEmailAddressConfidential(Yes);
             respondent.getValue().setIsPhoneNumberConfidential(Yes);
@@ -1045,7 +1066,7 @@ public class C100RespondentSolicitorService {
                 authorisation,
                 callbackRequest,
                 caseData,
-                representedRespondent,
+                element(representedRespondent.getId(), amended),
                 quarantineLegalDocList
             );
 
@@ -1069,7 +1090,7 @@ public class C100RespondentSolicitorService {
 
     private CaseData updateRefugeDocumentList(CaseData caseData, PartyDetails respondent) {
 
-        if (YesOrNo.Yes.equals(respondent.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(respondent.getLiveInRefuge())
             && respondent.getRefugeConfidentialityC8Form() != null) {
             log.info("Respondent lives in refuge");
             List<Element<RefugeConfidentialDocuments>> refugeDocuments = caseData.getRefugeDocuments();
@@ -1102,9 +1123,9 @@ public class C100RespondentSolicitorService {
     private PartyDetails updatedRefugeData(PartyDetails respondent) {
         if (null != respondent.getResponse()
             && null != respondent.getResponse().getCitizenDetails()
-            && YesOrNo.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
+            && YesNoIDontKnowV2.Yes.equals(respondent.getResponse().getCitizenDetails().getLiveInRefuge())) {
             respondent = respondent.toBuilder()
-                .liveInRefuge(Yes)
+                .liveInRefuge(YesNoIDontKnowV2.Yes)
                 .refugeConfidentialityC8Form(respondent
                                                  .getResponse()
                                                  .getCitizenDetails()
@@ -1526,7 +1547,8 @@ public class C100RespondentSolicitorService {
         }
         dataMap.put(
                 "solicitorRepresented",
-                null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
+                (null != solicitorRepresentedRespondent.getValue().getUser()
+                    && null != solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented())
                         ? solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented() : No
         );
         if (null != response.getSupportYouNeed()) {
@@ -1658,7 +1680,8 @@ public class C100RespondentSolicitorService {
                 .contains(ConfidentialityListEnum.phoneNumber))) {
             dataMap.put(PHONE, THIS_INFORMATION_IS_CONFIDENTIAL);
             isConfidentialDataPresent = true;
-        } else if (null != response.getCitizenDetails().getContact()
+        } else if (null != response.getCitizenDetails()
+                && null != response.getCitizenDetails().getContact()
                 && StringUtils.isNoneEmpty(response.getCitizenDetails().getContact().getPhoneNumber())) {
             dataMap.put(PHONE, response.getCitizenDetails().getContact().getPhoneNumber());
         } else {
@@ -1687,7 +1710,7 @@ public class C100RespondentSolicitorService {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
             }
         } else {
-            if (null != response.getCitizenDetails().getAddress()) {
+            if (null != response.getCitizenDetails() && null != response.getCitizenDetails().getAddress()) {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(response.getCitizenDetails().getAddress()));
             } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
                 dataMap.put(ADDRESS, CaseUtils.formatAddress(solicitorRepresentedRespondent.getValue().getAddress()));
@@ -2292,5 +2315,135 @@ public class C100RespondentSolicitorService {
                 .solicitorRepresentedPartyName(partyName)
                 .solicitorRepresentedPartyId(partyId)
                 .build();
+    }
+
+    public void addLanguageSupportCaseNotes(
+        String authorisation,
+        CaseData caseData) {
+        String caseId = String.valueOf(caseData.getId());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent
+            = allTabService.getStartUpdateForSpecificUserEvent(
+            caseId,
+            CaseEvent.SOLICITOR_LANG_SUPPORT_NOTES.getValue(),
+            authorisation
+        );
+
+        String languageSupportCaseNotes = generateLanguageSupportCaseNote(caseData, startAllTabsUpdateDataContent.userDetails());
+
+        if (StringUtils.isEmpty(languageSupportCaseNotes)) {
+            log.info("No language support case note needed for case: {}", caseId);
+            return;
+        }
+
+        CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+            LANG_SUPPORT_NEED_SUBJECT,
+            languageSupportCaseNotes,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+        Map<String, Object> caseNotesMap = new HashMap<>();
+
+        List<Element<CaseNoteDetails>> caseNoteDetails = addCaseNoteService.getCaseNoteDetails(
+            caseData,
+            currentCaseNoteDetails
+        );
+
+        caseNotesMap.put(
+            CASE_NOTES,
+            caseNoteDetails
+        );
+
+        caseNoteDetails.stream()
+            .filter(caseNoteDetailsElement -> currentCaseNoteDetails.equals(caseNoteDetailsElement.getValue()))
+            .findFirst()
+            .map(Element::getId)
+            .ifPresent(id ->
+                           caseNotesMap.put(
+                               WA_CASE_NOTE_ID,
+                               id
+                           ));
+
+        allTabService.submitUpdateForSpecificUserEvent(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseNotesMap,
+            startAllTabsUpdateDataContent.userDetails()
+        );
+        ResponseEntity.status(HttpStatus.OK).body("Language support needs published in case notes");
+    }
+
+    private String generateLanguageSupportCaseNote(CaseData caseData, UserDetails userDetails) {
+        return caseData.getRespondents().stream()
+            .filter(r -> Objects.equals(r.getValue().getSolicitorEmail(), userDetails.getEmail()))
+            .map(r -> generateAttendToCourtNote(r.getValue().getResponse().getAttendToCourt()))
+            .collect(Collectors.joining("\n\n"));
+    }
+
+    private String generateAttendToCourtNote(AttendToCourt attendToCourt) {
+        List<String> sections = new ArrayList<>();
+
+        if (attendToCourt.getIsRespondentNeededInterpreter() != null) {
+            sections.add(generateInterpreterSection(attendToCourt));
+        }
+
+        if (attendToCourt.getHaveAnyDisability() != null) {
+            sections.add(generateCaseNoteSection(
+                DISABILITY_PRESENT_TEXT,
+                attendToCourt.getHaveAnyDisability().getDisplayedValue(),
+                attendToCourt.getDisabilityNeeds())
+            );
+        }
+
+        if (attendToCourt.getRespondentSpecialArrangements() != null) {
+            sections.add(generateCaseNoteSection(
+                SPECIAL_ARRANGEMENTS_REQUIRED_TEXT,
+                attendToCourt.getRespondentSpecialArrangements().getDisplayedValue(),
+                attendToCourt.getRespondentSpecialArrangementDetails())
+            );
+        }
+
+        if (attendToCourt.getRespondentIntermediaryNeeds() != null) {
+            sections.add(generateCaseNoteSection(
+                INTERMEDIARY_REQUIRED_TEXT,
+                attendToCourt.getRespondentIntermediaryNeeds().getDisplayedValue(),
+                attendToCourt.getRespondentIntermediaryNeedDetails())
+            );
+        }
+        return String.join("\n\n", sections);
+    }
+
+    private String generateInterpreterSection(AttendToCourt attendToCourt) {
+        StringBuilder interpreterSection = new StringBuilder(generateCaseNoteSection(
+            INTERPRETER_REQUIRED_TEXT,
+            attendToCourt.getIsRespondentNeededInterpreter().getDisplayedValue(),
+            null)
+        );
+
+        if (attendToCourt.getRespondentInterpreterNeeds() != null
+            && !attendToCourt.getRespondentInterpreterNeeds().isEmpty()) {
+            for (Element<RespondentInterpreterNeeds> interpreterNeed : attendToCourt.getRespondentInterpreterNeeds()) {
+                appendIfNotEmpty(interpreterSection, interpreterNeed.getValue().getRelationName());
+                appendIfNotEmpty(interpreterSection, interpreterNeed.getValue().getRequiredLanguage());
+                appendIfNotEmpty(interpreterSection, interpreterNeed.getValue().getRespondentOtherAssistance());
+            }
+        }
+        return interpreterSection.toString();
+    }
+
+    private void appendIfNotEmpty(StringBuilder stringBuilder, String value) {
+        if (!StringUtils.isEmpty(value)) {
+            stringBuilder.append("\n").append(value);
+        }
+    }
+
+    private String generateCaseNoteSection(String heading, String field, String subfield) {
+        String section = heading.concat("\n").concat(field);
+
+        if (!StringUtils.isEmpty(subfield)) {
+            section = section.concat("\n").concat(subfield);
+        }
+        return section;
     }
 }

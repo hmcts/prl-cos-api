@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -54,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -110,6 +112,8 @@ class UpdatePartyDetailsServiceTest {
     ManageOrderService manageOrderService;
     @Mock
     C8ArchiveService c8ArchiveService;
+    @Mock
+    C8Service c8Service;
     @Mock
     CaseNameService caseNameService;
 
@@ -1474,7 +1478,34 @@ class UpdatePartyDetailsServiceTest {
         );
 
         // then
-        assertFalse(bool);
+        assertTrue(bool);
+    }
+
+    @Test
+    void shouldCountAsChangedWhenRefugeToggled() {
+        UUID respondentUuid = UUID.randomUUID();
+        PartyDetails respondent = PartyDetails.builder()
+            .liveInRefuge(YesNoIDontKnowV2.No)
+            .email("test1")
+            .address(Address.builder()
+                         .addressLine1("test1")
+                         .build())
+            .phoneNumber("012345")
+            .build();
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(element(respondentUuid, respondent)))
+            .build();
+
+        PartyDetails respondentAfter = respondent.toBuilder()
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
+            .build();
+
+        assertThat(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
+            caseDataBefore,
+            element(respondentUuid, respondentAfter)
+        )).isTrue();
     }
 
     @Test
@@ -1503,6 +1534,30 @@ class UpdatePartyDetailsServiceTest {
             wrappedRespondent
         );
         assertTrue(bool);
+    }
+
+    @Test
+    void checkIfDetailsChangedRespondentWhenRespondentsDidNotExistBefore() {
+        UUID existingRespondentId = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
+        UUID newRespondentId = UUID.fromString("95edcc74-77c5-4a5b-b369-ff10fb6192e5");
+
+        PartyDetails existingRespondent = PartyDetails.builder()
+            .email("old@test.com")
+            .build();
+
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(element(existingRespondentId, existingRespondent)))
+            .build();
+
+        PartyDetails newRespondent = PartyDetails.builder()
+            .email("new@test.com")
+            .build();
+
+        assertThat(updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
+            caseDataBefore,
+            element(newRespondentId, newRespondent)
+        )).isTrue();
     }
 
     @Test
@@ -2093,7 +2148,7 @@ class UpdatePartyDetailsServiceTest {
         PartyDetails otherParties = PartyDetails.builder().firstName("test")
             .dateOfBirth(LocalDate.of(1976, 7, 7)).isDateOfBirthKnown(YesOrNo.Yes)
             .placeOfBirth("birthPlace").isPlaceOfBirthKnown(YesOrNo.Yes).isCurrentAddressKnown(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes).refugeConfidentialityC8Form(Document.builder().build())
+            .liveInRefuge(YesNoIDontKnowV2.Yes).refugeConfidentialityC8Form(Document.builder().build())
             .isAddressConfidential(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -2103,7 +2158,7 @@ class UpdatePartyDetailsServiceTest {
             .address(Address.builder().addressLine1("test").build()).lastName("test").build();
         Element<PartyDetails> wrappedOtherParties = Element.<PartyDetails>builder().value(otherParties).build();
         PartyDetails otherParties2 = PartyDetails.builder().firstName("test")
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .refugeConfidentialityC8Form(Document.builder().build())
             .address(Address.builder().addressLine1("test").addressLine2("test").build()).lastName("test").build();
         Element<PartyDetails> wrappedOtherParties2 = Element.<PartyDetails>builder().value(otherParties2).build();
@@ -2151,6 +2206,8 @@ class UpdatePartyDetailsServiceTest {
                 RefugeConfidentialDocuments.builder().build())),
             List.of(element(RefugeConfidentialDocuments.builder().build()))
         );
+        // todo check this test
+        when(c8Service.generateOtherPartiesC8s(any(), any(), any())).thenReturn(Map.of());
         when(confidentialityC8RefugeService.processC8RefugeDocumentsOnAmendForC100(
             caseData, caseData, HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS[0])).thenReturn(
             refugeConfidentialDocumentsRecord);
@@ -2160,7 +2217,7 @@ class UpdatePartyDetailsServiceTest {
             Mockito.anyString()
         );
         Map<String, Object> updatedCaseData = updatePartyDetailsService.updateOtherPeopleInTheCaseConfidentialityData(
-            callbackRequest);
+            callbackRequest, "authToken");
         assertNotNull(updatedCaseData);
     }
 
@@ -2170,6 +2227,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentAc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(true).build());
@@ -2190,6 +2248,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentBc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
@@ -2229,6 +2288,7 @@ class UpdatePartyDetailsServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().respondentDc8Documents(new ArrayList<>(List.of(element(
                 ResponseDocuments.builder().dateTimeCreated(LocalDateTime.now()).build())))).build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().build());
@@ -2291,6 +2351,7 @@ class UpdatePartyDetailsServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondentC8Document(RespondentC8Document.builder().build())
+            .state(State.CASE_ISSUED)
             .build();
         when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenEng(true).build());
@@ -2303,7 +2364,7 @@ class UpdatePartyDetailsServiceTest {
                 PartyDetails.builder().firstName("firstName").lastName("lastName").build())
         );
         assertNotNull(updatedCaseData.get("respondentBc8Documents"));
-        assertEquals(1, ((ArrayList) updatedCaseData.get("respondentBc8Documents")).size());
+        assertEquals(1, ((List<?>) updatedCaseData.get("respondentBc8Documents")).size());
     }
 
     @Test
@@ -2321,6 +2382,118 @@ class UpdatePartyDetailsServiceTest {
         );
         assertNotNull(updatedCaseData.get("respondentBc8Documents"));
         assertEquals(Collections.emptyList(), (updatedCaseData.get("respondentBc8Documents")));
+    }
+
+    @Test
+    void testPopulateC8DocumentsWhenRespondentChangesFromConfidentialToNonConfidential() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .respondentC8Document(RespondentC8Document.builder()
+                                     .respondentAc8Documents(List.of(existingResponseDocument()))
+                                     .build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        updatePartyDetailsService.populateC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 0, respondent("Respondent A")
+        );
+
+        assertNotNull(updatedCaseData.get("respondentAc8Documents"));
+        assertTrue(((List<?>) updatedCaseData.get("respondentAc8Documents")).isEmpty());
+        assertEquals(1, ((List<?>) updatedCaseData.get("c8ArchivedDocuments")).size());
+        verify(documentGenService, Mockito.never()).generateSingleDocument(anyString(), any(), anyString(),
+                                                                            Mockito.anyBoolean(), anyMap());
+    }
+
+    @Test
+    void testPopulateC8DocumentsWhenRespondentRemainsConfidentialAndDetailsChange() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .respondentC8Document(RespondentC8Document.builder()
+                                     .respondentAc8Documents(List.of(existingResponseDocument()))
+                                     .build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
+        when(documentGenService.generateSingleDocument(anyString(), any(), anyString(), Mockito.anyBoolean(), anyMap()))
+            .thenReturn(Document.builder().build());
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
+
+        updatePartyDetailsService.populateC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 0, respondent("Respondent A")
+        );
+
+        assertEquals(1, ((List<?>) updatedCaseData.get("respondentAc8Documents")).size());
+        assertEquals(1, ((List<?>) updatedCaseData.get("c8ArchivedDocuments")).size());
+        verify(documentGenService, Mockito.times(1)).generateSingleDocument(anyString(), any(), anyString(),
+                                                                            Mockito.anyBoolean(), anyMap());
+    }
+
+    @Test
+    void testPopulateC8DocumentsWhenRespondentChangesFromNonConfidentialToConfidential() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .respondentC8Document(RespondentC8Document.builder().build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
+        when(documentGenService.generateSingleDocument(anyString(), any(), anyString(), Mockito.anyBoolean(), anyMap()))
+            .thenReturn(Document.builder().build());
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
+
+        updatePartyDetailsService.populateC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 0, respondent("Respondent A")
+        );
+
+        assertEquals(1, ((List<?>) updatedCaseData.get("respondentAc8Documents")).size());
+        assertEquals(0, ((List<?>) updatedCaseData.get("c8ArchivedDocuments")).size());
+        verify(documentGenService, Mockito.times(1)).generateSingleDocument(anyString(), any(), anyString(),
+                                                                            Mockito.anyBoolean(), anyMap());
+    }
+
+    @Test
+    void testPopulateC8DocumentsWhenTwoRespondentsRemainConfidentialAndBothDetailsChange() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .respondentC8Document(RespondentC8Document.builder()
+                                     .respondentAc8Documents(List.of(existingResponseDocument()))
+                                     .respondentBc8Documents(List.of(existingResponseDocument()))
+                                     .build())
+            .build();
+        when(manageOrderService.getLoggedInUserType("authToken")).thenReturn("testUser");
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder().isGenWelsh(false).build());
+        when(documentGenService.generateSingleDocument(anyString(), any(), anyString(), Mockito.anyBoolean(), anyMap()))
+            .thenReturn(Document.builder().build());
+
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
+
+        updatePartyDetailsService.populateC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 0, respondent("Respondent A")
+        );
+        updatePartyDetailsService.populateC8Documents(
+            "authToken", updatedCaseData, caseData, dataMap, true, 1, respondent("Respondent B")
+        );
+
+        assertEquals(1, ((List<?>) updatedCaseData.get("respondentAc8Documents")).size());
+        assertEquals(1, ((List<?>) updatedCaseData.get("respondentBc8Documents")).size());
+        assertEquals(2, ((List<?>) updatedCaseData.get("c8ArchivedDocuments")).size());
+        verify(documentGenService, Mockito.times(2)).generateSingleDocument(anyString(), any(), anyString(),
+                                                                            Mockito.anyBoolean(), anyMap());
     }
 
     @ParameterizedTest
@@ -2694,6 +2867,17 @@ class UpdatePartyDetailsServiceTest {
         List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
 
         assertTrue(validationErrorList.isEmpty());
+    }
+
+    private Element<ResponseDocuments> existingResponseDocument() {
+        return element(ResponseDocuments.builder()
+                           .dateTimeCreated(LocalDateTime.now())
+                           .respondentC8Document(Document.builder().build())
+                           .build());
+    }
+
+    private Element<PartyDetails> respondent(String label) {
+        return element(PartyDetails.builder().firstName(label).lastName("Test").build());
     }
 
     private Element<PartyDetails> getPartyDetails(String partyName, boolean hasBarrister) {

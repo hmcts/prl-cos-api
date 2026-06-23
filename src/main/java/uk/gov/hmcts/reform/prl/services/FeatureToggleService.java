@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.models.Features.IS_BARRISTER_FEATURE_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_CAFCASS_DATE_TIME_FEATURE_ENABLED;
+import static uk.gov.hmcts.reform.prl.models.Features.IS_CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED;
 import static uk.gov.hmcts.reform.prl.models.Features.IS_OS_COURT_LOOKUP_ENABLED;
 
 
@@ -52,7 +53,19 @@ public class FeatureToggleService {
         return isFeatureEnabled(IS_CAFCASS_DATE_TIME_FEATURE_ENABLED);
     }
 
+    public boolean isCreateRequestCirUpdateTaskEnabled() {
+        return isFeatureEnabled(IS_CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED);
+    }
+
     public boolean isOsCourtLookupFeatureEnabled() {
         return isFeatureEnabled(IS_OS_COURT_LOOKUP_ENABLED);
+    }
+
+    public boolean isAwaitingInformationEnabled() {
+        return isFeatureEnabled(Features.IS_AWAITING_INFORMATION_ENABLED);
+    }
+
+    public boolean isExitAwaitingInformationEnabled() {
+        return isFeatureEnabled(Features.IS_EXIT_AWAITING_INFORMATION_ENABLED);
     }
 }
