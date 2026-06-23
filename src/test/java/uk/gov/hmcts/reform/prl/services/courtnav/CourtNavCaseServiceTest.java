@@ -58,6 +58,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_FORMAT;
+import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_NULL;
 import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_NUMBER;
 import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -282,6 +283,16 @@ class CourtNavCaseServiceTest {
         verify(documentGenService, times(1))
             .createUpdatedCaseDataWithDocuments(Mockito.anyString(),
                                Mockito.any(CaseData.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNullOrEmptyDocument() {
+        assertThrows(
+            ResponseStatusException.class, () -> courtNavCaseService.uploadDocument(
+                "Bearer abc", null, "WITNESS_STATEMENT",
+                "1234567891234567"
+            ), COURTNAV_DOC_FAILURE_NULL
+        );
     }
 
     @Test
