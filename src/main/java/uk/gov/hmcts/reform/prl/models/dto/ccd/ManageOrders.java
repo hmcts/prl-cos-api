@@ -51,6 +51,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageOrders implements MappableObject {
 
+    @JsonProperty("isThisUrgent")
+    private final YesOrNo isThisUrgent;
     private final String childListForSpecialGuardianship;
     @JsonProperty("cafcassOfficeDetails")
     private final String cafcassOfficeDetails;
