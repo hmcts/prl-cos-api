@@ -4784,6 +4784,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -4937,6 +4938,168 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(response);
         // Verify combineAndFinalizeCustomOrder was NOT called - stale customOrderDoc should be ignored
+        verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_stickyCustomOrderNameOption_routesAsNonCustomWhenUploadOrder() throws Exception {
+        // Real-world scenario from prod logs: an earlier custom order left customOrderNameOption
+        // sticky on the case (CCD merge ignores put(null) on FixedList fields). The user then runs
+        // upload-an-order. The submitted callback must route on caseData.manageOrdersOptions (the
+        // user's actual page-1 selection for THIS event), not on the sticky callback field.
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .build();
+
+        // The decisive signal: caseData (from startAllTabsUpdate) has manageOrdersOptions=uploadAnOrder
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+
+        // Callback view carries the sticky customOrderNameOption (would have mis-routed under the
+        // old code) plus a customOrderDoc the user just uploaded for the upload-order flow.
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("id", 12345L);
+        callbackDataMap.put("manageOrdersOptions", "uploadAnOrder");
+        callbackDataMap.put("customOrderNameOption", "directionOnIssue"); // sticky from previous event
+        callbackDataMap.put("customOrderDoc", Document.builder().documentFileName("sample.docx").build());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken, s2sToken, callbackRequest);
+
+        assertNotNull(response);
+        // Must NOT have routed through the custom-order combiner despite the sticky callback field.
+        verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_manageOrdersOptionsCreateCustomOrder_routesAsCustom() throws Exception {
+        // Positive case for the new routing: when caseData.manageOrdersOptions IS createCustomOrder,
+        // the submitted callback must invoke combineAndFinalizeCustomOrder. This locks in the
+        // happy-path custom-order route after the routing-signal change.
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("id", 12345L);
+        callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
+        callbackDataMap.put("customOrderDoc", Document.builder().documentFileName("user.docx").build());
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken, s2sToken, callbackRequest);
+
+        verify(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    public void finalizeOrderSubmissionAndSendNotifications_nullManageOrdersOptions_routesAsNonCustom() throws Exception {
+        // Defensive case for the new routing: caseData.manageOrdersOptions is null (e.g. cleared
+        // by cleanUpSelectedManageOrderOptions before a re-entry, or never set). Must NOT trip the
+        // custom-order branch — equals() on the enum is null-safe.
+        ManageOrders manageOrders = ManageOrders.builder()
+            .isCaseWithdrawn(No)
+            .markedToServeEmailNotification(No)
+            .build();
+
+        CaseData caseDataFromDb = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(manageOrders)
+            // manageOrdersOptions deliberately not set
+            .build();
+
+        Map<String, Object> databaseMap = new HashMap<>();
+        databaseMap.put("id", 12345L);
+
+        Map<String, Object> callbackDataMap = new HashMap<>();
+        callbackDataMap.put("id", 12345L);
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authToken,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            databaseMap,
+            caseDataFromDb,
+            null
+        );
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                .id(12345L)
+                .data(callbackDataMap)
+                .build())
+            .build();
+
+        when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken, s2sToken, callbackRequest);
+
         verify(customOrderService, never()).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
     }
 
@@ -5130,6 +5293,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
         Map<String, Object> databaseMap = new HashMap<>();
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -5215,6 +5379,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("FL401")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         Map<String, Object> databaseMap = new HashMap<>();
@@ -6188,6 +6353,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("orderCollection", dbOrderCollection);
@@ -6276,6 +6442,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("orderCollection", dbOrderCollection);
@@ -6369,6 +6536,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
         Map<String, Object> databaseMap = new HashMap<>();
         databaseMap.put("orderCollection", dbOrderCollection);
@@ -6580,6 +6748,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -6671,6 +6840,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -6743,6 +6913,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -6819,6 +6990,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -6899,6 +7071,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -6962,6 +7135,7 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(manageOrders)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -7178,6 +7352,7 @@ public class ManageOrdersControllerTest {
                               .markedToServeEmailNotification(No)
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
                               .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         Map<String, Object> databaseMap = new HashMap<>();
@@ -7246,6 +7421,7 @@ public class ManageOrdersControllerTest {
                               .markedToServeEmailNotification(No)
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(

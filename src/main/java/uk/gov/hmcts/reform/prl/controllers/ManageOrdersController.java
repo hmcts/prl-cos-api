@@ -415,7 +415,7 @@ public class ManageOrdersController {
             log.info("Submitted callback: caseDataUpdated (from DB) has orderCollection={}, draftOrderCollection={}",
                 caseDataUpdated.get(ORDER_COLLECTION) != null,
                 caseDataUpdated.get(DRAFT_ORDER_COLLECTION) != null);
-            boolean isCustomOrder = copyCustomOrderFieldsFromCallback(callbackData, caseDataUpdated);
+            boolean isCustomOrder = copyCustomOrderFieldsFromCallback(caseData, callbackData, caseDataUpdated);
             log.info("Submitted callback: isCustomOrder={}", isCustomOrder);
             // Capture the URL of the user's uploaded customOrderDoc BEFORE processCustomOrder runs,
             // because the service clears that field on failure. If processing later fails we use
@@ -1073,16 +1073,19 @@ public class ManageOrdersController {
             .build();
     }
 
-    private boolean copyCustomOrderFieldsFromCallback(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
-        // Note: caseDataUpdated from allTabService is from the DATABASE (old data before this event).
-        // The callback request data has the CURRENT data from the aboutToSubmit response (not yet persisted).
-        // For custom order fields, we must use callbackRequest data.
-
-        // Detect a real custom-order event from customOrderNameOption — the dropdown selection
-        // that is only set during an in-flight custom-order flow. The about-to-submit callback
-        // self-heals any stale value of this field on non-custom-order events, so a legacy
-        // stuck case will not reach here with it lingering.
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_NAME_OPTION) != null;
+    private boolean copyCustomOrderFieldsFromCallback(CaseData caseData,
+                                                      Map<String, Object> callbackData,
+                                                      Map<String, Object> caseDataUpdated) {
+        // Route on the user's actual page-1 selection (manageOrdersOptions), not the
+        // persisted customOrderNameOption. CCD's merge engine ignores put(null) for FixedList
+        // fields, so customOrderNameOption can stick on the case across events — the upload-order
+        // logs at 13:54:07 confirmed this: customOrderNameOption=directionOnIssue (stale from a
+        // previous custom order) while manageOrdersOptions=uploadAnOrder (the real intent).
+        boolean isCustomOrder = ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions());
+        log.info("Submitted callback: isCustomOrder decision: manageOrdersOptions={}, customOrderNameOption(callback)={}, decided={}",
+            caseData.getManageOrdersOptions(),
+            callbackData.get(CUSTOM_ORDER_NAME_OPTION),
+            isCustomOrder);
 
         if (!isCustomOrder) {
             // Backstop: if for any reason stale custom-order transient fields are still on
