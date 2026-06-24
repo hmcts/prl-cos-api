@@ -143,6 +143,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_R
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -1590,6 +1591,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData3, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
+        assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -1639,6 +1641,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData4, auth, caseDataMap);
 
         assertEquals(2,updatedMessageList.size());
+        assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -1693,6 +1696,7 @@ public class SendAndReplyServiceTest {
         List<Element<Message>> updatedMessageList = sendAndReplyService.addMessage(caseData5, auth, caseDataMap);
 
         assertEquals(2, updatedMessageList.size());
+        assertEquals(TEST_UUID, caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
@@ -2014,6 +2018,7 @@ public class SendAndReplyServiceTest {
 
         assertEquals(1, msgList.get(0).getValue().getReplyHistory().size());
         verify(sendAndReplyMessageHandlerService).handleMessage(any(MessageRequest.class));
+        assertEquals("testIdam", caseDataMap.get(TASK_ASSIGNEE_IDAM_ID));
     }
 
     @Test
