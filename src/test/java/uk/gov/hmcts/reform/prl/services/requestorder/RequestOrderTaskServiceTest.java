@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -240,6 +241,8 @@ class RequestOrderTaskServiceTest {
         verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
+
+
     @Test
     void firedEventCarriesCurrentHearingIdAndUpdatedCollectionWithTodayAsLastFiredDate() {
         CaseData caseData = baseCaseBuilder("FL401").build();
@@ -397,6 +400,64 @@ class RequestOrderTaskServiceTest {
         verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
+    @Test
+    void skipFiringWhenOrderReceivedForCustomOrderHearingsType() {
+        int days = 1;
+        DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String hearingTypeValue = "Case Management Hearing";
+        String hearingTypeLabel = String.join(" ",
+                                              hearingTypeValue,
+                                              "-",
+                                              formatter.format(TODAY.minusDays(days)),
+                                              "09:00:00");
+
+        CaseData caseData = baseCaseBuilder("C100")
+            .customOrderHearingsType(
+                DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                               .code(hearingTypeLabel)
+                               .label(hearingTypeLabel)
+                               .build())
+                    .build())
+            .build();
+        stubSearchReturning(caseData);
+        stubHearings(completedHearingEndingDaysAgo(1, hearingTypeValue));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+
+        service.processRequestOrderTasks();
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+    }
+
+    @Test
+    void shouldFireWhenNoMatchingCustomOrderHearingsType() {
+        int days = 1;
+        DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String hearingTypeValue = "Case Management Hearing";
+        String hearingTypeLabel = String.join(" ",
+                                              "No match Hearing",
+                                              "-",
+                                              formatter.format(TODAY.minusDays(days)),
+                                              "09:00:00");
+
+        CaseData caseData = baseCaseBuilder("C100")
+            .customOrderHearingsType(
+                DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                               .code(hearingTypeLabel)
+                               .label(hearingTypeLabel)
+                               .build())
+                    .build())
+            .build();
+        stubSearchReturning(caseData);
+        stubHearings(completedHearingEndingDaysAgo(1, hearingTypeValue));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(4);
+
+        service.processRequestOrderTasks();
+        verify(allTabService).getStartUpdateForSpecificEvent(anyString(), anyString());
+    }
+
     private CaseData.CaseDataBuilder<?, ?> baseCaseBuilder(String caseType) {
         return CaseData.builder()
             .id(Long.valueOf(CASE_ID))
@@ -405,11 +466,20 @@ class RequestOrderTaskServiceTest {
     }
 
     private CaseHearing completedHearingEndingDaysAgo(int days) {
-        return hearing("COMPLETED", HEARING_ID, TODAY.minusDays(days));
+        return completedHearingEndingDaysAgo(days, null);
+    }
+
+    private CaseHearing completedHearingEndingDaysAgo(int days, String hearingTypeValue) {
+        return hearing("COMPLETED", HEARING_ID, TODAY.minusDays(days), hearingTypeValue);
     }
 
     private CaseHearing hearing(String status, String hearingId, LocalDate endDate) {
+        return hearing(status, hearingId, endDate, null);
+    }
+
+    private CaseHearing hearing(String status, String hearingId, LocalDate endDate, String hearingTypeValue) {
         return CaseHearing.caseHearingWith()
+            .hearingTypeValue(hearingTypeValue)
             .hearingID(Long.valueOf(hearingId))
             .hmcStatus(status)
             .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
