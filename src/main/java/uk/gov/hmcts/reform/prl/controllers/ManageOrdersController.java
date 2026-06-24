@@ -539,6 +539,10 @@ public class ManageOrdersController {
             // transient fields left over from a previously-failed custom-order event. Otherwise they
             // would survive into the submitted callback and be mis-interpreted as an in-flight
             // custom-order, causing the sealing/combining flow to run against stale data.
+            log.info("Self-heal check: manageOrdersOptions={}, customOrderNameOption={}, customOrderDoc={}",
+                caseData.getManageOrdersOptions(),
+                caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION),
+                caseDataUpdated.get(CUSTOM_ORDER_DOC) != null ? "present" : "absent");
             if (!ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
                 removeStaleCustomOrderFields(caseDataUpdated);
             }
