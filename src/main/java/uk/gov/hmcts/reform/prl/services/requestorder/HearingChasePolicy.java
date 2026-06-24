@@ -138,7 +138,18 @@ class HearingChasePolicy {
             || isDraftOrderReferencedByHearingsType(
                 caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes)
 
-            || isFinalisedOrderReferencedByHearingsType(caseData.getOrderCollection(), hearingLabels);
+            || isFinalisedOrderReferencedByHearingsType(caseData.getOrderCollection(), hearingLabels)
+            || isCustomOrderHearingsType(caseData.getCustomOrderHearingsType(), hearingLabels);
+    }
+
+    private static boolean isCustomOrderHearingsType(DynamicList customOrderHearingsType,
+                                                     Set<String> hearingLabels) {
+        log.info("Evaluating CustomOrderHearingsType for the hearings {}", hearingLabels);
+        return Optional.ofNullable(customOrderHearingsType)
+            .map(DynamicList::getValue)
+            .map(DynamicListElement::getCode)
+            .filter(hearingLabels::contains)
+            .isPresent();
     }
 
     private static <T> boolean isHearingReferencedByManageOrderHearingDetails(

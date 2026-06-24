@@ -83,7 +83,8 @@ public class RequestOrderTaskService {
                 "data.caseTypeOfApplication",
                 "data.draftOrderCollection",
                 "data.orderCollection",
-                "data.requestOrderTaskTrackingByHearing"
+                "data.requestOrderTaskTrackingByHearing",
+                "data.customOrderHearingsType"
             ));
 
         Semaphore semaphore = new Semaphore(concurrentRequest);
