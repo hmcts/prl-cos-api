@@ -1138,11 +1138,15 @@ public class ManageOrdersController {
         for (String field : staleFields) {
             if (caseDataUpdated.get(field) != null) {
                 foundStale = true;
-                caseDataUpdated.remove(field);
             }
+            // Explicitly null the field in the response. Map.remove() drops the key, which
+            // CCD interprets as "no change" and leaves the previously-persisted value on the
+            // case. Putting null tells CCD to wipe the field so the next event's submitted
+            // callback doesn't see stale custom-order state.
+            caseDataUpdated.put(field, null);
         }
         if (foundStale) {
-            log.info("Self-heal: removed stale custom-order transient fields from a non-custom-order event");
+            log.info("Self-heal: cleared stale custom-order transient fields from a non-custom-order event");
         }
     }
 
@@ -1272,15 +1276,19 @@ public class ManageOrdersController {
     }
 
     private void cleanupCustomOrderFields(Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.remove(CUSTOM_ORDER_DOC);
-        caseDataUpdated.remove(PREVIEW_ORDER_DOC);
-        caseDataUpdated.remove(CUSTOM_ORDER_NAME_OPTION);
-        caseDataUpdated.remove(NAME_OF_ORDER);
-        caseDataUpdated.remove(AMEND_ORDER_SELECT_CHECK_OPTIONS);
-        caseDataUpdated.remove(WHAT_DO_WITH_ORDER);
-        caseDataUpdated.remove(DO_YOU_WANT_TO_SERVE_ORDER);
-        caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS);
-        caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS_OPTIONS);
+        // Use put(null) rather than remove(): this map is passed to submitAllTabsUpdate -> CCD,
+        // and CCD interprets an absent key as "no change" (keeping the stale value). Explicit
+        // nulls tell CCD to wipe the field, so the next event's submitted callback won't see
+        // a sticky customOrderNameOption and mis-route an upload-order as a custom order.
+        caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+        caseDataUpdated.put(PREVIEW_ORDER_DOC, null);
+        caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
+        caseDataUpdated.put(NAME_OF_ORDER, null);
+        caseDataUpdated.put(AMEND_ORDER_SELECT_CHECK_OPTIONS, null);
+        caseDataUpdated.put(WHAT_DO_WITH_ORDER, null);
+        caseDataUpdated.put(DO_YOU_WANT_TO_SERVE_ORDER, null);
+        caseDataUpdated.put(CUSTOM_ORDER_DATE_ENDS, null);
+        caseDataUpdated.put(CUSTOM_ORDER_DATE_ENDS_OPTIONS, null);
         log.info("Cleaned up custom order fields after processing");
     }
 

@@ -65,6 +65,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -4654,6 +4655,49 @@ class CustomOrderServiceTest {
         );
         assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
         assertNotNull(ex.getCause(), "Underlying POI cause should be preserved");
+    }
+
+    @Test
+    void testCombineHeaderAndContent_translatesSecurityRejectionIntoInvalidCustomOrderDocument() throws Exception {
+        // DocxCombineUtils.validateDocumentSecurity throws a plain IOException with one of three
+        // known messages when the upload contains macros / OLE objects / external links. The
+        // service must translate those into InvalidCustomOrderDocumentException(UNSAFE_DOCX_ERROR)
+        // so the controller routes to handleCustomOrderFailure instead of bubbling a raw 500.
+        byte[] header = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] userBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+
+        try (var mocked = mockStatic(uk.gov.hmcts.reform.prl.utils.DocxCombineUtils.class)) {
+            mocked.when(() -> uk.gov.hmcts.reform.prl.utils.DocxCombineUtils.combineDocuments(header, userBytes))
+                .thenThrow(new java.io.IOException("Document contains embedded objects which are not permitted"));
+
+            var ex = assertThrows(
+                uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+                () -> customOrderService.combineHeaderAndContent(header, userBytes)
+            );
+            assertEquals(CustomOrderService.UNSAFE_DOCX_ERROR, ex.getMessage());
+            assertNotNull(ex.getCause(), "Underlying IOException cause should be preserved");
+        }
+    }
+
+    @Test
+    void testCombineHeaderAndContent_unrelatedIoExceptionIsNotTranslated() throws Exception {
+        // Any IOException that doesn't carry one of the security-validator messages should
+        // propagate unchanged — we don't want to mask genuine merge failures behind a
+        // user-friendly "remove macros" message.
+        byte[] header = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] userBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+
+        try (var mocked = mockStatic(uk.gov.hmcts.reform.prl.utils.DocxCombineUtils.class)) {
+            java.io.IOException unrelated = new java.io.IOException("Failed to merge documents: unexpected zip entry");
+            mocked.when(() -> uk.gov.hmcts.reform.prl.utils.DocxCombineUtils.combineDocuments(header, userBytes))
+                .thenThrow(unrelated);
+
+            var thrown = assertThrows(
+                java.io.IOException.class,
+                () -> customOrderService.combineHeaderAndContent(header, userBytes)
+            );
+            assertEquals(unrelated.getMessage(), thrown.getMessage());
+        }
     }
 
     @Test

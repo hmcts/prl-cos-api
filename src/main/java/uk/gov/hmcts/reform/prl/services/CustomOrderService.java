@@ -87,6 +87,16 @@ public class CustomOrderService {
         "The uploaded file is not a valid Word (.docx) document. "
             + "Please remove the file and upload a valid .docx file.";
 
+    /**
+     * Error message shown to the user when their uploaded custom order document
+     * contains content that is not permitted (e.g. macros, embedded files,
+     * external links). Detected by DocxCombineUtils.validateDocumentSecurity.
+     */
+    public static final String UNSAFE_DOCX_ERROR =
+        "The uploaded file contains content that is not allowed (such as macros, "
+            + "embedded files, or external links). Please remove the file, save a "
+            + "clean copy without that content, and upload it again.";
+
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingDataService hearingDataService;
@@ -1752,6 +1762,15 @@ public class CustomOrderService {
      * into {@link InvalidCustomOrderDocumentException} so callers can surface
      * a user-friendly error and stop the event.</p>
      *
+     * <p>If the user content is a valid .docx but contains disallowed
+     * features (macros, OLE objects, external relationships),
+     * {@link DocxCombineUtils#combineDocuments} throws a plain
+     * {@link IOException} from its security validator. We detect that here
+     * by message prefix and translate it into the same
+     * {@link InvalidCustomOrderDocumentException} carrying
+     * {@link #UNSAFE_DOCX_ERROR} so the user gets a clear message and the
+     * event aborts cleanly instead of being swallowed as a generic 500.</p>
+     *
      * @param headerBytes Rendered header document bytes
      * @param userContentBytes User's uploaded document bytes
      * @return Combined document bytes
@@ -1762,7 +1781,25 @@ public class CustomOrderService {
         } catch (UnsupportedFileFormatException | org.apache.poi.ooxml.POIXMLException e) {
             log.warn("Custom order combine failed - uploaded content is not a valid .docx: {}", e.getMessage());
             throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR, e);
+        } catch (IOException e) {
+            // DocxCombineUtils.validateDocumentSecurity throws IOException with one of:
+            //   "Document contains macros which are not permitted"
+            //   "Document contains embedded objects which are not permitted"
+            //   "Document contains external links which are not permitted"
+            // Translate those into a user-friendly validation failure; otherwise rethrow.
+            if (isSecurityValidationFailure(e)) {
+                log.warn("Custom order combine failed - upload contains disallowed content: {}", e.getMessage());
+                throw new InvalidCustomOrderDocumentException(UNSAFE_DOCX_ERROR, e);
+            }
+            throw e;
         }
+    }
+
+    private static boolean isSecurityValidationFailure(IOException e) {
+        String msg = e.getMessage();
+        return msg != null && (msg.contains("macros which are not permitted")
+            || msg.contains("embedded objects which are not permitted")
+            || msg.contains("external links which are not permitted"));
     }
 
     /**
