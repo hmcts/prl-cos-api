@@ -302,6 +302,18 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+bankHolidays:
+  api:
+    url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
+
+# FPVTL-2408/2409 - Request Order task re-trigger cadence in working days.
+# Override per env (e.g. 0 in preview for fast E2E testing).
+request-order-task:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+  cadence-working-days:
+    c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
+    fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
+
 fees-register:
   api:
     url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
@@ -736,6 +748,8 @@ document:
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
       doc_cover_sheet_serve_order_template: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
       doc_cover_sheet_welsh_serve_order_template: FL-PRL-APP-WEL-COVER-SERVE-ORDER-SHEET.docx
+      prl_blank_cover_letter_template: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      prl_blank_cover_letter_welsh_template: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
@@ -806,7 +820,7 @@ ccd:
 
 refdata:
   api:
-    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+    url: ${REFDATA_API_URL:http://rd-commondata-api-aat.service.core-compute-aat.internal}
   category-id: HearingType
 
 welsh:
