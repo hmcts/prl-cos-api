@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.services.UpdateHearingActualsService;
-import uk.gov.hmcts.reform.prl.services.requestorder.RequestOrderTaskService;
 
 /**
  * TODO: this class is now misnamed — it does both the original today-only hearing-actuals
@@ -18,12 +17,10 @@ import uk.gov.hmcts.reform.prl.services.requestorder.RequestOrderTaskService;
 public class UpdateHearingActualTask implements Runnable {
 
     private final UpdateHearingActualsService updateHearingActualsService;
-    private final RequestOrderTaskService requestOrderTaskService;
 
     @Override
     public void run() {
         //Invoke fm5 reminder service to evaluate & notify if needed
         updateHearingActualsService.updateHearingActuals();
-        requestOrderTaskService.processRequestOrderTasks();
     }
 }
