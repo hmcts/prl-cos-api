@@ -78,7 +78,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -3218,6 +3220,87 @@ public class DocumentGenServiceTest {
         verifyNoMoreInteractions(dgsService);
     }
 
+    @Test
+    public void testGenerateCoverLetterBothEnglishAndWelsh() throws Exception {
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetterWelsh");
+
+        Address address = Address.builder()
+            .addressLine1("addressLine1")
+            .postCode("postcode")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        GeneratedDocumentInfo englishDocInfo = GeneratedDocumentInfo.builder()
+            .url("coverLetterUrl")
+            .binaryUrl("coverLetterBinaryUrl")
+            .docName("coverLetter.pdf")
+            .build();
+
+        GeneratedDocumentInfo welshDocInfo = GeneratedDocumentInfo.builder()
+            .url("coverLetterWelshUrl")
+            .binaryUrl("coverLetterWelshBinaryUrl")
+            .docName("coverLetterWelsh.pdf")
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(englishDocInfo).when(dgsService).generateDocument(
+            anyString(),
+            anyString(),
+            eq("coverLetter"),
+            anyMap()
+        );
+        doReturn(welshDocInfo).when(dgsService).generateDocument(
+            anyString(),
+            anyString(),
+            eq("coverLetterWelsh"),
+            anyMap()
+        );
+
+        List<Document> results = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
+
+        assertNotNull(results);
+        assertEquals(2, results.size()); // both English and Welsh
+        assertEquals("coverLetter.pdf", results.get(0).getDocumentFileName());
+        assertEquals("coverLetterWelsh.pdf", results.get(1).getDocumentFileName());
+
+        verify(dgsService, times(2)).generateDocument(anyString(), anyString(), anyString(), anyMap());
+    }
+
+    @Test
+    public void testGenerateCoverLetterThrowsWhenDocumentGenerationFails() {
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
+
+        Address address = Address.builder()
+            .addressLine1("addressLine1")
+            .postCode("postcode")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyMap()
+        )).thenThrow(new RuntimeException("Document generation failed"));
+
+        assertThrows(RuntimeException.class, () ->
+            documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address)
+        );
+    }
+
     private Map<String, String> createDocumentValues(String documentType) {
         Map<String, String> documentValues = new HashMap<>();
 
@@ -3279,4 +3362,3 @@ public class DocumentGenServiceTest {
         }
     }
 }
-

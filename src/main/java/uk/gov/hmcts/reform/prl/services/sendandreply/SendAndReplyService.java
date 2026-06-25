@@ -63,8 +63,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -124,12 +122,10 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHOOSE_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -143,18 +139,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIFIER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_REPLY_DYNAMIC_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED_WITH_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
@@ -997,7 +992,7 @@ public class SendAndReplyService {
     }
 
     public uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
-                                                                                  DynamicList submittedDocumentList) {
+                                                                                 DynamicList submittedDocumentList) {
         if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
             return null;
         }
@@ -1445,7 +1440,7 @@ public class SendAndReplyService {
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
             .toList();
-        allocateJudgeIfMessageSentToJudge(authorization, caseData, replyMessage, caseDataMap);
+        addJudgeIdamIdIfMessageSentToJudge(caseData, replyMessage, caseDataMap);
 
         return messages;
     }
@@ -1618,7 +1613,7 @@ public class SendAndReplyService {
         if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
             messages.addAll(caseData.getSendOrReplyMessage().getMessages());
         }
-        allocateJudgeIfMessageSentToJudge(authorisation, caseData, newMessage, caseDataMap);
+        addJudgeIdamIdIfMessageSentToJudge(caseData, newMessage, caseDataMap);
         applyMessageHandlers(caseData, caseDataMap, newMessage);
 
         messages.add(element(newMessage));
@@ -1637,67 +1632,13 @@ public class SendAndReplyService {
         sendAndReplyMessageHandlerService.handleMessage(request);
     }
 
-    private void allocateJudgeIfMessageSentToJudge(String authorisation,
-                                                   CaseData caseData,
-                                                   Message newMessage,
-                                                   Map<String, Object> caseDataMap) {
+    private void addJudgeIdamIdIfMessageSentToJudge(CaseData caseData,
+                                                    Message newMessage,
+                                                    Map<String, Object> caseDataMap) {
         if (InternalMessageWhoToSendToEnum.JUDICIARY.equals(newMessage.getInternalMessageWhoToSendTo())
             || InternalMessageReplyToEnum.JUDICIARY.equals(newMessage.getInternalMessageReplyTo())) {
-            List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getSendOrReplyDto()
-                .getAllocatedJudgeForSendAndReply();
-            if (allocatedJudgeForSendAndReply == null) {
-                allocatedJudgeForSendAndReply = new ArrayList<>();
-            }
-
             String judgeIdamId = getSendReplyJudgeIdamId(caseData);
-
-            if (isNotBlank(judgeIdamId)) {
-                //Check if the Judge is already allocated to any of the message
-                Optional<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyOptional = retreiveExistingJudgeAllocationFromSendAndReply(
-                    allocatedJudgeForSendAndReply,
-                    judgeIdamId
-                );
-
-                if (allocatedJudgeForSendAndReplyOptional.isPresent()) {
-                    if (!checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
-                        allocatedJudgeForSendAndReply,
-                        judgeIdamId,
-                        newMessage.getMessageIdentifier()
-                    )) {
-                        //Check if the Judge is already allocated to this message
-                        allocatedJudgeForSendAndReply
-                            .add(element(AllocatedJudgeForSendAndReply.builder()
-                                             .judgeIdamId(judgeIdamId)
-                                             .roleAssignmentId(
-                                                 allocatedJudgeForSendAndReplyOptional.get().getRoleAssignmentId())
-                                             .messageIdentifier(newMessage.getMessageIdentifier())
-                                             .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
-                                             .build()));
-                    }
-                } else {
-                    RoleAssignmentResponse roleAssignmentResponse = checkIfCaseIsAlreadyAllocatedJudge(String.valueOf(
-                        caseData.getId()), judgeIdamId);
-                    if (null != roleAssignmentResponse) {
-                        log.info("Case ID: {} - Case is already allocated to judge", caseData.getId());
-                    } else {
-                        log.info("Case ID: {} - Case is not allocated to judge {}", caseData.getId(), judgeIdamId);
-                        //Allocate Judge to this message
-                        allocatedJudgeForSendAndReply
-                            .add(element(AllocatedJudgeForSendAndReply
-                                             .builder()
-                                             .roleAssignmentId(createRoleAssignmentAndRetrieveId(
-                                                 authorisation,
-                                                 caseData.getId(),
-                                                 judgeIdamId
-                                             ))
-                                             .judgeIdamId(judgeIdamId)
-                                             .messageIdentifier(newMessage.getMessageIdentifier())
-                                             .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
-                                             .build()));
-                    }
-                }
-                caseDataMap.put(ALLOCATED_JUDGE_FOR_SEND_AND_REPLY, allocatedJudgeForSendAndReply);
-            }
+            caseDataMap.put(TASK_ASSIGNEE_IDAM_ID, judgeIdamId);
         }
     }
 
@@ -1710,66 +1651,6 @@ public class SendAndReplyService {
             return caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getIdamId();
         }
         return null;
-    }
-
-    private String createRoleAssignmentAndRetrieveId(String authorisation, long caseId, String judgeIdamId) {
-        RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-            .judicialUser(JudicialUser.builder()
-                              .idamId(judgeIdamId)
-                              .build())
-            .build();
-
-        roleAssignmentService.createRoleAssignment(
-            authorisation,
-            CaseDetails.builder()
-                .jurisdiction(JURISDICTION)
-                .caseTypeId(CASE_TYPE)
-                .id(caseId)
-                .build(),
-            roleAssignmentDto,
-            ALLOCATED_JUDGE.getName(),
-            false,
-            ALLOCATE_JUDGE_ROLE
-        );
-        List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            judgeIdamId
-        );
-        return roleAssignmentResponseList.stream()
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId))).toList().getFirst().getId();
-    }
-
-    private Optional<AllocatedJudgeForSendAndReply> retreiveExistingJudgeAllocationFromSendAndReply(
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
-        String idamId) {
-
-        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).toList()
-            .stream().filter(i -> i.getJudgeIdamId().equals(idamId)).findAny();
-    }
-
-    private boolean checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
-        String idamId,
-        String messageIdentifier) {
-
-        return allocatedJudgeForSendAndReply.stream()
-            .map(Element::getValue)
-            .anyMatch(i -> i.getJudgeIdamId().equals(idamId)
-                && i.getMessageIdentifier().equals(messageIdentifier));
-    }
-
-    private RoleAssignmentResponse checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
-        List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            judgeIdamId
-        );
-        return roleAssignmentResponseList.stream()
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                ALLOCATE_JUDGE_ROLE))
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId)))
-            .findFirst()
-            .orElse(null);
     }
 
     public String fetchAdditionalApplicationCodeIfExist(CaseData caseData, SendOrReply sendOrReply) {
@@ -2110,13 +1991,24 @@ public class SendAndReplyService {
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
-            log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+
+            List<Document> documents = new ArrayList<>();
+
+            documents.addAll(documentGenService.generateCoverLetter(
+                authorisation,
+                caseData,
+                partyDetails.getLabelForDynamicList(),
+                partyDetails.getAddress()
+            ));
+            documents.addAll(docs);
+
+            log.info("*** number of files in the pack *** {}", documents.size());
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs,
+                documents,
                 partyDetails.getLabelForDynamicList()
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
