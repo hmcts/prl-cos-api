@@ -19,14 +19,14 @@ case:
 prl:
   environment: ${APP_ENV:preview}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
-    username: ${PRL_IDAM_REFDATA_USERNAME:prl-rd-system-user@justice.gov.uk}
-    password: ${PRL_IDAM_REFDATA_PASSWORD:Password2023}
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxxxx}
 
 management:
   endpoint:
@@ -276,28 +276,28 @@ idam:
     token:
       context-path: /oauth2/token
   user:
-    genericpassword: ${PRL_GENERIC_PASSWORD:genericpassword}
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxxxx}
   citizen:
-    username: ${IDAM_CITIZEN_USERNAME:familyprivatelaw@gmail.com}
-    password: ${IDAM_CITIZEN_PASSWORD:Password12}
+    username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxx}
   solicitor:
-    username: ${IDAM_SOLICITOR_USERNAME:fprl_caseworker_solicitor@mailinator.com}
-    password: ${IDAM_SOLICITOR_PASSWORD:Nagoya0102}
+    username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxxxxxxx}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:prl-system-update@mailinator.com}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:w6:j9NcYZ6}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxxxx}
   apigateway:
-    username: ${COURTNAV_USERNAME:courtnav@mailinator.com}
-    password: ${COURTNAV_PASSWORD:Nagoya0102}
+    username: ${COURTNAV_USERNAME:xxxxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxxxx}
   cafcass:
-    username: ${CAFCASS_USERNAME:prl_aat_cafcass_cymru11@justice.gov.uk}
-    password: ${CAFCASS_PASSWORD:Nagoya0102}
+    username: ${CAFCASS_USERNAME:xxxxxxxxxx}
+    password: ${CAFCASS_PASSWORD:xxxxxxxx}
   judge:
-    username: ${JUDGE_USER_NAME:HHJ.Elizabeth.Williams@ejudiciary.net}
-    password: ${JUDGE_PASSWORD:Hmcts@123}
+    username: ${JUDGE_USER_NAME:xxxxxxxxxxx}
+    password: ${JUDGE_PASSWORD:xxxxxxx}
   admin:
-    username: ${IDAM_COURT_ADMIN_USERNAME:prl_ctscadmin24_swansea@justice.gov.uk}
-    password: ${IDAM_COURT_ADMIN_PASSWORD:Nagoya0102}
+    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxxxx}
+    password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxxxx}
   api_gw:
     microservice: api_gw
 
