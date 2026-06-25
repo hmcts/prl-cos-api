@@ -59,7 +59,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.BarristerHelper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
@@ -145,6 +144,46 @@ public class NoticeOfChangePartiesService {
             generateFl401NocDetails(caseData, representing, strategy, data);
         }
         return data;
+    }
+
+    /**
+     * Method to sync the current applicant/respondent information into the NoC answer fields,
+     * clearing them first to avoid stale NoC answer field values
+     * @param caseData the current case data
+     * @param representing the solicitors representing litigants
+     * @return Map<String, Object> updated map with the noc answers
+     */
+    public Map<String, Object> syncNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
+        log.info("syncing noc answers");
+        Map<String, Object> nocAnswerUpdates = clearNocAnswerFields(caseData, representing);
+        nocAnswerUpdates.putAll(generate(caseData, representing));
+        return nocAnswerUpdates;
+    }
+
+    /**
+     * Method to clear all Noc answers fields, make them null, avoid stale values
+     * @param caseData the current case data
+     * @param representing the solicitors representing litigants
+     * @return Map<String, Object> clean map with the empty noc answers
+     */
+    private Map<String, Object> clearNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
+
+        Map<String, Object> nocAnswerUpdates = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("clearing noc answers for C100 application");
+            List<SolicitorRole> roles = SolicitorRole.matchingRoles(representing);
+            for (int i = 0; i < roles.size(); i++) {
+                nocAnswerUpdates.put(
+                    String.format(representing.getNocAnswersTemplate(), i + 1),
+                    null
+                );
+            }
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("clearing noc answers for FL401 application");
+            nocAnswerUpdates.put(representing.getNocAnswersTemplate(), null);
+        }
+
+        return nocAnswerUpdates;
     }
 
     public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
@@ -317,7 +356,7 @@ public class NoticeOfChangePartiesService {
             systemAuthorisation,
             String.valueOf(allTabsUpdateCaseData.getId())
         );
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
@@ -430,11 +469,9 @@ public class NoticeOfChangePartiesService {
             if (updPartyDetails.getResponse() != null
                 && !YesOrNo.Yes.equals(updPartyDetails.getResponse().getC7ResponseSubmitted())) {
                 PartyDetails respondingParty = updPartyDetails.toBuilder().response(Response.builder().build()).build();
-                updatedRepresentedRespondentElement = ElementUtils
-                    .element(partyDetailsElement.getId(), respondingParty);
+                updatedRepresentedRespondentElement = element(partyDetailsElement.getId(), respondingParty);
             } else {
-                updatedRepresentedRespondentElement = ElementUtils
-                    .element(partyDetailsElement.getId(), updPartyDetails);
+                updatedRepresentedRespondentElement = element(partyDetailsElement.getId(), updPartyDetails);
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
             if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
@@ -445,8 +482,7 @@ public class NoticeOfChangePartiesService {
                     caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLICITOR, false);
             }
         } else if (CAAPPLICANT.equals(representing)) {
-            updatedRepresentedRespondentElement = ElementUtils
-                .element(partyDetailsElement.getId(), updPartyDetails);
+            updatedRepresentedRespondentElement = element(partyDetailsElement.getId(), updPartyDetails);
             caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
             if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
@@ -793,7 +829,7 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateCaseData
         );
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(systemAuthorisation, caseId);
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
 
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
 
@@ -996,13 +1032,13 @@ public class NoticeOfChangePartiesService {
                             solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
                             break;
                         case DAAPPLICANT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
+                            solicitorRepresentedParties.add(element(
                                 caseData.getApplicantsFL401().getPartyId(),
                                 caseData.getApplicantsFL401()
                             ));
                             break;
                         case DARESPONDENT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
+                            solicitorRepresentedParties.add(element(
                                 caseData.getRespondentsFL401().getPartyId(),
                                 caseData.getRespondentsFL401()
                             ));

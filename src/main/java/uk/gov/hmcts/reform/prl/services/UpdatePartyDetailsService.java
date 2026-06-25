@@ -218,8 +218,8 @@ public class UpdatePartyDetailsService {
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             setC100ApplicantPartyName(applicantsWrapped, updatedCaseData);
             // set applicant and respondent case flag
