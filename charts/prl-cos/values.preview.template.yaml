@@ -5,6 +5,10 @@ java:
   devcpuLimits: 2000m
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
+  # Per-build annotation: forces the rendered Deployment spec to differ on every build,
+  # so `helm upgrade` always produces a diff and Kubernetes rolls the pod
+  podAnnotations:
+    buildNumber: "${BUILD_NUMBER}"
   keyVaults:
     prl:
       secrets:
