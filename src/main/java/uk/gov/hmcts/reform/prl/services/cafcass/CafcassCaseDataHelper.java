@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 import static uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum.applicantApplication;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.addInOtherDocuments;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.buildCaseDataWithProcessedDocumentsCleared;
-import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isCafcassCymruRegion;
+import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isCafcassEnglandRegion;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.isDocumentPresent;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.parseQuarantineLegalDocs;
 import static uk.gov.hmcts.reform.prl.services.cafcass.CafcassUpdateHelperUtils.removeRedactedDocuments;
@@ -105,7 +105,7 @@ public class CafcassCaseDataHelper {
         cafCassResponse.getCases().forEach(caseDetails -> {
             CaseManagementLocation caseManagementLocation = caseDetails.getCaseData().getCaseManagementLocation();
             if (caseManagementLocation != null) {
-                if (isCafcassCymruRegion(caseManagementLocation.getRegionId())) {
+                if (isCafcassEnglandRegion(caseManagementLocation.getRegionId())) {
                     addCaseRegionMapping(
                         caseIdWithRegionIdMap,
                         caseDetails,
@@ -113,7 +113,7 @@ public class CafcassCaseDataHelper {
                         caseManagementLocation.getBaseLocationId()
                     );
                     filteredCafcassResponse.getCases().add(caseDetails);
-                } else if (isCafcassCymruRegion(caseManagementLocation.getRegion())) {
+                } else if (isCafcassEnglandRegion(caseManagementLocation.getRegion())) {
                     addCaseRegionMapping(
                         caseIdWithRegionIdMap,
                         caseDetails,
@@ -186,7 +186,7 @@ public class CafcassCaseDataHelper {
         if (caseManagementLocation == null) {
             return null;
         }
-        if (isCafcassCymruRegion(caseManagementLocation.getRegionId())) {
+        if (isCafcassEnglandRegion(caseManagementLocation.getRegionId())) {
             addCaseRegionMapping(
                 caseIdWithRegionIdMap,
                 cafCassCaseDetail,

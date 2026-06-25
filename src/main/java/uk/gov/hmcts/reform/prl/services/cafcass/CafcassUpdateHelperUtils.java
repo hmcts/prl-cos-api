@@ -36,7 +36,7 @@ final class CafcassUpdateHelperUtils {
     private CafcassUpdateHelperUtils() {
     }
 
-    static boolean isCafcassCymruRegion(String region) {
+    static boolean isCafcassEnglandRegion(String region) {
         return region != null && Integer.parseInt(region) < 7;
     }
 
