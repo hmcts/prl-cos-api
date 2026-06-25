@@ -3998,6 +3998,7 @@ public class ManageOrderService {
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
+        waFieldsMap.put(CHECK_IS_THIS_URGENT, caseData.getManageOrders().getCheckIsThisUrgent());
         return waFieldsMap;
     }
 
