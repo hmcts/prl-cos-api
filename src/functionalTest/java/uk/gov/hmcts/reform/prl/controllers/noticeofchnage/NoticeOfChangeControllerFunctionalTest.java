@@ -60,7 +60,8 @@ public class NoticeOfChangeControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        AboutToStartOrSubmitCallbackResponse response1 = RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        AboutToStartOrSubmitCallbackResponse response1 = RestAssured.given().relaxedHTTPSValidation()
+            .baseUri(targetInstance)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())

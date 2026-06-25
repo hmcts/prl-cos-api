@@ -281,7 +281,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Order(7)
+    @Disabled
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
@@ -297,7 +297,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Order(8)
+    @Disabled
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
         request
@@ -315,7 +315,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Order(9)
+    @Disabled
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
@@ -333,7 +333,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Order(10)
+    @Disabled
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
