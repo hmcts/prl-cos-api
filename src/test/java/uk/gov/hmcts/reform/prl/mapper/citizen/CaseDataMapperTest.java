@@ -49,11 +49,6 @@ class CaseDataMapperTest {
         setValue();
     }
 
-    @BeforeEach
-    void beforeEach() throws IOException {
-        setValue();
-    }
-
     private void setValue() throws IOException {
         MockitoAnnotations.openMocks(this);
         mapper.registerModule(new JSR310Module());
