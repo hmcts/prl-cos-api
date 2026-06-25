@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.FurtherEvidenceDocumentType;
 import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingCaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingData;
@@ -26,18 +26,12 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingRequestDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -48,14 +42,11 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT1;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_1_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MAGISTRATES_FACTS_AND_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MEDICAL_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
@@ -74,35 +65,37 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SEC37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_37_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_47_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_ADDENDUM_REPORT_LA;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_1_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILD_IMPACT_REPORT_2_LA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_INVOLVEMENT_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_47_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_ADDENDUM_REPORT_LA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT_LA;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class BundleCreateRequestMapper {
+@ConditionalOnProperty(prefix = "feature.toggle", name = "bundleByCategoryEnabled", havingValue = "false", matchIfMissing = true)
+public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
 
-    public static final String REDACTED_DOCUMENT_URL = "documents/00000000-0000-0000-0000-000000000000";
-    public static final String REDACTED_DOCUMENT_URL_BINARY = "documents/00000000-0000-0000-0000-000000000000/binary";
-    public static final String REDACTED_DOCUMENT_FILE_NAME = "*redacted*";
+    private final HearingDetailsMapperUtil hearingDetailsMapperUtil;
 
+    @Override
     public BundleCreateRequest mapCaseDataToBundleCreateRequest(CaseData caseData, String eventId, Hearings hearingDetails,
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
             .caseDetails(BundlingCaseDetails.builder()
-                .bundleName(caseData.getApplicantName())
-                .caseData(mapCaseData(caseData,hearingDetails,
-                    bundleConfigFileName))
-                .build())
+                             .bundleName(caseData.getApplicantName())
+                             .caseData(mapCaseData(
+                                 caseData, hearingDetails,
+                                 bundleConfigFileName
+                             ))
+                             .build())
             .caseTypeId(CASE_TYPE).jurisdictionId(JURISDICTION).eventId(eventId).build();
         log.info("*** create bundle request mapped for the case id  : {}", caseData.getId());
         return bundleCreateRequest;
@@ -112,45 +105,12 @@ public class BundleCreateRequestMapper {
         return BundlingCaseData.builder().id(String.valueOf(caseData.getId())).bundleConfiguration(
                 bundleConfigFileName)
             .data(BundlingData.builder().caseNumber(String.valueOf(caseData.getId())).applicantCaseName(caseData.getApplicantCaseName())
-                .hearingDetails(mapHearingDetails(hearingDetails))
+                .hearingDetails(hearingDetailsMapperUtil.mapHearingDetails(hearingDetails))
                 .applications(mapApplicationsFromCaseData(caseData))
                 .orders(mapOrdersFromCaseData(caseData.getOrderCollection()))
                 .allOtherDocuments(mapAllOtherDocuments(caseData)).build()).build();
     }
 
-    private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
-        if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
-            List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
-                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
-            if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
-                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
-                if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
-                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
-                        .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? getBundleDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
-                        .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
-                }
-            }
-        }
-        return BundleHearingInfo.builder().build();
-    }
-
-    public static String getBundleDateTime(LocalDateTime bundleDateTime) {
-        StringBuilder newBundleDateTime = new StringBuilder();
-        LocalDateTime ldt = CaseUtils.convertUtcToBst(bundleDateTime);
-
-        return newBundleDateTime
-            .append(bundleDateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)))
-            .append(EMPTY_SPACE_STRING)
-            .append(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
-            .toString();
-    }
-
-    private String getHearingVenueAddress(HearingDaySchedule hearingDaySchedule) {
-        return null != hearingDaySchedule.getHearingVenueName()
-            ? hearingDaySchedule.getHearingVenueName() + "\n" +  hearingDaySchedule.getHearingVenueAddress()
-            : hearingDaySchedule.getHearingVenueAddress();
-    }
 
     List<Element<BundlingRequestDocument>> mapAllOtherDocuments(CaseData caseData) {
 
@@ -159,14 +119,14 @@ public class BundleCreateRequestMapper {
         List<Element<BundlingRequestDocument>> fl401SupportingDocs = mapFl401SupportingDocs(caseData.getFl401UploadSupportDocuments());
         if (!fl401SupportingDocs.isEmpty()) {
             fl401SupportingDocs.forEach(docDetailsElement -> {
-                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                 addOtherDocument(allOtherDocuments, docDetailsElement);
             });
         }
         List<Element<BundlingRequestDocument>> fl401WitnessDocs = mapFl401WitnessDocs(caseData.getFl401UploadWitnessDocuments());
         if (!fl401WitnessDocs.isEmpty()) {
             fl401WitnessDocs.forEach(docDetailsElement -> {
-                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                 addOtherDocument(allOtherDocuments, docDetailsElement);
             });
         }
@@ -177,7 +137,7 @@ public class BundleCreateRequestMapper {
                 caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings());
             if (!fl401ApplicantOtherProceedingsDocs.isEmpty()) {
                 fl401ApplicantOtherProceedingsDocs.forEach(docDetailsElement -> {
-                    //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                    // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                     addOtherDocument(allOtherDocuments, docDetailsElement);
                 });
             }
@@ -186,17 +146,17 @@ public class BundleCreateRequestMapper {
         List<Element<BundlingRequestDocument>> c100ApplicantOtherProceedingsDocs = mapC100OtherProceedings(caseData.getExistingProceedingsWithDoc());
         if (!c100ApplicantOtherProceedingsDocs.isEmpty()) {
             c100ApplicantOtherProceedingsDocs.forEach(docDetailsElement -> {
-                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                 addOtherDocument(allOtherDocuments, docDetailsElement);
             });
         }
 
-        //SNI-4260 fix
-        //Updated to retrieve otherDocuments according to the new manageDocuments event
+        // SNI-4260 fix
+        // Updated to retrieve otherDocuments according to the new manageDocuments event
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData);
         if (null != otherDocuments && !otherDocuments.isEmpty()) {
             otherDocuments.forEach(docDetailsElement -> {
-                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                 addOtherDocument(allOtherDocuments, docDetailsElement);
             });
         }
@@ -205,7 +165,7 @@ public class BundleCreateRequestMapper {
             mapApplicationsFromFurtherEvidences(caseData.getFurtherEvidences());
         if (!miamCertAndPreviousOrdersUploadedByCourtAdmin.isEmpty()) {
             miamCertAndPreviousOrdersUploadedByCourtAdmin.forEach(docDetailsElement -> {
-                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                 addOtherDocument(allOtherDocuments, docDetailsElement);
             });
         }
@@ -213,7 +173,7 @@ public class BundleCreateRequestMapper {
         List<Element<BundlingRequestDocument>> miamDocuments = mapMiamDetails(caseData.getMiamDetails());
         if (null != miamDocuments && !miamDocuments.isEmpty()) {
             miamDocuments.forEach(docDetailsElement -> {
-                //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+                // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
                 addOtherDocument(allOtherDocuments, docDetailsElement);
             });
         }
@@ -224,6 +184,7 @@ public class BundleCreateRequestMapper {
 
     /**
      * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles.
+     *
      * @param allOtherDocuments list of BundlingRequestDocument including other documents to be added to the list
      * @param docDetailsElement Other Document to be added to the list
      */
@@ -237,7 +198,7 @@ public class BundleCreateRequestMapper {
             && !document.getDocumentUrl().endsWith(REDACTED_DOCUMENT_URL)
             && !document.getDocumentBinaryUrl().endsWith(REDACTED_DOCUMENT_URL_BINARY)
             && !(document.getDocumentFileName()).equalsIgnoreCase(REDACTED_DOCUMENT_FILE_NAME)) {
-            //Once verified that this is not a redacted document, add to the global other documents list
+            // Once verified that this is not a redacted document, add to the global other documents list
             allOtherDocuments.add(docDetailsElement);
         }
     }
@@ -250,8 +211,11 @@ public class BundleCreateRequestMapper {
             return fl401WitnessDocs;
         }
         ElementUtils.unwrapElements(fl401UploadWitnessDocuments).forEach(witnessDocs ->
-            fl401WitnessDocs.add(ElementUtils.element(mapBundlingRequestDocument(witnessDocs,
-                BundlingDocGroupEnum.applicantWitnessStatements))));
+                                                                             fl401WitnessDocs.add(ElementUtils.element(
+                                                                                 mapBundlingRequestDocument(
+                                                                                     witnessDocs,
+                                                                                     BundlingDocGroupEnum.applicantWitnessStatements
+                                                                                 ))));
         return fl401WitnessDocs;
     }
 
@@ -286,8 +250,11 @@ public class BundleCreateRequestMapper {
             return fl401SupportingDocs;
         }
         ElementUtils.unwrapElements(fl401UploadSupportDocuments).forEach(supportDocs ->
-            fl401SupportingDocs.add(ElementUtils.element(mapBundlingRequestDocument(supportDocs,
-                BundlingDocGroupEnum.applicantStatementSupportingEvidence))));
+                                                                             fl401SupportingDocs.add(ElementUtils.element(
+                                                                                 mapBundlingRequestDocument(
+                                                                                     supportDocs,
+                                                                                     BundlingDocGroupEnum.applicantStatementSupportingEvidence
+                                                                                 ))));
         return fl401SupportingDocs;
     }
 
@@ -295,17 +262,29 @@ public class BundleCreateRequestMapper {
         List<BundlingRequestDocument> applications = new ArrayList<>();
 
         if (null != caseData.getFinalDocument()) {
-            applications.add(mapBundlingRequestDocument(caseData.getFinalDocument(), BundlingDocGroupEnum.applicantApplication));
+            applications.add(mapBundlingRequestDocument(
+                caseData.getFinalDocument(),
+                BundlingDocGroupEnum.applicantApplication
+            ));
         }
         if (null != caseData.getFinalWelshDocument()) {
-            applications.add(mapBundlingRequestDocument(caseData.getFinalWelshDocument(), BundlingDocGroupEnum.applicantApplication));
+            applications.add(mapBundlingRequestDocument(
+                caseData.getFinalWelshDocument(),
+                BundlingDocGroupEnum.applicantApplication
+            ));
         }
 
         if (null != caseData.getC1ADocument()) {
-            applications.add(mapBundlingRequestDocument(caseData.getC1ADocument(), BundlingDocGroupEnum.applicantC1AApplication));
+            applications.add(mapBundlingRequestDocument(
+                caseData.getC1ADocument(),
+                BundlingDocGroupEnum.applicantC1AApplication
+            ));
         }
         if (null != caseData.getC1AWelshDocument()) {
-            applications.add(mapBundlingRequestDocument(caseData.getC1AWelshDocument(), BundlingDocGroupEnum.applicantC1AApplication));
+            applications.add(mapBundlingRequestDocument(
+                caseData.getC1AWelshDocument(),
+                BundlingDocGroupEnum.applicantC1AApplication
+            ));
         }
 
         List<BundlingRequestDocument> citizenUploadedC7Documents = mapC7DocumentsFromCaseData(caseData.getCitizenResponseC7DocumentList());
@@ -320,11 +299,17 @@ public class BundleCreateRequestMapper {
         if (null != miamDetails) {
             Document miamCertificateUpload = miamDetails.getMiamCertificationDocumentUpload();
             if (null != miamCertificateUpload) {
-                miamBundlingDocuments.add(mapBundlingRequestDocument(miamCertificateUpload, BundlingDocGroupEnum.applicantMiamCertificate));
+                miamBundlingDocuments.add(mapBundlingRequestDocument(
+                    miamCertificateUpload,
+                    BundlingDocGroupEnum.applicantMiamCertificate
+                ));
             }
             Document miamCertificateUpload1 = miamDetails.getMiamCertificationDocumentUpload1();
             if (null != miamCertificateUpload1) {
-                miamBundlingDocuments.add(mapBundlingRequestDocument(miamCertificateUpload1, BundlingDocGroupEnum.applicantMiamCertificate));
+                miamBundlingDocuments.add(mapBundlingRequestDocument(
+                    miamCertificateUpload1,
+                    BundlingDocGroupEnum.applicantMiamCertificate
+                ));
             }
         }
         return ElementUtils.wrapElements(miamBundlingDocuments);
@@ -337,8 +322,11 @@ public class BundleCreateRequestMapper {
             return applications;
         }
         ElementUtils.unwrapElements(citizenResponseC7DocumentList).forEach(c7CitizenResponseDocument ->
-            applications.add(mapBundlingRequestDocument(c7CitizenResponseDocument.getCitizenDocument(),
-                BundlingDocGroupEnum.c7Documents)));
+                                                                               applications.add(
+                                                                                   mapBundlingRequestDocument(
+                                                                                       c7CitizenResponseDocument.getCitizenDocument(),
+                                                                                       BundlingDocGroupEnum.c7Documents
+                                                                                   )));
         return applications;
     }
 
@@ -356,11 +344,15 @@ public class BundleCreateRequestMapper {
         ElementUtils.unwrapElements(furtherEvidencesFromCaseData).forEach(furtherEvidence -> {
             if (!furtherEvidence.getRestrictCheckboxFurtherEvidence().contains(restrictToGroup)) {
                 if (FurtherEvidenceDocumentType.miamCertificate.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
-                    applications.add(mapBundlingRequestDocument(furtherEvidence.getDocumentFurtherEvidence(),
-                        BundlingDocGroupEnum.applicantMiamCertificate));
+                    applications.add(mapBundlingRequestDocument(
+                        furtherEvidence.getDocumentFurtherEvidence(),
+                        BundlingDocGroupEnum.applicantMiamCertificate
+                    ));
                 } else if (FurtherEvidenceDocumentType.previousOrders.equals(furtherEvidence.getTypeOfDocumentFurtherEvidence())) {
-                    applications.add(mapBundlingRequestDocument(furtherEvidence.getDocumentFurtherEvidence(),
-                        BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication));
+                    applications.add(mapBundlingRequestDocument(
+                        furtherEvidence.getDocumentFurtherEvidence(),
+                        BundlingDocGroupEnum.applicantPreviousOrdersSubmittedWithApplication
+                    ));
                 }
             }
         });
@@ -378,7 +370,7 @@ public class BundleCreateRequestMapper {
         ordersFromCaseData.forEach(orderDetailsElement -> {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
-            //FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
+            // FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles
             addOrderDocument(orders, document);
             Document welshDocument = orderDetails.getOrderDocumentWelsh();
             addOrderDocument(orders, welshDocument);
@@ -388,7 +380,8 @@ public class BundleCreateRequestMapper {
 
     /**
      * FPVTL-1178 - Exclude redacted documents and placeholder documents from bundles.
-     * @param orders list of BundlingRequestDocument including order documents to be added to the list
+     *
+     * @param orders   list of BundlingRequestDocument including order documents to be added to the list
      * @param document Order Document to be added to the list
      */
     void addOrderDocument(List<BundlingRequestDocument> orders, Document document) {
@@ -404,8 +397,8 @@ public class BundleCreateRequestMapper {
         }
     }
 
-    //SNI-4260 fix
-    //Updated to retrieve otherDocuments according to the new manageDocuments event
+    // SNI-4260 fix
+    // Updated to retrieve otherDocuments according to the new manageDocuments event
     private List<Element<BundlingRequestDocument>> mapOtherDocumentsFromCaseData(
         CaseData caseData) {
         List<Element<QuarantineLegalDoc>> allDocuments = new ArrayList<>();
@@ -422,7 +415,11 @@ public class BundleCreateRequestMapper {
         for (QuarantineLegalDoc doc : ElementUtils.unwrapElements(allDocuments)) {
             BundlingRequestDocument otherDoc = mapBundlingRequestDocumentForOtherDocs(doc);
             if (null != otherDoc) {
-                log.info("otherDoc in bundle with filename: {} for case: {}", otherDoc.documentFileName, caseData.getId());
+                log.info(
+                    "otherDoc in bundle with filename: {} for case: {}",
+                    otherDoc.documentFileName,
+                    caseData.getId()
+                );
                 otherBundlingDocuments.add(otherDoc);
             }
         }
@@ -465,10 +462,12 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getDrugAndAlcoholTestDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.reportsForDrugAndAlcoholTest).build() : null
         );
-        bundleMap.put(POLICE_REPORT, Objects.nonNull(doc.getPoliceReportDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getPoliceReportDocument())
-            .documentFileName(doc.getPoliceReportDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.policeReport).build() : null);
+        bundleMap.put(
+            POLICE_REPORT, Objects.nonNull(doc.getPoliceReportDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getPoliceReportDocument())
+                .documentFileName(doc.getPoliceReportDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.policeReport).build() : null
+        );
         bundleMap.put(
             DNA_REPORTS_EXPERT_REPORT,
             Objects.nonNull(doc.getDnaReportsExpertReportDocument()) ? BundlingRequestDocument.builder()
@@ -625,43 +624,62 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getSection37ReportDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.cafcassSection37Report).build() : null
         );
-        bundleMap.put(OTHER_DOCS, Objects.nonNull(doc.getOtherDocsDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getOtherDocsDocument())
-            .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null);
+        bundleMap.put(
+            OTHER_DOCS, Objects.nonNull(doc.getOtherDocsDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getOtherDocsDocument())
+                .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null
+        );
 
     }
 
     private static void mapLocalAuthorityDocs(QuarantineLegalDoc doc, HashMap<String, BundlingRequestDocument> bundleMap) {
-        bundleMap.put(SEC37_REPORT, Objects.nonNull(doc.getSec37ReportDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getSec37ReportDocument())
-            .documentFileName(doc.getSec37ReportDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSection37Report).build() : null);
-        bundleMap.put(CHILD_IMPACT_REPORT_1_LA, Objects.nonNull(doc.getChildImpactReport1LaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getChildImpactReport1LaDocument())
-            .documentFileName(doc.getChildImpactReport1LaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionChildImpactReport1Report).build() : null);
-        bundleMap.put(CHILD_IMPACT_REPORT_2_LA, Objects.nonNull(doc.getChildImpactReport2LaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getChildImpactReport2LaDocument())
-            .documentFileName(doc.getChildImpactReport2LaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionChildImpactReport2Report).build() : null);
-        bundleMap.put(SECTION_7_REPORT_LA, Objects.nonNull(doc.getSection7ReportLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getSection7ReportLaDocument())
-            .documentFileName(doc.getSection7ReportLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionSection7ReportReport).build() : null);
-        bundleMap.put(SECTION_7_ADDENDUM_REPORT_LA, Objects.nonNull(doc.getSection7AddendumReportLaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getSection7AddendumReportLaDocument())
-            .documentFileName(doc.getSection7AddendumReportLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionSection7AddendumReportReport).build() : null);
-        bundleMap.put(LOCAL_AUTHORITY_INVOLVEMENT_LA, Objects.nonNull(doc.getLocalAuthorityInvolvementLaDocument())
-            ? BundlingRequestDocument.builder()
-            .documentLink(doc.getLocalAuthorityInvolvementLaDocument())
-            .documentFileName(doc.getLocalAuthorityInvolvementLaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionLocalAuthorityInvolvementReport).build() : null);
-        bundleMap.put(SECTION_47_LA, Objects.nonNull(doc.getSection47LaDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getSection47LaDocument())
-            .documentFileName(doc.getSection47LaDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.laSectionSection47EnquiryReport).build() : null);
+        bundleMap.put(
+            SEC37_REPORT, Objects.nonNull(doc.getSec37ReportDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getSec37ReportDocument())
+                .documentFileName(doc.getSec37ReportDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSection37Report).build() : null
+        );
+        bundleMap.put(
+            CHILD_IMPACT_REPORT_1_LA,
+            Objects.nonNull(doc.getChildImpactReport1LaDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getChildImpactReport1LaDocument())
+                .documentFileName(doc.getChildImpactReport1LaDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSectionChildImpactReport1Report).build() : null
+        );
+        bundleMap.put(
+            CHILD_IMPACT_REPORT_2_LA,
+            Objects.nonNull(doc.getChildImpactReport2LaDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getChildImpactReport2LaDocument())
+                .documentFileName(doc.getChildImpactReport2LaDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSectionChildImpactReport2Report).build() : null
+        );
+        bundleMap.put(
+            SECTION_7_REPORT_LA, Objects.nonNull(doc.getSection7ReportLaDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getSection7ReportLaDocument())
+                .documentFileName(doc.getSection7ReportLaDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSectionSection7ReportReport).build() : null
+        );
+        bundleMap.put(
+            SECTION_7_ADDENDUM_REPORT_LA,
+            Objects.nonNull(doc.getSection7AddendumReportLaDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getSection7AddendumReportLaDocument())
+                .documentFileName(doc.getSection7AddendumReportLaDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSectionSection7AddendumReportReport).build() : null
+        );
+        bundleMap.put(
+            LOCAL_AUTHORITY_INVOLVEMENT_LA, Objects.nonNull(doc.getLocalAuthorityInvolvementLaDocument())
+                ? BundlingRequestDocument.builder()
+                .documentLink(doc.getLocalAuthorityInvolvementLaDocument())
+                .documentFileName(doc.getLocalAuthorityInvolvementLaDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSectionLocalAuthorityInvolvementReport).build() : null
+        );
+        bundleMap.put(
+            SECTION_47_LA, Objects.nonNull(doc.getSection47LaDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getSection47LaDocument())
+                .documentFileName(doc.getSection47LaDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.laSectionSection47EnquiryReport).build() : null
+        );
 
         bundleMap.put(
             LA_OTHER_DOCS,
@@ -680,10 +698,12 @@ public class BundleCreateRequestMapper {
                 .documentFileName(doc.getPositionStatementsDocument().getDocumentFileName())
                 .documentGroup(BundlingDocGroupEnum.positionStatements).build() : null
         );
-        bundleMap.put(CASE_SUMMARY, Objects.nonNull(doc.getCaseSummaryDocument()) ? BundlingRequestDocument.builder()
-            .documentLink(doc.getCaseSummaryDocument())
-            .documentFileName(doc.getCaseSummaryDocument().getDocumentFileName())
-            .documentGroup(BundlingDocGroupEnum.caseSummary).build() : null);
+        bundleMap.put(
+            CASE_SUMMARY, Objects.nonNull(doc.getCaseSummaryDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getCaseSummaryDocument())
+                .documentFileName(doc.getCaseSummaryDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.caseSummary).build() : null
+        );
         bundleMap.put(
             FM5_STATEMENTS,
             Objects.nonNull(doc.getFm5StatementsDocument()) ? BundlingRequestDocument.builder()

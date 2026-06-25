@@ -1,25 +1,24 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import javassist.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.AdditionalApplicationTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStatus;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
@@ -28,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
@@ -38,32 +38,31 @@ import uk.gov.hmcts.reform.prl.utils.UploadAdditionalApplicationUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class RequestUpdateCallbackServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class RequestUpdateCallbackServiceTest {
 
-    private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "PRLAPPS";
     private final Long caseId = 1234567887654321L;
-    private final String eventName = "paymentSuccessCallback";
-    private final String eventFailureName = "paymentFailureCallback";
-    public static final String authToken = "Bearer TestAuthToken";
-    private final String serviceAuthToken = "Bearer testServiceAuth";
-    private final String systemUserId = "systemUserID";
-    private final String eventToken = "eventToken";
-
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private CoreCaseDataApi coreCaseDataApi;
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
 
     @Mock
     ObjectMapper objectMapper;
@@ -81,13 +80,13 @@ public class RequestUpdateCallbackServiceTest {
     private CaseWorkerEmailService caseWorkerEmailService;
 
     @Mock
-    private ConfidentialityTabService confidentialityTabService;
-
-    @Mock
     AllTabServiceImpl allTabService;
 
     @Mock
     private Court court;
+
+    @Mock
+    private UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
 
     @Mock
     CcdCoreCaseDataService coreCaseDataService;
@@ -101,227 +100,110 @@ public class RequestUpdateCallbackServiceTest {
     @InjectMocks
     RequestUpdateCallbackService requestUpdateCallbackService;
 
-    @Mock
-    UploadAdditionalApplicationUtils uploadAdditionalApplicationUtils;
-
-    private StartEventResponse startEventResponse;
     private CaseDetails caseDetails;
+    private StartEventResponse startEventResponse;
 
-    @Before
-    public void setUp() {
-        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(systemUserService.getUserId(authToken)).thenReturn(systemUserId);
-        when(systemUserService.getSysUserToken()).thenReturn(authToken);
-        when(coreCaseDataService.eventRequest(CaseEvent.PAYMENT_SUCCESS_CALLBACK, systemUserId)).thenReturn(
-            EventRequestData.builder().build());
-        caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(Map.of("id", 1)).build();
-        startEventResponse = StartEventResponse.builder().eventId(eventName)
+    @BeforeEach
+    void setUp() {
+        String systemUserId = "systemUserID";
+        when(systemUserService.getUserId(AUTH_TOKEN)).thenReturn(systemUserId);
+        when(systemUserService.getSysUserToken()).thenReturn(AUTH_TOKEN);
+
+        caseDetails = CaseDetails.builder().id(caseId).data(Map.of("id", 1)).build();
+        String eventName = "paymentSuccessCallback";
+        String eventToken = "eventToken";
+        startEventResponse = StartEventResponse.builder()
+            .eventId(eventName)
             .caseDetails(caseDetails)
-            .token(eventToken).build();
-        when(coreCaseDataService.findCaseById(
-            Mockito.anyString(),
-            Mockito.anyString()
-        )).thenReturn(caseDetails);
-        when(coreCaseDataService.startUpdate(
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.anyString(),
-            Mockito.anyBoolean()
-        )).thenReturn(startEventResponse);
-        when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(any(), any())).thenCallRealMethod();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void shouldStartAndSubmitEventWithCaseDetails() throws Exception {
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
-        ))
-            .thenReturn(startEventResponse);
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
+            .token(eventToken)
             .build();
 
-        CaseData caseData = CaseData.builder().build();
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-
-        verify(coreCaseDataApi).startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                        caseType, Long.toString(caseId), eventName
-        );
-        verify(coreCaseDataApi).submitEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                         caseType, Long.toString(caseId), true,
-                                                         buildCaseDataContent(eventName, eventToken, null)
-        );
+        when(uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(any()))
+            .thenReturn("AWP Task");
+        when(coreCaseDataService.findCaseById(anyString(), anyString())).thenReturn(caseDetails);
+        when(coreCaseDataService.eventRequest(
+            any(CaseEvent.class),
+            anyString()
+        )).thenReturn(EventRequestData.builder().build());
+        when(coreCaseDataService.startUpdate(anyString(), any(), anyString(), anyBoolean())).thenReturn(
+            startEventResponse);
+        when(coreCaseDataService.createCaseDataContent(any(), any())).thenReturn(CaseDataContent.builder().build());
     }
 
     @Test
-    public void shouldNotStartOrSubmitEventWithoutCaseDetails() throws Exception {
-
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, "123")).thenReturn(caseDetails);
-
-        assertThrows(Exception.class, () -> {
-            serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-                .ccdCaseNumber("123")
-                .serviceRequestStatus(
-                    "Paid").build();
-
-            requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        });
-
-    }
-
-    @Test
-    public void shouldProcessCallback() throws Exception {
-        CaseData caseData = CaseData.builder().id(1L)
-            .paymentServiceRequestReferenceNumber("test-reference").build();
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
-        ))
-            .thenReturn(startEventResponse);
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
+    void shouldSkipProcessingWhenDuplicatePaymentDetected() {
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("test-reference")
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
+            .serviceRequestReference("test-ref")
+            .payment(PaymentDto.builder().paymentReference("pay-ref").build())
             .serviceRequestStatus("Paid")
             .build();
 
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
+        CaseData duplicateCaseData = CaseData.builder()
+            .paymentServiceRequestReferenceNumber("test-ref")
+            .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
+                                                     .serviceRequestReference("test-ref")
+                                                     .serviceRequestStatus("Paid")
+                                                     .build())
+            .build();
 
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(duplicateCaseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
     }
 
     @Test
-    public void shouldProcessCallbackNotPaid() throws Exception {
-        CaseData caseData = CaseData.builder().id(1L)
-            .paymentServiceRequestReferenceNumber("test-reference").build();
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
-        ))
-            .thenReturn(startEventResponse);
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("test-reference")
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("test")
-            .build();
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
-
-    }
-
-    @Test
-    public void shouldProcessPendingCallback() throws Exception {
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
-        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle
-                                                     .builder().payment(Payment.builder()
-                                                                            .paymentServiceRequestReferenceNumber("Paid")
-                                                                            .build())
-                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
-                                                                                  .applicationStatus(ApplicationStatus
-                                                                                                         .SUBMITTED
-                                                                                                         .getDisplayedValue()).build())
-                                                     .c2DocumentBundle(C2DocumentBundle.builder()
-                                                                           .applicationStatus(ApplicationStatus
-                                                                                                  .SUBMITTED.getDisplayedValue()).build())
-                                                     .build()));
-        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
-            .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
-            .additionalApplicationFeesToPay("£232.00")
-            .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().urgencyTimeFrameType(
-                UrgencyTimeFrameType.WITHIN_2_DAYS).build())
-            .build();
-        CaseData caseData = CaseData.builder().id(1L).additionalApplicationsBundle(additionalApplicationsBundle)
-            .paymentServiceRequestReferenceNumber("test-reference").uploadAdditionalApplicationData(uploadAdditionalApplicationData).build();
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventFailureName
-        ))
-            .thenReturn(startEventResponse);
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenReturn(court);
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("Paid")
-            .serviceRequestReference("Paid")
-            .build();
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
-
-    }
-
-    @Test
-    public void shouldThrowExceptionForProcessCallback() throws Exception {
-        CaseData caseData = CaseData.builder().id(1L)
-            .paymentServiceRequestReferenceNumber("test-reference").build();
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString())).thenReturn(caseDetails);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(allTabService.updateAllTabsIncludingConfTab(Mockito.anyString())).thenReturn(caseDetails);
-        when(coreCaseDataApi.startEventForCaseWorker(authToken, serviceAuthToken, systemUserId, jurisdiction,
-                                                     caseType, Long.toString(caseId), eventName
-        ))
-            .thenReturn(startEventResponse);
-        when(courtFinderService.getNearestFamilyCourt(Mockito.any(CaseData.class))).thenThrow(new RuntimeException());
-        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
-            .ccdCaseNumber(caseId.toString())
-            .serviceRequestReference("test-reference")
-            .payment(PaymentDto.builder()
-                         .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
-                         .build())
-            .serviceRequestStatus("Paid")
-            .build();
-
-        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
-        assertEquals(coreCaseDataApi.getCase(authToken, serviceAuthToken, caseId.toString()), caseDetails);
-
-    }
-
-    @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() {
+    void shouldStartAndSubmitEventWithCaseDetails() {
         CaseData caseData = CaseData.builder()
-            .id(1L)
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("2026-1750003526111")
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("2026-1750003526111")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentMethod("cash")
+                         .paymentReference("reference")
+                         .caseReference("reference")
+                         .accountNumber("123445555")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
+    }
+
+    @Test
+    void shouldNotStartOrSubmitEventWithoutCaseDetails() {
+        when(coreCaseDataService.findCaseById(anyString(), eq("123"))).thenReturn(null);
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber("123")
+            .serviceRequestStatus("Paid")
+            .build();
+
+        assertThrows(
+            NullPointerException.class, () ->
+                requestUpdateCallbackService.processCallback(serviceRequestUpdateDto)
+        );
+
+        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
+        verify(coreCaseDataService, never()).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void shouldProcessCallbackNotPaid() {
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("test-reference")
             .state(State.SUBMITTED_NOT_PAID)
             .build();
 
@@ -335,17 +217,326 @@ public class RequestUpdateCallbackServiceTest {
                          .caseReference("reference")
                          .accountNumber("123445555")
                          .build())
+            .serviceRequestStatus("Not Paid")
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService).findCaseById(anyString(), eq(caseId.toString()));
+        verify(coreCaseDataService, times(2)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+        verify(coreCaseDataService).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
+        verify(allTabService).mapAndSubmitAllTabsUpdate(any(), any(), any(), any(), any());
+
+        verifyNoInteractions(solicitorEmailService);
+        verifyNoInteractions(caseWorkerEmailService);
+    }
+
+    @Test
+    void shouldProcessPendingCallback() throws NotFoundException {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
+                                                     .payment(Payment.builder()
+                                                                  .paymentServiceRequestReferenceNumber("Paid")
+                                                                  .build())
+                                                     .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                                                  .applicationStatus("Submitted")
+                                                                                  .build())
+                                                     .c2DocumentBundle(C2DocumentBundle.builder()
+                                                                           .applicationStatus("Submitted")
+                                                                           .build())
+                                                     .build()));
+
+        UploadAdditionalApplicationData uploadAdditionalApplicationData =
+            UploadAdditionalApplicationData.builder()
+                .additionalApplicationsApplyingFor(AdditionalApplicationTypeEnum.otherOrder)
+                .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder()
+                                                      .urgencyTimeFrameType(UrgencyTimeFrameType.WITHIN_2_DAYS)
+                                                      .build())
+                .additionalApplicationFeesToPay("£232.00")
+                .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .additionalApplicationsBundle(additionalApplicationsBundle)
+            .paymentServiceRequestReferenceNumber("test-reference") // Intentionally mismatched to force AWP logic path
+            .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("test-ref")
             .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentMethod("cash")
+                         .paymentReference("reference")
+                         .caseReference("reference")
+                         .accountNumber("123445555")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class))).thenReturn(court);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService, times(1)).findCaseById(anyString(), eq(caseId.toString()));
+        verify(coreCaseDataService, times(1)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+        verify(coreCaseDataService, times(1)).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
+    }
+
+    @Test
+    void shouldSkipProcessingWhenDuplicateAwpPaymentDetected() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("12345")
+                             .status("Paid")
+                             .build())
+                .build()
+        ));
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .additionalApplicationsBundle(additionalApplicationsBundle)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("12345")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder().paymentReference("ref").build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        // Because it is a duplicate (existing inner payment already Paid), we should not call startUpdate
+        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void shouldPopulateAwPCaseDataMapWhenBundleElementMatchesAndPaid() {
+        UUID elementId = UUID.randomUUID();
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            elementId,
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("match-ref")
+                             .status("Not paid")
+                             .build())
+                .build()
+        ));
+
+        CaseData startEventCaseData = CaseData.builder()
+            .id(caseId)
+            .additionalApplicationsBundle(additionalApplicationsBundle)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("match-ref")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder().paymentReference("p-ref").build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(startEventCaseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService).createCaseDataContent(
+            eq(startEventResponse),
+            argThat(arg -> {
+                if (!(arg instanceof Map<?, ?> m)) {
+                    return false;
+                }
+                return m.containsKey("additionalApplicationsBundle")
+                    && m.containsKey("additionalApplicationsBundleId")
+                    && "AWP Task".equals(m.get("awpWaTaskName"))
+                    && "Yes".equals(m.get("awpWaTaskToBeCreated"));
+            })
+        );
+    }
+
+
+    @Test
+    void shouldProcessCallbackCasePaymentSuccess() {
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("matching-case-reference")
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("matching-case-reference") // Forces isCasePayment = true
+            .serviceRequestStatus("Paid")                       // Forces isStatusPaid = true
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("matching-case-reference")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.PAYMENT_SUCCESS_CALLBACK));
+    }
+
+    @Test
+    void shouldSelectCaseEventForCasePaymentFailure() {
+        // Case: isCasePayment = true and status = "Failed"
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("case-ref")
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("case-ref")
+            .serviceRequestStatus("Failed")
+            .payment(PaymentDto.builder().paymentReference("ref").paymentAmount("1").build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.PAYMENT_FAILURE_CALLBACK));
+    }
+
+    @Test
+    void shouldSelectCaseEventForAwpPaymentSuccess() {
+        CaseData awpCaseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("other-ref")
+            .additionalApplicationsBundle(new ArrayList<>())
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("awp-ref")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder().paymentReference("p-ref").build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(awpCaseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK));
+    }
+
+    @Test
+    void shouldProcessCallbackAwpPaymentFailure() {
+        CaseData caseData = CaseData.builder()
+            .id(1L)
+            .paymentServiceRequestReferenceNumber("initial-case-reference") // Mismatch forces isCasePayment = false
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("completely-different-awp-reference")
+            .serviceRequestStatus("Not paid")                                 // Forces isStatusPaid = false
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("reference")
+                         .build())
+            .build();
+
+        when(coreCaseDataService.findCaseById(anyString(), eq(caseId.toString()))).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        // Verify it triggers the AWP failure event path
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK));
+    }
+
+    @Test
+    void shouldHandleCourtFinderExceptionAndContinueProcessing() throws NotFoundException {
+        CaseData caseData = CaseData.builder()
+            .id(1L)
+            .paymentServiceRequestReferenceNumber("test-reference")
+            .state(State.SUBMITTED_NOT_PAID)
+            .paymentCallbackServiceRequestUpdate(null)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("test-reference")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("reference")
+                         .build())
+            .build();
+
+        when(coreCaseDataService.findCaseById(anyString(), eq(caseId.toString()))).thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        when(courtFinderService.getNearestFamilyCourt(any(CaseData.class)))
+            .thenThrow(new NotFoundException("Postcode not recognized"));
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService).findCaseById(anyString(), eq(caseId.toString()));
+        verify(coreCaseDataService, times(2)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
+        verify(coreCaseDataService, times(1)).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
+        verify(allTabService).mapAndSubmitAllTabsUpdate(any(), any(), any(), any(), any());
+        verify(solicitorEmailService).sendEmail(any());
+        verify(caseWorkerEmailService).sendEmail(any());
+    }
+
+    @Test
+    void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsPendingWhenPaymentIsSuccessful() {
+        CaseData caseData = CaseData.builder()
+            .id(1L)
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("test-reference")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("reference")
+                         .build())
             .build();
 
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
+        assertEquals(
+            State.SUBMITTED_PAID, updatedCaseData.getState(),
+            "Case state should transition to SUBMITTED_PAID when payment is successful"
+        );
+
+        assertNotNull(updatedCaseData.getDateSubmitted(), "Date submitted should be populated upon successful payment");
     }
 
     @Test
-    public void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsWithdrawnWhenPaymentIsSuccessful() {
+    void shouldUpdateCaseStateToSubmittedWhenCurrentCaseStateIsWithdrawnWhenPaymentIsSuccessful() {
         CaseData caseData = CaseData.builder()
             .id(1L)
             .state(State.CASE_WITHDRAWN)
@@ -354,24 +545,29 @@ public class RequestUpdateCallbackServiceTest {
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .serviceRequestReference("test-reference")
+            .serviceRequestStatus("Paid")
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
-                         .paymentMethod("cash")
-                         .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
+                         .paymentReference("RC-REFERENCE")
                          .build())
-            .serviceRequestStatus("Paid")
             .build();
 
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-        assertEquals(State.SUBMITTED_PAID, updatedCaseData.getState());
+        assertEquals(
+            State.SUBMITTED_PAID, updatedCaseData.getState(),
+            "Case state should move from WITHDRAWN to SUBMITTED_PAID upon successful payment"
+        );
+
+        assertNotNull(
+            updatedCaseData.getDateSubmitted(),
+            "Date submitted should be set even when coming from a withdrawn state"
+        );
     }
 
     @Test
-    public void shouldNotUpdateCaseStateToSubmittedWhenCurrentCaseStateIsCaseIssuedWhenPaymentIsSuccessful() {
+    void shouldNotUpdateCaseStateToSubmittedWhenCurrentCaseStateIsCaseIssuedWhenPaymentIsSuccessful() {
         CaseData caseData = CaseData.builder()
             .id(1L)
             .state(State.CASE_ISSUED)
@@ -380,29 +576,19 @@ public class RequestUpdateCallbackServiceTest {
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
             .ccdCaseNumber(caseId.toString())
             .serviceRequestReference("test-reference")
+            .serviceRequestStatus("Paid")
             .payment(PaymentDto.builder()
                          .paymentAmount("123")
-                         .paymentMethod("cash")
                          .paymentReference("reference")
-                         .caseReference("reference")
-                         .accountNumber("123445555")
                          .build())
-            .serviceRequestStatus("Paid")
             .build();
 
         CaseData updatedCaseData =
             requestUpdateCallbackService.getCaseDataWithStateAndDateSubmitted(serviceRequestUpdateDto, caseData);
 
-        assertEquals(State.CASE_ISSUED, updatedCaseData.getState());
-    }
-
-    private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object caseData) {
-        return CaseDataContent.builder()
-            .eventToken(eventToken)
-            .event(Event.builder()
-                       .id(eventId)
-                       .build())
-            .data(caseData)
-            .build();
+        assertEquals(
+            State.CASE_ISSUED, updatedCaseData.getState(),
+            "State should NOT change back to SUBMITTED_PAID if the case is already ISSUED"
+        );
     }
 }

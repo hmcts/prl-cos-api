@@ -2134,8 +2134,10 @@ public class CustomOrderService {
                 updateFinalOrderCollection(caseData, caseDataUpdated, finalDoc, orderName);
             }
 
-            // Clean up previewOrderDoc now that we've used it
+            // Clean up previewOrderDoc and customOrderDoc now that we've used them
+            // This prevents stale data affecting subsequent order flows
             caseDataUpdated.put("previewOrderDoc", null);
+            caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
 
         } catch (Exception e) {
             log.error("Failed to process custom order in submitted callback", e);
