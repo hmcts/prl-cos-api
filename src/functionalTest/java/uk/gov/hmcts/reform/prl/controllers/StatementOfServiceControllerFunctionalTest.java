@@ -5,8 +5,10 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -26,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunction
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StatementOfServiceControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
@@ -55,7 +58,7 @@ public class StatementOfServiceControllerFunctionalTest {
     public void testStmtOfServiceAboutToStart() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        caseDetails = request
+        CaseDetails caseDetails = request
             .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem())
             .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -127,6 +130,7 @@ public class StatementOfServiceControllerFunctionalTest {
             .post("/{caseId}/{eventId}/save-statement-of-service-by-citizen")
             .then()
             .statusCode(200);
+
 
     }
 

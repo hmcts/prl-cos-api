@@ -26,7 +26,6 @@ import java.nio.file.Files;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-
 @TestPropertySource(
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",

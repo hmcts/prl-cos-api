@@ -390,7 +390,6 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-  testCompileOnly 'junit:junit'
   testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
   testImplementation 'org.testng:testng:7.12.0'
   testImplementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
@@ -459,7 +458,7 @@ dependencies {
 
   contractTestImplementation(platform("org.junit:junit-bom:${versions.junit}"))
   contractTestImplementation 'org.junit.jupiter:junit-jupiter'
-  contractTestRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  contractTestRuntimeOnly 'org.junit.platform:junit-platform-launcher:6.1.0'
   contractTestImplementation group: 'com.google.guava', name: 'guava', version: versions.guava
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact
@@ -689,19 +688,22 @@ bootWithCCD {
   environment("HEALTH_WORK_ALLOCATION_TASK_API", "http://host.docker.internal:9193/health")
 }
 
-tasks.register('loadLocalEnv', Exec) {
-  group = 'cftlib'
-  description = 'Loads the local dev environment variables from .aat-env into the current shell.'
-  commandLine 'bash', '-c', 'set -a && source .aat-env && set +a'
-}
-
 tasks.register('localFunctionalTests', Test) {
   group = 'cftlib'
   description = 'Runs the functional tests against the local dev environment.'
 
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
-  
+
+  doFirst() {
+    project.file('./.aat-env').readLines().each() {
+      def index = it.indexOf("=")
+      def key = it.substring(0, index)
+      def value = it.substring(index + 1)
+      environment key, value
+    }
+  }
+
   environment("spring.profiles.active", "local")
   environment("RSE_LIB_ADDITIONAL_DATABASES", "camunda,wa_workflow_api,cft_task_db,cft_task_db_replica")
   // ccd-data-store-api

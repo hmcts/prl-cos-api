@@ -34,7 +34,6 @@ src/main/resources/application.yaml
 /yarn.lock
 /.yarn/releases/yarn-4.12.0.cjs
 /.aat-env*
-/.local-env*
 /target/poitl-output/*
 
 .aat-env*

@@ -54,9 +54,6 @@ public class CourtNavCaseControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-    @Value("${TEST_URL}")
-    protected String cosApiUrl;
-
     @Autowired
     private IdamTokenGenerator idamTokenGenerator;
 
@@ -87,7 +84,7 @@ public class CourtNavCaseControllerFunctionalTest {
         Assertions.assertNotNull(caseDetails);
         Assertions.assertNotNull(caseDetails.getId());
 
-        RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())

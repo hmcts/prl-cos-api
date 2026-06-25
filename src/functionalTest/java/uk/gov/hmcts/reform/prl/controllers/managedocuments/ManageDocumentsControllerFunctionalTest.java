@@ -6,7 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -52,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ManageDocumentsControllerFunctionalTest {
 
     @Autowired
@@ -87,6 +91,7 @@ public class ManageDocumentsControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     @Test
+    @Order(1)
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -107,6 +112,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(2)
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
@@ -145,6 +151,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(3)
     public void givenManageDocuments_whenCopy_manage_docsEndPoint_thenRespWithCopiedDocuments() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
         request
@@ -218,6 +225,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(4)
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
         request
@@ -233,6 +241,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(5)
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
@@ -249,6 +258,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(6)
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
 
@@ -271,6 +281,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(7)
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
@@ -286,6 +297,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(8)
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
         request
@@ -303,6 +315,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(9)
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
@@ -320,6 +333,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Order(10)
     public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 

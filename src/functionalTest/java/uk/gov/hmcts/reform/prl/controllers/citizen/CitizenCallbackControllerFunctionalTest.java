@@ -60,7 +60,7 @@ public class CitizenCallbackControllerFunctionalTest {
         Assertions.assertNotNull(caseDetails);
         Assertions.assertNotNull(caseDetails.getId());
 
-        RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())

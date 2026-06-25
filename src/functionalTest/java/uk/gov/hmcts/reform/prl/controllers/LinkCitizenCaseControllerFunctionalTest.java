@@ -6,7 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,7 +19,6 @@ import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.citizen.CaseDataWithHearingResponse;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LinkCitizenCaseControllerFunctionalTest {
 
     @Autowired
@@ -64,6 +67,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
         = "requests/link-citizen-case-access-code1.json";
 
     @Test
+    @Order(1)
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
@@ -85,6 +89,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
     }
 
     @Test
+    @Order(2)
     public void givenRequestBody_linkCitizenToCaseWithHearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY1);
         String requestBodyRevised = requestBody
@@ -98,34 +103,18 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .contentType("application/json")
             .post("/citizen/link-case-to-account-with-hearing")
             .then()
+            .body("caseData.caseInvites[0].id", equalTo("3fa85f64-5717-4562-b3fc-2c963f66afa6"))
+            .body("caseData.caseInvites[0].value.accessCode", equalTo("FVJKGHF"))
+            .body("caseData.caseInvites[0].value.hasLinked", equalTo(YesOrNo.Yes.toString()))
             .extract()
             .as(CaseDataWithHearingResponse.class);
+        log.info("Response from link-case-to-account API: {}", response);
         Assertions.assertNotNull(response);
 
     }
 
     @Test
-    public void givenRequestBody_linkCaseToAccount_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY);
-        String requestBodyRevised = requestBody
-            .replace("1711626009844770", caseDetails1.getId().toString());
-        request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyRevised)
-            .when()
-            .contentType("application/json")
-            .post("/citizen/link-case-to-account")
-            .then()
-            .body("caseInvites[0].id", equalTo("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                  "caseInvites[0].value.accessCode", equalTo("FVJKGHF"))
-            .body("caseInvites[0].value.hasLinked", equalTo(YesOrNo.Yes.toString()))
-            .extract()
-            .as(CaseData.class);
-
-    }
-
-    @Test
+    @Order(4)
     public void givenRequestBody_validateAccessCode_thenDuplicateResponse() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(CITIZEN_REQUEST_BODY1);
@@ -146,7 +135,8 @@ public class LinkCitizenCaseControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_validateAccessCode_then200Response11() throws Exception {
+    @Order(5)
+    public void givenRequestBody_validateAccessCode_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CREATE_CASE_WITH_ACCESS_CODE_REQUEST_BODY);
         CaseDetails caseDetails3 =  request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())

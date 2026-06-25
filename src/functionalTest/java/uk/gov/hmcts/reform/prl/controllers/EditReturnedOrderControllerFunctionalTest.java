@@ -6,10 +6,11 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EditReturnedOrderControllerFunctionalTest {
 
     @Autowired
@@ -55,6 +57,7 @@ public class EditReturnedOrderControllerFunctionalTest {
 
     @Test
     @Order(1)
+
     void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -75,7 +78,7 @@ public class EditReturnedOrderControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Order(2)
     public void givenRequestBody_whenAboutToStart_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         Response response = request
@@ -99,7 +102,7 @@ public class EditReturnedOrderControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Order(3)
     public void givenBody_whenMidEventToPopulateInstructions() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         Response response = request
@@ -124,27 +127,14 @@ public class EditReturnedOrderControllerFunctionalTest {
     }
 
     @Test
-    @Order(2)
+    @Order(4)
     public void givenBody_whenSubmittedToResubmit() throws Exception {
-
-        String requestBodyCaseDetails = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        caseDetails = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBodyCaseDetails)
-            .when()
-            .contentType("application/json")
-            .post("/testing-support/create-ccd-case-data")
-            .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(CaseDetails.class);
 
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_RETURNED_ORDER);
         String requestBodyRevised = requestBody
             .replaceAll("1706607610239516", caseDetails.getId().toString());
         Response response = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
             .when()

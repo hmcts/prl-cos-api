@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.citizen;
 
 import io.restassured.RestAssured;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class FeesAndPaymentControllerFunctionalTest {
 
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
     private static final String CREATE_PAYMENT_INPUT = "requests/create-payment-input.json";
 
     @Autowired
@@ -26,15 +33,12 @@ public class FeesAndPaymentControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    @Value("${TEST_URL}")
-    protected String cosApiUrl;
-
     /*
     These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
      */
     @Test
     public void givenRequestBody_whenGetC100ApplicationFees_then200Response() throws Exception {
-        FeeResponseForCitizen response1 = RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        FeeResponseForCitizen response1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -54,7 +58,7 @@ public class FeesAndPaymentControllerFunctionalTest {
 
     @Test
     public void testFetchFee() {
-        FeeResponseForCitizen response = RestAssured.given().relaxedHTTPSValidation().baseUri(cosApiUrl)
+        FeeResponseForCitizen response = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header("Accepts", APPLICATION_JSON_VALUE)
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate("prl_citizen_frontend"))
