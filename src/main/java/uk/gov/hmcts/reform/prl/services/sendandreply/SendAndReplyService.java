@@ -53,7 +53,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -113,7 +112,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -207,12 +205,6 @@ public class SendAndReplyService {
 
     @Value("${refdata.category-id}")
     private String hearingTypeCategoryId;
-
-    @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
-    private List<String> sendAndReplyFutureHearingStatuses;
-
-    @Value("#{'${hearing_component.hearingStatusesToFilter}'.split(',')}")
-    private List<String> sendAndReplyPastHearingStatuses;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -527,30 +519,13 @@ public class SendAndReplyService {
         }
     }
 
-    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization,
-                                                        boolean includePastHearings,
-                                                        String lockToHearingId) {
+    public CaseData populateDynamicListsForSendAndReply(CaseData caseData, String authorization) {
         String caseReference = String.valueOf(caseData.getId());
         DynamicList documentCategoryList = getCategoriesAndDocuments(authorization, caseReference);
         String s2sToken = authTokenGenerator.generate();
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
 
         DynamicList legalAdviserList = getLegalAdviserList();
-
-        // includePastHearings=true is reserved for the WA-task chase flow
-        // (waSendOrReplyToMessages), where the user may need to message about a hearing
-        // that has already occurred. Regular send-and-reply paths pass false.
-        DynamicList hearings = includePastHearings
-            ? getAllHearingsDynamicList(authorization, s2sToken, caseReference)
-            : getFutureHearingDynamicList(authorization, s2sToken, caseReference);
-
-        // lockToHearingId is set when the user opened this event from a Request Order WA
-        // task: narrow the dropdown to the hearing the task is bound to, so it appears
-        // selected and non-editable in EXUI (FPVTL-2408/2409). Falls back to the full list
-        // if the hearingId is somehow unmatched.
-        if (lockToHearingId != null) {
-            hearings = lockHearingDropdownTo(hearings, lockToHearingId);
-        }
 
         return caseData.toBuilder().sendOrReplyMessage(
                 SendOrReplyMessage.builder()
@@ -570,7 +545,11 @@ public class SendAndReplyService {
                                            .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                                      .label(loggedInUserEmail).code(
                                                    loggedInUserEmail).build())))
-                                           .futureHearingsList(hearings)
+                                           .futureHearingsList(getFutureHearingDynamicList(
+                                               authorization,
+                                               s2sToken,
+                                               caseReference
+                                           ))
                                            .legalAdviserList(legalAdviserList)
                                            .build())
                     .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
@@ -607,34 +586,9 @@ public class SendAndReplyService {
     }
 
     public DynamicList getFutureHearingDynamicList(String authorization, String s2sToken, String caseId) {
-        return buildHearingDynamicList(authorization, s2sToken, caseId,
-            ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream()
-                .map(String::trim).distinct().toList());
-    }
+        Hearings futureHearings = hearingService.getFutureHearings(authorization, caseId);
 
-    public DynamicList getAllHearingsDynamicList(String authorization, String s2sToken, String caseId) {
-        List<String> allowed = Stream.concat(
-                ofNullable(sendAndReplyFutureHearingStatuses).orElse(emptyList()).stream(),
-                ofNullable(sendAndReplyPastHearingStatuses).orElse(emptyList()).stream())
-            .map(String::trim)
-            .distinct()
-            .toList();
-        return buildHearingDynamicList(authorization, s2sToken, caseId, allowed);
-    }
-
-    private DynamicList buildHearingDynamicList(String authorization, String s2sToken, String caseId,
-                                                List<String> allowedStatuses) {
-        Hearings fetched = hearingService.getHearings(authorization, caseId);
-
-        if (fetched != null && fetched.getCaseHearings() != null && !fetched.getCaseHearings().isEmpty()) {
-
-            List<CaseHearing> filteredHearings = fetched.getCaseHearings().stream()
-                .filter(h -> allowedStatuses.contains(h.getHmcStatus()))
-                .toList();
-
-            if (filteredHearings.isEmpty()) {
-                return DynamicList.builder().value(DynamicListElement.EMPTY).build();
-            }
+        if (futureHearings != null && futureHearings.getCaseHearings() != null && !futureHearings.getCaseHearings().isEmpty()) {
 
             Map<String, String> refDataCategoryValueMap = getRefDataMap(
                 authorization,
@@ -643,7 +597,7 @@ public class SendAndReplyService {
                 hearingTypeCategoryId
             );
 
-            List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
+            List<DynamicListElement> hearingDropdowns = futureHearings.getCaseHearings().stream()
                 .map(caseHearing -> {
                     //get hearingId
                     String hearingId = String.valueOf(caseHearing.getHearingID());
@@ -674,32 +628,6 @@ public class SendAndReplyService {
 
     private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
         return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).toList();
-    }
-
-    /**
-     * Filters a hearings DynamicList down to the single element whose code starts with
-     * "{hearingId} - " and pre-selects it. Returns the input unchanged if no element
-     * matches
-     */
-    private DynamicList lockHearingDropdownTo(DynamicList full, String hearingId) {
-        if (full == null || full.getListItems() == null || full.getListItems().isEmpty()) {
-            return full;
-        }
-        log.info("hearingId associated with task ==>{}", hearingId);
-        DynamicListElement match = full.getListItems().stream()
-            .filter(e -> {
-                log.info("hearing code => {}", e.getCode());
-                return e.getCode() != null && e.getCode().contains(hearingId);
-            })
-            .findFirst()
-            .orElse(null);
-        if (match == null) {
-            return full;
-        }
-        return DynamicList.builder()
-            .value(match)
-            .listItems(List.of(match))
-            .build();
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
@@ -1437,7 +1365,6 @@ public class SendAndReplyService {
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
 
         if (null != message && ObjectUtils.isNotEmpty(message.getRecipientEmailAddresses())) {
-            log.info("message.getRecipientEmailAddresses()={} for case={}", message.getRecipientEmailAddresses(), caseData.getId());
             final String[] recipientEmailAddresses = message.getRecipientEmailAddresses().split(COMMA);
 
             if (recipientEmailAddresses.length > 0) {
@@ -2179,11 +2106,9 @@ public class SendAndReplyService {
     }
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        return nonNull(message) && nonNull(message.getApplicationsList())
-            && message.getApplicationsList().getListItems().size() == 1 && nonNull(
-            message.getApplicationsList().getValue())
-            && StringUtils.isNotEmpty(message.getApplicationsList().getValue().getCode());
+        DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
+        return nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && nonNull(
+            applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
 
     public boolean atLeastOnePartySelectedForExternalMessage(Message message) {
@@ -2194,28 +2119,15 @@ public class SendAndReplyService {
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, caseData.getChooseSendOrReply().name(), authorisation);
 
-    }
-
-    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest,
-                                                                               String authorisation) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return sendAndReplySubmittedForChoice(caseData, REPLY.name(), authorisation);
-    }
-
-    private ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedForChoice(CaseData caseData,
-            String sendOrReplyChoice, String authorisation) {
-        log.info("sendOrReplyChoice={} for case={}", sendOrReplyChoice, caseData.getId());
-        if (REPLY.name().equals(sendOrReplyChoice)
+        if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
             return ok(SubmittedCallbackResponse.builder().confirmationBody(
                 REPLY_AND_CLOSE_MESSAGE
             ).build());
         }
 
-        if (SEND.name().equals(sendOrReplyChoice)) {
-            log.info("in SEND for case={}", sendOrReplyChoice, caseData.getId());
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
             sendNotificationToExternalParties(
                 caseData,
                 authorisation
@@ -2233,6 +2145,19 @@ public class SendAndReplyService {
         }
 
         closeAwPTask(caseData);
+
+        return ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        String optionSendOrReply = caseData.getOptionSendOrReply();
+        if ((REPLY.name().equalsIgnoreCase(optionSendOrReply) || REPLY.equals(caseData.getChooseSendOrReply()))
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                REPLY_AND_CLOSE_MESSAGE
+            ).build());
+        }
 
         return ok(SubmittedCallbackResponse.builder().build());
     }
@@ -2258,9 +2183,6 @@ public class SendAndReplyService {
 
 
     public void checkTaskAssociatedWithMessage(CaseData caseData) {
-        log.info("checkTaskAssociatedWithMessage==>");
-        log.info("checkTaskAssociatedWithMessage==>caseData.getChooseSendOrReply() {}", caseData.getChooseSendOrReply());
-        log.info("checkTaskAssociatedWithMessage==>caseData.getOptionSendOrReply() {}", caseData.getOptionSendOrReply());
         if (REPLY.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
             caseData.setChooseSendOrReply(REPLY);
             DynamicList dynamicMessagesListAssociatedWithTask = getDynamicMessagesListAssociatedWithTask(
@@ -2268,8 +2190,8 @@ public class SendAndReplyService {
                 caseData.getMessageIdentifier()
             );
             caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
-        } else if (SEND.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
-            caseData.setChooseSendOrReply(SEND);
+        } else {
+            caseData.setOptionSendOrReply(EMPTY_VALUE);
         }
     }
 }
