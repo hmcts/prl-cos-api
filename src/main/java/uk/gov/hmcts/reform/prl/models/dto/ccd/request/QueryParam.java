@@ -18,9 +18,6 @@ public class QueryParam {
     private Query query;
     private String size;
     private String from;
-    private List<Sort> sort;
-    @JsonProperty("search_after")
-    private List<String> searchAfter;
     @JsonProperty("_source")
     private List<String> dataToReturn;
 }
