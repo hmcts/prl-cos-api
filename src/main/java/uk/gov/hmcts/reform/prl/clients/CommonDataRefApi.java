@@ -1,16 +1,16 @@
 package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.prl.config.FeignRetryConfig;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 
 @FeignClient(name = "common-ref-data-api", url = "${commonData.api.url}",
-    configuration = FeignClientProperties.FeignClientConfiguration.class)
+    configuration = FeignRetryConfig.class)
 public interface CommonDataRefApi {
 
     @GetMapping(value = "refdata/commondata/lov/categories/{categoryId}", consumes = "application/json")
