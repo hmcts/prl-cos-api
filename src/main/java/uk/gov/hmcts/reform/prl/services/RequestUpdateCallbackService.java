@@ -78,7 +78,7 @@ public class RequestUpdateCallbackService {
         boolean isCasePayment = isRootServiceRequest(
             caseDetails,
             serviceRequestUpdateDto.getServiceRequestReference()
-        );
+        ) || isServiceRequestOnCaseWithoutAwp(currentCaseData, serviceRequestUpdateDto.getServiceRequestReference());
 
         CaseEvent caseEvent;
         if (isCasePayment) {
@@ -179,6 +179,24 @@ public class RequestUpdateCallbackService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         return !StringUtils.isEmpty(serviceRequestReference)
             && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+    }
+
+    private boolean isServiceRequestOnCaseWithoutAwp(CaseData caseData, String serviceRequestReference) {
+        boolean hasNoAwpApplications = caseData.getAdditionalApplicationsBundle() == null
+            || caseData.getAdditionalApplicationsBundle().isEmpty();
+        if (!StringUtils.isEmpty(serviceRequestReference)
+            && hasNoAwpApplications
+            && !serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber())) {
+            log.warn(
+                "Payment callback service request reference {} does not match root reference {} for case {}, "
+                    + "but no AWP applications exist on the case. Treating callback as root payment.",
+                serviceRequestReference,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getId()
+            );
+            return true;
+        }
+        return false;
     }
 
     private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
