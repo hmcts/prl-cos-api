@@ -959,6 +959,7 @@ public class PrlAppsConstants {
     public static final String CITIZEN = "Citizen";
     public static final String SUCCESS = "Success";
     public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
+    public static final String DOCUMENT_BLANK_COVER_SHEET_HINT = "DOCUMENT_BLANK_COVER_SHEET_HINT";
 
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
 
@@ -1104,6 +1105,6 @@ public class PrlAppsConstants {
     public static final String CATEGORY_ID = "category_id";
     public static final String DOCUMENT_FILENAME = "document_filename";
 
-
-
+    public static final String TASK_TRIGGERED_BY = "RequestOrder";
+    public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
 }
