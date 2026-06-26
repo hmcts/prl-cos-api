@@ -420,10 +420,19 @@ class RequestUpdateCallbackServiceTest {
 
     @Test
     void shouldSelectCaseEventForAwpPaymentSuccess() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("awp-ref")
+                             .status("Not paid")
+                             .build())
+                .build()
+        ));
         CaseData awpCaseData = CaseData.builder()
             .id(caseId)
             .paymentServiceRequestReferenceNumber("other-ref")
-            .additionalApplicationsBundle(new ArrayList<>())
+            .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
@@ -444,10 +453,77 @@ class RequestUpdateCallbackServiceTest {
     }
 
     @Test
+    void shouldTreatMismatchedServiceRequestAsRootPaymentWhenNoAwpBundleExists() {
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("stale-root-ref")
+            .state(State.SUBMITTED_NOT_PAID)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("incoming-root-ref")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("p-ref")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.PAYMENT_SUCCESS_CALLBACK));
+    }
+
+    @Test
+    void shouldSkipDuplicateMismatchedServiceRequestWhenNoAwpBundleExists() {
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("stale-root-ref")
+            .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
+                                                     .serviceRequestReference("incoming-root-ref")
+                                                     .serviceRequestStatus("Paid")
+                                                     .build())
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("incoming-root-ref")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("p-ref")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
+    }
+
+    @Test
     void shouldProcessCallbackAwpPaymentFailure() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("completely-different-awp-reference")
+                             .status("Not paid")
+                             .build())
+                .build()
+        ));
+
         CaseData caseData = CaseData.builder()
             .id(1L)
             .paymentServiceRequestReferenceNumber("initial-case-reference") // Mismatch forces isCasePayment = false
+            .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()

@@ -78,7 +78,7 @@ public class RequestUpdateCallbackService {
         boolean isCasePayment = isRootServiceRequest(
             caseDetails,
             serviceRequestUpdateDto.getServiceRequestReference()
-        );
+        ) || isServiceRequestOnCaseWithoutAwp(currentCaseData, serviceRequestUpdateDto.getServiceRequestReference());
 
         CaseEvent caseEvent;
         if (isCasePayment) {
@@ -181,13 +181,32 @@ public class RequestUpdateCallbackService {
             && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
     }
 
+    private boolean isServiceRequestOnCaseWithoutAwp(CaseData caseData, String serviceRequestReference) {
+        boolean hasNoAwpApplications = caseData.getAdditionalApplicationsBundle() == null
+            || caseData.getAdditionalApplicationsBundle().isEmpty();
+        if (!StringUtils.isEmpty(serviceRequestReference)
+            && hasNoAwpApplications
+            && !serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber())) {
+            log.warn(
+                "Payment callback service request reference {} does not match root reference {} for case {}, "
+                    + "but no AWP applications exist on the case. Treating callback as root payment.",
+                serviceRequestReference,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                caseData.getId()
+            );
+            return true;
+        }
+        return false;
+    }
+
     private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         String incomingRef = paymentUpdateDto.getServiceRequestReference();
 
         // Root Case Payment Request
-        if (isRootServiceRequest(caseDetails, paymentUpdateDto.getServiceRequestReference())) {
+        if (isRootServiceRequest(caseDetails, paymentUpdateDto.getServiceRequestReference())
+            || isServiceRequestOnCaseWithoutAwp(caseData, paymentUpdateDto.getServiceRequestReference())) {
             // If the database already shows a recorded callback and it was successful, it's a duplicate
             return caseData.getPaymentCallbackServiceRequestUpdate() != null
                 && PAID.equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestStatus());
