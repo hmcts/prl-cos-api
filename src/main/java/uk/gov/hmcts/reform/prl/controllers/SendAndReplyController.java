@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,14 +38,15 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData.temporaryFields;
 import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToStart;
+import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.getOpenMessages;
-import static uk.gov.hmcts.reform.prl.utils.ClientContextUtils.extractHearingIdFromClientContext;
 
 
 @Slf4j
@@ -240,79 +240,68 @@ public class SendAndReplyController extends AbstractCallbackController {
             .build();
     }
 
+
+
+
     @PostMapping("/send-or-reply-to-messages/mid-event")
     public CallbackResponse sendOrReplyToMessagesMidEvent(@RequestHeader("Authorization")
                                                                @Parameter(hidden = true) String authorisation,
-                                                          @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
-                                                              required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest);
-        // Regular event: future hearings only (FPVTL-2408/2409 — past hearings are
-        // exclusively for the WA chase flow). No task context, so no hearing lock.
-        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
-        log.info("simple: hearingId Associated with the task==> {}", lockToHearingId);
-        return processSendOrReplyMidEvent(authorisation, caseData, !StringUtils.isBlank(lockToHearingId), lockToHearingId);
+        return processSendOrReplyMidEvent(authorisation, caseData);
     }
+
+
+
 
     @PostMapping("/send-or-reply-to-messages/mid-event-task")
     public CallbackResponse sendOrReplyToMessagesMidEventTask(@RequestHeader("Authorization")
                                                           @Parameter(hidden = true) String authorisation,
-                                                          @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
-                                                                         required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        // WA-task chase flow: include past hearings so the user can message about a
-        // hearing that has already occurred. If the task's additionalProperties.hearingId
-        // is in the client-context header, lock the dropdown to that hearing
-        // (FPVTL-2408/2409).
-        String lockToHearingId = extractHearingIdFromClientContext(clientContext);
-        log.info("midevent task: hearingId Associated with the task==> {}", lockToHearingId);
-        return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
+        return processSendOrReplyMidEvent(authorisation, caseData);
     }
+
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
-                                                                            @RequestBody CallbackRequest callbackRequest,
-                                                                            @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
-                                                                                required = false) String clientContext) {
-        //Called from RequestOrderTask OR NextSteps dropdpown
+                                                                            @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        // Regular event does not close request-order tasks (FPVTL-2408/2409) — null hearingId
-        // tells processAboutToSubmit to skip the tracking update.
-        String chasedHearingId = extractHearingIdFromClientContext(clientContext);
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
+
+        return processSendAndReplyAboutToSubmit(authorisation, caseData, caseDataMap);
     }
+
+
 
     @PostMapping("/send-or-reply-to-messages/about-to-submit-task")
     public AboutToStartOrSubmitCallbackResponse sendOrReplyToMessagesSubmitTask(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
-                                                                            @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER,
-                                                                                           required = false) String clientContext,
                                                                             @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
-        // WA-task variant closes the request-order task. The chased hearingId comes from the WA
-        // client-context header (the same source used by mid-event-task to lock the dropdown),
-        // so submit-time and mid-event-time agree on which hearing this chase is for
-        // regardless of what's in the message dropdown (FPVTL-2408/2409).
-        String chasedHearingId = extractHearingIdFromClientContext(clientContext);
-        return sendAndReplyCommonService.processAboutToSubmit(authorisation, caseData, caseDataMap, chasedHearingId);
+
+        return processSendAndReplyAboutToSubmit(authorisation, caseData, caseDataMap);
     }
+
+
+
 
     @PostMapping("/send-or-reply-to-messages/submitted")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReply(@RequestHeader("Authorization")
                   @Parameter(hidden = true) String authorisation,
                   @RequestBody CallbackRequest callbackRequest,
                   @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext) {
-        log.info("Not Triggered By Task==>");
+
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
+
+
 
     @PostMapping("/send-or-reply-to-messages/submitted-task")
     public ResponseEntity<SubmittedCallbackResponse> handleSubmittedSendAndReplyTask(@RequestHeader("Authorization")
@@ -334,9 +323,8 @@ public class SendAndReplyController extends AbstractCallbackController {
         return sendAndReplyService.clearDynamicLists(callbackRequest);
     }
 
-    private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData,
-                                                        boolean includePastHearings,
-                                                        String lockToHearingId) {
+
+    private CallbackResponse processSendOrReplyMidEvent(String authorisation, CaseData caseData) {
         List<String> errors = new ArrayList<>();
         if (REPLY.equals(caseData.getChooseSendOrReply())) {
             if (isEmpty(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()))) {
@@ -345,16 +333,31 @@ public class SendAndReplyController extends AbstractCallbackController {
                 caseData = sendAndReplyService.populateMessageReplyFields(caseData, authorisation);
             }
         } else {
-            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation,
-                                                                                includePastHearings,
-                                                                                lockToHearingId);
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
         }
 
         return CallbackResponse.builder().data(caseData).errors(errors).build();
     }
 
+
     private CaseData getCaseData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         return CaseUtils.getCaseData(caseDetails, objectMapper);
+    }
+
+
+    private AboutToStartOrSubmitCallbackResponse processSendAndReplyAboutToSubmit(String authorisation,
+                                                                                  CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseData.getChooseSendOrReply().equals(SEND)) {
+            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
+        } else {
+            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
+        }
+
+        //clear temp fields
+        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
+        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 }
