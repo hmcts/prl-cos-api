@@ -59,8 +59,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
@@ -469,86 +471,78 @@ class CaseDocumentControllerTest {
         when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         //When
-        ResponseEntity<?> response = caseDocumentController.deleteDocument(AUTH_TOKEN, S2S_TOKEN, "TEST_DOCUMENT_ID");
+        ResponseEntity<?> response = caseDocumentController.deleteDocument(AUTH_TOKEN, S2S_TOKEN, "TEST_DOCUMENT_ID", null);
         //Then
+        verify(documentGenService).deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID");
+        verify(caseService).removeDocumentReferenceFromUserCases(AUTH_TOKEN, S2S_TOKEN, "TEST_DOCUMENT_ID");
         assertEquals(documentResponse, response.getBody());
     }
 
     @Test
-    void testDeleteDocumentDelinksCitizenUploadedDocumentFromCase() throws Exception {
-        DocumentResponse documentResponse = DocumentResponse.builder()
+    void testDeleteDocumentRemovesDocumentReferenceFromCaseWhenCaseIdProvided() {
+        DocumentResponse documentResponse = DocumentResponse
+            .builder()
             .status("SUCCESS")
-            .build();
-
-        Element<QuarantineLegalDoc> quarantineLegalDocElement = Element.<QuarantineLegalDoc>builder()
-            .id(UUID.fromString("00000000-0000-0000-0000-000000000123"))
-            .value(QuarantineLegalDoc.builder()
-                       .citizenQuarantineDocument(Document.builder()
-                                                        .documentUrl(
-                                                            "http://dm-store:8080/documents/00000000-0000-0000-0000-000000000123")
-                                                        .build())
-                       .build())
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .documentManagementDetails(
-                DocumentManagementDetails.builder()
-                    .citizenQuarantineDocsList(List.of(quarantineLegalDocElement))
-                    .build()
-            )
             .build();
 
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
-        when(caseService.retrieveCases(AUTH_TOKEN, S2S_TOKEN)).thenReturn(List.of(caseData));
+        when(documentGenService.deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID")).thenReturn(documentResponse);
+
+        ResponseEntity<?> response = caseDocumentController.deleteDocument(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            "TEST_DOCUMENT_ID",
+            "123456789"
+        );
+
+        verify(documentGenService).deleteDocument(AUTH_TOKEN, "TEST_DOCUMENT_ID");
+        verify(caseService).delinkCitizenUploadedDocumentFromCase(AUTH_TOKEN, "123456789", "TEST_DOCUMENT_ID");
+        verify(caseService, never()).removeDocumentReferenceFromUserCases(any(), any(), any());
+        assertEquals(documentResponse, response.getBody());
+    }
+
+    @Test
+    void testDeleteDocumentRemovesDocumentReferenceFromUserCases() {
+        DocumentResponse documentResponse = DocumentResponse.builder()
+            .status("SUCCESS")
+            .build();
+
+        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+        when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
         when(documentGenService.deleteDocument(AUTH_TOKEN, "00000000-0000-0000-0000-000000000123")).thenReturn(documentResponse);
         when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
 
         ResponseEntity<?> response = caseDocumentController.deleteDocument(
             AUTH_TOKEN,
             S2S_TOKEN,
-            "00000000-0000-0000-0000-000000000123"
+            "00000000-0000-0000-0000-000000000123",
+            null
         );
 
-        verify(caseService).retrieveCases(AUTH_TOKEN, S2S_TOKEN);
-        verify(caseService).delinkCitizenUploadedDocumentFromCase(
+        verify(documentGenService).deleteDocument(AUTH_TOKEN, "00000000-0000-0000-0000-000000000123");
+        verify(caseService).removeDocumentReferenceFromUserCases(
             AUTH_TOKEN,
-            "12345",
+            S2S_TOKEN,
             "00000000-0000-0000-0000-000000000123"
         );
         assertEquals(documentResponse, response.getBody());
     }
 
     @Test
-    void testDeleteDocumentThrowsCaseIdWhenDelinkCitizenUploadedDocumentFails() throws Exception {
-        Element<QuarantineLegalDoc> quarantineLegalDocElement = Element.<QuarantineLegalDoc>builder()
-            .id(UUID.randomUUID())
-            .value(QuarantineLegalDoc.builder()
-                       .citizenQuarantineDocument(Document.builder()
-                                                        .documentUrl(
-                                                            "http://dm-store:8080/documents/00000000-0000-0000-0000-000000000123")
-                                                        .build())
-                       .build())
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .documentManagementDetails(
-                DocumentManagementDetails.builder()
-                    .citizenQuarantineDocsList(List.of(quarantineLegalDocElement))
-                    .build()
-            )
+    void testDeleteDocumentThrowsWhenRemoveDocumentReferenceFromUserCasesFails() {
+        DocumentResponse documentResponse = DocumentResponse.builder()
+            .status("SUCCESS")
             .build();
 
         when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(S2S_TOKEN)).thenReturn(Boolean.TRUE);
-        when(caseService.retrieveCases(AUTH_TOKEN, S2S_TOKEN)).thenReturn(List.of(caseData));
+        when(documentGenService.deleteDocument(AUTH_TOKEN, "00000000-0000-0000-0000-000000000123")).thenReturn(documentResponse);
         when(authTokenGenerator.generate()).thenReturn(S2S_TOKEN);
         doThrow(new RuntimeException("test failure"))
-            .when(caseService).delinkCitizenUploadedDocumentFromCase(
+            .when(caseService).removeDocumentReferenceFromUserCases(
                 AUTH_TOKEN,
-                "12345",
+                S2S_TOKEN,
                 "00000000-0000-0000-0000-000000000123"
             );
 
@@ -557,7 +551,8 @@ class CaseDocumentControllerTest {
             () -> caseDocumentController.deleteDocument(
                 AUTH_TOKEN,
                 S2S_TOKEN,
-                "00000000-0000-0000-0000-000000000123"
+                "00000000-0000-0000-0000-000000000123",
+                null
             )
         );
 
@@ -571,7 +566,8 @@ class CaseDocumentControllerTest {
         assertThrows(
             RuntimeException.class, () -> caseDocumentController.deleteDocument(
                 AUTH_TOKEN, S2S_TOKEN,
-                "TEST_DOCUMENT_ID"
+                "TEST_DOCUMENT_ID",
+                null
             )
         );
     }

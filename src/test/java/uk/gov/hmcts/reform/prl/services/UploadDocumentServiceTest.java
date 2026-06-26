@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import feign.FeignException;
+import feign.Request;
+import feign.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.citizen.UploadedDocumentRequest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -29,6 +33,11 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -125,6 +134,55 @@ public class UploadDocumentServiceTest {
         assertEquals(OK, response.getStatusCode());
     }
 
+    @Test
+    public void deleteDocumentSuccess() {
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+
+        uploadDocumentService.deleteDocument(AUTH, "1accfb1e-2574-4084-b97e-1cd53fd14815");
+
+        verify(caseDocumentClient).deleteDocument(
+            AUTH,
+            "s2s",
+            UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815"),
+            true
+        );
+    }
+
+    @Test
+    public void deleteDocumentShouldTreatNotFoundAsAlreadyDeleted() {
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        doThrow(feignException(404))
+            .when(caseDocumentClient).deleteDocument(eq(AUTH), eq("s2s"), any(UUID.class), anyBoolean());
+
+        uploadDocumentService.deleteDocument(AUTH, "1accfb1e-2574-4084-b97e-1cd53fd14815");
+
+        verify(caseDocumentClient).deleteDocument(
+            AUTH,
+            "s2s",
+            UUID.fromString("1accfb1e-2574-4084-b97e-1cd53fd14815"),
+            true
+        );
+    }
+
+    @Test
+    public void deleteDocumentShouldPropagateUpstreamErrors() {
+        when(authTokenGenerator.generate()).thenReturn("s2s");
+        doThrow(feignException(500))
+            .when(caseDocumentClient).deleteDocument(eq(AUTH), eq("s2s"), any(UUID.class), anyBoolean());
+
+        assertThrows(
+            FeignException.class,
+            () -> uploadDocumentService.deleteDocument(AUTH, "1accfb1e-2574-4084-b97e-1cd53fd14815")
+        );
+    }
+
+    private FeignException feignException(int status) {
+        return FeignException.errorStatus("deleteDocument", Response.builder()
+            .status(status)
+            .reason("test")
+            .request(Request.create(Request.HttpMethod.DELETE, "/documents", Map.of(), null, null, null))
+            .build());
+    }
 
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();

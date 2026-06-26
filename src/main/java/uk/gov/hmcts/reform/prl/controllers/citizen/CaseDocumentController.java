@@ -60,7 +60,6 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -371,33 +370,20 @@ public class CaseDocumentController {
         @ApiResponse(responseCode = "500", description = "Internal server error")})
     public ResponseEntity<Object> deleteDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
                                             @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-                                            @PathVariable("documentId") String documentId) {
+                                            @PathVariable("documentId") String documentId,
+                                            @RequestParam(value = "caseId", required = false) String caseId) {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        delinkCitizenUploadedDocument(authorisation, authTokenGenerator.generate(), documentId);
-        return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
-    }
-
-    private void delinkCitizenUploadedDocument(String authorisation, String serviceAuthorization, String documentId) {
-        Optional<CaseData> matchedCaseData = Optional.ofNullable(caseService.retrieveCases(authorisation, serviceAuthorization))
-            .orElse(List.of())
-            .stream()
-            .filter(caseData -> isNotEmpty(caseData.getDocumentManagementDetails()))
-            .filter(caseData -> isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()))
-            .filter(caseData -> caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
-                .stream()
-                .anyMatch(element -> isNotEmpty(element.getValue().getCitizenQuarantineDocument())
-                    && documentId.equalsIgnoreCase(DocumentUtils.getDocumentId(element.getValue().getCitizenQuarantineDocument().getDocumentUrl()))))
-            .findFirst();
-
-        if (matchedCaseData.isEmpty()) {
-            return;
+        DocumentResponse documentResponse = documentGenService.deleteDocument(authorisation, documentId);
+        if (StringUtils.isNotBlank(caseId)) {
+            log.info("Removing document reference {} from case data for case {}", documentId, caseId);
+            caseService.delinkCitizenUploadedDocumentFromCase(authorisation, caseId, documentId);
+        } else {
+            log.info("No caseId supplied for document reference {} removal, searching user cases", documentId);
+            caseService.removeDocumentReferenceFromUserCases(authorisation, authTokenGenerator.generate(), documentId);
         }
-
-        CaseData caseDataToUpdate = matchedCaseData.get();
-        String caseId = String.valueOf(caseDataToUpdate.getId());
-        caseService.delinkCitizenUploadedDocumentFromCase(authorisation, caseId, documentId);
+        return ResponseEntity.ok(documentResponse);
     }
 
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
@@ -482,4 +468,3 @@ public class CaseDocumentController {
     }
 
 }
-

@@ -54,6 +54,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
@@ -67,9 +68,12 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemover;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -184,6 +188,7 @@ public class CaseService {
     private final DashboardNotificationsConfig notificationsConfig;
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final DocumentRemover documentRemover;
 
     public CaseDetails updateCase(CaseData caseData, String authToken,
                                   String caseId, String eventId) throws JsonProcessingException {
@@ -543,6 +548,89 @@ public class CaseService {
             false
         );
 
+    }
+
+    public void removeDocumentReferenceFromCase(String authToken, String caseId, String documentId) {
+        UserInfo userInfo = idamClient.getUserInfo(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(CITIZEN_UPLOADED_DOCUMENT);
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
+            caseEvent,
+            userInfo.getUid()
+        );
+
+        StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
+            authToken,
+            eventRequestData,
+            caseId,
+            false
+        );
+
+        Map<String, Object> updatedCaseData;
+        try {
+            updatedCaseData = documentRemover.removeDocument(startEventResponse.getCaseDetails().getData(), documentId);
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to remove document reference from case data", exception);
+        }
+
+        CaseDataContent caseDataContent = ccdCoreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            updatedCaseData
+        );
+
+        ccdCoreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+    }
+
+    public void removeDocumentReferenceFromUserCases(String authToken, String s2sToken, String documentId) {
+        List<CaseData> userCases = retrieveCases(authToken, s2sToken);
+        log.info("Searching {} user cases for document reference {}", userCases.size(), documentId);
+
+        List<CaseData> matchingCases = userCases.stream()
+            .filter(caseData -> hasDocumentReference(caseData, documentId))
+            .toList();
+
+        if (matchingCases.isEmpty()) {
+            log.warn("No user case found containing document reference {}", documentId);
+            return;
+        }
+
+        matchingCases.forEach(caseData -> {
+            String caseId = String.valueOf(caseData.getId());
+            if (hasCitizenQuarantineDocument(caseData, documentId)) {
+                log.info("Removing citizen quarantine document reference {} from case {}", documentId, caseId);
+                delinkCitizenUploadedDocumentFromCase(authToken, caseId, documentId);
+            } else {
+                log.info("Removing generic document reference {} from case {}", documentId, caseId);
+                removeDocumentReferenceFromCase(authToken, caseId, documentId);
+            }
+        });
+    }
+
+    private boolean hasDocumentReference(CaseData caseData, String documentId) {
+        return hasCitizenQuarantineDocument(caseData, documentId)
+            || documentRemover.hasDocument(caseData.toMap(objectMapper), documentId);
+    }
+
+    private boolean hasCitizenQuarantineDocument(CaseData caseData, String documentId) {
+        return Optional.ofNullable(caseData)
+            .map(CaseData::getDocumentManagementDetails)
+            .map(DocumentManagementDetails::getCitizenQuarantineDocsList)
+            .orElse(List.of())
+            .stream()
+            .filter(Objects::nonNull)
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .map(QuarantineLegalDoc::getCitizenQuarantineDocument)
+            .filter(Objects::nonNull)
+            .map(Document::getDocumentUrl)
+            .filter(StringUtils::isNotBlank)
+            .map(DocumentUtils::getDocumentId)
+            .anyMatch(documentId::equalsIgnoreCase);
     }
 
     private List<CitizenDocuments> getCitizenApplicationPacks(CaseData caseData,

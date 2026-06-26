@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,12 +70,16 @@ public class UploadDocumentService {
 
 
     public void deleteDocument(String authorizationToken, String documentId) {
-        caseDocumentClient.deleteDocument(
-            authorizationToken,
-            authTokenGenerator.generate(),
-            UUID.fromString(documentId),
-            true
-        );
+        try {
+            caseDocumentClient.deleteDocument(
+                authorizationToken,
+                authTokenGenerator.generate(),
+                UUID.fromString(documentId),
+                true
+            );
+        } catch (FeignException.NotFound exception) {
+            log.info("Document {} does not exist in CDAM, treating as already deleted", documentId);
+        }
     }
 
     public UploadedDocuments uploadedDocuments(UploadedDocumentRequest uploadedDocumentRequest, String authorisation) {

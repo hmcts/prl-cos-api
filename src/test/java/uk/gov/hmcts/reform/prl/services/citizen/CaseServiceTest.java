@@ -80,11 +80,13 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemover;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -102,6 +104,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -195,6 +198,9 @@ public class CaseServiceTest {
 
     @Mock
     private RoleAssignmentService roleAssignmentService;
+
+    @Mock
+    private DocumentRemover documentRemover;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -1974,6 +1980,156 @@ public class CaseServiceTest {
             })
         );
         Mockito.verify(coreCaseDataService).submitUpdate(AUTH_TOKEN, eventRequestData, caseDataContent, CASE_ID, false);
+    }
+
+    @Test
+    void testRemoveDocumentReferenceFromCase() throws Exception {
+        String documentId = "00000000-0000-0000-0000-000000000123";
+        Map<String, Object> originalCaseData = Map.of(
+            "applicantUploadFiles",
+            List.of(Map.of("document_url", "http://dm-store:8080/documents/" + documentId))
+        );
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(Long.parseLong(CASE_ID))
+                             .data(originalCaseData)
+                             .build())
+            .build();
+
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(UserInfo.builder().uid("test-user-id").build());
+        when(coreCaseDataService.eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id")).thenReturn(eventRequestData);
+        when(coreCaseDataService.startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false)).thenReturn(startEventResponse);
+        when(documentRemover.removeDocument(originalCaseData, documentId)).thenReturn(updatedCaseData);
+        when(coreCaseDataService.createCaseDataContent(startEventResponse, updatedCaseData)).thenReturn(caseDataContent);
+
+        caseService.removeDocumentReferenceFromCase(AUTH_TOKEN, CASE_ID, documentId);
+
+        Mockito.verify(documentRemover).removeDocument(originalCaseData, documentId);
+        Mockito.verify(coreCaseDataService).submitUpdate(AUTH_TOKEN, eventRequestData, caseDataContent, CASE_ID, false);
+    }
+
+    @Test
+    void testRemoveDocumentReferenceFromCaseThrowsUncheckedIOException() throws Exception {
+        String documentId = "00000000-0000-0000-0000-000000000123";
+        Map<String, Object> originalCaseData = Map.of("applicantUploadFiles", List.of());
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(Long.parseLong(CASE_ID))
+                             .data(originalCaseData)
+                             .build())
+            .build();
+
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(UserInfo.builder().uid("test-user-id").build());
+        when(coreCaseDataService.eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id")).thenReturn(eventRequestData);
+        when(coreCaseDataService.startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false)).thenReturn(startEventResponse);
+        when(documentRemover.removeDocument(originalCaseData, documentId)).thenThrow(new IOException("test failure"));
+
+        assertThrows(
+            UncheckedIOException.class,
+            () -> caseService.removeDocumentReferenceFromCase(AUTH_TOKEN, CASE_ID, documentId)
+        );
+    }
+
+    @Test
+    void testRemoveDocumentReferenceFromUserCasesDelinksCitizenQuarantineDocument() {
+        String documentId = "00000000-0000-0000-0000-000000000123";
+        Element<QuarantineLegalDoc> documentToDelink = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString(documentId))
+            .value(QuarantineLegalDoc.builder()
+                       .citizenQuarantineDocument(Document.builder()
+                                                        .documentUrl("http://dm-store:8080/documents/" + documentId)
+                                                        .build())
+                       .build())
+            .build();
+        Element<QuarantineLegalDoc> retainedDocument = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000124"))
+            .value(QuarantineLegalDoc.builder()
+                       .citizenQuarantineDocument(Document.builder()
+                                                        .documentUrl(
+                                                            "http://dm-store:8080/documents/00000000-0000-0000-0000-000000000124")
+                                                        .build())
+                       .build())
+            .build();
+        CaseData caseDataWithCitizenDocuments = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(List.of(documentToDelink, retainedDocument))
+                                           .build())
+            .build();
+        Map<String, Object> searchCaseData = Map.of("search", "data");
+        Map<String, Object> updateCaseData = Map.of("update", "data");
+        CaseDetails searchCaseDetails = CaseDetails.builder()
+            .id(Long.parseLong(CASE_ID))
+            .data(searchCaseData)
+            .build();
+        CaseDetails updateCaseDetails = CaseDetails.builder()
+            .id(Long.parseLong(CASE_ID))
+            .data(updateCaseData)
+            .build();
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(updateCaseDetails)
+            .build();
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().id("test-user-id").build());
+        when(coreCaseDataApi.searchForCitizen(
+            Mockito.eq(AUTH_TOKEN),
+            Mockito.eq(S2S_TOKEN),
+            Mockito.eq("test-user-id"),
+            anyString(),
+            anyString(),
+            Mockito.anyMap()
+        )).thenReturn(List.of(searchCaseDetails));
+        when(objectMapper.convertValue(searchCaseData, CaseData.class)).thenReturn(caseDataWithCitizenDocuments);
+        when(objectMapper.convertValue(updateCaseData, CaseData.class)).thenReturn(caseDataWithCitizenDocuments);
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(UserInfo.builder().uid("test-user-id").build());
+        when(coreCaseDataService.eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id")).thenReturn(eventRequestData);
+        when(coreCaseDataService.startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false)).thenReturn(startEventResponse);
+        when(coreCaseDataService.createCaseDataContent(
+            Mockito.eq(startEventResponse),
+            Mockito.<Map<String, Object>>argThat(caseDataMap -> {
+                List<Element<QuarantineLegalDoc>> updatedDocuments =
+                    (List<Element<QuarantineLegalDoc>>) caseDataMap.get("citizenQuarantineDocsList");
+
+                return updatedDocuments.size() == 1
+                    && updatedDocuments.getFirst().getId().equals(retainedDocument.getId());
+            })
+        )).thenReturn(caseDataContent);
+
+        caseService.removeDocumentReferenceFromUserCases(AUTH_TOKEN, S2S_TOKEN, documentId);
+
+        Mockito.verify(coreCaseDataService).submitUpdate(AUTH_TOKEN, eventRequestData, caseDataContent, CASE_ID, false);
+        Mockito.verify(documentRemover, Mockito.never()).hasDocument(any(), anyString());
+    }
+
+    @Test
+    void testRemoveDocumentReferenceFromUserCasesDoesNothingWhenNoCaseContainsDocument() {
+        String documentId = "00000000-0000-0000-0000-000000000123";
+        Map<String, Object> searchCaseData = Map.of("search", "data");
+        CaseDetails searchCaseDetails = CaseDetails.builder()
+            .id(Long.parseLong(CASE_ID))
+            .data(searchCaseData)
+            .build();
+
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(UserDetails.builder().id("test-user-id").build());
+        when(coreCaseDataApi.searchForCitizen(
+            Mockito.eq(AUTH_TOKEN),
+            Mockito.eq(S2S_TOKEN),
+            Mockito.eq("test-user-id"),
+            anyString(),
+            anyString(),
+            Mockito.anyMap()
+        )).thenReturn(List.of(searchCaseDetails));
+        when(objectMapper.convertValue(searchCaseData, CaseData.class)).thenReturn(CaseData.builder().build());
+        when(documentRemover.hasDocument(any(), Mockito.eq(documentId))).thenReturn(false);
+
+        caseService.removeDocumentReferenceFromUserCases(AUTH_TOKEN, S2S_TOKEN, documentId);
+
+        Mockito.verify(coreCaseDataService, Mockito.never()).startUpdate(any(), any(), any(), Mockito.anyBoolean());
     }
 
     @Test
