@@ -2476,6 +2476,7 @@ public class ManageOrderService {
                            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                            .selectChildArrangementsOrder(caseData.getManageOrders().getSelectChildArrangementsOrder())
                            .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())
+                           .checkIsThisUrgent(caseData.getManageOrders().getCheckIsThisUrgent())
                            .finalisationDetails(finalisationDetailsService.buildFinalisationDetails(caseData))
                            .childOption(getChildOption(caseData))
                            .isOrderUploaded(No)
