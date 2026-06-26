@@ -3,23 +3,17 @@ package uk.gov.hmcts.reform.prl.services.sendandreply;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
-import uk.gov.hmcts.reform.prl.services.requestorder.HearingTrackingLedger;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_ADDTIONAL_APPLICATION_BUNDLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_IN_REVIEW;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ACCESS_CATEGORY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
-import static uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage.temporaryFieldsAboutToSubmit;
 
 @Service
 @Slf4j
@@ -94,34 +88,6 @@ public class SendAndReplyCommonService {
 
         //WA - clear reply field in case of SEND
         sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
-    }
-
-    public AboutToStartOrSubmitCallbackResponse processAboutToSubmit(String authorisation,
-                                                                     CaseData caseData,
-                                                                     Map<String, Object> caseDataMap,
-                                                                     String chasedHearingId) {
-        log.info("processAboutToSubmit==>getChooseSendOrReply {}", caseData.getChooseSendOrReply());
-        if (SEND.equals(caseData.getChooseSendOrReply())) {
-            sendMessages(authorisation, caseData, caseDataMap);
-        } else {
-            replyMessages(authorisation, caseData, caseDataMap);
-        }
-
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-        if (chasedHearingId != null) {
-            recordRequestOrderCompletionForChasedHearing(caseData, caseDataMap, chasedHearingId);
-        }
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
-    }
-
-    private void recordRequestOrderCompletionForChasedHearing(CaseData caseData,
-                                                              Map<String, Object> caseDataMap,
-                                                              String chasedHearingId) {
-        HearingTrackingLedger ledger = HearingTrackingLedger.from(caseData);
-        ledger.recordCompleted(chasedHearingId, LocalDate.now(ZoneId.of("Europe/London")));
-        caseDataMap.put("requestOrderTaskTrackingByHearing", ledger.asCollection());
     }
 
 }
