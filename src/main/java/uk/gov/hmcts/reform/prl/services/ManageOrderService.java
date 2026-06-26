@@ -968,6 +968,9 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, nopNonPartiesWelshTemplate);
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopNonPartiesWelshFile);
                 break;
+            case noticeOfHearing:
+                // add files when they exist
+                break;
             default:
                 break;
         }
