@@ -20,7 +20,7 @@ class UpdateHearingActualTaskTest {
     UpdateHearingActualsService updateHearingActualsService;
 
     @Test
-    void runInvokesBothServicesInSequence() {
+    void runTaskWithHearingAwayDays() {
         updateHearingActualTask.run();
 
         verify(updateHearingActualsService, times(1)).updateHearingActuals();
