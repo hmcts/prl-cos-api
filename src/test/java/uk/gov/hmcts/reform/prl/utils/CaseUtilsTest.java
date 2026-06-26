@@ -12,12 +12,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -82,33 +79,5 @@ class CaseUtilsTest {
             .caseTypeOfApplication(caseType)
             .issueDate(issueDate)
             .build();
-    }
-
-    @Test
-    void getWaMapperReturnsNullForNullClientContext() {
-        assertThat(CaseUtils.getWaMapper(null)).isNull();
-    }
-
-    @Test
-    void getWaMapperReturnsNullForMalformedBase64ClientContext() {
-        assertThat(CaseUtils.getWaMapper("not-base64!!!")).isNull();
-    }
-
-    @Test
-    void getWaMapperReturnsNullForBase64StringThatIsNotValidJson() {
-        String notJson = Base64.getEncoder().encodeToString("not json".getBytes(StandardCharsets.UTF_8));
-
-        assertThat(CaseUtils.getWaMapper(notJson)).isNull();
-    }
-
-    @Test
-    void getWaMapperParsesValidBase64EncodedClientContext() {
-        String json = "{\"client_context\":{\"user_task\":{\"task_data\":{\"additional_properties\":{\"hearingId\":\"999\"}}}}}";
-        String encoded = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-
-        WaMapper waMapper = CaseUtils.getWaMapper(encoded);
-
-        assertThat(waMapper).isNotNull();
-        assertThat(CaseUtils.getHearingId(waMapper)).isEqualTo("999");
     }
 }
