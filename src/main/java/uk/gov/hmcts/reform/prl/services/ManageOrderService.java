@@ -1405,6 +1405,7 @@ public class ManageOrderService {
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
+            .checkIsThisUrgent(caseData.getManageOrders().getCheckIsThisUrgent())
             .approvalDate(caseData.getApprovalDate())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
