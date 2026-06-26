@@ -728,35 +728,32 @@ public class StmtOfServImplService {
                                                                      String template) {
         if (!CaseUtils.hasDashboardAccess(respondent)
             && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-            List<Document> documents = null;
-            try {
-                //cover sheets
-                documents = new ArrayList<>(serviceOfApplicationPostService
-                                                .getCoverSheets(caseData, authorization,
-                                                                respondent.getValue().getAddress(),
-                                                                respondent.getValue().getLabelForDynamicList(),
-                                                                DOCUMENT_COVER_SHEET_HINT
-                                                ));
 
+            try {
                 //cover letters
                 CaseInvite caseInvite = null;
                 if (!CaseUtils.hasDashboardAccess(respondent)
                     && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     caseInvite = CaseUtils.getCaseInvite(respondent.getId(), caseData.getCaseInvites());
                 }
-                List<Document> coverLetters = serviceOfApplicationService.generateAccessCodeLetter(authorization,
+                List<Document> documentsAndCovers = serviceOfApplicationService.generateAccessCodeLetter(authorization,
                                                                                                    caseData, respondent,
                                                                                                    caseInvite,
                                                                                                    template);
-
-                documents.addAll(coverLetters);
-
+                //cover sheets
+                List<Document> coverSheets = serviceOfApplicationPostService
+                                                .getCoverSheets(caseData, authorization,
+                                                                respondent.getValue().getAddress(),
+                                                                respondent.getValue().getLabelForDynamicList(),
+                                                                DOCUMENT_COVER_SHEET_HINT
+                                                );
+                documentsAndCovers.addAll(coverSheets);
                 //post letters via bulk print
                 BulkPrintDetails bulkPrintDetails = serviceOfApplicationPostService.sendPostNotificationToParty(
                     caseData,
                     authorization,
                     respondent,
-                    documents,
+                    documentsAndCovers,
                     respondent.getValue().getLabelForDynamicList()
                 );
                 log.info(
@@ -771,7 +768,7 @@ public class StmtOfServImplService {
                                                      .partyType(PartyType.RESPONDENT)
                                                      .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                                                      .build())
-                                   .documents(ElementUtils.wrapElements(coverLetters))
+                                   .documents(ElementUtils.wrapElements(documentsAndCovers))
                                    .build());
             } catch (Exception e) {
                 log.error(
