@@ -261,8 +261,6 @@ public class ManageOrderService {
 
     public static final String CIR_DOCUMENTS_REQUESTED = "cirDocumentsRequested";
 
-    private static final String CHECK_IS_THIS_URGENT = "checkIsThisUrgent";
-
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
 
@@ -4000,7 +3998,6 @@ public class ManageOrderService {
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
-        waFieldsMap.put(CHECK_IS_THIS_URGENT, caseData.getManageOrders().getCheckIsThisUrgent());
         return waFieldsMap;
     }
 
@@ -4011,7 +4008,6 @@ public class ManageOrderService {
         if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
             Map<String, Object> waFieldsMap = new HashMap<>();
             waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
-            waFieldsMap.put(CHECK_IS_THIS_URGENT, caseData.getManageOrders().getCheckIsThisUrgent());
             setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
             setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
             cancelCirDocumentsRequestedTask(caseData, waFieldsMap);
@@ -4077,7 +4073,6 @@ public class ManageOrderService {
 
         caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY, localAuthorityReportFiledByDate);
         caseDataMap.put(WHEN_REPORTS_MUST_BE_FILED, cafcassReportFiledByDate);
-        caseDataMap.put(CHECK_IS_THIS_URGENT, caseData.getManageOrders().getCheckIsThisUrgent());
 
         allTabService.submitAllTabsUpdate(
             startAllTabsUpdateDataContent.authorisation(),
