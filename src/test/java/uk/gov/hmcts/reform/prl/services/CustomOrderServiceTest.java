@@ -2146,7 +2146,6 @@ class CustomOrderServiceTest {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("customOrderDoc", customDoc);
-        // NO previewOrderDoc in map - should fall back to caseData.getPreviewOrderDoc()
 
         when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(customDoc);
@@ -2157,19 +2156,38 @@ class CustomOrderServiceTest {
                 .documentUrl("http://preview-url")
                 .documentFileName("preview.docx")
                 .build();
+
         CaseData caseData = CaseData.builder()
             .id(123L)
-            .previewOrderDoc(previewDoc)  // Fallback source
+            .previewOrderDoc(previewDoc)
             .build();
 
-        // Act - downstream NPE is wrapped; fallback path is still exercised
-        assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
-            customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
 
-        // Assert - the method should have used caseData.getPreviewOrderDoc() as fallback.
-        // Since previewDoc had a valid binaryUrl, processing continued past the early
-        // return and the customDoc was converted.
+        byte[] headerBytes = new byte[]{0x50, 0x4B, 0x03, 0x04};
+        byte[] pdfBytes = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31};
+
+        when(documentGenService.getDocumentBytes("http://preview-binary", "system-token", "s2s-token"))
+            .thenReturn(headerBytes);
+        when(documentGenService.getDocumentBytes("http://custom-binary", "system-token", "s2s-token"))
+            .thenReturn(pdfBytes);
+
+        // Act
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true)
+        );
+
+        // Assert
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+
         verify(objectMapper).convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
+        verify(documentGenService).getDocumentBytes("http://preview-binary", "system-token", "s2s-token");
+        verify(documentGenService).getDocumentBytes("http://custom-binary", "system-token", "s2s-token");
+
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
     }
 
     @Test
