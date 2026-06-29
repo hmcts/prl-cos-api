@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.prl.enums;
 
 public enum ManageOrderFieldsEnum {
 
-    manageOrdersOptions("manageOrdersOptions"),
+    // manageOrdersOptions removed from clean up in about-to-submit. The submitted
+    // callback reads it back from the DB via getStartAllTabsUpdate to decide whether to run
+    // the custom-order combine/seal step
     createSelectOrderOptions("createSelectOrderOptions"),
     childArrangementOrders("childArrangementOrders"),
     domesticAbuseOrders("domesticAbuseOrders"),

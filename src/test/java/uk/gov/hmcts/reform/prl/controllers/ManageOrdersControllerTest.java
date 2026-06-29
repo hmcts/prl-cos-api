@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
@@ -1705,12 +1707,11 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
         verify(manageOrderService, times(1))
@@ -4285,7 +4286,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse
+        ResponseEntity<SubmittedCallbackResponse> aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
@@ -4809,7 +4810,7 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
 
         // Call the method
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -4864,7 +4865,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -4930,7 +4931,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -4992,7 +4993,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
@@ -5334,7 +5335,7 @@ public class ManageOrdersControllerTest {
             return null;
         }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -5429,7 +5430,7 @@ public class ManageOrdersControllerTest {
             return null;
         }).when(customOrderService).combineAndFinalizeCustomOrder(any(), any(), any(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -6289,7 +6290,7 @@ public class ManageOrdersControllerTest {
                 .build())
             .build();
 
-        AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+        ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
@@ -6694,7 +6695,7 @@ public class ManageOrdersControllerTest {
     // ========== Tests for handleCustomOrderFailure / removePlaceholderCustomOrderFromCollections ==========
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByBinaryUrl() {
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByBinaryUrl() throws Exception {
         // Bad upload (e.g. PDF renamed to .docx) - controller must:
         //  (a) return errors on the response (user-facing message)
         //  (b) remove the matching placeholder entry from orderCollection
@@ -6775,14 +6776,14 @@ public class ManageOrdersControllerTest {
             .when(customOrderService).combineAndFinalizeCustomOrder(
                 anyString(), any(CaseData.class), anyMap(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        ResponseEntity<SubmittedCallbackResponse> response =
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
-        // (a) user-facing error returned
+        // (a) user-facing error returned via confirmationHeader
         assertNotNull(response);
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
-        assertTrue(response.getErrors().get(0).contains("not a valid"));
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getConfirmationHeader());
+        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
 
         // (b) the matching placeholder entry has been removed, the unrelated one survives
         @SuppressWarnings("unchecked")
@@ -6800,7 +6801,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByDocUrl() {
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByDocUrl() throws Exception {
         // Same as above but the placeholder entry only carries the self/document_url (not binary).
         // Also exercises the camelCase fallback (documentBinaryUrl / documentUrl) in docUrlMatches.
         String customDocSelfUrl = "http://test.url/bad-upload.docx";
@@ -6867,7 +6868,7 @@ public class ManageOrdersControllerTest {
             .when(customOrderService).combineAndFinalizeCustomOrder(
                 anyString(), any(CaseData.class), anyMap(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        ResponseEntity<SubmittedCallbackResponse> response =
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
@@ -6879,7 +6880,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_noUrl_fallsBackToRemovingFirst() {
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_noUrl_fallsBackToRemovingFirst() throws Exception {
         // No customOrderDoc on the callback - extractCustomOrderDocBinaryUrl returns null,
         // so removeMatchingEntry falls back to removing the most recently added (index 0)
         // entry from each collection.
@@ -6940,7 +6941,7 @@ public class ManageOrdersControllerTest {
             .when(customOrderService).combineAndFinalizeCustomOrder(
                 anyString(), any(CaseData.class), anyMap(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        ResponseEntity<SubmittedCallbackResponse> response =
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
@@ -6952,7 +6953,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_noMatchingEntry_leavesCollectionAlone() {
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_noMatchingEntry_leavesCollectionAlone() throws Exception {
         // customOrderDoc has a binary url that does NOT match any entry in the collection.
         // The collection must be left untouched (the early-return branch in removeMatchingEntry).
         String customDocBinaryUrl = "http://test.url/binary/unmatched.docx";
@@ -7017,7 +7018,7 @@ public class ManageOrdersControllerTest {
             .when(customOrderService).combineAndFinalizeCustomOrder(
                 anyString(), any(CaseData.class), anyMap(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        ResponseEntity<SubmittedCallbackResponse> response =
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
@@ -7029,7 +7030,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_matchesOrderDocumentWelsh() {
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_matchesOrderDocumentWelsh() throws Exception {
         // The bad upload's URL only matches via the orderDocumentWelsh field on the entry,
         // exercising the second branch of entryReferencesDoc.
         String customDocBinaryUrl = "http://test.url/binary/welsh-bad.docx";
@@ -7098,7 +7099,7 @@ public class ManageOrdersControllerTest {
             .when(customOrderService).combineAndFinalizeCustomOrder(
                 anyString(), any(CaseData.class), anyMap(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        ResponseEntity<SubmittedCallbackResponse> response =
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
@@ -7109,7 +7110,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_emptyCollection_isNoOp() {
+    public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_emptyCollection_isNoOp() throws Exception {
         // Collection is present but empty - removeMatchingEntry returns early without
         // mutating it. Verifies we don't blow up on the empty-list early-return branch.
         Map<String, Object> customDocMap = new HashMap<>();
@@ -7162,12 +7163,13 @@ public class ManageOrdersControllerTest {
             .when(customOrderService).combineAndFinalizeCustomOrder(
                 anyString(), any(CaseData.class), anyMap(), anyBoolean());
 
-        AboutToStartOrSubmitCallbackResponse response =
+        ResponseEntity<SubmittedCallbackResponse> response =
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
-        assertNotNull(response.getErrors());
-        assertEquals(1, response.getErrors().size());
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getConfirmationHeader());
+        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
     }
 
     @Test
@@ -7310,6 +7312,7 @@ public class ManageOrdersControllerTest {
         assertEquals(Yes, response.getData().get(PrlAppsConstants.CAFCASS_OR_CYMRU_NEED_TO_PROVIDE_REPORT));
     }
 
+    @SneakyThrows
     @Test
     @SuppressWarnings("unchecked")
     public void finalizeOrderSubmission_customOrder_shouldMergeNewDraftOrderIntoExistingDraftCollection() {
@@ -7396,6 +7399,7 @@ public class ManageOrdersControllerTest {
         assertEquals(existingDraftId, resultDrafts.get(1).get("id"));
     }
 
+    @SneakyThrows
     @Test
     public void finalizeOrderSubmission_customOrder_withNonFl404Type_shouldNotCreateFl404CustomFields() {
         CaseData callbackCaseData = CaseData.builder()

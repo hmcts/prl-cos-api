@@ -2172,7 +2172,7 @@ public class CustomOrderService {
         CaseData caseData,
         Map<String, Object> caseDataUpdated,
         boolean isDraftOrder
-    ) {
+    ) throws IOException {
         try {
             // Get the user's uploaded document
             Object customOrderDocObj = caseDataUpdated.get(CUSTOM_ORDER_DOC);
@@ -2233,17 +2233,13 @@ public class CustomOrderService {
             caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
 
         } catch (InvalidCustomOrderDocumentException e) {
-            // Bad upload (e.g. PDF renamed to .docx). Wipe the offending doc so
-            // the user can retry cleanly, and propagate so the controller can
-            // return an error to CCD and abort the event before notifications run.
             log.error("Invalid custom order document for case {}: {}", caseData.getId(), e.getMessage());
             clearCustomOrderDocState(caseDataUpdated);
             throw e;
         } catch (Exception e) {
             log.error("Failed to process custom order in submitted callback for case {}", caseData.getId(), e);
             clearCustomOrderDocState(caseDataUpdated);
-            throw new InvalidCustomOrderDocumentException(
-                "Failed to process the uploaded custom order document. Please re-upload and try again.", e);
+            throw e;
         }
     }
 
@@ -2257,8 +2253,10 @@ public class CustomOrderService {
         }
         caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
         caseDataUpdated.put("previewOrderDoc", null);
-        caseDataUpdated.put(CUSTOM_ORDER_USED_CDAM_ASSOCIATION, null);
-        log.info("Cleared customOrderDoc / previewOrderDoc / customOrderUsedCdamAssociation after failure");
+        // CUSTOM_ORDER_USED_CDAM_ASSOCIATION is an in-memory flag only - remove rather than
+        // null it so it doesn't get submitted to CCD which has no such field defined.
+        caseDataUpdated.remove(CUSTOM_ORDER_USED_CDAM_ASSOCIATION);
+        log.info("Cleared customOrderDoc / previewOrderDoc after failure");
     }
 
     void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,

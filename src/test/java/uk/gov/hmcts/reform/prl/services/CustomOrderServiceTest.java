@@ -11,7 +11,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -41,7 +40,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.document.PoiTlDocxRenderer;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -49,7 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,6 +64,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
@@ -108,7 +106,7 @@ class CustomOrderServiceTest {
     // ========== Tests for EXISTING FLOW (renderUploadedCustomOrderAndStoreOnManageOrders) ==========
 
     @Test
-    void testCustomOrderDocKeptAndTransformedDocPersisted() throws Exception {
+    void testCustomOrderDocKeptAndTransformedDocPersisted() {
         // Arrange
         Map<String, Object> caseDataUpdated = new HashMap<>();
         uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -219,7 +217,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testRenderUploadedCustomOrder_formatsOrderNameWithActReference() throws Exception {
+    void testRenderUploadedCustomOrder_formatsOrderNameWithActReference() {
         // Tests buildCustomOrderPlaceholders branch where formNumber and actReference are both non-null
         Map<String, Object> caseDataUpdated = new HashMap<>();
         uk.gov.hmcts.reform.prl.models.documents.Document customOrderDoc =
@@ -1964,12 +1962,11 @@ class CustomOrderServiceTest {
     // ========== Tests for combineAndFinalizeCustomOrder ==========
 
     @Test
-    void testCombineAndFinalizeCustomOrder_skipsWhenNoDocuments() {
+    void testCombineAndFinalizeCustomOrder_skipsWhenNoDocuments() throws IOException {
         // Arrange - no customOrderDoc
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
-        // Act - should not throw, just skip
         customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false);
 
         // Assert - no changes made
@@ -1977,7 +1974,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_skipsWhenNoHeaderPreview() {
+    void testCombineAndFinalizeCustomOrder_skipsWhenNoHeaderPreview() throws IOException {
         // Arrange - has customOrderDoc but no headerPreview
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -2100,26 +2097,39 @@ class CustomOrderServiceTest {
         caseDataUpdated.put("customOrderDoc", customDoc);
         caseDataUpdated.put("previewOrderDoc", previewDoc);
 
-        // Mock objectMapper to return the documents
         when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(customDoc);
         when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(previewDoc);
 
+        when(systemUserService.getSysUserToken()).thenReturn("system-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        byte[] headerBytes = new byte[]{0x50, 0x4B, 0x03, 0x04}; // docx/zip-like
+        byte[] pdfBytes = new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31}; // %PDF-1
+
+        when(documentGenService.getDocumentBytes("http://preview-binary", "system-token", "s2s-token"))
+            .thenReturn(headerBytes);
+        when(documentGenService.getDocumentBytes("http://custom-binary", "system-token", "s2s-token"))
+            .thenReturn(pdfBytes);
+
         CaseData caseData = CaseData.builder()
             .id(123L)
             .build();
 
-        // Act - downstream call will NPE due to missing mocks; the service now
-        // wraps any failure during combining as InvalidCustomOrderDocumentException
-        // and clears the transient state.
-        assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
-            customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
+        // Act / Assert
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true)
+        );
 
-        // Assert - verify objectMapper was called to convert both documents
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+
         verify(objectMapper).convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
         verify(objectMapper).convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class);
-        // And the bad upload state was cleared on failure
+        verify(documentGenService).getDocumentBytes("http://preview-binary", "system-token", "s2s-token");
+        verify(documentGenService).getDocumentBytes("http://custom-binary", "system-token", "s2s-token");
+
         assertNull(caseDataUpdated.get("customOrderDoc"));
         assertNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -2188,7 +2198,7 @@ class CustomOrderServiceTest {
 
         CaseData caseData = CaseData.builder().id(123L).build();
 
-        // Act - processing will fail downstream (no document bytes mocked);
+        // Act - processing will fail downstream (no document bytes mocked)
         // failure is now wrapped as InvalidCustomOrderDocumentException.
         assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
             customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
@@ -2199,7 +2209,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_skipsWhenCustomDocBinaryUrlNull() {
+    void testCombineAndFinalizeCustomOrder_skipsWhenCustomDocBinaryUrlNull() throws IOException {
         // Arrange - customOrderDoc has null binaryUrl
         uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -2223,7 +2233,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_skipsWhenHeaderPreviewBinaryUrlNull() {
+    void testCombineAndFinalizeCustomOrder_skipsWhenHeaderPreviewBinaryUrlNull() throws IOException {
         // Arrange - headerPreview has null binaryUrl
         uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -2284,7 +2294,7 @@ class CustomOrderServiceTest {
         CaseData caseData = CaseData.builder().id(123L).build();
 
         // Use spy to mock just processCustomOrderOnSubmitted
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
             anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
 
@@ -3862,8 +3872,8 @@ class CustomOrderServiceTest {
         List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>> updatedList =
             (List<Element<uk.gov.hmcts.reform.prl.models.DraftOrder>>) caseDataUpdated.get("draftOrderCollection");
         assertEquals(1, updatedList.size());
-        assertEquals("updated.docx", updatedList.get(0).getValue().getOrderDocument().getDocumentFileName());
-        assertEquals("Custom Order", updatedList.get(0).getValue().getOrderTypeId());
+        assertEquals("updated.docx", updatedList.getFirst().getValue().getOrderDocument().getDocumentFileName());
+        assertEquals("Custom Order", updatedList.getFirst().getValue().getOrderTypeId());
     }
 
     // ========== Tests for updateFinalOrderCollection ==========
@@ -3925,8 +3935,8 @@ class CustomOrderServiceTest {
         List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
             (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
         assertEquals(1, updatedList.size());
-        assertEquals("final.docx", updatedList.get(0).getValue().getOrderDocument().getDocumentFileName());
-        assertEquals("Final Custom Order", updatedList.get(0).getValue().getOrderTypeId());
+        assertEquals("final.docx", updatedList.getFirst().getValue().getOrderDocument().getDocumentFileName());
+        assertEquals("Final Custom Order", updatedList.getFirst().getValue().getOrderTypeId());
     }
 
 
@@ -4658,7 +4668,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineHeaderAndContent_translatesSecurityRejectionIntoInvalidCustomOrderDocument() throws Exception {
+    void testCombineHeaderAndContent_translatesSecurityRejectionIntoInvalidCustomOrderDocument() {
         // DocxCombineUtils.validateDocumentSecurity throws a plain IOException with one of three
         // known messages when the upload contains macros / OLE objects / external links. The
         // service must translate those into InvalidCustomOrderDocumentException(UNSAFE_DOCX_ERROR)
@@ -4680,7 +4690,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineHeaderAndContent_unrelatedIoExceptionIsNotTranslated() throws Exception {
+    void testCombineHeaderAndContent_unrelatedIoExceptionIsNotTranslated() {
         // Any IOException that doesn't carry one of the security-validator messages should
         // propagate unchanged — we don't want to mask genuine merge failures behind a
         // user-friendly "remove macros" message.
@@ -4749,7 +4759,7 @@ class CustomOrderServiceTest {
         CaseData caseData = CaseData.builder().id(123L).build();
 
         // Spy so we can simulate the validator inside processCustomOrderOnSubmitted throwing
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doThrow(new uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException(
             CustomOrderService.INVALID_DOCX_ERROR))
             .when(spyService).processCustomOrderOnSubmitted(
@@ -4792,7 +4802,7 @@ class CustomOrderServiceTest {
 
         CaseData caseData = CaseData.builder().id(123L).build();
 
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doThrow(new RuntimeException("boom"))
             .when(spyService).processCustomOrderOnSubmitted(
                 anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
@@ -4842,7 +4852,7 @@ class CustomOrderServiceTest {
         when(documentGenService.getDocumentBytes("http://user-doc", "system-token", "s2s-token"))
             .thenReturn(userBytes);
 
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doReturn(combinedBytes).when(spyService).combineHeaderAndContent(headerBytes, userBytes);
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
@@ -4903,7 +4913,7 @@ class CustomOrderServiceTest {
             .thenReturn(headerBytes)
             .thenReturn(userBytes);
 
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doReturn(combinedBytes).when(spyService).combineHeaderAndContent(headerBytes, userBytes);
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links =
@@ -4997,7 +5007,7 @@ class CustomOrderServiceTest {
         when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(previewDoc);
 
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
             anyString(), anyLong(), any(), anyString(), anyString(), any(), eq(true)
         );
@@ -5061,7 +5071,7 @@ class CustomOrderServiceTest {
         when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(previewDoc);
 
-        CustomOrderService spyService = Mockito.spy(customOrderService);
+        CustomOrderService spyService = spy(customOrderService);
         doReturn(finalDoc).when(spyService).processCustomOrderOnSubmitted(
             anyString(), anyLong(), any(), anyString(), anyString(), any(), eq(false)
         );

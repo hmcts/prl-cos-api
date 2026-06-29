@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -62,6 +63,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -390,10 +392,10 @@ public class ManageOrdersController {
     @Operation(description = "Send Email Notification on Case order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+            schema = @Schema(implementation = SubmittedCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse finalizeOrderSubmissionAndSendNotifications(
+    public ResponseEntity<SubmittedCallbackResponse> finalizeOrderSubmissionAndSendNotifications(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
@@ -430,9 +432,6 @@ public class ManageOrdersController {
                         caseDataUpdated.get(ORDER_COLLECTION) != null
                             ? ((List<?>) caseDataUpdated.get(ORDER_COLLECTION)).size() : "null");
                 } catch (InvalidCustomOrderDocumentException e) {
-                    // Bad upload (e.g. PDF renamed to .docx). Fail the event: clear the
-                    // placeholder/transient state, persist the cleanup, and return early
-                    // with an error. No notifications, no AHM, no CIR docs task.
                     return handleCustomOrderFailure(
                         callbackRequest,
                         startAllTabsUpdateDataContent,
@@ -494,7 +493,6 @@ public class ManageOrdersController {
 
             // Clean up custom order fields BEFORE persisting - these fields are transient for the order journey
             // and shouldn't persist to affect subsequent order creations.
-            // Note: This is a submitted callback using submitAllTabsUpdate, so the response is not used by CCD.
             if (isCustomOrder) {
                 cleanupCustomOrderFields(caseDataUpdated);
             }
@@ -511,7 +509,7 @@ public class ManageOrdersController {
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -868,6 +866,10 @@ public class ManageOrdersController {
                 log.info("Custom order selected on Page 1, populating hearings dropdown");
                 caseDataUpdated.put("customOrderHearingsType",
                     manageOrderService.populateHearingsDropdown(authorisation, caseData));
+                // Always clear any previously persisted customOrderDoc at the start of a new
+                // custom order journey so a stale/rejected doc from a previous attempt cannot
+                // carry over and cause validation to fail on the next attempt.
+                caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
             } else {
                 // Clear custom order fields when a different option is selected
                 // This prevents stale data from a cancelled custom order flow affecting other flows
@@ -1076,11 +1078,10 @@ public class ManageOrdersController {
     private boolean copyCustomOrderFieldsFromCallback(CaseData caseData,
                                                       Map<String, Object> callbackData,
                                                       Map<String, Object> caseDataUpdated) {
-        // Route on the user's actual page-1 selection (manageOrdersOptions), not the
-        // persisted customOrderNameOption. CCD's merge engine ignores put(null) for FixedList
-        // fields, so customOrderNameOption can stick on the case across events — the upload-order
-        // logs at 13:54:07 confirmed this: customOrderNameOption=directionOnIssue (stale from a
-        // previous custom order) while manageOrdersOptions=uploadAnOrder (the real intent).
+        // Route on the user's actual page-1 selection (manageOrdersOptions). This survives
+        // about-to-submit now that manageOrdersOptions has been removed from
+        // cleanUpSelectedManageOrderOptions / ManageOrderFieldsEnum, so the submitted
+        // callback can rely on the real user choice with no fallback markers.
         boolean isCustomOrder = ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions());
         log.info("Submitted callback: isCustomOrder decision: manageOrdersOptions={}, customOrderNameOption(callback)={}, decided={}",
             caseData.getManageOrdersOptions(),
@@ -1279,7 +1280,12 @@ public class ManageOrdersController {
             || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && (!AmendOrderCheckEnum.noCheck.equals(amendCheck)
                     || manageOrderService.isSaveAsDraft(caseData)));
-        customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
+        try {
+            customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
+        } catch (IOException e) {
+            throw new InvalidCustomOrderDocumentException(
+                "Failed to process the uploaded custom order document. Please re-upload and try again.");
+        }
     }
 
     private void cleanupCustomOrderFields(Map<String, Object> caseDataUpdated) {
@@ -1305,10 +1311,12 @@ public class ManageOrdersController {
      * <p>Skips all further forward activities (notifications, automated hearing
      * management, CIR docs task). Clears the transient custom-order fields,
      * removes the placeholder order/draft entry that referenced the bad upload,
-     * persists the cleaned-up case data, and returns a CCD callback response
-     * carrying the user-facing error message.</p>
+     * persists the cleaned-up case data, and returns a CCD submitted-callback
+     * response carrying a user-facing failure message via
+     * {@code confirmationHeader} / {@code confirmationBody} so it actually shows
+     * on screen instead of looking like a successful submit.</p>
      */
-    private AboutToStartOrSubmitCallbackResponse handleCustomOrderFailure(
+    private ResponseEntity<SubmittedCallbackResponse> handleCustomOrderFailure(
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest,
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
         Map<String, Object> caseDataUpdated,
@@ -1334,10 +1342,11 @@ public class ManageOrdersController {
             caseDataUpdated
         );
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated)
-            .errors(List.of(failure.getMessage()))
-            .build();
+        return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+            .confirmationHeader("# Order could not be created")
+            .confirmationBody("**" + failure.getMessage() + "**\n\n"
+                + "The uploaded file has been discarded. Please try the event again with a valid .docx file.")
+            .build());
     }
 
     /**
