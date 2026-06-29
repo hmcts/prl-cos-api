@@ -7,21 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class QueryParam {
-    private Query query;
-    private String size;
-    private String from;
-    private List<Sort> sort;
-    @JsonProperty("search_after")
-    private List<String> searchAfter;
-    @JsonProperty("_source")
-    private List<String> dataToReturn;
+public class Sort {
+    @JsonProperty("reference.keyword")
+    private String referenceKeyword;
 }
-
