@@ -19,6 +19,16 @@ tasks.register("testWithCoverage") {
     def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
     def checkAll = targets.isEmpty()
 
+    def normaliseTarget = { String target ->
+      def simpleName = target.tokenize('.').last()
+
+      if (simpleName.endsWith("Test")) {
+        return simpleName.substring(0, simpleName.length() - "Test".length())
+      }
+
+      return simpleName
+    }
+
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
     int grandMissedUnits = 0
@@ -42,10 +52,22 @@ tasks.register("testWithCoverage") {
           def className = fileName.replace(".java", "")
           allClassNames.add(className)
 
-          boolean isTargeted = targets.any { it.equalsIgnoreCase(className) }
+          def pkgName = pkg.attribute('name')?.toString() ?: ""
+          def fqcn = pkgName ? "${pkgName}.${className}" : className
+
+          def matchedTarget = targets.find { target ->
+            def normalised = normaliseTarget(target)
+
+            target.equalsIgnoreCase(className)
+              || target.equalsIgnoreCase(fqcn)
+              || normalised.equalsIgnoreCase(className)
+              || (pkgName ? "${pkgName}.${normalised}".equalsIgnoreCase(fqcn) : false)
+          }
+
+          boolean isTargeted = matchedTarget != null
 
           if (checkAll || isTargeted) {
-            if (isTargeted) foundTargets.add(targets.find { it.equalsIgnoreCase(className) })
+            if (isTargeted) foundTargets.add(matchedTarget)
 
             int fileMissedInstr = 0, fileCoveredInstr = 0
             int fileMissedBranch = 0, fileCoveredBranch = 0

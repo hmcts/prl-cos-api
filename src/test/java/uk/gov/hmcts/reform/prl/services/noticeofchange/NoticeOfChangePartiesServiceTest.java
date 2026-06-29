@@ -100,6 +100,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -256,7 +260,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateCaForSubmission(wrappedRespondents))
             .thenReturn(noticeOfChangeParties);
 
-        Map<String, Object> test = noticeOfChangePartiesService.generate(caseData, role.getRepresenting());
+        Map<String, Object> test = noticeOfChangePartiesService.syncNocAnswerFields(caseData, role.getRepresenting());
 
         assertTrue(test.containsKey("caRespondent1Policy"));
 
@@ -272,7 +276,7 @@ public class NoticeOfChangePartiesServiceTest {
         when(partiesConverter.generateDaForSubmission(partyDetails))
             .thenReturn(noticeOfChangeParties);
 
-        Map<String, Object> test = noticeOfChangePartiesService.generate(caseDataForDa, roleForDa.getRepresenting());
+        Map<String, Object> test = noticeOfChangePartiesService.syncNocAnswerFields(caseDataForDa, roleForDa.getRepresenting());
 
         assertTrue(test.containsKey("daRespondentPolicy"));
 
@@ -302,6 +306,119 @@ public class NoticeOfChangePartiesServiceTest {
 
         assertTrue(test.containsKey("caApplicant3Policy"));
 
+    }
+
+    @Test
+    public void shouldSyncC100ApplicantNocAnswerFieldsAndClearUnusedFields() {
+        Element<PartyDetails> applicant1 = element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName("Jane")
+            .lastName("Smith")
+            .build());
+
+        Element<PartyDetails> applicant2 = element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName("Alex")
+            .lastName("Brown")
+            .build());
+
+        NoticeOfChangeParties applicant1Answer = NoticeOfChangeParties.builder().build();
+        NoticeOfChangeParties applicant2Answer = NoticeOfChangeParties.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(List.of(applicant1, applicant2))
+            .build();
+
+        when(partiesConverter.generateCaForSubmission(applicant1)).thenReturn(applicant1Answer);
+        when(partiesConverter.generateCaForSubmission(applicant2)).thenReturn(applicant2Answer);
+
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT);
+
+        assertThat(result.get("caApplicant1")).isSameAs(applicant1Answer);
+        assertThat(result.get("caApplicant2")).isSameAs(applicant2Answer);
+        assertThat(result.get("caApplicant3")).isNull();
+        assertThat(result.get("caApplicant4")).isNull();
+        assertThat(result.get("caApplicant5")).isNull();
+    }
+
+    @Test
+    public void shouldSyncC100RespondentNocAnswerFieldsAndClearUnusedFields() {
+        Element<PartyDetails> respondent1 = element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName("Bob")
+            .lastName("Jones")
+            .build());
+
+        Element<PartyDetails> respondent2 = element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName("Charlie")
+            .lastName("Green")
+            .build());
+
+        NoticeOfChangeParties respondent1Answer = NoticeOfChangeParties.builder().build();
+        NoticeOfChangeParties respondent2Answer = NoticeOfChangeParties.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(respondent1, respondent2))
+            .build();
+
+        when(partiesConverter.generateCaForSubmission(respondent1)).thenReturn(respondent1Answer);
+        when(partiesConverter.generateCaForSubmission(respondent2)).thenReturn(respondent2Answer);
+
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT);
+
+        assertThat(result.get("caRespondent1")).isSameAs(respondent1Answer);
+        assertThat(result.get("caRespondent2")).isSameAs(respondent2Answer);
+        assertThat(result.get("caRespondent3")).isNull();
+        assertThat(result.get("caRespondent4")).isNull();
+        assertThat(result.get("caRespondent5")).isNull();
+    }
+
+    @Test
+    public void shouldClearAllC100ApplicantNocAnswerFieldsWhenApplicantsAreEmpty() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(Collections.emptyList())
+            .build();
+
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT);
+
+        assertThat(result.get("caApplicant1")).isNull();
+        assertThat(result.get("caApplicant2")).isNull();
+        assertThat(result.get("caApplicant3")).isNull();
+        assertThat(result.get("caApplicant4")).isNull();
+        assertThat(result.get("caApplicant5")).isNull();
+    }
+
+    @Test
+    public void shouldClearFl401ApplicantNocAnswerFieldWhenApplicantIsAbsent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(null)
+            .build();
+
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, DAAPPLICANT);
+
+        assertThat(result).containsEntry("daApplicant", null);
+    }
+
+    @Test
+    public void shouldSyncFl401RespondentNocAnswerFieldWhenRespondentIsPresent() {
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("Robin")
+            .lastName("Black")
+            .build();
+
+        NoticeOfChangeParties respondentAnswer = NoticeOfChangeParties.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(respondent)
+            .build();
+
+        when(partiesConverter.generateDaForSubmission(respondent)).thenReturn(respondentAnswer);
+
+        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, DARESPONDENT);
+
+        assertThat(result.get("daRespondent")).isSameAs(respondentAnswer);
     }
 
     @Test
