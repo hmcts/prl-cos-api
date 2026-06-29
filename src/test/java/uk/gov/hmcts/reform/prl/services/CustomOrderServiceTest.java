@@ -2192,15 +2192,16 @@ class CustomOrderServiceTest {
 
     @Test
     void testCombineAndFinalizeCustomOrder_attemptsProcessingWithValidDocs() {
-        // Arrange - both docs have valid binary URLs
         uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                 .documentBinaryUrl("http://custom-binary")
+                .documentFileName("custom.docx")
                 .build();
 
         uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                 .documentBinaryUrl("http://preview-binary")
+                .documentFileName("preview.docx")
                 .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -2214,16 +2215,25 @@ class CustomOrderServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("system-token");
         when(authTokenGenerator.generate()).thenReturn("s2s-token");
 
-        CaseData caseData = CaseData.builder().id(123L).build();
+        when(documentGenService.getDocumentBytes("http://preview-binary", "system-token", "s2s-token"))
+            .thenReturn(new byte[]{0x50, 0x4B, 0x03, 0x04});
 
-        // Act - processing will fail downstream (no document bytes mocked)
-        // failure is now wrapped as InvalidCustomOrderDocumentException.
-        assertThrows(uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class, () ->
-            customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true));
+        when(documentGenService.getDocumentBytes("http://custom-binary", "system-token", "s2s-token"))
+            .thenReturn(new byte[]{0x25, 0x50, 0x44, 0x46, 0x2D, 0x31});
 
-        // Assert - verify the method attempted to get tokens for document download
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+
+        assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true)
+        );
+
         verify(systemUserService).getSysUserToken();
         verify(authTokenGenerator).generate();
+        verify(documentGenService).getDocumentBytes("http://preview-binary", "system-token", "s2s-token");
+        verify(documentGenService).getDocumentBytes("http://custom-binary", "system-token", "s2s-token");
     }
 
     @Test
@@ -4796,7 +4806,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testCombineAndFinalizeCustomOrder_unexpectedExceptionIsWrappedAndStateCleared() throws Exception {
+    void testCombineAndFinalizeCustomOrder_unexpectedExceptionIsRethrownAndStateCleared() throws Exception {
         uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
             uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                 .documentBinaryUrl("http://custom-binary")
@@ -4825,14 +4835,13 @@ class CustomOrderServiceTest {
             .when(spyService).processCustomOrderOnSubmitted(
                 anyString(), anyLong(), any(), anyString(), anyString(), any(), anyBoolean());
 
-        var ex = assertThrows(
-            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+        RuntimeException ex = assertThrows(
+            RuntimeException.class,
             () -> spyService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, false)
         );
-        assertNotNull(ex.getCause(), "Original failure should be preserved as the cause");
-        assertEquals("boom", ex.getCause().getMessage());
 
-        // Transient state still cleared on unexpected failure
+        assertEquals("boom", ex.getMessage());
+
         assertNull(caseDataUpdated.get("customOrderDoc"));
         assertNull(caseDataUpdated.get("previewOrderDoc"));
     }
@@ -5159,5 +5168,74 @@ class CustomOrderServiceTest {
         byte[] zipSpanned = new byte[]{0x50, 0x4B, 0x07, 0x08, 0x00, 0x00};
 
         customOrderService.validateDocxContent(zipSpanned);
+    }
+
+    @Test
+    void testCombineAndFinalizeCustomOrder_rejectsPdfForCustomOrderCombine() {
+        uk.gov.hmcts.reform.prl.models.documents.Document customDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://custom-binary")
+                .documentUrl("http://custom-url")
+                .documentFileName("uploaded-order.pdf")
+                .build();
+
+        uk.gov.hmcts.reform.prl.models.documents.Document previewDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                .documentBinaryUrl("http://preview-binary")
+                .documentUrl("http://preview-url")
+                .documentFileName("preview.docx")
+                .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("customOrderDoc", customDoc);
+        caseDataUpdated.put("previewOrderDoc", previewDoc);
+
+        when(objectMapper.convertValue(customDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(customDoc);
+        when(objectMapper.convertValue(previewDoc, uk.gov.hmcts.reform.prl.models.documents.Document.class))
+            .thenReturn(previewDoc);
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.combineAndFinalizeCustomOrder("auth", caseData, caseDataUpdated, true)
+        );
+
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+
+        verify(documentGenService, never()).getDocumentBytes(any(), any(), any());
+        assertNull(caseDataUpdated.get("customOrderDoc"));
+        assertNull(caseDataUpdated.get("previewOrderDoc"));
+    }
+
+    @Test
+    void testValidateCustomOrderCanBeCombined_allowsDocxExtension() {
+        customOrderService.validateCustomOrderCanBeCombined("uploaded-order.docx");
+    }
+
+    @Test
+    void testValidateCustomOrderCanBeCombined_allowsUppercaseDocxExtension() {
+        customOrderService.validateCustomOrderCanBeCombined("UPLOADED-ORDER.DOCX");
+    }
+
+    @Test
+    void testValidateCustomOrderCanBeCombined_rejectsPdfExtension() {
+        var ex = assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.validateCustomOrderCanBeCombined("uploaded-order.pdf")
+        );
+
+        assertEquals(CustomOrderService.INVALID_DOCX_ERROR, ex.getMessage());
+    }
+
+    @Test
+    void testValidateCustomOrderCanBeCombined_rejectsMissingFileName() {
+        assertThrows(
+            uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException.class,
+            () -> customOrderService.validateCustomOrderCanBeCombined(null)
+        );
     }
 }

@@ -84,7 +84,7 @@ public class CustomOrderService {
      * is not a valid .docx file (e.g. a PDF renamed to .docx).
      */
     public static final String INVALID_DOCX_ERROR =
-        "The uploaded file is not a valid Word (.docx) document. "
+        "Custom order upload must be a valid Word (.docx) document. "
             + "Please remove the file and upload a valid .docx file.";
 
     /**
@@ -2202,7 +2202,7 @@ public class CustomOrderService {
                 log.warn("Skipping custom order combine - customOrderDoc or headerPreview not available");
                 return;
             }
-
+            validateCustomOrderCanBeCombined(customOrderDoc.getDocumentFileName());
             // Combine header preview + user content (sealing happens inside for final orders)
             uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
                 processCustomOrderOnSubmitted(
@@ -2243,6 +2243,12 @@ public class CustomOrderService {
         }
     }
 
+    void validateCustomOrderCanBeCombined(String fileName) {
+        if (fileName == null || !fileName.toLowerCase().endsWith(DOCX_EXTENSION)) {
+            log.warn("Custom order upload rejected: file cannot be combined with docx header ({})", fileName);
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
+        }
+    }
     /**
      * Clears state related to the uploaded custom order document so that a
      * failed upload does not get persisted or reused on retry.
