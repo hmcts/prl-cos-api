@@ -108,9 +108,7 @@ public class LinkCitizenCaseControllerFunctionalTest {
             .body("caseData.caseInvites[0].value.hasLinked", equalTo(YesOrNo.Yes.toString()))
             .extract()
             .as(CaseDataWithHearingResponse.class);
-        log.info("Response from link-case-to-account API: {}", response);
         Assertions.assertNotNull(response);
-
     }
 
     @Test
