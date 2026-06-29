@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.prl.services.UpdateHearingActualsService;
-import uk.gov.hmcts.reform.prl.services.requestorder.RequestOrderTaskService;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,14 +19,10 @@ class UpdateHearingActualTaskTest {
     @Mock
     UpdateHearingActualsService updateHearingActualsService;
 
-    @Mock
-    RequestOrderTaskService requestOrderTaskService;
-
     @Test
-    void runInvokesBothServicesInSequence() {
+    void runTaskWithHearingAwayDays() {
         updateHearingActualTask.run();
 
         verify(updateHearingActualsService, times(1)).updateHearingActuals();
-        verify(requestOrderTaskService, times(1)).processRequestOrderTasks();
     }
 }
