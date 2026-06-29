@@ -102,8 +102,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -386,39 +384,6 @@ public class NoticeOfChangePartiesServiceTest {
         assertThat(result.get("caApplicant3")).isNull();
         assertThat(result.get("caApplicant4")).isNull();
         assertThat(result.get("caApplicant5")).isNull();
-    }
-
-    @Test
-    public void shouldClearFl401ApplicantNocAnswerFieldWhenApplicantIsAbsent() {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(null)
-            .build();
-
-        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, DAAPPLICANT);
-
-        assertThat(result).containsEntry("daApplicant", null);
-    }
-
-    @Test
-    public void shouldSyncFl401RespondentNocAnswerFieldWhenRespondentIsPresent() {
-        PartyDetails respondent = PartyDetails.builder()
-            .firstName("Robin")
-            .lastName("Black")
-            .build();
-
-        NoticeOfChangeParties respondentAnswer = NoticeOfChangeParties.builder().build();
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .respondentsFL401(respondent)
-            .build();
-
-        when(partiesConverter.generateDaForSubmission(respondent)).thenReturn(respondentAnswer);
-
-        Map<String, Object> result = noticeOfChangePartiesService.syncNocAnswerFields(caseData, DARESPONDENT);
-
-        assertThat(result.get("daRespondent")).isSameAs(respondentAnswer);
     }
 
     @Test

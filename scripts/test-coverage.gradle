@@ -20,10 +20,16 @@ tasks.register("testWithCoverage") {
     def checkAll = targets.isEmpty()
 
     def normaliseTarget = { String target ->
-      def simpleName = target.tokenize('.').last()
+      def cleaned = target
+        .replace('\\', '.')
+        .replace('/', '.')
+        .replaceAll(/\.java$/, '')
 
+      def simpleName = cleaned.tokenize('.').last()
+
+      // Allow passing either the production class or its test class
       if (simpleName.endsWith("Test")) {
-        return simpleName.substring(0, simpleName.length() - "Test".length())
+        simpleName = simpleName.substring(0, simpleName.length() - "Test".length())
       }
 
       return simpleName
@@ -61,13 +67,17 @@ tasks.register("testWithCoverage") {
             target.equalsIgnoreCase(className)
               || target.equalsIgnoreCase(fqcn)
               || normalised.equalsIgnoreCase(className)
-              || (pkgName ? "${pkgName}.${normalised}".equalsIgnoreCase(fqcn) : false)
+              || fqcn.toLowerCase().endsWith(".${normalised.toLowerCase()}")
           }
 
           boolean isTargeted = matchedTarget != null
 
           if (checkAll || isTargeted) {
-            if (isTargeted) foundTargets.add(matchedTarget)
+            if (isTargeted) {
+              foundTargets.add(matchedTarget)
+              foundTargets.add(normaliseTarget(matchedTarget))
+              foundTargets.add(className)
+            }
 
             int fileMissedInstr = 0, fileCoveredInstr = 0
             int fileMissedBranch = 0, fileCoveredBranch = 0
@@ -155,17 +165,37 @@ tasks.register("testWithCoverage") {
         }
       }
 
-      def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
+      def missingTargets = targets.findAll { target ->
+        def normalised = normaliseTarget(target)
+
+        !foundTargets.any { found ->
+          found.equalsIgnoreCase(target)
+            || found.equalsIgnoreCase(normalised)
+        }
+      }
+
       if (!checkAll && !missingTargets.isEmpty()) {
         logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
+
         missingTargets.each { missing ->
+          def normalisedMissing = normaliseTarget(missing)
+
           logger.lifecycle("   - ${missing}")
-          def suggestions = allClassNames.findAll { it.toLowerCase().contains(missing.toLowerCase()) }.sort()
+          if (!normalisedMissing.equalsIgnoreCase(missing)) {
+            logger.lifecycle("     ${gray}Resolved coverage target: ${normalisedMissing}${reset}")
+          }
+
+          def suggestions = allClassNames.findAll {
+            it.toLowerCase().contains(normalisedMissing.toLowerCase())
+              || normalisedMissing.toLowerCase().contains(it.toLowerCase())
+          }.sort()
+
           if (!suggestions.isEmpty()) {
             logger.lifecycle("     ${green}Did you mean?${reset}")
             suggestions.take(5).each { logger.lifecycle("      • ${it}") }
           }
         }
+
         throw new GradleException("Target class mismatch. Check spelling!")
       }
 

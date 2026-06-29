@@ -179,9 +179,6 @@ public class NoticeOfChangePartiesService {
                     null
                 );
             }
-        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("clearing noc answers for FL401 application");
-            nocAnswerUpdates.put(representing.getNocAnswersTemplate(), null);
         }
 
         return nocAnswerUpdates;
