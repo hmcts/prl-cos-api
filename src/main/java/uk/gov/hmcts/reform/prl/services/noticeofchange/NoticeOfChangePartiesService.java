@@ -149,10 +149,10 @@ public class NoticeOfChangePartiesService {
 
     /**
      * Method to sync the current applicant/respondent information into the NoC answer fields,
-     * clearing them first to avoid stale NoC answer field values
-     * @param caseData the current case data
-     * @param representing the solicitors representing litigants
-     * @return Map<String, Object> updated map with the noc answers
+     * clearing them first to avoid stale NoC answer field values.
+     * @param caseData the current case data.
+     * @param representing the solicitors representing litigants.
+     * @return {@code Map<String, Object>} updated map with the noc answers.
      */
     public Map<String, Object> syncNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
         log.info("syncing noc answers");
@@ -162,10 +162,10 @@ public class NoticeOfChangePartiesService {
     }
 
     /**
-     * Method to clear all Noc answers fields, make them null, avoid stale values
-     * @param caseData the current case data
-     * @param representing the solicitors representing litigants
-     * @return Map<String, Object> clean map with the empty noc answers
+     * Method to clear all Noc answers fields, make them null, avoid stale values.
+     * @param caseData the current case data.
+     * @param representing the solicitors representing litigants.
+     * @return {@code Map<String, Object>} clean map with the empty noc answers.
      */
     private Map<String, Object> clearNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
 
