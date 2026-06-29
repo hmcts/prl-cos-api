@@ -2249,6 +2249,7 @@ public class CustomOrderService {
             throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
         }
     }
+
     /**
      * Clears state related to the uploaded custom order document so that a
      * failed upload does not get persisted or reused on retry.
