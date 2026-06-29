@@ -131,7 +131,9 @@ public class ReviewAdditionalApplicationController extends AbstractCallbackContr
 
         List<String> errors = new ArrayList<>();
         if (SEND.equals(caseData.getChooseSendOrReply())) {
-            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation);
+            // Additional application review: future hearings only, no hearing lock
+            // (not the WA chase flow).
+            caseData = sendAndReplyService.populateDynamicListsForSendAndReply(caseData, authorisation, false, null);
             if (caseData.getReviewAdditionalApplicationWrapper() != null
                 && caseData.getReviewAdditionalApplicationWrapper().getSelectedAdditionalApplicationsBundle() != null) {
                 Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
