@@ -76,7 +76,7 @@ public class ManageOrdersUtils {
         "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
 
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
-        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings", "noticeOfHearing"};
+        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
