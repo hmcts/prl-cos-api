@@ -6,21 +6,20 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
-
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
 public class AllocateJudgeControllerFT {
 
     @Autowired
@@ -68,8 +67,8 @@ public class AllocateJudgeControllerFT {
             .post(allocateJudgeEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsValue("circuitJudge"));
+        Assertions.assertNotNull(res.getData());
+        Assertions.assertTrue(res.getData().containsValue("circuitJudge"));
     }
 
     @Test
@@ -85,8 +84,8 @@ public class AllocateJudgeControllerFT {
             .post(prePopulateLegalAdvisersEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsKey("legalAdviserList"));
+        Assertions.assertNotNull(res.getData());
+        Assertions.assertTrue(res.getData().containsKey("legalAdviserList"));
 
     }
 
@@ -107,8 +106,8 @@ public class AllocateJudgeControllerFT {
             response.getBody().asString(),
             AboutToStartOrSubmitCallbackResponse.class
         );
-        Assert.assertNotNull(res.getData());
-        Assert.assertTrue(res.getData().containsKey("judgeNameAndEmail"));
+        Assertions.assertNotNull(res.getData());
+        Assertions.assertTrue(res.getData().containsKey("judgeNameAndEmail"));
 
     }
 }
