@@ -969,7 +969,7 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopNonPartiesWelshFile);
                 break;
             case noticeOfHearing:
-                // add files when they exist
+                // add templates from FPVTL-3133 when they exist
                 break;
             default:
                 break;
