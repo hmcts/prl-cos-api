@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
+import uk.gov.hmcts.reform.prl.services.taskmanagement.TaskManagementService;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
@@ -26,24 +27,23 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HearingChasePolicyTest {
 
     private static final String HEARING_ID = "1";
-    private static final LocalDate TODAY = LocalDate.of(2026, 4, 24);
+    private static final LocalDate TODAY = LocalDate.of(2026, 4, 24);//Friday
 
     @Mock WorkingDayIndicator workingDayIndicator;
+
+    @Mock TaskManagementService taskManagementService;
 
     HearingChasePolicy policy;
 
     @BeforeEach
     void setUp() {
-        policy = new HearingChasePolicy(workingDayIndicator);
+        policy = new HearingChasePolicy(workingDayIndicator, taskManagementService);
         ReflectionTestUtils.setField(policy, "c100CadenceWorkingDays", 3);
         ReflectionTestUtils.setField(policy, "fl401CadenceWorkingDays", 1);
         ReflectionTestUtils.setField(policy, "hearingStatusesToFilter",
@@ -86,14 +86,14 @@ class HearingChasePolicyTest {
     }
 
     @Test
-    void decideSkipsWhenHearingHasNotEnded() {
+    void decideSkipsWhenHearingHasNotAtCadence() {
         CaseHearing hearing = hearing("COMPLETED", TODAY.plusDays(1));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
         ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), TODAY);
 
         assertThat(decision.shouldFire()).isFalse();
-        assertThat(decision.description()).startsWith("skipped - hearingEndDate=");
-        assertThat(decision.description()).endsWith("not in past");
+        assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-25 not 1 days away");
     }
 
     @Test
@@ -101,6 +101,8 @@ class HearingChasePolicyTest {
         CaseData caseData = fl401Case()
             .draftOrderCollection(List.of(draftOrderForHearing(HEARING_ID)))
             .build();
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
 
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", TODAY.minusDays(5)), caseData, emptyLedger(), TODAY);
@@ -128,6 +130,8 @@ class HearingChasePolicyTest {
         CaseData caseData = fl401Case()
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(label)))
             .build();
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
 
         ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), TODAY);
 
@@ -157,6 +161,8 @@ class HearingChasePolicyTest {
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(savedLabel)))
             .build();
 
+        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
         ChaseDecision decision = policy.decide(hearingWithEmptyType, caseData, emptyLedger(), TODAY);
 
         assertThat(decision.shouldFire()).isFalse();
@@ -193,39 +199,43 @@ class HearingChasePolicyTest {
             .orderCollection(List.of(savedOrderForHearing(HEARING_ID)))
             .build();
 
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
+
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(5)), caseData, emptyLedger(), TODAY);
+            hearing("COMPLETED", TODAY.plusDays(1)), caseData, emptyLedger(), TODAY);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
     }
 
     @Test
-    void decideSkipsWhenPreviousFireAwaitsCompletion() {
+    void shouldFireForMarkAsDoneWithNoLastCompleted() {
         HearingTrackingLedger ledger = ledgerWith(
             RequestOrderHearingTracking.builder()
                 .hearingId(HEARING_ID)
                 .lastFiredDate(TODAY.minusDays(1))
+                .lastCompletedDate(null)
                 .build());
+
+        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(true);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", TODAY.minusDays(5)), fl401Case().build(), ledger, TODAY);
 
-        assertThat(decision.shouldFire()).isFalse();
-        assertThat(decision.description()).isEqualTo("skipped - previous fire awaiting completion");
-        verify(workingDayIndicator, never()).workingDaysBetween(any(), any());
+        assertThat(decision.shouldFire()).isTrue();
     }
 
     @Test
-    void decideSkipsWhenCadenceNotMet() {
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(0);
+    void decideSkipsWhenHearingCadenceNotMet() {
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", TODAY.minusDays(1)), fl401Case().build(), emptyLedger(), TODAY);
 
         assertThat(decision.shouldFire()).isFalse();
-        assertThat(decision.description()).startsWith("skipped - 0 working day(s) since anchor");
-        assertThat(decision.description()).endsWith("(need 1)");
+        assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-23 not 1 days away");
     }
 
     @Test
@@ -233,7 +243,7 @@ class HearingChasePolicyTest {
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(1)), fl401Case().build(), emptyLedger(), TODAY);
+            hearing("COMPLETED", TODAY.plusDays(1)), fl401Case().build(), emptyLedger(), TODAY);
 
         assertThat(decision.shouldFire()).isTrue();
         assertThat(decision.description()).isEqualTo("cadence met - firing");
@@ -250,33 +260,8 @@ class HearingChasePolicyTest {
     }
 
     @Test
-    void initialChaseAnchorsOnHearingEndDate() {
-        LocalDate hearingEnd = TODAY.minusDays(5);
-        when(workingDayIndicator.workingDaysBetween(eq(hearingEnd), eq(TODAY))).thenReturn(5);
-
-        policy.decide(hearing("COMPLETED", hearingEnd), fl401Case().build(), emptyLedger(), TODAY);
-
-        verify(workingDayIndicator).workingDaysBetween(eq(hearingEnd), eq(TODAY));
-    }
-
-    @Test
-    void retriggerAnchorsOnLastCompletedDateOverridingHearingEndDate() {
-        LocalDate lastCompleted = TODAY.minusDays(2);
-        HearingTrackingLedger ledger = ledgerWith(
-            RequestOrderHearingTracking.builder()
-                .hearingId(HEARING_ID)
-                .lastCompletedDate(lastCompleted)
-                .build());
-        when(workingDayIndicator.workingDaysBetween(eq(lastCompleted), eq(TODAY))).thenReturn(2);
-
-        policy.decide(hearing("COMPLETED", TODAY.minusDays(20)), fl401Case().build(), ledger, TODAY);
-
-        verify(workingDayIndicator).workingDaysBetween(eq(lastCompleted), eq(TODAY));
-    }
-
-    @Test
     void decideSkipsWhenHearingMappedToFinalisedOrder() {
-        LocalDate hearingDate = TODAY.minusDays(2);
+        LocalDate hearingDate = TODAY.plusDays(3);
         CaseData caseData = fl401Case()
             .orderCollection(List.of(finalisedOrder(hearingDate)))
             .build();
@@ -290,6 +275,8 @@ class HearingChasePolicyTest {
                                             .build()))
             .build();
 
+        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
             hearingWithType, caseData, emptyLedger(), TODAY);
@@ -370,7 +357,7 @@ class HearingChasePolicyTest {
         ).build();
     }
 
-    private static Element<OrderDetails> finalisedOrder(LocalDate hearingDate) {
+    private Element<OrderDetails> finalisedOrder(LocalDate hearingDate) {
         String formattedDate = hearingDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         return Element.<OrderDetails>builder().value(
             OrderDetails.builder()

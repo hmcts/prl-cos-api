@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
+import uk.gov.hmcts.reform.prl.services.taskmanagement.TaskManagementService;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 /**
@@ -41,6 +43,7 @@ class HearingChasePolicy {
     private static final String C100 = "C100";
 
     private final WorkingDayIndicator workingDayIndicator;
+    private final TaskManagementService taskManagementService;
 
     @Value("${request-order-task.cadence-working-days.c100}")
     private int c100CadenceWorkingDays;
@@ -64,27 +67,34 @@ class HearingChasePolicy {
             return ChaseDecision.skipStatusNotInFilter(hearing.getHmcStatus());
         }
         LocalDate hearingEndDate = computeHearingEndDate(hearing);
-        if (hearingEndDate == null || hearingEndDate.isAfter(today)) {
-            return ChaseDecision.skipHearingNotEnded(hearingEndDate);
+        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
+        Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
+
+        int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(today, hearingEndDate);
+        if (hearingEndDate != null && workingDaysSinceHearingEndDate != cadence) {
+            return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
+        LocalDate lastCompletedDate = tracking.map(RequestOrderHearingTracking::getLastCompletedDate)
+            .orElse(null);
+        if (lastCompletedDate == null && noOutstandingRequestSolicitorOrderTasks(caseData.getId(), hearingId)) {
+            return ChaseDecision.fire();
+        } else {
+            int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
+            if (workingDaysSinceLastCompletedDate != cadence) {
+                return ChaseDecision.skipInFlight();
+            }
+        }
+
         if (isHearingMappedToOrder(caseData, hearing)) {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
-        Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
-        if (tracking.map(t -> t.getLastFiredDate() != null).orElse(false)) {
-            return ChaseDecision.skipInFlight();
-        }
-
-        LocalDate anchor = tracking
-            .map(RequestOrderHearingTracking::getLastCompletedDate)
-            .orElse(hearingEndDate);
-        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
-        int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(anchor, today);
-        if (workingDaysSinceAnchor < cadence) {
-            return ChaseDecision.skipBeforeCadence(workingDaysSinceAnchor, anchor, cadence);
-        }
         return ChaseDecision.fire();
+    }
+
+    private boolean noOutstandingRequestSolicitorOrderTasks(long caseId, String hearingId) {
+        return taskManagementService.hasNoCompletableTasksForHearing(hearingId, String.valueOf(caseId),
+                                                                      ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
     }
 
     private List<String> allowedStatuses() {

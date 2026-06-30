@@ -19,8 +19,8 @@ record ChaseDecision(boolean shouldFire, String description) {
         return skip("status=" + hmcStatus + " not in filter");
     }
 
-    static ChaseDecision skipHearingNotEnded(LocalDate hearingEndDate) {
-        return skip("hearingEndDate=" + hearingEndDate + " not in past");
+    static ChaseDecision skipHearingNotAtCadence(LocalDate hearingEndDate, int cadence) {
+        return skip("hearingEndDate=" + hearingEndDate + " not " + cadence + " days away");
     }
 
     static ChaseDecision skipLinkedOrderExists() {
@@ -29,11 +29,6 @@ record ChaseDecision(boolean shouldFire, String description) {
 
     static ChaseDecision skipInFlight() {
         return skip("previous fire awaiting completion");
-    }
-
-    static ChaseDecision skipBeforeCadence(int workingDaysSinceAnchor, LocalDate anchor, int cadence) {
-        return skip(workingDaysSinceAnchor + " working day(s) since anchor " + anchor
-            + " (need " + cadence + ")");
     }
 
     private static ChaseDecision skip(String reason) {

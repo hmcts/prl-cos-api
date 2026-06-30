@@ -17,10 +17,13 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Sort;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
@@ -32,6 +35,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -158,10 +162,17 @@ public class RequestOrderTaskService {
         StateFilter stateFilter = StateFilter.builder().should(List.of(
             Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
             Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
+            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build(),
+            Should.builder().match(Match.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getValue()).build()).build()
         )).build();
 
+        //qry for lastModified>=deployDate
+        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().toString()).build();
+        Range range = Range.builder().lastModified(lastModified).build();
+        Filter rangeFilter = Filter.builder().range(range).build();
+
         Bool filter = Bool.builder()
+            .filter(rangeFilter)
             .should(caseTypes)
             .minimumShouldMatch(1)
             .must(Must.builder().stateFilter(stateFilter).build())
