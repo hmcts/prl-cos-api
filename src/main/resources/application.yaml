@@ -454,7 +454,6 @@ aca:
 wa-task-management:
   api:
     url: ${TASK_MANAGEMENT_API_BASEURL:http://wa-task-management-api-aat.service.core-compute-aat.internal}
-    endpoint: /task/search-for-completable
 
 test-url: ${TEST_URL:http://localhost:4044}
 
