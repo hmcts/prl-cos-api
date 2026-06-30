@@ -5,22 +5,22 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UploadAdditionalApplicationControllerFunctionalTest {
 
@@ -31,7 +31,6 @@ public class UploadAdditionalApplicationControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -49,7 +48,6 @@ public class UploadAdditionalApplicationControllerFunctionalTest {
 
     @Autowired
     private UploadAdditionalApplicationService uploadAdditionalApplicationService;
-
 
     @Test
     public void testPre_populate_applicants_with_invliad_request_thenResponse415() throws Exception {
