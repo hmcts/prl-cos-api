@@ -7,17 +7,15 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ResourceUtils;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -26,10 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @TestPropertySource(
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
@@ -37,7 +33,7 @@ import java.nio.file.Files;
         "idam.s2s-auth.microservice=prl_citizen_frontend"
     }
 )
-@ContextConfiguration
+
 @SuppressWarnings("PMD")
 public class CaseDocumentControllerFunctionalTest {
 
@@ -58,7 +54,7 @@ public class CaseDocumentControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
     }
@@ -78,9 +74,9 @@ public class CaseDocumentControllerFunctionalTest {
         response.then().assertThat().statusCode(200);
         DocumentResponse res = objectMapper.readValue(response.getBody().asString(), DocumentResponse.class);
 
-        Assert.assertEquals("Success", res.getStatus());
-        Assert.assertNotNull(res.getDocument());
-        Assert.assertEquals("Test.pdf", res.getDocument().getDocumentFileName());
+        Assertions.assertEquals("Success", res.getStatus());
+        Assertions.assertNotNull(res.getDocument());
+        Assertions.assertEquals("Test.pdf", res.getDocument().getDocumentFileName());
     }
 
     @Test
@@ -110,9 +106,8 @@ public class CaseDocumentControllerFunctionalTest {
         deleteResponse.then().assertThat().statusCode(200);
         DocumentResponse delRes = objectMapper.readValue(deleteResponse.getBody().asString(), DocumentResponse.class);
 
-        Assert.assertEquals("Success", delRes.getStatus());
+        Assertions.assertEquals("Success", delRes.getStatus());
     }
-
 
     public static byte[] resourceAsBytes(final String resourcePath) throws IOException {
         final File file = ResourceUtils.getFile(resourcePath);
