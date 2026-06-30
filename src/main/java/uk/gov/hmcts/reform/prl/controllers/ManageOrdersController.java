@@ -1343,11 +1343,12 @@ public class ManageOrdersController {
             caseDataUpdated
         );
 
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-            .confirmationHeader("# Order could not be created")
-            .confirmationBody("**" + failure.getMessage() + "**\n\n"
-                + "The uploaded file has been discarded. Please try the event again with a valid .docx file.")
-            .build());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(SubmittedCallbackResponse.builder()
+                .confirmationHeader("# Order could not be created")
+                .confirmationBody("**" + failure.getMessage() + "**\n\n"
+                    + "The uploaded file has been discarded. Please try the event again with a valid .docx file.")
+                .build());
     }
 
     /**

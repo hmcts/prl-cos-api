@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -4286,14 +4287,14 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> aboutToStartOrSubmitCallbackResponse
+        ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse
             = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
         );
 
-        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(submittedCallbackResponse);
     }
 
     @Test
@@ -6697,7 +6698,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByBinaryUrl() throws Exception {
         // Bad upload (e.g. PDF renamed to .docx) - controller must:
-        //  (a) return errors on the response (user-facing message)
+        //  (a) return 422 with a submitter-callback confirmation msg
         //  (b) remove the matching placeholder entry from orderCollection
         //  (c) cleanup transient custom-order fields
         //  (d) NOT call notifications / AHM / CIR docs task
@@ -6781,6 +6782,7 @@ public class ManageOrdersControllerTest {
 
         // (a) user-facing error returned via confirmationHeader
         assertNotNull(response);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getConfirmationHeader());
         assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
@@ -6872,6 +6874,9 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
         // Placeholder draft entry was removed (matched via documentUrl camelCase fallback)
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingDrafts =
@@ -6945,6 +6950,9 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
         // Fallback path removed index 0 (the most recently added entry)
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
@@ -7022,6 +7030,10 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
+
         // Unrelated entry untouched, collection unchanged
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
@@ -7103,6 +7115,10 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
+
         // Entry that matched via orderDocumentWelsh was removed
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
@@ -7167,8 +7183,8 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertNotNull(response.getBody().getConfirmationHeader());
         assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
     }
 
