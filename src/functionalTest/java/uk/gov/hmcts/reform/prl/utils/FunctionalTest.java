@@ -6,6 +6,7 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -13,9 +14,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -26,10 +27,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Slf4j
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 @TestPropertySource("classpath:application.yaml")
 public abstract class FunctionalTest {
 
-    private static final LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(2021, 04, 28, 1, 0);
+    private static final LocalDateTime LOCAL_DATE_TIME = LocalDateTime.of(2021, 4, 28, 1, 0);
     private static final String SOLICITOR_CREATE = "solicitorCreate";
 
     @Value("${test-url}")
@@ -46,7 +48,6 @@ public abstract class FunctionalTest {
 
     @Autowired
     protected ObjectMapper objectMapper;
-
 
     protected CaseDetails createCaseInCcd() {
         String solicitorToken = idamTokenGenerator.generateIdamTokenForSolicitor();
@@ -108,7 +109,7 @@ public abstract class FunctionalTest {
         );
     }
 
-    protected Response triggerCallback(Map<String, Object> caseData, String eventId, String url) throws IOException {
+    protected Response triggerCallback(Map<String, Object> caseData, String eventId, String url) {
         CallbackRequest request = CallbackRequest
             .builder()
             .eventId(eventId)
@@ -134,8 +135,7 @@ public abstract class FunctionalTest {
         return triggerCallback(request, url);
     }
 
-
-    protected Response triggerCallback(CallbackRequest request, String url) throws IOException {
+    protected Response triggerCallback(CallbackRequest request, String url) {
         return RestAssured
             .given()
             .relaxedHTTPSValidation()
@@ -147,7 +147,6 @@ public abstract class FunctionalTest {
             .when()
             .post(url);
     }
-
 
     protected CaseData getCaseData(Map<String, Object> data) {
         return objectMapper.convertValue(data, CaseData.class);
