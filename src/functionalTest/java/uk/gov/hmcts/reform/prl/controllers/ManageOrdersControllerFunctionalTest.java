@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
-
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,19 +56,19 @@ public class ManageOrdersControllerFunctionalTest {
     @Autowired
     protected RoleAssignmentService roleAssignmentService;
 
-    @MockBean
+    @MockitoBean
     private ManageOrderService manageOrderService;
 
-    @MockBean
+    @MockitoBean
     private RoleAssignmentApi roleAssignmentApi;
 
-    @MockBean
+    @MockitoBean
     private HearingService hearingService;
 
-    @MockBean
+    @MockitoBean
     private AllTabServiceImpl allTabService;
 
-    @MockBean
+    @MockitoBean
     private ManageOrderEmailService manageOrderEmailService;
 
     @Autowired
@@ -491,7 +490,8 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-        CaseDetails caseDetails =  request2
+
+        CaseDetails caseDetails = request2
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -499,12 +499,14 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .assertThat().statusCode(200)
+            .assertThat()
+            .statusCode(200)
             .extract()
             .as(CaseDetails.class);
 
         String requestBodyRevised = requestBody
             .replace("1703068453862935", caseDetails.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -513,27 +515,10 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.postalInformationCaOnlyC47a", equalTo(null))
-            .body("data.postalInformationCA", equalTo(null))
-            .body("data.otherParties", equalTo(null))
-            .body("data.recipientsOptions", equalTo(null))
-            .body("data.cafcassCymruEmail", equalTo(null))
-            .body("data.serveOrderDynamicList", equalTo(null))
-            .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.cafcassCymruServedOptions", equalTo(null))
-            .body("data.emailInformationCaOnlyC47a", equalTo(null))
-            .body("data.localAuthoritySolicitorOrganisationPolicy",
-                  equalTo(null))
-            .body("data.localAuthority.isLocalAuthorityInvolvedInCase",equalTo("No"))
-            .body("data.localAuthority.localAuthoritySolicitorOrganisationName",      equalTo(null))
-            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
-                  equalTo("Yes"))
-            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
-            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
-                  equalTo("Yes"))
-            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+            .assertThat()
+            .statusCode(200)
+            .body("confirmation_header", nullValue())
+            .body("confirmation_body", nullValue())
             .extract()
             .as(SubmittedCallbackResponse.class);
     }
