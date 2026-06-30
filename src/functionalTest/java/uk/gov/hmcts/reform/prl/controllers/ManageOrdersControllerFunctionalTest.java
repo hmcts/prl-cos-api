@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,20 +23,32 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
+import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -70,6 +84,16 @@ public class ManageOrdersControllerFunctionalTest {
 
     @MockBean
     private HearingService hearingService;
+
+    @MockBean
+    private AllTabServiceImpl allTabService;
+
+    @MockBean
+    private ManageOrderEmailService manageOrderEmailService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
@@ -604,9 +628,11 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
-        CaseDetails caseDetails =  request2
+
+        CaseDetails createdCaseDetails = request2
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -614,13 +640,33 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .assertThat().statusCode(200)
+            .assertThat()
+            .statusCode(200)
             .extract()
             .as(CaseDetails.class);
 
-
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", caseDetails.getId().toString());
+            .replace("1706997775517206", createdCaseDetails.getId().toString());
+
+        Map<String, Object> persistedCaseData = new HashMap<>(createdCaseDetails.getData());
+
+        CaseData caseDataFromDb = objectMapper.convertValue(
+            persistedCaseData,
+            CaseData.class
+        );
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
+            new StartAllTabsUpdateDataContent(
+                idamTokenGenerator.generateIdamTokenForSystem(),
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                persistedCaseData,
+                caseDataFromDb,
+                null
+            );
+
+        when(allTabService.getStartAllTabsUpdate(anyString()))
+            .thenReturn(startAllTabsUpdateDataContent);
 
         request3
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -630,14 +676,33 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.recipientsOptions", equalTo(null))
-            .body("data.cafcassCymruEmail", equalTo(null))
-            .body("data.serveOrderDynamicList", equalTo(null))
-            .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.applicants[0].id", equalTo("97e25c77-f915-4b4e-8436-89a0d1678813"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat()
+            .statusCode(200);
 
+        ArgumentCaptor<Map<String, Object>> caseDataCaptor = ArgumentCaptor.forClass(Map.class);
+
+        verify(allTabService).submitAllTabsUpdate(
+            anyString(),
+            anyString(),
+            any(),
+            any(),
+            caseDataCaptor.capture()
+        );
+
+        Map<String, Object> submittedCaseData = caseDataCaptor.getValue();
+
+        assertNull(submittedCaseData.get("recipientsOptions"));
+        assertNull(submittedCaseData.get("cafcassCymruEmail"));
+        assertNull(submittedCaseData.get("serveOrderDynamicList"));
+        assertNull(submittedCaseData.get("serveOtherPartiesCA"));
+
+        List<Map<String, Object>> applicants =
+            (List<Map<String, Object>>) submittedCaseData.get("applicants");
+
+        assertEquals(
+            "97e25c77-f915-4b4e-8436-89a0d1678813",
+            applicants.get(0).get("id")
+        );
     }
 
     /**

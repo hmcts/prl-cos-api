@@ -423,8 +423,9 @@ public class ManageOrdersController {
             // because the service clears that field on failure. If processing later fails we use
             // this to match and remove only the placeholder order/draft entry that actually
             // references this upload.
-            String customOrderDocUrl = extractCustomOrderDocBinaryUrl(caseDataUpdated);
             if (isCustomOrder) {
+                String customOrderDocUrl = extractCustomOrderDocBinaryUrl(caseDataUpdated);
+
                 log.info("Submitted callback: calling processCustomOrder");
                 try {
                     processCustomOrder(authorisation, caseData, caseDataUpdated);
