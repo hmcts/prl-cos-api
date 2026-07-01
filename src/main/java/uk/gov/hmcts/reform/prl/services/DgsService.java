@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Objects.nonNull;
@@ -77,6 +78,13 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName)
         throws DocumentGenerationException {
 
+        return generateDocument(authorisation, caseDetails, templateName, Optional.empty());
+    }
+
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName,
+                                                  Optional<String> dynamicFilename)
+        throws DocumentGenerationException {
+
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
@@ -94,6 +102,9 @@ public class DgsService {
             TemplateConstants.CASE_DETAILS,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
+
+        dynamicFilename.ifPresent(s -> tempCaseDetails.put("dynamic_fileName", s));
+
         try {
             GenerateDocumentRequest request = GenerateDocumentRequest.builder()
                 .caseId(String.valueOf(caseDetails.getCaseData().getId()))
@@ -129,6 +140,13 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName)
         throws DocumentGenerationException {
 
+        return generateWelshDocument(authorisation, caseDetails, templateName, Optional.empty());
+    }
+
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName,
+                                                       Optional<String> dynamicFilename)
+        throws DocumentGenerationException {
+
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
@@ -155,6 +173,8 @@ public class DgsService {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
         tempCaseDetails.put(TemplateConstants.CASE_DETAILS, caseDataMap);
+        dynamicFilename.ifPresent(s -> tempCaseDetails.put("dynamic_fileName", s));
+
         try {
             GenerateDocumentRequest request = GenerateDocumentRequest.builder()
                 .caseId(String.valueOf(caseDetails.getCaseData().getId()))
