@@ -308,7 +308,7 @@ public class ManageOrdersControllerFunctionalTest {
     /**
      * Court Admin manageOrders journey - creates the order with one hearings with approval required.
      */
-    @Ignore
+    @Disabled
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
@@ -352,7 +352,7 @@ public class ManageOrdersControllerFunctionalTest {
     /**
      * Court Admin manageOrders journey - creates the order with many hearings with approval required.
      */
-    @Ignore
+    @Disabled
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_requiredMultiple() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED_MANY_HEARING);
@@ -662,7 +662,7 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required_sdo() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
