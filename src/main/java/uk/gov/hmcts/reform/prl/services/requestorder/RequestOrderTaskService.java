@@ -167,7 +167,7 @@ public class RequestOrderTaskService {
         )).build();
 
         //qry for lastModified>=deployDate
-        LastModified lastModified = LastModified.builder().gte(LocalDateTime.now().toString()).build();
+        LastModified lastModified = LastModified.builder().gte(LocalDate.now().toString()).build();
         Range range = Range.builder().lastModified(lastModified).build();
         Filter rangeFilter = Filter.builder().range(range).build();
 
