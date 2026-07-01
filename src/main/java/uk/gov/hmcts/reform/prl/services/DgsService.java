@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Objects.nonNull;
@@ -81,6 +82,13 @@ public class DgsService {
     public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName)
         throws DocumentGenerationException {
 
+        return generateDocument(authorisation, caseDetails, templateName, Optional.empty());
+    }
+
+    public GeneratedDocumentInfo generateDocument(String authorisation, CaseDetails caseDetails, String templateName,
+                                                  Optional<String> dynamicFilename)
+        throws DocumentGenerationException {
+
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
@@ -98,7 +106,10 @@ public class DgsService {
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+
+        dynamicFilename.ifPresent(s -> tempCaseDetails.put("dynamic_fileName", s));
+
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -133,6 +144,13 @@ public class DgsService {
     public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName)
         throws DocumentGenerationException {
 
+        return generateWelshDocument(authorisation, caseDetails, templateName, Optional.empty());
+    }
+
+    public GeneratedDocumentInfo generateWelshDocument(String authorisation, CaseDetails caseDetails, String templateName,
+                                                       Optional<String> dynamicFilename)
+        throws DocumentGenerationException {
+
 
         CaseData caseData = caseDetails.getCaseData();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -160,7 +178,9 @@ public class DgsService {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
         }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
-        GeneratedDocumentInfo generatedDocumentInfo = null;
+
+        dynamicFilename.ifPresent(s -> tempCaseDetails.put("dynamic_fileName", s));
+        GeneratedDocumentInfo generatedDocumentInfo;
         try {
             generatedDocumentInfo =
                 dgsApiClient.generateDocument(authorisation, GenerateDocumentRequest
@@ -249,10 +269,10 @@ public class DgsService {
         caseDetails.put(FAMILYMAN_CASE_NUMBER, familymanCaseNumber);
         caseDetails.put(
             APPLICANT_NAME,
-            getApplicantName(applicantWitnessStatement, respondentWitnessStatement, documentRequest, caseDataFromCcd));
+            getApplicantName(applicantWitnessStatement, respondentWitnessStatement, caseDataFromCcd));
         caseDetails.put(
             RESPONDENT_NAME,
-            getRespondentName(respondentWitnessStatement, applicantWitnessStatement, documentRequest, caseDataFromCcd));
+            getRespondentName(respondentWitnessStatement, applicantWitnessStatement, caseDataFromCcd));
         caseDetails.put(CITIZEN_UPLOADED_STATEMENT, documentRequest.getFreeTextStatements());
         caseDetails.put(SIGNED_BY, documentRequest.getPartyName());
         caseDetails.put(SIGNED_DATE, LocalDateTime.now());
@@ -296,7 +316,7 @@ public class DgsService {
     }
 
     private String getApplicantName(boolean applicantWitnessStatement, boolean respondentWitnessStatement,
-                                    DocumentRequest documentRequest,CaseData caseDataFromCcd) {
+                                    CaseData caseDataFromCcd) {
         String applicantName = null;
 
         if (!applicantWitnessStatement && !respondentWitnessStatement) {
@@ -319,7 +339,7 @@ public class DgsService {
     }
 
     private String getRespondentName(boolean respondentWitnessStatement, boolean applicantWitnessStatement,
-                                     DocumentRequest documentRequest,CaseData caseDataFromCcd) {
+                                     CaseData caseDataFromCcd) {
         String respondentName = null;
         if (!applicantWitnessStatement && !respondentWitnessStatement) {
             respondentName = "";
