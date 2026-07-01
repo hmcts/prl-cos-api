@@ -82,6 +82,9 @@ aca:
 wa-task-management:
   api:
     url: ${TASK_MANAGEMENT_API_BASEURL:http://wa-task-management-api-aat.service.core-compute-aat.internal}
+  system:
+    username: ${WA_SYSTEM_USER_USERNAME:xxxxxx}
+    password: ${WA_SYSTEM_USER_PASSWORD:xxxxxx}
 
 uk:
   gov:

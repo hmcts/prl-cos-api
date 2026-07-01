@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.wa.CompletableTaskResponse;
 import uk.gov.hmcts.reform.prl.models.wa.SearchEventAndCaseRequest;
+import uk.gov.hmcts.reform.prl.services.WaSystemUserService;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -17,7 +17,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TaskManagementService {
 
-    private final AuthTokenGenerator authTokenGenerator;
+    private final WaSystemUserService waSystemUserService;
 
     private final TaskManagementClient taskManagementClient;
 
@@ -34,6 +34,6 @@ public class TaskManagementService {
             .caseId(caseId)
             .eventId(eventId)
             .build();
-        return taskManagementClient.searchForCompletable(authTokenGenerator.generate(), searchEventAndCaseRequest);
+        return taskManagementClient.searchForCompletable(waSystemUserService.getSysUserToken(), searchEventAndCaseRequest);
     }
 }

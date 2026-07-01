@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.models.wa;
 
 import lombok.Builder;
+import lombok.Data;
 
+@Data
 @Builder
 public class SearchEventAndCaseRequest {
 
