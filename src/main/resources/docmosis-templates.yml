@@ -248,33 +248,33 @@ docmosis:
       filename: C1A_Document_Draft_Welsh.pdf
     - templateName: FL-PRL-APP-WEL-C1A-Final-V2.docx
       filename: C1AWelshDocument.pdf
-    - templateName: PRL-LET-ENG-C100-RE5.docx
+    - templateName: FL-PRL-LET-ENG-C100-RE5.docx
       filename: cover_letter_re5.pdf
-    - templateName: PRL-LET-ENG-C100-RE7.docx
+    - templateName: FL-PRL-LET-ENG-C100-RE7.docx
       filename: cover_letter_re7.pdf
-    - templateName: PRL-LET-WEL-C100-RE7.docx
+    - templateName: FL-PRL-LET-WEL-C100-RE7.docx
       filename: cover_letter_welsh_re7.pdf
-    - templateName: PRL-LET-ENG-FL401-AP1.docx
+    - templateName: FL-PRL-LET-ENG-FL401-AP1.docx
       filename: cover_letter_ap1.pdf
-    - templateName: PRL-LET-ENG-FL401-AP2.docx
+    - templateName: FL-PRL-LET-ENG-FL401-AP2.docx
       filename: cover_letter_ap2.pdf
-    - templateName: PRL-LET-ENG-C100-AP6.docx
+    - templateName: FL-PRL-LET-ENG-C100-AP6.docx
       filename: cover_letter_ap6.pdf
-    - templateName: PRL-LET-ENG-C100-AP7.docx
+    - templateName: FL-PRL-LET-ENG-C100-AP7.docx
       filename: cover_letter_ap7.pdf
-    - templateName: PRL-LET-ENG-C100-AP8.docx
+    - templateName: FL-PRL-LET-ENG-C100-AP8.docx
       filename: cover_letter_ap8.pdf
-    - templateName: PRL-LET-ENG-FL401-RE1.docx
+    - templateName: FL-PRL-LET-ENG-FL401-RE1.docx
       filename: cover_letter_re1.pdf
-    - templateName: PRL-LET-ENG-FL401-RE2.docx
+    - templateName: FL-PRL-LET-ENG-FL401-RE2.docx
       filename: cover_letter_re2.pdf
-    - templateName: PRL-LET-ENG-FL401-RE3.docx
+    - templateName: FL-PRL-LET-ENG-FL401-RE3.docx
       filename: cover_letter_re3.pdf
-    - templateName: PRL-LET-ENG-FL401-RE4.docx
+    - templateName: FL-PRL-LET-ENG-FL401-RE4.docx
       filename: cover_letter_re4.pdf
-    - templateName: PRL-LET-ENG-C100-RE6.docx
+    - templateName: FL-PRL-LET-ENG-C100-RE6.docx
       filename: cover_letter_re6.pdf
-    - templateName: PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx
+    - templateName: FL-PRL-LET-ENG-LIST-WITHOUT-NOTICE.docx
       filename: List_without_notice_letter.pdf
     - templateName: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
       filename: PrlPostDocumentCoverSheet.pdf
@@ -284,7 +284,7 @@ docmosis:
       filename: PrlMessageDocumentLetter.pdf
     - templateName: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
       filename: WelshPrlMessageDocumentLetter.pdf
-    - templateName: PRL-LEG-REP-REMOVED.docx
+    - templateName: FL-PRL-LET-ENG-REP-REMOVED.docx
       filename: Cover_letter_with_access_code.pdf
     - templateName: FL-PRL-APP-ENG-C100-DRAFT-V3.docx
       filename: C100DraftDocument.pdf
@@ -298,48 +298,52 @@ docmosis:
       filename: C1AResponseDocument.pdf
     - templateName: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       filename: C1AResponseWelshDocument.pdf
-    - templateName: PRL-LTR-ENG-C100-FM5.docx
+    - templateName: FL-PRL-LET-ENG-C100-FM5.docx
       filename: Cover_letter_fm5.pdf
-    - templateName: PRL-LET-ENG-C100-AP13.docx
+    - templateName: FL-PRL-LET-ENG-C100-AP13.docx
       filename: Cover_letter_ap13.pdf
-    - templateName: PRL-LET-WEL-C100-AP13.docx
+    - templateName: FL-PRL-LET-WEL-C100-AP13.docx
       filename: Cover_letter_ap13_welsh.pdf
-    - templateName: PRL-LET-ENG-C100-AP14.docx
+    - templateName: FL-PRL-LET-ENG-C100-AP14.docx
       filename: Cover_letter_ap14.pdf
-    - templateName: PRL-LET-WEL-C100-AP14.docx
+    - templateName: FL-PRL-LET-WEL-C100-AP14.docx
       filename: Cover_letter_ap14_welsh.pdf
-    - templateName: PRL-LET-ENG-C100-AP15.docx
+    - templateName: FL-PRL-LET-ENG-C100-AP15.docx
       filename: Cover_letter_ap15.pdf
-    - templateName: PRL-LET-WEL-C100-AP15.docx
+    - templateName: FL-PRL-LET-WEL-C100-AP15.docx
       filename: Cover_letter_ap15_welsh.pdf
-    - templateName: PRL-LET-ENG-FL401-RE8.docx
+    - templateName: FL-PRL-LET-ENG-FL401-RE8.docx
       filename: Cover_letter_re8.pdf
-    - templateName: PRL-LET-WEL-FL401-RE8.docx
+    - templateName: FL-PRL-LET-WEL-FL401-RE8.docx
       filename: Cover_letter_welsh_re8.pdf
-    - templateName: PRL-LET-WEL-FL401-AP1.docx
+    - templateName: FL-PRL-LET-WEL-FL401-AP1.docx
       filename: cover_letter_welsh_ap1.pdf
-    - templateName: PRL-LET-WEL-FL401-AP2.docx
+    - templateName: FL-PRL-LET-WEL-FL401-AP2.docx
       filename: cover_letter_welsh_ap2.pdf
-    - templateName: PRL-LET-WEL-C100-AP6.docx
+    - templateName: FL-PRL-LET-WEL-C100-AP6.docx
       filename: cover_letter_welsh_ap6.pdf
-    - templateName: PRL-LET-WEL-C100-AP7.docx
+    - templateName: FL-PRL-LET-WEL-C100-AP7.docx
       filename: cover_letter_welsh_ap7.pdf
-    - templateName: PRL-LET-WEL-C100-AP8.docx
+    - templateName: FL-PRL-LET-WEL-C100-AP8.docx
       filename: cover_letter_welsh_ap8.pdf
-    - templateName: PRL-LET-WEL-FL401-RE1.docx
+    - templateName: FL-PRL-LET-WEL-FL401-RE1.docx
       filename: cover_letter_welsh_re1.pdf
-    - templateName: PRL-LET-WEL-FL401-RE2.docx
+    - templateName: FL-PRL-LET-WEL-FL401-RE2.docx
       filename: cover_letter_welsh_re2.pdf
-    - templateName: PRL-LET-WEL-FL401-RE3.docx
+    - templateName: FL-PRL-LET-WEL-FL401-RE3.docx
       filename: cover_letter_welsh_re3.pdf
-    - templateName: PRL-LET-WEL-FL401-RE4.docx
+    - templateName: FL-PRL-LET-WEL-FL401-RE4.docx
       filename: cover_letter_welsh_re4.pdf
-    - templateName: PRL-LET-WEL-C100-RE5.docx
+    - templateName: FL-PRL-LET-WEL-C100-RE5.docx
       filename: cover_letter_welsh_re5.pdf
-    - templateName: PRL-LET-WEL-C100-RE6.docx
+    - templateName: FL-PRL-LET-WEL-C100-RE6.docx
       filename: cover_letter_welsh_re6.pdf
     - templateName: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
       filename: C8Document_Welsh.pdf
+    - templateName: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      filename: cover_letter.pdf
+    - templateName: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
+      filename: cover_letter_welsh.pdf
     - templateName: FL-PRL-GOR-ENG-OTHER-C8.docx
       filename: C8Document.pdf
     - templateName: FL-PRL-GOR-WEL-OTHER-C8.docx
