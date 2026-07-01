@@ -69,6 +69,59 @@
           }
         }
       ],
+      "children": [
+        {
+          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+          "value": {
+            "firstName": "Test",
+            "lastName": "Child",
+            "dateOfBirth": "2000-10-10",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "orderAppliedFor": [
+              "childArrangementsOrder"
+            ],
+            "applicantsRelationshipToChild": "grandParent",
+            "otherApplicantsRelationshipToChild": null,
+            "respondentsRelationshipToChild": "mother",
+            "otherRespondentsRelationshipToChild": null,
+            "childLiveWith": [
+              "anotherPerson",
+              "respondent",
+              "applicant"
+            ],
+            "childrenKnownToLocalAuthority": null,
+            "childrenKnownToLocalAuthorityTextArea": null,
+            "childrenSubjectOfChildProtectionPlan": null,
+            "isChildCurrentAddressKnown": "Yes",
+            "childUnsupervisedTime": "No",
+            "childContactFromOtherRecipients": "No",
+            "relationshipToApplicant": null,
+            "relationshipToRespondent": null,
+            "personWhoLivesWithChild": [
+              {
+                "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+                "value": {
+                  "firstName": "Test",
+                  "lastName": "Aunt",
+                  "relationshipToChildDetails": "Aunt",
+                  "address": {
+                    "AddressLine1": "17 Lorne Road",
+                    "AddressLine2": "",
+                    "AddressLine3": "",
+                    "PostTown": "test",
+                    "County": "",
+                    "Country": "",
+                    "PostCode": "le2 1yh"
+                  },
+                  "isPersonIdentityConfidential": "No"
+                }
+              }
+            ]
+          }
+        }
+      ],
       "withDrawApplicationData": {
         "withDrawApplication": "Yes",
         "withDrawApplicationReason": "Test"
