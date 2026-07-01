@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.UnsupportedFileFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -76,6 +78,24 @@ public class CustomOrderService {
     private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+
+    /**
+     * Error message shown to the user when their uploaded custom order document
+     * is not a valid .docx file (e.g. a PDF renamed to .docx).
+     */
+    public static final String INVALID_DOCX_ERROR =
+        "Custom order upload must be a valid Word (.docx) document. "
+            + "Please remove the file and upload a valid .docx file.";
+
+    /**
+     * Error message shown to the user when their uploaded custom order document
+     * contains content that is not permitted (e.g. macros, embedded files,
+     * external links). Detected by DocxCombineUtils.validateDocumentSecurity.
+     */
+    public static final String UNSAFE_DOCX_ERROR =
+        "The uploaded file contains content that is not allowed (such as macros, "
+            + "embedded files, or external links). Please remove the file, save a "
+            + "clean copy without that content, and upload it again.";
 
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
@@ -1732,12 +1752,80 @@ public class CustomOrderService {
      * Combines the header template with user's uploaded content.
      * Delegates to DocxCombineUtils for the actual document manipulation.
      *
+     * <p>If the user content is not a valid OOXML (.docx) file (e.g. a PDF
+     * renamed to .docx, an old binary .doc, or a corrupt zip), POI throws
+     * either {@link UnsupportedFileFormatException} (covers
+     * {@code NotOfficeXmlFileException}, {@code OldFileFormatException},
+     * etc.) or {@link org.apache.poi.ooxml.POIXMLException} (covers
+     * {@code InvalidFormatException} wrappers such as
+     * "Package should contain a content type part"). Both are translated
+     * into {@link InvalidCustomOrderDocumentException} so callers can surface
+     * a user-friendly error and stop the event.</p>
+     *
+     * <p>If the user content is a valid .docx but contains disallowed
+     * features (macros, OLE objects, external relationships),
+     * {@link DocxCombineUtils#combineDocuments} throws a plain
+     * {@link IOException} from its security validator. We detect that here
+     * by message prefix and translate it into the same
+     * {@link InvalidCustomOrderDocumentException} carrying
+     * {@link #UNSAFE_DOCX_ERROR} so the user gets a clear message and the
+     * event aborts cleanly instead of being swallowed as a generic 500.</p>
+     *
      * @param headerBytes Rendered header document bytes
      * @param userContentBytes User's uploaded document bytes
      * @return Combined document bytes
      */
     public byte[] combineHeaderAndContent(byte[] headerBytes, byte[] userContentBytes) throws IOException {
-        return DocxCombineUtils.combineDocuments(headerBytes, userContentBytes);
+        try {
+            return DocxCombineUtils.combineDocuments(headerBytes, userContentBytes);
+        } catch (UnsupportedFileFormatException | org.apache.poi.ooxml.POIXMLException e) {
+            log.warn("Custom order combine failed - uploaded content is not a valid .docx: {}", e.getMessage());
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR, e);
+        } catch (IOException e) {
+            // DocxCombineUtils.validateDocumentSecurity throws IOException with one of:
+            //   "Document contains macros which are not permitted"
+            //   "Document contains embedded objects which are not permitted"
+            //   "Document contains external links which are not permitted"
+            // Translate those into a user-friendly validation failure; otherwise rethrow.
+            if (isSecurityValidationFailure(e)) {
+                log.warn("Custom order combine failed - upload contains disallowed content: {}", e.getMessage());
+                throw new InvalidCustomOrderDocumentException(UNSAFE_DOCX_ERROR, e);
+            }
+            throw e;
+        }
+    }
+
+    private static boolean isSecurityValidationFailure(IOException e) {
+        String msg = e.getMessage();
+        return msg != null && (msg.contains("macros which are not permitted")
+            || msg.contains("embedded objects which are not permitted")
+            || msg.contains("external links which are not permitted"));
+    }
+
+    /**
+     * Validates that the supplied bytes look like a real OOXML (.docx) file by
+     * checking the file magic numbers. Catches the common case where a user has
+     * renamed a PDF (or another non-Office format) to .docx before uploading.
+     *
+     * @param bytes Raw bytes of the uploaded document
+     * @throws InvalidCustomOrderDocumentException if the bytes are not a valid OOXML container
+     */
+    void validateDocxContent(byte[] bytes) {
+        if (bytes == null || bytes.length < 4) {
+            log.warn("Custom order upload rejected: empty or too small ({} bytes)",
+                bytes == null ? 0 : bytes.length);
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
+        }
+        // %PDF
+        boolean isPdf = bytes[0] == 0x25 && bytes[1] == 0x50 && bytes[2] == 0x44 && bytes[3] == 0x46;
+        // PK\x03\x04 (ZIP/OOXML container)
+        boolean isZip = bytes[0] == 0x50 && bytes[1] == 0x4B
+            && (bytes[2] == 0x03 || bytes[2] == 0x05 || bytes[2] == 0x07)
+            && (bytes[3] == 0x04 || bytes[3] == 0x06 || bytes[3] == 0x08);
+        if (isPdf || !isZip) {
+            log.warn("Custom order upload rejected: not a valid OOXML file (isPdf={}, isZip={})", isPdf, isZip);
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
+        }
     }
 
     /**
@@ -1776,6 +1864,11 @@ public class CustomOrderService {
         log.info("Downloading user content from URL: {}", userDocUrl);
         byte[] userContentBytes = documentGenService.getDocumentBytes(userDocUrl, systemAuth, s2sToken);
         log.info("Downloaded user content: {} bytes", userContentBytes.length);
+
+        // 2a. Fail fast if the upload is not a real .docx (e.g. PDF renamed to .docx).
+        // This throws InvalidCustomOrderDocumentException, which combineAndFinalizeCustomOrder
+        // will catch in order to clear customOrderDoc and stop the event.
+        validateDocxContent(userContentBytes);
 
         // 3. Combine header + user content
         byte[] combinedBytes = combineHeaderAndContent(headerBytes, userContentBytes);
@@ -2079,7 +2172,7 @@ public class CustomOrderService {
         CaseData caseData,
         Map<String, Object> caseDataUpdated,
         boolean isDraftOrder
-    ) {
+    ) throws IOException {
         try {
             // Get the user's uploaded document
             Object customOrderDocObj = caseDataUpdated.get(CUSTOM_ORDER_DOC);
@@ -2109,7 +2202,7 @@ public class CustomOrderService {
                 log.warn("Skipping custom order combine - customOrderDoc or headerPreview not available");
                 return;
             }
-
+            validateCustomOrderCanBeCombined(customOrderDoc.getDocumentFileName());
             // Combine header preview + user content (sealing happens inside for final orders)
             uk.gov.hmcts.reform.prl.models.documents.Document finalDoc =
                 processCustomOrderOnSubmitted(
@@ -2139,9 +2232,38 @@ public class CustomOrderService {
             caseDataUpdated.put("previewOrderDoc", null);
             caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
 
+        } catch (InvalidCustomOrderDocumentException e) {
+            log.error("Invalid custom order document for case {}: {}", caseData.getId(), e.getMessage());
+            clearCustomOrderDocState(caseDataUpdated);
+            throw e;
         } catch (Exception e) {
-            log.error("Failed to process custom order in submitted callback", e);
+            log.error("Failed to process custom order in submitted callback for case {}", caseData.getId(), e);
+            clearCustomOrderDocState(caseDataUpdated);
+            throw e;
         }
+    }
+
+    void validateCustomOrderCanBeCombined(String fileName) {
+        if (fileName == null || !fileName.toLowerCase().endsWith(DOCX_EXTENSION)) {
+            log.warn("Custom order upload rejected: file cannot be combined with docx header ({})", fileName);
+            throw new InvalidCustomOrderDocumentException(INVALID_DOCX_ERROR);
+        }
+    }
+
+    /**
+     * Clears state related to the uploaded custom order document so that a
+     * failed upload does not get persisted or reused on retry.
+     */
+    void clearCustomOrderDocState(Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated == null) {
+            return;
+        }
+        caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+        caseDataUpdated.put("previewOrderDoc", null);
+        // CUSTOM_ORDER_USED_CDAM_ASSOCIATION is an in-memory flag only - remove rather than
+        // null it so it doesn't get submitted to CCD which has no such field defined.
+        caseDataUpdated.remove(CUSTOM_ORDER_USED_CDAM_ASSOCIATION);
+        log.info("Cleared customOrderDoc / previewOrderDoc after failure");
     }
 
     void updateDraftOrderCollection(CaseData caseData, Map<String, Object> caseDataUpdated,

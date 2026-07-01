@@ -74,6 +74,13 @@ public class DocxCombineUtils {
             return out.toByteArray();
         } catch (IOException e) {
             throw e;
+        } catch (org.apache.poi.UnsupportedFileFormatException | org.apache.poi.ooxml.POIXMLException e) {
+            // The supplied bytes are not a valid OOXML (.docx) document - e.g. a
+            // PDF renamed to .docx, a corrupt zip, an old binary .doc, etc.
+            // Propagate so callers can surface a user-friendly error instead of
+            // burying it inside a generic IOException.
+            log.warn("Cannot merge: input is not a valid OOXML document: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("Failed to merge documents", e);
             throw new IOException("Failed to merge documents: " + e.getMessage(), e);

@@ -8,13 +8,16 @@ GATE_FLAG="$REPO_ROOT/.run-coverage-on-commit"
 if [ -f "$GATE_FLAG" ]; then
     echo "🛡️  Coverage Gate is ON. Running checks..."
 
-    # 1. Get staged Java class names (e.g., "MyService,MyController")
-    # This filters for added/modified Java files and strips the path/extension
-    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR | grep '\.java$' | xargs -I {} basename {} .java | sort -u | paste -sd "," -)
+    # 1. Get staged Java class names from MAIN source only (skip tests).
+    # Test files don't have a corresponding production-code target in the
+    # JaCoCo report, so feeding them into -Ptarget causes a spurious
+    # "TARGETS NOT FOUND" gate failure. The production class they cover
+    # is gated separately whenever it's part of the commit.
+    STAGED_CLASSES=$(git diff --cached --name-only --diff-filter=ACMR | grep '^src/main/.*\.java$' | xargs -I {} basename {} .java | sort -u | paste -sd "," -)
 
-    # 2. If no Java files are staged, just proceed
+    # 2. If no production Java files are staged, just proceed
     if [ -z "$STAGED_CLASSES" ]; then
-        echo "ℹ️  No Java changes detected. Proceeding..."
+        echo "ℹ️  No production Java changes detected. Proceeding..."
         exit 0
     fi
 
