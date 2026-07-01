@@ -71,8 +71,10 @@ public enum CreateSelectOrderOptionsEnum {
     @JsonProperty("other")
     other("other", "Other (upload an order)","18",
         "Arall (uwchlwythwch orchymyn)"),
+    @JsonProperty("noticeOfHearingParties")
+    noticeOfHearingParties("noticeOfHearingParties", "Notice of Hearing", "19", "--Welsh?"),
     @JsonProperty("noticeOfHearing")
-    noticeOfHearing("noticeOfHearing", "Notice of Hearing", "19", "--Welsh?");
+    noticeOfHearing("noticeOfHearing", "Notice of Hearing (FL401)", "20", "--Welsh?");
 
     private final String id;
     private final String displayedValue;

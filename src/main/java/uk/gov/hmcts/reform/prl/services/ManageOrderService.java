@@ -971,6 +971,9 @@ public class ManageOrderService {
             case noticeOfHearing:
                 // add templates from FPVTL-3133 when they exist
                 break;
+            case noticeOfHearingParties:
+                // add templates from FPVTL-3133 when they exist
+                break;
             default:
                 break;
         }
