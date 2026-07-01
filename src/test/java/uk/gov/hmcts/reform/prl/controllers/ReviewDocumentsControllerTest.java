@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.exception.ReviewDocumentException;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -22,12 +23,15 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReviewDocumentsControllerTest {
+
+    private static final String AUTHORISATION = "authorisation";
 
     @InjectMocks
     private ReviewDocumentsController reviewDocumentsController;
@@ -93,7 +97,7 @@ public class ReviewDocumentsControllerTest {
     public void testHandleAboutToStart() throws Exception {
 
         when(reviewDocumentService.fetchDocumentDynamicListElements(caseData)).thenReturn(dynamicListElements);
-        reviewDocumentsController.handleAboutToStart(auth, callbackRequest);
+        reviewDocumentsController.handleAboutToStart(callbackRequest);
         verify(reviewDocumentService).fetchDocumentDynamicListElements(caseData);
         verifyNoMoreInteractions(reviewDocumentService);
     }
@@ -102,20 +106,47 @@ public class ReviewDocumentsControllerTest {
     public void testHandleMidEvent() {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
-        verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
+        verify(reviewDocumentService).getReviewedDocumentDetailsNew(AUTHORISATION, caseData, stringObjectMap);
+        verifyNoMoreInteractions(reviewDocumentService);
+    }
+
+
+    @Test
+    public void testHandleValidateEvent() {
+        // when
+        reviewDocumentsController.handleValidateMidEvent(callbackRequest);
+
+        // then
+        verify(reviewDocumentService).validateEvent(stringObjectMap);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
+        reviewDocumentsController.handleAboutToSubmit(callbackRequest);
         verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
+    @Test(expected = ReviewDocumentException.class)
+    public void testHandleAboutToSubmitWhenReviewDocsDynamicListIsNull() throws Exception {
+        // given
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData.getReviewDocuments().setReviewDocsDynamicList(null);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        // when
+        reviewDocumentsController.handleAboutToSubmit(callbackRequest);
+
+        // then
+        verifyNoInteractions(reviewDocumentService);
+    }
+
+
     @Test
     public void testHandleSubmitted() {
+        // given
         CaseDetails caseDetailsBefore = CaseDetails.builder().id(123L).build();
         CaseData caseDataBefore = CaseData.builder().id(123L).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -124,7 +155,11 @@ public class ReviewDocumentsControllerTest {
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetailsBefore)
             .build();
-        reviewDocumentsController.handleSubmitted(auth, callbackRequest);
+
+        // when
+        reviewDocumentsController.handleSubmitted(callbackRequest);
+
+        // then
         verify(reviewDocumentService).cleanupOldCopyOfDocuments(caseData, caseDataBefore);
         verify(reviewDocumentService).getReviewResult(caseData);
         verifyNoMoreInteractions(reviewDocumentService);

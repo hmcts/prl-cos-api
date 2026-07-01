@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.mapper.courtnav.FL401ApplicationMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseCreationResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,9 +32,12 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtLocationService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
+import java.util.Optional;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 
 @Slf4j
@@ -48,7 +52,7 @@ public class CourtNavCaseController {
     private final CourtLocationService courtLocationService;
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
-    private  final CafcassUploadDocService cafcassUploadDocService;
+    private final CafcassUploadDocService cafcassUploadDocService;
     private final SystemUserService systemUserService;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -66,8 +70,12 @@ public class CourtNavCaseController {
         @Valid @RequestBody CourtNavFl401 inputData
     ) throws Exception {
 
-        if (!authorisationService.authoriseUser(authorisation)
-            || !authorisationService.authoriseService(serviceAuthorization)) {
+        if (!authorisationService.isAuthorized(authorisation, serviceAuthorization)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isEmpty() || !userInfo.get().getRoles().contains(COURTNAV_USER)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
 
@@ -98,17 +106,27 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        if (userInfo.isPresent() && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 
-            if (authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
+            if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("uploading cafcass document");
-                cafcassUploadDocService.uploadDocument(systemUserService.getSysUserToken(), file, typeOfDocument, caseId);
+                cafcassUploadDocService.uploadDocument(
+                    systemUserService.getSysUserToken(),
+                    file,
+                    typeOfDocument,
+                    caseId
+                );
             } else {
-                courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                if (userInfo.get().getRoles().contains(COURTNAV_USER)) {
+                    courtNavCaseService.uploadDocument(authorisation, file, typeOfDocument, caseId);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+                }
             }
-            return ResponseEntity.ok().body(new ResponseMessage("Document has been uploaded successfully: "
-                                                                    + file.getOriginalFilename()));
+            return ResponseEntity.ok().body(new ResponseMessage(
+                "Document has been uploaded successfully: " + file.getOriginalFilename()));
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }

@@ -45,7 +45,8 @@ public class CitizenDocumentsManagement {
         Set.of(
             "section37Report",
             "16aRiskAssessment",
-            "sec37Report",
+            "cirTransferRequest",
+            "cirExtensionRequest",
             "publicFundingCertificates",
             "noticesOfActingDischarge",
             "requestForFASFormsToBeChanged",
@@ -56,7 +57,9 @@ public class CitizenDocumentsManagement {
             "importantInfoAboutAddressAndContact",
             "specialMeasures",
             "noticeOfHearing",
-            "caseSummary"
+            "caseSummary",
+            "cirExtensionRequestLa",
+            "cirTransferRequestLa"
         );
 
     public static final Set<String> otherDocumentsCategoriesForUI =

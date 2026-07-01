@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -12,8 +12,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -28,12 +29,11 @@ import static uk.gov.hmcts.reform.prl.utils.TestResourceUtil.readFile;
 
 /**
  * functional test case for cafcass safegaurding letter upload.
- *<p></p>
  *  ignored the test case as caseId won't be available in PR & higher environment.
  */
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CafcassUploadDocumentFunctionalTest {
 
@@ -42,7 +42,6 @@ public class CafcassUploadDocumentFunctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
-
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -70,14 +69,14 @@ public class CafcassUploadDocumentFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
     }
 
     @Test
     @Order(2)
     public void givenValidDocumentData_then200Response() throws IOException {
-        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+        final File fileToUpload = ResourceUtils.getFile(CAFCASS_DUMMY_UPLOAD_FILE);
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
@@ -90,5 +89,39 @@ public class CafcassUploadDocumentFunctionalTest {
             .then().assertThat().statusCode(200)
             .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
 
+    }
+
+    @Test
+    @Order(3)
+    public void givenCirTransferDocument_then200Response() throws IOException {
+        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .multiPart("file", fileToUpload)
+            .param("typeOfDocument", "cirTransferRequest")
+            .pathParam("caseId", caseDetails.getId())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200)
+            .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
+    }
+
+    @Test
+    @Order(4)
+    public void givenCirExtensionDocument_then200Response() throws IOException {
+        final File fileToUpload = readFile(CAFCASS_DUMMY_UPLOAD_FILE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .multiPart("file", fileToUpload)
+            .param("typeOfDocument", "cirExtensionRequest")
+            .pathParam("caseId", caseDetails.getId())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/{caseId}/document")
+            .then().assertThat().statusCode(200)
+            .body("message", equalTo("Document has been uploaded successfully: Dummy_pdf_file.pdf"));
     }
 }

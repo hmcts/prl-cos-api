@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -29,6 +31,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataRespondentDetailsElementsMapper {
 
     private CaseDataRespondentDetailsElementsMapper() {
@@ -77,6 +80,15 @@ public class CaseDataRespondentDetailsElementsMapper {
             .email(isNotEmpty(respondentDetails.getRespondentContactDetail().getEmailAddress())
                        ? respondentDetails.getRespondentContactDetail().getEmailAddress() : null)
             .canYouProvidePhoneNumber(buildCanYouProvidePhoneNumber(respondentDetails))
+            .isPhoneNumberConfidential(YesNoIDontKnowV2.Yes.equals(respondentDetails.getLiveInRefuge()) ? Yes
+                : respondentDetails.getIsRespondentTelephoneNumberConfidential())
+            .isAddressConfidential(YesNoIDontKnowV2.Yes.equals(respondentDetails.getLiveInRefuge()) ? Yes
+                : respondentDetails.getIsRespondentAddressConfidential())
+            .isEmailAddressConfidential(YesNoIDontKnowV2.Yes.equals(respondentDetails.getLiveInRefuge()) ? Yes
+                : respondentDetails.getIsRespondentEmailAddressConfidential())
+            .liveInRefuge(isNotEmpty(respondentDetails.getLiveInRefuge())
+                              ? YesNoIDontKnowV2.valueOf(respondentDetails.getLiveInRefuge().getDisplayedValue())
+                              : null)
             .phoneNumber(isNotEmpty(respondentDetails.getRespondentContactDetail().getTelephoneNumber())
                              ? respondentDetails.getRespondentContactDetail().getTelephoneNumber() : null)
             .build();
@@ -89,7 +101,19 @@ public class CaseDataRespondentDetailsElementsMapper {
 
     private static LocalDate buildDateOfBirth(RespondentDetails respondentDetails) {
         LocalDate dateOfBirth = buildDateOfBirth(respondentDetails.getPersonalDetails().getDateOfBirth());
-        return dateOfBirth != null ? dateOfBirth : buildDateOfBirth(respondentDetails.getPersonalDetails().getApproxDateOfBirth());
+
+        if (dateOfBirth != null) {
+            return dateOfBirth;
+        }
+
+        try {
+            return buildDateOfBirth(respondentDetails.getPersonalDetails().getApproxDateOfBirth());
+        } catch (Exception e) {
+            log.warn("Unable to parse approx date of birth {} for respondent with id: {}",
+                     respondentDetails.getPersonalDetails().getApproxDateOfBirth(),
+                     respondentDetails.getId());
+            return null;
+        }
     }
 
     private static LocalDate buildDateOfBirth(DateofBirth date) {

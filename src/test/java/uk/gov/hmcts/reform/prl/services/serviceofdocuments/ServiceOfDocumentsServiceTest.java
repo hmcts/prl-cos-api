@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -53,6 +54,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -65,13 +67,19 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPLAY_LEGAL_REP_OPTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_BLANK_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -118,6 +126,9 @@ public class ServiceOfDocumentsServiceTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+
+    @Mock
+    private DocumentGenService documentGenService;
 
     @Mock
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
@@ -509,7 +520,7 @@ public class ServiceOfDocumentsServiceTest {
         caseData = caseData.toBuilder()
             .serviceOfDocuments(serviceOfDocuments)
             .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
-            .respondents(List.of(element(UUID.fromString(TEST_UUID),partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
             .build();
 
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
@@ -520,6 +531,9 @@ public class ServiceOfDocumentsServiceTest {
             caseData,
             null
         );
+
+
+
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
@@ -527,23 +541,114 @@ public class ServiceOfDocumentsServiceTest {
                                                                                .isGenEng(true)
                                                                                .isGenWelsh(true)
                                                                                .build());
-        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
-                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
-                                                                                    Mockito.anyString()))
-            .thenReturn(EmailNotificationDetails.builder().build());
+        when(documentGenService.getTemplate(
+            any(CaseData.class),
+            eq(DOCUMENT_BLANK_COVER_SHEET_HINT),
+            anyBoolean()
+        )).thenReturn("FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx");
+
         when(serviceOfApplicationPostService.getCoverSheets(
             any(CaseData.class),
             anyString(),
             any(Address.class),
             anyString(),
             anyString()
-        )).thenReturn(
-            List.of(Document.builder().build()));
-        when(bulkPrintService.send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(UUID.randomUUID());
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsService.handleSubmitted(TEST_AUTHORIZATION, callbackRequest);
+        )).thenReturn(List.of(Document.builder()
+                                  .documentFileName("coverSheet.pdf")
+                                  .build()));
+
+        when(documentGenService.generateCoverLetter(
+            anyString(),
+            any(CaseData.class),
+            any(),
+            any(Address.class)
+        )).thenReturn(List.of(Document.builder()
+                          .documentUrl("coverLetterUrl")
+                          .documentBinaryUrl("coverLetterUrl")
+                          .documentFileName("coverLetter.pdf")
+                          .build()));
+
+        when(bulkPrintService.send(
+            anyString(), anyString(), anyString(), anyList(), anyString()
+        )).thenReturn(UUID.fromString(TEST_UUID));
+
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfDocumentsService.handleSubmitted(TEST_AUTHORIZATION, callbackRequest);
+
         assertNotNull(response);
 
+        ArgumentCaptor<List<Document>> documentsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(bulkPrintService, times(2)).send(
+            anyString(),
+            anyString(),
+            anyString(),
+            documentsCaptor.capture(),
+            anyString()
+        );
+
+        List<Document> capturedDocs = documentsCaptor.getValue();
+        assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
+        assertEquals("coverSheet.pdf", capturedDocs.get(1).getDocumentFileName());
+    }
+
+    @Test
+    public void testHandleSubmittedNonPersonalServiceForLipThrowsWhenAddressCoverLetterGenerationFails() throws Exception {
+        partyDetails = partyDetails.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorEmail(null)
+            .build();
+
+        sodPack = sodPack.toBuilder()
+            .isPersonalService(YesOrNo.No)
+            .applicantIds(List.of(element(TEST_UUID)))
+            .respondentIds(List.of(element(TEST_UUID)))
+            .build();
+
+        serviceOfDocuments = serviceOfDocuments.toBuilder()
+            .sodUnServedPack(sodPack)
+            .sodDocumentsCheckOptions(ServiceOfDocumentsCheckEnum.noCheck)
+            .build();
+
+        caseData = caseData.toBuilder()
+            .serviceOfDocuments(serviceOfDocuments)
+            .applicants(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .respondents(List.of(element(UUID.fromString(TEST_UUID), partyDetails)))
+            .build();
+
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            TEST_AUTHORIZATION,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            caseData.toMap(new ObjectMapper()),
+            caseData,
+            null
+        );
+
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage.builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
+        when(documentGenService.generateCoverLetter(
+            anyString(),
+            any(CaseData.class),
+            any(),
+            any(Address.class)
+        )).thenThrow(new RuntimeException("Document generation failed"));
+        when(serviceOfApplicationPostService.getCoverSheets(
+            any(CaseData.class),
+            anyString(),
+            any(Address.class),
+            anyString(),
+            anyString()
+        )).thenReturn(List.of(Document.builder()
+                                  .documentFileName("coverSheet.pdf")
+                                  .build()));
+
+        assertThrows(Exception.class, () ->
+            serviceOfDocumentsService.handleSubmitted(TEST_AUTHORIZATION, callbackRequest)
+        );
     }
 
     @Test
@@ -599,9 +704,21 @@ public class ServiceOfDocumentsServiceTest {
                                                                                     Mockito.any(),Mockito.any(),Mockito.any(),
                                                                                     Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
+        when(documentGenService.generateCoverLetter(
+            anyString(),
+            any(CaseData.class),
+            any(),
+            any(Address.class)
+        )).thenReturn(List.of(Document.builder()
+                          .documentUrl("coverLetterUrl")
+                          .documentBinaryUrl("coverLetterUrl")
+                          .documentFileName("coverLetter.pdf")
+                          .build()));
+        when(bulkPrintService.send(
+            anyString(), anyString(), anyString(), anyList(), anyString()
+        )).thenReturn(UUID.fromString(TEST_UUID));
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfDocumentsService.handleSubmitted(TEST_AUTHORIZATION, callbackRequest);
         assertNotNull(response);
-
     }
 
     @Test
@@ -975,5 +1092,73 @@ public class ServiceOfDocumentsServiceTest {
         assertEquals(1,response.size());
     }
 
+    @Test
+    public void validateAdditionalRecipientsShouldReturnErrorsForInvalidEmails() {
+        Document document = Document.builder()
+            .documentUrl("testUrl")
+            .documentBinaryUrl("testUrl")
+            .documentFileName("testFile.pdf")
+            .build();
+        CaseData testData = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder()
+                                    .sodAdditionalDocumentsList(List.of(element(document)))
+                                    .sodAdditionalRecipientsList(List.of(
+                                        element(ServeOrgDetails.builder()
+                                                    .serveByPostOrEmail(DeliveryByEnum.email)
+                                                    .emailInformation(EmailInformation.builder()
+                                                                          .emailAddress("invalid-email")
+                                                                          .build())
+                                                    .build())))
+                                    .build())
+            .build();
+
+        CallbackRequest testCallback = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID))
+                             .data(caseData.toMap(new ObjectMapper()))
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
+
+        List<String> errors = serviceOfDocumentsService.validateAdditionalRecipients(testCallback);
+
+        assertNotNull(errors);
+        assertEquals(1, errors.size());
+        assertEquals("Please provide valid email address for all recipients", errors.getFirst());
+    }
+
+    @Test
+    public void validateAdditionalRecipientsShouldReturnNoErrorsForValidEmails() {
+        Document document = Document.builder()
+            .documentUrl("testUrl")
+            .documentBinaryUrl("testUrl")
+            .documentFileName("testFile.pdf")
+            .build();
+        CaseData testData = CaseData.builder()
+            .serviceOfDocuments(ServiceOfDocuments.builder()
+                                    .sodAdditionalDocumentsList(List.of(element(document)))
+                                    .sodAdditionalRecipientsList(List.of(
+                                        element(ServeOrgDetails.builder()
+                                                    .serveByPostOrEmail(DeliveryByEnum.email)
+                                                    .emailInformation(EmailInformation.builder()
+                                                                          .emailAddress("test@test.com")
+                                                                          .build())
+                                                    .build())))
+                                    .build())
+            .build();
+
+        CallbackRequest testCallback = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder().id(Long.valueOf(TEST_CASE_ID))
+                             .data(caseData.toMap(new ObjectMapper()))
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(testData);
+
+        List<String> errors = serviceOfDocumentsService.validateAdditionalRecipients(testCallback);
+
+        assertNotNull(errors);
+        assertEquals(0, errors.size());
+    }
 
 }

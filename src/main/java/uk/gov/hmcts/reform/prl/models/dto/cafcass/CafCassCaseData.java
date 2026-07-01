@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
@@ -758,6 +759,7 @@ public class CafCassCaseData {
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTab;
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
     private List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> restrictedDocuments;
@@ -770,6 +772,9 @@ public class CafCassCaseData {
     private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentDc8Documents;
     private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> respondentEc8Documents;
 
+    private List<uk.gov.hmcts.reform.prl.models.Element<ResponseDocuments>> otherPartyC8Documents;
+
+
     private uk.gov.hmcts.reform.prl.models.documents.Document specialArrangementsLetter;
     private uk.gov.hmcts.reform.prl.models.documents.Document additionalDocuments;
     private List<uk.gov.hmcts.reform.prl.models.Element<uk.gov.hmcts.reform.prl.models.documents.Document>> additionalDocumentsList;
@@ -780,4 +785,5 @@ public class CafCassCaseData {
     private List<uk.gov.hmcts.reform.prl.models.Element<StmtOfServiceAddRecipient>> stmtOfServiceForApplication;
 
     private List<uk.gov.hmcts.reform.prl.models.Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+    private List<uk.gov.hmcts.reform.prl.models.Element<AdditionalOrderDocument>> additionalOrderDocuments;
 }

@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.mapper.bundle;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -76,7 +77,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESULTS_OF_HAIR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFEGUARDING_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_37_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_REPORT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SIXTEENA_RISK_ASSESSMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_RESPONDENT_C1A_APPLCATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIAL_GUARDIANSHIP_REPORT;
@@ -93,9 +93,16 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BundleCreateRequestMapperTest {
-    @InjectMocks
+
+    private HearingDetailsMapperUtil hearingDetailsMapperUtil;
+
     private BundleCreateRequestMapper bundleCreateRequestMapper;
 
+    @Before
+    public void setUp() {
+        hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
+        bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil);
+    }
 
     @Test
     public void testAddOtherDocument_excludesRedactedByUrl() {
@@ -558,11 +565,6 @@ public class BundleCreateRequestMapperTest {
             .documentParty("Cafcass Cymru").categoryName(SECTION_7_REPORT).categoryId("section7Report").build();
         courtStaffDoc.add(element(section7Report));
 
-        QuarantineLegalDoc sixteenARiskAssessment = QuarantineLegalDoc.builder()
-            .sixteenARiskAssessmentDocument(Document.builder().documentFileName("16ARiskAssessment").build())
-            .documentParty("Cafcass Cymru").categoryName(SIXTEENA_RISK_ASSESSMENT).categoryId("16aRiskAssessment").build();
-        courtStaffDoc.add(element(sixteenARiskAssessment));
-
         QuarantineLegalDoc guardianReport = QuarantineLegalDoc.builder()
             .guardianReportDocument(Document.builder().documentFileName("guardianReport").build())
             .documentParty("Cafcass Cymru").categoryName(GUARDIAN_REPORT).categoryId("guardianReport").build();
@@ -678,11 +680,13 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().build(),"sample.yaml");
         assertNotNull(bundleCreateRequest);
-        // Should not contain police disclosures or medical records
+        // Should not contain police disclosures, medical records, anyOtherDocuments, 16A risk assessments,
+        // CIR Transfer Requests, or CIR Extension Requests (AC6)
         assertThat(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments().stream()
                        .map(Element::getValue)
                        .map(BundlingRequestDocument::getDocumentFileName)
-                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments")
+                       .filter(fileName -> List.of("policeDisclosures", "medicalRecords", "anyOtherDocuments",
+                                                   "16ARiskAssessment", "cirTransferRequest", "cirExtensionRequest")
                            .contains(fileName)).toList())
             .asInstanceOf(LIST).isEmpty();
     }
@@ -715,6 +719,22 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
+    }
+
+    @Test
+    public void testBundleCreateRequestMapperWhenReviewDocumentsIsNull() {
+        CaseData c100CaseData = CaseData.builder()
+            .id(123456789123L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+            .bundleInformation(BundlingInformation.builder().build())
+            .reviewDocuments(null)
+            .build();
+
+        BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(
+            c100CaseData, "createBundle", null, "sample.yaml");
+        assertNotNull(bundleCreateRequest);
+        assertNotNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getAllOtherDocuments());
     }
 
     @Test
@@ -1045,6 +1065,216 @@ public class BundleCreateRequestMapperTest {
                                                                        Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
 
+    }
+
+    private Document createDoc(String name) {
+        return Document.builder()
+            .documentFileName(name)
+            .documentUrl("url")
+            .documentBinaryUrl("binaryUrl")
+            .build();
+    }
+
+    @Test
+    public void testLocalAuthorityChild1ImpactDocumentsUpdatedInMap() {
+        final String categoryId = "childImpactReport1La";
+        final String categoryName = "Child Impact Report 1";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .childImpactReport1LaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        BundlingRequestDocument expected = result.getFirst().getValue();
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, expected.getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionChildImpactReport1Report, expected.getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthorityChild2ImpactDocumentsUpdatedInMap() {
+        final String categoryId = "childImpactReport2La";
+        final String categoryName = "Child Impact Report 2";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .childImpactReport2LaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionChildImpactReport2Report, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection37ReportUpdatedInMap() {
+        final String categoryId = "sec37Report";
+        final String categoryName = "Section 37 (S37) report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .sec37ReportDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+                                .reviewDocuments(ReviewDocuments.builder()
+                                                .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                                    quarantineLegalDoc))).build())
+                                .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSection37Report, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection7ReportUpdatedInMap() {
+        final String categoryId = "section7ReportLa";
+        final String categoryName = "Section 7 report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .section7ReportLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionSection7ReportReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection7AddendumReportUpdatedInMap() {
+        final String categoryId = "section7AddendumReportLa";
+        final String categoryName = "Section 7 addendum report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .section7AddendumReportLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionSection7AddendumReportReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySectionInvolvementLetterUpdatedInMap() {
+        final String categoryId = "localAuthorityInvolvementLa";
+        final String categoryName = "Local Authority involvement letter";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .localAuthorityInvolvementLaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionLocalAuthorityInvolvementReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthoritySection47EnquiryUpdatedInMap() {
+        final String categoryId = "section47La";
+        final String categoryName = "Section 47 enquiry";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .section47LaDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laSectionSection47EnquiryReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testLocalAuthorityOtherDocumentsUpdatedInMap() {
+        final String categoryId = "localAuthorityOtherDoc";
+        final String categoryName = "Other";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .localAuthorityOtherDocDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.LOCAL_AUTHORITY.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.laOtherDocuments, result.get(0).getValue().getDocumentGroup());
     }
 
 }

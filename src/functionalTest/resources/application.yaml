@@ -4,7 +4,7 @@ server:
 runs-locally: ${RUNS_LOCALLY:true}
 
 env: ${test_environment:local}
-TEST_URL: http://localhost:4044
+TEST_URL: https://localhost:4044
 
 case:
   orchestration:
@@ -19,14 +19,14 @@ case:
 prl:
   environment: ${APP_ENV:preview}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
-    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
-    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxxxx}
 
 management:
   endpoint:
@@ -78,6 +78,7 @@ pba:
 feature-toggle:
   toggle:
     example: ${FEATURE_EXAMPLE:false}
+    bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -89,7 +90,7 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxx}
+        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
@@ -176,24 +177,28 @@ notify:
   baseUrl: https://api.notifications.service.gov.uk
 
 send-grid:
-  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  api-key: ${SEND_GRID_API_KEY:xxxxxxx}
   notification:
     email:
       templates:
         english:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-f6f24e4d816c4813a36555e2a2ee0401}
-          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-c56878eae5ba49258041ecbfeebe5906}
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-a897504a9e2645978ffc59d8cc488d89}
           SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-54982840ce414c43acdc6ac166fbb07f}
           SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-e2ca5bfc715049f9a6030087110d5aac}
+          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-b2cf161dd4dd482794057ea5b919b082}
           SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-0d33615a698a49a4bbbb58b73c43ba1f}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-c1b5991660204a9c87b70a655519f6fe}
-          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
-          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
-          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-4648305f896a4110aedaa01e6a6032ed}
-          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
-          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
+          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-1f2ea9ee8ac54a8db3af21a2c46c2d4a}
+          SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-4a8751998e024bb1b69ec3b6ba0cbd88}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-19ea91b1dfd8471bb509825b188e4377}
+          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-7c5f0b34c01c4fafaf1aa97466d58909}
+          SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-e99d580ca3a34f59ab660e0fc37b58b1}
+          SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-ce6ddab2e9c74dc8a7e50aa2526daaba}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-00bc2fa3911b4b2aa95d175cfed0eec8}
+          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-8502be2765ac487fa2c3a68997e8b06b}
+          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-985fad2d0eb7452e9372dce27ddefbd7}
           FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR: ${FM5_REMINDER_APPLICANT_RESPONDENT_SOLICITOR:d-06b96acab2484b60b91962b58608adba}
           FM5_REMINDER_APPLICANT_RESPONDENT: ${FM5_REMINDER_APPLICANT_RESPONDENT:d-27c887d8102d43c1992e7f16d81c3b51}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
@@ -203,24 +208,28 @@ send-grid:
           C1A_NOTIFICATION_APPLICANT_SOLICITOR: ${C1A_NOTIFICATION_APPLICANT_SOLICITOR:d-ec36aa7e392841f68f3ba291c2765451}
           C1A_RESPONSE_NOTIFICATION_APPLICANT: ${C1A_RESPONSE_NOTIFICATION_APPLICANT:d-821083909cdf4655a923e16bff735ae9}
           C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR: ${C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR:d-b43e61866fbe44a8841fbbcf687073c1}
-          SOD_PERSONAL_SERVICE_APPLICANT_LIP: ${SOD_PERSONAL_SERVICE_APPLICANT_LIP:d-1cc07dce35024527af4ab937ceeaf1f8}
-          SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: ${SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP:d-05c9b7ba4e0d48438c9cfc11801820c4}
+          SOD_PERSONAL_SERVICE_APPLICANT_LIP: ${SOD_PERSONAL_SERVICE_APPLICANT_LIP:d-0508a0848da147af8fc291b93c71ea04}
+          SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP: ${SOD_NON_PERSONAL_SERVICE_APPLICANT_RESPONDENT_LIP:d-e23ef2960e1043b4b2bcb978b84b0cc4}
           SOD_APPLICANT_RESPONDENT_SOLICITOR: ${SOD_APPLICANT_RESPONDENT_SOLICITOR:d-d546049909a74966a5f9d75428fbeb56}
           SOD_ADDITIONAL_RECIPIENTS: ${SOD_ADDITIONAL_RECIPIENTS:d-ada46351d4e44796bb0badcc2a46eed4}
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: ${SNED_GRID_OTHER_ORGANISATION_ORDER:d-2dbde39ca0ed4297825fe736b26a0bb6}
           SERVE_ORDER_CAFCASS_CYMRU: ${SEND_GRID_CAFCASS_CYMRU_ORDER:d-f117f63372a3466aae1eb08120ed1fd0}
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: ${SEND_GRID_SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR:d-f6f24e4d816c4813a36555e2a2ee0401}
-          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-c56878eae5ba49258041ecbfeebe5906}
-          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-c1b5991660204a9c87b70a655519f6fe}
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: ${SEND_GRID_SERVE_ORDER_NON_PERSONAL_SOLLICITOR:d-a897504a9e2645978ffc59d8cc488d89}
+          SERVE_ORDER_APPLICANT_RESPONDENT: ${SEND_GRID_SERVE_ORDER_APPLICANT_RESPONDENT:d-19ea91b1dfd8471bb509825b188e4377}
           SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: ${SEND_GRID_SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP:d-54982840ce414c43acdc6ac166fbb07f}
           SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-e2ca5bfc715049f9a6030087110d5aac}
+          SOA_SERVE_APPLICANT_PER_CA_CB: ${SOA_SERVE_APPLICANT_PER_CA_CB:d-b2cf161dd4dd482794057ea5b919b082}
           SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-0d33615a698a49a4bbbb58b73c43ba1f}
-          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-7908952eaa5f4ed18624464eb1f2fad6}
-          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-5a791412f19a4cf8b9b2ead4b8638b81}
-          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-57f5799efc154451b186eb9772be6ce6}
-          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-1efe2b96497e412abde05cb1779bac32}
-          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-a3e1a8e19f4d415ea74d4becc7103808}
+          SOA_CA_APPLICANT_LIP_PERSONAL: ${SOA_CA_APPLICANT_LIP_PERSONAL:d-1f2ea9ee8ac54a8db3af21a2c46c2d4a}
+          SOA_DA_APPLICANT_LIP_PERSONAL: ${SOA_DA_APPLICANT_LIP_PERSONAL:d-4a8751998e024bb1b69ec3b6ba0cbd88}
+          SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-7c5f0b34c01c4fafaf1aa97466d58909}
+          SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_APPLICANT_LIP:d-e99d580ca3a34f59ab660e0fc37b58b1}
+          SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_DA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-ce6ddab2e9c74dc8a7e50aa2526daaba}
+          SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP: ${SOA_CA_NON_PERSONAL_SERVICE_RESPONDENT_LIP:d-00bc2fa3911b4b2aa95d175cfed0eec8}
+          SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP: ${SEND_GRID_SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP:d-8502be2765ac487fa2c3a68997e8b06b}
+          SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP: ${SERVE_ORDER_DA_PERSONAL_APPLICANT_LIP:d-985fad2d0eb7452e9372dce27ddefbd7}
           SEND_EMAIL_TO_EXTERNAL_PARTY: ${SEND_GRID_EMAIL_TO_EXTERNAL_PARTY:d-d6f807d095b046458517924e6c48e5ea}
   rpa:
     email:
@@ -253,42 +262,42 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    secret: ${PRL_IDAM_CLIENT_SECRET:xxxxxxx}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
     token:
       context-path: /oauth2/token
   user:
-    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxxxx}
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
-    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxx}
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
-    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxxxxxxx}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxxxx}
   apigateway:
-    username: ${COURTNAV_USERNAME:xxxxxx}
-    password: ${COURTNAV_PASSWORD:xxxxxx}
+    username: ${COURTNAV_USERNAME:xxxxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxxxx}
   cafcass:
-    username: ${CAFCASS_USERNAME:xxxxxx}
-    password: ${CAFCASS_PASSWORD:xxxxxx}
+    username: ${CAFCASS_USERNAME:xxxxxxxxxx}
+    password: ${CAFCASS_PASSWORD:xxxxxxxx}
   judge:
-    username: ${JUDGE_USER_NAME:xxxxxx}
-    password: ${JUDGE_PASSWORD:xxxxxx}
+    username: ${JUDGE_USER_NAME:xxxxxxxxxxx}
+    password: ${JUDGE_PASSWORD:xxxxxxx}
   admin:
-    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxx}
-    password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxx}
+    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxxxx}
+    password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxxxx}
   api_gw:
     microservice: api_gw
 
@@ -393,6 +402,8 @@ document:
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
       c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
       c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_resp_c8_welsh_draft_template: FL-PRL-GOR-WEL-RES-C8-DRAFT.docx
+      c100_resp_c8_welsh_draft_filename: C8Document_Welsh_Draft.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
@@ -417,10 +428,14 @@ document:
       fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename: C8Document.pdf
       fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
-      fl401_resp_c8_filename_welsh: C8Document.pdf
+      fl401_resp_c8_filename_welsh: C8Document_Welsh.pdf
+      fl401_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename: C8Document_Draft.pdf
+      fl401_resp_c8_draft_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     common:
-      doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
-      doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
+      doc_cover_sheet_template: FL-PRL-APP-ENG-COVER-SHEET.docx
+      doc_cover_sheet_welsh_template: FL-PRL-APP-WEL-COVER-SHEET.docx
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
       doc_cover_sheet_welsh_filename: WelshPrlPostDocumentCoverSheet.pdf
       prl_c21_template: FL-PRL-GOR-ENG-C21-Blank-Order-Final.docx
@@ -570,13 +585,23 @@ document:
       prl_sdo_welsh_draft_filename: Welsh_Standard_Directions_Order_draft.pdf
       prl_sdo_welsh_template: FL-PRL-GOR-WEL-Standard-Directions-Order-Final.docx
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
-      doc_cover_sheet_serve_order_template: PRL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
-      doc_cover_sheet_welsh_serve_order_template: PRL-WEL-DOCUMENT-COVER-SERVE-ORDER-SHEET.docx
+      doc_cover_sheet_serve_order_template: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
+      doc_cover_sheet_welsh_serve_order_template: FL-PRL-APP-WEL-COVER-SERVE-ORDER-SHEET.docx
+      prl_blank_cover_letter_template: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      prl_blank_cover_letter_welsh_template: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
+      other_c8_template: FL-PRL-GOR-ENG-OTHER-C8.docx
+      other_c8_filename: C8Document.pdf
+      other_c8_draft_filename: C8Document_Draft.pdf
+      other_c8_template_welsh: FL-PRL-GOR-WEL-OTHER-C8.docx
+      other_c8_filename_welsh: C8Document_Welsh.pdf
+      other_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     citizen:
+      prl_citizen_witness_statement_welsh_template: FL-PRL-GOR-WEL-Citizen-Witness-Statement.docx
+      prl_citizen_witness_statement_template: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx
       prl_citizen_upload_template: FL-PRL-GOR-ENG-Citizen-Uploaded-Statement.docx
       prl_citizen_upload_filename: Citizen_Uploaded_Statement.pdf
     fl401listonnotice:
@@ -623,7 +648,7 @@ amRoleAssignment:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:XXXXXXXXXXXXXXXX}
+    key: ${POST_CODE_LOOKUP_KEY:xxxxxxx}
 
 cafcaas:
   search-case-type-id: PRLAPPS
@@ -664,3 +689,15 @@ acro:
   source-directory: /tmp/acro/source
   zip-password: ${ACRO_ZIP_PASSWORD:test1234}
   search-case-type-id: PRLAPPS
+  sftp:
+    host: some_host
+    port: 22
+    user: some_user
+    azure-deployment: true
+    private-key: /mnt/secrets/private-law/bais-xerox-key
+    private-key-pass-phrase: ""
+    session-wait-timeout: 10000
+    pool-size: 10
+    allow-unknown-keys: true
+    remote-directory: /
+    password: ${ACRO_SFTP_USER_PASSWORD:some_password}

@@ -28,12 +28,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
@@ -58,10 +60,12 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenDocumentService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -90,6 +94,7 @@ public class CaseDocumentController {
     private final CaseService caseService;
     private final EmailService emailService;
     private final CitizenDocumentService citizenDocumentService;
+    private final AuthTokenGenerator authTokenGenerator;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
@@ -204,12 +209,12 @@ public class CaseDocumentController {
         emailService.send(
             email,
             EmailTemplateNames.DOCUMENT_UPLOADED,
-            buildUploadDocuemntEmail(tempCaseData, name, dashboardUrl),
+            buildUploadDocumentEmail(tempCaseData, name, dashboardUrl),
             LanguagePreference.english
         );
     }
 
-    private EmailTemplateVars buildUploadDocuemntEmail(CaseData caseData, String name, String link) {
+    private EmailTemplateVars buildUploadDocumentEmail(CaseData caseData, String name, String link) {
         return UploadDocumentEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
@@ -223,7 +228,7 @@ public class CaseDocumentController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
-        @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
+        @ApiResponse(responseCode = "401", description = "Provided authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<Object> uploadCitizenStatementDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -315,9 +320,9 @@ public class CaseDocumentController {
         CaseData tempCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         if (deleteDocumentRequest.getValues() != null
             && deleteDocumentRequest.getValues().containsKey("documentId")) {
-            final String documenIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
+            final String documentIdToBeDeleted = deleteDocumentRequest.getValues().get("documentId");
             tempUploadedDocumentsList = tempCaseData.getCitizenUploadedDocumentList();
-            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documenIdToBeDeleted.equalsIgnoreCase(
+            uploadedDocumentsList = tempUploadedDocumentsList.stream().filter(element -> !documentIdToBeDeleted.equalsIgnoreCase(
                 element.getId().toString()))
                 .toList();
         }
@@ -342,7 +347,7 @@ public class CaseDocumentController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Uploaded Successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request while uploading the document"),
-        @ApiResponse(responseCode = "401", description = "Provided Authroization token is missing or invalid"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<Object> uploadCitizenDocument(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -370,11 +375,35 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+        delinkCitizenUploadedDocument(authorisation, authTokenGenerator.generate(), documentId);
         return ResponseEntity.ok(documentGenService.deleteDocument(authorisation, documentId));
     }
 
+    private void delinkCitizenUploadedDocument(String authorisation, String serviceAuthorization, String documentId) {
+        Optional<CaseData> matchedCaseData = Optional.ofNullable(caseService.retrieveCases(authorisation, serviceAuthorization))
+            .orElse(List.of())
+            .stream()
+            .filter(caseData -> isNotEmpty(caseData.getDocumentManagementDetails()))
+            .filter(caseData -> isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()))
+            .filter(caseData -> caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
+                .stream()
+                .anyMatch(element -> isNotEmpty(element.getValue().getCitizenQuarantineDocument())
+                    && documentId.equalsIgnoreCase(DocumentUtils.getDocumentId(element.getValue().getCitizenQuarantineDocument().getDocumentUrl()))))
+            .findFirst();
+
+        if (matchedCaseData.isEmpty()) {
+            return;
+        }
+
+        CaseData caseDataToUpdate = matchedCaseData.get();
+        String caseId = String.valueOf(caseDataToUpdate.getId());
+        caseService.delinkCitizenUploadedDocumentFromCase(authorisation, caseId, documentId);
+    }
+
     private boolean isAuthorized(String authorisation, String serviceAuthorization) {
-        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
+
+        Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
+        return userInfo.isPresent() && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization));
     }
 
@@ -415,16 +444,16 @@ public class CaseDocumentController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
 
-        DocumentResponse documentResponse = null;
+        List<DocumentResponse> documentResponses;
         try {
-            documentResponse = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
+            documentResponses = documentGenService.generateAndUploadDocument(authorisation, documentRequest);
         } catch (DocumentGenerationException dge) {
             log.error("Exception in generating a document {}", dge.getMessage());
             return ResponseEntity.internalServerError().body("Error in generating a document");
         }
 
-        if (isNotEmpty(documentResponse)) {
-            return ResponseEntity.ok(documentResponse);
+        if (isNotEmpty(documentResponses)) {
+            return ResponseEntity.ok(documentResponses);
         } else {
             return ResponseEntity.internalServerError().body("Error in generating citizen document");
         }

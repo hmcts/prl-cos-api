@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.validator.routines.EmailValidator;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -10,10 +11,11 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_NAME;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_REFERENCE;
 
 @Slf4j
 public class EmailUtils {
-
 
     private EmailUtils() {
 
@@ -51,9 +53,20 @@ public class EmailUtils {
     public static Map<String, Object> getCommonSendgridDynamicTemplateData(CaseData caseData) {
         Map<String, Object> dynamicTemplateData = new HashMap<>();
 
-        dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
-        dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
+        dynamicTemplateData.put(CASE_NAME, caseData.getApplicantCaseName());
+        dynamicTemplateData.put(CASE_REFERENCE, String.valueOf(caseData.getId()));
 
         return dynamicTemplateData;
+    }
+
+    public static boolean isValidEmailAddress(final String email) {
+        return isValidEmailAddress(email, false);
+    }
+
+    public static boolean isValidEmailAddress(final String email, boolean allowEmpty) {
+        if (allowEmpty && StringUtils.isEmpty(email)) {
+            return true;
+        }
+        return EmailValidator.getInstance().isValid(email);
     }
 }

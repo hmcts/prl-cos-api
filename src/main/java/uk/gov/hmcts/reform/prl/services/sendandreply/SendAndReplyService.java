@@ -63,8 +63,6 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
-import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.sendandreply.AllocatedJudgeForSendAndReply;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
@@ -117,17 +115,18 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHOOSE_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -136,25 +135,31 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_SEND_REPLY_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_IDENTIFIER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MESSAGE_REPLY_DYNAMIC_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OPTION_SEND_OR_REPLY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_EXTERNAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSOCIATED_WITH_MESSAGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlLaunchDarklyFlagConstants.ROLE_ASSIGNMENT_API_IN_ORDERS_JOURNEY;
-import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getMessageIdentifierAssociatedWithTask;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -164,8 +169,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendAndReplyService {
 
-    public static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
-    public static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
+    private static final String ALLOCATED_JUDGE_FOR_SEND_AND_REPLY = "allocatedJudgeForSendAndReply";
+    private static final String ALLOCATED_AS_PART_OF_SEND_AND_REPLY = "ALLOCATED_AS_PART_OF_SEND_AND_REPLY";
+    private static final String MESSAGE_OBJECT = "messageObject";
     private final EmailService emailService;
 
     private final UserService userService;
@@ -251,12 +257,9 @@ public class SendAndReplyService {
     public static final String DOCUMENT = "Document";
     public static final String MESSAGE_DETAILS = "Message details";
     public static final String NO_MESSAGE_FOUND_ERROR = "No message found with that ID";
-    public static final String APPLICATION_LINK = "#Other%20applications";
     public static final String HEARINGS_LINK = "/hearings";
-    public static final String OTHER_APPLICATION = "Other application";
     public static final String HEARINGS = "Hearings";
     public static final String ANCHOR_HREF_START = "<a href='";
-    public static final String OTHER_APPLICATION_ANCHOR_END = "'>Other application</a>";
     public static final String HEARINGS_ANCHOR_END = "'>Hearings</a>";
     public static final String ARROW_SEPARATOR = "->";
 
@@ -666,7 +669,7 @@ public class SendAndReplyService {
         if (caseData.getAdditionalApplicationsBundle() != null && !caseData.getAdditionalApplicationsBundle().isEmpty()) {
             List<DynamicListElement> dynamicListElements = new ArrayList<>();
             additionalApplicationElements = caseData.getAdditionalApplicationsBundle();
-            additionalApplicationElements.stream().forEach(additionalApplicationsBundleElement -> {
+            additionalApplicationElements.forEach(additionalApplicationsBundleElement -> {
                 AdditionalApplicationsBundle additionalApplicationsBundle = additionalApplicationsBundleElement.getValue();
 
                 getOtherApplicationBundleDynamicList(
@@ -909,11 +912,12 @@ public class SendAndReplyService {
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
         if (MessageAboutEnum.APPLICATION.equals(message.getMessageAbout())) {
-            return getApplicationDocument(
-                message.getApplicationsList(),
-                caseData,
-                getValueCode(message.getApplicationsList())
-            );
+            List<Element<Document>> applicationDocuments = getApplicationDocument(message.getApplicationsList(),
+                                                                                  caseData, getValueCode(message.getApplicationsList()));
+            List<Document> updatedApplicationDocuments = ElementUtils.unwrapElements(applicationDocuments).stream()
+                .map(Document::withoutCategory).toList();
+            return ElementUtils.wrapElements(updatedApplicationDocuments);
+
         } else if (MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS.equals(message.getMessageAbout())) {
             return List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList())));
         }
@@ -988,7 +992,7 @@ public class SendAndReplyService {
     }
 
     public uk.gov.hmcts.reform.prl.models.documents.Document getSelectedDocument(String authorization,
-                                                                                  DynamicList submittedDocumentList) {
+                                                                                 DynamicList submittedDocumentList) {
         if (null == submittedDocumentList || null == submittedDocumentList.getValueCode()) {
             return null;
         }
@@ -1001,9 +1005,18 @@ public class SendAndReplyService {
                 .getMetadataForDocument(authorization, authTokenGenerator.generate(), UUID.fromString(documentId));
 
             if (document != null) {
-                return buildFromDocument(document);
+                uk.gov.hmcts.reform.prl.models.documents.Document prlDocument = buildFromDocument(document);
+
+                final String[] labelParts = submittedDocumentList.getValue().getLabel().split(ARROW_SEPARATOR);
+                final String documentName = labelParts[documentPath.length - 1].trim();
+
+                return prlDocument.toBuilder()
+                    .documentFileName(documentName)
+                    .build();
             }
+
         }
+
         return null;
     }
 
@@ -1050,8 +1063,7 @@ public class SendAndReplyService {
     }
 
     private static List<Element<Document>> getOtherApplicationDocuments(OtherApplicationsBundle otherApplicationsBundle) {
-        List<Element<Document>> otherApplicationDocuments = new ArrayList<>();
-        otherApplicationDocuments.addAll(otherApplicationsBundle.getFinalDocument());
+        List<Element<Document>> otherApplicationDocuments = new ArrayList<>(otherApplicationsBundle.getFinalDocument());
 
         if (otherApplicationsBundle.getSupportingEvidenceBundle() != null) {
             otherApplicationDocuments.addAll(
@@ -1068,8 +1080,7 @@ public class SendAndReplyService {
     }
 
     private static List<Element<Document>> getC2ApplicationDocuments(C2DocumentBundle c2DocumentBundle) {
-        List<Element<Document>> c2ApplicationDocuments = new ArrayList<>();
-        c2ApplicationDocuments.addAll(c2DocumentBundle.getFinalDocument());
+        List<Element<Document>> c2ApplicationDocuments = new ArrayList<>(c2DocumentBundle.getFinalDocument());
 
         if (c2DocumentBundle.getSupportingEvidenceBundle() != null) {
             c2ApplicationDocuments.addAll(
@@ -1121,19 +1132,85 @@ public class SendAndReplyService {
         MessageMetaData messageMetaData = MessageMetaData.builder()
             .senderEmail(getLoggedInUserEmail(authorisation))
             .build();
-        data.put("messageObject", messageMetaData);
+        data.put(MESSAGE_OBJECT, messageMetaData);
+        data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
+        data.put(MESSAGE_IDENTIFIER, EMPTY_VALUE);
+        data.put(OPTION_SEND_OR_REPLY, EMPTY_VALUE);
 
         List<Element<Message>> openMessages = getOpenMessages(caseData.getSendOrReplyMessage().getMessages());
         if (isNotEmpty(openMessages)) {
-            data.put("messageReplyDynamicList", getReplyMessagesList(openMessages));
+            data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
         }
         return data;
     }
 
+    public Map<String, Object> setSenderAndGenerateMessageReplyList(CaseData caseData, String authorisation, String clientContext) {
+        Map<String, Object> data = new HashMap<>();
+        MessageMetaData messageMetaData = MessageMetaData.builder()
+            .senderEmail(getLoggedInUserEmail(authorisation))
+            .build();
+        data.put(MESSAGE_OBJECT, messageMetaData);
+
+        String messageIdentifier = getMessageIdentifierAssociatedWithTask(clientContext);
+        List<Element<Message>> openMessages = emptyIfNull(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()));
+        Element<Message> messageElement = null;
+        if (StringUtils.isNotBlank(messageIdentifier)) {
+            messageElement = openMessages.stream()
+                .filter(element -> messageIdentifier.equalsIgnoreCase(element.getValue().getMessageIdentifier()))
+                .findFirst()
+                .orElse(null);
+        }
+
+        Message message = nonNull(messageElement) ? messageElement.getValue() : null;
+
+        if (isNotEmpty(openMessages)) {
+            if (nonNull(message)) {
+                CaseData caseData1 = populateMessageReplyFields(
+                    caseData,
+                    authorisation,
+                    message
+                );
+                data.putAll(objectMapper.convertValue(caseData1, Map.class));
+                DynamicList replyMessagesList = getReplyMessagesList(List.of(messageElement));
+                data.put(MESSAGE_REPLY_DYNAMIC_LIST, replyMessagesList);
+                data.put(MESSAGE_IDENTIFIER, messageIdentifier);
+                data.put(TASK_ASSOCIATED_WITH_MESSAGE, Yes);
+                data.put(CHOOSE_SEND_OR_REPLY, REPLY.name());
+                data.put(OPTION_SEND_OR_REPLY, REPLY.name());
+            } else {
+                data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
+                data.put(MESSAGE_REPLY_DYNAMIC_LIST, getReplyMessagesList(openMessages));
+                data.put(MESSAGE_IDENTIFIER, EMPTY_VALUE);
+                data.put(OPTION_SEND_OR_REPLY, EMPTY_VALUE);
+            }
+        } else {
+            data.put(TASK_ASSOCIATED_WITH_MESSAGE, YesOrNo.No);
+            data.put(MESSAGE_IDENTIFIER, EMPTY_VALUE);
+            data.put(OPTION_SEND_OR_REPLY, EMPTY_VALUE);
+        }
+        return data;
+    }
+
+    public DynamicList getDynamicMessagesListAssociatedWithTask(CaseData caseData, String messageIdentifier) {
+        List<Element<Message>> openMessages = emptyIfNull(getOpenMessages(caseData.getSendOrReplyMessage().getMessages()));
+        Element<Message> messageElement = null;
+        if (StringUtils.isNotBlank(messageIdentifier)) {
+            messageElement = openMessages.stream()
+                .filter(element -> messageIdentifier.equalsIgnoreCase(element.getValue().getMessageIdentifier()))
+                .findFirst()
+                .orElse(null);
+        }
+        return nonNull(messageElement) ? getReplyMessagesList(List.of(messageElement), messageElement.getId()) : null;
+    }
+
     public DynamicList getReplyMessagesList(List<Element<Message>> openMessages) {
+        return getReplyMessagesList(openMessages, null);
+    }
+
+    public DynamicList getReplyMessagesList(List<Element<Message>> openMessages, UUID messageId) {
         return ElementUtils.asDynamicList(
             openMessages,
-            null,
+            messageId,
             Message::getLabelForReplyDynamicList
         );
     }
@@ -1161,9 +1238,14 @@ public class SendAndReplyService {
         }
 
         //populate message table
-        String messageReply = renderMessageTable(previousMessage.get());
+        Message message = previousMessage.get();
+        return populateMessageReplyFields(caseData, authorization, message);
+    }
+
+    private CaseData populateMessageReplyFields(CaseData caseData, String authorization, Message message) {
+        String messageReply = renderMessageTable(message);
         //PRL-4411 - consolidate & add docs to display in reply history
-        List<Element<SendReplyTempDoc>> sendReplyTempDocs = getSendReplyTempDocs(previousMessage.get());
+        List<Element<SendReplyTempDoc>> sendReplyTempDocs = getSendReplyTempDocs(message);
         DynamicList legalAdviserList = getLegalAdviserList();
 
         final String loggedInUserEmail = getLoggedInUserEmail(authorization);
@@ -1358,7 +1440,7 @@ public class SendAndReplyService {
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
             .toList();
-        allocateJudgeIfMessageSentToJudge(authorization, caseData, replyMessage, caseDataMap);
+        addJudgeIdamIdIfMessageSentToJudge(caseData, replyMessage, caseDataMap);
 
         return messages;
     }
@@ -1531,7 +1613,7 @@ public class SendAndReplyService {
         if (isNotEmpty(caseData.getSendOrReplyMessage().getMessages())) {
             messages.addAll(caseData.getSendOrReplyMessage().getMessages());
         }
-        allocateJudgeIfMessageSentToJudge(authorisation, caseData, newMessage, caseDataMap);
+        addJudgeIdamIdIfMessageSentToJudge(caseData, newMessage, caseDataMap);
         applyMessageHandlers(caseData, caseDataMap, newMessage);
 
         messages.add(element(newMessage));
@@ -1550,70 +1632,13 @@ public class SendAndReplyService {
         sendAndReplyMessageHandlerService.handleMessage(request);
     }
 
-    private void allocateJudgeIfMessageSentToJudge(String authorisation,
-                                                   CaseData caseData,
-                                                   Message newMessage,
-                                                   Map<String, Object> caseDataMap) {
+    private void addJudgeIdamIdIfMessageSentToJudge(CaseData caseData,
+                                                    Message newMessage,
+                                                    Map<String, Object> caseDataMap) {
         if (InternalMessageWhoToSendToEnum.JUDICIARY.equals(newMessage.getInternalMessageWhoToSendTo())
             || InternalMessageReplyToEnum.JUDICIARY.equals(newMessage.getInternalMessageReplyTo())) {
-            List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply = caseData.getSendOrReplyDto()
-                .getAllocatedJudgeForSendAndReply();
-            if (allocatedJudgeForSendAndReply == null) {
-                allocatedJudgeForSendAndReply = new ArrayList<>();
-            }
-
             String judgeIdamId = getSendReplyJudgeIdamId(caseData);
-
-            if (isNotBlank(judgeIdamId)) {
-                //Check if the Judge is already allocated to any of the message
-                Optional<AllocatedJudgeForSendAndReply> allocatedJudgeForSendAndReplyOptional = retreiveExistingJudgeAllocationFromSendAndReply(
-                    allocatedJudgeForSendAndReply,
-                    judgeIdamId
-                );
-
-                if (allocatedJudgeForSendAndReplyOptional.isPresent()) {
-                    if (!checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
-                        allocatedJudgeForSendAndReply,
-                        judgeIdamId,
-                        newMessage.getMessageIdentifier()
-                    )) {
-                        //Check if the Judge is already allocated to this message
-                        allocatedJudgeForSendAndReply
-                            .add(element(AllocatedJudgeForSendAndReply.builder()
-                                             .judgeIdamId(judgeIdamId)
-                                             .roleAssignmentId(
-                                                 allocatedJudgeForSendAndReplyOptional.get().getRoleAssignmentId())
-                                             .messageIdentifier(newMessage.getMessageIdentifier())
-                                             .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
-                                             .build()));
-                    }
-                } else {
-                    RoleAssignmentResponse roleAssignmentResponse = checkIfCaseIsAlreadyAllocatedJudge(String.valueOf(
-                        caseData.getId()), judgeIdamId);
-                    if (null != roleAssignmentResponse) {
-                        log.info(
-                            "Allocate judge -> case is already allocated to judge manually,"
-                                + " no entry into caseData & no need remove allocation later");
-                    } else {
-                        log.info(
-                            "Allocate judge -> case is not allocated to judge, create new role assignment & add judge details to send & reply list");
-                        //Allocate Judge to this message
-                        allocatedJudgeForSendAndReply
-                            .add(element(AllocatedJudgeForSendAndReply
-                                             .builder()
-                                             .roleAssignmentId(createRoleAssignmentAndRetrieveId(
-                                                 authorisation,
-                                                 caseData.getId(),
-                                                 judgeIdamId
-                                             ))
-                                             .judgeIdamId(judgeIdamId)
-                                             .messageIdentifier(newMessage.getMessageIdentifier())
-                                             .status(ALLOCATED_AS_PART_OF_SEND_AND_REPLY)
-                                             .build()));
-                    }
-                }
-                caseDataMap.put(ALLOCATED_JUDGE_FOR_SEND_AND_REPLY, allocatedJudgeForSendAndReply);
-            }
+            caseDataMap.put(TASK_ASSIGNEE_IDAM_ID, judgeIdamId);
         }
     }
 
@@ -1626,66 +1651,6 @@ public class SendAndReplyService {
             return caseData.getSendOrReplyMessage().getReplyMessageObject().getSendReplyJudgeName().getIdamId();
         }
         return null;
-    }
-
-    private String createRoleAssignmentAndRetrieveId(String authorisation, long caseId, String judgeIdamId) {
-        RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-            .judicialUser(JudicialUser.builder()
-                              .idamId(judgeIdamId)
-                              .build())
-            .build();
-
-        roleAssignmentService.createRoleAssignment(
-            authorisation,
-            CaseDetails.builder()
-                .jurisdiction(JURISDICTION)
-                .caseTypeId(CASE_TYPE)
-                .id(caseId)
-                .build(),
-            roleAssignmentDto,
-            ALLOCATED_JUDGE.getName(),
-            false,
-            ALLOCATE_JUDGE_ROLE
-        );
-        List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            judgeIdamId
-        );
-        return roleAssignmentResponseList.stream()
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                ALLOCATE_JUDGE_ROLE) && roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId))).toList().get(0).getId();
-    }
-
-    private Optional<AllocatedJudgeForSendAndReply> retreiveExistingJudgeAllocationFromSendAndReply(
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
-        String idamId) {
-
-        return allocatedJudgeForSendAndReply.stream().map(Element::getValue).toList()
-            .stream().filter(i -> i.getJudgeIdamId().equals(idamId)).findAny();
-    }
-
-    private boolean checkIfExistingJudgeAllocationFromSendAndReplyWithIdamIdAndMessageIdentifier(
-        List<Element<AllocatedJudgeForSendAndReply>> allocatedJudgeForSendAndReply,
-        String idamId,
-        String messageIdentifier) {
-
-        return allocatedJudgeForSendAndReply.stream()
-            .map(Element::getValue)
-            .anyMatch(i -> i.getJudgeIdamId().equals(idamId)
-                && i.getMessageIdentifier().equals(messageIdentifier));
-    }
-
-    private RoleAssignmentResponse checkIfCaseIsAlreadyAllocatedJudge(String caseId, String judgeIdamId) {
-        List<RoleAssignmentResponse> roleAssignmentResponseList = roleAssignmentService.getRoleAssignmentForActorId(
-            judgeIdamId
-        );
-        return roleAssignmentResponseList.stream()
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(
-                ALLOCATE_JUDGE_ROLE))
-            .filter(roleAssignmentResponse -> roleAssignmentResponse.getAttributes().getCaseId().equals(
-                String.valueOf(caseId)))
-            .findFirst()
-            .orElse(null);
     }
 
     public String fetchAdditionalApplicationCodeIfExist(CaseData caseData, SendOrReply sendOrReply) {
@@ -1720,7 +1685,7 @@ public class SendAndReplyService {
                 .forEach(document -> sendReplyTempDocs.add(
                     element(SendReplyTempDoc.builder()
                                 .attachedTime(message.getUpdatedTime())
-                                .document(document).build())));
+                                .document(Document.withoutCategory(document)).build())));
         }
 
         //documents from message history
@@ -1735,7 +1700,7 @@ public class SendAndReplyService {
                             .forEach(document -> sendReplyTempDocs.add(
                                 element(SendReplyTempDoc.builder()
                                             .attachedTime(attachedTime)
-                                            .document(document).build())));
+                                            .document(Document.withoutCategory(document)).build())));
                     }
                 });
         }
@@ -1876,6 +1841,7 @@ public class SendAndReplyService {
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
             authorization,
             SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                .caseReference(String.valueOf(caseData.getId()))
                 .dynamicTemplateData(dynamicDataForEmail)
                 .listOfAttachments(allSelectedDocuments)
                 .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
@@ -1883,8 +1849,6 @@ public class SendAndReplyService {
     }
 
     private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, List<String> emails, String authorization) {
-
-
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -1898,6 +1862,7 @@ public class SendAndReplyService {
                         SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
                         authorization,
                         SendgridEmailConfig.builder().toEmailAddress(emailAddress)
+                            .caseReference(String.valueOf(caseData.getId()))
                             .dynamicTemplateData(dynamicData)
                             .listOfAttachments(allSelectedDocuments)
                             .languagePreference(LanguagePreference.getPreferenceLanguage(caseData))
@@ -1948,7 +1913,7 @@ public class SendAndReplyService {
                 .documentCreatedOn(new Date())
                 .build();
         } catch (Exception e) {
-            log.error("Failed to generate message document {}", e);
+            log.error("Failed to generate message document", e);
         }
         return null;
     }
@@ -2026,13 +1991,24 @@ public class SendAndReplyService {
         String bulkPrintedId = "";
         try {
             log.info("*** Initiating request to Bulk print service ***");
-            log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
+
+            List<Document> documents = new ArrayList<>();
+
+            documents.addAll(documentGenService.generateCoverLetter(
+                authorisation,
+                caseData,
+                partyDetails.getLabelForDynamicList(),
+                partyDetails.getAddress()
+            ));
+            documents.addAll(docs);
+
+            log.info("*** number of files in the pack *** {}", documents.size());
 
             UUID bulkPrintId = bulkPrintService.send(
                 String.valueOf(caseData.getId()),
                 authorisation,
                 LETTER_TYPE,
-                docs,
+                documents,
                 partyDetails.getLabelForDynamicList()
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
@@ -2131,7 +2107,7 @@ public class SendAndReplyService {
 
     private boolean doesThisMessageCloseAwpTasks(CaseData caseData) {
         DynamicList applicationsList = caseData.getSendOrReplyMessage().getSendMessageObject().getApplicationsList();
-        return Objects.nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && Objects.nonNull(
+        return nonNull(applicationsList) && applicationsList.getListItems().size() == 1 && nonNull(
             applicationsList.getValue()) && StringUtils.isNotEmpty(applicationsList.getValue().getCode());
     }
 
@@ -2142,7 +2118,7 @@ public class SendAndReplyService {
     }
 
     public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmitted(CallbackRequest callbackRequest, String authorisation) {
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
         if (REPLY.equals(caseData.getChooseSendOrReply())
             && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
@@ -2173,12 +2149,25 @@ public class SendAndReplyService {
         return ok(SubmittedCallbackResponse.builder().build());
     }
 
+    public ResponseEntity<SubmittedCallbackResponse> sendAndReplySubmittedTask(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        String optionSendOrReply = caseData.getOptionSendOrReply();
+        if ((REPLY.name().equalsIgnoreCase(optionSendOrReply) || REPLY.equals(caseData.getChooseSendOrReply()))
+            && YesOrNo.Yes.equals(caseData.getSendOrReplyMessage().getRespondToMessage())) {
+            return ok(SubmittedCallbackResponse.builder().confirmationBody(
+                REPLY_AND_CLOSE_MESSAGE
+            ).build());
+        }
+
+        return ok(SubmittedCallbackResponse.builder().build());
+    }
+
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
+        CaseData caseData = getCaseData(caseDetails, objectMapper);
+        checkTaskAssociatedWithMessage(caseData);
         Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
-        if (Objects.nonNull(message)
+        if (nonNull(message)
             && InternalExternalMessageEnum.EXTERNAL.equals(message.getInternalOrExternalMessage())
             && !atLeastOnePartySelectedForExternalMessage(message)) {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
@@ -2190,5 +2179,19 @@ public class SendAndReplyService {
         Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
+
+
+    public void checkTaskAssociatedWithMessage(CaseData caseData) {
+        if (REPLY.name().equalsIgnoreCase(caseData.getOptionSendOrReply())) {
+            caseData.setChooseSendOrReply(REPLY);
+            DynamicList dynamicMessagesListAssociatedWithTask = getDynamicMessagesListAssociatedWithTask(
+                caseData,
+                caseData.getMessageIdentifier()
+            );
+            caseData.getSendOrReplyMessage().setMessageReplyDynamicList(dynamicMessagesListAssociatedWithTask);
+        } else {
+            caseData.setOptionSendOrReply(EMPTY_VALUE);
+        }
     }
 }

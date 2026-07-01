@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -40,7 +41,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV_USER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.CAFCASS_USER_ROLE;
 
@@ -78,14 +81,17 @@ public class CourtNavCaseControllerTest {
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
+    @Mock
+    private UserInfo userInfo;
+
     @Before
     public void setUp() {
         file
             = new MockMultipartFile(
-            "file",
-            "hello.txt",
-            MediaType.TEXT_PLAIN_VALUE,
-            "Hello, World!".getBytes()
+                "file",
+                "hello.txt",
+                MediaType.TEXT_PLAIN_VALUE,
+                "Hello, World!".getBytes()
         );
     }
 
@@ -94,8 +100,10 @@ public class CourtNavCaseControllerTest {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
 
@@ -112,7 +120,7 @@ public class CourtNavCaseControllerTest {
 
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
 
-        ResponseEntity response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
+        ResponseEntity<Object> response = courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData);
         assertEquals(CREATED, response.getStatusCode());
 
     }
@@ -121,14 +129,11 @@ public class CourtNavCaseControllerTest {
     public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
 
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of("COURTNAV")).build();
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-
-        ResponseEntity response = courtNavCaseController.uploadDocument(
+        ResponseEntity<Object> response = courtNavCaseController.uploadDocument(
             AUTH,
             "s2s token",
             "1234567891234567",
@@ -143,15 +148,11 @@ public class CourtNavCaseControllerTest {
     public void shouldUploadDocumentWhenCalledWithValidS2sAndAuthToken_Cafcass() {
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(cafcassUploadDocService).uploadDocument(any(), any(), any(), any());
 
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of(CAFCASS_USER_ROLE)).build();
-
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-
-        ResponseEntity response = courtNavCaseController.uploadDocument(
+        ResponseEntity<Object> response = courtNavCaseController.uploadDocument(
             AUTH,
             "s2s token",
             "1234567891234567",
@@ -176,7 +177,8 @@ public class CourtNavCaseControllerTest {
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
-        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.createCase(
+            "Bearer:test", "s2s token", courtNavCaseData));
     }
 
     @Test
@@ -184,7 +186,7 @@ public class CourtNavCaseControllerTest {
         CaseData caseData = CaseData.builder()
             .applicantCaseName("test")
             .build();
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
@@ -193,53 +195,78 @@ public class CourtNavCaseControllerTest {
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
         when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
-        assertThrows(ResponseStatusException.class, () -> courtNavCaseController.createCase("Bearer:test", "s2s token", courtNavCaseData));
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class,
+                     () -> courtNavCaseController.createCase(
+                         "Bearer:test", "s2s token", courtNavCaseData));
 
     }
 
-    @Test(expected = ResponseStatusException.class)
-    public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() throws Exception {
+    @Test
+    public void shouldNotCreateCaseWhenCalledWithInvalidS2SToken() {
         CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
             .fl401(CourtNavCaseData.builder()
                        .beforeStart(BeforeStart.builder().applicantAge(
                            ApplicantAge.eighteenOrOlder).build()).build())
             .build();
-        ResponseEntity response = courtNavCaseController
-            .createCase("Bearer:test", "s2s token", courtNavCaseData);
+
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.createCase(
+            "Bearer:test", "s2s token", courtNavCaseData));
+    }
+
+    @Test
+    public void shouldNotCreateCaseWhenCalledWithInvalidRole() {
+        CaseData caseData = CaseData.builder()
+            .applicantCaseName("test")
+            .build();
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of("invalidRole"));
+        when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
+            1234567891234567L).data(Map.of("id", "1234567891234567")).build());
+        CourtNavFl401 courtNavCaseData = CourtNavFl401.builder()
+            .fl401(CourtNavCaseData.builder()
+                       .beforeStart(BeforeStart.builder().applicantAge(
+                           ApplicantAge.eighteenOrOlder).build()).build())
+            .build();
+        when(fl401ApplicationMapper.mapCourtNavData(courtNavCaseData)).thenReturn(caseData);
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.createCase(
+            "Bearer:test", "s2s token", courtNavCaseData));
     }
 
     @Test
     public void shouldUploadDocWhenCalledWithCorrectParameters() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         doNothing().when(courtNavCaseService).uploadDocument(any(), any(), any(), any());
-        UserInfo userInfo = UserInfo.builder().roles(
-            List.of("COURTNAV")).build();
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
 
-        ResponseEntity response = courtNavCaseController
+        ResponseEntity<Object> response = courtNavCaseController
             .uploadDocument("Bearer:test", "s2s token",
                             "", file, "fl401Doc1"
             );
         assertEquals(OK, response.getStatusCode());
-
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test
     public void shouldNotUploadDocWhenCalledWithInvalidAuthToken() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        ResponseEntity response = courtNavCaseController
-            .uploadDocument("Bearer:invalid", "s2s token",
-                            "", file, "fl401Doc1"
-            );
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(
+            "Bearer:invalid", "s2s token", "", file, "fl401Doc1"));
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test
     public void shouldNotUploadDocWhenCalledWithInvalidS2SToken() {
-        ResponseEntity response = courtNavCaseController
-            .uploadDocument("Bearer:test", "s2s token",
-                            "", file, "fl401Doc1"
-            );
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(
+            "Bearer:test", "invalid", "", file, "fl401Doc1"));
+    }
+
+    @Test
+    public void shouldNotUploadDocWhenCalledWithInvalidRole() {
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of("invalidRole"));
+        assertThrows(FORBIDDEN.toString(), ResponseStatusException.class, () -> courtNavCaseController.uploadDocument(
+            "Bearer:test", "s2s token", "", file, "fl401Doc1"));
     }
 
     @Test
@@ -257,8 +284,9 @@ public class CourtNavCaseControllerTest {
             .applicantCaseName("test")
             .home(testHome)
             .build();
-        when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(List.of(COURTNAV_USER));
         when(courtNavCaseService.createCourtNavCase(any(), any())).thenReturn(CaseDetails.builder().id(
             1234567891234567L).data(Map.of("id", "1234567891234567")).build());
 

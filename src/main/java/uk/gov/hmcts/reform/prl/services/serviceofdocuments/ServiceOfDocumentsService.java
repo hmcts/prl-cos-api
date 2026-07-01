@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.DocumentsDynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofdocuments.SodPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -50,6 +51,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -103,6 +105,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
+import static uk.gov.hmcts.reform.prl.utils.EmailUtils.isValidEmailAddress;
 
 @Service
 @Slf4j
@@ -122,6 +125,7 @@ public class ServiceOfDocumentsService {
     private final UserService userService;
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
+    private final DocumentGenService documentGenService;
     private final EmailService emailService;
     private final BulkPrintService bulkPrintService;
     private final ConfidentialityCheckService confidentialityCheckService;
@@ -660,16 +664,17 @@ public class ServiceOfDocumentsService {
                                                   String name,
                                                   Address address,
                                                   String servedParty) throws Exception {
-        List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
-                                                       .getCoverSheets(
-                                                           caseData,
-                                                           authorisation,
-                                                           address,
-                                                           name,
-                                                           DOCUMENT_COVER_SHEET_HINT
-                                                       ));
+        List<Document> documents = new ArrayList<>();
+        documents.addAll(documentGenService.generateCoverLetter(authorisation, caseData, name, address));
+        documents.addAll(serviceOfApplicationPostService
+                             .getCoverSheets(
+                                 caseData,
+                                 authorisation,
+                                 address,
+                                 name,
+                                 DOCUMENT_COVER_SHEET_HINT
+                             ));
         documents.addAll(unwrapElements(docs));
-
         UUID bulkPrintId = bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,
@@ -967,6 +972,22 @@ public class ServiceOfDocumentsService {
                 caseDataMap.put(field, null);
             }
         }
+    }
+
+    public List<String> validateAdditionalRecipients(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
+        // Validate additional recipients email addresses - return error on first invalid email
+        if (CollectionUtils.isNotEmpty(caseData.getServiceOfDocuments().getSodAdditionalRecipientsList())) {
+            for (Element<ServeOrgDetails> recipient : caseData.getServiceOfDocuments()
+                .getSodAdditionalRecipientsList()) {
+                if (recipient.getValue().getServeByPostOrEmail().equals(DeliveryByEnum.email)
+                    && !isValidEmailAddress(recipient.getValue().getEmailInformation().getEmailAddress())) {
+                    return List.of("Please provide valid email address for all recipients");
+                }
+            }
+        }
+        return emptyList();
     }
 
     public List<String> validateDocuments(CallbackRequest callbackRequest) {

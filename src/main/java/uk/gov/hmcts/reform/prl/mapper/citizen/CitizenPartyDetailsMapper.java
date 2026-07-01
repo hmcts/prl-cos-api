@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.exception.CoreCaseDataStoreException;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildOtherProceedingsEle
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmentsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildScreeningQuestionsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
@@ -63,10 +65,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NAME_HMCTS_INTERNAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
@@ -102,6 +106,7 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsEle
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataScreeningQuestionsElementsMapper.updateScreeningQuestionsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPartyResponse;
@@ -721,7 +726,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private static PartyDetails forceConfidentiality(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        if (Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
+        if (YesNoIDontKnowV2.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())) {
             existingPartyDetails = existingPartyDetails.toBuilder()
                 .response(getPartyResponse(existingPartyDetails).toBuilder()
                               .keepDetailsPrivate(getPartyResponse(existingPartyDetails)
@@ -790,7 +795,7 @@ public class CitizenPartyDetailsMapper {
     }
 
     private PartyDetails updateCitizenConfidentialData(PartyDetails existingPartyDetails, PartyDetails citizenProvidedPartyDetails) {
-        if (YesOrNo.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(citizenProvidedPartyDetails.getLiveInRefuge())
             && null != citizenProvidedPartyDetails.getResponse()
             && null != citizenProvidedPartyDetails.getResponse().getKeepDetailsPrivate()) {
             return existingPartyDetails.toBuilder()
@@ -927,10 +932,9 @@ public class CitizenPartyDetailsMapper {
                 "applicantPcqId",
                 citizenUpdatedCaseData.getC100RebuildData().getApplicantPcqId()
             );
-            caseDataMapToBeUpdated.put(
-                "applicantCaseName",
-                buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData())
-            );
+            String caseName = buildApplicantAndRespondentForCaseName(citizenUpdatedCaseData.getC100RebuildData());
+            caseDataMapToBeUpdated.put(APPLICANT_CASE_NAME, caseName);
+            caseDataMapToBeUpdated.put(CASE_NAME_HMCTS_INTERNAL, caseName);
             caseDataMapToBeUpdated.put(
                 "miamDocumentsCopy",
                 getMiamDocuments(citizenUpdatedCaseData.getC100RebuildData().getC100RebuildMaim()));
@@ -984,6 +988,12 @@ public class CitizenPartyDetailsMapper {
             C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
             updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
+        }
+
+        if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildScreeningQuestions())) {
+            C100RebuildScreeningQuestionsElements c100RebuildScreeningQuestionsElements = mapper
+                .readValue(c100RebuildData.getC100RebuildScreeningQuestions(), C100RebuildScreeningQuestionsElements.class);
+            updateScreeningQuestionsElementsForCaseData(caseDataBuilder, c100RebuildScreeningQuestionsElements);
         }
 
         if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildHearingUrgency())) {
@@ -1058,7 +1068,9 @@ public class CitizenPartyDetailsMapper {
 
         updateHelpWithFeesDetailsForCaseData(caseDataBuilder, c100RebuildData);
 
-        caseDataBuilder.applicantCaseName(buildApplicantAndRespondentForCaseName(c100RebuildData));
+        String caseName = buildApplicantAndRespondentForCaseName(c100RebuildData);
+        caseDataBuilder.applicantCaseName(caseName);
+        caseDataBuilder.caseNameHmctsInternal(caseName);
         caseDataBuilder.caseAccessCategory(caseData.getCaseTypeOfApplication());
         //Set case type, applicant name & respondent names for case list table
         caseDataBuilder.selectedCaseTypeID(caseData.getCaseTypeOfApplication());
@@ -1072,7 +1084,7 @@ public class CitizenPartyDetailsMapper {
         return nullSafeList(parties).get(0).getValue().getLabelForDynamicList();
     }
 
-    public String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
+    private String buildApplicantAndRespondentForCaseName(C100RebuildData c100RebuildData) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
         C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
@@ -1089,7 +1101,6 @@ public class CitizenPartyDetailsMapper {
         }
         return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
     }
-
 
     private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {

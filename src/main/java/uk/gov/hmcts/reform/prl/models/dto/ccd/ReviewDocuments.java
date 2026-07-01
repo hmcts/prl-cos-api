@@ -27,6 +27,8 @@ public class ReviewDocuments {
     private YesNoNotSure reviewDecisionYesOrNo;
     private String docToBeReviewed;
     private Document reviewDoc;
+    private DynamicList documentCategories;
+    private String documentNewName;
 
     //NOT IN USE
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListConfTab;
@@ -39,6 +41,7 @@ public class ReviewDocuments {
 
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> localAuthorityUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
     private List<Element<QuarantineLegalDoc>> citizenUploadedDocListDocTab;
@@ -51,7 +54,8 @@ public class ReviewDocuments {
 
     public static String[] reviewDocTempFields() {
         return new String[]{
-            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList"
+            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList",
+            "documentNewName", "documentCategories", "quarantineInformation", "docLabel"
         };
     }
 
@@ -60,6 +64,7 @@ public class ReviewDocuments {
         return Stream.of(
                 legalProfUploadDocListDocTab,
                 cafcassUploadDocListDocTab,
+                localAuthorityUploadDocListDocTab,
                 courtStaffUploadDocListDocTab,
                 bulkScannedDocListDocTab,
                 citizenUploadedDocListDocTab,

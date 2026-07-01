@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames.RESPONDENT
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C1A_RESPONSE_NOTIFICATION_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames.C7_NOTIFICATION_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.services.SendgridService.CASE_REFERENCE;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DASH_BOARD_LINK;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.hasDashboardAccess;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -294,6 +295,7 @@ public class NotificationService {
                                                     PartyDetails applicant,
                                                     String respondentName) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        dynamicData.put(CASE_REFERENCE, String.valueOf(caseData.getId()));
         dynamicData.put(APPLICANT_NAME, applicant.getLabelForDynamicList());
         dynamicData.put("solicitorName", applicant.getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
@@ -315,6 +317,7 @@ public class NotificationService {
                 sendgridEmailTemplateName,
                 authorisation,
                 SendgridEmailConfig.builder()
+                    .caseReference((String)dynamicDataForEmail.get(CASE_REFERENCE))
                     .toEmailAddress(emailAddress)
                     .dynamicTemplateData(dynamicDataForEmail)
                     .listOfAttachments(List.of(responseDocument))
@@ -354,13 +357,6 @@ public class NotificationService {
             try {
                 //generate cover sheet
                 String authorisation = systemUserService.getSysUserToken();
-                List<Document> responseDocuments = serviceOfApplicationPostService.getCoverSheets(
-                    caseData,
-                    authorisation,
-                    applicant.getValue().getAddress(),
-                    applicant.getValue().getLabelForDynamicList(),
-                    DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
-                );
 
                 //cover letters
                 Map<String, Object> dataMap = fetchApplicantResponseDataMap(caseData,
@@ -368,8 +364,18 @@ public class NotificationService {
                                                                             applicant.getValue().getLabelForDynamicList(),
                                                                             respondentName);
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-                responseDocuments.addAll(serviceOfApplicationService.fetchCoverLetter(authorisation, coverLetterTemplateHint,
-                                                 dataMap, documentLanguage.isGenEng(), documentLanguage.isGenWelsh()));
+                List<Document>  responseDocuments = serviceOfApplicationService
+                    .fetchCoverLetter(authorisation, coverLetterTemplateHint, dataMap, documentLanguage.isGenEng(),
+                                      documentLanguage.isGenWelsh());
+
+                responseDocuments.addAll(serviceOfApplicationPostService.getCoverSheets(
+                    caseData,
+                    authorisation,
+                    applicant.getValue().getAddress(),
+                    applicant.getValue().getLabelForDynamicList(),
+                    DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
+                ));
+
                 //response document
                 responseDocuments.add(responseDocument);
 

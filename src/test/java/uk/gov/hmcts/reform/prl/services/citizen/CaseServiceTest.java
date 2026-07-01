@@ -2,16 +2,18 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -27,7 +29,6 @@ import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
-import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
@@ -66,6 +67,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.FM5ReminderNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -96,15 +98,15 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
@@ -123,6 +125,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_REQUEST_SUPPORT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PERSONAL_SERVICE_SERVED_BY_BAILIFF;
@@ -137,16 +140,13 @@ import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.OCCUPATION_OR
 import static uk.gov.hmcts.reform.prl.services.citizen.CaseService.YYYY_MM_DD;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CaseServiceTest {
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "Bearer TestAuthToken";
-    public static final String caseId = "1234567891234567";
-    public static final String eventId = "1234567891234567";
-
-    public static final String accessCode = "123456";
-
+    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    public static final String S2S_TOKEN = "Bearer TestAuthToken";
+    public static final String CASE_ID = "1234567891234567";
     public static final String CA_SOA_PERSONAL_APPLICANT = "CAN7_SOA_PERSONAL_APPLICANT,CAN9_SOA_PERSONAL_APPLICANT";
     public static final String DA_SOA_PERSONAL_APPLICANT = "DN2_SOA_PERSONAL_APPLICANT";
     public static final String CA_SOA_APPLICANT = "CAN4_SOA_PERSONAL_NON_PERSONAL_APPLICANT";
@@ -201,9 +201,9 @@ public class CaseServiceTest {
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
-    private CitizenUpdatedCaseData citizenUpdatedCaseData;
 
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private final UUID testUuid1 = UUID.fromString("06eef861-d2aa-4dbd-acc0-9244a1dfab17");
 
     private ServedApplicationDetails servedApplicationDetails;
 
@@ -222,8 +222,8 @@ public class CaseServiceTest {
 
     private OrderDetails orderDetails;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+     void setup() {
         partyDetails = PartyDetails.builder()
             .firstName("")
             .lastName("test")
@@ -377,7 +377,7 @@ public class CaseServiceTest {
         map.put("fm5StatementsDocument",fm5QuarantineLegalDoc);
 
         //When
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(objectMapper.convertValue(quarantineLegalDoc, Map.class)).thenReturn(map);
         when(objectMapper.convertValue(fm5QuarantineLegalDoc, Map.class)).thenReturn(map);
 
@@ -407,7 +407,7 @@ public class CaseServiceTest {
             .id("00000000-0000-0000-0000-000000000000")
             .roles(List.of(Roles.CITIZEN.getValue())).build();
         //When
-        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        when(userService.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
 
         ServedParties servedParties = ServedParties.builder()
             .partyId("00000000-0000-0000-0000-000000000000")
@@ -437,49 +437,41 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCase() {
+     void testGetCase() {
         assertNotNull(caseService.getCase("", ""));
     }
 
     @Test
-    public void testRetrieveCases() {
+     void testRetrieveCases() {
         assertNotNull(caseService.retrieveCases("", ""));
     }
 
     @Test
-    public void testRetrieveCasesTwoParams() {
+     void testRetrieveCasesTwoParams() {
         assertNotNull(caseService.retrieveCases("", ""));
     }
 
     @Test
-    public void shouldCreateCase() {
-        //Given
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
+     void shouldCreateCase() {
+
         userDetails = UserDetails
             .builder()
             .roles(List.of(COURT_ADMIN_ROLE))
             .email("test@gmail.com")
             .build();
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build();
-
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        when(caseRepository.createCase(authToken, caseData)).thenReturn(caseDetails);
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        when(caseRepository.createCase(AUTH_TOKEN, caseData)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.createCase(caseData, authToken);
+        CaseDetails actualCaseDetails =  caseService.createCase(caseData, AUTH_TOKEN);
 
         //Then
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
     @Test
-    public void testGetPartyCaseFlags() {
+     void testGetPartyCaseFlags() {
         User user1 = User.builder().idamId("applicant-1").build();
         User user2 = User.builder().idamId("respondent-1").build();
         User user3 = User.builder().idamId("respondent-2").build();
@@ -517,7 +509,7 @@ public class CaseServiceTest {
             element(flagDetailRequestForHearing)
         )).build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .id(1234567891234567L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(Collections.singletonList(element(applicant)))
@@ -525,17 +517,17 @@ public class CaseServiceTest {
             .allPartyFlags(AllPartyFlags.builder().caApplicant1ExternalFlags(applicant1PartyFlags).caRespondent1ExternalFlags(
                 respondent1PartyFlags).caRespondent2ExternalFlags(respondent2PartyFlags).build())
             .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData1.toMap(new ObjectMapper());
         CaseDetails caseDetailsCaseFlags = CaseDetails.builder()
             .id(1234567891234567L)
             .data(stringObjectMap)
             .build();
-        when(caseService.getCase(authToken, caseId)).thenReturn(caseDetailsCaseFlags);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseService.getCase(AUTH_TOKEN, CASE_ID)).thenReturn(caseDetailsCaseFlags);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
 
         // Unhappy path - when the request is valid, but party details is invalid.
-        Flags invalidUserExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "applicant-2");
-        Assert.assertNull(invalidUserExternalFlag);
+        Flags invalidUserExternalFlag = caseService.getPartyCaseFlags(AUTH_TOKEN, CASE_ID, "applicant-2");
+        assertNull(invalidUserExternalFlag);
 
         // Happy path 1 - when the request is valid and respondent party external flags is retrieved from the existing case data.
         when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
@@ -544,9 +536,9 @@ public class CaseServiceTest {
             1
         )).thenReturn("caRespondent2ExternalFlags");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(respondent2PartyFlags);
-        Flags respondentExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "respondent-2");
-        Assert.assertNotNull(respondentExternalFlag);
-        Assert.assertEquals("Respondent 2 FN Respondent 2 LN", respondentExternalFlag.getPartyName());
+        Flags respondentExternalFlag = caseService.getPartyCaseFlags(AUTH_TOKEN, CASE_ID, "respondent-2");
+        assertNotNull(respondentExternalFlag);
+        assertEquals("Respondent 2 FN Respondent 2 LN", respondentExternalFlag.getPartyName());
 
         // Happy path 2 - when the request is valid and applicant party external flags is retrieved from the existing case data.
         when(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
@@ -555,42 +547,36 @@ public class CaseServiceTest {
             0
         )).thenReturn("caApplicant1ExternalFlags");
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(applicant1PartyFlags);
-        Flags applicantExternalFlag = caseService.getPartyCaseFlags(authToken, caseId, "applicant-1");
-        Assert.assertNotNull(applicantExternalFlag);
-        Assert.assertEquals(applicant1PartyFlags, applicantExternalFlag);
+        Flags applicantExternalFlag = caseService.getPartyCaseFlags(AUTH_TOKEN, CASE_ID, "applicant-1");
+        assertNotNull(applicantExternalFlag);
+        assertEquals(applicant1PartyFlags, applicantExternalFlag);
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseName() throws IOException {
+     void shouldUpdateCaseWithCaseName() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
 
-        CaseDetails caseDetails = mock(CaseDetails.class);
-
-        CaseData updatedCaseData = caseData.toBuilder()
+        CaseData updatedCaseData = caseData1.toBuilder()
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
 
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, AUTH_TOKEN, CASE_ID,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -598,7 +584,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWhenNonCitizenEventId() throws IOException {
+     void shouldUpdateCaseWhenNonCitizenEventId() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
@@ -618,11 +604,11 @@ public class CaseServiceTest {
             .applicantCaseName("applicantLN1 V respLN1")
             .build();
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData,
+        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData,
                                        C100_REQUEST_SUPPORT)).thenReturn(caseDetails1);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, authToken, caseId,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, AUTH_TOKEN, CASE_ID,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -632,34 +618,27 @@ public class CaseServiceTest {
 
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException {
+     void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
             .build();
 
-        CaseData caseData = CaseData.builder()
+        CaseData caseData1 = CaseData.builder()
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
-
-        CaseDetails caseDetails = mock(CaseDetails.class);
-
-        CaseData updatedCaseData = caseData.toBuilder()
+        CaseData updatedCaseData = caseData1.toBuilder()
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .build();
 
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
 
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData1, AUTH_TOKEN, CASE_ID,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -667,28 +646,21 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException {
+     void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException {
 
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
 
-        CaseDetails caseDetails = mock(CaseDetails.class);
+
 
         CaseData updatedCaseData = caseData.toBuilder()
             .id(1234567891234567L)
             .build();
 
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, AUTH_TOKEN, CASE_ID,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -696,30 +668,19 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException {
-
-        CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
-        UserDetails userDetails = UserDetails
-            .builder()
-            .email("test@gmail.com")
-            .build();
-
-        CaseDetails caseDetails = mock(CaseDetails.class);
-
+     void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException {
         CaseData updatedCaseData = caseData.toBuilder()
             .id(1234567891234567L)
             .applicantCaseName("test")
             .build();
 
-        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
         when(caseDataMapper.buildUpdatedCaseData(any())).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+        when(caseRepository.updateCase(AUTH_TOKEN, CASE_ID, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
         //When
-        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, caseId,
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, AUTH_TOKEN, CASE_ID,
                                                                 CITIZEN_CASE_UPDATE.getValue());
 
         //Then
@@ -727,27 +688,29 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void getCaseWithHearing() {
-        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+     void getCaseWithHearing() {
+        when(coreCaseDataService.findCaseById(AUTH_TOKEN, CASE_ID)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings(authToken, "123")).thenReturn(Hearings.hearingsWith().build());
-        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "yes");
+        when(hearingService.getHearings(AUTH_TOKEN, "123")).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(AUTH_TOKEN,
+                                                                                                 CASE_ID, "yes");
         assertNotNull(caseDataWithHearingResponse.getHearings());
     }
 
     @Test
-    public void getCaseWithHearingHearingNotNeeded() {
-        when(coreCaseDataService.findCaseById(authToken, caseId)).thenReturn(caseDetails);
+     void getCaseWithHearingHearingNotNeeded() {
+        when(coreCaseDataService.findCaseById(AUTH_TOKEN, CASE_ID)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(hearingService.getHearings(authToken, caseId)).thenReturn(Hearings.hearingsWith().build());
-        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(authToken, caseId, "dud");
+        when(hearingService.getHearings(AUTH_TOKEN, CASE_ID)).thenReturn(Hearings.hearingsWith().build());
+        CaseDataWithHearingResponse caseDataWithHearingResponse = caseService.getCaseWithHearing(AUTH_TOKEN,
+                                                                                                 CASE_ID, "dud");
         assertNull(caseDataWithHearingResponse.getHearings());
     }
 
     @Test
-    public void testGetCitizenDocuments() {
+     void testGetCitizenDocuments() {
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -757,13 +720,13 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocumentsWithFm5Reminders() {
+     void testGetCitizenDocumentsWithFm5Reminders() {
         CaseData citizenCaseData1 = citizenCaseData.toBuilder().fm5ReminderNotificationDetails(
                 FM5ReminderNotificationDetails.builder().fm5RemindersSent("YES").build())
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(fm5QuarantineLegalDoc))).build()).build();
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -773,13 +736,13 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocumentsWithFm5RemindersSetToNO() {
+     void testGetCitizenDocumentsWithFm5RemindersSetToNO() {
         CaseData citizenCaseData1 = citizenCaseData.toBuilder().fm5ReminderNotificationDetails(
                 FM5ReminderNotificationDetails.builder().fm5RemindersSent("NO").build())
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(fm5QuarantineLegalDoc))).build()).build();
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -789,7 +752,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenDocumentsWithFm5RemindersWhenPartyIdIsDiffer() {
+     void testGetCitizenDocumentsWithFm5RemindersWhenPartyIdIsDiffer() {
 
         QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder()
             .fm5StatementsDocument(Document.builder().build())
@@ -806,7 +769,7 @@ public class CaseServiceTest {
             .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(List.of(
                 element(quarantineLegalDoc1))).build()).build();
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -817,12 +780,12 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testEmptyCitizenDocumentsWhenNoDocs() {
+     void testEmptyCitizenDocumentsWhenNoDocs() {
         //Given
         citizenCaseData = CaseData.builder().state(State.DECISION_OUTCOME).build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -832,7 +795,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testFilterNonAccessibleCitizenDocuments() {
+     void testFilterNonAccessibleCitizenDocuments() {
         //Given
         QuarantineLegalDoc otherPartyDoc = QuarantineLegalDoc.builder()
             .uploaderRole(CITIZEN)
@@ -849,7 +812,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, citizenCaseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, citizenCaseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -857,7 +820,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenApplicantOrdersC100() {
+     void testGetCitizenApplicantOrdersC100() {
         //Given
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -867,11 +830,11 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
@@ -881,7 +844,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenRespondentOrdersC100() {
+     void testGetCitizenRespondentOrdersC100() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -901,7 +864,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
@@ -914,9 +877,9 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenApplicantOrdersFL401() {
+     void testGetCitizenApplicantOrdersFL401() {
         //Given
-        finalServedApplicationDetailsList.get(0).getValue().getBulkPrintDetails().get(0).getValue().setPartyIds(testUuid.toString());
+        finalServedApplicationDetailsList.getFirst().getValue().getBulkPrintDetails().getFirst().getValue().setPartyIds(testUuid.toString());
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .state(State.DECISION_OUTCOME)
@@ -926,7 +889,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -939,7 +902,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testGetCitizenRespondentOrdersFL401() {
+     void testGetCitizenRespondentOrdersFL401() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -957,7 +920,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -970,7 +933,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedC100() {
+     void testCitizenOrdersSosCompletedC100() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -988,7 +951,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
@@ -996,11 +959,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(CA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(CA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401() {
+     void testCitizenOrdersSosCompletedFL401() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -1036,7 +999,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1044,11 +1007,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersWithSolicitorUploadedApplicationFL401() {
+     void testCitizenOrdersWithSolicitorUploadedApplicationFL401() {
         //Given
         orderDetails = orderDetails.toBuilder()
             .serveOrderDetails(orderDetails.getServeOrderDetails().toBuilder()
@@ -1085,7 +1048,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1094,7 +1057,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
+     void testCitizenOrdersSosCompletedFL401ForOccupationOrder() {
 
         //Given
         OrderDetails orderDetails1 = orderDetails.toBuilder()
@@ -1142,7 +1105,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1150,11 +1113,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401CustomFields1() {
+     void testCitizenOrdersSosCompletedFL401CustomFields1() {
 
         //Given
         OrderDetails orderDetails1 = orderDetails.toBuilder()
@@ -1198,7 +1161,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1206,11 +1169,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenOrdersSosCompletedFL401ForOccupationOrderWithNoPowerOfArrest() {
+     void testCitizenOrdersSosCompletedFL401ForOccupationOrderWithNoPowerOfArrest() {
         //Given
         OrderDetails orderDetails1 = orderDetails.toBuilder()
             .dateCreated(LocalDateTime.now())
@@ -1261,7 +1224,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1269,12 +1232,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(DA_ORDER_SOS_CA_CB_APPLICANT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
 
     @Test
-    public void testCitizenApplicantSoaPersonalServiceC100() {
+     void testCitizenApplicantSoaPersonalServiceC100() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(UNREPRESENTED_APPLICANT)
@@ -1292,12 +1255,12 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getRespondentSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getRespondentSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
@@ -1306,7 +1269,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSoaPersonalServiceFL401() {
+     void testCitizenApplicantSoaPersonalServiceFL401() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(UNREPRESENTED_APPLICANT)
@@ -1325,15 +1288,15 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getRespondentSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getRespondentSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
@@ -1341,7 +1304,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedC100() {
+     void testCitizenApplicantSosCompletedC100() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
@@ -1362,11 +1325,11 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
         //Assert
         assertNotNull(citizenDocumentsManagement);
         assertNotNull(citizenDocumentsManagement.getCitizenApplicationPacks());
-        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().get(0).getApplicantSoaPack()));
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenApplicationPacks().getFirst().getApplicantSoaPack()));
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
         assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
@@ -1374,7 +1337,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedFL401() {
+     void testCitizenApplicantSosCompletedFL401() {
         //Given
         servedApplicationDetails = servedApplicationDetails.toBuilder()
             .whoIsResponsible(PERSONAL_SERVICE_SERVED_BY_CA)
@@ -1395,7 +1358,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1408,7 +1371,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnly() {
+     void testCitizenApplicantSosCompletedPostOnly() {
         //Given
         caseData = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1424,7 +1387,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1437,7 +1400,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnlyWhenCaseStatePrepareForHearingConductHearing() {
+     void testCitizenApplicantSosCompletedPostOnlyWhenCaseStatePrepareForHearingConductHearing() {
         OrderDetails orderDetails1 = orderDetails.toBuilder()
             .dateCreated(LocalDateTime.now())
             .fl404CustomFields(FL404.builder().fl404bIsPowerOfArrest1(NO).fl404bIsPowerOfArrest2(YES)
@@ -1467,7 +1430,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1479,7 +1442,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnlyWhenBothPartiesIdamIdIsNull() {
+     void testCitizenApplicantSosCompletedPostOnlyWhenBothPartiesIdamIdIsNull() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1495,7 +1458,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1505,7 +1468,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenApplicantSosCompletedPostOnlyWhenCaseStateIsJudicialReview() {
+     void testCitizenApplicantSosCompletedPostOnlyWhenCaseStateIsJudicialReview() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1522,7 +1485,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1532,7 +1495,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testRespondentCitizenDocOrders() {
+     void testRespondentCitizenDocOrders() {
         List<Element<FL401Proceedings>> fl401Proceedings = new ArrayList<>();
         fl401Proceedings.add(ElementUtils.element(FL401Proceedings.builder().uploadRelevantOrder(Document.builder().build()).build()));
         List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
@@ -1556,7 +1519,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1565,7 +1528,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocOrdersWhenRespondentsFl401IdamIdIsNull() {
+     void testCitizenDocOrdersWhenRespondentsFl401IdamIdIsNull() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -1581,7 +1544,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1592,7 +1555,7 @@ public class CaseServiceTest {
 
 
     @Test
-    public void testCitizenDocOrdersWhenC100IsCaseType() {
+     void testCitizenDocOrdersWhenC100IsCaseType() {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
@@ -1608,7 +1571,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1616,12 +1579,12 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
 
     @Test
-    public void testCitizenDocOrdersWhenRespondentPartyIdamIdIsNull() {
+     void testCitizenDocOrdersWhenRespondentPartyIdamIdIsNull() {
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
         partyDetailsList.add(Element.<PartyDetails>builder()
                                  .value(PartyDetails.builder()
@@ -1645,7 +1608,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1653,11 +1616,11 @@ public class CaseServiceTest {
         assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
         //Assert notifications
         assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
-        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().get(0).getId());
+        assertEquals(ORDER_APPLICANT_RESPONDENT, citizenDocumentsManagement.getCitizenNotifications().getFirst().getId());
     }
 
     @Test
-    public void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNull() {
+     void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNull() {
         List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
         partyDetailsList.add(Element.<PartyDetails>builder()
                                  .value(PartyDetails.builder()
@@ -1681,7 +1644,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1691,7 +1654,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNotSameAsUser() {
+     void testCitizenDocOrdersWhenApplicantAndRespondentPartyIdamIdIsNotSameAsUser() {
 
         List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
         respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
@@ -1725,7 +1688,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1735,7 +1698,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testCitizenDocOrdersWhenApplicationServedBy() {
+     void testCitizenDocOrdersWhenApplicationServedBy() {
 
         List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
         respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
@@ -1791,7 +1754,7 @@ public class CaseServiceTest {
             .build();
 
         //Action
-        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData1);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
 
         //Assert
         assertNotNull(citizenDocumentsManagement);
@@ -1801,9 +1764,220 @@ public class CaseServiceTest {
     }
 
 
+    @Test
+     void testCitizenDocOrdersWhenApplicationServedByWhenPartyIdsDoNotMatch() {
+
+        List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
+        respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
+            Document.builder().categoryId("ordersFromOtherProceedings").build()).build()));
+        Response response = Response.builder().respondentExistingProceedings(respondentProceedingDetails).build();
+        List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
+        partyDetailsList.add(Element.<PartyDetails>builder().id(testUuid)
+                                 .value(PartyDetails.builder().partyId(testUuid)
+                                            .user(User.builder().idamId(userDetails.getId()).build())
+                                            .response(response).partyId(testUuid).build()).build());
+        partyDetailsList.add(Element.<PartyDetails>builder()
+                                 .value(PartyDetails.builder().partyId(testUuid)
+                                            .build()).build());
+        List<Element<Document>> docs = new ArrayList<>();
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        emailNotificationDetails.add(element(EmailNotificationDetails.builder().partyIds("1234").docs(
+            docs).servedParty(SERVED_PARTY_APPLICANT).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        bulkPrintDetails.add(element(BulkPrintDetails.builder().partyIds("5678").printDocs(List.of(
+            element(Document.builder().build()))).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<ServedApplicationDetails>> servedApplicationDetails1 = new ArrayList<>();
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
+                emailNotificationDetails).servedBy("courtAdmin").servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).whoIsResponsible("courtAdmin")
+                                                  .modeOfService(SOA_BY_EMAIL_AND_POST).build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_EMAIL).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_POST).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService("SOA").bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .applicants(partyDetailsList)
+            .respondents(partyDetailsList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(PartyDetails.builder()
+                                  .user(User.builder().idamId("00000000-0000-0000-0000-000000000000").build())
+                                  .partyId(UUID.randomUUID()).build())
+            .state(State.DECISION_OUTCOME)
+            .serviceOfDocuments(ServiceOfDocuments.builder().servedDocumentsDetailsList(servedApplicationDetails1).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        //Assert notifications
+        assertTrue(CollectionUtils.isNotEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+    }
+
 
     @Test
-    public void testUpdateCitizenRaFlagsWithNullPartyDetailsMeta() {
+     void testCitizenDocOrdersWhenApplicationServedByNullPointerExceptionScenario() {
+
+        List<Element<RespondentProceedingDetails>> respondentProceedingDetails = new ArrayList<>();
+        respondentProceedingDetails.add(ElementUtils.element(RespondentProceedingDetails.builder().uploadRelevantOrder(
+            Document.builder().categoryId("ordersFromOtherProceedings").build()).build()));
+        Response response = Response.builder().respondentExistingProceedings(respondentProceedingDetails).build();
+        List<Element<PartyDetails>> applicantPartyDetailsList = new ArrayList<>();
+        applicantPartyDetailsList.add(Element.<PartyDetails>builder().id(null)
+                                 .value(PartyDetails.builder().partyId(testUuid)
+                                            .response(response).partyId(testUuid).build()).build());
+        applicantPartyDetailsList.add(Element.<PartyDetails>builder().id(testUuid1)
+                                 .value(PartyDetails.builder().partyId(testUuid1)
+                                            .build()).build());
+
+        List<Element<PartyDetails>> respondantPartyDetailsList = new ArrayList<>();
+        respondantPartyDetailsList.add(Element.<PartyDetails>builder().id(testUuid)
+                                          .value(PartyDetails.builder().partyId(testUuid)
+                                                     .response(response).partyId(testUuid).build()).build());
+        respondantPartyDetailsList.add(Element.<PartyDetails>builder().id(testUuid1)
+                                          .value(PartyDetails.builder().partyId(testUuid1)
+                                                     .build()).build());
+
+
+
+        List<Element<Document>> docs = new ArrayList<>();
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        emailNotificationDetails.add(element(EmailNotificationDetails.builder().partyIds("00000000-0000-0000-0000-000000000000").docs(
+            docs).servedParty(SERVED_PARTY_APPLICANT).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        bulkPrintDetails.add(element(BulkPrintDetails.builder().partyIds("00000000-0000-0000-0000-000000000000").printDocs(List.of(
+            element(Document.builder().build()))).timeStamp(LocalDateTime.now().format(DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).build()));
+        List<Element<ServedApplicationDetails>> servedApplicationDetails1 = new ArrayList<>();
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
+                emailNotificationDetails).servedBy("courtAdmin").servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).whoIsResponsible("courtAdmin")
+                                                  .modeOfService(SOA_BY_EMAIL_AND_POST).build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_EMAIL).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService(SOA_BY_POST).bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+        servedApplicationDetails1.add(element(ServedApplicationDetails.builder().servedAt(LocalDateTime.now().format(
+                DATE_TIME_FORMATTER_DD_MMM_YYYY_HH_MM_SS)).modeOfService("SOA").bulkPrintDetails(bulkPrintDetails)
+                                                  .servedBy("courtAdmin").whoIsResponsible("courtAdmin").build()));
+
+        //Given
+        CaseData caseData1 = caseData.toBuilder()
+            .applicants(applicantPartyDetailsList)
+            .respondents(respondantPartyDetailsList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(PartyDetails.builder()
+                                  .user(User.builder().idamId("00000000-0000-0000-0000-000000000000").build())
+                                  .partyId(UUID.randomUUID()).build())
+            .state(State.DECISION_OUTCOME)
+            .serviceOfDocuments(ServiceOfDocuments.builder().servedDocumentsDetailsList(servedApplicationDetails1).build())
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsListPostOnly)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceForApplication(List.of(element(StmtOfServiceAddRecipient.builder()
+                                                                                     .selectedPartyId(testUuid.toString())
+                                                                                     .build())))
+                                    .build())
+            .build();
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseData1);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenOrders()));
+        //Assert notifications
+        assertTrue(CollectionUtils.isEmpty(citizenDocumentsManagement.getCitizenNotifications()));
+    }
+
+
+    @Test
+    void testDelinkCitizenUploadedDocumentFromCase() {
+        String documentId = "00000000-0000-0000-0000-000000000123";
+        Element<QuarantineLegalDoc> documentToDelink = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString(documentId))
+            .value(QuarantineLegalDoc.builder()
+                       .citizenQuarantineDocument(Document.builder()
+                                                        .documentUrl("http://dm-store:8080/documents/" + documentId)
+                                                        .build())
+                       .build())
+            .build();
+        Element<QuarantineLegalDoc> retainedDocument = Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString("00000000-0000-0000-0000-000000000124"))
+            .value(QuarantineLegalDoc.builder()
+                       .citizenQuarantineDocument(Document.builder()
+                                                        .documentUrl(
+                                                            "http://dm-store:8080/documents/00000000-0000-0000-0000-000000000124")
+                                                        .build())
+                       .build())
+            .build();
+        CaseData caseDataWithCitizenDocuments = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(List.of(documentToDelink, retainedDocument))
+                                           .build())
+            .build();
+        CaseDetails caseDetailsWithCitizenDocuments = CaseDetails.builder()
+            .id(Long.parseLong(CASE_ID))
+            .data(Map.of())
+            .build();
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder()
+            .caseDetails(caseDetailsWithCitizenDocuments)
+            .build();
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(UserInfo.builder().uid("test-user-id").build());
+        when(coreCaseDataService.eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id")).thenReturn(eventRequestData);
+        when(coreCaseDataService.startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false)).thenReturn(startEventResponse);
+        when(objectMapper.convertValue(caseDetailsWithCitizenDocuments.getData(), CaseData.class))
+            .thenReturn(caseDataWithCitizenDocuments);
+        when(coreCaseDataService.createCaseDataContent(
+            Mockito.eq(startEventResponse),
+            Mockito.<Map<String, Object>>argThat(caseDataMap -> {
+                List<Element<QuarantineLegalDoc>> updatedDocuments =
+                    (List<Element<QuarantineLegalDoc>>) caseDataMap.get("citizenQuarantineDocsList");
+
+                return updatedDocuments.size() == 1
+                    && updatedDocuments.getFirst().getId().equals(retainedDocument.getId());
+            })
+        )).thenReturn(caseDataContent);
+
+        caseService.delinkCitizenUploadedDocumentFromCase(AUTH_TOKEN, CASE_ID, documentId);
+
+        Mockito.verify(coreCaseDataService).eventRequest(CITIZEN_UPLOADED_DOCUMENT, "test-user-id");
+        Mockito.verify(coreCaseDataService).startUpdate(AUTH_TOKEN, eventRequestData, CASE_ID, false);
+        Mockito.verify(coreCaseDataService).createCaseDataContent(
+            Mockito.eq(startEventResponse),
+            Mockito.<Map<String, Object>>argThat(caseDataMap -> {
+                List<Element<QuarantineLegalDoc>> updatedDocuments =
+                    (List<Element<QuarantineLegalDoc>>) caseDataMap.get("citizenQuarantineDocsList");
+
+                return updatedDocuments.size() == 1
+                    && updatedDocuments.getFirst().getId().equals(retainedDocument.getId());
+            })
+        );
+        Mockito.verify(coreCaseDataService).submitUpdate(AUTH_TOKEN, eventRequestData, caseDataContent, CASE_ID, false);
+    }
+
+    @Test
+     void testUpdateCitizenRaFlagsWithNullPartyDetailsMeta() {
         //Given
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .partyExternalFlags(FlagsRequest.builder().build())
@@ -1817,7 +1991,7 @@ public class CaseServiceTest {
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1825,13 +1999,13 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenRaFlagsBadRequest() {
+     void testUpdateCitizenRaFlagsBadRequest() {
         //Given
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .partyExternalFlags(FlagsRequest.builder().build())
             .build();
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1839,7 +2013,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenRaFlagsWithPartyDetailsMetaEmptyExtCaseFlag() {
+     void testUpdateCitizenRaFlagsWithPartyDetailsMetaEmptyExtCaseFlag() {
         //Given
         caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
@@ -1856,7 +2030,7 @@ public class CaseServiceTest {
         when(coreCaseDataService.eventRequest(Mockito.any(), Mockito.anyString())).thenReturn(EventRequestData.builder()
                                                                                                   .build());
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1864,7 +2038,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testUpdateCitizenRaFlagsWithPartyDetailsMetaWithExtCaseFlag() {
+     void testUpdateCitizenRaFlagsWithPartyDetailsMetaWithExtCaseFlag() {
         //Given
         caseData = caseData.toBuilder().caseTypeOfApplication(C100_CASE_TYPE).build();
         when(idamClient.getUserInfo(Mockito.anyString())).thenReturn(UserInfo.builder().uid("test").build());
@@ -1887,7 +2061,7 @@ public class CaseServiceTest {
             .partyIdamId(TEST_UUID)
             .build();
         //Action
-        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", authToken,
+        ResponseEntity<Object> response = caseService.updateCitizenRAflags("test", "citizenAwpCreate", AUTH_TOKEN,
                                                                            citizenPartyFlagsRequest);
 
         //Assert
@@ -1895,9 +2069,50 @@ public class CaseServiceTest {
     }
 
     @Test
-    public void testFetchIdamRoles() {
+    void testCirAndRiskAssessmentDocsAreNotReturnedToLipDashboard() {
+        // Given - CIR Transfer Request and CIR Extension Request docs in cafcassUploadDocListDocTab
+        // (simulates admin marking the docs as non-restricted during review — they must still be hidden)
+        QuarantineLegalDoc cirTransferDoc = QuarantineLegalDoc.builder()
+            .categoryId("cirTransferRequest")
+            .documentParty("Cafcass")
+            .uploadedBy("Cafcass")
+            .uploaderRole("CAFCASS")
+            .documentUploadedDate(LocalDateTime.now())
+            .citizenQuarantineDocument(Document.builder().documentUrl("http://url/cir-transfer").build())
+            .build();
+        QuarantineLegalDoc cirExtensionDoc = QuarantineLegalDoc.builder()
+            .categoryId("cirExtensionRequest")
+            .documentParty("Cafcass")
+            .uploadedBy("Cafcass")
+            .uploaderRole("CAFCASS")
+            .documentUploadedDate(LocalDateTime.now())
+            .citizenQuarantineDocument(Document.builder().documentUrl("http://url/cir-extension").build())
+            .build();
+
+        CaseData caseDataWithCirDocs = citizenCaseData.toBuilder()
+            .reviewDocuments(citizenCaseData.getReviewDocuments().toBuilder()
+                                 .cafcassUploadDocListDocTab(List.of(element(cirTransferDoc), element(cirExtensionDoc)))
+                                 .build())
+            .build();
+
+        // Action
+        CitizenDocumentsManagement result = caseService.getAllCitizenDocumentsOrders(AUTH_TOKEN, caseDataWithCirDocs);
+
+        // Assert - CIR docs must NOT appear in any section of the LIP dashboard (AC6)
+        assertNotNull(result);
+        List<String> otherDocCategoryIds = result.getCitizenOtherDocuments() != null
+            ? result.getCitizenOtherDocuments().stream().map(CitizenDocuments::getCategoryId).toList()
+            : List.of();
+        assertFalse(otherDocCategoryIds.contains("cirTransferRequest"),
+                    "CIR Transfer Request must not appear on LIP dashboard");
+        assertFalse(otherDocCategoryIds.contains("cirExtensionRequest"),
+                    "CIR Extension Request must not appear on LIP dashboard");
+    }
+
+    @Test
+    void testFetchIdamRoles() {
         when(roleAssignmentService.fetchIdamAmRoles(Mockito.anyString(), Mockito.anyString())).thenReturn(Map.of("test", "role"));
-        Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, "test");
+        Map<String, String> roles = caseService.fetchIdamAmRoles(AUTH_TOKEN, "test");
         assertEquals("role", roles.get("test"));
     }
 

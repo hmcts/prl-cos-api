@@ -93,6 +93,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -110,6 +111,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARIN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
@@ -497,6 +499,52 @@ public class CaseService {
         return citizenDocumentsManagement;
     }
 
+    public void delinkCitizenUploadedDocumentFromCase(String authToken, String caseId, String documentId) {
+        UserInfo userInfo = idamClient.getUserInfo(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(CITIZEN_UPLOADED_DOCUMENT);
+        EventRequestData eventRequestData = ccdCoreCaseDataService.eventRequest(
+            caseEvent,
+            userInfo.getUid()
+        );
+
+        StartEventResponse startEventResponse =
+            ccdCoreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+
+        List<Element<QuarantineLegalDoc>> quarantineLegalDocList = Optional.ofNullable(
+                caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
+            )
+            .orElse(List.of())
+            .stream()
+            .filter(element -> !documentId.equalsIgnoreCase(
+                DocumentUtils.getDocumentId(element.getValue().getCitizenQuarantineDocument().getDocumentUrl())
+            ))
+            .toList();
+
+        Map<String, Object> quarantineLegalDocListMap = new HashMap<>();
+        quarantineLegalDocListMap.put("citizenQuarantineDocsList", quarantineLegalDocList);
+
+        CaseDataContent caseDataContent = ccdCoreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            quarantineLegalDocListMap
+        );
+
+        ccdCoreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+
+    }
+
     private List<CitizenDocuments> getCitizenApplicationPacks(CaseData caseData,
                                                               Map<String, String> partyIdAndType) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
@@ -721,6 +769,8 @@ public class CaseService {
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
             //add cafacss uploaded docs
             otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            //add local authority uploaded docs
+            otherDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLocalAuthorityUploadDocListDocTab()));
             //add court staff uploaded docs
             citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
             //add citizen uploaded docs
@@ -1653,8 +1703,13 @@ public class CaseService {
                 .sort(comparing(s -> s.getValue().getServedDateTime(), Comparator.reverseOrder()));
 
             return servedDetails.getEmailNotificationDetails().stream()
+                .filter(Objects::nonNull)
                 .map(Element::getValue)
-                .filter(emailNotification -> partyIdAndType.get(PARTY_ID).equals(emailNotification.getPartyIds()))
+                .filter(Objects::nonNull)
+                .filter(emailNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return Objects.equals(partyId, emailNotification.getPartyIds());
+                })
                 .map(emailNotification ->
                     getSodDocuments(
                         emailNotification.getDocs(),
@@ -1679,7 +1734,10 @@ public class CaseService {
 
             return servedDetails.getBulkPrintDetails().stream()
                 .map(Element::getValue)
-                .filter(postNotification -> partyIdAndType.get(PARTY_ID).equals(postNotification.getPartyIds()))
+                .filter(postNotification -> {
+                    String partyId = nonNull(partyIdAndType) ? partyIdAndType.get(PARTY_ID) : null;
+                    return nonNull(partyId) && partyId.equals(postNotification.getPartyIds());
+                })
                 .map(postNotification ->
                          getSodDocuments(
                              postNotification.getPrintDocs(),

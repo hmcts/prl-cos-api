@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +62,7 @@ class BaisDocumentUploadServiceTest {
     @Mock private CsvWriter csvWriter;
     @Mock private PdfExtractorService pdfExtractorService;
     @Mock private LaunchDarklyClient launchDarklyClient;
+    @Mock private SftpService sftpService;
 
     @Captor
     ArgumentCaptor<CsvData> csvDataArgumentCaptor;
@@ -191,18 +194,31 @@ class BaisDocumentUploadServiceTest {
                     .id(1L)
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(List.of(createOrderDetails()))
+                        .familymanCaseNumber("familymanCaseNumber")
+                        .applicant(PartyDetails.builder().build())
+                        .respondent(PartyDetails.builder().build())
                         .build())
                     .build(),
                 AcroCaseDetail.builder()
                     .id(2L)
                     .caseData(AcroCaseData.builder()
                         .fl404Orders(null)
+                        .familymanCaseNumber("familymanCaseNumber")
+                        .applicant(PartyDetails.builder().build())
+                        .respondent(PartyDetails.builder().build())
                         .build())
                     .build(),
                 AcroCaseDetail.builder()
                     .id(3L)
                     .caseData(AcroCaseData.builder()
+                        .familymanCaseNumber("familymanCaseNumber")
                         .fl404Orders(Collections.emptyList())
+                        .applicant(PartyDetails.builder().isEmailAddressConfidential(null)
+                                     .isPhoneNumberConfidential(null)
+                                     .build())
+                        .respondent(PartyDetails.builder().isEmailAddressConfidential(null)
+                                      .isPhoneNumberConfidential(null)
+                                      .build())
                         .build())
                     .build()
             ))
@@ -301,15 +317,14 @@ class BaisDocumentUploadServiceTest {
     @Test
     void testPrepareDataForCsvMapsAllFieldsCorrectly() throws Exception {
         LocalDateTime orderCreatedDate = LocalDateTime.of(2024, 10, 15, 14, 30);
-        LocalDateTime expectedExpiryDate = LocalDateTime.of(2025, 4, 15, 14, 30);
-        String expectedOrderMadeDate = "2025-10-14";
+        LocalDateTime orderExpiryDate = LocalDateTime.of(2025, 4, 15, 14, 30);
 
         FL404 fl404CustomFields = FL404.builder()
-            .orderSpecifiedDateTime(expectedExpiryDate)
+            .orderSpecifiedDateTime(orderExpiryDate)
             .build();
 
         OtherOrderDetails otherOrderDetails = OtherOrderDetails.builder()
-            .orderMadeDate(expectedOrderMadeDate)
+            .orderMadeDate("14 Oct 2025")
             .build();
 
         OrderDetails order = OrderDetails.builder()
@@ -324,15 +339,18 @@ class BaisDocumentUploadServiceTest {
         PartyDetails applicant = PartyDetails.builder()
             .firstName("John")
             .lastName("Doe")
+            .dateOfBirth(LocalDate.of(2010, 1, 1))
             .build();
 
         PartyDetails respondent = PartyDetails.builder()
             .firstName("Jane")
             .lastName("Smith")
+            .dateOfBirth(LocalDate.of(2010, 1, 1))
             .build();
 
         AcroCaseData caseData = AcroCaseData.builder()
             .id(98765L)
+            .familymanCaseNumber("familymanCaseNumber")
             .caseTypeOfApplication("FL402")
             .applicant(applicant)
             .respondent(respondent)
@@ -362,19 +380,31 @@ class BaisDocumentUploadServiceTest {
         CsvData capturedData = csvDataArgumentCaptor.getValue();
 
         Map<String, Object[]> fieldMappings = Map.of(
+            "Family Case number", new Object[]{caseData.getFamilymanCaseNumber(),
+                capturedData.getFamilymanCaseNumber(), "caseData.getId()"},
             "ID", new Object[]{caseData.getId(), capturedData.getId(), "caseData.getId()"},
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
-            "Applicant", new Object[]{caseData.getApplicant(), capturedData.getApplicant(), "caseData.getApplicant()"},
-            "Respondent", new Object[]{caseData.getRespondent(), capturedData.getRespondent(), "caseData.getRespondent()"},
+            "Applicant", new Object[]{caseData.getApplicant().toBuilder()
+                .dateOfBirth(null)
+                .isAddressConfidential(YesOrNo.No)
+                .isPhoneNumberConfidential(YesOrNo.No)
+                .isEmailAddressConfidential(YesOrNo.No).build(),
+                capturedData.getApplicant(), "caseData.getApplicant()"},
+            "Respondent", new Object[]{caseData.getRespondent().toBuilder()
+                .dateOfBirth(LocalDate.of(2010, 1, 1))
+                .isAddressConfidential(YesOrNo.No)
+                .isPhoneNumberConfidential(YesOrNo.No)
+                .isEmailAddressConfidential(YesOrNo.No).build(),
+                capturedData.getRespondent(), "caseData.getRespondent()"},
             "Court Name", new Object[]{caseData.getCourtName(), capturedData.getCourtName(), "caseData.getCourtName()"},
             "Court EPIMS ID", new Object[]{caseData.getCourtEpimsId(), capturedData.getCourtEpimsId(),
                 "caseData.getCourtEpimsId()"},
             "Court Type ID", new Object[]{caseData.getCourtTypeId(), capturedData.getCourtTypeId(),
                 "caseData.getCourtTypeId()"},
-            "Date Order Made", new Object[]{expectedOrderMadeDate, capturedData.getDateOrderMade(),
+            "Date Order Made", new Object[]{"14/10/2025", capturedData.getDateOrderMade(),
                 "order.getOtherDetails().getOrderMadeDate()"},
-            "Order Expiry Date", new Object[]{expectedExpiryDate, capturedData.getOrderExpiryDate(),
+            "Order Expiry Date", new Object[]{"15/04/2025_14:30", capturedData.getOrderExpiryDate(),
                 "fl404CustomFields.getOrderSpecifiedDateTime()"}
         );
 
@@ -382,8 +412,8 @@ class BaisDocumentUploadServiceTest {
             Object expected = mapping[0];
             Object actual = mapping[1];
             String source = (String) mapping[2];
-            assertEquals(expected, actual,
-                String.format("%s should be mapped from %s", fieldName, source));
+
+            assertEquals(expected, actual, String.format("%s should be mapped from %s", fieldName, source));
         });
     }
 
@@ -417,7 +447,10 @@ class BaisDocumentUploadServiceTest {
 
     private AcroCaseData createCaseDataWithHearings(List<CaseHearing> hearings) {
         return AcroCaseData.builder()
+            .familymanCaseNumber("familymanCaseNumber")
             .fl404Orders(List.of(createOrderDetails()))
+            .applicant(PartyDetails.builder().build())
+            .respondent(PartyDetails.builder().build())
             .caseHearings(hearings)
             .build();
     }
@@ -439,7 +472,7 @@ class BaisDocumentUploadServiceTest {
             .orderDocument(createDocument())
             .orderDocumentWelsh(createDocument())
             .otherDetails(OtherOrderDetails.builder()
-                .orderMadeDate("2025-10-14")
+                .orderMadeDate("14 Oct 2025")
                 .build())
             .build();
     }
@@ -455,6 +488,9 @@ class BaisDocumentUploadServiceTest {
                 .id(1L)
                 .caseData(AcroCaseData.builder()
                     .fl404Orders(List.of(createOrderDetails()))
+                    .familymanCaseNumber("familymanCaseNumber")
+                    .applicant(PartyDetails.builder().build())
+                    .respondent(PartyDetails.builder().build())
                     .build())
                 .build()))
             .build();

@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -47,6 +51,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
+
+    public static final String JUDICIAL_USER_CACHE = "judicialUserCache";
+
     private final AuthTokenGenerator authTokenGenerator;
     private final StaffResponseDetailsApi staffResponseDetailsApi;
     private final JudicialUserDetailsApi judicialUserDetailsApi;
@@ -58,11 +65,6 @@ public class RefDataUserService {
     private String refDataIdamUsername;
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
-
-    private List<DynamicListElement> listOfCategoryValues;
-    private CommonDataResponse commonDataResponse;
-
-    private CaseFlag caseFlag;
 
     /**
      * Gets all staff filtered by the provided filter and returns them as a dynamic list.
@@ -160,6 +162,36 @@ public class RefDataUserService {
         );
     }
 
+    /**
+     * Gets judicial user details by IDAM ID (sidamId) with caching.
+     * Cache is evicted every 30 minutes.
+     *
+     * @param sidamId The IDAM user ID
+     * @return List of judicial user details, or empty list if not found
+     */
+    @Cacheable(cacheNames = JUDICIAL_USER_CACHE, key = "#sidamId")
+    public List<JudicialUsersApiResponse> getJudicialUserBySidamId(String sidamId) {
+        log.info("Fetching judicial user details for sidamId: {} (not cached)", sidamId);
+        Map<String, Object> requestBody = Map.of("sidam_ids", new String[]{sidamId});
+        List<JudicialUsersApiResponse> response = judicialUserDetailsApi.getJudicialUsersByRequestMap(
+            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+            authTokenGenerator.generate(),
+            requestBody
+        );
+        if (response != null && !response.isEmpty()) {
+            JudicialUsersApiResponse judge = response.get(0);
+            log.info("Judicial API response for sidamId {}: postNominals={}, appointments={}",
+                sidamId, judge.getPostNominals(), judge.getAppointments());
+        }
+        return response;
+    }
+
+    @CacheEvict(allEntries = true, cacheNames = JUDICIAL_USER_CACHE)
+    @Scheduled(fixedDelay = 1800000) // 30 minutes
+    public void evictJudicialUserCache() {
+        log.info("Evicting judicial user cache");
+    }
+
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
         if (null != listOfStaffResponse) {
             return listOfStaffResponse.stream()
@@ -176,6 +208,7 @@ public class RefDataUserService {
 
     public CommonDataResponse retrieveCategoryValues(String authorization, String categoryId,String isHearingChildRequired) {
         log.info("retrieveCategoryValues {}", categoryId);
+        CommonDataResponse commonDataResponse = null;
         try {
             commonDataResponse = commonDataRefApi.getAllCategoryValuesByCategoryId(
                 authorization,
@@ -194,6 +227,7 @@ public class RefDataUserService {
 
     public CaseFlag retrieveCaseFlags(String authorization, String flagType) {
         log.info("retrieve case flags for flag type{} ", flagType);
+        CaseFlag caseFlag = null;
         try {
             caseFlag = commonDataRefApi.retrieveCaseFlagsByServiceId(
                 authorization,
@@ -209,7 +243,7 @@ public class RefDataUserService {
 
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         if (null != commonDataResponse) {
-            listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
+            List<DynamicListElement> listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
                 .map(this::getDisplayCategoryEntry).collect(Collectors.toList());
             Collections.sort(listOfCategoryValues, (a, b) -> a.getCode().compareToIgnoreCase(b.getCode()));

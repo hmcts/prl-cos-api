@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static feign.Request.HttpMethod.GET;
@@ -83,9 +84,8 @@ public class CafcassDocumentManagementControllerTest {
         ResponseEntity<Resource> expectedResponse = ResponseEntity.status(OK).contentType(MediaType.APPLICATION_PDF).body(
             documentResource);
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
 
         Mockito.when(cafcassCdamService.getDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
@@ -107,9 +107,8 @@ public class CafcassDocumentManagementControllerTest {
     @DisplayName("Failed download of document through CDAM Service")
     public void testGetDocumentBinary() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
+        when(userInfo.getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
 
         Mockito.when(cafcassCdamService.getDocument(
                 CAFCASS_TEST_AUTHORISATION_TOKEN,
@@ -133,7 +132,7 @@ public class CafcassDocumentManagementControllerTest {
     @Test
     public void testInvalidServicAuth_401UnAuthorized() {
         when(authorisationService.authoriseService(any())).thenReturn(false);
-        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
             CAFCASS_TEST_AUTHORISATION_TOKEN,
             CAFCASS_TEST_SERVICE_AUTHORISATION_TOKEN,
@@ -146,9 +145,8 @@ public class CafcassDocumentManagementControllerTest {
     @Test
     public void testFeignExceptionBadRequest() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
         when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.BAD_REQUEST.value(), "Not found"));
         final ResponseEntity response = cafcassDocumentManagementController.downloadDocument(
@@ -162,9 +160,8 @@ public class CafcassDocumentManagementControllerTest {
     @Test
     public void testFeignExceptionUnAuthorised() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
-        when(authorisationService.getUserInfo()).thenReturn(userInfo);
-        when(authorisationService.getUserInfo().getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
 
         when(cafcassCdamService.getDocument(TEST_AUTHORIZATION, TEST_SERVICE_AUTHORIZATION, documentId)).thenThrow(
             feignException(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"));
@@ -179,7 +176,8 @@ public class CafcassDocumentManagementControllerTest {
     @Test
     public void testExceptionInternalServerError() throws IOException {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        when(userInfo.getRoles()).thenReturn(Arrays.asList("caseworker-privatelaw-cafcass"));
         when(cafcassCdamService.getDocument(
             TEST_AUTHORIZATION,
             TEST_SERVICE_AUTHORIZATION,

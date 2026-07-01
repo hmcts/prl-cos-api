@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -43,6 +45,9 @@ public class FeesAndPaymentCitizenControllerTest {
 
     @Mock
     private FeeResponse feeResponse;
+
+    @Mock
+    private UserInfo userInfo;
 
     @Mock
     private PaymentRequestService paymentRequestService;
@@ -72,7 +77,7 @@ public class FeesAndPaymentCitizenControllerTest {
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         feesAndPaymentCitizenController.fetchFeesAmount(authToken, s2sToken);
@@ -83,7 +88,7 @@ public class FeesAndPaymentCitizenControllerTest {
     public void fetchFeeDetailsWithInvalidClient() throws Exception {
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.FALSE);
         when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
         FeeResponseForCitizen feeResponseForCitizen = feesAndPaymentCitizenController.fetchFeesAmount(
@@ -115,7 +120,7 @@ public class FeesAndPaymentCitizenControllerTest {
         PaymentResponse paymentResponse = PaymentResponse.builder()
                 .paymentReference(PAYMENT_REFERENCE).build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         when(paymentRequestService.createPayment(authToken, createPaymentRequest)).thenReturn(paymentResponse);
 
@@ -134,7 +139,7 @@ public class FeesAndPaymentCitizenControllerTest {
                 .builder().caseId(TEST_CASE_ID).returnUrl(REDIRECT_URL)
                 .build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.empty());
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
 
         //Then
@@ -155,7 +160,7 @@ public class FeesAndPaymentCitizenControllerTest {
             .paymentGroupReference("2022-1662471461349")
             .build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
 
         when(paymentRequestService.fetchPaymentStatus(authToken,PAYMENT_REFERENCE))
@@ -170,7 +175,7 @@ public class FeesAndPaymentCitizenControllerTest {
     @Test
     public void retrievePaymentStatusWithInvalidClient() throws Exception {
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.empty());
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
 
         //Then
@@ -184,7 +189,7 @@ public class FeesAndPaymentCitizenControllerTest {
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
         when(feeService.fetchFeeCode(feeRequest,authToken)).thenReturn(feeResponseForCitizen);
@@ -202,7 +207,7 @@ public class FeesAndPaymentCitizenControllerTest {
         feeResponseForCitizen = FeeResponseForCitizen.builder()
             .amount(feeResponse.getAmount().toString()).build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.of(userInfo));
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
         when(feeService.fetchFeeCode(feeRequest,authToken)).thenThrow(new RuntimeException());
@@ -220,7 +225,7 @@ public class FeesAndPaymentCitizenControllerTest {
         //Given
         feeResponseForCitizen = FeeResponseForCitizen.builder().errorRetrievingResponse("Invalid Client").build();
 
-        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Optional.empty());
         when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
         FeeRequest feeRequest = FeeRequest.builder().caseId("123").build();
         FeeResponseForCitizen actualResponse = feesAndPaymentCitizenController

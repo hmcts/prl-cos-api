@@ -171,6 +171,11 @@ public class WelshLangMapper {
         welshMap.put(Gender.male.getDisplayedValue(), "Gwryw");
         welshMap.put(Gender.other.getDisplayedValue(), "Maent yn uniaethu mewn rhyw ffordd arall");
 
+        welshMap.put("liveInRefuge_Yes", "Ydy");
+        welshMap.put("liveInRefuge_No", "Nac ydy");
+        welshMap.put("liveInRefuge_IDontKnow", "Dw i ddim yn gwybod");
+
+        welshMap.put("watermark_DRAFT", "DRAFFT");
         /**
          *  Type of Application - What order(s) are you applying for?.
          */
@@ -609,10 +614,10 @@ public class WelshLangMapper {
          * Attending the hearing.*/
         welshMap.put("isWelshNeeded_yes", "Bydd");
         welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
-        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
+        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Bydd eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
-            "Byddant eisiau darllen ac ysgrifennu yn Gymraeg"
+            "Bydd eisiau darllen ac ysgrifennu yn Gymraeg"
         );
         welshMap.put(SpokenOrWrittenWelshEnum.both.getDisplayedValue(), "Y ddau");
         welshMap.put("isInterpreterNeeded_yes", "Bydd");
@@ -1023,6 +1028,12 @@ public class WelshLangMapper {
         welshMap.put(Gender.male.getDisplayedValue(), "Gwrywaidd");
         welshMap.put(Gender.other.getDisplayedValue(), "Hunaniaeth ryweddol arall");
 
+        welshMap.put("liveInRefuge_Yes", "Ydy");
+        welshMap.put("liveInRefuge_No", "Nac ydy");
+        welshMap.put("liveInRefuge_IDontKnow", "Dw i ddim yn gwybod");
+
+        welshMap.put("watermark_DRAFT", "DRAFFT");
+
         /**
          * FL401 Type of Application.
          */
@@ -1274,10 +1285,10 @@ public class WelshLangMapper {
          */
         welshMap.put("isWelshNeeded_yes", "Bydd");
         welshMap.put("isWelshNeeded_no", WELSH_NO_NA_FYDD);
-        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Byddant eisiau siarad Cymraeg");
+        welshMap.put(SpokenOrWrittenWelshEnum.spoken.getDisplayedValue(), "Bydd eisiau siarad Cymraeg");
         welshMap.put(
             SpokenOrWrittenWelshEnum.written.getDisplayedValue(),
-            "Byddant eisiau darllen ac ysgrifennu yn Gymraeg"
+            "Bydd eisiau darllen ac ysgrifennu yn Gymraeg"
         );
         welshMap.put("isInterpreterNeeded_yes", "Ydw");
         welshMap.put("isInterpreterNeeded_no", WELSH_NO_NAC_YDW);

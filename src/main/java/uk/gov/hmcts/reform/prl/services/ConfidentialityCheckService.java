@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -101,7 +102,7 @@ public class ConfidentialityCheckService {
     }
 
     private static void findAndShowC8RefugeDocs(Map<String, Object> caseDataMap, PartyDetails eachApp, String ccdCaseFieldId) {
-        if (YesOrNo.Yes.equals(eachApp.getLiveInRefuge())
+        if (YesNoIDontKnowV2.Yes.equals(eachApp.getLiveInRefuge())
                 && null != eachApp.getRefugeConfidentialityC8Form()) {
             caseDataMap.put(ccdCaseFieldId, eachApp.getRefugeConfidentialityC8Form());
         } else {
@@ -144,7 +145,11 @@ public class ConfidentialityCheckService {
         ResponseDocuments respondentDoc = getRespondentC8(respondentC8, index);
 
         if (respondentDocument != null && respondentDoc != null) {
-            if (respondentDoc.getDateTimeCreated().isAfter(respondentDocument.getDateTimeCreated())) {
+            // Pre FPVTL-2381, dateTimeCreated was only on respondentDocument, dateCreated was on respondentDoc
+            if ((isNotEmpty(respondentDoc.getDateTimeCreated())
+                    && respondentDoc.getDateTimeCreated().isAfter(respondentDocument.getDateTimeCreated()))
+                || (isNotEmpty(respondentDoc.getDateCreated())
+                    && respondentDoc.getDateCreated().isAfter(respondentDocument.getDateTimeCreated().toLocalDate()))) {
                 return respondentDoc;
             }
             return respondentDocument;

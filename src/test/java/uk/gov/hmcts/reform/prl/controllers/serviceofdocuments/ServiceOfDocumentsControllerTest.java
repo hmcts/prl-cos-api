@@ -41,6 +41,7 @@ public class ServiceOfDocumentsControllerTest {
     public static final String NO_DOCUMENTS_SELECTED_ERROR = "Please select a document or upload a document to serve";
     public static final String UN_SERVED_DOCUMENTS_PRESENT_ERROR =
         "Can not execute service of documents, there are unserved document(s) pending review";
+    public static final String INVALID_ADDITIONAL_RECIPIENTS_EMAIL = "Please provide valid email address for all recipients";
 
     @InjectMocks
     private ServiceOfDocumentsController serviceOfDocumentsController;
@@ -133,6 +134,30 @@ public class ServiceOfDocumentsControllerTest {
     }
 
     @Test
+    public void testValidateSodRequestWhenEmailIsInvalid() {
+        List<String> errors = List.of(INVALID_ADDITIONAL_RECIPIENTS_EMAIL);
+        when(serviceOfDocumentsService.validateAdditionalRecipients(Mockito.any(CallbackRequest.class))).thenReturn(errors);
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
+            .validateAdditionalRecipients(any(),any(),callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getErrors());
+        assertEquals(INVALID_ADDITIONAL_RECIPIENTS_EMAIL, aboutToStartOrSubmitCallbackResponse.getErrors().getFirst());
+    }
+
+    @Test
+    public void testValidateSodRequestWhenEmailIsValid() {
+        when(serviceOfDocumentsService.validateAdditionalRecipients(Mockito.any(CallbackRequest.class)))
+            .thenReturn(Collections.emptyList());
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfDocumentsController
+            .validateAdditionalRecipients(any(),any(),callbackRequest);
+
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
     public void testHandleSubmitted() {
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse = ResponseEntity.ok().build();
         when(serviceOfDocumentsService.handleSubmitted(anyString(), Mockito.any(CallbackRequest.class))).thenReturn(submittedCallbackResponse);
@@ -168,10 +193,10 @@ public class ServiceOfDocumentsControllerTest {
     }
 
     @Test
-    public void testExceptionValidateDocuments() {
+    public void testExceptionValidateAdditionalRecipients() {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         assertExpectedException(() -> {
-            serviceOfDocumentsController.validateDocuments(any(), any(), callbackRequest);
+            serviceOfDocumentsController.validateAdditionalRecipients(any(), any(), callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

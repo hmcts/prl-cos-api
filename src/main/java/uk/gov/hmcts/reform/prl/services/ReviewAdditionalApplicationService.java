@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -12,9 +11,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.O
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
@@ -24,8 +25,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class ReviewAdditionalApplicationService {
+
+    private static final String ERROR_RETRIEVE_ADDITIONAL_APPLICATION =
+        "Unable to retrieve additional application details.";
 
     public Map<String, Object> populateReviewAdditionalApplication(CaseData caseData,
                                                                    Map<String, Object> caseDataMap,
@@ -48,12 +51,35 @@ public class ReviewAdditionalApplicationService {
         if (Event.REVIEW_ADDITIONAL_APPLICATION.getId().equals(eventId) && StringUtils.isNotEmpty(clientContext)) {
             log.info("Getting additional application id from client context");
             WaMapper waMapper = CaseUtils.getWaMapper(clientContext);
-            additionalApplicationId = UUID.fromString(CaseUtils.getAdditionalApplicationId(waMapper));
+            String applicationId = CaseUtils.getAdditionalApplicationId(waMapper);
+            additionalApplicationId = Optional.ofNullable(applicationId).map(UUID::fromString).orElse(null);
         } else {
             log.info("Getting first additional application id from dynamic list ");
             additionalApplicationId = additionalApplicationCollection.getFirst().getId();
         }
-        return CaseUtils.getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
+        if (additionalApplicationId == null) {
+            log.error("Could not find additional application details");
+            throw new IllegalStateException(ERROR_RETRIEVE_ADDITIONAL_APPLICATION);
+        }
+
+        AdditionalApplicationsBundle selectedAB = CaseUtils
+            .getAdditionalApplicationFromCollectionId(additionalApplicationCollection, additionalApplicationId);
+        if (selectedAB != null && selectedAB.getC2DocumentBundle() != null) {
+            ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getFinalDocument()).forEach(
+                document -> document.setCategoryId(null)
+            );
+            ElementUtils.unwrapElements(selectedAB.getC2DocumentBundle().getSupportingEvidenceBundle()).forEach(
+                supplement -> supplement.getDocument().setCategoryId(null)
+            );
+        } else if (selectedAB != null && selectedAB.getOtherApplicationsBundle() != null) {
+            ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getFinalDocument()).forEach(
+                document -> document.setCategoryId(null)
+            );
+            ElementUtils.unwrapElements(selectedAB.getOtherApplicationsBundle().getSupportingEvidenceBundle()).forEach(
+                supplement -> supplement.getDocument().setCategoryId(null)
+            );
+        }
+        return selectedAB;
     }
 
     public String getApplicationBundleDynamicCode(AdditionalApplicationsBundle additionalApplicationsBundle) {

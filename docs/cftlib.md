@@ -1,6 +1,8 @@
 # RSE CFT lib
 This page provides instructions on how to develop and test `prl-cos-api` in a local development
-environment using [cftlib](https://github.com/hmcts/rse-cft-lib). AAT is used to provide some of the dependent services.
+environment using [cftlib](https://github.com/hmcts/rse-cft-lib). AAT is used to provide some of the dependent services. As a consequence, the local environment
+will only work when the AAT environment is available.
+See this [page](https://hmcts.github.io/cloud-native-platform/environments/auto-shutdown.html) for details of AAT availability.
 
 An `.aat-env` file is needed to provide the environment variables required to point services at AAT.
 As these include Azure secrets, it is not stored in Git.
@@ -24,7 +26,7 @@ There is currently no support for
 The first time cftlib is run it needs to download Docker images from the Azure Registry. You must therefore login
 to Azure as follows:
 ```bash
-az acr login --name hmctspublic --subscription DCD-CNP-Prod
+az acr login --name hmctsprod --subscription DCD-CNP-Prod
 az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 ```
 

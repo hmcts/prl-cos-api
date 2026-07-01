@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
@@ -49,6 +51,9 @@ public class StatementOfServiceControllerTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private UserInfo userInfo;
 
     @Mock
     private CafcassDateTimeService cafcassDateTimeService;
@@ -122,7 +127,7 @@ public class StatementOfServiceControllerTest {
             .data(stringObjectMap)
             .build();
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
@@ -177,7 +182,7 @@ public class StatementOfServiceControllerTest {
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -236,7 +241,7 @@ public class StatementOfServiceControllerTest {
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -298,7 +303,7 @@ public class StatementOfServiceControllerTest {
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
@@ -359,7 +364,7 @@ public class StatementOfServiceControllerTest {
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
@@ -418,7 +423,7 @@ public class StatementOfServiceControllerTest {
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
@@ -430,7 +435,7 @@ public class StatementOfServiceControllerTest {
     @Test
     public void testCitizenSoaSubmit() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         assertNotNull(statementOfServiceController.citizenSoaSubmit("123456789", "Citizen-case-update",
                                                                     authToken, s2sToken, CitizenSos.builder().build()));
     }
@@ -438,7 +443,7 @@ public class StatementOfServiceControllerTest {
     @Test
     public void testCitizenSoaSubmitException() {
         when(authorisationService.authoriseService(any())).thenReturn(true);
-        when(authorisationService.authoriseUser(any())).thenReturn(false);
+        when(authorisationService.authoriseUser(any())).thenReturn(Optional.empty());
         assertThrows(Exception.class, () -> {
             statementOfServiceController.citizenSoaSubmit("123456789", "Citizen-case-update",
                                                           authToken, s2sToken, CitizenSos.builder().build());
