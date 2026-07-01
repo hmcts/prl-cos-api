@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
@@ -26,7 +27,7 @@ public class RespondentOrgPolicyService {
 
     private static final int MAX_RESPONDENTS = 5;
 
-    private final RoleAssignmentService roleAssignmentService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     private final OrganisationService organisationService;
 
@@ -119,12 +120,17 @@ public class RespondentOrgPolicyService {
             return;
         }
         String assigneeUserId = userIdOpt.get();
-        roleAssignmentService.createRoleAssignment(
+        String solicitorOrgId = respondent.getSolicitorOrg() != null ? respondent.getSolicitorOrg().getOrganisationID() : null;
+        // Delegate to CCD case-assignment API rather than calling Role Assignment Service directly.
+        // The role reference stored on OrgPolicyCaseAssignedRole (e.g. "[C100RESPONDENTSOLICITOR1]") is a CCD
+        // case-role reference and is not a valid AMS role name; CCD's case-assignment endpoint knows how to
+        // translate it into the correct AMS role assignment via its own drools rules. Same call is used
+        // elsewhere in ServiceOfApplicationService for the equivalent path.
+        assignCaseAccessService.assignCaseAccessToUserWithRole(
             caseId,
             assigneeUserId,
-            uk.gov.hmcts.reform.prl.enums.RoleCategory.PROFESSIONAL,
             assignedRole,
-            false
+            solicitorOrgId
         );
     }
 
