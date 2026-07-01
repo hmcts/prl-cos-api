@@ -103,7 +103,8 @@ public class CaseDataOtherPersonsElementsMapper {
         if (YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())) {
             return No;
         } else if (!YesOrNo.Yes.equals(otherPersonDetails.getAddressUnknown())
-            && YesNoIDontKnowV2.Yes.equals(otherPersonDetails.getLiveInRefuge())) {
+            && (YesNoIDontKnowV2.Yes.equals(otherPersonDetails.getLiveInRefuge())
+                || YesOrNo.Yes.equals(otherPersonDetails.getIsOtherPersonAddressOnlyConfidential()))) {
             return Yes;
         } else {
             return No;

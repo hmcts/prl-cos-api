@@ -31,7 +31,8 @@ public class OtherPersonDetail {
     @JsonProperty("address")
     private OtherPersonAddress otherPersonAddress;
     @JsonProperty("isOtherPersonAddressConfidential")
-    private YesOrNo isOtherPersonAddressConfidential;
+    private YesOrNo isOtherPersonAddressConfidential; // identity
+    private YesOrNo isOtherPersonAddressOnlyConfidential; // address
     private YesOrNo addressUnknown;
     private YesNoIDontKnowV2 liveInRefuge;
     private Document refugeConfidentialityC8Form;
