@@ -403,6 +403,7 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
+
     }
 
     /**
@@ -428,6 +429,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+
 
     }
 
@@ -609,6 +611,7 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
+
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
 
@@ -684,6 +687,7 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
+
 
     /**
      * Judge  manageOrders journey - creates the sdo order with one hearing .
