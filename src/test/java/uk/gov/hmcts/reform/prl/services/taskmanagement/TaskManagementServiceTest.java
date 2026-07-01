@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
 import uk.gov.hmcts.reform.prl.models.wa.CompletableTaskResponse;
 import uk.gov.hmcts.reform.prl.models.wa.TaskData;
@@ -21,11 +22,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TaskManagementServiceTest {
-    @Mock
-    private WaSystemUserService waSystemUserService;
 
     @Mock
+    private WaSystemUserService waSystemUserService;
+    @Mock
     private TaskManagementClient taskManagementClient;
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
 
     private static final String HEARING_ID = "100";
     private static final String CASE_ID = "200";
@@ -40,7 +44,8 @@ class TaskManagementServiceTest {
     void setUp() {
         when(waSystemUserService.getSysUserToken()).thenReturn(WA_TOKEN);
 
-        taskManagementService = new TaskManagementService(waSystemUserService, taskManagementClient);
+        taskManagementService = new TaskManagementService(waSystemUserService, taskManagementClient,
+                                                          authTokenGenerator);
     }
 
     @Test
@@ -48,7 +53,7 @@ class TaskManagementServiceTest {
         CompletableTaskResponse completableTaskResponse = CompletableTaskResponse.builder()
             .tasks(Collections.emptyList())
             .build();
-        when(taskManagementClient.searchForCompletable(anyString(), any())).thenReturn(completableTaskResponse);
+        when(taskManagementClient.searchForCompletable(anyString(), any(), any())).thenReturn(completableTaskResponse);
 
         assertTrue(taskManagementService.hasNoCompletableTasksForHearing(HEARING_ID, CASE_ID, EVENT_ID));
     }
@@ -65,7 +70,7 @@ class TaskManagementServiceTest {
                                      .taskState("taskState")
                                      .build()))
             .build();
-        when(taskManagementClient.searchForCompletable(anyString(), any())).thenReturn(completableTaskResponse);
+        when(taskManagementClient.searchForCompletable(anyString(), any(), any())).thenReturn(completableTaskResponse);
 
         assertFalse(taskManagementService.hasNoCompletableTasksForHearing(HEARING_ID, CASE_ID, EVENT_ID));
     }

@@ -17,6 +17,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
     configuration = FeignClientProperties.FeignClientConfiguration.class
 )
 public interface TaskManagementClient {
+    static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
 
     @PostMapping(
         value = "/task/search-for-completable",
@@ -24,6 +25,7 @@ public interface TaskManagementClient {
     )
     CompletableTaskResponse searchForCompletable(
         @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
         @RequestBody final SearchEventAndCaseRequest searchEventAndCaseRequest
     );
 }

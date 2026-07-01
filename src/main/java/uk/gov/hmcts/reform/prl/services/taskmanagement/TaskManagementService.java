@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.models.wa.CompletableTaskResponse;
 import uk.gov.hmcts.reform.prl.models.wa.SearchEventAndCaseRequest;
 import uk.gov.hmcts.reform.prl.services.WaSystemUserService;
@@ -18,8 +19,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 public class TaskManagementService {
 
     private final WaSystemUserService waSystemUserService;
-
     private final TaskManagementClient taskManagementClient;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public boolean hasNoCompletableTasksForHearing(String hearingId, String caseId, String eventId) {
         CompletableTaskResponse completableTaskResponse = getCompletableTasks(caseId, eventId);
@@ -34,6 +35,7 @@ public class TaskManagementService {
             .caseId(caseId)
             .eventId(eventId)
             .build();
-        return taskManagementClient.searchForCompletable(waSystemUserService.getSysUserToken(), searchEventAndCaseRequest);
+        return taskManagementClient.searchForCompletable(waSystemUserService.getSysUserToken(),
+                                                         authTokenGenerator.generate(), searchEventAndCaseRequest);
     }
 }
