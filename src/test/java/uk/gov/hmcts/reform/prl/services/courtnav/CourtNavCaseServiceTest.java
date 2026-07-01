@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.prl.services.courtnav;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
@@ -45,27 +48,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
+import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_FORMAT;
+import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_NULL;
+import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_NUMBER;
+import static uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService.COURTNAV_DOC_FAILURE_TYPE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class CourtNavCaseServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class CourtNavCaseServiceTest {
 
     private final String authToken = "Bearer abc";
-    private static final String systemUpdateUser = "system User";
-    private final String jurisdiction = "PRIVATELAW";
-    private final String caseType = "PRLAPPS";
-    private final String eventName = "system-update";
-    private final String systemUserId = "systemUserID";
-    private final String eventToken = "eventToken";
     private final String s2sToken = "s2s token";
     private final String randomUserId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-    private static final String randomAlphaNumeric = "A1b2c3EFGH";
+    private static final String RANDOM_ALPHA_NUMERIC = "A1b2c3EFGH";
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -112,8 +117,8 @@ public class CourtNavCaseServiceTest {
     private StartEventResponse startEventResponse;
     private CaseDetails caseDetails;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         caseDataMap.put("id", "1234567891234567");
         caseDataMap.put("applicantCaseName", "xyz");
         caseDetails = CaseDetails.builder()
@@ -137,12 +142,13 @@ public class CourtNavCaseServiceTest {
                 startEventResponse);
         when(ccdCoreCaseDataService.startSubmitCreate(authToken, s2sToken, null, true)).thenReturn(
             startEventResponse);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper)).thenReturn(caseData);
+        when(objectMapper.convertValue(any(Map.class), eq(CaseData.class))).thenAnswer(invocation -> caseData);
+        when(caseDocumentClient.uploadDocuments(any(), any(), any(), any(), any()))
+            .thenReturn(new UploadResponse(List.of(testDocument())));
     }
 
     @Test
-    public void shouldStartAndSubmitEventWithEventData() {
+    void shouldStartAndSubmitEventWithEventData() {
         courtNavCaseService.createCourtNavCase("Bearer abc", caseData);
         verify(ccdCoreCaseDataService).submitCreate(Mockito.anyString(), Mockito.anyString(),
                                                     Mockito.anyString(),
@@ -150,7 +156,7 @@ public class CourtNavCaseServiceTest {
     }
 
     @Test
-    public void shouldUploadDocumentWhenAllFieldsAreCorrect() {
+    void shouldUploadDocumentWhenAllFieldsAreCorrect() {
         QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().build();
         List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
         courtNavUploadedDocListDocs.add(element(courtNavDocument));
@@ -164,6 +170,7 @@ public class CourtNavCaseServiceTest {
 
         caseData = caseData.toBuilder().reviewDocuments(reviewDocuments).build();
 
+        String eventToken = "eventToken";
         CaseDataContent caseDataContent = CaseDataContent.builder()
             .eventToken(eventToken)
             .event(Event.builder()
@@ -194,7 +201,6 @@ public class CourtNavCaseServiceTest {
         )).build());
         when(ccdCoreCaseDataService.startUpdate(authToken, null, "1234567891234567", true))
             .thenReturn(startEventResponse);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"
         );
@@ -214,22 +220,18 @@ public class CourtNavCaseServiceTest {
         );
     }
 
-    @Test(expected = ResponseStatusException.class)
-    public void shouldNotUploadDocumentWhenInvalidDocumentTypeOfDocumentIsRequested() {
-        courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
-                                           "1234567891234567"
+    @Test
+    void shouldNotUploadDocumentWhenInvalidDocumentTypeIsRequested() {
+        assertThrows(
+            ResponseStatusException.class, () -> courtNavCaseService.uploadDocument(
+                "Bearer abc", file, "InvalidTypeOfDocument",
+                "1234567891234567"
+            ), COURTNAV_DOC_FAILURE_TYPE
         );
     }
 
-    @Test(expected = ResponseStatusException.class)
-    public void shouldNotUploadDocumentWhenInvalidDocumentFormatIsRequested() {
-        courtNavCaseService.uploadDocument("Bearer abc", file, "InvalidTypeOfDocument",
-                                           "1234567891234567"
-        );
-    }
-
-    @Test(expected = ResponseStatusException.class)
-    public void shouldThrowExceptionForNumberOfAttchmentsSize() {
+    @Test
+    void shouldThrowExceptionForNumberOfAttchmentsSize() {
         List<Element<UploadedDocuments>> courtNavUploadedDocs = new ArrayList<>();
         UploadedDocuments uploadedDocuments = UploadedDocuments.builder().build();
         courtNavUploadedDocs.add(element(uploadedDocuments));
@@ -247,30 +249,32 @@ public class CourtNavCaseServiceTest {
         caseData = CaseData.builder().id(1234567891234567L).applicantCaseName("xyz").documentManagementDetails(
                 DocumentManagementDetails.builder().build())
             .numberOfAttachments("2").reviewDocuments(reviewDocuments).build();
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
+        assertThrows(ResponseStatusException.class,
+                     () -> courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
                                            "1234567891234567"
-        );
+        ), COURTNAV_DOC_FAILURE_NUMBER + ", " + 2);
     }
 
-    @Test(expected = ResponseStatusException.class)
-    public void shouldThrowExceptionWhenInvalidTypeOfDocumentIsPassed() {
-        file = new MockMultipartFile(
+    @Test
+    void shouldThrowExceptionWhenInvalidFormatOfDocumentIsPassed() {
+        MultipartFile invalidFormatDoc = new MockMultipartFile(
             "file",
             "private-law.json",
             MediaType.TEXT_PLAIN_VALUE,
             "FL401 case".getBytes()
         );
-        courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT",
-                                           "1234567891234567"
+        assertThrows(
+            ResponseStatusException.class, () -> courtNavCaseService.uploadDocument(
+                "Bearer abc", invalidFormatDoc, "InvalidTypeOfDocument",
+                "1234567891234567"
+            ), COURTNAV_DOC_FAILURE_FORMAT
         );
     }
 
     @Test
-    public void testRefreshTabs() throws Exception {
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+    void testRefreshTabs() throws Exception {
+        Map<String, Object> stringObjectMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         when(documentGenService.createUpdatedCaseDataWithDocuments(authToken, caseData)).thenReturn(stringObjectMap);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authToken,
             EventRequestData.builder().build(), StartEventResponse.builder().build(), stringObjectMap, caseData, null);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
@@ -281,11 +285,56 @@ public class CourtNavCaseServiceTest {
                                Mockito.any(CaseData.class));
     }
 
+    @Test
+    void shouldThrowExceptionWhenNullOrEmptyDocument() {
+        assertThrows(
+            ResponseStatusException.class, () -> courtNavCaseService.uploadDocument(
+                "Bearer abc", null, "WITNESS_STATEMENT",
+                "1234567891234567"
+            ), COURTNAV_DOC_FAILURE_NULL
+        );
+    }
+
+    @Test
+    void shouldEarlyReturnWhenDocumentWithExistingFilenameAndTypeUploaded() {
+        QuarantineLegalDoc existingCourtNavDoc = QuarantineLegalDoc.builder()
+            .documentType("WITNESS_STATEMENT")
+            .courtNavQuarantineDocument(
+                uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                    .documentFileName("private-law.pdf")
+                    .build()
+            )
+            .build();
+
+        DocumentManagementDetails docMgmtDetails = DocumentManagementDetails.builder()
+            .courtNavQuarantineDocumentList(List.of(element(existingCourtNavDoc)))
+            .build();
+
+        caseData = caseData.toBuilder().documentManagementDetails(docMgmtDetails).build();
+
+        courtNavCaseService.uploadDocument("Bearer abc", file, "WITNESS_STATEMENT", "1234567891234567");
+
+        verify(caseDocumentClient, never()).uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyList()
+        );
+        verify(ccdCoreCaseDataService, never()).submitUpdate(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyBoolean()
+        );
+    }
+
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();
-        binaryLink.href = randomAlphaNumeric;
+        binaryLink.href = RANDOM_ALPHA_NUMERIC;
         Document.Link selfLink = new Document.Link();
-        selfLink.href = randomAlphaNumeric;
+        selfLink.href = RANDOM_ALPHA_NUMERIC;
 
         Document.Links links = new Document.Links();
         links.binary = binaryLink;
@@ -293,7 +342,7 @@ public class CourtNavCaseServiceTest {
 
         Document document = Document.builder().build();
         document.links = links;
-        document.originalDocumentName = randomAlphaNumeric;
+        document.originalDocumentName = RANDOM_ALPHA_NUMERIC;
 
         return document;
     }

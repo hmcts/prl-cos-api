@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,6 +58,12 @@ public class CourtNavCaseService {
 
     protected static final String[] ALLOWED_FILE_TYPES = {"pdf", "jpeg", "jpg", "doc", "docx", "bmp", "png", "tiff", "txt", "tif"};
     protected static final String[] ALLOWED_TYPE_OF_DOCS = {"WITNESS_STATEMENT", "EXHIBITS_EVIDENCE", "EXHIBITS_COVERSHEET", "C8_DOCUMENT"};
+    private static final String COURTNAV_DOCUMENT_UPLOAD_ERROR_LOG = "CourtNav failed to upload document of type {} on case {}, {}";
+    static final String COURTNAV_DOC_FAILURE_NULL = "Document is null or empty";
+    static final String COURTNAV_DOC_FAILURE_FORMAT = "Document file format is disallowed";
+    static final String COURTNAV_DOC_FAILURE_TYPE = "Document type is disallowed";
+    static final String COURTNAV_DOC_FAILURE_NUMBER = "Number of attachments size is reached";
+
     private final CcdCoreCaseDataService coreCaseDataService;
     private final IdamClient idamClient;
     private final CaseDocumentClient caseDocumentClient;
@@ -99,88 +106,121 @@ public class CourtNavCaseService {
     }
 
     public void uploadDocument(String authorisation, MultipartFile document, String typeOfDocument, String caseId) {
-
-        if (null != document && null != document.getOriginalFilename()
-            && checkFileFormat(document.getOriginalFilename())
-            && checkTypeOfDocument(typeOfDocument)) {
-            EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-                CaseEvent.COURTNAV_DOCUMENT_UPLOAD_EVENT_ID,
-                idamClient.getUserInfo(authorisation).getUid()
-            );
-            StartEventResponse startEventResponse = checkIfCasePresent(caseId, authorisation, eventRequestData);
-            if (startEventResponse == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-            }
-            CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
-            int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
-            if (tempCaseData.getNumberOfAttachments() != null
-                && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
-                log.error("Number of attachments size is reached {}", tempCaseData.getNumberOfAttachments());
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-            }
-            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
-                authorisation,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                List.of(document)
-            );
-            log.info("Document uploaded successfully through caseDocumentClient");
-
-            Map<String, Object> fields = new HashMap<>();
-
-            QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
-                document.getOriginalFilename(),
-                tempCaseData,
-                uploadResponse.getDocuments().getFirst(),
-                typeOfDocument
-            );
-
-            manageDocumentsService.moveDocumentsToQuarantineTab(
-                courtNavQuarantineLegalDoc,
-                tempCaseData,
-                fields,
-                COURTNAV
-            );
-
-            manageDocumentsService.setFlagsForWaTask(
-                tempCaseData,
-                fields,
-                COURTNAV,
-                courtNavQuarantineLegalDoc
-            );
-
-            //Changes to generate one WA task for courtnav upload document
-            if (!fields.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
-                fields.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
-            }
-
-            CaseDataContent caseDataContent = CaseDataContent.builder()
-                .eventToken(startEventResponse.getToken())
-                .event(Event.builder()
-                           .id(startEventResponse.getEventId())
-                           .build())
-                .data(fields).build();
-
-            coreCaseDataService.submitUpdate(
-                authorisation,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                true
-            );
-
-            log.info("Document has been saved in caseData {}", document.getOriginalFilename());
-        } else {
-            log.error("Un acceptable format/type of document {}", typeOfDocument);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (null == document || null == document.getOriginalFilename()) {
+            log.error(COURTNAV_DOCUMENT_UPLOAD_ERROR_LOG, typeOfDocument, caseId, COURTNAV_DOC_FAILURE_NULL);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, COURTNAV_DOC_FAILURE_NULL);
         }
+
+        if (!checkFileFormat(document.getOriginalFilename())) {
+            log.error(COURTNAV_DOCUMENT_UPLOAD_ERROR_LOG, typeOfDocument, caseId, COURTNAV_DOC_FAILURE_FORMAT);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, COURTNAV_DOC_FAILURE_FORMAT);
+        }
+
+        if (!checkTypeOfDocument(typeOfDocument)) {
+            log.error(COURTNAV_DOCUMENT_UPLOAD_ERROR_LOG, typeOfDocument, caseId, COURTNAV_DOC_FAILURE_TYPE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, COURTNAV_DOC_FAILURE_TYPE);
+        }
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            CaseEvent.COURTNAV_DOCUMENT_UPLOAD_EVENT_ID,
+            idamClient.getUserInfo(authorisation).getUid()
+        );
+        StartEventResponse startEventResponse = checkIfCasePresent(caseId, authorisation, eventRequestData);
+        if (startEventResponse == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        String newDocFilename = document.getOriginalFilename();
+        CaseData tempCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(startEventResponse, objectMapper);
+        boolean isAlreadyUploaded = hasDocumentFilenameAlreadyBeenUploaded(tempCaseData, newDocFilename, typeOfDocument);
+        if (isAlreadyUploaded) {
+            // if we already have a document matching this filename & type, return a success response to CourtNav
+            log.info("Skipping attachment of CourtNav document of type {} on case {}, already uploaded", typeOfDocument, caseId);
+            return;
+        }
+
+        int alreadyUploadedCourtNavDocSize = getAlreadyUploadedCourtNavDocsSize(tempCaseData);
+        if (tempCaseData.getNumberOfAttachments() != null
+            && Integer.parseInt(tempCaseData.getNumberOfAttachments()) <= alreadyUploadedCourtNavDocSize) {
+            log.error(COURTNAV_DOCUMENT_UPLOAD_ERROR_LOG, typeOfDocument, caseId,
+                      COURTNAV_DOC_FAILURE_NUMBER + ", " +  alreadyUploadedCourtNavDocSize);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, COURTNAV_DOC_FAILURE_NUMBER);
+        }
+        UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+            authorisation,
+            authTokenGenerator.generate(),
+            PrlAppsConstants.CASE_TYPE,
+            PrlAppsConstants.JURISDICTION,
+            List.of(document)
+        );
+        log.info("CourtNav document of type {} for case {} uploaded successfully through caseDocumentClient",
+                 typeOfDocument, caseId);
+
+        Map<String, Object> fields = new HashMap<>();
+
+        QuarantineLegalDoc courtNavQuarantineLegalDoc = getCourtNavQuarantineDocument(
+            document.getOriginalFilename(),
+            tempCaseData,
+            uploadResponse.getDocuments().getFirst(),
+            typeOfDocument
+        );
+
+        manageDocumentsService.moveDocumentsToQuarantineTab(
+            courtNavQuarantineLegalDoc,
+            tempCaseData,
+            fields,
+            COURTNAV
+        );
+
+        manageDocumentsService.setFlagsForWaTask(
+            tempCaseData,
+            fields,
+            COURTNAV,
+            courtNavQuarantineLegalDoc
+        );
+
+        //Changes to generate one WA task for courtnav upload document
+        if (!fields.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
+            fields.put(MANAGE_DOCUMENTS_TRIGGERED_BY, null);
+        }
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(fields).build();
+
+        coreCaseDataService.submitUpdate(
+            authorisation,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            true
+        );
+
+        log.info("CourtNav has attached a new document of type {} on case {}", typeOfDocument, caseId);
+    }
+
+    private boolean hasDocumentFilenameAlreadyBeenUploaded(CaseData caseData,
+                                                           String documentFilename,
+                                                           String typeOfDocument) {
+        if (ObjectUtils.isNotEmpty(caseData.getDocumentManagementDetails())
+            && ObjectUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())) {
+            return caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList().stream()
+                .map(Element::getValue)
+                .anyMatch(doc -> ObjectUtils.isNotEmpty(doc.getCourtNavQuarantineDocument())
+                    && doc.getCourtNavQuarantineDocument().getDocumentFileName().equals(documentFilename)
+                    && doc.getDocumentType().equals(typeOfDocument));
+        }
+        return false;
     }
 
     private static int getAlreadyUploadedCourtNavDocsSize(CaseData tempCaseData) {
-        int alreadyUploadedCourtNavDocSize = !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
+        int alreadyUploadedCourtNavDocSize = !ObjectUtils.isEmpty(tempCaseData.getReviewDocuments())
+            && !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab())
             ? tempCaseData.getReviewDocuments().getCourtNavUploadedDocListDocTab().size() : 0;
-        if (!CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
+        if (!ObjectUtils.isEmpty(tempCaseData.getReviewDocuments())
+            && !CollectionUtils.isEmpty(tempCaseData.getReviewDocuments().getRestrictedDocuments())) {
             for (Element<QuarantineLegalDoc> restrictedDocument : tempCaseData.getReviewDocuments().getRestrictedDocuments()) {
                 if (COURTNAV.equalsIgnoreCase(restrictedDocument.getValue().getUploadedBy())) {
                     alreadyUploadedCourtNavDocSize++;
