@@ -506,7 +506,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateDraftDocumentEng() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(Yes).build()).build();
+                                                                           .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -517,7 +517,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateDraftDocumentWelsh() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(Yes).build()).build();
+                                                                           .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -2658,7 +2658,7 @@ public class DocumentGenServiceTest {
             .build();
 
         assertExpectedException(() -> documentGenService
-            .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
+                                    .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
                                 "Resource is invalid TestUrl");
     }
 

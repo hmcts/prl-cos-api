@@ -28,9 +28,11 @@ import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ServiceOfApplicationException;
@@ -62,6 +64,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -73,6 +76,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -217,6 +221,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
     public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
+    public static final String IS_CITIZEN = "isCitizen";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -313,6 +318,10 @@ public class ServiceOfApplicationService {
     private final LaunchDarklyClient launchDarklyClient;
     private final ConfidentialityCheckService confidentialityCheckService;
     private final HearingService hearingService;
+    private final OrganisationService organisationService;
+    private final MaskEmail maskEmail;
+    private final AssignCaseAccessService assignCaseAccessService;
+    private final RespondentOrgPolicyService respondentOrgPolicyService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -1921,6 +1930,16 @@ public class ServiceOfApplicationService {
         //PRL-3466 - auto link citizen case if conf check is not required
         autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
+        //fill in the organisation details for respondents where assign case expects to see it
+        if (caseData.getRespondents() != null) {
+
+            caseDataMap = respondentOrgPolicyService.populateRespondentOrganisations(
+                caseDataMap,
+                caseData
+            );
+
+        }
+
         //PRL-5335 - WA fields for bundling lip case
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
         if (null == isAllApplicantsAreLiP) {
@@ -2013,16 +2032,18 @@ public class ServiceOfApplicationService {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
 
+
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
+        } else {
+            return processNonConfidentialSoa(
+                authorisation,
+                caseData,
+                caseDataMap,
+                startAllTabsUpdateDataContent,
+                String.valueOf(callbackRequest.getCaseDetails().getId())
+            );
         }
-        return processNonConfidentialSoa(
-            authorisation,
-            caseData,
-            caseDataMap,
-            startAllTabsUpdateDataContent,
-            String.valueOf(callbackRequest.getCaseDetails().getId())
-        );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
@@ -2064,6 +2085,9 @@ public class ServiceOfApplicationService {
             updatedCaseDataContent.eventRequestData(),
             caseDataMap
         );
+        // respondent sols access
+        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationBanner.get(CONFIRMATION_HEADER))
                       .confirmationBody(confirmationBody).build());
@@ -2148,6 +2172,9 @@ public class ServiceOfApplicationService {
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
                                                     + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Confidential details are present, case needs to be reviewed and served later");
+        // respondent sols access
+        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
                       .confirmationBody(confirmationBody).build());
@@ -3237,15 +3264,15 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", false);
+        dataMap.put(IS_CITIZEN, false);
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
             // This check is added to disable or enable DA citizen journey as needed
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
         }
         return dataMap;
@@ -4505,5 +4532,84 @@ public class ServiceOfApplicationService {
             && isNotEmpty(party.getValue().getEmail())
             && party.getValue().getEmail().equalsIgnoreCase(
             caseData.getUserInfo().get(0).getValue().getEmailAddress());
+    }
+
+    Map<String, Object> assignRespondentSolicitorsAccess(String invokingAuth, Map<String, Object> caseDataMap,
+                                                  CaseData caseData) {
+
+        if (!launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")) {
+            return caseDataMap;
+        }
+
+        if (caseData.getRespondents() == null) {
+            log.warn("No respondents on case id {}", caseData.getId());
+            return caseDataMap;
+        }
+
+        boolean isC100 = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData));
+
+        for (int i = 0; i < caseData.getRespondents().size(); i++) {
+            PartyDetails party = caseData.getRespondents().get(i).getValue();
+
+            if (!YesNoDontKnow.yes.equals(party.getDoTheyHaveLegalRepresentation())) {
+                continue;
+            }
+
+            var solicitorOrgObj = party.getSolicitorOrg();
+            String solicitorOrgId = solicitorOrgObj != null ? solicitorOrgObj.getOrganisationID() : null;
+            String solicitorEmail = party.getSolicitorEmail();
+
+            String caseId = String.valueOf(caseData.getId());
+
+            if (!isSolicitorEmailValid(solicitorEmail, caseId, i)
+                || !isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
+                continue;
+            }
+
+            Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
+
+            if (userIdOpt.isPresent()) {
+                String caseRole = resolveRespondentSolicitorRole(isC100, i);
+                assignCaseAccessService.assignCaseAccessToUserWithRole(
+                    caseId,
+                    userIdOpt.get(),
+                    caseRole,
+                    solicitorOrgId
+                );
+            } else {
+                log.warn(
+                    "Unable to resolve IDAM user for respondent sol {} on case {}",
+                    maskEmail.mask(solicitorEmail), caseId
+                );
+            }
+        }
+        return caseDataMap;
+    }
+
+    private String resolveRespondentSolicitorRole(boolean isC100, int respondentIndex) {
+        if (isC100) {
+            return SolicitorRole.fromRepresentingAndIndex(
+                SolicitorRole.Representing.CARESPONDENT, respondentIndex + 1
+            ).map(SolicitorRole::getCaseRoleLabel)
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "No solicitor role found for C100 respondent index " + respondentIndex));
+        }
+        return SolicitorRole.FL401RESPONDENTSOLICITOR.getCaseRoleLabel();
+    }
+
+    private boolean isSolicitorEmailValid(String email, String caseId, int index) {
+        if (email == null || email.isBlank()) {
+            log.warn("Respondent solicitor email missing on case {} for respondent index {}; skipping", caseId, index);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isSolicitorOrgIdValid(String orgId, String caseId) {
+        if (orgId == null || orgId.isBlank()) {
+            log.warn("Respondent solicitor org missing on case {}; skipping", caseId);
+            return false;
+        }
+        return true;
     }
 }
