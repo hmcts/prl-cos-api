@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
@@ -75,6 +76,46 @@ class CaseUtilsTest {
             Arguments.of(caseData(FL401_CASE_TYPE, null), false),
             Arguments.of(caseData(FL401_CASE_TYPE, LocalDate.now()), false)
         );
+    }
+
+    @Test
+    void testGetC8FileName() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .build();
+
+        String c8FileName = CaseUtils.getC8FileName(partyDetails, false, false);
+        assertThat(c8FileName)
+            .startsWith("Confidential_C8 of John Doe ")
+            .endsWith(".pdf")
+            .matches("^Confidential_C8 of John Doe .+\\.pdf$");
+
+        String welshC8FileName = CaseUtils.getC8FileName(partyDetails, true, false);
+        assertThat(welshC8FileName)
+            .startsWith("Confidential_C8 of John Doe ")
+            .endsWith("Welsh.pdf")
+            .matches("^Confidential_C8 of John Doe .+ Welsh\\.pdf$");
+    }
+
+    @Test
+    void testGetDraftC8FileName() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("John")
+            .lastName("Doe")
+            .build();
+
+        String c8FileName = CaseUtils.getC8FileName(partyDetails, false, true);
+        assertThat(c8FileName)
+            .startsWith("Confidential_C8 of John Doe ")
+            .endsWith("Draft.pdf")
+            .matches("^Confidential_C8 of John Doe .+ Draft\\.pdf$");
+
+        String welshC8FileName = CaseUtils.getC8FileName(partyDetails, true, true);
+        assertThat(welshC8FileName)
+            .startsWith("Confidential_C8 of John Doe ")
+            .endsWith(" Welsh Draft.pdf")
+            .matches("^Confidential_C8 of John Doe .+ Welsh Draft\\.pdf$");
     }
 
     private static CaseData caseData(String caseType, LocalDate issueDate) {
