@@ -1060,10 +1060,9 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order by looking at customOrderNameOption in the callback data.
-        // This field is only set during the custom order flow and is cleaned up at the end of submitted callback.
-        // We can't use manageOrdersOptions because it gets cleaned up in about-to-submit.
-        // We can't use customOrderDoc because it was sticky (persisted from previous orders) - that's the bug we fixed.
+        // Check if this is a custom order by looking at performingAction in the callback data (this reflects the
+        // 'contents' page 1 option)
+        // We can't use any custom orders fields as they are sticky (persisted from previous orders)
         boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
