@@ -35,7 +35,7 @@ public class TaskManagementService {
             .caseId(caseId)
             .eventId(eventId)
             .build();
-        return taskManagementClient.searchForCompletable(waSystemUserService.getSysUserToken(),
+        return taskManagementClient.searchForCompletable(waSystemUserService.getWaSysUserToken(),
                                                          authTokenGenerator.generate(), searchEventAndCaseRequest);
     }
 }

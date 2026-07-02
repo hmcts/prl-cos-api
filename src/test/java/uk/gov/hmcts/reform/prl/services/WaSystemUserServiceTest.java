@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.OAuth2Configuration;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.config.WaSystemUserConfiguration;
 
@@ -26,9 +25,6 @@ public class WaSystemUserServiceTest {
     IdamClient idamClient;
 
     @Mock
-    OAuth2Configuration auth;
-
-    @Mock
     WaSystemUserConfiguration userConfig;
 
     WaSystemUserService waSystemUserService;
@@ -37,7 +33,7 @@ public class WaSystemUserServiceTest {
 
     @Before
     public void setUp() {
-        waSystemUserService = new WaSystemUserService(auth, userConfig, idamClient);
+        waSystemUserService = new WaSystemUserService(userConfig, idamClient);
         token = RandomStringUtils.randomAlphanumeric(10);
     }
 
@@ -47,7 +43,7 @@ public class WaSystemUserServiceTest {
         when(userConfig.getPassword()).thenReturn(PASSWORD);
         when(idamClient.getAccessToken(anyString(), anyString())).thenReturn(token);
 
-        assertThat(token).isEqualTo(waSystemUserService.getSysUserToken());
+        assertThat(token).isEqualTo(waSystemUserService.getWaSysUserToken());
     }
 
     @Test

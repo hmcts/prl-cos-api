@@ -42,7 +42,7 @@ class TaskManagementServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(waSystemUserService.getSysUserToken()).thenReturn(WA_TOKEN);
+        when(waSystemUserService.getWaSysUserToken()).thenReturn(WA_TOKEN);
 
         taskManagementService = new TaskManagementService(waSystemUserService, taskManagementClient,
                                                           authTokenGenerator);
