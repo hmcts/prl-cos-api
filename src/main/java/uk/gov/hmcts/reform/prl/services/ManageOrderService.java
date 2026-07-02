@@ -135,6 +135,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENT_ORDER_A_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C21_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C43_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
@@ -1307,6 +1308,7 @@ public class ManageOrderService {
         Map<String, Object> orderMap = new HashMap<>();
         orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
         orderMap.put(ORDER_COLLECTION, orderCollection);
+        orderMap.put(CURRENT_ORDER_A_DRAFT_ORDER, false);
         return orderMap;
     }
 
@@ -1361,7 +1363,7 @@ public class ManageOrderService {
         caseData = caseData.toBuilder().draftOrderCollection(draftOrderList).build();
         return Map.of(
             DRAFT_ORDER_COLLECTION,
-            caseData.getDraftOrderCollection());
+            caseData.getDraftOrderCollection(), CURRENT_ORDER_A_DRAFT_ORDER, true);
     }
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
@@ -3944,6 +3946,7 @@ public class ManageOrderService {
         String performingAction = null;
         String orderNameForWA = null;
         Map<String, Object> waFieldsMap = new HashMap<>();
+        waFieldsMap.put(WA_ORDER_COLLECTION_ID, newDraftOrderCollectionId);
         ManageOrdersOptionsEnum manageOrdersOption = caseData.getManageOrdersOptions();
         log.info("setFieldsForWaTask: manageOrdersOptions={}, createSelectOrderOptions={}, eventId={}",
             manageOrdersOption, caseData.getCreateSelectOrderOptions(), eventId);
@@ -3989,6 +3992,7 @@ public class ManageOrderService {
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
                 log.info("setFieldsForWaTask: setting WA_ORDER_NAME_JUDGE_CREATED={}", orderNameForWA);
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
+                waFieldsMap.put(WA_ORDER_COLLECTION_ID, newDraftOrderCollectionId);
             }
             log.info("setFieldsForWaTask: performingUser={}, orderNameForWA={}", performingUser, orderNameForWA);
         } else {
