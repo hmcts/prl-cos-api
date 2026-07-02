@@ -86,7 +86,7 @@ class HearingChasePolicy {
         if (lastFiredDate != null && lastCompletedDate == null
             && noOutstandingRequestSolicitorOrderTasks(caseData.getId(), hearingId)) {
             return ChaseDecision.fire();
-        } else if (lastCompletedDate != null){
+        } else if (lastCompletedDate != null) {
             int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
             if (workingDaysSinceLastCompletedDate != cadence) {
                 return ChaseDecision.skipInFlight();
