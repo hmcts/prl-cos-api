@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
-import uk.gov.hmcts.reform.prl.services.taskmanagement.TaskManagementService;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 
@@ -28,7 +27,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 /**
@@ -43,7 +41,6 @@ class HearingChasePolicy {
     private static final String C100 = "C100";
 
     private final WorkingDayIndicator workingDayIndicator;
-    private final TaskManagementService taskManagementService;
 
     @Value("${request-order-task.cadence-working-days.c100}")
     private int c100CadenceWorkingDays;
@@ -83,9 +80,8 @@ class HearingChasePolicy {
             .orElse(null);
         LocalDate lastFiredDate = tracking.map(RequestOrderHearingTracking::getLastFiredDate)
             .orElse(null);
-        if (lastFiredDate != null && lastCompletedDate == null
-            && noOutstandingRequestSolicitorOrderTasks(caseData.getId(), hearingId)) {
-            return ChaseDecision.fire();
+        if (lastFiredDate != null && (lastCompletedDate == null && (today.equals(lastFiredDate.plusDays(cadence))))) {
+            return ChaseDecision.fire("cadence met task Done action flow- firing");
         } else if (lastCompletedDate != null) {
             int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
             if (workingDaysSinceLastCompletedDate != cadence) {
@@ -93,12 +89,7 @@ class HearingChasePolicy {
             }
         }
 
-        return ChaseDecision.fire();
-    }
-
-    private boolean noOutstandingRequestSolicitorOrderTasks(long caseId, String hearingId) {
-        return taskManagementService.hasNoCompletableTasksForHearing(hearingId, String.valueOf(caseId),
-                                                                      ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        return ChaseDecision.fire("cadence met - firing");
     }
 
     private List<String> allowedStatuses() {

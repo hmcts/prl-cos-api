@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.requestorder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -35,7 +37,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.taskmanagement.TaskManagementService;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
@@ -71,9 +72,10 @@ class RequestOrderTaskServiceTest {
     @Mock AllTabServiceImpl allTabService;
     @Mock HearingService hearingService;
     @Mock WorkingDayIndicator workingDayIndicator;
-    @Mock TaskManagementService taskManagementService;
-
     RequestOrderTaskService service;
+
+    @Captor
+    ArgumentCaptor<Map<String, Object>> captor;
 
     @BeforeEach
     void setUp() {
@@ -86,7 +88,7 @@ class RequestOrderTaskServiceTest {
                 StartEventResponse.builder().build(),
                 null, null, null));
 
-        HearingChasePolicy chasePolicy = new HearingChasePolicy(workingDayIndicator, taskManagementService);
+        HearingChasePolicy chasePolicy = new HearingChasePolicy(workingDayIndicator);
         ReflectionTestUtils.setField(chasePolicy, "c100CadenceWorkingDays", 3);
         ReflectionTestUtils.setField(chasePolicy, "fl401CadenceWorkingDays", 1);
         ReflectionTestUtils.setField(chasePolicy, "hearingStatusesToFilter",
@@ -254,17 +256,26 @@ class RequestOrderTaskServiceTest {
 
         service.processRequestOrderTasks();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+
         verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
         Map<String, Object> payload = captor.getValue();
-        assertThat(payload.get("currentHearingId")).isEqualTo(HEARING_ID);
-        @SuppressWarnings("unchecked")
+        assertThat(payload)
+            .containsEntry("currentHearingId",HEARING_ID);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
         List<Element<RequestOrderHearingTracking>> collection =
-            (List<Element<RequestOrderHearingTracking>>) payload.get("requestOrderTaskTrackingByHearing");
-        assertThat(collection).hasSize(1);
-        assertThat(collection.get(0).getValue().getHearingId()).isEqualTo(HEARING_ID);
-        assertThat(collection.get(0).getValue().getLastFiredDate()).isEqualTo(LocalDate.now());
+            mapper.convertValue(
+                payload.get("requestOrderTaskTrackingByHearing"),
+                new TypeReference<>() {});
+
+        assertThat(collection)
+            .singleElement()
+            .extracting(Element::getValue)
+            .satisfies(tracking -> {
+                assertThat(tracking.getHearingId()).isEqualTo(HEARING_ID);
+                assertThat(tracking.getLastFiredDate()).isEqualTo(LocalDate.now());
+            });
     }
 
     @Test
@@ -295,9 +306,8 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService, times(3)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+
         verify(allTabService, times(3))
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
         assertThat(captor.getAllValues())
@@ -341,14 +351,57 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+           CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+
         verify(allTabService)
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
         assertThat(captor.getAllValues())
             .extracting(m -> (String) m.get("currentHearingId"))
             .containsExactly("10");
+    }
+
+    @Test
+    void whenDoneActionNoLastCompletedDateSoFireCadence() {
+        CaseData caseData = baseCaseBuilder("FL401")
+            .requestOrderTaskTrackingByHearing(List.of(
+                Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                               .hearingId("10")
+                               .lastFiredDate(LocalDate.now().minusDays(1))
+                        .build())
+                    .build()))
+            .build();
+
+        stubSearchReturning(caseData);
+        when(hearingService.getHearings(anyString(), anyString()))
+            .thenReturn(Hearings.hearingsWith()
+                .caseRef(CASE_ID)
+                .caseHearings(List.of(
+                    hearing("COMPLETED", "10", TODAY.plusDays(3))))
+                .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+
+        when(allTabService
+                 .getStartUpdateForSpecificEvent(
+                     CASE_ID,
+                     CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()))
+            .thenReturn(new StartAllTabsUpdateDataContent(
+                "s2sToken",
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                null,
+                caseData,
+                null));
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService).getStartUpdateForSpecificEvent(
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(allTabService)
+            .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
+        assertThat(captor.getValue())
+            .containsEntry("currentHearingId", "10");
     }
 
     @Test
@@ -375,7 +428,7 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService, times(0)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
     }
 
     @Test
@@ -388,10 +441,10 @@ class RequestOrderTaskServiceTest {
     }
 
     @Test
-    void exceptionFromOneCaseDoesNotPreventProcessingOfTheNextCase() throws JsonProcessingException {
+    void exceptionFromOneCaseDoesNotPreventProcessingOfTheNextCase() {
         String secondCaseId = "456";
         CaseData firstCase = baseCaseBuilder("FL401").build();
-        CaseData secondCase = baseCaseBuilder("FL401").id(Long.valueOf(secondCaseId)).build();
+        CaseData secondCase = baseCaseBuilder("FL401").id(Long.parseLong(secondCaseId)).build();
         stubSearchReturningCases(firstCase, secondCase);
         stubHearings(completedHearingEndingDaysAgo(1));
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
@@ -486,7 +539,7 @@ class RequestOrderTaskServiceTest {
 
     private CaseData.CaseDataBuilder<?, ?> baseCaseBuilder(String caseType) {
         return CaseData.builder()
-            .id(Long.valueOf(CASE_ID))
+            .id(Long.parseLong(CASE_ID))
             .state(State.JUDICIAL_REVIEW)
             .caseTypeOfApplication(caseType);
     }

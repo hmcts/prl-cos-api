@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
-import uk.gov.hmcts.reform.prl.services.taskmanagement.TaskManagementService;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
@@ -37,13 +36,11 @@ class HearingChasePolicyTest {
 
     @Mock WorkingDayIndicator workingDayIndicator;
 
-    @Mock TaskManagementService taskManagementService;
-
     HearingChasePolicy policy;
 
     @BeforeEach
     void setUp() {
-        policy = new HearingChasePolicy(workingDayIndicator, taskManagementService);
+        policy = new HearingChasePolicy(workingDayIndicator);
         ReflectionTestUtils.setField(policy, "c100CadenceWorkingDays", 3);
         ReflectionTestUtils.setField(policy, "fl401CadenceWorkingDays", 1);
         ReflectionTestUtils.setField(policy, "hearingStatusesToFilter",
@@ -209,7 +206,6 @@ class HearingChasePolicyTest {
                 .lastCompletedDate(null)
                 .build());
 
-        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(true);
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
