@@ -93,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIEW_ORDER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHAT_DO_WITH_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -1063,7 +1064,7 @@ public class ManageOrdersController {
         // This field is only set during the custom order flow and is cleaned up at the end of submitted callback.
         // We can't use manageOrdersOptions because it gets cleaned up in about-to-submit.
         // We can't use customOrderDoc because it was sticky (persisted from previous orders) - that's the bug we fixed.
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_NAME_OPTION) != null;
+        boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
