@@ -101,8 +101,6 @@ class HearingChasePolicyTest {
         CaseData caseData = fl401Case()
             .draftOrderCollection(List.of(draftOrderForHearing(HEARING_ID)))
             .build();
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
-        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
 
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", TODAY.minusDays(5)), caseData, emptyLedger(), TODAY);
@@ -130,8 +128,6 @@ class HearingChasePolicyTest {
         CaseData caseData = fl401Case()
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(label)))
             .build();
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
-        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
 
         ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), TODAY);
 
@@ -161,8 +157,6 @@ class HearingChasePolicyTest {
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(savedLabel)))
             .build();
 
-        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
         ChaseDecision decision = policy.decide(hearingWithEmptyType, caseData, emptyLedger(), TODAY);
 
         assertThat(decision.shouldFire()).isFalse();
@@ -198,9 +192,6 @@ class HearingChasePolicyTest {
         CaseData caseData = fl401Case()
             .orderCollection(List.of(savedOrderForHearing(HEARING_ID)))
             .build();
-
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
-        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
 
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", TODAY.plusDays(1)), caseData, emptyLedger(), TODAY);
@@ -274,9 +265,6 @@ class HearingChasePolicyTest {
                                             .hearingEndDateTime(hearingDate.atTime(16, 0))
                                             .build()))
             .build();
-
-        when(taskManagementService.hasNoCompletableTasksForHearing(any(), any(), any())).thenReturn(false);
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
             hearingWithType, caseData, emptyLedger(), TODAY);

@@ -66,6 +66,10 @@ class HearingChasePolicy {
         if (!allowedStatuses().contains(hearing.getHmcStatus())) {
             return ChaseDecision.skipStatusNotInFilter(hearing.getHmcStatus());
         }
+        if (isHearingMappedToOrder(caseData, hearing)) {
+            return ChaseDecision.skipLinkedOrderExists();
+        }
+
         LocalDate hearingEndDate = computeHearingEndDate(hearing);
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
@@ -74,19 +78,19 @@ class HearingChasePolicy {
         if (hearingEndDate != null && workingDaysSinceHearingEndDate != cadence) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
+
         LocalDate lastCompletedDate = tracking.map(RequestOrderHearingTracking::getLastCompletedDate)
             .orElse(null);
-        if (lastCompletedDate == null && noOutstandingRequestSolicitorOrderTasks(caseData.getId(), hearingId)) {
+        LocalDate lastFiredDate = tracking.map(RequestOrderHearingTracking::getLastFiredDate)
+            .orElse(null);
+        if (lastFiredDate != null && lastCompletedDate == null
+            && noOutstandingRequestSolicitorOrderTasks(caseData.getId(), hearingId)) {
             return ChaseDecision.fire();
         } else {
             int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
             if (workingDaysSinceLastCompletedDate != cadence) {
                 return ChaseDecision.skipInFlight();
             }
-        }
-
-        if (isHearingMappedToOrder(caseData, hearing)) {
-            return ChaseDecision.skipLinkedOrderExists();
         }
 
         return ChaseDecision.fire();
