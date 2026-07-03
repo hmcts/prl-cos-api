@@ -81,7 +81,7 @@ class HearingChasePolicy {
         LocalDate lastFiredDate = tracking.map(RequestOrderHearingTracking::getLastFiredDate)
             .orElse(null);
         if (lastFiredDate != null && (lastCompletedDate == null && (today.equals(lastFiredDate.plusDays(cadence))))) {
-            return ChaseDecision.fire("cadence met task Done action flow- firing");
+            return ChaseDecision.fireCadenceMetDone();
         } else if (lastCompletedDate != null) {
             int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
             if (workingDaysSinceLastCompletedDate != cadence) {
@@ -89,7 +89,7 @@ class HearingChasePolicy {
             }
         }
 
-        return ChaseDecision.fire("cadence met - firing");
+        return ChaseDecision.fireCadenceMet();
     }
 
     private List<String> allowedStatuses() {

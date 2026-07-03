@@ -9,7 +9,16 @@ class ChaseDecisionTest {
     @Test
     void fireFactoryProducesShouldFireWithFiringDescription() {
         String reason = "cadence met - firing";
-        ChaseDecision decision = ChaseDecision.fire(reason);
+        ChaseDecision decision = ChaseDecision.fireCadenceMet();
+
+        assertThat(decision.shouldFire()).isTrue();
+        assertThat(decision.description()).isEqualTo(reason);
+    }
+
+    @Test
+    void fireFactoryProducesShouldFireWithFiringMarkAsDoneDescription() {
+        String reason = "cadence met task Done action flow - firing";
+        ChaseDecision decision = ChaseDecision.fireCadenceMetDone();
 
         assertThat(decision.shouldFire()).isTrue();
         assertThat(decision.description()).isEqualTo(reason);

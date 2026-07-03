@@ -7,7 +7,11 @@ import java.time.LocalDate;
  */
 record ChaseDecision(boolean shouldFire, String description) {
 
-    static ChaseDecision fire(String reason) {
+    static ChaseDecision fireCadenceMetDone() {
+        return new ChaseDecision(true, "cadence met task Done action flow - firing");
+    }
+
+    static ChaseDecision fireCadenceMet() {
         return new ChaseDecision(true, "cadence met - firing");
     }
 
