@@ -112,6 +112,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENT_ORDER_A_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
@@ -216,22 +217,22 @@ public class ManageOrdersControllerTest {
 
     @Mock
     @Qualifier("caseSummaryTab")
-    CaseSummaryTabService caseSummaryTabService;
+    private CaseSummaryTabService caseSummaryTabService;
 
-    PartyDetails applicant;
+    private PartyDetails applicant;
 
-    PartyDetails respondent;
+    private PartyDetails respondent;
 
     @Mock
-    RefDataUserService refDataUserService;
+    private RefDataUserService refDataUserService;
     @Mock
-    RoleAssignmentService roleAssignmentService;
+    private RoleAssignmentService roleAssignmentService;
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Before
     public void setUp() {
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
@@ -527,9 +528,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -577,9 +575,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -5541,7 +5536,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
+            .thenReturn(Map.of("orderCollection", orderDetailsList, CURRENT_ORDER_A_DRAFT_ORDER, false));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -5891,8 +5886,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
         // Throw exception with blank message
-        when(hearingService.getHearings(anyString(), anyString()))
-            .thenThrow(new RuntimeException(""));
+        when(hearingService.getHearings(anyString(), anyString())).thenThrow(new RuntimeException(""));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
