@@ -16,10 +16,6 @@ java:
           alias: SYSTEM_UPDATE_USER_USERNAME
         - name: system-update-user-password
           alias: PRL_SYSTEM_UPDATE_PASSWORD
-        - name: wa-system-user-username
-          alias: WA_SYSTEM_USER_USERNAME
-        - name: wa-system-user-password
-          alias: WA_SYSTEM_USER_PASSWORD
         - name: notification-client-api-key
           alias: UK_GOV_NOTIFY_API_KEY
         - name: test-genericpassword
@@ -85,7 +81,6 @@ java:
     CORE_CASE_DATA_API_URL: ${CORE_CASE_DATA_API_URL}
     CCD_CASE_DOCS_AM_API: ${CCD_CASE_DOCS_AM_API}
     ACA_SERVICE_API_BASEURL: ${ACA_SERVICE_API_BASEURL}
-    TASK_MANAGEMENT_API_BASEURL: http://wa-task-management-api-aat.service.core-compute-aat.internal
     BUNDLE_URL: http://em-ccd-orchestrator-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     AM_ROLE_ASSIGNMENT_API_URL: http://am-role-assignment-service-aat.service.core-compute-aat.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net

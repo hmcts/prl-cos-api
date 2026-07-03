@@ -100,7 +100,7 @@ public class SendAndReplyCommonService {
                                                                      CaseData caseData,
                                                                      Map<String, Object> caseDataMap,
                                                                      String chasedHearingId) {
-        log.info("processAboutToSubmit==>getChooseSendOrReply {}", caseData.getChooseSendOrReply());
+        log.info("for caseId={}, ChooseSendOrReply={}", caseData.getId(), caseData.getChooseSendOrReply());
         if (SEND.equals(caseData.getChooseSendOrReply())) {
             sendMessages(authorisation, caseData, caseDataMap);
         } else {

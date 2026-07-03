@@ -58,10 +58,6 @@ java:
           alias: SYSTEM_UPDATE_USER_USERNAME
         - name: system-update-user-password
           alias: PRL_SYSTEM_UPDATE_PASSWORD
-        - name: wa-system-user-username
-          alias: WA_SYSTEM_USER_USERNAME
-        - name: wa-system-user-password
-          alias: WA_SYSTEM_USER_PASSWORD
         - name: notification-client-api-key
           alias: UK_GOV_NOTIFY_API_KEY
         - name: test-genericpassword

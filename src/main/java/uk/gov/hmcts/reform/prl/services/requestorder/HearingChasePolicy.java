@@ -134,25 +134,26 @@ class HearingChasePolicy {
             // any saved order's "<type> - <date>" code cannot match on the full label.
             // Falling back to date-suffix matching keeps the chase correct while the
             // upstream ref-data issue is investigated.
-            log.warn("Request Order link-check: hearingTypeValue empty for hearingId={} — "
-                    + "ref-data lookup likely failed; falling back to date-suffix match",
+            log.warn("Request Order link-check: hearingTypeValue empty for caseId={}, hearingId={} — "
+                    + "ref-data lookup likely failed; falling back to date-suffix match", caseData.getId(),
                 hearingId);
         }
 
-        return isHearingReferencedByManageOrderHearingDetails(caseData.getDraftOrderCollection(),
+        Long caseId = caseData.getId();
+        return isHearingReferencedByManageOrderHearingDetails(caseId, caseData.getDraftOrderCollection(),
                                                               DraftOrder::getManageOrderHearingDetails, hearingId)
-            || isHearingReferencedByManageOrderHearingDetails(caseData.getOrderCollection(),
+            || isHearingReferencedByManageOrderHearingDetails(caseId, caseData.getOrderCollection(),
                                                               OrderDetails::getManageOrderHearingDetails, hearingId)
-            || isDraftOrderReferencedByHearingsType(
-                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes)
+            || isDraftOrderReferencedByHearingsType(caseId, caseData.getDraftOrderCollection(),
+                                                    hearingLabels, hearingDateSuffixes)
 
-            || isFinalisedOrderReferencedByHearingsType(caseData.getOrderCollection(), hearingLabels)
-            || isCustomOrderHearingsType(caseData.getCustomOrderHearingsType(), hearingLabels);
+            || isFinalisedOrderReferencedByHearingsType(caseId, caseData.getOrderCollection(), hearingLabels)
+            || isCustomOrderHearingsType(caseId, caseData.getCustomOrderHearingsType(), hearingLabels);
     }
 
-    private static boolean isCustomOrderHearingsType(DynamicList customOrderHearingsType,
+    private static boolean isCustomOrderHearingsType(Long caseId, DynamicList customOrderHearingsType,
                                                      Set<String> hearingLabels) {
-        log.info("Evaluating CustomOrderHearingsType for the hearings {}", hearingLabels);
+        log.info("Evaluating CustomOrderHearingsType for the caseId={}, hearings {}", caseId, hearingLabels);
         return Optional.ofNullable(customOrderHearingsType)
             .map(DynamicList::getValue)
             .map(DynamicListElement::getCode)
@@ -160,11 +161,12 @@ class HearingChasePolicy {
             .isPresent();
     }
 
-    private static <T> boolean isHearingReferencedByManageOrderHearingDetails(
+    private static <T> boolean isHearingReferencedByManageOrderHearingDetails(Long caseId,
             List<Element<T>> orders,
             Function<T, List<Element<HearingData>>> hearingDetailsExtractor,
             String hearingId) {
-        log.info("trying isHearingReferencedByManageOrderHearingDetails for {}", hearingId);
+        log.info("trying isHearingReferencedByManageOrderHearingDetails for caseId={}, hearingId={}",
+                 caseId, hearingId);
         return nullSafeCollection(orders).stream()
             .map(Element::getValue)
             .anyMatch(order -> orderReferencesHearing(order, hearingDetailsExtractor, hearingId));
@@ -184,10 +186,10 @@ class HearingChasePolicy {
             .anyMatch(hearingId::equals);
     }
 
-    private static boolean isDraftOrderReferencedByHearingsType(List<Element<DraftOrder>> draftOrders,
+    private static boolean isDraftOrderReferencedByHearingsType(Long caseId, List<Element<DraftOrder>> draftOrders,
                                                                  Set<String> hearingLabels,
                                                                  Set<String> hearingDateSuffixes) {
-        log.info("trying isDraftOrderReferencedByHearingsType");
+        log.info("trying isDraftOrderReferencedByHearingsType for caseId={}", caseId);
         if (hearingLabels.isEmpty() && hearingDateSuffixes.isEmpty()) {
             return false;
         }
@@ -203,9 +205,9 @@ class HearingChasePolicy {
                 || hearingDateSuffixes.contains(HearingLabelUtils.extractDateSuffix(code)));
     }
 
-    private static boolean isFinalisedOrderReferencedByHearingsType(List<Element<OrderDetails>> orderDetails,
+    private static boolean isFinalisedOrderReferencedByHearingsType(Long caseId, List<Element<OrderDetails>> orderDetails,
                                                                 Set<String> hearingLabels) {
-        log.info("trying isFinalisedOrderReferencedByHearingsType");
+        log.info("trying isFinalisedOrderReferencedByHearingsType for caseId={}", caseId);
         if (hearingLabels.isEmpty()) {
             return false;
         }

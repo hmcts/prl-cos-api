@@ -256,7 +256,8 @@ public class RequestOrderTaskService {
         String hearingId = hearingIdOf(hearing);
         HearingTrackingLedger ledger = HearingTrackingLedger.from(caseData);
         ChaseDecision decision = chasePolicy.decide(hearing, caseData, ledger, LocalDate.now(UK_ZONE));
-        log.info("Request Order: caseId={} hearingId={} {}", caseData.getId(), hearingId, decision.description());
+        log.info("Request Order: caseId={} hearingId={} decision={}",
+                 caseData.getId(), hearingId, decision.description());
         if (decision.shouldFire()) {
             return Optional.of(ledger);
         }
