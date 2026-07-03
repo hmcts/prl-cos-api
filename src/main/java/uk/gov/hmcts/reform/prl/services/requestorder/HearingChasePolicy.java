@@ -80,6 +80,9 @@ class HearingChasePolicy {
             .orElse(null);
         LocalDate lastFiredDate = tracking.map(RequestOrderHearingTracking::getLastFiredDate)
             .orElse(null);
+        if (today.equals(lastFiredDate)) {
+            return ChaseDecision.skipInFlight();
+        }
         if (lastFiredDate != null && (lastCompletedDate == null && (today.equals(lastFiredDate.plusDays(cadence))))) {
             return ChaseDecision.fireCadenceMetDone();
         } else if (lastCompletedDate != null) {

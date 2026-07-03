@@ -405,6 +405,36 @@ class RequestOrderTaskServiceTest {
     }
 
     @Test
+    void whenLastFiredDateIsTodaySkipTaskCreation() {
+        CaseData caseData = baseCaseBuilder("FL401")
+            .requestOrderTaskTrackingByHearing(List.of(
+                Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                               .hearingId("10")
+                               .lastFiredDate(LocalDate.now())
+                               .build())
+                    .build()))
+            .build();
+
+        stubSearchReturning(caseData);
+        when(hearingService.getHearings(anyString(), anyString()))
+            .thenReturn(Hearings.hearingsWith()
+                            .caseRef(CASE_ID)
+                            .caseHearings(List.of(
+                                hearing("COMPLETED", "10", TODAY.plusDays(3))))
+                            .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(allTabService, never())
+            .submitAllTabsUpdate(anyString(), anyString(), any(), any(), any());
+    }
+
+    @Test
     void skipForLastCompletedCadenceNotMet() {
         CaseData caseData = baseCaseBuilder("FL401")
             .requestOrderTaskTrackingByHearing(List.of(
