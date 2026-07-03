@@ -4236,10 +4236,13 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
-        assertExpectedException(() -> {
-                                    manageOrdersController
-                                        .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
-                                RuntimeException.class, "Invalid Client");
+        assertExpectedException(
+            () -> {
+                manageOrdersController
+                    .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
+            },
+            RuntimeException.class, "Invalid Client"
+        );
 
     }
 
