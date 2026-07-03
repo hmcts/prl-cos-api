@@ -544,11 +544,12 @@ public class ManageOrdersController {
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
             Boolean currentOrderADraftOrder = (Boolean) caseDataUpdated.get(CURRENT_ORDER_A_DRAFT_ORDER);
+            boolean finalOrder = nonNull(currentOrderADraftOrder) && !currentOrderADraftOrder;
             UUID newDraftOrderCollectionId;
-            if (nonNull(currentOrderADraftOrder) && !currentOrderADraftOrder) {
+            if (finalOrder) {
                 newDraftOrderCollectionId = getOrderId(caseDataUpdated);
             } else {
-                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseData, caseDataUpdated);
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated);
             }
             caseDataUpdated.remove(CURRENT_ORDER_A_DRAFT_ORDER);
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
@@ -571,7 +572,7 @@ public class ManageOrdersController {
         }
     }
 
-    private UUID getDraftOrderId(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+    private UUID getDraftOrderId(String authorisation, Map<String, Object> caseDataUpdated) {
         UUID newDraftOrderCollectionId = null;
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         if ((UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType))
