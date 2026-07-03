@@ -351,7 +351,7 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService).getStartUpdateForSpecificEvent(
-           CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
 
         verify(allTabService)
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
