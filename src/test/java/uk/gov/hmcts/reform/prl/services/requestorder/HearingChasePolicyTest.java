@@ -215,6 +215,23 @@ class HearingChasePolicyTest {
     }
 
     @Test
+    void shouldNotFireForMarkAsDoneWithNoLastCompletedBeforeCadence() {
+        HearingTrackingLedger ledger = ledgerWith(
+            RequestOrderHearingTracking.builder()
+                .hearingId(HEARING_ID)
+                .lastFiredDate(TODAY.minusDays(1))
+                .lastCompletedDate(null)
+                .build());
+
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3).thenReturn(2);
+
+        ChaseDecision decision = policy.decide(
+            hearing("COMPLETED", TODAY.minusDays(1)), c100Case().build(), ledger, TODAY);
+
+        assertThat(decision.shouldFire()).isFalse();
+    }
+
+    @Test
     void decideSkipsWhenHearingCadenceNotMet() {
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 

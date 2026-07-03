@@ -83,16 +83,23 @@ class HearingChasePolicy {
         if (today.equals(lastFiredDate)) {
             return ChaseDecision.skipInFlight();
         }
-        if (lastFiredDate != null && (lastCompletedDate == null && (today.equals(lastFiredDate.plusDays(cadence))))) {
-            return ChaseDecision.fireCadenceMetDone();
-        } else if (lastCompletedDate != null) {
+
+        if (lastCompletedDate != null) {
             int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
             if (workingDaysSinceLastCompletedDate != cadence) {
                 return ChaseDecision.skipInFlight();
             }
         }
+        if (lastCompletedDate == null && lastFiredDate != null) {
+            int workingDaysSinceLastFired = workingDayIndicator.workingDaysBetween(lastFiredDate, today);
+            if (workingDaysSinceLastFired < cadence) {
+                return ChaseDecision.skipInFlight();
+            } else if (workingDaysSinceLastFired == cadence) {
+                return ChaseDecision.fireCadenceMetDone(); //every cadence days it will fire a new Task
+            }
+        }
 
-        return ChaseDecision.fireCadenceMet();
+        return ChaseDecision.fireCadenceMet();//order still not added
     }
 
     private List<String> allowedStatuses() {
