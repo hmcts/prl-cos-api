@@ -126,6 +126,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -1223,7 +1224,7 @@ public class ManageOrderService {
                 .map(Element::getValue).toList();
 
             List<String> applicantSolicitorNames = applicants.stream()
-                .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
+                .map(party -> nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
                 .toList();
@@ -4009,12 +4010,19 @@ public class ManageOrderService {
     }
 
     public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
+        orchestrateCirDocumentsRequestedTask(caseData, authorisation, null);
+    }
+
+    public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation, UUID draftOrderCollectionId) {
         LocalDate localAuthorityReportFiledByDate = caseData.getServeOrderData()
             .getWhenReportsMustBeFiledByLocalAuthority();
         LocalDate cafcassReportFiledByDate = caseData.getServeOrderData().getWhenReportsMustBeFiled();
         if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
             Map<String, Object> waFieldsMap = new HashMap<>();
             waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+            if (nonNull(draftOrderCollectionId)) {
+                waFieldsMap.put(WA_ORDER_COLLECTION_ID, draftOrderCollectionId);
+            }
             setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
             setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
             cancelCirDocumentsRequestedTask(caseData, waFieldsMap);

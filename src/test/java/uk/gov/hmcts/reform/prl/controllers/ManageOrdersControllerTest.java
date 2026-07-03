@@ -126,6 +126,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
+import static uk.gov.hmcts.reform.prl.models.user.UserRoles.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -1253,7 +1254,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when((manageOrderService.getLoggedInUserType(anyString()))).thenReturn(UserRoles.COURT_ADMIN.name());
+        when((manageOrderService.getLoggedInUserType(anyString()))).thenReturn(COURT_ADMIN.name());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             s2sToken,
@@ -1511,7 +1512,7 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
             callbackRequest, authToken, s2sToken
         );
@@ -2678,7 +2679,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
@@ -2719,7 +2720,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
@@ -4439,7 +4440,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", List.of()));
@@ -4490,7 +4491,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(new java.util.HashMap<>());
@@ -4557,7 +4558,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithoutServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithoutServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -4621,7 +4622,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataNoServeData);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoServeData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -4699,7 +4700,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataNoOrders);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoOrders);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", newOrderCollection));
@@ -4796,7 +4797,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Call the method
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
@@ -4971,7 +4972,7 @@ public class ManageOrdersControllerTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -4999,7 +5000,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Use doAnswer to capture the map contents AT THE TIME combineAndFinalizeCustomOrder is called
         // (before cleanup removes them)
@@ -5094,7 +5095,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture fl404CustomFields to verify date was copied
         Map<String, Object> capturedFl404Fields = new HashMap<>();
@@ -5193,7 +5194,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
 
         // When
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
@@ -5399,7 +5400,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithJudgeReview);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithJudgeReview);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -5476,7 +5477,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithHearing);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithHearing);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.getHearingDataForSelectedHearing(any(), any(), any())).thenReturn(hearingDetailsList);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
@@ -5534,7 +5535,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithManagerReview);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithManagerReview);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList, CURRENT_ORDER_A_DRAFT_ORDER, false));
 
@@ -5570,9 +5571,9 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -5840,7 +5841,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         // Make setHearingData throw an exception by making hearingService.getHearings fail
         when(hearingService.getHearings(anyString(), anyString()))
             .thenThrow(new RuntimeException("Template placeholder error"));
@@ -5884,7 +5885,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         // Throw exception with blank message
         when(hearingService.getHearings(anyString(), anyString())).thenThrow(new RuntimeException(""));
 
@@ -5949,7 +5950,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(objectMapper.convertValue(any(Map.class), eq(CaseData.class))).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(manageOrderService.isSaveAsDraft(any(CaseData.class))).thenReturn(false);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -6013,7 +6014,7 @@ public class ManageOrdersControllerTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -6042,7 +6043,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture the map when combineAndFinalizeCustomOrder is called
         Map<String, Object> capturedMap = new HashMap<>();
@@ -6092,11 +6093,11 @@ public class ManageOrdersControllerTest {
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
-
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(COURT_ADMIN.name());
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -6105,7 +6106,7 @@ public class ManageOrdersControllerTest {
             .manageOrders(manageOrders)
             .build();
         Map<String, Object> databaseMap = new HashMap<>();
-        databaseMap.put("orderCollection", dbOrderCollection);
+        databaseMap.put("draftOrderCollection", dbOrderCollection);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -6125,7 +6126,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture the map when combineAndFinalizeCustomOrder is called
         Map<String, Object> capturedMap = new HashMap<>();
@@ -6184,7 +6185,7 @@ public class ManageOrdersControllerTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -6213,7 +6214,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture the map when combineAndFinalizeCustomOrder is called
         Map<String, Object> capturedMap = new HashMap<>();

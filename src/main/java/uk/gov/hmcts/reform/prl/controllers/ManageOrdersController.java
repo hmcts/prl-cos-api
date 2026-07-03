@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createCustomOrder;
@@ -489,8 +490,23 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
+            boolean finalOrder = false;
+            boolean saveAsDraft = manageOrderService.isSaveAsDraft(caseData);
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+                if (!(!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) || saveAsDraft)) {
+                    finalOrder = true;
+                }
+            }
 
-            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+            UUID newDraftOrderCollectionId;
+            if (finalOrder) {
+                newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            } else {
+                newDraftOrderCollectionId = getDraftOrderId(caseDataUpdated, authorisation);
+            }
+
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
 
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
@@ -581,6 +597,21 @@ public class ManageOrdersController {
 
             List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
             newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection) ? draftOrderCollection.getFirst().getId() : null;
+        }
+        return newDraftOrderCollectionId;
+    }
+
+
+    private UUID getDraftOrderId(Map<String, Object> caseDataUpdated, String authorisation) {
+        UUID newDraftOrderCollectionId = null;
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        if ((UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType))
+            && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
+            && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
+
+            List<Map<String, Object>> draftOrderCollection = (List<Map<String, Object>>) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
+            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                ? UUID.fromString((String)draftOrderCollection.getFirst().get("id")) : null;
         }
         return newDraftOrderCollectionId;
     }
