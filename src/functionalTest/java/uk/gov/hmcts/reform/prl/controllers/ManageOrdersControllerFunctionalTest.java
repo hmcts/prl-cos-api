@@ -45,8 +45,11 @@ public class ManageOrdersControllerFunctionalTest {
 
     public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT
         = "/manage-orders/recipients-validations";
+    private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
+
+    private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -415,7 +418,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-
     }
 
     /**
@@ -441,7 +443,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
 
     }
 
@@ -491,8 +492,7 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
-
-        CaseDetails caseDetails = request2
+        CaseDetails caseDetails =  request2
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -500,14 +500,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .assertThat()
-            .statusCode(200)
+            .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
 
         String requestBodyRevised = requestBody
             .replace("1703068453862935", caseDetails.getId().toString());
-
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -562,7 +560,7 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
 
-        CaseDetails createdCaseDetails = request2
+        CaseDetails caseDetails =  request2
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -570,13 +568,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .assertThat()
-            .statusCode(200)
+            .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", createdCaseDetails.getId().toString());
+            .replace("1706997775517206", caseDetails.getId().toString());
 
         request3
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -597,8 +594,7 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
-
-        CaseDetails caseDetails = request2
+        CaseDetails caseDetails =  request2
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -606,8 +602,7 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/testing-support/create-ccd-case-data")
             .then()
-            .assertThat()
-            .statusCode(200)
+            .assertThat().statusCode(200)
             .extract()
             .as(CaseDetails.class);
 

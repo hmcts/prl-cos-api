@@ -73,6 +73,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.core.HttpHeaders;
 
 import static java.util.Optional.ofNullable;
@@ -96,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIEW_ORDER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHAT_DO_WITH_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -392,7 +394,7 @@ public class ManageOrdersController {
     @Operation(description = "Send Email Notification on Case order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = SubmittedCallbackResponse.class))),
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
     public ResponseEntity<SubmittedCallbackResponse> finalizeOrderSubmissionAndSendNotifications(
@@ -419,10 +421,6 @@ public class ManageOrdersController {
                 caseDataUpdated.get(DRAFT_ORDER_COLLECTION) != null);
             boolean isCustomOrder = copyCustomOrderFieldsFromCallback(caseData, callbackData, caseDataUpdated);
             log.info("Submitted callback: isCustomOrder={}", isCustomOrder);
-            // Capture the URL of the user's uploaded customOrderDoc BEFORE processCustomOrder runs,
-            // because the service clears that field on failure. If processing later fails we use
-            // this to match and remove only the placeholder order/draft entry that actually
-            // references this upload.
             if (isCustomOrder) {
                 String customOrderDocUrl = extractCustomOrderDocBinaryUrl(caseDataUpdated);
 
@@ -494,6 +492,7 @@ public class ManageOrdersController {
 
             // Clean up custom order fields BEFORE persisting - these fields are transient for the order journey
             // and shouldn't persist to affect subsequent order creations.
+            // Note: This is a submitted callback using submitAllTabsUpdate, so the response is not used by CCD.
             if (isCustomOrder) {
                 cleanupCustomOrderFields(caseDataUpdated);
             }
@@ -1079,16 +1078,14 @@ public class ManageOrdersController {
     private boolean copyCustomOrderFieldsFromCallback(CaseData caseData,
                                                       Map<String, Object> callbackData,
                                                       Map<String, Object> caseDataUpdated) {
-        // Route on the user's actual page-1 selection (manageOrdersOptions). This survives
-        // about-to-submit now that manageOrdersOptions has been removed from
-        // cleanUpSelectedManageOrderOptions / ManageOrderFieldsEnum, so the submitted
-        // callback can rely on the real user choice with no fallback markers.
-        boolean isCustomOrder = ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions());
+        // Check if this is a custom order by looking at performingAction in the callback data (this reflects the
+        // 'contents' page 1 option)
+        // We can't use any custom orders fields as they are sticky (persisted from previous orders)
+        boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
         log.info("Submitted callback: isCustomOrder decision: manageOrdersOptions={}, customOrderNameOption(callback)={}, decided={}",
-            caseData.getManageOrdersOptions(),
-            callbackData.get(CUSTOM_ORDER_NAME_OPTION),
-            isCustomOrder);
-
+                 caseData.getManageOrdersOptions(),
+                 callbackData.get(CUSTOM_ORDER_NAME_OPTION),
+                 isCustomOrder);
         if (!isCustomOrder) {
             // Backstop: if for any reason stale custom-order transient fields are still on
             // the callback / persisted map, wipe them so they cannot mis-trigger anything
@@ -1343,7 +1340,8 @@ public class ManageOrdersController {
             caseDataUpdated
         );
 
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(SubmittedCallbackResponse.builder()
                 .confirmationHeader("# Order could not be created")
                 .confirmationBody("**" + failure.getMessage() + "**\n\n"
                     + "The uploaded file has been discarded. Please try the event again with a valid .docx file.")
