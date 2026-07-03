@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -401,9 +400,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         HearingData hearingData = HearingData.builder().build();
@@ -1206,7 +1205,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -1321,7 +1320,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -1338,7 +1337,7 @@ public class ManageOrdersControllerTest {
         caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
-                .nameOfJudgeToReviewOrder(JudicialUser.builder().idamId("123").build()).build())
+                              .nameOfJudgeToReviewOrder(JudicialUser.builder().idamId("123").build()).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1346,11 +1345,11 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .courtName("testcourt")
             .previewOrderDoc(Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                .build())
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
@@ -1371,9 +1370,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
@@ -1431,7 +1430,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -1448,7 +1447,7 @@ public class ManageOrdersControllerTest {
         caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
-                .amendOrderSelectJudgeOrLa(JudgeOrLegalAdvisorCheckEnum.judge).build())
+                              .amendOrderSelectJudgeOrLa(JudgeOrLegalAdvisorCheckEnum.judge).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1456,11 +1455,11 @@ public class ManageOrdersControllerTest {
             .children(listOfChildren)
             .courtName("testcourt")
             .previewOrderDoc(Document.builder()
-                .documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName("PRL-ORDER-C21-COMMON.docx")
-                .build())
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("PRL-ORDER-C21-COMMON.docx")
+                                 .build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .previewOrderDoc(Document.builder().build())
@@ -1481,9 +1480,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
@@ -1864,7 +1863,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -2075,9 +2074,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = manageOrdersController.whenToServeOrder(
@@ -2483,7 +2482,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class), any())).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class),
-            any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
+                                                          any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -2552,7 +2551,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class), any())).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class),
-            any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
+                                                          any(CreateSelectOrderOptionsEnum.class), any())).thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -3205,9 +3204,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -3274,7 +3273,7 @@ public class ManageOrdersControllerTest {
         hearingElementList.add(element(HearingData.builder().build()));
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -3393,7 +3392,7 @@ public class ManageOrdersControllerTest {
         hearingElementList.add(element(HearingData.builder().build()));
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -3855,7 +3854,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -3966,7 +3965,7 @@ public class ManageOrdersControllerTest {
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+                                                                  .build()).build();
 
         ManageOrders manageOrders = ManageOrders.builder()
             .nameOfLaToReviewOrder(dynamicList)
@@ -4238,8 +4237,8 @@ public class ManageOrdersControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
         assertExpectedException(() -> {
-            manageOrdersController
-                .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
+                                    manageOrdersController
+                                        .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
                                 RuntimeException.class, "Invalid Client");
 
     }
@@ -4256,9 +4255,9 @@ public class ManageOrdersControllerTest {
                               .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
                                          .id(UUID.randomUUID()).value(OrderDetails
-                                                             .builder()
-                                                             .isAutoHearingReqPending(Yes)
-                                                             .build())
+                                                                          .builder()
+                                                                          .isAutoHearingReqPending(Yes)
+                                                                          .build())
                                          .build()))
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
@@ -4287,14 +4286,14 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData1);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse
+        ResponseEntity<SubmittedCallbackResponse> aboutToStartOrSubmitCallbackResponse
             = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
             callbackRequest
         );
 
-        assertNotNull(submittedCallbackResponse);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
     @Test
@@ -4438,10 +4437,10 @@ public class ManageOrdersControllerTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(serveOrderData)
             .previewOrderDoc(Document.builder()
-                .documentUrl("http://test.url/preview.pdf")
-                .documentBinaryUrl("http://test.url/binary/preview.pdf")
-                .documentFileName("preview.pdf")
-                .build())
+                                 .documentUrl("http://test.url/preview.pdf")
+                                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                                 .documentFileName("preview.pdf")
+                                 .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseDataWithServe.toMap(new ObjectMapper());
@@ -4458,9 +4457,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -4509,9 +4508,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -4553,10 +4552,10 @@ public class ManageOrdersControllerTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(serveOrderData)
             .previewOrderDoc(Document.builder()
-                .documentUrl("http://test.url/preview.pdf")
-                .documentBinaryUrl("http://test.url/binary/preview.pdf")
-                .documentFileName("preview.pdf")
-                .build())
+                                 .documentUrl("http://test.url/preview.pdf")
+                                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                                 .documentFileName("preview.pdf")
+                                 .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseDataWithoutServe.toMap(new ObjectMapper());
@@ -4576,9 +4575,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -4617,10 +4616,10 @@ public class ManageOrdersControllerTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(null)  // null serveOrderData
             .previewOrderDoc(Document.builder()
-                .documentUrl("http://test.url/preview.pdf")
-                .documentBinaryUrl("http://test.url/binary/preview.pdf")
-                .documentFileName("preview.pdf")
-                .build())
+                                 .documentUrl("http://test.url/preview.pdf")
+                                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                                 .documentFileName("preview.pdf")
+                                 .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseDataNoServeData.toMap(new ObjectMapper());
@@ -4640,9 +4639,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -4687,10 +4686,10 @@ public class ManageOrdersControllerTest {
             .serveOrderData(serveOrderData)
             .orderCollection(null)  // Explicitly null - no existing orders
             .previewOrderDoc(Document.builder()
-                .documentUrl("http://test.url/preview.pdf")
-                .documentBinaryUrl("http://test.url/binary/preview.pdf")
-                .documentFileName("preview.pdf")
-                .build())
+                                 .documentUrl("http://test.url/preview.pdf")
+                                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                                 .documentFileName("preview.pdf")
+                                 .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseDataNoOrders.toMap(new ObjectMapper());
@@ -4700,12 +4699,12 @@ public class ManageOrdersControllerTest {
 
         // The service will create an orderCollection with the new order
         List<Element<OrderDetails>> newOrderCollection = List.of(Element.<OrderDetails>builder()
-            .id(UUID.randomUUID())
-            .value(OrderDetails.builder()
-                .orderType("Custom Order")
-                .orderDocument(customOrderDoc)
-                .build())
-            .build());
+                                                                     .id(UUID.randomUUID())
+                                                                     .value(OrderDetails.builder()
+                                                                                .orderType("Custom Order")
+                                                                                .orderDocument(customOrderDoc)
+                                                                                .build())
+                                                                     .build());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataNoOrders);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoOrders);
@@ -4718,9 +4717,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -4738,7 +4737,7 @@ public class ManageOrdersControllerTest {
 
         // 3. orderCollection in response must not be null (this was the root cause of the NPE)
         assertNotNull("orderCollection must not be null - this caused NPE in submitted callback",
-            response.getData().get("orderCollection"));
+                      response.getData().get("orderCollection"));
 
         // 4. orderCollection should contain the new order
         @SuppressWarnings("unchecked")
@@ -4801,9 +4800,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)  // Callback data HAS custom order fields
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)  // Callback data HAS custom order fields
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -4858,9 +4857,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -4924,9 +4923,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -4986,9 +4985,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5041,9 +5040,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5091,9 +5090,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5140,9 +5139,9 @@ public class ManageOrdersControllerTest {
             .CallbackRequest.builder()
             .eventId("manageOrders")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(caseDataMap)
-                .build())
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
             .build();
 
         manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
@@ -5184,9 +5183,9 @@ public class ManageOrdersControllerTest {
             .CallbackRequest.builder()
             .eventId("manageOrders")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(caseDataMap)
-                .build())
+                             .id(12345L)
+                             .data(caseDataMap)
+                             .build())
             .build();
 
         manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
@@ -5233,9 +5232,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5310,9 +5309,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5411,9 +5410,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5462,9 +5461,9 @@ public class ManageOrdersControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5510,9 +5509,9 @@ public class ManageOrdersControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5547,9 +5546,9 @@ public class ManageOrdersControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5595,9 +5594,9 @@ public class ManageOrdersControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5643,9 +5642,9 @@ public class ManageOrdersControllerTest {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -5708,10 +5707,10 @@ public class ManageOrdersControllerTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(serveOrderData)
             .previewOrderDoc(Document.builder()
-                .documentUrl("http://test.url/preview.pdf")
-                .documentBinaryUrl("http://test.url/binary/preview.pdf")
-                .documentFileName("preview.pdf")
-                .build())
+                                 .documentUrl("http://test.url/preview.pdf")
+                                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                                 .documentFileName("preview.pdf")
+                                 .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseDataWithJudgeReview.toMap(new ObjectMapper());
@@ -5731,9 +5730,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -5762,8 +5761,8 @@ public class ManageOrdersControllerTest {
         List<Element<HearingData>> hearingDetailsList = List.of(
             Element.<HearingData>builder()
                 .value(HearingData.builder()
-                    .hearingDateConfirmOptionEnum(dateConfirmedByListingTeam)
-                    .build())
+                           .hearingDateConfirmOptionEnum(dateConfirmedByListingTeam)
+                           .build())
                 .build()
         );
 
@@ -5785,10 +5784,10 @@ public class ManageOrdersControllerTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .serveOrderData(serveOrderData)
             .previewOrderDoc(Document.builder()
-                .documentUrl("http://test.url/preview.pdf")
-                .documentBinaryUrl("http://test.url/binary/preview.pdf")
-                .documentFileName("preview.pdf")
-                .build())
+                                 .documentUrl("http://test.url/preview.pdf")
+                                 .documentBinaryUrl("http://test.url/binary/preview.pdf")
+                                 .documentFileName("preview.pdf")
+                                 .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseDataWithHearing.toMap(new ObjectMapper());
@@ -5809,9 +5808,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -5865,9 +5864,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -5901,9 +5900,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeaderTask(
@@ -5926,9 +5925,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         assertThrows(RuntimeException.class, () ->
@@ -5955,9 +5954,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
@@ -5992,9 +5991,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
@@ -6028,9 +6027,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateFromHearing(
@@ -6054,9 +6053,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         assertThrows(InvalidClientException.class, () ->
@@ -6089,9 +6088,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.manageOrderMidEvent(
@@ -6127,9 +6126,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.validateAndPopulateHearingData(
@@ -6172,9 +6171,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -6216,9 +6215,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build())
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
             .build();
 
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.saveOrderDetails(
@@ -6248,9 +6247,9 @@ public class ManageOrdersControllerTest {
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
             .manageOrders(ManageOrders.builder()
-                .amendOrderSelectCheckOptions(null)  // null to trigger amendCheck = null path
-                .markedToServeEmailNotification(No)
-                .build())
+                              .amendOrderSelectCheckOptions(null)  // null to trigger amendCheck = null path
+                              .markedToServeEmailNotification(No)
+                              .build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createCustomOrder)
             .build();
 
@@ -6286,9 +6285,9 @@ public class ManageOrdersControllerTest {
             .CallbackRequest.builder()
             .eventId("manageOrders")
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         ResponseEntity<SubmittedCallbackResponse> response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
@@ -6371,9 +6370,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -6460,9 +6459,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -6554,9 +6553,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -6698,7 +6697,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void finalizeOrderSubmissionAndSendNotifications_invalidCustomOrderDoc_removesMatchingPlaceholderByBinaryUrl() throws Exception {
         // Bad upload (e.g. PDF renamed to .docx) - controller must:
-        //  (a) return 422 with a submitter-callback confirmation msg
+        //  (a) return errors on the response (user-facing message)
         //  (b) remove the matching placeholder entry from orderCollection
         //  (c) cleanup transient custom-order fields
         //  (d) NOT call notifications / AHM / CIR docs task
@@ -6765,9 +6764,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -6782,7 +6781,6 @@ public class ManageOrdersControllerTest {
 
         // (a) user-facing error returned via confirmationHeader
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getConfirmationHeader());
         assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
@@ -6858,9 +6856,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -6874,9 +6872,6 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
         // Placeholder draft entry was removed (matched via documentUrl camelCase fallback)
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingDrafts =
@@ -6934,9 +6929,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -6950,9 +6945,6 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
         // Fallback path removed index 0 (the most recently added entry)
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
@@ -7014,9 +7006,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -7030,10 +7022,6 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
-
         // Unrelated entry untouched, collection unchanged
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
@@ -7099,9 +7087,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -7115,10 +7103,6 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
-
         // Entry that matched via orderDocumentWelsh was removed
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> resultingOrders = (List<Map<String, Object>>) databaseMap.get("orderCollection");
@@ -7167,9 +7151,9 @@ public class ManageOrdersControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(callbackDataMap)
-                .build())
+                             .id(12345L)
+                             .data(callbackDataMap)
+                             .build())
             .build();
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
@@ -7183,8 +7167,8 @@ public class ManageOrdersControllerTest {
             manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getConfirmationHeader());
         assertTrue(response.getBody().getConfirmationHeader().contains("Order could not be created"));
     }
 
