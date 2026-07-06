@@ -1708,10 +1708,10 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
         verify(manageOrderService, times(1))
@@ -4769,8 +4769,7 @@ public class ManageOrdersControllerTest {
             .documentFileName("preview.pdf")
             .build();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
-callbackDataMap.put("performingAction", "Create a custom order");
-
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("previewOrderDoc", previewOrderDoc);
         callbackDataMap.put("nameOfOrder", "Test Custom Order");
