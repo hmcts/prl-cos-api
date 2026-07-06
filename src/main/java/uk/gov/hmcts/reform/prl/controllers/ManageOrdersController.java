@@ -503,7 +503,7 @@ public class ManageOrdersController {
             if (finalOrder) {
                 newDraftOrderCollectionId = getOrderId(caseDataUpdated);
             } else {
-                newDraftOrderCollectionId = getDraftOrderId(caseDataUpdated, authorisation);
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated);
             }
 
             manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
@@ -588,6 +588,7 @@ public class ManageOrdersController {
         }
     }
 
+
     private UUID getDraftOrderId(String authorisation, Map<String, Object> caseDataUpdated) {
         UUID newDraftOrderCollectionId = null;
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
@@ -595,23 +596,19 @@ public class ManageOrdersController {
             && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
             && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
 
-            List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
-            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection) ? draftOrderCollection.getFirst().getId() : null;
-        }
-        return newDraftOrderCollectionId;
-    }
-
-
-    private UUID getDraftOrderId(Map<String, Object> caseDataUpdated, String authorisation) {
-        UUID newDraftOrderCollectionId = null;
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        if ((UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType))
-            && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
-            && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
-
-            List<Map<String, Object>> draftOrderCollection = (List<Map<String, Object>>) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
-            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                ? UUID.fromString((String)draftOrderCollection.getFirst().get("id")) : null;
+            List draftOrderCollection = (List) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
+            if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
+                Object first = draftOrderCollection.getFirst();
+                if (first instanceof Map<?, ?>) {
+                    List<Map<String, Object>> orders = (List<Map<String, Object>>) draftOrderCollection;
+                    newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                        ? UUID.fromString((String)orders.getFirst().get("id")) : null;
+                }
+                if (first instanceof  Element<?>) {
+                    List<Element<DraftOrder>> orders = (List<Element<DraftOrder>>) draftOrderCollection;
+                    newDraftOrderCollectionId = orders.getFirst().getId();
+                }
+            }
         }
         return newDraftOrderCollectionId;
     }

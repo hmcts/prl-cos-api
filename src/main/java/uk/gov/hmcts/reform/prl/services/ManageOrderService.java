@@ -1527,6 +1527,7 @@ public class ManageOrderService {
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) //PRL-4854
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
+            .checkIsThisUrgent(caseData.getManageOrders().getCheckIsThisUrgent())
             .approvalDate(caseData.getApprovalDate())
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .orderSelectionType(orderSelectionType)
