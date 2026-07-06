@@ -929,7 +929,6 @@ public class NoticeOfChangePartiesService {
     void removeSolicitorAndBarristerFlags(Element<PartyDetails> oldPartyDetails,
                                           Element<PartyDetails> newPartyDetails,
                                           CaseData caseData) {
-        // Keep allocated barrister context aligned, then regenerate all party flags so solicitor and barrister entries are recalculated together.
         barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getValue)
                                                   .orElseGet(newPartyDetails::getValue),
