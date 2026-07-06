@@ -4769,6 +4769,8 @@ public class ManageOrdersControllerTest {
             .documentFileName("preview.pdf")
             .build();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+callbackDataMap.put("performingAction", "Create a custom order");
+
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("previewOrderDoc", previewOrderDoc);
         callbackDataMap.put("nameOfOrder", "Test Custom Order");
@@ -5026,6 +5028,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("id", 12345L);
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("customOrderDoc", Document.builder().documentFileName("user.docx").build());
 
@@ -6742,6 +6745,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderDoc", customDocMap);
         callbackDataMap.put("customOrderNameOption", "other");
         callbackDataMap.put("orderCollection", orderCollection);
@@ -6834,6 +6838,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderDoc", customDocMap);
         callbackDataMap.put("customOrderNameOption", "other");
         callbackDataMap.put("draftOrderCollection", draftCollection);
@@ -6907,6 +6912,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderNameOption", "other");
         // NOTE: no customOrderDoc, so extractCustomOrderDocBinaryUrl returns null
         callbackDataMap.put("orderCollection", orderCollection);
@@ -6984,6 +6990,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderDoc", customDocMap);
         callbackDataMap.put("customOrderNameOption", "other");
         callbackDataMap.put("orderCollection", orderCollection);
@@ -7065,6 +7072,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderDoc", customDocMap);
         callbackDataMap.put("customOrderNameOption", "other");
         callbackDataMap.put("orderCollection", orderCollection);
@@ -7129,6 +7137,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = new HashMap<>();
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderDoc", customDocMap);
         callbackDataMap.put("customOrderNameOption", "other");
         callbackDataMap.put("orderCollection", new ArrayList<>());
@@ -7349,6 +7358,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = callbackCaseData.toMap(new ObjectMapper());
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderNameOption", "other");
         callbackDataMap.put("customOrderDoc", Document.builder().documentFileName("custom.docx").build());
         callbackDataMap.put("previewOrderDoc", Document.builder().documentFileName("preview.pdf").build());
@@ -7418,6 +7428,7 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> callbackDataMap = callbackCaseData.toMap(new ObjectMapper());
         callbackDataMap.put("manageOrdersOptions", "createCustomOrder");
+        callbackDataMap.put("performingAction", "Create a custom order");
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("customOrderDateEndsOptions", "specifiedDateAndTime");
         callbackDataMap.put("customOrderDateEnds", "2025-06-30T14:00:00.000");
