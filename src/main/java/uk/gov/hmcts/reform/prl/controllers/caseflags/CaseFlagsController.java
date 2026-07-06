@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.caseflags.FlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -115,7 +116,10 @@ public class CaseFlagsController extends AbstractCallbackController {
         caseFlagsWaService.setSelectedFlags(caseData);
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        caseDataMap.put(WA_ALL_SELECTED_FLAGS, caseData.getReviewRaRequestWrapper().getSelectedFlags());
+        caseDataMap.put(WA_ALL_SELECTED_FLAGS,
+                        caseData.getReviewRaRequestWrapper() == null
+                            ? Collections.emptyList()
+                            : caseData.getReviewRaRequestWrapper().getSelectedFlags());
 
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
@@ -139,7 +143,9 @@ public class CaseFlagsController extends AbstractCallbackController {
 
         List<String> errors = new ArrayList<>();
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
+        if (mostRecentlyModified == null || mostRecentlyModified.getValue() == null) {
+            errors.add("No case flag selected to review");
+        } else if (REQUESTED.equals(mostRecentlyModified.getValue().getStatus())) {
             errors.add("Please select status other than Requested");
         } else {
             caseFlagsWaService.searchAndUpdateCaseFlags(caseData, caseDataMap, mostRecentlyModified);

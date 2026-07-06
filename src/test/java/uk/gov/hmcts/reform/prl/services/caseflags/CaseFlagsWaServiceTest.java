@@ -14,11 +14,14 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -354,6 +357,75 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
+    public void testSetSelectedFlagsIgnoresStaleC100SolicitorFlagsWhenUnrepresented() throws IOException {
+        Flags staleSolicitorFlags = getApplicant1ExternalFlag1();
+        PartyDetails unrepresentedApplicant = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .applicants(List.of(ElementUtils.element(unrepresentedApplicant)))
+            .allPartyFlags(AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(staleSolicitorFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        when(objectMapper.writeValueAsString(staleSolicitorFlags)).thenReturn("staleC100");
+        when(objectMapper.readValue("staleC100", Flags.class)).thenReturn(staleSolicitorFlags);
+
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+    }
+
+    @Test
+    public void testSetSelectedFlagsIgnoresStaleFl401SolicitorFlagsWhenUnrepresented() throws IOException {
+        Flags staleSolicitorFlags = getApplicant1ExternalFlag1();
+        PartyDetails unrepresentedApplicant = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .applicantsFL401(unrepresentedApplicant)
+            .allPartyFlags(AllPartyFlags.builder().daApplicantSolicitorExternalFlags(staleSolicitorFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        when(objectMapper.writeValueAsString(staleSolicitorFlags)).thenReturn("staleFl401");
+        when(objectMapper.readValue("staleFl401", Flags.class)).thenReturn(staleSolicitorFlags);
+
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+    }
+
+    @Test
+    public void testSetSelectedFlagsIgnoresStaleFl401RespondentSolicitorFlagsWhenUnrepresented() throws IOException {
+        Flags staleSolicitorFlags = getApplicant1ExternalFlag1();
+        PartyDetails unrepresentedRespondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .respondentsFL401(unrepresentedRespondent)
+            .allPartyFlags(AllPartyFlags.builder().daRespondentSolicitorExternalFlags(staleSolicitorFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        when(objectMapper.writeValueAsString(staleSolicitorFlags)).thenReturn("staleFl401Resp");
+        when(objectMapper.readValue("staleFl401Resp", Flags.class)).thenReturn(staleSolicitorFlags);
+
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+    }
+
+    @Test
     public void testValidateAllFlags() {
         List<Element<Flags>> selectedFlags = new ArrayList<>();
         selectedFlags.add(ElementUtils.element(getApplicant1ExternalFlag1()));
@@ -371,6 +443,18 @@ public class CaseFlagsWaServiceTest {
 
         Element<FlagDetail> actualDetails = caseFlagsWaService.validateAllFlags(caseData);
         assertEquals(ACTIVE, actualDetails.getValue().getStatus());
+    }
+
+    @Test
+    public void testValidateAllFlagsWhenNoSelectedFlags() {
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        Element<FlagDetail> actualDetails = caseFlagsWaService.validateAllFlags(caseData);
+
+        Assert.assertNull(actualDetails);
     }
 
     @Test
@@ -399,6 +483,82 @@ public class CaseFlagsWaServiceTest {
         boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
 
         assertTrue(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsIgnoresStaleC100SolicitorFlagsWhenUnrepresented() {
+        Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
+        PartyDetails unrepresentedApplicant = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .applicants(List.of(ElementUtils.element(unrepresentedApplicant)))
+            .allPartyFlags(AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(solicitorFlags).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsIgnoresStaleFl401SolicitorFlagsWhenUnrepresented() {
+        Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
+        PartyDetails unrepresentedApplicant = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .applicantsFL401(unrepresentedApplicant)
+            .allPartyFlags(AllPartyFlags.builder().daApplicantSolicitorExternalFlags(solicitorFlags).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsIgnoresStaleFl401RespondentSolicitorFlagsWhenUnrepresented() {
+        Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
+        PartyDetails unrepresentedRespondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .respondentsFL401(unrepresentedRespondent)
+            .allPartyFlags(AllPartyFlags.builder().daRespondentSolicitorExternalFlags(solicitorFlags).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsKeepsC100SolicitorFlagsWhenRepresented() {
+        Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
+        PartyDetails representedApplicant = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .user(User.builder().solicitorRepresented(YesOrNo.Yes).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .applicants(List.of(ElementUtils.element(representedApplicant)))
+            .allPartyFlags(AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(solicitorFlags).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertFalse(actual);
     }
 
     @Test

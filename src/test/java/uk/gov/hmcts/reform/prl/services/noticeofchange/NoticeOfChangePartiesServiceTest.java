@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +42,8 @@ import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -93,6 +96,8 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -875,6 +880,10 @@ public class NoticeOfChangePartiesServiceTest {
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .applicants(applicant)
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicantSolicitor1ExternalFlags(Flags.builder().partyName("legacy").build())
+                               .caApplicantSolicitor1InternalFlags(Flags.builder().partyName("legacy").build())
+                               .build())
             .solStopRepChooseParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
             .build();
@@ -1342,6 +1351,10 @@ public class NoticeOfChangePartiesServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        Map<String, Object> refreshedFlags = new HashMap<>();
+        refreshedFlags.put("caApplicantSolicitor1ExternalFlags", null);
+        refreshedFlags.put("caApplicantSolicitor1InternalFlags", null);
+        stubPartyFlagRefresh(refreshedFlags);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
             any(),
             anyInt(),
@@ -1370,12 +1383,17 @@ public class NoticeOfChangePartiesServiceTest {
             .isNull();
         assertThat(party.getSolicitorOrg())
             .isEqualTo(Organisation.builder().build());
+        assertThat(updatedCaseData.getAllPartyFlags().getCaApplicantSolicitor1ExternalFlags())
+            .isNull();
+        assertThat(updatedCaseData.getAllPartyFlags().getCaApplicantSolicitor1InternalFlags())
+            .isNull();
         verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
-                                                                                    any(Function.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
     }
 
     @Test
@@ -1532,6 +1550,10 @@ public class NoticeOfChangePartiesServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsNoRep)
             .respondentsFL401(partyDetails)
+            .allPartyFlags(AllPartyFlags.builder()
+                               .daRespondentSolicitorExternalFlags(Flags.builder().partyName("legacy").build())
+                               .daRespondentSolicitorInternalFlags(Flags.builder().partyName("legacy").build())
+                               .build())
             .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
                 dynamicListElement)).build())
             .build();
@@ -1583,12 +1605,7 @@ public class NoticeOfChangePartiesServiceTest {
             .data(caseData.toMap(realObjectMapper))
             .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .caseDetailsBefore(caseDetails)
-            .build();
-
-        List<CaseEventDetail> caseEvents = List.of(
+        final List<CaseEventDetail> caseEvents = List.of(
             CaseEventDetail.builder().stateId(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build(),
             CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
@@ -1608,8 +1625,18 @@ public class NoticeOfChangePartiesServiceTest {
                                    .organisationName("FPRL-test-organisation")
                                    .build())
             .build();
-        PartyDetails updPartyDetails =
+        final PartyDetails updPartyDetails =
             updatePartyDetails(null, changeOrganisationRequest, partyDetails,TypeOfNocEventEnum.removeLegalRepresentation);
+
+        final CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        Map<String, Object> refreshedFlags = new HashMap<>();
+        refreshedFlags.put("daRespondentSolicitorExternalFlags", null);
+        refreshedFlags.put("daRespondentSolicitorInternalFlags", null);
+        stubPartyFlagRefresh(refreshedFlags);
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn("test");
@@ -1629,12 +1656,194 @@ public class NoticeOfChangePartiesServiceTest {
         SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
             .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
+        verify(tabService).updatePartyDetailsForNoc(anyString(),
+                                                    anyString(),
+                                                    isA(StartEventResponse.class),
+                                                    isA(EventRequestData.class),
+                                                    caseDataArgumentCaptor.capture());
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        assertThat(updatedCaseData.getAllPartyFlags().getDaRespondentSolicitorExternalFlags())
+            .isNull();
+        assertThat(updatedCaseData.getAllPartyFlags().getDaRespondentSolicitorInternalFlags())
+            .isNull();
         verify(barristerHelper, times(2)).setAllocatedBarrister(isA(PartyDetails.class),
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
-                                                                                    any(Function.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
+    }
+
+    @Test
+    public void testSubmittedAdminRemoveLegalRepresentativeFL401Applicant() {
+        PartyDetails representedApplicant = partyDetails.toBuilder()
+            .barrister(Barrister.builder().barristerEmail("barrister@gmail.com").build())
+            .build();
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(representedApplicant.getPartyId().toString())
+            .label(representedApplicant.getFirstName() + " " + representedApplicant.getLastName())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(representedApplicant)
+            .respondentsFL401(partyDetailsNoRep)
+            .allPartyFlags(AllPartyFlags.builder()
+                               .daApplicantSolicitorExternalFlags(Flags.builder().partyName("legacy").build())
+                               .daApplicantSolicitorInternalFlags(Flags.builder().partyName("legacy").build())
+                               .build())
+            .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        Map<String, Object> refreshedFlags = new HashMap<>();
+        refreshedFlags.put("daApplicantSolicitorExternalFlags", null);
+        refreshedFlags.put("daApplicantSolicitorInternalFlags", null);
+        stubPartyFlagRefresh(refreshedFlags);
+
+        final CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenAnswer(i -> i.getArguments()[0]);
+
+        SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
+            .submittedAdminRemoveLegalRepresentative(callbackRequest);
+
+        assertNotNull(submittedCallbackResponse);
+        verify(tabService).updatePartyDetailsForNoc(anyString(),
+                                                    anyString(),
+                                                    isA(StartEventResponse.class),
+                                                    isA(EventRequestData.class),
+                                                    caseDataArgumentCaptor.capture());
+
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        assertThat(updatedCaseData.getAllPartyFlags().getDaApplicantSolicitorExternalFlags()).isNull();
+        assertThat(updatedCaseData.getAllPartyFlags().getDaApplicantSolicitorInternalFlags()).isNull();
+
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
+    }
+
+    @Test
+    public void testSubmittedAdminRemoveLegalRepresentativeC100Respondent() {
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        applicants.add(element(partyDetailsNoRep));
+
+        List<Element<PartyDetails>> respondents = new ArrayList<>();
+        Element<PartyDetails> respondentElement = element(partyDetails.toBuilder()
+                                                      .barrister(Barrister.builder().barristerEmail("barrister@gmail.com").build())
+                                                      .build());
+        respondents.add(respondentElement);
+
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(respondentElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .respondents(respondents)
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caRespondentSolicitor1ExternalFlags(Flags.builder().partyName("legacy").build())
+                               .caRespondentSolicitor1InternalFlags(Flags.builder().partyName("legacy").build())
+                               .build())
+            .removeLegalRepAndPartiesList(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).listItems(List.of(
+                dynamicListElement)).build())
+            .build();
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseData.toMap(realObjectMapper))
+            .build();
+
+        final CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(systemUserService.getUserId("test")).thenReturn("test");
+        when(ccdCoreCaseDataService.eventRequest(CaseEvent.UPDATE_ALL_TABS, "test")).thenReturn(EventRequestData.builder().build());
+        when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenAnswer(i -> i.getArguments()[0]);
+
+        Map<String, Object> refreshedFlags = new HashMap<>();
+        refreshedFlags.put("caRespondentSolicitor1ExternalFlags", null);
+        refreshedFlags.put("caRespondentSolicitor1InternalFlags", null);
+        stubPartyFlagRefresh(refreshedFlags);
+
+        SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
+            .submittedAdminRemoveLegalRepresentative(callbackRequest);
+
+        assertNotNull(submittedCallbackResponse);
+        verify(tabService).updatePartyDetailsForNoc(anyString(),
+                                                    anyString(),
+                                                    isA(StartEventResponse.class),
+                                                    isA(EventRequestData.class),
+                                                    caseDataArgumentCaptor.capture());
+
+        CaseData updatedCaseData = caseDataArgumentCaptor.getValue();
+        assertThat(updatedCaseData.getAllPartyFlags().getCaRespondentSolicitor1ExternalFlags()).isNull();
+        assertThat(updatedCaseData.getAllPartyFlags().getCaRespondentSolicitor1InternalFlags()).isNull();
+
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
+        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
+    }
+
+    private void stubPartyFlagRefresh(Map<String, Object> refreshedFlags) {
+        when(partyLevelCaseFlagsService.generatePartyCaseFlags(any(CaseData.class))).thenReturn(refreshedFlags);
+        doAnswer(invocation -> {
+            CaseData caseDataToUpdate = invocation.getArgument(0);
+            Function<CaseData, Map<String, Object>> flagUpdater = invocation.getArgument(1);
+            Map<String, Object> existingFlags = new HashMap<>();
+            if (caseDataToUpdate.getAllPartyFlags() != null) {
+                existingFlags.putAll(realObjectMapper.convertValue(caseDataToUpdate.getAllPartyFlags(),
+                                                                   new TypeReference<Map<String, Object>>() {}));
+            }
+            existingFlags.putAll(flagUpdater.apply(caseDataToUpdate));
+            caseDataToUpdate.setAllPartyFlags(realObjectMapper.convertValue(existingFlags, AllPartyFlags.class));
+            return null;
+        }).when(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(
+            any(CaseData.class),
+            any()
+        );
     }
 
     private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1727,8 +1936,7 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(CaseData.class),
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
-        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class),
-                                                                                    any(Function.class));
+        verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
     }
 
 

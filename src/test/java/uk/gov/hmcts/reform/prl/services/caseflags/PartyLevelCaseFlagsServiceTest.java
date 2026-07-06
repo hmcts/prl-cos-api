@@ -179,11 +179,44 @@ class PartyLevelCaseFlagsServiceTest {
     @Test
     void testIndividualCaseFlagForFl401CaseWhenPartiesRepresent() {
         CaseData caseData = createFl401CaseData();
+        when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenReturn(caseData);
 
         CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
             caseData, 0, DARESPONDENTSOLICITOR, false);
 
         assertEquals(FL401_CASE_TYPE, updatedCaseData.getCaseTypeOfApplication());
+    }
+
+    @Test
+    void testIndividualCaseFlagForFl401CaseWhenSolicitorNotRepresentedUpdatesReturnedCaseData() {
+        CaseData caseData = createFl401CaseData();
+        when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenAnswer(invocation -> {
+                CaseData incomingCaseData = invocation.getArgument(0);
+                String caseDataField = invocation.getArgument(2);
+                Flags updatedFlag = Flags.builder().partyName("updated-" + caseDataField).build();
+                AllPartyFlags currentFlags = incomingCaseData.getAllPartyFlags() == null
+                    ? AllPartyFlags.builder().build() : incomingCaseData.getAllPartyFlags();
+                var updatedFlagsBuilder = currentFlags.toBuilder();
+
+                if ("daRespondentSolicitorExternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.daRespondentSolicitorExternalFlags(updatedFlag);
+                } else if ("daRespondentSolicitorInternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.daRespondentSolicitorInternalFlags(updatedFlag);
+                }
+
+                return incomingCaseData.toBuilder().allPartyFlags(updatedFlagsBuilder.build()).build();
+            });
+
+        CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData, 0, DARESPONDENTSOLICITOR, false);
+
+        assertNotNull(updatedCaseData.getAllPartyFlags());
+        assertEquals("updated-daRespondentSolicitorExternalFlags",
+                     updatedCaseData.getAllPartyFlags().getDaRespondentSolicitorExternalFlags().getPartyName());
+        assertEquals("updated-daRespondentSolicitorInternalFlags",
+                     updatedCaseData.getAllPartyFlags().getDaRespondentSolicitorInternalFlags().getPartyName());
     }
 
     @Test
