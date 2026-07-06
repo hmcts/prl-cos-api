@@ -73,7 +73,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 import javax.ws.rs.core.HttpHeaders;
 
 import static java.util.Optional.ofNullable;
