@@ -260,7 +260,7 @@ public class ManageOrdersController {
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
-                JudgeOrMagistrateTitleEnum judgeTitle = null;
+                JudgeOrMagistrateTitleEnum judgeTitle;
 
                 // Legal advisers are not in JRD, so set title directly
                 if (userTypeDetails.isLegalAdviser()) {
@@ -464,7 +464,7 @@ public class ManageOrdersController {
                 List<?> orders = (List<?>) caseDataUpdated.get(ORDER_COLLECTION);
                 log.info("Before submitAllTabsUpdate: orderCollection size={}", orders.size());
                 if (!orders.isEmpty()) {
-                    Object firstOrder = orders.get(0);
+                    Object firstOrder = orders.getFirst();
                     if (firstOrder instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> orderMap = (Map<String, Object>) firstOrder;
@@ -590,6 +590,7 @@ public class ManageOrdersController {
     }
 
 
+    @SuppressWarnings("unchecked")
     private UUID getDraftOrderId(String authorisation, Map<String, Object> caseDataUpdated) {
         UUID newDraftOrderCollectionId = null;
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
@@ -597,7 +598,7 @@ public class ManageOrdersController {
             && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
             && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
 
-            List draftOrderCollection = (List) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
+            var draftOrderCollection = (List) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
             if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
                 Object first = draftOrderCollection.getFirst();
                 if (first instanceof Map<?, ?>) {
@@ -615,6 +616,7 @@ public class ManageOrdersController {
     }
 
 
+    @SuppressWarnings("unchecked")
     private UUID getOrderId(Map<String, Object> caseDataUpdated) {
         UUID orderCollectionId = null;
         if (caseDataUpdated.containsKey(ORDER_COLLECTION) && null != caseDataUpdated.get(ORDER_COLLECTION)) {
