@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.JUDICIAL_REVIEW;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getC8FileName;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 
 @Service
@@ -100,18 +101,20 @@ public class C8Service {
 
         // Uses the same template, but a different filename to indicate draft files
         String templateHint = C8_OTHER_FINAL_HINT;
-        if (SEALED_STATES.contains(caseData.getState())) {
-            dataMap.put("sealed", true);
-            dataMap.put("watermark", "");
-        } else {
+        boolean draft = !SEALED_STATES.contains(caseData.getState());
+        if (draft) {
             dataMap.put("sealed", false);
             dataMap.put("watermark", "DRAFT");
             templateHint = C8_OTHER_DRAFT_HINT;
+        } else {
+            dataMap.put("sealed", true);
+            dataMap.put("watermark", "");
         }
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         Document c8Welsh = null;
         if (documentLanguage.isGenWelsh()) {
+            dataMap.put("dynamic_fileName", getC8FileName(partyDetails.getValue(), true, draft));
             c8Welsh = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
@@ -121,6 +124,7 @@ public class C8Service {
             );
         }
 
+        dataMap.put("dynamic_fileName", getC8FileName(partyDetails.getValue(), false, draft));
         dataMap.put("party", objectMapper.convertValue(partyDetails.getValue(), new TypeReference<Map<String, Object>>() {}));
         Document c8English = documentGenService.generateSingleDocument(
             authorisation,
