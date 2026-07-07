@@ -69,10 +69,12 @@ class CafcassCaseDataHelperTest {
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
+            .lastModified(LocalDateTime.of(2026, 2, 1, 9, 0, 0))
             .data(caseData)
             .build();
         CaseDetails caseDetailsBefore = CaseDetails.builder()
             .id(123L)
+            .lastModified(LocalDateTime.of(2026, 1, 1, 9, 0, 0))
             .data(caseDataBefore)
             .build();
 

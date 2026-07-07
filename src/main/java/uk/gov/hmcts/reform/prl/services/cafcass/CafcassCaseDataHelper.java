@@ -93,7 +93,12 @@ public class CafcassCaseDataHelper {
         addSpecificDocumentsFromCaseFileViewBasedOnCategories(cafCassCaseDetail);
         cafCassCaseDetail = removeUnnecessaryFieldsFromResponse(cafCassCaseDetail);
         removeRedactedDocumentsFromResponse(cafCassCaseDetail);
-        return cafCassCaseDetail;
+
+        // return data with the dates updated by individual events nullified, so we don't compare them
+        return cafCassCaseDetail.toBuilder()
+            .lastModified(null)
+            .lastStateModifiedDate(null)
+            .build();
     }
 
     public CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
