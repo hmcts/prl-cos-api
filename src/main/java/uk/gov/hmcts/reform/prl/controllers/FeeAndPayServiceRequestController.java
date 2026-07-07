@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
-import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
 
 import java.util.ArrayList;
 
@@ -63,7 +62,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
 
     private final SolicitorEmailService solicitorEmailService;
-    private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final AuthorisationService authorisationService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -71,12 +69,10 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     protected FeeAndPayServiceRequestController(ObjectMapper objectMapper,
                                                 EventService eventPublisher,
                                                 SolicitorEmailService solicitorEmailService,
-                                                FeeAndPayServiceRequestService feeAndPayServiceRequestService,
                                                 AuthorisationService authorisationService,
                                                 PartyLevelCaseFlagsService partyLevelCaseFlagsService) {
         super(objectMapper, eventPublisher);
         this.solicitorEmailService = solicitorEmailService;
-        this.feeAndPayServiceRequestService = feeAndPayServiceRequestService;
         this.authorisationService = authorisationService;
         this.partyLevelCaseFlagsService = partyLevelCaseFlagsService;
     }

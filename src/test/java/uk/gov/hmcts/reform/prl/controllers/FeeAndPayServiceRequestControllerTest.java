@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
-import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
 import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.payment.PaymentRequestService;
 
@@ -67,8 +66,7 @@ public class FeeAndPayServiceRequestControllerTest {
     @Mock
     private SolicitorEmailService solicitorEmailService;
 
-    @Mock
-    private FeeAndPayServiceRequestService feeAndPayServiceRequestService;
+
 
     @Mock
     private EventService eventPublisher;
@@ -138,7 +136,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build())
             .eventId(Event.SUBMIT_AND_PAY.getId())
             .build();
-        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenCallRealMethod();
+
         Assert.assertEquals(
             HWF_SUPPRESSION_ERROR_MESSAGE,
             feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
@@ -160,7 +158,7 @@ public class FeeAndPayServiceRequestControllerTest {
                                                             .build()).build())
             .eventId(Event.UPLOAD_ADDITIONAL_APPLICATIONS.getId())
             .build();
-        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenCallRealMethod();
+
         Assert.assertEquals(
             HWF_SUPPRESSION_ERROR_MESSAGE,
             feeAndPayServiceRequestController.helpWithFeesValidator(authToken, PrlAppsConstants.ENGLISH, callbackRequest).getErrors().get(0)
