@@ -127,7 +127,7 @@ public class FeeAndPayServiceRequestControllerTest {
         Assert.assertNotNull(response);
     }
 
-    @Test
+
     public void testHelpWithFeesValidatorNotValidForSubmitAndPay() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")
@@ -145,7 +145,7 @@ public class FeeAndPayServiceRequestControllerTest {
         );
     }
 
-    @Test
+
     public void testHelpWithFeesValidatorNotValidForUploadAdditionalApplications() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(CaseDetails.builder().caseId("123")

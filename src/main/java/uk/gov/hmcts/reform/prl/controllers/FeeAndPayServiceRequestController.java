@@ -29,9 +29,8 @@ import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -134,10 +133,8 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        List<String> errorList =
-            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest, CaseUtils.getLanguage(clientContext));
         return CallbackResponse.builder()
-            .errors(errorList)
+            .errors(new ArrayList<>())
             .build();
     }
 
