@@ -180,7 +180,7 @@ public class DgsServiceTest {
 
     @Test
     public void testToGenerateDocumentWithCaseDataNoDataExpectedException() {
-        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
+        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, (Map) null);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });

@@ -4,7 +4,7 @@ server:
 runs-locally: ${RUNS_LOCALLY:true}
 
 env: ${test_environment:local}
-TEST_URL: http://localhost:4044
+TEST_URL: https://localhost:4044
 
 case:
   orchestration:
@@ -19,14 +19,14 @@ case:
 prl:
   environment: ${APP_ENV:preview}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
   document:
     generate:
       uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
-    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
-    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
+    username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxxxx}
+    password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxxxx}
 
 management:
   endpoint:
@@ -90,7 +90,7 @@ uk:
   gov:
     notify:
       api:
-        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxx}
+        key: ${UK_GOV_NOTIFY_API_KEY:xxxxxxxx}
         baseUrl: https://api.notifications.service.gov.uk
       email:
         templates:
@@ -177,7 +177,7 @@ notify:
   baseUrl: https://api.notifications.service.gov.uk
 
 send-grid:
-  api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  api-key: ${SEND_GRID_API_KEY:xxxxxxx}
   notification:
     email:
       templates:
@@ -262,42 +262,42 @@ idam:
   s2s-auth:
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
     microservice: prl_cos_api
-    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxx}
+    totp-secret: ${IDAM_S2S_AUTH_TOTP_SECRET:xxxxxxxx}
   api:
     url: https://idam-api.aat.platform.hmcts.net
   client:
     id: prl-cos-api
     baseUrl: https://idam-api.aat.platform.hmcts.net
     redirect_uri: https://manage-case.aat.platform.hmcts.net/oauth2/callback
-    secret: ${IDAM_CLIENT_SECRET:xxxxxxx}
+    secret: ${PRL_IDAM_CLIENT_SECRET:xxxxxxx}
     clientId: xuiwebapp
     authorize:
       context-path: /oauth2/authorize
     token:
       context-path: /oauth2/token
   user:
-    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+    genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxxxx}
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
-    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
+    password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxx}
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
-    password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxxxxxxx}
   system-update:
-    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
-    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
+    username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxxxxx}
+    password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxxxx}
   apigateway:
-    username: ${COURTNAV_USERNAME:xxxxxx}
-    password: ${COURTNAV_PASSWORD:xxxxxx}
+    username: ${COURTNAV_USERNAME:xxxxxxxx}
+    password: ${COURTNAV_PASSWORD:xxxxxxxx}
   cafcass:
-    username: ${CAFCASS_USERNAME:xxxxxx}
-    password: ${CAFCASS_PASSWORD:xxxxxx}
+    username: ${CAFCASS_USERNAME:xxxxxxxxxx}
+    password: ${CAFCASS_PASSWORD:xxxxxxxx}
   judge:
-    username: ${JUDGE_USER_NAME:xxxxxx}
-    password: ${JUDGE_PASSWORD:xxxxxx}
+    username: ${JUDGE_USER_NAME:xxxxxxxxxxx}
+    password: ${JUDGE_PASSWORD:xxxxxxx}
   admin:
-    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxx}
-    password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxx}
+    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxxxx}
+    password: ${IDAM_COURT_ADMIN_PASSWORD:xxxxxxxx}
   api_gw:
     microservice: api_gw
 
@@ -587,6 +587,8 @@ document:
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
       doc_cover_sheet_serve_order_template: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
       doc_cover_sheet_welsh_serve_order_template: FL-PRL-APP-WEL-COVER-SERVE-ORDER-SHEET.docx
+      prl_blank_cover_letter_template: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      prl_blank_cover_letter_welsh_template: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
@@ -646,7 +648,7 @@ amRoleAssignment:
 postcodelookup:
   api:
     url: https://api.os.uk/search/places/v1
-    key: ${POST_CODE_LOOKUP_KEY:XXXXXXXXXXXXXXXX}
+    key: ${POST_CODE_LOOKUP_KEY:xxxxxxx}
 
 cafcaas:
   search-case-type-id: PRLAPPS
