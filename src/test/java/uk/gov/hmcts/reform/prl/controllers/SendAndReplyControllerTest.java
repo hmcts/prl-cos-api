@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -23,16 +24,20 @@ import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum
 import uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.SendOrReplyDto;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,6 +47,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -56,6 +63,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
@@ -83,6 +91,9 @@ public class SendAndReplyControllerTest {
     @Mock
     private AllTabServiceImpl allTabService;
 
+    @Spy
+    private TaskUtils taskUtils = new TaskUtils(new ObjectMapper());
+
     private CaseData replyCaseData;
     private Map<String, Object> caseDataMap;
     private CaseDetails sendCaseDetails;
@@ -106,6 +117,23 @@ public class SendAndReplyControllerTest {
     private Element<Message> message1Element;
 
     private Element<Message> message2Element;
+
+    private static final String CLIENT_CONTEXT = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : true
+            }
+          }
+        }
+        """;
+
+    private static final String ENCODED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
     @Before
     public void setup() {
@@ -597,11 +625,213 @@ public class SendAndReplyControllerTest {
                 .build());
 
         // when
-        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest, null);
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest, null)
+            .getBody();
 
         // then
         verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, null);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitWithClientContextCompleteTaskTrue() {
+        Message message = Message.builder()
+            .futureHearingsList(DynamicList.builder()
+                                    .value(DynamicListElement.builder()
+                                               .code("12345 Hearing label")
+                                               .build())
+                                    .build())
+            .build();
+        SendOrReplyMessage sendOrReplyMessage = SendOrReplyMessage.builder()
+            .sendMessageObject(message)
+            .build();
+        // given
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap, "12345"))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
+
+        // when
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseEntity = sendAndReplyController.sendOrReplyToMessagesSubmit(
+            auth,
+            callbackRequest,
+            ENCODED_CLIENT_CONTEXT
+        );
+
+        String encoded = responseEntity.getHeaders()
+            .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER);
+        WaMapper waMapper = CaseUtils.getWaMapper(encoded);
+
+        // then
+        assertThat(waMapper.getClientContext().getUserTask().isCompleteTask())
+            .isTrue();
+        assertThat(responseEntity.getBody().getData().get("CaseAccessCategory"))
+            .isEqualTo("C100");
+
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, "12345");
+        verify(taskUtils).getTaskAdditionalProperties(ENCODED_CLIENT_CONTEXT);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitWithClientContextCompleteTaskFalse() {
+        Message message = Message.builder()
+            .futureHearingsList(DynamicList.builder()
+                                    .value(DynamicListElement.builder()
+                                               .code("99999 Hearing label")
+                                               .build())
+                                    .build())
+            .build();
+        SendOrReplyMessage sendOrReplyMessage = SendOrReplyMessage.builder()
+            .sendMessageObject(message)
+            .build();
+        // given
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap, "12345"))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
+
+        // when
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseEntity = sendAndReplyController.sendOrReplyToMessagesSubmit(
+            auth,
+            callbackRequest,
+            ENCODED_CLIENT_CONTEXT
+        );
+
+        String encoded = responseEntity.getHeaders()
+            .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER);
+        WaMapper waMapper = CaseUtils.getWaMapper(encoded);
+
+        // then
+        assertThat(waMapper.getClientContext().getUserTask().isCompleteTask())
+            .isFalse();
+        assertThat(responseEntity.getBody().getData().get("CaseAccessCategory"))
+            .isEqualTo("C100");
+
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, "12345");
+        verify(taskUtils).getTaskAdditionalProperties(ENCODED_CLIENT_CONTEXT);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitWithClientContextCompleteTaskFalseWhenNoHearingPresent() {
+        Message message = Message.builder()
+            .dateSent("Data sent")
+            .build();
+
+        SendOrReplyMessage sendOrReplyMessage = SendOrReplyMessage.builder()
+            .sendMessageObject(message)
+            .build();
+        // given
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap, "12345"))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
+
+        // when
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseEntity = sendAndReplyController.sendOrReplyToMessagesSubmit(
+            auth,
+            callbackRequest,
+            ENCODED_CLIENT_CONTEXT
+        );
+
+        String encoded = responseEntity.getHeaders()
+            .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER);
+        WaMapper waMapper = CaseUtils.getWaMapper(encoded);
+
+        // then
+        assertThat(waMapper.getClientContext().getUserTask().isCompleteTask())
+            .isFalse();
+
+        assertThat(responseEntity.getBody().getData().get("CaseAccessCategory"))
+            .isEqualTo("C100");
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, "12345");
+        verify(taskUtils).getTaskAdditionalProperties(ENCODED_CLIENT_CONTEXT);
+    }
+
+    @Test
+    public void testSendOrReplyToMessagesSubmitWithClientContextWithoutTask() {
+        String clientContext = """
+            {
+              "client_context": {
+                  "userLanguage" : "English"
+                }
+              }
+            }
+            """;
+
+        String encodedClientContext = Base64.getEncoder().encodeToString(clientContext.getBytes());
+        Message message = Message.builder()
+            .futureHearingsList(DynamicList.builder()
+                                    .value(DynamicListElement.builder()
+                                               .code("99999 Hearing label")
+                                               .build())
+                                    .build())
+            .build();
+        SendOrReplyMessage sendOrReplyMessage = SendOrReplyMessage.builder()
+            .sendMessageObject(message)
+            .build();
+        // given
+        CaseDetails caseDetails = getCaseDetailsForSubmitted();
+        CaseData caseData = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .sendOrReplyMessage(sendOrReplyMessage)
+            .caseTypeOfApplication("C100")
+            .build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDataMap, null))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(java.util.Map.of("CaseAccessCategory", "C100"))
+                .build());
+
+        // when
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> responseEntity = sendAndReplyController.sendOrReplyToMessagesSubmit(
+            auth,
+            callbackRequest,
+            encodedClientContext
+        );
+
+        // then
+        assertThat(responseEntity.getHeaders()
+                       .getFirst(CLIENT_CONTEXT_HEADER_PARAMETER))
+            .isNull();
+        assertThat(responseEntity.getBody().getData().get("CaseAccessCategory"))
+            .isEqualTo("C100");
+
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDataMap, null);
+        verify(taskUtils).getTaskAdditionalProperties(encodedClientContext);
+
     }
 
 
@@ -634,12 +864,6 @@ public class SendAndReplyControllerTest {
         String clientContextJson = """
             {
               "client_context": {
-                "user_task": {
-                  "task_data": {
-                    "additional_properties": {
-                      "hearingId": "999"
-                    }
-                  }
                 }
               }
             }
@@ -653,7 +877,7 @@ public class SendAndReplyControllerTest {
         CaseDetails caseDetails = getCaseDetailsForSubmitted();
         CaseData caseData = getCaseDataForSubmitted(caseDetails);
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData(), "999"))
+        when(sendAndReplyCommonService.processAboutToSubmit(auth, caseData, caseDetails.getData(), null))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
                 .data(java.util.Map.of("CaseAccessCategory", "C100"))
                 .build());
@@ -662,7 +886,7 @@ public class SendAndReplyControllerTest {
             .sendOrReplyToMessagesSubmitTask(auth, encodedClientContext, callbackRequest);
 
         verify(sendAndReplyService).checkTaskAssociatedWithMessage(caseData);
-        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData(), "999");
+        verify(sendAndReplyCommonService).processAboutToSubmit(auth, caseData, caseDetails.getData(), null);
         Assert.assertEquals("C100", response.getData().get("CaseAccessCategory"));
     }
 
