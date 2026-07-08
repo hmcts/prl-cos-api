@@ -21,9 +21,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
@@ -457,9 +454,6 @@ send-letter:
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
-prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
@@ -835,3 +829,6 @@ acro:
     remote-directory: /
     password: some_password
 
+docmosis:
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
