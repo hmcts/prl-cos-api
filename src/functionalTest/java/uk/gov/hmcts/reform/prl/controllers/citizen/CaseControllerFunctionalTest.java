@@ -5,22 +5,20 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -36,10 +34,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
-@Ignore
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@Disabled
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
 @TestPropertySource(
     properties = {
         "idam.client.secret=${CITIZEN_IDAM_CLIENT_SECRET}",
@@ -84,12 +81,12 @@ public class CaseControllerFunctionalTest {
 
     private static CaseData caseData;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void createCaseInCcd() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
@@ -104,7 +101,7 @@ public class CaseControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testRetrieveCitizenCases() {
         request
@@ -117,7 +114,7 @@ public class CaseControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testLinkCitizenToCase() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
@@ -134,10 +131,7 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
-
-
-
-    @Ignore("as there is no end point existing with this link")
+    @Disabled("as there is no end point existing with this link")
     @Test
     public void testLinkCitizenToCaseWith401() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
@@ -190,8 +184,8 @@ public class CaseControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseData.class);
-        Assert.assertNotNull(caseData);
-        Assert.assertNotNull(caseData.getId());
+        Assertions.assertNotNull(caseData);
+        Assertions.assertNotNull(caseData.getId());
     }
 
     @Test
@@ -209,10 +203,10 @@ public class CaseControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(responseData);
-        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised());
-        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
-        Assert.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
-        Assert.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
+        Assertions.assertNotNull(responseData);
+        Assertions.assertNotNull(responseData.getOtherPartyInTheCaseRevised());
+        Assertions.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
+        Assertions.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
+        Assertions.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
     }
 }

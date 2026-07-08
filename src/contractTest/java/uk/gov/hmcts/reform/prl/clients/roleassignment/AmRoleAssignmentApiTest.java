@@ -35,7 +35,6 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
             "fis_hearing.api.url=",
             "refdata.api.url=",
             "courtfinder.api.url=",
-            "prl-dgs-api.url=",
             "fees-register.api.url=",
             "judicialUsers.api.url=",
             "locationfinder.api.url=",
@@ -45,7 +44,8 @@ import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
             "staffDetails.api.url=",
             "amRoleAssignment.api.url=http://localhost:8999",
             "core_case_data.api.url=",
-            "postcodelookup.api.url="
+            "postcodelookup.api.url=",
+            "bankHolidays.api.url="
         }
 )
 

@@ -1087,6 +1087,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
+    public static final String C_8_FILENAME_PATTERN = "Confidential_C8 of %s %s%s%s.pdf";
     public static final String CHILD_IMPACT_REPORT_1_LA = "childImpactReport1La";
     public static final String CHILD_IMPACT_REPORT_2_LA = "childImpactReport2La";
     public static final String SECTION_7_REPORT_LA = "section7ReportLa";
@@ -1095,6 +1096,6 @@ public class PrlAppsConstants {
     public static final String SECTION_47_LA = "section47La";
     public static final String CIR_EXTENSION_REQUEST_LA = "cirExtensionRequestLa";
     public static final String CIR_TRANSFER_REQUEST_LA = "cirTransferRequestLa";
-
+    public static final String TASK_TRIGGERED_BY = "RequestOrder";
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
 }
