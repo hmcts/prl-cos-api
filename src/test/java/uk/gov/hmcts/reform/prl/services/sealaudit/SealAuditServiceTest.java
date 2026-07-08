@@ -82,7 +82,6 @@ class SealAuditServiceTest {
         ReflectionTestUtils.setField(sealAuditService, "batchDelaySeconds", 1);
         ReflectionTestUtils.setField(sealAuditService, "pageSize", 500);
         ReflectionTestUtils.setField(sealAuditService, "fromDateStr", "2025-01-15");
-        ReflectionTestUtils.setField(sealAuditService, "toDateStr", "2025-01-15");
         ReflectionTestUtils.setField(sealAuditService, "emailEnabled", false);
         ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "");
         ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "");
@@ -217,11 +216,13 @@ class SealAuditServiceTest {
 
         String query = queryCaptor.getValue();
 
+        String expectedLt = "\"lt\": \"" + LocalDate.now().plusDays(1) + "T00:00:00\"";
+
         assertTrue(query.contains("\"from\": 0"));
         assertTrue(query.contains("\"size\": 500"));
         assertTrue(query.contains("\"created_date\""));
         assertTrue(query.contains("\"gte\": \"2025-01-15T00:00:00\""));
-        assertTrue(query.contains("\"lt\": \"2025-01-16T00:00:00\""));
+        assertTrue(query.contains(expectedLt));
         assertTrue(query.contains("\"data.orderCollection\""));
         assertTrue(query.contains("\"reference.keyword\""));
     }

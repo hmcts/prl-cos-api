@@ -66,9 +66,6 @@ public class SealAuditService {
     @Value("${seal-audit.from-date:2024-04-01}")
     private String fromDateStr;
 
-    @Value("${seal-audit.to-date:}")
-    private String toDateStr;
-
     @Value("${seal-audit.email.to:}")
     private String toEmailAddress;
 
@@ -87,7 +84,7 @@ public class SealAuditService {
         long startTime = System.currentTimeMillis();
 
         LocalDate fromDate = parseDate(fromDateStr).orElse(LocalDate.of(2024, 4, 1));
-        LocalDate toDate = parseDate(toDateStr).orElse(LocalDate.now());
+        LocalDate toDate = LocalDate.now();
 
         log.info("Audit case created date range: {} to {}", fromDate, toDate);
 
