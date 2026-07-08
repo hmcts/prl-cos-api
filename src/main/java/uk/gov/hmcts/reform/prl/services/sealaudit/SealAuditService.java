@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -473,6 +474,16 @@ public class SealAuditService {
             return;
         }
 
+        List<String> recipients = Arrays.stream(toEmailAddress.split(","))
+            .map(String::trim)
+            .filter(email -> !email.isBlank())
+            .toList();
+
+        if (recipients.isEmpty()) {
+            log.info("No valid recipient configured, skipping email");
+            return;
+        }
+
         try {
             String dateStr = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
             String statusSummary = missingSeals == 0 && errors == 0 ? "All seals present" : "Issues found";
@@ -496,14 +507,16 @@ public class SealAuditService {
             Object fileUpload = prepareUpload(csvBytes, true, false, "26 weeks");
             templateVars.put("link_to_file", fileUpload);
 
-            notificationClient.sendEmail(
-                emailTemplateId,
-                toEmailAddress,
-                templateVars,
-                "seal-audit-" + dateStr
-            );
+            for (String recipient : recipients) {
+                notificationClient.sendEmail(
+                    emailTemplateId,
+                    recipient,
+                    templateVars,
+                    "seal-audit-" + dateStr
+                );
+            }
 
-            log.info("Seal audit summary email sent successfully to {}", toEmailAddress);
+            log.info("Seal audit summary email sent successfully to {}", recipients);
 
         } catch (NotificationClientException e) {
             log.error("Error sending seal audit summary email via Gov Notify", e);

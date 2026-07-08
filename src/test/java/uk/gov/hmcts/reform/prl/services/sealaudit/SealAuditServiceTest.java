@@ -624,4 +624,47 @@ class SealAuditServiceTest {
 
         when(sealDetectionService.detectSeal(mockPdfBytes)).thenReturn(sealStatus);
     }
+
+    @Test
+    void shouldSendSummaryEmailToMultipleRecipients() throws Exception {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(
+            sealAuditService,
+            "toEmailAddress",
+            "test1@example.com, test2@example.com, test3@example.com"
+        );
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test1@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test2@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test3@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
+    }
 }
