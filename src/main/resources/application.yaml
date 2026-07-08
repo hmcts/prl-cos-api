@@ -675,9 +675,9 @@ document:
       prl_fl404a_welsh_final_filename: welsh_non_molestation_order_fl404a_final.pdf
       prl_fl404a_welsh_draft_template: FL-PRL-GOR-WEL-FL404A-Non-Molestation-Order-Draft.docx
       prl_fl404a_welsh_draft_filename: welsh_non_molestation_order_fl404a_draft.pdf
-      prl_fl402_draft_template: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
+      prl_fl402_draft_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Hearings-Draft.docx
       prl_fl402_draft_filename: NoticeOfProceedings(FL402)Draft.pdf
-      prl_fl402_final_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
+      prl_fl402_final_template: FL-PRL-HNO-ENG-FL402-Notice-Of-Hearings-Final.docx
       prl_fl402_final_filename: NoticeOfProceedings(FL402).pdf
 
       prl_fl402_welsh_draft_template: PRL-HNO-WEL-FL402-Notice-Of-Proceedings-Draft.docx
@@ -704,9 +704,9 @@ document:
       prl_c45a_welsh_filename: Welsh_Parental_Responsibility_Order_C45A.pdf
       prl_c45a_welsh_draft_template: FL-PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       prl_c45a_welsh_draft_filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
-      prl_c6_template: FL-PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
+      prl_c6_template: FL-PRL-GOR-ENG-C100-Notice-of-hearing-Final.docx
       prl_c6_filename: Notice_Of_Proceeding_Order_C6.pdf
-      prl_c6_draft_template: FL-PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+      prl_c6_draft_template: FL-PRL-GOR-ENG-C100-Notice-of-hearings-Draft.docx
       prl_c6_draft_filename: Notice_Of_Proceeding_Order_C6_draft.pdf
       prl_c6_welsh_template: FL-PRL-GOR-WEL-C6-Notice-of-parties-Order-Final.docx
       prl_c6_welsh_filename: Welsh_Notice_Of_Proceeding_Order_C6.pdf
