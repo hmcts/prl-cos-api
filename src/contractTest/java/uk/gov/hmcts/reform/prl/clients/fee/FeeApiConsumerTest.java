@@ -37,7 +37,6 @@ import java.math.BigDecimal;
         "fis_hearing.api.url=localhost:5000",
         "refdata.api.url=",
         "courtfinder.api.url=",
-        "prl-dgs-api.url=",
         "fees-register.api.url=http://localhost:8881",
         "fis_hearing.api.url=",
         "judicialUsers.api.url=",

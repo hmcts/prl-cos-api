@@ -21,9 +21,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
@@ -41,7 +38,7 @@ management:
   #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
-    import: "optional:configtree:/mnt/secrets/prl/"
+    import: optional:configtree:/mnt/secrets/prl/,optional:classpath:docmosis-templates.yml
   application:
     name: Prl cos api
   servlet:
@@ -467,9 +464,6 @@ send-letter:
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
-prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
@@ -866,3 +860,17 @@ hwf-update-case-state-task:
 prepare-hearing-bundle:
   calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
 
+docmosis:
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
+  pdf:
+    familyCourtImgKey: "familycourt"
+    familyCourtImgVal: "[userImage:familycourt.png]"
+    hmctsImgKey: "hmcts"
+    hmctsImgVal: "[userImage:hmcts.png]"
+    displayTemplateKey: "displayTemplateOnly"
+    displayTemplateVal: "1"
+
+http:
+  connect-timeout: 60s
+  read-timeout: 60s
