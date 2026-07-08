@@ -314,6 +314,9 @@ request-order-task:
     c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
     fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
 
+update-hearing-actuals:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+
 fees-register:
   api:
     url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}

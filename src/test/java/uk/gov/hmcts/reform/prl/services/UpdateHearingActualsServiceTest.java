@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -77,6 +78,7 @@ public class UpdateHearingActualsServiceTest {
     public void setUp() {
         when(systemUserService.getSysUserToken()).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sAuthToken);
+        ReflectionTestUtils.setField(updateHearingActualsService, "concurrentRequest", 5);
 
         caseData = CaseData.builder()
             .id(123L)

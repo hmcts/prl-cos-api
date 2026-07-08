@@ -60,8 +60,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 public class UpdateHearingActualsService {
 
     private static final ZoneId UK_ZONE = ZoneId.of("Europe/London");
-    private static final String C100 = "C100";
-    @Value("${request-order-task.concurrent-request}")
+    @Value("${update-hearing-actuals.concurrent-request}")
     private int concurrentRequest;
 
     private final SystemUserService systemUserService;
@@ -137,7 +136,7 @@ public class UpdateHearingActualsService {
                 .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
                 .forEach(caseDetails -> {
                     try {
-                        log.info("semaphore permit count {}", caseSemaphore.availablePermits());
+                        log.info("case semaphore permit count {}", caseSemaphore.availablePermits());
                         caseSemaphore.acquire();
                         executor.submit(() -> {
                             try {
@@ -160,7 +159,10 @@ public class UpdateHearingActualsService {
         hearingIdIterator.forEach(hearingId -> {
                 StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue());
                 CaseData caseData = startAllTabsUpdateDataContent.caseData();
-                getUpdatedCaseData(caseData, hearingId)
+            List<Element<UpdateHearingActualTracking>> trackingByHearingIds = Optional.ofNullable(caseData.getUpdateHearingActualTracking())
+                .orElse(new ArrayList<>());
+
+            getUpdatedCaseData(caseData, hearingId, trackingByHearingIds)
                     .ifPresent(caseDataUpdated -> allTabService.submitAllTabsUpdate(
                         startAllTabsUpdateDataContent.authorisation(),
                         caseId,
@@ -171,8 +173,10 @@ public class UpdateHearingActualsService {
             });
     }
 
-    private  Optional<Map<String, Object>> getUpdatedCaseData(CaseData caseData, String hearingId) {
-        UpdateHearingActualTracking updateHearingActualTracking = caseData.getUpdateHearingActualTracking().stream()
+    private  Optional<Map<String, Object>> getUpdatedCaseData(CaseData caseData,
+                                                              String hearingId,
+                                                              List<Element<UpdateHearingActualTracking>> trackingByHearingIds) {
+        UpdateHearingActualTracking updateHearingActualTracking = trackingByHearingIds.stream()
             .map(Element::getValue)
             .filter(value -> hearingId.equals(value.getHearingId()))
             .findFirst()
@@ -187,7 +191,7 @@ public class UpdateHearingActualsService {
         }
 
         if (updateHearingActualTracking.getLastFiredDate() == null) {
-            caseData.getUpdateHearingActualTracking().add(Element.<UpdateHearingActualTracking>builder().id(UUID.randomUUID())
+            trackingByHearingIds.add(Element.<UpdateHearingActualTracking>builder().id(UUID.randomUUID())
                                                               .value(updateHearingActualTracking)
                                                               .build());
         }
@@ -197,7 +201,7 @@ public class UpdateHearingActualsService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put(
             "updateHearingActualTracking",
-            caseData.getUpdateHearingActualTracking());
+            trackingByHearingIds);
         return Optional.of(caseDataUpdated);
     }
 
