@@ -82,6 +82,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C_8_FILENAME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
@@ -92,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_EMAIL_AND_POST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_BY_POST;
@@ -112,6 +114,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 public class CaseUtils {
 
     public static final String EUROPE_LONDON = "Europe/London";
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
     private CaseUtils() {
 
@@ -157,7 +160,14 @@ public class CaseUtils {
             ? caseData.getCaseTypeOfApplication() : caseData.getSelectedCaseTypeID();
     }
 
-
+    public static String getC8FileName(PartyDetails partyDetails, boolean welsh, boolean draft) {
+        return C_8_FILENAME_PATTERN.formatted(
+            partyDetails.getLabelForDynamicList(),
+            LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter),
+            welsh ? " Welsh" : "",
+            draft ? " Draft" : ""
+        );
+    }
 
     public static String getOrderSelectionType(CaseData caseData) {
         String orderSelectionType = null;
@@ -902,9 +912,9 @@ public class CaseUtils {
     public static WaMapper getWaMapper(String clientContext) {
         if (clientContext != null) {
             log.info("clientContext is present");
+            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+            String decodedString = new String(decodedBytes);
             try {
-                byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
-                String decodedString = new String(decodedBytes);
                 return new ObjectMapper().readValue(decodedString, WaMapper.class);
             } catch (Exception ex) {
                 log.error("Exception while parsing the Client-Context {}", ex.getMessage());
@@ -975,15 +985,6 @@ public class CaseUtils {
                                            .getHearingId())
             );
         return taskHearingId;
-    }
-
-    public static String getTaskTriggeredBy(WaMapper waMapper) {
-        if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
-            if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
-                return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getTaskTriggeredBy();
-            }
-        }
-        return null;
     }
 
     public static DraftOrder getDraftOrderFromCollectionId(List<Element<DraftOrder>> draftOrderCollection, UUID draftOrderId) {

@@ -19,7 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
         "fis_hearing.api.url=localhost:5000",
         "refdata.api.url=",
         "courtfinder.api.url=",
-        "prl-dgs-api.url=",
         "fees-register.api.url=",
         "fis_hearing.api.url=",
         "judicialUsers.api.url=",
@@ -30,8 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
         "staffDetails.api.url=",
         "amRoleAssignment.api.url=",
         "core_case_data.api.url=",
-        "postcodelookup.api.url=",
-        "bankHolidays.api.url="
+        "postcodelookup.api.url="
     }
 )
 public class ReferenceDataOrganisationalInternalUsersConsumerTest extends ReferenceDataConsumerTestBase {

@@ -51,10 +51,12 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -100,7 +102,6 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
-import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.time.LocalDate;
@@ -128,6 +129,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
@@ -156,6 +158,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_DATA;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
@@ -2904,10 +2907,18 @@ public class ManageOrderService {
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
+                //get hearingType
+                String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
+                //return hearingId concatenated with hearingDate
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
-                return hearingDaySchedules.map(daySchedules -> daySchedules.stream()
-                    .map(daySchedule -> HearingLabelUtils.buildHearingsTypeLabel(caseHearing, daySchedule))
-                    .filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
+                return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
+                    if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
+                        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+                        String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
+                        return concat(concat(hearingType, " - "), hearingDate);
+                    }
+                    return null;
+                }).filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
             }).map(this::getDynamicListElements)
             .flatMap(Collection::stream)
             .toList();
@@ -3040,9 +3051,19 @@ public class ManageOrderService {
             if (caseHearing.getHearingDaySchedule() == null) {
                 continue;
             }
+
+            String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
+
             for (HearingDaySchedule schedule : caseHearing.getHearingDaySchedule()) {
-                if (selectedLabel.equals(HearingLabelUtils.buildHearingsTypeLabel(caseHearing, schedule))) {
-                    return schedule;
+                if (schedule.getHearingStartDateTime() != null) {
+                    java.time.format.DateTimeFormatter formatter =
+                        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
+                    String hearingDate = schedule.getHearingStartDateTime().format(formatter);
+                    String expectedLabel = hearingType + " - " + hearingDate;
+
+                    if (expectedLabel.equals(selectedLabel)) {
+                        return schedule;
+                    }
                 }
             }
         }
@@ -4384,7 +4405,8 @@ public class ManageOrderService {
                     && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                     && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
                     removeLocalAuthoritySolicitorService.removeLocalAuthoritySolicitor(caseData);
-                    caseDataUpdated.remove(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY);
+                    caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, OrganisationPolicy.builder().organisation(
+                        Organisation.builder().build()).orgPolicyCaseAssignedRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE).build());
                     LocalAuthority localAuthority = LocalAuthority.builder().isLocalAuthorityInvolvedInCase(YesOrNo.No)
                         .localAuthoritySolicitorOrganisationName(null)
                         .build();

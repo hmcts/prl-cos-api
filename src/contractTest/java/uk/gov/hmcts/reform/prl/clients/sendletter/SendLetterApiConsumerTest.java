@@ -44,7 +44,6 @@ import static org.testng.AssertJUnit.assertNotNull;
         "fis_hearing.api.url=localhost:5000",
         "refdata.api.url=",
         "courtfinder.api.url=",
-        "prl-dgs-api.url=",
         "fees-register.api.url=",
         "send-letter.url=http://localhost:8881",
         "fis_hearing.api.url=",
@@ -56,8 +55,7 @@ import static org.testng.AssertJUnit.assertNotNull;
         "staffDetails.api.url=",
         "amRoleAssignment.api.url=",
         "core_case_data.api.url=",
-        "postcodelookup.api.url=",
-        "bankHolidays.api.url="
+        "postcodelookup.api.url="
     }
 )
 
