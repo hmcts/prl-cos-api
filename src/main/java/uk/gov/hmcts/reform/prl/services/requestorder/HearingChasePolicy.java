@@ -68,6 +68,7 @@ class HearingChasePolicy {
         }
 
         LocalDate hearingEndDate = computeHearingEndDate(hearing);
+        log.info("caseId={} hearingEndDate={}", caseData.getId(), hearingEndDate);
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
 
