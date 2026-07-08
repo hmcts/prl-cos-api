@@ -93,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIEW_ORDER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHAT_DO_WITH_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
@@ -473,6 +474,13 @@ public class ManageOrdersController {
                 }
             }
 
+            // Clean up custom order fields BEFORE persisting - these fields are transient for the order journey
+            // and shouldn't persist to affect subsequent order creations.
+            // Note: This is a submitted callback using submitAllTabsUpdate, so the response is not used by CCD.
+            if (isCustomOrder) {
+                cleanupCustomOrderFields(caseDataUpdated);
+            }
+
             allTabService.submitAllTabsUpdate(
                     startAllTabsUpdateDataContent.authorisation(),
                     String.valueOf(callbackRequest.getCaseDetails().getId()),
@@ -484,11 +492,6 @@ public class ManageOrdersController {
 
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
-
-            // Clean up custom order fields to prevent them affecting subsequent order creations
-            if (isCustomOrder) {
-                cleanupCustomOrderFields(caseDataUpdated);
-            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -615,6 +618,16 @@ public class ManageOrdersController {
             } else if (isSdo) {
                 caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
             }
+            if (createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                String effectiveOrderName = customOrderService.getEffectiveOrderName(caseData, caseDataUpdated);
+                caseData.setNameOfOrder(effectiveOrderName);
+                caseDataUpdated.put(NAME_OF_ORDER, effectiveOrderName);
+            }
+            log.info("Custom order naming before save: customOrderNameOption={}, nameOfOrder={}, customOrderDoc={}",
+                     caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION),
+                     caseData.getNameOfOrder(),
+                     caseDataUpdated.get(CUSTOM_ORDER_DOC));
+
             caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                 authorisation,
                 caseData,
@@ -829,6 +842,7 @@ public class ManageOrdersController {
                 // Clear custom order fields when a different option is selected
                 // This prevents stale data from a cancelled custom order flow affecting other flows
                 caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+                caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -1046,8 +1060,10 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order - customOrderDoc being present is the indicator
-        boolean isCustomOrder = callbackData.get(CUSTOM_ORDER_DOC) != null;
+        // Check if this is a custom order by looking at performingAction in the callback data (this reflects the
+        // 'contents' page 1 option)
+        // We can't use any custom orders fields as they are sticky (persisted from previous orders)
+        boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
         if (isCustomOrder) {
             // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
             copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);

@@ -21,9 +21,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
@@ -312,9 +309,6 @@ send-letter:
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
 
-prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
-
 courtfinder:
   api:
     url: ${FACT_API:http://fact-api-aat.service.core-compute-aat.internal}
@@ -568,6 +562,8 @@ document:
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
       doc_cover_sheet_serve_order_template: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
       doc_cover_sheet_welsh_serve_order_template: FL-PRL-APP-WEL-COVER-SERVE-ORDER-SHEET.docx
+      prl_blank_cover_letter_template: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      prl_blank_cover_letter_welsh_template: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
@@ -689,3 +685,7 @@ acro:
     pool-size: 10
     allow-unknown-keys: true
     password: ${ACRO_SFTP_USER_PASSWORD:some_password}
+
+docmosis:
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
