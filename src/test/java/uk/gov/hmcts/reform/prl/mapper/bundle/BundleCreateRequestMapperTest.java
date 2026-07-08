@@ -1277,4 +1277,54 @@ public class BundleCreateRequestMapperTest {
         assertEquals(BundlingDocGroupEnum.laOtherDocuments, result.get(0).getValue().getDocumentGroup());
     }
 
+    @Test
+    public void testCafcassEnforcementOrderSuitabilityReportUpdatedInMap() {
+        final String categoryId = "enforcementOrderSuitabilityReport";
+        final String categoryName = "Enforcement Order Suitability Report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .enforcementOrderSuitabilityReportDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.enforcementOrderSuitabilityReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testCafcassParentalOrderReporterReportUpdatedInMap() {
+        final String categoryId = "parentalOrderReporterReport";
+        final String categoryName = "Parental Order Reporter Report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .parentalOrderReporterReportDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.parentalOrderReporterReport, result.get(0).getValue().getDocumentGroup());
+    }
+
 }

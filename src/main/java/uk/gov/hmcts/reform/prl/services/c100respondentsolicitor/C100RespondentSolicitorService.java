@@ -122,6 +122,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERPRETER_REQ
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_CONFIDENTIAL_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESP_CHILD_ABUSES_DOCMOSIS;
@@ -2292,6 +2293,7 @@ public class C100RespondentSolicitorService {
         CaseData parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         String userRole = CaseUtils.getUserRole(userDetails);
         manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, quarantineLegalDocList.get(0));
+        caseDataUpdated.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
         for (QuarantineLegalDoc eachDoc : quarantineLegalDocList) {
             manageDocumentsService.moveDocumentsToQuarantineTab(eachDoc, parsedCaseData, caseDataUpdated, userRole);
             parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
