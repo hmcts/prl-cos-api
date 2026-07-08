@@ -68,11 +68,12 @@ class HearingChasePolicy {
         }
 
         LocalDate hearingEndDate = computeHearingEndDate(hearing);
-        log.info("caseId={} hearingEndDate={}", caseData.getId(), hearingEndDate);
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
 
         int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(today, hearingEndDate);
+        log.info("caseId={} hearingId={} hearingEndDate={} workingDaysSinceHearingEndDate={}", caseData.getId(),
+                 hearingId, hearingEndDate, workingDaysSinceHearingEndDate);
         if (hearingEndDate != null && workingDaysSinceHearingEndDate != cadence) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
