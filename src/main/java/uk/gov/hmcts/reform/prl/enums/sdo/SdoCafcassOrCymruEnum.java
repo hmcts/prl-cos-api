@@ -24,7 +24,11 @@ public enum SdoCafcassOrCymruEnum {
     @JsonProperty("childImpactReport2")
     childImpactReport2("childImpactReport2", "Child Impact Report 2"),
     @JsonProperty("section7Report")
-    section7Report("section7Report", "Section 7 report/Child impact analysis");
+    section7Report("section7Report", "Section 7 report"),
+    @JsonProperty("enforcementOrderSuitabilityReport")
+    enforcementOrderSuitabilityReport("enforcementOrderSuitabilityReport", "Enforcement Order Suitability Report"),
+    @JsonProperty("parentalOrderReporterReport")
+    parentalOrderReporterReport("parentalOrderReporterReport", "Parental Order Reporter Report");
 
     private final String id;
     private final String displayedValue;
