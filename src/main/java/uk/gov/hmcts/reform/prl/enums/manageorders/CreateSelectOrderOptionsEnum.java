@@ -48,7 +48,7 @@ public enum CreateSelectOrderOptionsEnum {
     appointmentOfGuardian("appointmentOfGuardian", "Appointment of a guardian (C47A)","10",
         "Penodi gwarcheidwad (C47A)"),
     @JsonProperty("noticeOfHearingParties")
-    noticeOfHearingParties("noticeOfHearingParties", "Notice of Hearing (CA)", "11", "--Welsh?"),
+    noticeOfHearingParties("noticeOfHearingParties", "Notice of Hearing (CA)", "11", "Hysbysiad o Wrandawiad (CA)"),
     @JsonProperty("nonMolestation")
     nonMolestation("nonMolestation", "Non-molestation order (FL404A)","12",
         "Gorchymyn rhag molestu (FL404A)"),
@@ -74,7 +74,7 @@ public enum CreateSelectOrderOptionsEnum {
     other("other", "Other (upload an order)","19",
         "Arall (uwchlwythwch orchymyn)"),
     @JsonProperty("noticeOfHearing")
-    noticeOfHearing("noticeOfHearing", "Notice of Hearing (DA)", "20", "--Welsh?");
+    noticeOfHearing("noticeOfHearing", "Notice of Hearing (DA)", "20", "Hysbysiad o Wrandawiad (DA)");
 
     private final String id;
     private final String displayedValue;
