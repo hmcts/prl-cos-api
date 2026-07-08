@@ -72,8 +72,7 @@ public class UpdateHearingActualsService {
 
     private final ObjectMapper objectMapper;
 
-    @Value("${ccd.elastic-search-api.result-size}")
-    private String ccdElasticSearchApiResultSize;
+    private static final String ES_PAGE_SIZE = "100";
 
 
     public void updateHearingActuals() {
@@ -82,6 +81,7 @@ public class UpdateHearingActualsService {
         log.info("Running Hearing actual task cron job...");
         QueryParam.QueryParamBuilder queryParamBuilder = QueryParam.builder();
         Semaphore hearingSemaphore = new Semaphore(concurrentRequest);
+        Semaphore caseSemaphore = new Semaphore(concurrentRequest);
         String userToken = systemUserService.getSysUserToken();
         String s2sToken = authTokenGenerator.generate();
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
@@ -98,7 +98,9 @@ public class UpdateHearingActualsService {
                     s2sToken,
                     getListOfCaseidsForHearings(caseDetailsList)
                 );
-                hearingsForToday.forEach(processHearings(caseDetailsList));
+                hearingsForToday.forEach(process(executor,
+                                                 caseSemaphore,
+                                                 caseDetailsList));
                 String searchAfterValue = caseDetailsList.getLast().getId().toString();
                 log.info("search after value {}", searchAfterValue);
                 do {
@@ -113,7 +115,9 @@ public class UpdateHearingActualsService {
                             userToken,
                             s2sToken,
                             getListOfCaseidsForHearings(caseDetailsList));
-                        hearingsForToday.forEach(processHearings(caseDetailsList));
+                        hearingsForToday.forEach(process(executor,
+                                                         caseSemaphore,
+                                                         caseDetailsList));
                         searchAfterValue = caseDetailsList.getLast().getId().toString();
                         log.info("search after value {}", searchAfterValue);
                     }
@@ -125,13 +129,31 @@ public class UpdateHearingActualsService {
 
     }
 
-    private BiConsumer<String, List<String>> processHearings(List<CaseDetails> caseDetailsList) {
+    private BiConsumer<String, List<String>> process(ExecutorService executor,
+                                                             Semaphore caseSemaphore,
+                                                             List<CaseDetails> caseDetailsList) {
         return (caseId, hearingIds) ->
             caseDetailsList.stream()
                 .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
-                .forEach(caseDetails ->
-                    processHearing(caseId, hearingIds)
-                );
+                .forEach(caseDetails -> {
+                    try {
+                        log.info("semaphore permit count {}", caseSemaphore.availablePermits());
+                        caseSemaphore.acquire();
+                        executor.submit(() -> {
+                            try {
+                                processHearing(caseId, hearingIds);
+                            } catch (Exception e) {
+                                log.error("Error while processing case {}", caseDetails.getId(), e);
+                            } finally {
+                                caseSemaphore.release();
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.error("Interrupted while submitting case {}", caseId, e);
+                    }
+
+                });
     }
 
     private void processHearing(String caseId, List<String> hearingIdIterator) {
@@ -159,6 +181,8 @@ public class UpdateHearingActualsService {
                         .build());
 
         if (LocalDate.now().equals(updateHearingActualTracking.getLastFiredDate())) {
+            log.info("Skipping case and hearing as it has already been processed today. Case ID: {} and Hearing Id {}"
+                , caseData.getId(), hearingId);
             return Optional.empty();
         }
 
@@ -179,7 +203,7 @@ public class UpdateHearingActualsService {
 
 
     private Map<String, List<String>> fetchAndFilterHearingsForTodaysDate(ExecutorService executor,
-                                                                          Semaphore semaphore,
+                                                                          Semaphore hearingSemaphore,
                                                                           String userToken,
                                                                           String s2sToken,
                                                                           List<String> listOfCaseidsForHearings) {
@@ -193,9 +217,9 @@ public class UpdateHearingActualsService {
                     Math.min(i + concurrentRequest, listOfCaseidsForHearings.size())
                 ));
 
-            log.info("hearing semaphore permit count {}", semaphore.availablePermits());
+            log.info("hearing semaphore permit count {}", hearingSemaphore.availablePermits());
             try {
-                semaphore.acquire();
+                hearingSemaphore.acquire();
                 futures.add(executor.submit(() -> {
                     try {
                         return hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(
@@ -203,14 +227,19 @@ public class UpdateHearingActualsService {
                             s2sToken,
                             caseIds
                         );
+                    } catch (Exception e) {
+                        log.info("Exception while processing case starting with {} and ending with {}",
+                                 caseIds.getFirst(),
+                                 caseIds.getLast(),
+                                 e);
+                        return Collections.emptyMap();
                     } finally {
-                        semaphore.release();
+                        hearingSemaphore.release();
                     }
                 }));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 log.error("Interrupted while submitting hearing batch {}", caseIds, e);
-                break;
             }
         }
         for (Future<Map<String, List<String>>> future : futures) {
@@ -276,7 +305,7 @@ public class UpdateHearingActualsService {
 
         return queryParamFunction.apply(searchAfter)
                 .query(Query.builder().bool(finalFilter).build())
-                .size("100")
+                .size(ES_PAGE_SIZE)
             .dataToReturn(fetchFieldsRequiredForHearingActualTask())
             .sort(List.of(Sort.builder().referenceKeyword("asc").build()))
                 .build();
