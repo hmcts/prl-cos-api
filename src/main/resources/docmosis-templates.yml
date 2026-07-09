@@ -72,9 +72,9 @@ docmosis:
       filename: C49CreateOrder.pdf
     - templateName: FL-PRL-GOR-ENG-C49-Transfer-Of-Case-Draft.docx
       filename: C49CreateOrderDraft.pdf
-    - templateName: PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Draft.docx
+    - templateName: FL-PRL-HNO-ENG-FL402-Notice-Of-Hearings-Draft.docx
       filename: NoticeOfProceedings(FL402)Draft.pdf
-    - templateName: FL-PRL-HNO-ENG-FL402-Notice-Of-Proceedings-Final.docx
+    - templateName: FL-PRL-HNO-ENG-FL402-Notice-Of-Hearings-Final.docx
       filename: NoticeOfProceedings(FL402).pdf
     - templateName: FL-PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       filename: N117CreateOrderDraft.pdf
@@ -184,9 +184,9 @@ docmosis:
       filename: Welsh_Parental_Responsibility_Order_C45A.pdf
     - templateName: FL-PRL-GOR-WEL-C45A-Parental-Responsibility-Order-Draft.docx
       filename: Welsh_Parental_Responsibility_Order_C45A_draft.pdf
-    - templateName: FL-PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
+    - templateName: FL-PRL-GOR-ENG-C100-Notice-of-hearings-Draft.docx
       filename: Notice_Of_Proceeding_Order_C6_draft.pdf
-    - templateName: FL-PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
+    - templateName: FL-PRL-GOR-ENG-C100-Notice-of-hearing-Final.docx
       filename: Notice_Of_Proceeding_Order_C6.pdf
     - templateName: FL-PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
       filename: Notice_Of_Proceeding_Order_C6a_draft.pdf
