@@ -17,7 +17,50 @@ tasks.register("testWithCoverage") {
 
     def targetInput = findProperty('target')?.toString() ?: ""
     def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
-    def checkAll = targets.isEmpty()
+
+    def isIgnoredTestTarget = { String target ->
+      def cleaned = target
+        .replace('\\', '.')
+        .replace('/', '.')
+        .replaceAll(/\.java$/, '')
+
+      def simpleName = cleaned.tokenize('.').last()
+
+      // These are test-only classes, not production coverage targets.
+      // Do not turn FeesAndPaymentControllerFunctionalTest into FeesAndPaymentControllerFunctional.
+      return simpleName ==~ /.*(?:FunctionalTest|IntegrationTest|IT|Tests)$/
+    }
+
+    def normaliseTarget = { String target ->
+      def cleaned = target
+        .replace('\\', '.')
+        .replace('/', '.')
+        .replaceAll(/\.java$/, '')
+
+      def simpleName = cleaned.tokenize('.').last()
+
+      // Allow passing a unit test class name for the production class under test.
+      // FunctionalTest/IntegrationTest/IT classes are intentionally excluded above.
+      if (simpleName.endsWith("Test") && !simpleName.endsWith("FunctionalTest") && !simpleName.endsWith("IntegrationTest")) {
+        simpleName = simpleName.substring(0, simpleName.length() - "Test".length())
+      }
+
+      return simpleName
+    }
+
+    def coverageTargets = targets.findAll { !isIgnoredTestTarget(it) }
+    def ignoredTestTargets = targets.findAll { isIgnoredTestTarget(it) }
+    def checkAllCoverage = targets.isEmpty()
+
+
+    if (!ignoredTestTargets.isEmpty()) {
+      logger.lifecycle("${gray}Ignoring functional/integration test coverage target(s): ${ignoredTestTargets.join(', ')}${reset}")
+    }
+
+    if (!checkAllCoverage && coverageTargets.isEmpty()) {
+      logger.lifecycle("${yellow}No production coverage targets left after ignoring functional/integration test classes.${reset}")
+      return
+    }
 
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
@@ -42,10 +85,26 @@ tasks.register("testWithCoverage") {
           def className = fileName.replace(".java", "")
           allClassNames.add(className)
 
-          boolean isTargeted = targets.any { it.equalsIgnoreCase(className) }
+          def pkgName = pkg.attribute('name')?.toString() ?: ""
+          def fqcn = pkgName ? "${pkgName}.${className}" : className
 
-          if (checkAll || isTargeted) {
-            if (isTargeted) foundTargets.add(targets.find { it.equalsIgnoreCase(className) })
+          def matchedTarget = coverageTargets.find { target ->
+            def normalised = normaliseTarget(target)
+
+            target.equalsIgnoreCase(className)
+              || target.equalsIgnoreCase(fqcn)
+              || normalised.equalsIgnoreCase(className)
+              || fqcn.toLowerCase().endsWith(".${normalised.toLowerCase()}")
+          }
+
+          boolean isTargeted = matchedTarget != null
+
+          if (checkAllCoverage || isTargeted) {
+            if (isTargeted) {
+              foundTargets.add(matchedTarget)
+              foundTargets.add(normaliseTarget(matchedTarget))
+              foundTargets.add(className)
+            }
 
             int fileMissedInstr = 0, fileCoveredInstr = 0
             int fileMissedBranch = 0, fileCoveredBranch = 0
@@ -60,7 +119,7 @@ tasks.register("testWithCoverage") {
             grandMissedUnits += (fileMissedInstr + fileMissedBranch)
             grandCoveredUnits += (fileCoveredInstr + fileCoveredBranch)
 
-            if (!checkAll && isTargeted) {
+            if (!checkAllCoverage && isTargeted) {
               double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
               double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
               def color = filePct >= 80 ? green : red
@@ -133,17 +192,37 @@ tasks.register("testWithCoverage") {
         }
       }
 
-      def missingTargets = targets.findAll { t -> !foundTargets.any { f -> f.equalsIgnoreCase(t) } }
-      if (!checkAll && !missingTargets.isEmpty()) {
+      def missingTargets = coverageTargets.findAll { target ->
+        def normalised = normaliseTarget(target)
+
+        !foundTargets.any { found ->
+          found.equalsIgnoreCase(target)
+            || found.equalsIgnoreCase(normalised)
+        }
+      }
+
+      if (!checkAllCoverage && !missingTargets.isEmpty()) {
         logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
+
         missingTargets.each { missing ->
+          def normalisedMissing = normaliseTarget(missing)
+
           logger.lifecycle("   - ${missing}")
-          def suggestions = allClassNames.findAll { it.toLowerCase().contains(missing.toLowerCase()) }.sort()
+          if (!normalisedMissing.equalsIgnoreCase(missing)) {
+            logger.lifecycle("     ${gray}Resolved coverage target: ${normalisedMissing}${reset}")
+          }
+
+          def suggestions = allClassNames.findAll {
+            it.toLowerCase().contains(normalisedMissing.toLowerCase())
+              || normalisedMissing.toLowerCase().contains(it.toLowerCase())
+          }.sort()
+
           if (!suggestions.isEmpty()) {
             logger.lifecycle("     ${green}Did you mean?${reset}")
             suggestions.take(5).each { logger.lifecycle("      • ${it}") }
           }
         }
+
         throw new GradleException("Target class mismatch. Check spelling!")
       }
 
@@ -153,7 +232,7 @@ tasks.register("testWithCoverage") {
       def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}❌ FAIL${reset}"
 
       logger.lifecycle("\n" + "━" * 85)
-      def title = checkAll ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
+      def title = checkAllCoverage ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
       logger.lifecycle(" ${title}")
       logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
       logger.lifecycle("━" * 85 + "\n")
