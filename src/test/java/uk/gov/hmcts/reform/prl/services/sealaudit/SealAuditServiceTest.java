@@ -82,7 +82,6 @@ class SealAuditServiceTest {
         ReflectionTestUtils.setField(sealAuditService, "batchDelaySeconds", 1);
         ReflectionTestUtils.setField(sealAuditService, "pageSize", 500);
         ReflectionTestUtils.setField(sealAuditService, "fromDateStr", "2025-01-15");
-        ReflectionTestUtils.setField(sealAuditService, "toDateStr", "2025-01-15");
         ReflectionTestUtils.setField(sealAuditService, "emailEnabled", false);
         ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "");
         ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "");
@@ -217,11 +216,13 @@ class SealAuditServiceTest {
 
         String query = queryCaptor.getValue();
 
+        String expectedLt = "\"lt\": \"" + LocalDate.now().plusDays(1) + "T00:00:00\"";
+
         assertTrue(query.contains("\"from\": 0"));
         assertTrue(query.contains("\"size\": 500"));
         assertTrue(query.contains("\"created_date\""));
         assertTrue(query.contains("\"gte\": \"2025-01-15T00:00:00\""));
-        assertTrue(query.contains("\"lt\": \"2025-01-16T00:00:00\""));
+        assertTrue(query.contains(expectedLt));
         assertTrue(query.contains("\"data.orderCollection\""));
         assertTrue(query.contains("\"reference.keyword\""));
     }
@@ -623,5 +624,48 @@ class SealAuditServiceTest {
             .thenReturn(ResponseEntity.ok(resource));
 
         when(sealDetectionService.detectSeal(mockPdfBytes)).thenReturn(sealStatus);
+    }
+
+    @Test
+    void shouldSendSummaryEmailToMultipleRecipients() throws Exception {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(
+            sealAuditService,
+            "toEmailAddress",
+            "test1@example.com, test2@example.com, test3@example.com"
+        );
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test1@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test2@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test3@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
     }
 }
