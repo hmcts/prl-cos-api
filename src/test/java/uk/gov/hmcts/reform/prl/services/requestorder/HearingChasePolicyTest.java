@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 class HearingChasePolicyTest {
 
     private static final String HEARING_ID = "1";
-    private static final LocalDate TODAY = LocalDate.of(2026, 4, 24);//Friday
+    private static final LocalDate CRON_DATE = LocalDate.of(2026, 4, 24);//Friday
 
     @Mock WorkingDayIndicator workingDayIndicator;
 
@@ -66,7 +66,7 @@ class HearingChasePolicyTest {
         CaseHearing hearing = CaseHearing.caseHearingWith()
             .hearingID(null).hmcStatus("COMPLETED").build();
 
-        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), TODAY);
+        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - hearingId missing (status=COMPLETED)");
@@ -74,9 +74,9 @@ class HearingChasePolicyTest {
 
     @Test
     void decideSkipsWhenStatusNotInFilter() {
-        CaseHearing hearing = hearing("LISTED", TODAY.minusDays(5));
+        CaseHearing hearing = hearing("LISTED", CRON_DATE.minusDays(5));
 
-        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), TODAY);
+        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - status=LISTED not in filter");
@@ -84,10 +84,10 @@ class HearingChasePolicyTest {
 
     @Test
     void decideSkipsWhenHearingHasNotAtCadence() {
-        CaseHearing hearing = hearing("COMPLETED", TODAY.plusDays(1));
+        CaseHearing hearing = hearing("COMPLETED", CRON_DATE.plusDays(1));
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
-        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), TODAY);
+        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-25 not 1 days away");
@@ -100,7 +100,7 @@ class HearingChasePolicyTest {
             .build();
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(5)), caseData, emptyLedger(), TODAY);
+            hearing("COMPLETED", CRON_DATE.minusDays(5)), caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
@@ -110,7 +110,7 @@ class HearingChasePolicyTest {
     void decideSkipsWhenDraftOrderUsesHearingsTypeLinkage() {
         // Solicitor draft-an-order flow stores the hearing as the dropdown label, not the
         // HMC UUID. Format: "<hearingTypeValue> - dd/MM/yyyy hh:mm:ss".
-        LocalDate hearingDate = TODAY.minusDays(2);
+        LocalDate hearingDate = CRON_DATE.minusDays(2);
         String label = "Allocation - " + hearingDate.atTime(9, 0).format(
             java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss"));
         CaseHearing hearingWithType = CaseHearing.caseHearingWith()
@@ -126,7 +126,7 @@ class HearingChasePolicyTest {
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(label)))
             .build();
 
-        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), TODAY);
+        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
@@ -138,7 +138,7 @@ class HearingChasePolicyTest {
         // hearing.getHearingTypeValue() is blank. The draft order was saved earlier
         // (when ref-data was working) with the full "Allocation - dd/MM/yyyy hh:mm:ss"
         // label. Full-label match misses; date-suffix fallback still recognises the link.
-        LocalDate hearingDate = TODAY.minusDays(2);
+        LocalDate hearingDate = CRON_DATE.minusDays(2);
         String savedLabel = "Allocation - " + hearingDate.atTime(9, 0).format(
             java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss"));
         CaseHearing hearingWithEmptyType = CaseHearing.caseHearingWith()
@@ -154,7 +154,7 @@ class HearingChasePolicyTest {
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(savedLabel)))
             .build();
 
-        ChaseDecision decision = policy.decide(hearingWithEmptyType, caseData, emptyLedger(), TODAY);
+        ChaseDecision decision = policy.decide(hearingWithEmptyType, caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
@@ -163,7 +163,7 @@ class HearingChasePolicyTest {
     @Test
     void decideDoesNotSkipWhenHearingsTypeLabelDoesNotMatchAnyDaySchedule() {
         // A solicitor draft was created for a DIFFERENT hearing — the chase should still fire.
-        LocalDate hearingDate = TODAY.minusDays(2);
+        LocalDate hearingDate = CRON_DATE.minusDays(2);
         CaseHearing hearingWithType = CaseHearing.caseHearingWith()
             .hearingID(Long.valueOf(HEARING_ID))
             .hmcStatus("COMPLETED")
@@ -178,7 +178,7 @@ class HearingChasePolicyTest {
             .build();
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
-        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), TODAY);
+        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isTrue();
         assertThat(decision.description()).isEqualTo("cadence met - firing");
@@ -191,7 +191,7 @@ class HearingChasePolicyTest {
             .build();
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.plusDays(1)), caseData, emptyLedger(), TODAY);
+            hearing("COMPLETED", CRON_DATE.plusDays(1)), caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
@@ -202,14 +202,14 @@ class HearingChasePolicyTest {
         HearingTrackingLedger ledger = ledgerWith(
             RequestOrderHearingTracking.builder()
                 .hearingId(HEARING_ID)
-                .lastFiredDate(TODAY.minusDays(1))
+                .lastFiredDate(CRON_DATE.minusDays(1))
                 .lastCompletedDate(null)
                 .build());
 
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(5)), fl401Case().build(), ledger, TODAY);
+            hearing("COMPLETED", CRON_DATE.minusDays(5)), fl401Case().build(), ledger, CRON_DATE);
 
         assertThat(decision.shouldFire()).isTrue();
     }
@@ -219,14 +219,14 @@ class HearingChasePolicyTest {
         HearingTrackingLedger ledger = ledgerWith(
             RequestOrderHearingTracking.builder()
                 .hearingId(HEARING_ID)
-                .lastFiredDate(TODAY.minusDays(1))
+                .lastFiredDate(CRON_DATE.minusDays(1))
                 .lastCompletedDate(null)
                 .build());
 
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3).thenReturn(2);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(1)), c100Case().build(), ledger, TODAY);
+            hearing("COMPLETED", CRON_DATE.minusDays(1)), c100Case().build(), ledger, CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
     }
@@ -236,7 +236,7 @@ class HearingChasePolicyTest {
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(1)), fl401Case().build(), emptyLedger(), TODAY);
+            hearing("COMPLETED", CRON_DATE.minusDays(1)), fl401Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-23 not 1 days away");
@@ -247,7 +247,7 @@ class HearingChasePolicyTest {
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.plusDays(1)), fl401Case().build(), emptyLedger(), TODAY);
+            hearing("COMPLETED", CRON_DATE.plusDays(1)), fl401Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isTrue();
         assertThat(decision.description()).isEqualTo("cadence met - firing");
@@ -258,14 +258,14 @@ class HearingChasePolicyTest {
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", TODAY.minusDays(3)), c100Case().build(), emptyLedger(), TODAY);
+            hearing("COMPLETED", CRON_DATE.minusDays(3)), c100Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isTrue();
     }
 
     @Test
     void decideSkipsWhenHearingMappedToFinalisedOrder() {
-        LocalDate hearingDate = TODAY.plusDays(3);
+        LocalDate hearingDate = CRON_DATE.plusDays(3);
         CaseData caseData = fl401Case()
             .orderCollection(List.of(finalisedOrder(hearingDate)))
             .build();
@@ -280,7 +280,7 @@ class HearingChasePolicyTest {
             .build();
 
         ChaseDecision decision = policy.decide(
-            hearingWithType, caseData, emptyLedger(), TODAY);
+            hearingWithType, caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
