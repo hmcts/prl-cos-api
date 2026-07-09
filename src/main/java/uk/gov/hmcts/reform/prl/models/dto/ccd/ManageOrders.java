@@ -323,4 +323,6 @@ public class ManageOrders implements MappableObject {
     private final DynamicMultiSelectList otherPartiesOnlyC47a;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
+
+    private final YesOrNo isOrderCreatedBySolicitor;
 }
