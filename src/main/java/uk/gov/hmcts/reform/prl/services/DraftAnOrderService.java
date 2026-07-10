@@ -733,10 +733,6 @@ public class DraftAnOrderService {
             clientContext, eventId
         );
 
-        // FPVTL-3156, clear down previous answers in these fields to start fresh
-        caseDataMap.put("whatToDoWithOrderCourtAdmin", null);
-        caseDataMap.put("whatToDoWithOrderSolicitor", null);
-
         String languageChosen = CaseUtils.getLanguage(clientContext);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder, languageChosen));

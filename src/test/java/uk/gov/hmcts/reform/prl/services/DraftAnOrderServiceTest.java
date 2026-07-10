@@ -1075,8 +1075,6 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(caseData, authToken, null,
                                                                                          ADMIN_EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(caseDataMap.get("previewDraftOrder"));
-        assertNull(caseDataMap.get("whatToDoWithOrderCourtAdmin"));
-        assertNull(caseDataMap.get("whatToDoWithOrderSolicitor"));
     }
 
     @Test
