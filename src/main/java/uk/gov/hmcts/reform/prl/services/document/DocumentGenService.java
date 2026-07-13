@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,12 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
-import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -29,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDet
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
-import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
@@ -41,6 +37,8 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationRequest;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
@@ -105,7 +103,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
@@ -370,7 +367,7 @@ public class DocumentGenService {
     private final CaseDocumentClient caseDocumentClient;
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
-    private final DgsApiClient dgsApiClient;
+    private final PdfGenerationService pdfGenerationService;
     private final AuthTokenGenerator authTokenGenerator;
     private final Time dateTime;
 
@@ -1686,7 +1683,7 @@ public class DocumentGenService {
         }
     }
 
-    public Document convertToPdf(String authorisation, Document document) {
+    public Document convertToPdf(String caseId, String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
@@ -1700,37 +1697,19 @@ public class DocumentGenService {
                     try {
                         return resource.getInputStream().readAllBytes();
                     } catch (IOException e) {
-                        throw new InvalidResourceException("Doc name " + filename, e);
+                        throw new InvalidResourceException("Case ID " + caseId + ": Doc name " + filename, e);
                     }
                 })
-                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
-            Map<String, Object> tempCaseDetails = new HashMap<>();
-            tempCaseDetails.put("fileName", docInBytes);
-            GeneratedDocumentInfo generatedDocumentInfo = null;
-            try {
-                generatedDocumentInfo = dgsApiClient.convertDocToPdf(
-                    document.getDocumentFileName(),
-                    authorisation, GenerateDocumentRequest
-                        .builder().template(DUMMY).values(tempCaseDetails).build()
-                );
-            } catch (FeignException fe) {
-                log.error("FeignException while converting document to PDF: {}", fe.getMessage(), fe);
-            } catch (Exception e) {
-                log.error("Exception while converting document to PDF: {}", e.getMessage(), e);
-            }
-            if (nonNull(generatedDocumentInfo)) {
-                return Document.builder()
-                    .documentUrl(generatedDocumentInfo.getUrl())
-                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                    .documentFileName(generatedDocumentInfo.getDocName())
-                    .build();
-            } else {
-                log.error("generatedDocumentInfo is null for documentURL {}, binary url{}, file name {}", document.getDocumentUrl(),
-                          document.getDocumentBinaryUrl(), document.getDocumentFileName());
-                throw new PdfConversionException("PDF Conversion error");
-            }
+                .orElseThrow(() -> new InvalidResourceException("Case ID " + caseId + ": Resource is invalid " + filename));
 
+            PdfGenerationRequest pdfGenerationRequest = PdfGenerationRequest.builder()
+                .caseId(caseId)
+                .authToken(authorisation)
+                .fileContent(docInBytes)
+                .sourceFilename(document.getDocumentFileName())
+                .build();
 
+            return pdfGenerationService.generateAndStore(pdfGenerationRequest);
         }
         return document;
     }
