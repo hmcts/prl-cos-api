@@ -845,6 +845,10 @@ request-order-task:
   cadence-working-days:
     c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
     fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
+
+update-hearing-actuals:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
   access-key: ${DOCMOSIS_ACCESS_KEY:}
