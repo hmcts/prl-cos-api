@@ -119,7 +119,7 @@ public class BulkPrintServiceTest {
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-        when(documentGenService.convertToPdf(authToken,docInfo)).thenReturn(docInfo);
+        when(documentGenService.convertToPdf("12345", authToken,docInfo)).thenReturn(docInfo);
 
         when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "binaryUrl"))
             .thenReturn(expectedResponse);
@@ -174,12 +174,9 @@ public class BulkPrintServiceTest {
                                              .build())))
             .build();
 
-        //when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
-
-
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
-
-        when(documentGenService.convertToPdf(anyString(), any(Document.class))).thenThrow(new PdfConversionException("PDF Conversion Error"));
+        when(documentGenService.convertToPdf(anyString(), anyString(), any(Document.class)))
+            .thenThrow(new PdfConversionException("PDF Conversion Error"));
 
         assertThrows(
             BulkPrintException.class,
@@ -207,7 +204,7 @@ public class BulkPrintServiceTest {
                 .build();
         final List<Document> documentList = List.of(coverSheet, finalDoc);
 
-        when(documentGenService.convertToPdf(authToken,finalDoc)).thenThrow(new RuntimeException());
+        when(documentGenService.convertToPdf("123", authToken,finalDoc)).thenThrow(new RuntimeException());
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
         assertThrows(
@@ -236,7 +233,8 @@ public class BulkPrintServiceTest {
             .documentHash("coverSheet")
             .build();
         final List<Document> documentList = List.of(coverSheet, finalDoc);
-        when(documentGenService.convertToPdf(anyString(), any(Document.class))).thenThrow(new PdfConversionException("PDF Conversion Error"));
+        when(documentGenService.convertToPdf(anyString(), anyString(), any(Document.class)))
+            .thenThrow(new PdfConversionException("PDF Conversion Error"));
 
         assertThrows(
             BulkPrintException.class,
