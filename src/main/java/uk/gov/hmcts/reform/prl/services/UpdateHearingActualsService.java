@@ -78,6 +78,8 @@ public class UpdateHearingActualsService {
 
         //Fetch all cases in Hearing state with a hearing today
         log.info("Running Hearing actual task cron job...");
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
         QueryParam.QueryParamBuilder queryParamBuilder = QueryParam.builder();
         Semaphore hearingSemaphore = new Semaphore(concurrentRequest);
@@ -324,25 +326,28 @@ public class UpdateHearingActualsService {
     }
 
     private List<CaseDetails> runCcdSearch(QueryParam ccdQueryParam) {
-        SearchResultResponse response = SearchResultResponse.builder().cases(new ArrayList<>()).build();
         try {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
             log.info("json query {}",searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
-            response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
+            SearchResultResponse response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
+
+            List<CaseDetails> caseDetails = Optional.ofNullable(response.getCases())
+                .orElseGet(Collections::emptyList);
+
+            log.info(
+                "Total no. of cases {}, cases in current run {}",
+                response.getTotal(),
+                caseDetails.size()
+            );
+
+            return caseDetails;
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
+            return Collections.emptyList();
         }
-        if (null != response) {
-            log.info("Total no. of cases retrieved {}", response.getTotal());
-            return response.getCases();
-        }
-        return Collections.emptyList();
     }
 
 
