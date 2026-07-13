@@ -58,6 +58,8 @@ java:
           alias:  JUDGE_USER_NAME
         - name: judge-testpassword
           alias: JUDGE_PASSWORD
+        - name: docmosis-api-key
+          alias: DOCMOSIS_ACCESS_KEY
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
@@ -75,7 +77,6 @@ java:
     REFORM_SERVICE_NAME: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl-cos-api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request-update
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
