@@ -2,24 +2,23 @@ package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -28,8 +27,8 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
-import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,14 +55,15 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
 
-
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CafCassControllerFunctionalTest {
 
     private static final String USER_TOKEN = "Bearer testToken";
+    private static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
+    private static final String REDACTED_DOCUMENTS_RESPONSE =
+        "classpath:response/cafcass-search-response-redacted-documents.json";
+    private static final String VALID_DOCUMENT_UUID = "11111111-1111-1111-1111-111111111111";
 
     private MockMvc mockMvc;
 
@@ -91,15 +91,57 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private RefDataService refDataService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
-    @Ignore
+    @Test
+    public void givenRedactedDocumentsWhenGetRequestToSearchCasesThenRedactedDocumentsAreExcluded() throws Exception {
+        String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(REDACTED_DOCUMENTS_RESPONSE).toPath()));
+        ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
+        SearchResult expectedSearchResult = objectMapper.readValue(cafcassResponseStr, SearchResult.class);
+
+        Mockito.when(authorisationService.authoriseService(any())).thenReturn(true);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_AUTH_TOKEN);
+        Mockito.when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
+        Mockito.when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
+        when(systemUserService.getSysUserToken()).thenReturn(USER_TOKEN);
+        Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
+
+        MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORISATION_HEADER, TEST_AUTH_TOKEN)
+                        .header(SERVICE_AUTHORISATION_HEADER, TEST_SERVICE_AUTH_TOKEN)
+                        .queryParam(CAFCASS_START_DATE_PARAM, "2022-08-22T10:54:43.49")
+                        .queryParam(CAFCASS_END_DATE_PARAM, "2022-08-22T11:00:43.49")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        CafCassResponse actualCafcassResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsString(),
+            CafCassResponse.class
+        );
+
+        assertEquals(1, actualCafcassResponse.getTotal());
+        assertEquals(1, actualCafcassResponse.getCases().getFirst().getCaseData().getOtherDocuments().size());
+        assertEquals(
+            VALID_DOCUMENT_UUID,
+            actualCafcassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst()
+                .getValue().getDocumentOther().getDocumentId()
+        );
+        assertEquals(
+            "valid-document.pdf",
+            actualCafcassResponse.getCases().getFirst().getCaseData().getOtherDocuments().getFirst()
+                .getValue().getDocumentName()
+        );
+    }
+
+    @Disabled
     @Test
     public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
-        String cafcassResponseStr = TestResourceUtil.readFileFrom(CREATE_SERVICE_RESPONSE);
+        String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));
         ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
         Map<String, String> refDataMap = new HashMap<>();
         refDataMap.put("ABA5-APL","Appeal");
@@ -119,7 +161,6 @@ public class CafCassControllerFunctionalTest {
         Mockito.when(refDataService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5", "HearingType")).thenReturn(
             refDataMap);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
-
 
         MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
