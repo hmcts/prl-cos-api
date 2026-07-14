@@ -302,6 +302,13 @@ aca:
   api:
     url: ${ACA_SERVICE_API_BASEURL:http://localhost:4454}
 
+wa-task-management:
+  api:
+    url: ${TASK_MANAGEMENT_API_BASEURL:http://wa-task-management-api-aat.service.core-compute-aat.internal}
+  system:
+    username: ${WA_SYSTEM_USER_USERNAME:xxxxxx}
+    password: ${WA_SYSTEM_USER_PASSWORD:xxxxxx}
+
 test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
@@ -695,6 +702,19 @@ acro:
     allow-unknown-keys: true
     remote-directory: /
     password: ${ACRO_SFTP_USER_PASSWORD:some_password}
+
+bankHolidays:
+  api:
+    url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
+
+request-order-task:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+  cadence-working-days:
+    c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
+    fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
+
+update-hearing-actuals:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
 
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
