@@ -21,9 +21,6 @@ prl:
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxx}
-  document:
-    generate:
-      uri: http://prl-dgs-aat.service.core-compute-aat.internal/health/liveness
   refdata:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
@@ -41,7 +38,7 @@ management:
   #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
-    import: "optional:configtree:/mnt/secrets/prl/"
+    import: optional:configtree:/mnt/secrets/prl/,optional:classpath:docmosis-templates.yml
   application:
     name: Prl cos api
   servlet:
@@ -81,6 +78,10 @@ feature:
     barristerFeatureEnabled: ${BARRISTER_FEATURE_ENABLED:false}
     cafcassDateTimeFeatureEnabled: ${CAFCASS_DATE_TIME_FEATURE_ENABLED:false}
     osCourtLookupEnabled: ${OS_COURT_LOOKUP_ENABLED:false}
+    bundleByCategoryEnabled: ${BUNDLE_BY_CATEGORY_ENABLED:false}
+    awaitingInformationEnabled: ${AWAITING_INFORMATION_ENABLED:false}
+    exitAwaitingInformationEnabled: ${EXIT_AWAITING_INFORMATION_ENABLED:false}
+    createRequestCirUpdateTaskEnabled: ${CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED:false}
 
 xui:
   url: ${XUI_URL:https://manage-case.aat.platform.hmcts.net/cases/case-details}
@@ -439,8 +440,7 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-2868.preview.platform.hmcts.net/}
+    url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
 
 auth:
   idam:
@@ -463,9 +463,6 @@ send-letter:
 
 case_document_am:
   url: ${CCD_CASE_DOCS_AM_API:http://ccd-case-document-am-api-aat.service.core-compute-aat.internal}
-
-prl-dgs-api:
-  url: ${PRL_DGS_API_URL:http://prl-dgs-aat.service.core-compute-aat.internal}
 
 courtfinder:
   api:
@@ -548,6 +545,8 @@ document:
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
       c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
       c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
+      c100_resp_c8_welsh_draft_template: FL-PRL-GOR-WEL-RES-C8-DRAFT.docx
+      c100_resp_c8_welsh_draft_filename: C8Document_Welsh_Draft.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
@@ -572,7 +571,11 @@ document:
       fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
       fl401_resp_c8_filename: C8Document.pdf
       fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
-      fl401_resp_c8_filename_welsh: C8Document.pdf
+      fl401_resp_c8_filename_welsh: C8Document_Welsh.pdf
+      fl401_resp_c8_draft_template: FL-PRL-GOR-ENG-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename: C8Document_Draft.pdf
+      fl401_resp_c8_draft_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-DRAFT.docx
+      fl401_resp_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     common:
       doc_cover_sheet_template: FL-PRL-APP-ENG-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: FL-PRL-APP-WEL-COVER-SHEET.docx
@@ -727,10 +730,18 @@ document:
       prl_sdo_welsh_filename: Welsh_Standard_Directions_Order_Final.pdf
       doc_cover_sheet_serve_order_template: FL-PRL-APP-ENG-COVER-SERVE-ORDER-SHEET.docx
       doc_cover_sheet_welsh_serve_order_template: FL-PRL-APP-WEL-COVER-SERVE-ORDER-SHEET.docx
+      prl_blank_cover_letter_template: FL-PRL-APP-ENG-BLANK-COVER-LETTER.docx
+      prl_blank_cover_letter_welsh_template: FL-PRL-APP-WEL-BLANK-COVER-LETTER.docx
       prl_citizen_c1a_final_response_template: FL-PRL-GOR-ENG-CITIZEN-C1A-RESPONSE-FINAL.docx
       prl_citizen_c1a_final_response_welsh_template: FL-PRL-GOR-WEL-CITIZEN-C1A-RESPONSE-FINAL.docx
       doc_send_reply_message_template: FL-PRL-LET-ENG-SEND-REPLY-MESSAGE.docx
       doc_send_reply_message_welsh_template: FL-PRL-LET-WEL-SEND-REPLY-MESSAGE.docx
+      other_c8_template: FL-PRL-GOR-ENG-OTHER-C8.docx
+      other_c8_filename: C8Document.pdf
+      other_c8_draft_filename: C8Document_Draft.pdf
+      other_c8_template_welsh: FL-PRL-GOR-WEL-OTHER-C8.docx
+      other_c8_filename_welsh: C8Document_Welsh.pdf
+      other_c8_draft_filename_welsh: C8Document_Welsh_Draft.pdf
     citizen:
       prl_citizen_witness_statement_welsh_template: FL-PRL-GOR-WEL-Citizen-Witness-Statement.docx
       prl_citizen_witness_statement_template: FL-PRL-GOR-ENG-Citizen-Witness-Statement.docx
@@ -849,3 +860,17 @@ hwf-update-case-state-task:
 prepare-hearing-bundle:
   calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
 
+docmosis:
+  url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
+  access-key: ${DOCMOSIS_ACCESS_KEY:}
+  pdf:
+    familyCourtImgKey: "familycourt"
+    familyCourtImgVal: "[userImage:familycourt.png]"
+    hmctsImgKey: "hmcts"
+    hmctsImgVal: "[userImage:hmcts.png]"
+    displayTemplateKey: "displayTemplateOnly"
+    displayTemplateVal: "1"
+
+http:
+  connect-timeout: 60s
+  read-timeout: 60s

@@ -97,7 +97,8 @@ public class HelpWithFeesService {
     public Map<String, Object> setCaseStatus(CallbackRequest callbackRequest, String authorisation) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        if (callbackRequest.getCaseDetails().getState().equalsIgnoreCase((State.SUBMITTED_NOT_PAID.getValue()))) {
+        if (callbackRequest.getCaseDetails().getState().equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())
+            || callbackRequest.getCaseDetails().getState().equalsIgnoreCase(State.AWAITING_INFORMATION.getValue())) {
             caseDataUpdated.put(CASE_STATUS, CaseStatus.builder()
                 .state(SUBMITTED_PAID.getLabel())
                 .build());
@@ -176,7 +177,10 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         if (null != caseData) {
-            if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState()) && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
+            if ((State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState())
+                || State.AWAITING_INFORMATION.getValue().equalsIgnoreCase(caseDetails.getState()))
+                && YesOrNo.Yes.equals(caseData.getHelpWithFees())) {
+
                 String dynamicElement = String.format("Child arrangements application C100 - %s",
                                                       CommonUtils.formatLocalDateTime(caseData.getCaseSubmittedTimeStamp(),
                                                                                       DATE_TIME_OF_SUBMISSION_FORMAT));
@@ -236,7 +240,8 @@ public class HelpWithFeesService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         log.info("case state :" + caseDetails.getState());
-        if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState())) {
+        if (State.SUBMITTED_NOT_PAID.getValue().equalsIgnoreCase(caseDetails.getState())
+            || State.AWAITING_INFORMATION.getValue().equalsIgnoreCase(caseDetails.getState())) {
             log.info("populate data for C100 application");
             caseDataUpdated.put(HWF_APPLICATION_DYNAMIC_DATA_LABEL,
                                 String.format(
