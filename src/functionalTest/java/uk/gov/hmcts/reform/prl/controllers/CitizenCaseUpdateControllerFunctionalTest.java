@@ -5,17 +5,13 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,13 +22,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
-@Ignore
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Disabled
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CitizenCaseUpdateControllerFunctionalTest {
-
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -81,7 +73,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
 
     private static final String SUBMITTED_READY_FOR_WITHDRAW_REQUEST_BODY = "requests/submitted-aplication-ready-for-withdraw.json";
 
-
     @Test
     public void createCcdTestCase() throws Exception {
 
@@ -98,8 +89,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails1);
-        Assert.assertNotNull(caseDetails1.getId());
+        Assertions.assertNotNull(caseDetails1);
+        Assertions.assertNotNull(caseDetails1.getId());
 
     }
 
@@ -300,7 +291,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestBody_updateCitizenParty_Event_citizenContactPreference_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -321,7 +312,7 @@ public class CitizenCaseUpdateControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestBody_updateCitizenParty_Event_citizenInternalFlagUpdates_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(CITIZEN_UPDATE_CASE_REQUEST_BODY);
 
@@ -341,7 +332,6 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
     }
-
 
     @Test
     public void givenRequestBody_updateCitizenParty_Event_citizen_case_update_then200Response() throws Exception {
@@ -375,8 +365,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseData.class);
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(createNewCase.getId());
+        Assertions.assertNotNull(createNewCase);
+        Assertions.assertNotNull(createNewCase.getId());
 
         String requestBody = ResourceLoader.loadJson(SAVE_C100_DRAFT_CITIZEN_REQUEST_BODY);
 
@@ -394,23 +384,22 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(saveedCaseData);
+        Assertions.assertNotNull(createNewCase);
+        Assertions.assertNotNull(saveedCaseData);
 
         JSONObject createCaseMiamResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildMaim());
         JSONObject savedMiamResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildMaim());
 
-        Assert.assertEquals(YesOrNo.Yes.toString(), createCaseMiamResponse.get("miam_consent"));
-        Assert.assertEquals(YesOrNo.No.toString(),savedMiamResponse.get("miam_consent"));
+        Assertions.assertEquals(YesOrNo.Yes.toString(), createCaseMiamResponse.get("miam_consent"));
+        Assertions.assertEquals(YesOrNo.No.toString(),savedMiamResponse.get("miam_consent"));
 
         JSONObject createCaseHwfResponse = new JSONObject(createNewCase.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
         JSONObject savedHwfResponse = new JSONObject(saveedCaseData.getC100RebuildData().getC100RebuildHelpWithFeesDetails());
 
-        Assert.assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
-        Assert.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
+        Assertions.assertEquals(YesOrNo.No.toString(),createCaseHwfResponse.get("hwf_needHelpWithFees"));
+        Assertions.assertEquals(YesOrNo.Yes.toString(),savedHwfResponse.get("hwf_needHelpWithFees"));
 
     }
-
 
     @Test
     public void givenRequestBody_deleteApplicationCitizen_then200Response() throws Exception {
@@ -424,8 +413,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .then()
             .extract()
             .as(CaseData.class);
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(createNewCase.getId());
+        Assertions.assertNotNull(createNewCase);
+        Assertions.assertNotNull(createNewCase.getId());
 
         String requestBody = ResourceLoader.loadJson(DELETE_APPLICATION_CITIZEN_REQUEST_BODY);
 
@@ -443,8 +432,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(createNewCase);
-        Assert.assertNotNull(deletedApplicationCaseData);
+        Assertions.assertNotNull(createNewCase);
+        Assertions.assertNotNull(deletedApplicationCaseData);
 
     }
 
@@ -464,8 +453,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
 
         String requestBody1 = ResourceLoader.loadJson(WITHDRAW_APPLICATION_CITIZEN_REQUEST_BODY);
 
@@ -481,8 +470,8 @@ public class CitizenCaseUpdateControllerFunctionalTest {
             .extract()
             .as(CaseData.class);
 
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(withDrawCase);
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(withDrawCase);
 
     }
 }
