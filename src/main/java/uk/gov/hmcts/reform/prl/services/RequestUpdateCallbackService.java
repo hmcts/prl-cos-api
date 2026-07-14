@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 public class RequestUpdateCallbackService {
 
     public static final String PAID = "Paid";
+
     private enum PaymentCallbackType {
         ROOT,
         AWP,
