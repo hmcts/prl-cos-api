@@ -365,7 +365,7 @@ public class Fm5NotificationService {
                 DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
             );
         } catch (Exception e) {
-            log.error("Error occurred in generating cover sheets {}", e.getMessage());
+            log.error("Error occurred in generating cover sheets for case {}", caseData.getId(), e);
         }
         return coverSheets;
     }
