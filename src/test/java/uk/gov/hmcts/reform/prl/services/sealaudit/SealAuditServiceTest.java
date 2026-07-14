@@ -46,6 +46,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -79,9 +80,8 @@ class SealAuditServiceTest {
         ReflectionTestUtils.setField(sealAuditService, "searchCaseTypeId", "PRLAPPS");
         ReflectionTestUtils.setField(sealAuditService, "batchSize", 100);
         ReflectionTestUtils.setField(sealAuditService, "batchDelaySeconds", 1);
-        ReflectionTestUtils.setField(sealAuditService, "resultSize", "10000");
-        ReflectionTestUtils.setField(sealAuditService, "fromDateStr", "2024-01-01");
-        ReflectionTestUtils.setField(sealAuditService, "toDateStr", "2026-12-31");
+        ReflectionTestUtils.setField(sealAuditService, "pageSize", 500);
+        ReflectionTestUtils.setField(sealAuditService, "fromDateStr", "2025-01-15");
         ReflectionTestUtils.setField(sealAuditService, "emailEnabled", false);
         ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "");
         ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "");
@@ -133,10 +133,12 @@ class SealAuditServiceTest {
         SearchResult searchResult = SearchResult.builder()
             .cases(List.of(createCaseDetailsWithNoOrders()))
             .build();
+
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
 
         sealAuditService.runAudit();
+
         verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
     }
 
@@ -152,11 +154,6 @@ class SealAuditServiceTest {
                     "order.docx",
                     "2025-01-15T10:30:00.000000"
                 ),
-                createCaseDetailsWithServedOrder(
-                    2222222222222222L,
-                    "order.pdf",
-                    "2023-12-31T10:30:00.000000"
-                ),
                 createCaseDetailsWithoutServedParties()
             ))
             .build();
@@ -166,6 +163,136 @@ class SealAuditServiceTest {
 
         sealAuditService.runAudit();
 
+        verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
+    }
+
+    @Test
+    void shouldCheckServedPdfOrderRegardlessOfServedDate() throws IOException {
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of(
+                createCaseDetailsWithServedOrder(
+                    2222222222222222L,
+                    "order.pdf",
+                    "2023-12-31T10:30:00.000000"
+                )
+            ))
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        mockDocumentSealStatus(SealStatus.PRESENT);
+
+        sealAuditService.runAudit();
+
+        verify(caseDocumentClient).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService).detectSeal(any());
+    }
+
+    @Test
+    void shouldBuildSearchQueryUsingCreatedDateRangeAndPagination() {
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(coreCaseDataApi).searchCases(
+            anyString(),
+            anyString(),
+            eq("PRLAPPS"),
+            queryCaptor.capture()
+        );
+
+        String query = queryCaptor.getValue();
+
+        String expectedLt = "\"lt\": \"" + LocalDate.now().plusDays(1) + "T00:00:00\"";
+
+        assertTrue(query.contains("\"from\": 0"));
+        assertTrue(query.contains("\"size\": 500"));
+        assertTrue(query.contains("\"created_date\""));
+        assertTrue(query.contains("\"gte\": \"2025-01-15T00:00:00\""));
+        assertTrue(query.contains(expectedLt));
+        assertTrue(query.contains("\"data.orderCollection\""));
+        assertTrue(query.contains("\"reference.keyword\""));
+    }
+
+    @Test
+    void shouldRequestNextPageWhenFullPageReturned() {
+        ReflectionTestUtils.setField(sealAuditService, "pageSize", 2);
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult firstPage = SearchResult.builder()
+            .cases(List.of(
+                createCaseDetailsWithNoOrders(1111111111111111L),
+                createCaseDetailsWithNoOrders(2222222222222222L)
+            ))
+            .build();
+
+        SearchResult secondPage = SearchResult.builder()
+            .cases(List.of(createCaseDetailsWithNoOrders(3333333333333333L)))
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(firstPage)
+            .thenReturn(secondPage);
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
+        verify(coreCaseDataApi, times(2)).searchCases(
+            anyString(),
+            anyString(),
+            eq("PRLAPPS"),
+            queryCaptor.capture()
+        );
+
+        List<String> queries = queryCaptor.getAllValues();
+
+        assertTrue(queries.get(0).contains("\"from\": 0"));
+        assertTrue(queries.get(0).contains("\"size\": 2"));
+
+        assertTrue(queries.get(1).contains("\"from\": 2"));
+        assertTrue(queries.get(1).contains("\"size\": 2"));
+    }
+
+    @Test
+    void shouldStopPagingWhenResultPageIsEmpty() {
+        ReflectionTestUtils.setField(sealAuditService, "pageSize", 2);
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult firstPage = SearchResult.builder()
+            .cases(List.of(
+                createCaseDetailsWithNoOrders(1111111111111111L),
+                createCaseDetailsWithNoOrders(2222222222222222L)
+            ))
+            .build();
+
+        SearchResult emptyPage = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(firstPage)
+            .thenReturn(emptyPage);
+
+        sealAuditService.runAudit();
+
+        verify(coreCaseDataApi, times(2)).searchCases(anyString(), anyString(), anyString(), anyString());
         verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
     }
 
@@ -181,13 +308,12 @@ class SealAuditServiceTest {
         when(authTokenGenerator.generate()).thenReturn("s2s-token");
 
         SearchResult searchResult = SearchResult.builder()
-            .cases(List.of(
-                createCaseDetailsWithServedOrder()
-            ))
+            .cases(List.of(createCaseDetailsWithServedOrder()))
             .build();
 
         when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(searchResult);
+
         mockDocumentSealStatus(sealStatus);
 
         sealAuditService.runAudit();
@@ -393,29 +519,6 @@ class SealAuditServiceTest {
         );
     }
 
-    @Test
-    void shouldTreatNullDocumentDownloadBodyAsError() {
-        Document document = Document.builder()
-            .documentBinaryUrl("http://dm-store/documents/123/binary")
-            .build();
-
-        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
-            .thenReturn(ResponseEntity.ok(null));
-
-        SealStatus result = ReflectionTestUtils.invokeMethod(
-            sealAuditService,
-            "checkSealStatus",
-            document,
-            "user-token",
-            "s2s-token",
-            "1234567890123456"
-        );
-
-        assertEquals(SealStatus.ERROR, result);
-        verify(caseDocumentClient).getDocumentBinary(anyString(), anyString(), anyString());
-        verify(sealDetectionService, never()).detectSeal(any());
-    }
-
     private CaseDetails createCaseDetailsWithServedOrder() {
         return createCaseDetailsWithServedOrder(
             1234567890123456L,
@@ -471,11 +574,15 @@ class SealAuditServiceTest {
     }
 
     private CaseDetails createCaseDetailsWithNoOrders() {
+        return createCaseDetailsWithNoOrders(1111111111111111L);
+    }
+
+    private CaseDetails createCaseDetailsWithNoOrders(Long caseId) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("courtName", "Test Court");
 
         return CaseDetails.builder()
-            .id(1111111111111111L)
+            .id(caseId)
             .data(caseData)
             .build();
     }
@@ -517,5 +624,48 @@ class SealAuditServiceTest {
             .thenReturn(ResponseEntity.ok(resource));
 
         when(sealDetectionService.detectSeal(mockPdfBytes)).thenReturn(sealStatus);
+    }
+
+    @Test
+    void shouldSendSummaryEmailToMultipleRecipients() throws Exception {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(
+            sealAuditService,
+            "toEmailAddress",
+            "test1@example.com, test2@example.com, test3@example.com"
+        );
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test1@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test2@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test3@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
     }
 }

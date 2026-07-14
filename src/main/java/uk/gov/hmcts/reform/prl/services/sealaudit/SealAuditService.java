@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,14 +60,11 @@ public class SealAuditService {
     @Value("${seal-audit.batch-delay-seconds:5}")
     private int batchDelaySeconds;
 
-    @Value("${seal-audit.size:100}")
-    private String resultSize;
+    @Value("${seal-audit.page-size:500}")
+    private int pageSize;
 
     @Value("${seal-audit.from-date:2024-04-01}")
     private String fromDateStr;
-
-    @Value("${seal-audit.to-date:}")
-    private String toDateStr;
 
     @Value("${seal-audit.email.to:}")
     private String toEmailAddress;
@@ -86,95 +84,158 @@ public class SealAuditService {
         long startTime = System.currentTimeMillis();
 
         LocalDate fromDate = parseDate(fromDateStr).orElse(LocalDate.of(2024, 4, 1));
-        LocalDate toDate = parseDate(toDateStr).orElse(LocalDate.now());
+        LocalDate toDate = LocalDate.now();
 
-        log.info("Audit date range: {} to {}", fromDate, toDate);
+        log.info("Audit case created date range: {} to {}", fromDate, toDate);
 
         String sysUserToken = systemUserService.getSysUserToken();
         String s2sToken = authTokenGenerator.generate();
 
+        int totalCasesProcessed = 0;
         int totalOrders = 0;
         int missingSeals = 0;
         int presentSeals = 0;
         int errors = 0;
+        boolean foundAnyCases = false;
         List<String> csvRows = new ArrayList<>();
 
         try {
-            SearchResult searchResult = searchServedOrders(sysUserToken, s2sToken);
+            int from = 0;
 
-            if (searchResult == null || searchResult.getCases() == null || searchResult.getCases().isEmpty()) {
-                log.info("No cases with served orders found");
-                sendSummaryEmail(0, 0, 0, 0, 0, csvRows);
-                return;
-            }
+            while (true) {
+                SearchResult searchResult = searchServedOrders(
+                    sysUserToken,
+                    s2sToken,
+                    fromDate,
+                    toDate,
+                    from
+                );
 
-            log.info("Found {} cases to process", searchResult.getCases().size());
+                if (searchResult == null || searchResult.getCases() == null || searchResult.getCases().isEmpty()) {
+                    log.info("No cases returned for page from {} size {}", from, pageSize);
+                    break;
+                }
 
-            List<CaseDetails> cases = searchResult.getCases();
-            for (int i = 0; i < cases.size(); i++) {
-                CaseDetails caseDetails = cases.get(i);
-                log.info("Processing Case {}", caseDetails.getId());
+                List<CaseDetails> cases = searchResult.getCases();
+                foundAnyCases = true;
 
-                try {
-                    CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
+                log.info("Found {} cases to process from offset {}", cases.size(), from);
 
-                    String caseReference = String.valueOf(caseDetails.getId());
-                    String courtName = caseData.getCourtName();
+                for (CaseDetails caseDetails : cases) {
+                    totalCasesProcessed++;
+                    log.info("Processing Case {}", caseDetails.getId());
 
-                    List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-                    if (CollectionUtils.isEmpty(orderCollection)) {
-                        continue;
-                    }
+                    try {
+                        CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
 
-                    for (Element<OrderDetails> orderElement : orderCollection) {
-                        OrderDetails order = orderElement.getValue();
+                        String caseReference = String.valueOf(caseDetails.getId());
+                        String courtName = caseData.getCourtName();
 
-                        if (!isServedPdfOrder(order, fromDate, toDate)) {
+                        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
+                        if (CollectionUtils.isEmpty(orderCollection)) {
                             continue;
                         }
 
-                        totalOrders++;
-                        Document orderDoc = order.getOrderDocument();
+                        for (Element<OrderDetails> orderElement : orderCollection) {
+                            OrderDetails order = orderElement.getValue();
 
-                        SealStatus status = checkSealStatus(orderDoc, sysUserToken, s2sToken, caseReference);
-
-                        String orderType = order.getOrderTypeId();
-                        String firstServedDateTime = getFirstServedDateTime(order);
-                        String orderUploadTimestamp = orderDoc.getUploadTimeStamp() != null ? orderDoc.getUploadTimeStamp().toString() : null;
-                        String orderFilename = orderDoc.getDocumentFileName();
-                        String dateOrderMade = order.getOtherDetails() != null
-                            ? order.getOtherDetails().getOrderMadeDate() : null;
-
-                        switch (status) {
-                            case PRESENT -> presentSeals++;
-                            case MISSING -> {
-                                missingSeals++;
-                                logOrderResult(caseReference, courtName, orderElement.getId().toString(), orderType,
-                                    orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status);
-                                csvRows.add(buildCsvRow(caseReference, courtName, orderType, orderUploadTimestamp,
-                                                        orderFilename, dateOrderMade, status));
+                            if (!isServedPdfOrder(order)) {
+                                continue;
                             }
-                            case ERROR -> {
-                                errors++;
-                                logOrderResult(caseReference, courtName, orderElement.getId().toString(), orderType,
-                                    orderUploadTimestamp, orderFilename, dateOrderMade, firstServedDateTime, status);
-                                csvRows.add(buildCsvRow(caseReference, courtName, orderType, orderUploadTimestamp,
-                                                        orderFilename, dateOrderMade, status));
+
+                            totalOrders++;
+                            Document orderDoc = order.getOrderDocument();
+
+                            SealStatus status = checkSealStatus(orderDoc, sysUserToken, s2sToken, caseReference);
+
+                            String orderType = order.getOrderTypeId();
+                            String firstServedDateTime = getFirstServedDateTime(order);
+                            String orderUploadTimestamp = orderDoc.getUploadTimeStamp() != null
+                                ? orderDoc.getUploadTimeStamp().toString()
+                                : firstServedDateTime;
+                            String orderFilename = orderDoc.getDocumentFileName();
+                            String dateOrderMade = order.getOtherDetails() != null
+                                ? order.getOtherDetails().getOrderMadeDate() : null;
+
+                            switch (status) {
+                                case PRESENT -> presentSeals++;
+                                case MISSING -> {
+                                    missingSeals++;
+                                    logOrderResult(
+                                        caseReference,
+                                        courtName,
+                                        orderElement.getId().toString(),
+                                        orderType,
+                                        orderUploadTimestamp,
+                                        orderFilename,
+                                        dateOrderMade,
+                                        firstServedDateTime,
+                                        status
+                                    );
+                                    csvRows.add(buildCsvRow(
+                                        caseReference,
+                                        courtName,
+                                        orderType,
+                                        orderUploadTimestamp,
+                                        orderFilename,
+                                        dateOrderMade,
+                                        status
+                                    ));
+                                }
+                                case ERROR -> {
+                                    errors++;
+                                    logOrderResult(
+                                        caseReference,
+                                        courtName,
+                                        orderElement.getId().toString(),
+                                        orderType,
+                                        orderUploadTimestamp,
+                                        orderFilename,
+                                        dateOrderMade,
+                                        firstServedDateTime,
+                                        status
+                                    );
+                                    csvRows.add(buildCsvRow(
+                                        caseReference,
+                                        courtName,
+                                        orderType,
+                                        orderUploadTimestamp,
+                                        orderFilename,
+                                        dateOrderMade,
+                                        status
+                                    ));
+                                }
+                                default -> log.warn("Unexpected seal status: {}", status);
                             }
-                            default -> log.warn("Unexpected seal status: {}", status);
                         }
+
+                    } catch (Exception e) {
+                        log.error("Error processing case {}: {}", caseDetails.getId(), e.getMessage());
+                        errors++;
                     }
 
-                } catch (Exception e) {
-                    log.error("Error processing case {}: {}", caseDetails.getId(), e.getMessage());
-                    errors++;
+                    if (totalCasesProcessed % batchSize == 0) {
+                        log.info(
+                            "Processed {} cases, pausing for {} seconds",
+                            totalCasesProcessed,
+                            batchDelaySeconds
+                        );
+                        TimeUnit.SECONDS.sleep(batchDelaySeconds);
+                    }
                 }
 
-                if ((i + 1) % batchSize == 0 && i < cases.size() - 1) {
-                    log.info("Processed {}/{} cases, pausing for {} seconds",
-                             i + 1, cases.size(), batchDelaySeconds);
-                    TimeUnit.SECONDS.sleep(batchDelaySeconds);
+                if (cases.size() < pageSize) {
+                    log.info("Final page reached. Cases in final page: {}", cases.size());
+                    break;
                 }
+
+                from += pageSize;
+            }
+
+            if (!foundAnyCases) {
+                log.info("No cases with served orders found");
+                sendSummaryEmail(0, 0, 0, 0, 0, csvRows);
+                return;
             }
 
         } catch (InterruptedException e) {
@@ -186,6 +247,7 @@ public class SealAuditService {
 
         long duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime);
         log.info("*** Seal Audit Complete ***");
+        log.info("Total cases processed: {}", totalCasesProcessed);
         log.info("Total orders checked: {}", totalOrders);
         log.info("Seals present: {}", presentSeals);
         log.info("Seals missing: {}", missingSeals);
@@ -195,15 +257,35 @@ public class SealAuditService {
         sendSummaryEmail(totalOrders, presentSeals, missingSeals, errors, duration, csvRows);
     }
 
-    private SearchResult searchServedOrders(String userToken, String s2sToken) {
+    private SearchResult searchServedOrders(
+        String userToken,
+        String s2sToken,
+        LocalDate fromDate,
+        LocalDate toDate,
+        int from
+    ) {
         String query = """
             {
+              "from": %s,
+              "size": %s,
+              "sort": [
+                { "created_date": "asc" },
+                { "reference.keyword": "asc" }
+              ],
               "query": {
                 "bool": {
                   "must": [
                     {
                       "exists": {
                         "field": "data.orderCollection"
+                      }
+                    },
+                    {
+                      "range": {
+                        "created_date": {
+                          "gte": "%sT00:00:00",
+                          "lt": "%sT00:00:00"
+                        }
                       }
                     }
                   ],
@@ -223,20 +305,27 @@ public class SealAuditService {
                   ]
                 }
               },
-              "size": %s,
               "_source": [
                 "data.orderCollection",
                 "data.courtName",
-                "reference"
+                "reference",
+                "created_date"
               ]
             }
-            """.formatted(resultSize);
+            """.formatted(from, pageSize, fromDate, toDate.plusDays(1));
 
-        log.info("Executing search query for served orders");
+        log.info(
+            "Executing search query for cases created from {} to {} exclusive, from {}, size {}",
+            fromDate,
+            toDate.plusDays(1),
+            from,
+            pageSize
+        );
+
         return coreCaseDataApi.searchCases(userToken, s2sToken, searchCaseTypeId, query);
     }
 
-    private boolean isServedPdfOrder(OrderDetails order, LocalDate fromDate, LocalDate toDate) {
+    private boolean isServedPdfOrder(OrderDetails order) {
         if (order == null || order.getOrderDocument() == null) {
             return false;
         }
@@ -255,23 +344,7 @@ public class SealAuditService {
         }
 
         List<Element<ServedParties>> servedParties = order.getServeOrderDetails().getServedParties();
-        if (servedParties == null || servedParties.isEmpty()) {
-            return false;
-        }
-
-        LocalDateTime firstServed = servedParties.stream()
-            .map(Element::getValue)
-            .map(ServedParties::getServedDateTime)
-            .filter(Objects::nonNull)
-            .min(LocalDateTime::compareTo)
-            .orElse(null);
-
-        if (firstServed == null) {
-            return false;
-        }
-
-        LocalDate servedDate = firstServed.toLocalDate();
-        return !servedDate.isBefore(fromDate) && !servedDate.isAfter(toDate);
+        return servedParties != null && !servedParties.isEmpty();
     }
 
     private Optional<LocalDate> parseDate(String dateStr) {
@@ -360,13 +433,13 @@ public class SealAuditService {
         SealStatus sealStatus
     ) {
         return String.join(",",
-            escapeCsv(caseReference),
-            escapeCsv(courtName),
-            escapeCsv(orderType),
-            escapeCsv(orderFilename),
-            escapeCsv(dateOrderMade),
-            sealStatus.name(),
-            escapeCsv(orderUploadTimestamp)
+                           escapeCsv(caseReference),
+                           escapeCsv(courtName),
+                           escapeCsv(orderType),
+                           escapeCsv(orderFilename),
+                           escapeCsv(dateOrderMade),
+                           sealStatus.name(),
+                           escapeCsv(orderUploadTimestamp)
         );
     }
 
@@ -380,8 +453,14 @@ public class SealAuditService {
         return value;
     }
 
-    private void sendSummaryEmail(int totalOrders, int presentSeals, int missingSeals,
-                                   int errors, long durationSeconds, List<String> csvRows) {
+    private void sendSummaryEmail(
+        int totalOrders,
+        int presentSeals,
+        int missingSeals,
+        int errors,
+        long durationSeconds,
+        List<String> csvRows
+    ) {
         if (!emailEnabled || toEmailAddress == null || toEmailAddress.isBlank()) {
             log.info("Email not enabled or no recipient configured, skipping email");
             return;
@@ -389,6 +468,16 @@ public class SealAuditService {
 
         if (emailTemplateId == null || emailTemplateId.isBlank()) {
             log.error("Email template ID not configured, skipping email");
+            return;
+        }
+
+        List<String> recipients = Arrays.stream(toEmailAddress.split(","))
+            .map(String::trim)
+            .filter(email -> !email.isBlank())
+            .toList();
+
+        if (recipients.isEmpty()) {
+            log.info("No valid recipient configured, skipping email");
             return;
         }
 
@@ -415,14 +504,16 @@ public class SealAuditService {
             Object fileUpload = prepareUpload(csvBytes, true, false, "26 weeks");
             templateVars.put("link_to_file", fileUpload);
 
-            notificationClient.sendEmail(
-                emailTemplateId,
-                toEmailAddress,
-                templateVars,
-                "seal-audit-" + dateStr
-            );
+            for (String recipient : recipients) {
+                notificationClient.sendEmail(
+                    emailTemplateId,
+                    recipient,
+                    templateVars,
+                    "seal-audit-" + dateStr
+                );
+            }
 
-            log.info("Seal audit summary email sent successfully to {}", toEmailAddress);
+            log.info("Seal audit summary email sent successfully to {}", recipients);
 
         } catch (NotificationClientException e) {
             log.error("Error sending seal audit summary email via Gov Notify", e);

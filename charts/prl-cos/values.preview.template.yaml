@@ -68,6 +68,8 @@ java:
           alias: ACRO_SFTP_USER
         - name: acro-sftp-user-password
           alias: ACRO_SFTP_USER_PASSWORD
+        - name: docmosis-api-key
+          alias: DOCMOSIS_ACCESS_KEY
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -91,7 +93,6 @@ java:
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE: prl_cos_api
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS: 900
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -108,5 +109,6 @@ java:
     AWAITING_INFORMATION_ENABLED: true
     EXIT_AWAITING_INFORMATION_ENABLED: true
     CAFCASS_DATE_TIME_FEATURE_ENABLED: true
+    BUNDLE_BY_CATEGORY_ENABLED: true
     CREATE_REQUEST_CIR_UPDATE_TASK_ENABLED: true
     APP_ENV: "preview"
