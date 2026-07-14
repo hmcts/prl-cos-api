@@ -238,7 +238,7 @@ class RequestUpdateCallbackServiceTest {
         List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
         additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder()
                                                      .payment(Payment.builder()
-                                                                  .paymentServiceRequestReferenceNumber("Paid")
+                                                                  .paymentServiceRequestReferenceNumber("test-ref")
                                                                   .build())
                                                      .otherApplicationsBundle(OtherApplicationsBundle.builder()
                                                                                   .applicationStatus("Submitted")
@@ -260,7 +260,7 @@ class RequestUpdateCallbackServiceTest {
         CaseData caseData = CaseData.builder()
             .id(caseId)
             .additionalApplicationsBundle(additionalApplicationsBundle)
-            .paymentServiceRequestReferenceNumber("test-reference") // Intentionally mismatched to force AWP logic path
+            .paymentServiceRequestReferenceNumber("test-reference") // Root mismatch with matching AWP ref forces AWP logic path
             .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
             .build();
 
@@ -286,6 +286,84 @@ class RequestUpdateCallbackServiceTest {
         verify(coreCaseDataService, times(1)).findCaseById(anyString(), eq(caseId.toString()));
         verify(coreCaseDataService, times(1)).startUpdate(anyString(), any(), eq(caseId.toString()), eq(true));
         verify(coreCaseDataService, times(1)).submitUpdate(anyString(), any(), any(), eq(caseId.toString()), eq(true));
+    }
+
+    @Test
+    void shouldIgnorePaymentCallbackWhenReferenceMatchesNeitherRootNorAwp() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("awp-reference")
+                             .build())
+                .build()
+        ));
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .paymentServiceRequestReferenceNumber("root-reference")
+            .additionalApplicationsBundle(additionalApplicationsBundle)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("unknown-reference")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder().paymentReference("payment-reference").build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        verify(coreCaseDataService, never()).eventRequest(any(CaseEvent.class), anyString());
+        verify(coreCaseDataService, never()).startUpdate(anyString(), any(), anyString(), anyBoolean());
+        verify(coreCaseDataService, never()).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void shouldTreatUnmatchedPaymentCallbackAsRootPaymentWhenCaseIsSubmittedNotPaid() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("awp-reference")
+                             .build())
+                .build()
+        ));
+
+        CaseData caseData = CaseData.builder()
+            .id(caseId)
+            .state(State.SUBMITTED_NOT_PAID)
+            .paymentServiceRequestReferenceNumber("root-reference")
+            .additionalApplicationsBundle(additionalApplicationsBundle)
+            .build();
+
+        serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
+            .ccdCaseNumber(caseId.toString())
+            .serviceRequestReference("unknown-reference")
+            .serviceRequestStatus("Paid")
+            .payment(PaymentDto.builder()
+                         .paymentAmount("123")
+                         .paymentReference("payment-reference")
+                         .build())
+            .build();
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(coreCaseDataService.findCaseById(anyString(), eq(caseId.toString()))).thenReturn(
+            CaseDetails.builder()
+                .id(caseId)
+                .state(State.SUBMITTED_NOT_PAID.getValue())
+                .data(Map.of("id", 1))
+                .build()
+        );
+
+        requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
+
+        ArgumentCaptor<CaseEvent> eventCaptor = ArgumentCaptor.forClass(CaseEvent.class);
+        verify(coreCaseDataService, atLeastOnce()).eventRequest(eventCaptor.capture(), anyString());
+        List<CaseEvent> capturedEvents = eventCaptor.getAllValues();
+        assertTrue(capturedEvents.stream().anyMatch(e -> e == CaseEvent.PAYMENT_SUCCESS_CALLBACK));
     }
 
     @Test
@@ -420,10 +498,19 @@ class RequestUpdateCallbackServiceTest {
 
     @Test
     void shouldSelectCaseEventForAwpPaymentSuccess() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("awp-ref")
+                             .build())
+                .build()
+        ));
+
         CaseData awpCaseData = CaseData.builder()
             .id(caseId)
             .paymentServiceRequestReferenceNumber("other-ref")
-            .additionalApplicationsBundle(new ArrayList<>())
+            .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
@@ -445,9 +532,19 @@ class RequestUpdateCallbackServiceTest {
 
     @Test
     void shouldProcessCallbackAwpPaymentFailure() {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(
+            AdditionalApplicationsBundle.builder()
+                .payment(Payment.builder()
+                             .paymentServiceRequestReferenceNumber("completely-different-awp-reference")
+                             .build())
+                .build()
+        ));
+
         CaseData caseData = CaseData.builder()
             .id(1L)
-            .paymentServiceRequestReferenceNumber("initial-case-reference") // Mismatch forces isCasePayment = false
+            .paymentServiceRequestReferenceNumber("initial-case-reference") // Mismatch with AWP bundle forces isCasePayment = false
+            .additionalApplicationsBundle(additionalApplicationsBundle)
             .build();
 
         serviceRequestUpdateDto = ServiceRequestUpdateDto.builder()
