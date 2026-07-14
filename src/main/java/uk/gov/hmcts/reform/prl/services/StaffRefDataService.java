@@ -38,7 +38,7 @@ public class StaffRefDataService {
 
     @Cacheable(cacheNames = STAFF_REF_DATA_CACHE)
     public List<StaffResponse> getAllStaffDetails() {
-        log.info("Fetching all staff ref data (not cached)");
+        log.info("Fetching all staff ref data from refdata API");
         try {
             ResponseEntity<List<StaffResponse>> response = staffResponseDetailsApi.getAllStaffResponseDetails(
                 idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
