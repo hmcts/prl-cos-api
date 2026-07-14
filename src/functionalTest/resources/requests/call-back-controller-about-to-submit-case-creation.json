@@ -55,7 +55,57 @@
         "doTheyHaveLegalRepresentation": null,
         "sendSignUpLink": null,
         "solicitorEmail": null
-      }
+      },
+      "children": [
+        {
+          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+          "value": {
+            "firstName": "Test",
+            "lastName": "Child",
+            "dateOfBirth": "2000-10-10",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "orderAppliedFor": [
+              "childArrangementsOrder"
+            ],
+            "applicantsRelationshipToChild": "grandParent",
+            "otherApplicantsRelationshipToChild": null,
+            "respondentsRelationshipToChild": "mother",
+            "otherRespondentsRelationshipToChild": null,
+            "childLiveWith": [
+              "anotherPerson",
+              "respondent",
+              "applicant"
+            ],
+            "childrenKnownToLocalAuthority": null,
+            "childrenKnownToLocalAuthorityTextArea": null,
+            "childrenSubjectOfChildProtectionPlan": null,
+            "isChildCurrentAddressKnown": "Yes",
+            "childUnsupervisedTime": "No",
+            "childContactFromOtherRecipients": "No",
+            "relationshipToApplicant": null,
+            "relationshipToRespondent": null,
+            "otherPersonWhoLivesWithChild": [
+              {
+                "firstName": "Test",
+                "lastName": "Aunt",
+                "relationshipToChildDetails": "Aunt",
+                "address": {
+                  "AddressLine1": "17 Lorne Road",
+                  "AddressLine2": "",
+                  "AddressLine3": "",
+                  "PostTown": "test",
+                  "County": "",
+                  "Country": "",
+                  "PostCode": "le2 1yh"
+                },
+                "isPersonIdentityConfidential": "No"
+              }
+            ]
+          }
+        }
+      ]
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
