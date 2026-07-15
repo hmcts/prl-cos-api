@@ -57,17 +57,17 @@ testing-support-data:
   preview:
     org:
       org1:
-        id: LM6OZX0-FAIL_PREVIEW
-        name: Private law NOC solution-FAIL_PREVIEW
+        id: LM6OZX0
+        name: Private law NOC solution
       org2:
-        id: QO4A1Q8-FAIL_PREVIEW
-        name: FPRL-test-organisation-FAIL_PREVIEW
+        id: QO4A1Q8
+        name: FPRL-test-organisation
       org3:
-        id: F9I5I7G-FAIL_PREVIEW
-        name: Private law test organisation-FAIL_PREVIEW
+        id: F9I5I7G
+        name: Private law test organisation
       org4:
-        id: 5S5EJUH-FAIL_PREVIEW
-        name: KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q-FAIL_PREVIEW
+        id: 5S5EJUH
+        name: KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q
 
 management:
   endpoint:
