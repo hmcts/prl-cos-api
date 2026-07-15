@@ -15,7 +15,7 @@ public class TestingSupportFixtureLoader {
 
     public String loadJson(String filePath) throws Exception {
         String rawJson = ResourceLoader.loadJson(filePath);
-        log.info("Loading placeholdes for env={}", environment.toString());
+        log.info("Loading TestingSupport placeholders for filepath={} on env={}", filePath, environment.toString());
         return environment.resolvePlaceholders(rawJson);
     }
 }
