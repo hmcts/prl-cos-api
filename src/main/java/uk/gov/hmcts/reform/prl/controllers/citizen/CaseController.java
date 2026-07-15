@@ -182,7 +182,10 @@ public class CaseController {
     }
 
     private CitizenCaseData buildCitizenCaseData(CaseData caseData) {
-        return new CitizenCaseData(caseData, caseData.getState().getLabel());
+        CaseData newCaseData = caseData.toBuilder()
+            .noOfDaysRemainingToSubmitCase(CaseUtils.getRemainingDaysSubmitCase(caseData))
+            .build();
+        return new CitizenCaseData(newCaseData, caseData.getState().getLabel());
     }
 
     @PostMapping("/case/create")
