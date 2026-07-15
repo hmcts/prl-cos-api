@@ -89,6 +89,7 @@ import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP7;
@@ -361,18 +362,17 @@ public class ServiceOfApplicationService {
 
                 if (null != other.getValue().getAddress()
                     && null != other.getValue().getAddress().getAddressLine1()) {
-                    List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
-                                                              .getCoverSheets(caseData, authorization,
-                                                                              other.getValue().getAddress(),
-                                                                              other.getValue().getLabelForDynamicList(),
-                                                                              DOCUMENT_COVER_SHEET_HINT
-                                                              ));
-                    docs.addAll(packN);
+                    packN.addAll(serviceOfApplicationPostService
+                                     .getCoverSheets(caseData, authorization,
+                                                     other.getValue().getAddress(),
+                                                     other.getValue().getLabelForDynamicList(),
+                                                     DOCUMENT_COVER_SHEET_HINT
+                                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
                         other,
-                        docs,
+                        packN,
                         servedParty
                     )));
                 }
@@ -2497,17 +2497,18 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, List<Document> coverLetter,
                                                      String servedParty) {
-
         try {
-            List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
+            List<Document> docs = new ArrayList<>();
+            if (coverLetter != null) {
+                docs.addAll(coverLetter);
+            }
+            docs.addAll(serviceOfApplicationPostService
                                                       .getCoverSheets(caseData, authorization,
                                                                       party.getValue().getAddress(),
                                                                       party.getValue().getLabelForDynamicList(),
                                                                       DOCUMENT_COVER_SHEET_HINT
                                                       ));
-            if (coverLetter != null) {
-                docs.addAll(coverLetter);
-            }
+
             docs.addAll(packDocs);
             log.info("*** Sending docs to party Lip post");
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -4312,16 +4313,19 @@ public class ServiceOfApplicationService {
             log.info("Reject reason list not empty");
             // get existing reject reason
             confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
-            //The confidentiality check reason text is mandatory on Manage Case, therefore we only add it to the
-            //case when it has a value to avoid null entries.
-            log.info("Adding reject reason list to the case");
-            caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
-        } else {
-            //No rejection reasons = not an actual rejection  since the user interface does not allow proceeding with
-            //a rejection without writing at least one reason.
-            log.info("Reject reason list empty, therefore not an actual rejection but"
-                         + " likely timeout on update all tabs");
         }
+        if (!isEmpty(caseData.getServiceOfApplication().getRejectionReason())
+            && No.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
+            final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
+                    caseData.getServiceOfApplication().getRejectionReason())
+                .dateRejected(CaseUtils.getCurrentDate())
+                .build();
+
+            confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
+
+        }
+        caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
+
 
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
