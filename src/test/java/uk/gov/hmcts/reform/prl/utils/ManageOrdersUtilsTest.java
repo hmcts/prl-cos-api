@@ -2,20 +2,28 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 class ManageOrdersUtilsTest {
@@ -197,5 +205,65 @@ class ManageOrdersUtilsTest {
 
         assertEquals(1, errors.size());
         assertEquals("You must select a hearing type", errors.get(0));
+    }
+
+    @Test
+    void shouldNotEditOrderIfSolicitorUploadedOrderAndSolicitorOptionIsNotEdit() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .isOrderCreatedBySolicitor(Yes)
+                              .whatToDoWithOrderSolicitor(OrderApprovalDecisionsForSolicitorOrderEnum.sendToAdminToServe)
+                              .whatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe)
+                              .build())
+            .build();
+
+        boolean actual = ManageOrdersUtils.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
+
+        assertFalse(actual);
+    }
+
+    @Test
+    void shouldEditOrderIfSolicitorUploadedOrderAndSolicitorOptionIsEdit() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .isOrderCreatedBySolicitor(Yes)
+                              .whatToDoWithOrderSolicitor(OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe)
+                              .whatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe)
+                              .build())
+            .build();
+
+        boolean actual = ManageOrdersUtils.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
+
+        assertTrue(actual);
+    }
+
+    @Test
+    void shouldNotEditOrderIfCourtAdminUploadedOrderAndCourtAdminOptionIsNotEdit() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .isOrderCreatedBySolicitor(No)
+                              .whatToDoWithOrderSolicitor(OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe)
+                              .whatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe)
+                              .build())
+            .build();
+
+        boolean actual = ManageOrdersUtils.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
+
+        assertFalse(actual);
+    }
+
+    @Test
+    void shouldEditOrderIfCourtAdminUploadedOrderAndCourtAdminOptionIsEdit() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .isOrderCreatedBySolicitor(No)
+                              .whatToDoWithOrderSolicitor(OrderApprovalDecisionsForSolicitorOrderEnum.sendToAdminToServe)
+                              .whatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe)
+                              .build())
+            .build();
+
+        boolean actual = ManageOrdersUtils.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId());
+
+        assertTrue(actual);
     }
 }
