@@ -71,7 +71,7 @@ public class UpdateHearingActualsService {
 
     private final ObjectMapper objectMapper;
 
-    private static final String ES_PAGE_SIZE = "2";
+    private static final String ES_PAGE_SIZE = "100";
 
 
     public void updateHearingActuals() {
