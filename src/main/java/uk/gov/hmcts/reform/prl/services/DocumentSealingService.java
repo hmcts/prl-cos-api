@@ -10,22 +10,18 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
-import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationRequest;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 import static org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject.createFromByteArray;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REGION_WALES;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
@@ -43,13 +39,14 @@ public class DocumentSealingService {
     private static final String COURT_SEAL_BILINGUAL = "familycourtseal-bilingual.png";
     private static final String COURT_SEAL = "familycourtseal.png";
 
-    private final DgsApiClient dgsApiClient;
     private final DocumentGenService documentGenService;
     private final AuthTokenGenerator authTokenGenerator;
+    private final PdfGenerationService pdfGenerationService;
 
     public Document sealDocument(Document document, CaseData caseData, String authorisation) {
+        String caseId = String.valueOf(caseData.getId());
         if (documentGenService.checkFileFormat(document.getDocumentFileName())) {
-            document = documentGenService.convertToPdf(authorisation, document);
+            document = documentGenService.convertToPdf(caseId, authorisation, document);
         }
 
         String s2sToken = authTokenGenerator.generate();
@@ -64,20 +61,14 @@ public class DocumentSealingService {
         byte[] seal = readBytes(getCourtSealImage(region));
         byte[] sealedDocument = addSealToDocument(downloadedPdf, seal);
 
-        Map<String, Object> tempCaseDetails = new HashMap<>();
-        tempCaseDetails.put("fileName", sealedDocument);
-        GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
-            document.getDocumentFileName(),
-            authorisation, GenerateDocumentRequest
-                .builder().template(DUMMY).values(tempCaseDetails).build()
-        );
-
-        return Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentFileName(generatedDocumentInfo.getDocName())
+        PdfGenerationRequest pdfGenerationRequest = PdfGenerationRequest.builder()
+            .caseId(caseId)
+            .authToken(authorisation)
+            .fileContent(sealedDocument)
+            .sourceFilename(document.getDocumentFileName())
             .build();
 
+        return pdfGenerationService.generateAndStore(pdfGenerationRequest);
     }
 
     private byte[] addSealToDocument(byte[] binaries, byte[] seal) {
