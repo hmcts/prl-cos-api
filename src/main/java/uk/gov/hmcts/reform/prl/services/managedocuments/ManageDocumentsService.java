@@ -1013,7 +1013,12 @@ public class ManageDocumentsService {
                                 objectMapper.convertValue(previousDocElement.get().getValue(), Map.class).get(attributeName),
                                 Document.class
                             );
-                            deleteDocument(docToDelete);
+                            if (!docToDelete.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+                                deleteDocument(docToDelete);
+                            } else {
+                                log.info("Original document {} started with Confidential_, so skipping delete",
+                                         docToDelete.getDocumentId());
+                            }
                         }
                     }
                 } catch (Exception e) {

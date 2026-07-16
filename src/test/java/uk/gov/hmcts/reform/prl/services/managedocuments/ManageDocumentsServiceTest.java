@@ -2953,6 +2953,52 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    public void shouldNotCleanupDocumentWithExistingConfidentialFilename() {
+        uk.gov.hmcts.reform.prl.models.documents.Document oldDoc =
+            uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_existingdoc.pdf")
+            .documentUrl("http://doc-url/22222222-2222-2222-2222-222222222222")
+            .build();
+
+        QuarantineLegalDoc oldConfidentialNamedDoc = QuarantineLegalDoc.builder()
+            .categoryId("applicantApplication")
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+            .applicantApplicationDocument(oldDoc)
+            .build();
+
+        when(systemUserService.getSysUserToken()).thenReturn("userToken");
+        when(authTokenGenerator.generate()).thenReturn("sysToken");
+        final CaseData currentCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(List.of(element(ELEMENT_ID, oldConfidentialNamedDoc.toBuilder()
+                                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
+                                     .build())))
+                                 .build())
+            .build();
+        final CaseData previousCaseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(List.of(element(ELEMENT_ID, oldConfidentialNamedDoc)))
+                                 .build())
+            .build();
+
+        Map<String, Object> docMap = Map.of("applicantApplicationDocument", oldConfidentialNamedDoc);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(docMap);
+        when(objectMapper.convertValue(any(), eq(uk.gov.hmcts.reform.prl.models.documents.Document.class)))
+            .thenReturn(oldDoc);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
+
+        manageDocumentsService.cleanupOldCopyOfConfidentialDocuments(auth, currentCaseData, previousCaseData);
+
+        verify(caseDocumentClient, never()).deleteDocument(
+            any(),
+            any(),
+            eq(UUID.fromString("22222222-2222-2222-2222-222222222222")),
+            eq(true)
+        );
+    }
+
+
+    @Test
     public void shouldCleanupRenamedRestrictedDocument() {
         when(systemUserService.getSysUserToken()).thenReturn("userToken");
         when(authTokenGenerator.generate()).thenReturn("sysToken");
