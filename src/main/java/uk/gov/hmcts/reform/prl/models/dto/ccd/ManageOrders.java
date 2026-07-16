@@ -314,6 +314,8 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("checkForAutomatedHearing")
     private YesOrNo checkForAutomatedHearing;
 
+    private final YesOrNo isOrderCreatedBySolicitor;
+
     /*
     * Unused fields
     * */
@@ -325,4 +327,5 @@ public class ManageOrders implements MappableObject {
     private final DynamicMultiSelectList otherPartiesOnlyC47a;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
+
 }
