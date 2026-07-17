@@ -1,0 +1,16 @@
+[ {
+  "CaseEventID" : "c100ResSolMiamD",
+  "CaseFieldID" : "respondentSolicitorHaveYouAttendedMiam",
+  "ListElementCode" : "attendedMiam",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolMiamD",
+  "CaseFieldID" : "respondentSolicitorHaveYouAttendedMiam",
+  "ListElementCode" : "willingToAttendMiam",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolMiamD",
+  "CaseFieldID" : "respondentSolicitorHaveYouAttendedMiam",
+  "ListElementCode" : "reasonNotAttendingMiam",
+  "CaseTypeID" : "PRLAPPS"
+} ]

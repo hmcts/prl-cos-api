@@ -1,0 +1,26 @@
+[ {
+  "CaseEventID" : "WithdrawApplication_Event",
+  "CaseFieldID" : "withDrawApplicationData",
+  "ListElementCode" : "withDrawApplicationHeadingLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "WithdrawApplication_Event",
+  "CaseFieldID" : "withDrawApplicationData",
+  "ListElementCode" : "withDrawApplicationWarning",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "WithdrawApplication_Event",
+  "CaseFieldID" : "withDrawApplicationData",
+  "ListElementCode" : "withDrawApplicationCourtInfo",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "WithdrawApplication_Event",
+  "CaseFieldID" : "withDrawApplicationData",
+  "ListElementCode" : "withDrawApplication",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "WithdrawApplication_Event",
+  "CaseFieldID" : "withDrawApplicationData",
+  "ListElementCode" : "withDrawApplicationReason",
+  "CaseTypeID" : "PRLAPPS"
+} ]

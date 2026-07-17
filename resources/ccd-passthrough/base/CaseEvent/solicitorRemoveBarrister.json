@@ -1,0 +1,6 @@
+[ {
+  "ID" : "solicitorRemoveBarrister",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/barrister/remove/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-assignment/barrister/remove/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/barrister/remove/submitted"
+} ]

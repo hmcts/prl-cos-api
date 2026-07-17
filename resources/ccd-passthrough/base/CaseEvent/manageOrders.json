@@ -1,0 +1,6 @@
+[ {
+  "ID" : "manageOrders",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/populate-header",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/manage-orders/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/case-order-email-notification"
+} ]

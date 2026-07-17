@@ -1,0 +1,4 @@
+[ {
+  "ID" : "fl401AmendTypeOfApplication",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

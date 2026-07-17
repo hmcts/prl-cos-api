@@ -1,0 +1,4 @@
+[ {
+  "ID" : "UpdateNextHearingInfo",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/update-next-hearing-details-callback/about-to-submit"
+} ]

@@ -1,0 +1,96 @@
+[ {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "firstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "previousName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "isDateOfBirthKnown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "respondentLivedWithApplicant",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "isCurrentAddressKnown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "address.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "canYouProvideEmailAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "email",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "canYouProvidePhoneNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentsDetails",
+  "CaseFieldID" : "respondentsFL401",
+  "ListElementCode" : "phoneNumber",
+  "CaseTypeID" : "PRLAPPS"
+} ]

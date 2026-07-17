@@ -1,0 +1,107 @@
+[ {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "caApplicantApplicationType",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "caRespondentApplicationType",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "daApplicantApplicationType",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "daRespondentApplicationType",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "document",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "documentAcknowledgeLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "documentAcknowledge",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "urgencyTimeFrameType",
+  "CaseTypeID" : "PRLAPPS",
+  "Publish" : "True"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle.name",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle.secureAccommodationType",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle.notes",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle.document",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle.documentAcknowledgeLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supplementsBundle.documentAcknowledge",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supportingEvidenceBundle",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supportingEvidenceBundle.name",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supportingEvidenceBundle.notes",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supportingEvidenceBundle.document",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supportingEvidenceBundle.documentAcknowledgeLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "uploadAdditionalApplications",
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "ListElementCode" : "supportingEvidenceBundle.documentAcknowledge",
+  "CaseTypeID" : "PRLAPPS"
+} ]

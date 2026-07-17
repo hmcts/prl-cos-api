@@ -1,0 +1,226 @@
+[ {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "firstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "previousName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "gender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "otherGender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "placeOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "liveInRefuge",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "refugeConfidentialityC8Form",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "address.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "hintTextForC8Form",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "isAddressConfidential",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "isAtAddressLessThan5Years",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "addressLivedLessThan5YearsDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "canYouProvideEmailAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "email",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "isEmailAddressConfidential",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "contactPreferences",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "phoneNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "isPhoneNumberConfidential",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "representativeFirstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "representativeLastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorEmail",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorReference",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorOrg.OrganisationID",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorOrg",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorOrg.OrganisationName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "dxNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "solicitorAddress.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendApplicantsDetails",
+  "CaseFieldID" : "applicants",
+  "ListElementCode" : "addNewApplicantLabel",
+  "CaseTypeID" : "PRLAPPS"
+} ]

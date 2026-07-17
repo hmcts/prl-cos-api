@@ -1,0 +1,5 @@
+[ {
+  "ID" : "barristerStopRepresenting",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/barrister/stop-representing/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-assignment/barrister/remove/about-to-submit"
+} ]

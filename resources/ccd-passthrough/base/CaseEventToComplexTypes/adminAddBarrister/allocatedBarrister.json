@@ -1,0 +1,36 @@
+[ {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "partyList",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "barristerFirstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "barristerLastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "barristerEmail",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "barristerOrg",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "barristerOrg.OrganisationID",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminAddBarrister",
+  "CaseFieldID" : "allocatedBarrister",
+  "ListElementCode" : "barristerOrg.OrganisationName",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,21 @@
+[ {
+  "LiveFrom" : "01/12/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "EmailInformation",
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "emailInformation",
+  "ListElementCode" : "emailName",
+  "EventElementLabel" : " ",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "01/12/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "EmailInformation",
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "emailInformation",
+  "ListElementCode" : "emailAddress",
+  "EventElementLabel" : " ",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "MANDATORY"
+} ]

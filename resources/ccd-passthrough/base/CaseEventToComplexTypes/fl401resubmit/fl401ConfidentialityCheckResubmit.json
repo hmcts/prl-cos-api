@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "fl401resubmit",
+  "CaseFieldID" : "fl401ConfidentialityCheckResubmit",
+  "ListElementCode" : "confidentialityLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401resubmit",
+  "CaseFieldID" : "fl401ConfidentialityCheckResubmit",
+  "ListElementCode" : "confidentialityConsent",
+  "CaseTypeID" : "PRLAPPS"
+} ]

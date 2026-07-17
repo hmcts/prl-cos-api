@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "returningAnApplicationLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/return-application-return-message"
+} ]

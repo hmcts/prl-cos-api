@@ -1,0 +1,31 @@
+[ {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "otherDocuments",
+  "ListElementCode" : "documentName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "otherDocuments",
+  "ListElementCode" : "notes",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "otherDocuments",
+  "ListElementCode" : "documentOther",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "otherDocuments",
+  "ListElementCode" : "documentTypeOther",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "otherDocuments",
+  "ListElementCode" : "checkDocumentsConfidentialLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "otherDocuments",
+  "ListElementCode" : "restrictCheckboxOtherDocuments",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,74 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "ListElementCode" : "hasPrevOrOngoingOtherProceeding",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "ListElementCode" : "fl401OtherProceedings",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "COMPLEX",
+  "FieldShowCondition" : "fl401OtherProceedingDetails.hasPrevOrOngoingOtherProceeding=\"yes\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "ListElementCode" : "fl401OtherProceedings.nameOfCourt",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "ListElementCode" : "fl401OtherProceedings.caseNumber",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "ListElementCode" : "fl401OtherProceedings.typeOfCase",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "ListElementCode" : "fl401OtherProceedings.anyOtherDetails",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "ListElementCode" : "fl401OtherProceedings.uploadRelevantOrder",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Fl401ProceedingDetails",
+  "CaseEventID" : "fl401AmendOtherProceedings",
+  "ListElementCode" : "fl401OtherProceedings.addNewProceedingLabel",
+  "CaseFieldID" : "fl401OtherProceedingDetails",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL"
+} ]

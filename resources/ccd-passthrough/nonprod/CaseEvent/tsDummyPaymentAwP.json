@@ -1,0 +1,4 @@
+[ {
+  "ID" : "tsDummyPaymentAwP",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/testing-support/additional-application-payment"
+} ]

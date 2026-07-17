@@ -1,0 +1,5 @@
+[ {
+  "ID" : "hmcCaseUpdPrepForHearing",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/validate-hearing-state/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-allTabs-after-hmc-case-state/submitted"
+} ]

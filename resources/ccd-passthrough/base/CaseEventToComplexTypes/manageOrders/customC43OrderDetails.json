@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "customC43OrderDetails",
+  "ListElementCode" : "ordersToIssue",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "customC43OrderDetails",
+  "ListElementCode" : "childArrangementsOrderType",
+  "CaseTypeID" : "PRLAPPS"
+} ]

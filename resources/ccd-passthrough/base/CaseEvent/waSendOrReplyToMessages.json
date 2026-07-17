@@ -1,0 +1,6 @@
+[ {
+  "ID" : "waSendOrReplyToMessages",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/about-to-start-task",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/about-to-submit-task",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/submitted-task"
+} ]

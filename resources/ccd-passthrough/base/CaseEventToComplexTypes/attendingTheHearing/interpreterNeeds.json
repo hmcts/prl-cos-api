@@ -1,0 +1,61 @@
+[ {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "party",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "nameLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "name",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "language",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "addNewInterpreterNeedLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "otherAssistance",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "party",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "nameLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "name",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "language",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "addNewInterpreterNeedLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "attendingTheHearing",
+  "CaseFieldID" : "interpreterNeeds",
+  "ListElementCode" : "otherAssistance",
+  "CaseTypeID" : "PRLAPPS"
+} ]

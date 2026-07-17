@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "hwfAppList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/process-help-with-fees/populate-hwf-dynamic-data"
+}, {
+  "CaseFieldID" : "beforeYouStart",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/process-help-with-fees/mid-event"
+} ]

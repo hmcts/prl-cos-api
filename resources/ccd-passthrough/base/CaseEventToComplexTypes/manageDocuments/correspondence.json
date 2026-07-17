@@ -1,0 +1,26 @@
+[ {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "correspondence",
+  "ListElementCode" : "documentName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "correspondence",
+  "ListElementCode" : "notes",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "correspondence",
+  "ListElementCode" : "documentCorrespondence",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "correspondence",
+  "ListElementCode" : "checkDocumentsConfidentialLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "correspondence",
+  "ListElementCode" : "restrictCheckboxCorrespondence",
+  "CaseTypeID" : "PRLAPPS"
+} ]

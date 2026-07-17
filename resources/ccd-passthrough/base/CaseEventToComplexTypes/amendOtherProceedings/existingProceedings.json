@@ -1,0 +1,66 @@
+[ {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "previousOrOngoingProceedings",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "caseNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "dateStarted",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "dateEnded",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "typeOfOrder",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "otherTypeOfOrder",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "nameOfJudge",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "nameOfCourt",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "nameOfChildrenInvolved",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "nameOfGuardian",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "nameAndOffice",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "uploadRelevantOrder",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherProceedings",
+  "CaseFieldID" : "existingProceedings",
+  "ListElementCode" : "addNewProceedingLabel",
+  "CaseTypeID" : "PRLAPPS"
+} ]

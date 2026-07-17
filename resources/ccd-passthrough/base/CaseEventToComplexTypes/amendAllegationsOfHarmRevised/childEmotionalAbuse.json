@@ -1,0 +1,27 @@
+[ {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childEmotionalAbuse",
+  "ListElementCode" : "typeOfAbuse",
+  "CaseTypeID" : "PRLAPPS",
+  "DefaultValue" : "emotionalAbuse"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childEmotionalAbuse",
+  "ListElementCode" : "abuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childEmotionalAbuse",
+  "ListElementCode" : "behavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childEmotionalAbuse",
+  "ListElementCode" : "behavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childEmotionalAbuse",
+  "ListElementCode" : "behavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

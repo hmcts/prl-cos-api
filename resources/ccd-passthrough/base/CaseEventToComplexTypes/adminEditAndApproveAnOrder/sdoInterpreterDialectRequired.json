@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "adminEditAndApproveAnOrder",
+  "CaseFieldID" : "sdoInterpreterDialectRequired",
+  "ListElementCode" : "interpreterNeedFor",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "adminEditAndApproveAnOrder",
+  "CaseFieldID" : "sdoInterpreterDialectRequired",
+  "ListElementCode" : "languageOrDialect",
+  "CaseTypeID" : "PRLAPPS"
+} ]

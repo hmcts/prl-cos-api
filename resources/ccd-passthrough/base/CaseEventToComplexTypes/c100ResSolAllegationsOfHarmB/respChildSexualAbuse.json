@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmB",
+  "CaseFieldID" : "respChildSexualAbuse",
+  "ListElementCode" : "respAbuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmB",
+  "CaseFieldID" : "respChildSexualAbuse",
+  "ListElementCode" : "respBehavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmB",
+  "CaseFieldID" : "respChildSexualAbuse",
+  "ListElementCode" : "respBehavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmB",
+  "CaseFieldID" : "respChildSexualAbuse",
+  "ListElementCode" : "respBehavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

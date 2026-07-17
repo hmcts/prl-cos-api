@@ -1,0 +1,5 @@
+[ {
+  "ID" : "c100listWithoutNotice",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/listWithoutNotice",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/listWithoutNotice-confirmation"
+} ]

@@ -1,0 +1,16 @@
+[ {
+  "CaseEventID" : "respondentBehaviour",
+  "CaseFieldID" : "respondentBehaviourData",
+  "ListElementCode" : "applicantWantToStopFromRespondentDoing",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentBehaviour",
+  "CaseFieldID" : "respondentBehaviourData",
+  "ListElementCode" : "applicantWantToStopFromRespondentDoingToChild",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentBehaviour",
+  "CaseFieldID" : "respondentBehaviourData",
+  "ListElementCode" : "otherReasonApplicantWantToStopFromRespondentDoing",
+  "CaseTypeID" : "PRLAPPS"
+} ]

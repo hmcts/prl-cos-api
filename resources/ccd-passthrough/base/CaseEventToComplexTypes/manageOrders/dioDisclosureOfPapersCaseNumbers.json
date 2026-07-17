@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "dioDisclosureOfPapersCaseNumbers",
+  "ListElementCode" : "caseNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "dioDisclosureOfPapersCaseNumbers",
+  "ListElementCode" : "sdoDisclosureCourtList",
+  "CaseTypeID" : "PRLAPPS"
+} ]

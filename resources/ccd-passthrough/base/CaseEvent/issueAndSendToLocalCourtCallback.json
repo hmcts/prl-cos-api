@@ -1,0 +1,6 @@
+[ {
+  "ID" : "issueAndSendToLocalCourtCallback",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/pre-populate-court-details",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/issue-and-send-to-local-court",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/issue-and-send-to-local-court-notification"
+} ]

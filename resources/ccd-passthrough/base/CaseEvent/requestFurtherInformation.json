@@ -1,0 +1,5 @@
+[ {
+  "ID" : "requestFurtherInformation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/submit-request-further-information",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/history-update"
+} ]

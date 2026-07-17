@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "respondentNameForResponse",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/keep-details-private-list"
+} ]

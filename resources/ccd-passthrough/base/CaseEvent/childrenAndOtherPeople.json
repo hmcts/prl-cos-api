@@ -1,0 +1,6 @@
+[ {
+  "ID" : "childrenAndOtherPeople",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/pre-populate-other-people-to-child-relation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/populate-other-people-to-child-relation",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

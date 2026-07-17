@@ -1,0 +1,5 @@
+[ {
+  "ID" : "adminRemoveLocalAuthority",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/localauthority/remove/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/localauthority/remove/aboutToSubmit"
+} ]

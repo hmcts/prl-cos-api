@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "sdoWitnessStatementsCheckDetails",
+  "ListElementCode" : "sdoDioOtherDetails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

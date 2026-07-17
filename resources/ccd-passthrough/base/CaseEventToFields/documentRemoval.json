@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "documentRemovalCaseDocuments",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/document-removal/mid-event"
+} ]

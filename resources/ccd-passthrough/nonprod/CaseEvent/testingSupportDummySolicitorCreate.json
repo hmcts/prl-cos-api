@@ -1,0 +1,5 @@
+[ {
+  "ID" : "testingSupportDummySolicitorCreate",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/testing-support/about-to-submit-case-creation",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/testing-support/solicitor-submitted-case-creation-solicitor"
+} ]

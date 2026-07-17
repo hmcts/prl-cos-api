@@ -1,0 +1,5 @@
+[ {
+  "ID" : "removeDraftOrder",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/populate-remove-draft-order-dropdown",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/remove-draft-order/about-to-submit"
+} ]

@@ -1,0 +1,31 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "ID" : "AbuseTypes",
+  "ListElementCode" : "physicalAbuse",
+  "ListElement" : "Physical abuse",
+  "DisplayOrder" : 1
+}, {
+  "LiveFrom" : "20/08/2021",
+  "ID" : "AbuseTypes",
+  "ListElementCode" : "psychologicalAbuse",
+  "ListElement" : "Psychological abuse",
+  "DisplayOrder" : 2
+}, {
+  "LiveFrom" : "05/11/2021",
+  "ID" : "AbuseTypes",
+  "ListElementCode" : "sexualAbuse",
+  "ListElement" : "Sexual abuse",
+  "DisplayOrder" : 3
+}, {
+  "LiveFrom" : "05/11/2021",
+  "ID" : "AbuseTypes",
+  "ListElementCode" : "emotionalAbuse",
+  "ListElement" : "Emotional abuse",
+  "DisplayOrder" : 4
+}, {
+  "LiveFrom" : "05/11/2021",
+  "ID" : "AbuseTypes",
+  "ListElementCode" : "financialAbuse",
+  "ListElement" : "Financial abuse",
+  "DisplayOrder" : 5
+} ]

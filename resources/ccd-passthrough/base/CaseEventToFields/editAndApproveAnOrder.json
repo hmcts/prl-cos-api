@@ -1,0 +1,37 @@
+[ {
+  "CaseFieldID" : "orderNameLabel10",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel11",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "selectedOrder2",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrder4",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameHearingLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "sdoDirectionsCaseNeedsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/pre-populate-standard-direction-order-other-fields"
+}, {
+  "CaseFieldID" : "sdoSdoLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameEditScreenLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order-common-fields"
+}, {
+  "CaseFieldID" : "orderNameLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order-custom-fields"
+}, {
+  "CaseFieldID" : "amendedOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "parentalResponsibility",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "appointedGuardianLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+} ]

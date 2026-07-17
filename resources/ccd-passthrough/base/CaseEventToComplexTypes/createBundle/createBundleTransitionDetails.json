@@ -1,0 +1,28 @@
+[ {
+  "LiveFrom" : "16/12/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "createBundleTransitionDetailsObject",
+  "CaseEventID" : "createBundle",
+  "CaseFieldID" : "createBundleTransitionDetails",
+  "ListElementCode" : "createBundleSubmitLabel",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "16/12/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "createBundleTransitionDetailsObject",
+  "CaseEventID" : "createBundle",
+  "CaseFieldID" : "createBundleTransitionDetails",
+  "ListElementCode" : "bundleCreationSubmittedWhatHappensNext",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "16/12/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "createBundleTransitionDetailsObject",
+  "CaseEventID" : "createBundle",
+  "CaseFieldID" : "createBundleTransitionDetails",
+  "ListElementCode" : "bundleCreationSubmittedWhatHappensNextLabel",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "READONLY"
+} ]

@@ -1,0 +1,4 @@
+[ {
+  "ID" : "migrateCase",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/migrate-data/submitted"
+} ]

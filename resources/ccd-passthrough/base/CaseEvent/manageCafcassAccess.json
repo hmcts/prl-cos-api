@@ -1,0 +1,5 @@
+[ {
+  "ID" : "manageCafcassAccess",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/manage-cafcass-access/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/manage-cafcass-access/submitted"
+} ]

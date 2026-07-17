@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "removableDocuments",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/remove-documents/confirm-removals"
+} ]

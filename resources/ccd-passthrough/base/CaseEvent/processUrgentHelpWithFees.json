@@ -1,0 +1,6 @@
+[ {
+  "ID" : "processUrgentHelpWithFees",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/process-help-with-fees/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/process-help-with-fees/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/process-help-with-fees/submitted"
+} ]

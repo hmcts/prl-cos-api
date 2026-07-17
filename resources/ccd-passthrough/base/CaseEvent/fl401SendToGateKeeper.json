@@ -1,0 +1,5 @@
+[ {
+  "ID" : "fl401SendToGateKeeper",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/allocateJudge/pre-populate-legalAdvisor-details",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/send-to-gatekeeper"
+} ]

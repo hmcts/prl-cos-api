@@ -1,0 +1,6 @@
+[ {
+  "ID" : "manageDocumentsNew",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/manage-documents/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/manage-documents/copy-manage-docs",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/manage-documents/submitted"
+} ]

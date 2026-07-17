@@ -1,0 +1,6 @@
+[ {
+  "ID" : "sendOrReplyToMessages",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/submitted"
+} ]

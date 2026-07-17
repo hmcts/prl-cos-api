@@ -1,0 +1,5 @@
+[ {
+  "ID" : "testingSupportRespondentTaskListC",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/testing-support/fillRespondentTaskList",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/testing-support/submittedRespondentTaskList"
+} ]

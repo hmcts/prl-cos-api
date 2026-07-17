@@ -1,0 +1,4 @@
+[ {
+  "ID" : "exitAwaitingInformation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/submit-exit-awaiting-information"
+} ]

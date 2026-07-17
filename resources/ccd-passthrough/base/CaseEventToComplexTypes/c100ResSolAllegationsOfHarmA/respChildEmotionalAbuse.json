@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmA",
+  "CaseFieldID" : "respChildEmotionalAbuse",
+  "ListElementCode" : "respAbuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmA",
+  "CaseFieldID" : "respChildEmotionalAbuse",
+  "ListElementCode" : "respBehavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmA",
+  "CaseFieldID" : "respChildEmotionalAbuse",
+  "ListElementCode" : "respBehavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmA",
+  "CaseFieldID" : "respChildEmotionalAbuse",
+  "ListElementCode" : "respBehavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

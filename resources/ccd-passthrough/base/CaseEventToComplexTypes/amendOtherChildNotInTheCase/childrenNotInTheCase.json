@@ -1,0 +1,31 @@
+[ {
+  "CaseEventID" : "amendOtherChildNotInTheCase",
+  "CaseFieldID" : "childrenNotInTheCase",
+  "ListElementCode" : "firstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherChildNotInTheCase",
+  "CaseFieldID" : "childrenNotInTheCase",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherChildNotInTheCase",
+  "CaseFieldID" : "childrenNotInTheCase",
+  "ListElementCode" : "gender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherChildNotInTheCase",
+  "CaseFieldID" : "childrenNotInTheCase",
+  "ListElementCode" : "otherGender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherChildNotInTheCase",
+  "CaseFieldID" : "childrenNotInTheCase",
+  "ListElementCode" : "isDateOfBirthKnown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherChildNotInTheCase",
+  "CaseFieldID" : "childrenNotInTheCase",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+} ]

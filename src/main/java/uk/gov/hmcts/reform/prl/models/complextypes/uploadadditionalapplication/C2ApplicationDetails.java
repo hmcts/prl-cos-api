@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Slf4j
 @Data
@@ -15,7 +16,9 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2Consent;
 @Builder(toBuilder = true)
 public class C2ApplicationDetails {
 
+    @CCD(label = "Consent", searchable = false)
     private final C2Consent consent;
+    @CCD(label = "Reason the respondent cannot be informed", searchable = false)
     private final String reasonForNotInformingRespondent;
 
 }

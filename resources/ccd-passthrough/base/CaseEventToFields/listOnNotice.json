@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "selectedReasonsForListOnNotice",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/listOnNotice/reasonUpdation/mid-event"
+} ]

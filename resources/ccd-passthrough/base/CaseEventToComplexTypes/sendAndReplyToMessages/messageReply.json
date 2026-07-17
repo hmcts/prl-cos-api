@@ -1,0 +1,105 @@
+[ {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "senderEmail",
+  "EventElementLabel" : "Message from",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "messageSubject",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "messageUrgency",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "messageUrgency",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "messageHistory",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "isReplying",
+  "EventElementLabel" : "Do you need to reply?",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "replyFrom",
+  "EventElementLabel" : "Sender’s email address",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "messageReply.isReplying=\"Yes\""
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "replyTo",
+  "EventElementLabel" : "Recipient’s email address",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "messageReply.isReplying=\"Yes\""
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "messageContent",
+  "EventElementLabel" : "Reply",
+  "FieldDisplayOrder" : "9",
+  "DisplayContext" : "MANDATORY",
+  "FieldShowCondition" : "messageReply.isReplying=\"Yes\""
+}, {
+  "LiveFrom" : "03/02/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageReply",
+  "ListElementCode" : "closeMessageLabel",
+  "EventElementLabel" : " ",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "READONLY",
+  "FieldShowCondition" : "messageReply.isReplying=\"No\""
+} ]

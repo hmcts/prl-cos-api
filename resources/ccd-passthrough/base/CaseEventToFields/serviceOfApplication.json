@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "soaOtherParties",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/service-of-application/soa-validation"
+} ]

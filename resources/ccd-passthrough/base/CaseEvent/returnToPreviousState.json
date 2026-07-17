@@ -1,0 +1,4 @@
+[ {
+  "ID" : "returnToPreviousState",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/returnToPreviousState/about-to-submit"
+} ]

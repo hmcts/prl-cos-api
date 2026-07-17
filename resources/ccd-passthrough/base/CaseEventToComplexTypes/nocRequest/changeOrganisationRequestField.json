@@ -1,0 +1,37 @@
+[ {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "OrganisationToAdd.OrganisationID",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "OrganisationToAdd.OrganisationName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "OrganisationToRemove.OrganisationID",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "OrganisationToRemove.OrganisationName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "CaseRoleId",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "RequestTimestamp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "nocRequest",
+  "CaseFieldID" : "changeOrganisationRequestField",
+  "ListElementCode" : "ApprovalStatus",
+  "CaseTypeID" : "PRLAPPS",
+  "DefaultValue" : "1"
+} ]

@@ -1,0 +1,13 @@
+[ {
+  "CaseFieldID" : "representedPartyType",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/upload-additional-application/mid-event"
+}, {
+  "CaseFieldID" : "temporaryC2Document",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/upload-additional-application/mid-event/calculate-fee"
+}, {
+  "CaseFieldID" : "temporaryOtherApplicationsBundle",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/upload-additional-application/mid-event/calculate-fee"
+}, {
+  "CaseFieldID" : "additionalApplicationsHelpWithFeesNumber",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/validate-help-with-fees"
+} ]

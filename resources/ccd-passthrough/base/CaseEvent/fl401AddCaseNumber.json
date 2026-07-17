@@ -1,0 +1,5 @@
+[ {
+  "ID" : "fl401AddCaseNumber",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/fl401-add-case-number",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-application"
+} ]

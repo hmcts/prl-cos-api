@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "customC21OrderDetails",
+  "ListElementCode" : "orderOptions",
+  "CaseTypeID" : "PRLAPPS"
+} ]

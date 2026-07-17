@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "respondentRelationship",
+  "CaseFieldID" : "respondentRelationObject",
+  "ListElementCode" : "applicantRelationship",
+  "CaseTypeID" : "PRLAPPS"
+} ]

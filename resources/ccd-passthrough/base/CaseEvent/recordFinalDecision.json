@@ -1,0 +1,5 @@
+[ {
+  "ID" : "recordFinalDecision",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/closing-case/pre-populate-child-data",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/closing-case/about-to-submit"
+} ]

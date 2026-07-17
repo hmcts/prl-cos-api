@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 
 @Data
@@ -14,5 +15,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FinalisationDetails {
 
+    @CCD(label = "Finalisation Judge Details", searchable = false)
     private String judgeOrMagistrateTitle;
 }

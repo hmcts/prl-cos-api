@@ -1,0 +1,12 @@
+[ {
+  "LiveFrom" : "01/07/2025",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "FL400",
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404SchoolDirections&Details",
+  "ListElementCode" : "fl404SchoolDirections&DetailsComplex",
+  "EventElementLabel" : " ",
+  "FieldDisplayOrder" : "58",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "manageOrdersOptions=\"createAnOrder\" AND  createSelectOrderOptions=\"nonMolestation\" AND fl404CustomFields.fl404bRespondentNotToEnterSchool=\"respondentMustNotEnterSchool\""
+} ]

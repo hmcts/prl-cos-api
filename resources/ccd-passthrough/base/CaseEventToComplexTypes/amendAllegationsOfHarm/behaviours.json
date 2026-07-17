@@ -1,0 +1,41 @@
+[ {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "behavioursDescriptionLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "abuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "behavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "behavioursNature",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "behavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "behavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "behavioursApplicantHelpAction",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarm",
+  "CaseFieldID" : "behaviours",
+  "ListElementCode" : "addNewBehaviourLabel",
+  "CaseTypeID" : "PRLAPPS"
+} ]

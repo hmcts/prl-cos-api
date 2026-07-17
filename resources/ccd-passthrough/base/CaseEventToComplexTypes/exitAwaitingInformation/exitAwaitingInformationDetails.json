@@ -1,0 +1,7 @@
+[ {
+  "CaseEventID" : "exitAwaitingInformation",
+  "CaseFieldID" : "exitAwaitingInformationDetails",
+  "ListElementCode" : "exitAwaitingInformationTargetState",
+  "CaseTypeID" : "PRLAPPS",
+  "Publish" : "True"
+} ]

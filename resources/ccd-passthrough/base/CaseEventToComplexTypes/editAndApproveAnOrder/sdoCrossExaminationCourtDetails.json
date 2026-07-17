@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "editAndApproveAnOrder",
+  "CaseFieldID" : "sdoCrossExaminationCourtDetails",
+  "ListElementCode" : "sdoDioOtherDetails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

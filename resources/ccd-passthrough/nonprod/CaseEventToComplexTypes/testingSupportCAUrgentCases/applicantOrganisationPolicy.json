@@ -1,0 +1,67 @@
+[ {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "testingSupportCAUrgentCases",
+  "CaseFieldID" : "applicantOrganisationPolicy",
+  "ListElementCode" : "Organisation.OrganisationID",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "testingSupportCAUrgentCases",
+  "CaseFieldID" : "applicantOrganisationPolicy",
+  "ListElementCode" : "Organisation.OrganisationName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "9",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "testingSupportCAUrgentCases",
+  "CaseFieldID" : "applicantOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyCaseAssignedRole",
+  "DefaultValue" : "[APPLICANTSOLICITOR]",
+  "FieldDisplayOrder" : "10",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "testingSupportCAUrgentCases",
+  "CaseFieldID" : "applicantOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyReference",
+  "FieldDisplayOrder" : "11",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "EventElementLabel" : "",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "testingSupportCAUrgentCases",
+  "CaseFieldID" : "applicantOrganisationPolicy",
+  "ListElementCode" : "PreviousOrganisations",
+  "FieldDisplayOrder" : "12",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "EventElementLabel" : "",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "testingSupportCAUrgentCases",
+  "CaseFieldID" : "applicantOrganisationPolicy",
+  "ListElementCode" : "lastNoCRequestedBy",
+  "FieldDisplayOrder" : "13",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "EventElementLabel" : "",
+  "DisplayContext" : "OPTIONAL"
+} ]

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Data
 @AllArgsConstructor
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DomesticAbuseEvidenceDocument {
 
+    @CCD(label = "Upload evidence", categoryID = "MIAMCertificate", searchable = false)
     @JsonProperty("domesticAbuseDocument")
     private Document domesticAbuseDocument;
 

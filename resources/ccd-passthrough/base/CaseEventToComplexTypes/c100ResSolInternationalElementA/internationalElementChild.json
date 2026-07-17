@@ -1,0 +1,36 @@
+[ {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "childrenLiveOutsideOfEnWl",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "childrenLiveOutsideOfEnWlDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "parentsAnyOneLiveOutsideEnWlDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherPersonOrderOutsideEnWl",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherPersonOrderOutsideEnWlDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherCountryAskedInformation",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolInternationalElementA",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherCountryAskedInformationDetaails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

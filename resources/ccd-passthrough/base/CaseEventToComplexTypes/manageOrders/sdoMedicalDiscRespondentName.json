@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "sdoMedicalDiscRespondentName",
+  "ListElementCode" : "sdoNameOfRespondent",
+  "CaseTypeID" : "PRLAPPS"
+} ]

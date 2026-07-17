@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "fl401AmendTypeOfApplication",
+  "CaseFieldID" : "typeOfApplicationOrders",
+  "ListElementCode" : "orderType",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmD",
+  "CaseFieldID" : "respChildFinancialAbuse",
+  "ListElementCode" : "respAbuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmD",
+  "CaseFieldID" : "respChildFinancialAbuse",
+  "ListElementCode" : "respBehavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmD",
+  "CaseFieldID" : "respChildFinancialAbuse",
+  "ListElementCode" : "respBehavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmD",
+  "CaseFieldID" : "respChildFinancialAbuse",
+  "ListElementCode" : "respBehavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

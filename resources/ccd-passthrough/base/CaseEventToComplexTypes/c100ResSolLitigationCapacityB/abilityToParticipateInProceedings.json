@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "c100ResSolLitigationCapacityB",
+  "CaseFieldID" : "abilityToParticipateInProceedings",
+  "ListElementCode" : "giveDetailsAffectingLitigationCapacity",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolLitigationCapacityB",
+  "CaseFieldID" : "abilityToParticipateInProceedings",
+  "ListElementCode" : "detailsOfReferralOrAssessment",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolLitigationCapacityB",
+  "CaseFieldID" : "abilityToParticipateInProceedings",
+  "ListElementCode" : "factorsAffectingAbilityToParticipate",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolLitigationCapacityB",
+  "CaseFieldID" : "abilityToParticipateInProceedings",
+  "ListElementCode" : "provideDetailsForFactorsAffectingAbilityToParticipate",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,82 @@
+[ {
+  "CaseFieldID" : "manageOrdersOptions",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-order/mid-event"
+}, {
+  "CaseFieldID" : "childArrangementsOrdersToIssue",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrder10",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/show-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrderLabel1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrderLabel12",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrder1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "createAnOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/fetch-order-details"
+}, {
+  "CaseFieldID" : "customOrderHearingsType",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/populate-from-hearing"
+}, {
+  "CaseFieldID" : "selectedC21OrderLabel2",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/pre-populate-judge-or-la/mid-event"
+}, {
+  "CaseFieldID" : "customOrderHeaderPreviewLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "amendOrderHeaderLabel1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/amend-order/mid-event"
+}, {
+  "CaseFieldID" : "amendOrderReplaceOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/pre-populate-judge-or-la/mid-event"
+}, {
+  "CaseFieldID" : "doYouWantToServeOrder",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/when-to-serve/mid-event"
+}, {
+  "CaseFieldID" : "serveOrderAdditionalDocuments",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/serve-order/mid-event"
+}, {
+  "CaseFieldID" : "serveOrgDetailsList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/validate-additional-parties"
+}, {
+  "CaseFieldID" : "isTheOrderUploadedByConsent",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/fetch-order-details"
+}, {
+  "CaseFieldID" : "c21OrderOptions",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/fetch-order-details"
+}, {
+  "CaseFieldID" : "customOrderDoc",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "isTheOrderByConsent",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrder2",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrder4",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "selectedOrder7",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "transferCase",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "sdoSdoListLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-standard-direction-order-fields"
+}, {
+  "CaseFieldID" : "sdoSdoLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/validate-populate-hearing-data"
+}, {
+  "CaseFieldID" : "dioDirectionsCaseNeedsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-direction-on-issue"
+}, {
+  "CaseFieldID" : "selectedOrderHearingLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/validate-populate-hearing-data"
+} ]

@@ -1,0 +1,6 @@
+[ {
+  "ID" : "c100ReviewRARequest",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/caseflags/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/caseflags/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/caseflags/submitted-to-close-wa-task"
+} ]

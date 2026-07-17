@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "helpWithFeesReferenceNumber",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/validate-help-with-fees"
+} ]

@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "statementOfService",
+  "CaseFieldID" : "stmtOfServiceAddRecipient",
+  "ListElementCode" : "respondentDynamicList",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "statementOfService",
+  "CaseFieldID" : "stmtOfServiceAddRecipient",
+  "ListElementCode" : "servedDateTimeOption",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "statementOfService",
+  "CaseFieldID" : "stmtOfServiceAddRecipient",
+  "ListElementCode" : "stmtOfServiceDocumentLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "statementOfService",
+  "CaseFieldID" : "stmtOfServiceAddRecipient",
+  "ListElementCode" : "stmtOfServiceDocument",
+  "CaseTypeID" : "PRLAPPS"
+} ]

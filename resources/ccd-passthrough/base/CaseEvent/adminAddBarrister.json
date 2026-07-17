@@ -1,0 +1,6 @@
+[ {
+  "ID" : "adminAddBarrister",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/barrister/add/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/case-assignment/barrister/add/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/barrister/add/submitted"
+} ]

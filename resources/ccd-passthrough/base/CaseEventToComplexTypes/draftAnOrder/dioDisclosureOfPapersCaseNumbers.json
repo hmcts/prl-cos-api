@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "draftAnOrder",
+  "CaseFieldID" : "dioDisclosureOfPapersCaseNumbers",
+  "ListElementCode" : "caseNumber",
+  "CaseTypeID" : "PRLAPPS"
+} ]

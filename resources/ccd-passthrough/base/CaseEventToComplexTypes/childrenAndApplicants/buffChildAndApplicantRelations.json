@@ -1,0 +1,36 @@
+[ {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "applicantFullName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "childFullName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "childAndApplicantRelation",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "childAndApplicantRelationOtherDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "childLivesWith",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "applicantId",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childrenAndApplicants",
+  "CaseFieldID" : "buffChildAndApplicantRelations",
+  "ListElementCode" : "childId",
+  "CaseTypeID" : "PRLAPPS"
+} ]

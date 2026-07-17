@@ -1,0 +1,5 @@
+[ {
+  "ID" : "draftAnOrder",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/reset-fields",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/about-to-submit"
+} ]

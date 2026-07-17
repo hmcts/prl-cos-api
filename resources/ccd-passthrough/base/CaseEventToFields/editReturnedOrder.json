@@ -1,0 +1,31 @@
+[ {
+  "CaseFieldID" : "rejectedOrdersDynamicList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/edit-returned-order/mid-event/populate-instructions"
+}, {
+  "CaseFieldID" : "orderNameLabel11",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "selectedOrder2",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "orderNameLabel13",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "ordersHearingDetails",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order-custom-fields"
+}, {
+  "CaseFieldID" : "amendedOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel8",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel9",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel10",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+} ]

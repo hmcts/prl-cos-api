@@ -9,11 +9,13 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Data
 @Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CoverLetterMap {
+    @CCD(label = "Cover letter", searchable = false)
     @JsonProperty("coverLetters")
     private List<Element<Document>> coverLetters;
 

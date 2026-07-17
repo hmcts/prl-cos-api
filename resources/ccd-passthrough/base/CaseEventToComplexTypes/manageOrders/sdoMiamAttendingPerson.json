@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "sdoMiamAttendingPerson",
+  "ListElementCode" : "miamAttendingPersonName",
+  "CaseTypeID" : "PRLAPPS"
+} ]

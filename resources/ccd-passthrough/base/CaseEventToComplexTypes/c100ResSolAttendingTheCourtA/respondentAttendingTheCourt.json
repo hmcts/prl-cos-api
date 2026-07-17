@@ -1,0 +1,184 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "languageRequirementsLabel",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentWelshNeeds",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentWelshNeedsList",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "isRespondentNeededInterpreter",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "COMPLEX"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds.party",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds.relationNameLabel",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds.relationName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds.requiredLanguage",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "9",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds.respondentOtherAssistance",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentInterpreterNeeds.addInterpreterNeedLabel",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "11",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "accessibilityLabel",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "12",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "haveAnyDisability",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "13",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "disabilityNeeds",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "14",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "specialArrangementsLabel",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "15",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentSpecialArrangements",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "16",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentSpecialArrangementDetails",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "17",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentIntermediaryNeeds",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "18",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "AttendToCourt",
+  "CaseEventID" : "c100ResSolAttendingTheCourtA",
+  "CaseFieldID" : "respondentAttendingTheCourt",
+  "ListElementCode" : "respondentIntermediaryNeedDetails",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "19",
+  "DisplayContext" : "OPTIONAL"
+} ]

@@ -1,0 +1,5 @@
+[ {
+  "ID" : "amendMiam",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/update-task-list/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

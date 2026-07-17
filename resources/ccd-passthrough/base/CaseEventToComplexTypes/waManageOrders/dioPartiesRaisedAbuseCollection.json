@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "dioPartiesRaisedAbuseCollection",
+  "ListElementCode" : "partyName",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401ConfidentialityCheck",
+  "ListElementCode" : "confidentialityLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401ConfidentialityCheck",
+  "ListElementCode" : "confidentialityConsent",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,6 @@
+[ {
+  "ID" : "createFlagsForGivenCaseNote",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/caseflags/review-lang-sm/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/caseflags/review-lang-sm/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/caseflags/setup-wa-task"
+} ]

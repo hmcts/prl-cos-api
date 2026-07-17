@@ -1,0 +1,17 @@
+[ {
+  "LiveFrom" : "01/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "selectApplicationType-ApplicationConsideredInDaysAndHours",
+  "CaseEventID" : "selectApplicationType",
+  "CaseFieldID" : "applicationConsideredInDaysAndHours",
+  "ListElementCode" : "days",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "01/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "selectApplicationType-ApplicationConsideredInDaysAndHours",
+  "CaseEventID" : "selectApplicationType",
+  "CaseFieldID" : "applicationConsideredInDaysAndHours",
+  "ListElementCode" : "hours",
+  "DisplayContext" : "OPTIONAL"
+} ]

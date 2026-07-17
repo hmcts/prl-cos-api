@@ -1,0 +1,46 @@
+[ {
+  "CaseFieldID" : "draftOrderOptions",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-draft-order-fields"
+}, {
+  "CaseFieldID" : "selectedOrder1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "manageOrderHeaderLabel5",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "selectedOrder2",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-preview-order"
+}, {
+  "CaseFieldID" : "sdoDirectionsCaseNeedsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-standard-direction-order-fields"
+}, {
+  "CaseFieldID" : "dioDirectionsCaseNeedsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-direction-on-issue"
+}, {
+  "CaseFieldID" : "selectedOrder4",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "selectedOrderHearingLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "uploadHintLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/selected-order"
+}, {
+  "CaseFieldID" : "uploadAnOrder",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/selected-order"
+}, {
+  "CaseFieldID" : "c21OrderOptions",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/selected-order"
+}, {
+  "CaseFieldID" : "typeOfC21OrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/populate-draft-order-fields"
+}, {
+  "CaseFieldID" : "selectedOrderLabel1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "manageOrderHeaderLabel10",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "selectedOrder7",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+} ]

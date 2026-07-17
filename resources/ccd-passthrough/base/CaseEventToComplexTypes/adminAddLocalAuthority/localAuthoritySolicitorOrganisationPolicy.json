@@ -1,0 +1,66 @@
+[ {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "adminAddLocalAuthority",
+  "CaseFieldID" : "localAuthoritySolicitorOrganisationPolicy",
+  "ListElementCode" : "Organisation.OrganisationID",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "adminAddLocalAuthority",
+  "CaseFieldID" : "localAuthoritySolicitorOrganisationPolicy",
+  "ListElementCode" : "Organisation.OrganisationName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "9",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "adminAddLocalAuthority",
+  "CaseFieldID" : "localAuthoritySolicitorOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyCaseAssignedRole",
+  "DefaultValue" : "[LASOLICITOR]",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "RetainHiddenValue" : "Y"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "adminAddLocalAuthority",
+  "CaseFieldID" : "localAuthoritySolicitorOrganisationPolicy",
+  "ListElementCode" : "OrgPolicyReference",
+  "FieldDisplayOrder" : "11",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "EventElementLabel" : "",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "adminAddLocalAuthority",
+  "CaseFieldID" : "localAuthoritySolicitorOrganisationPolicy",
+  "ListElementCode" : "PreviousOrganisations",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "FieldDisplayOrder" : "12",
+  "EventElementLabel" : "",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/01/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OrganisationPolicy",
+  "CaseEventID" : "adminAddLocalAuthority",
+  "CaseFieldID" : "localAuthoritySolicitorOrganisationPolicy",
+  "ListElementCode" : "lastNoCRequestedBy",
+  "FieldDisplayOrder" : "13",
+  "FieldShowCondition" : "caseTypeOfApplication = \"DO_NOT_SHOW\"",
+  "EventElementLabel" : "",
+  "DisplayContext" : "OPTIONAL"
+} ]

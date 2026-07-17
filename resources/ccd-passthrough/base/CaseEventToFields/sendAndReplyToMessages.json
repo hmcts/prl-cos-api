@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "chooseSendOrReply",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/mid-event"
+} ]

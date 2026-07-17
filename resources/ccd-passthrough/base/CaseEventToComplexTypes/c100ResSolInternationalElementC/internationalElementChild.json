@@ -1,0 +1,74 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "childrenLiveOutsideOfEnWl",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "childrenLiveOutsideOfEnWlDetails",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "parentLiveOutsideOfEnWl",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "parentsAnyOneLiveOutsideEnWlDetails",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherPersonOrderOutsideEnWl",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherPersonOrderOutsideEnWlDetails",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherCountryAskedInformation",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SolicitorInternationalElement",
+  "CaseEventID" : "c100ResSolInternationalElementC",
+  "CaseFieldID" : "internationalElementChild",
+  "ListElementCode" : "anotherCountryAskedInformationDetaails",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL"
+} ]

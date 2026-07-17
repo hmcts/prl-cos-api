@@ -1,0 +1,26 @@
+[ {
+  "CaseEventID" : "fl401AmendApplicantFamilyDetails",
+  "CaseFieldID" : "applicantChildDetails",
+  "ListElementCode" : "fullName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401AmendApplicantFamilyDetails",
+  "CaseFieldID" : "applicantChildDetails",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401AmendApplicantFamilyDetails",
+  "CaseFieldID" : "applicantChildDetails",
+  "ListElementCode" : "applicantChildRelationship",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401AmendApplicantFamilyDetails",
+  "CaseFieldID" : "applicantChildDetails",
+  "ListElementCode" : "applicantRespondentShareParental",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401AmendApplicantFamilyDetails",
+  "CaseFieldID" : "applicantChildDetails",
+  "ListElementCode" : "respondentChildRelationship",
+  "CaseTypeID" : "PRLAPPS"
+} ]

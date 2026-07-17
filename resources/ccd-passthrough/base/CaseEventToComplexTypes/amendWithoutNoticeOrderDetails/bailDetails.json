@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "amendWithoutNoticeOrderDetails",
+  "CaseFieldID" : "bailDetails",
+  "ListElementCode" : "isRespondentAlreadyInBailCondition",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendWithoutNoticeOrderDetails",
+  "CaseFieldID" : "bailDetails",
+  "ListElementCode" : "bailConditionEndDate",
+  "CaseTypeID" : "PRLAPPS"
+} ]

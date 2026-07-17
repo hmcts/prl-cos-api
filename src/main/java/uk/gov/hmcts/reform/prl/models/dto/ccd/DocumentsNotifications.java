@@ -9,6 +9,11 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.notification.DocumentsNotification;
 
 import java.util.List;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.reform.prl.ccd.access.CaseworkerPrivatelawJudgeRPlus2RolesBmwiooAccess;
+import uk.gov.hmcts.reform.prl.ccd.access.CaseworkerPrivatelawSolicitorCitizenCrudAccess;
+import uk.gov.hmcts.reform.prl.ccd.access.CaseworkerPrivatelawCourtadminCrudPlus1RolesOunurxAccess;
+import uk.gov.hmcts.reform.prl.ccd.access.CaseworkerPrivatelawSuperuserRAccess;
 
 @Data
 @Builder(toBuilder = true)
@@ -17,6 +22,11 @@ import java.util.List;
 public class DocumentsNotifications {
 
     //PRL-5979 - RE7 access code cover letter
+    @CCD(
+            label = "Access code notifications",
+            searchable = false,
+            access = {CaseworkerPrivatelawJudgeRPlus2RolesBmwiooAccess.class, CaseworkerPrivatelawSolicitorCitizenCrudAccess.class, CaseworkerPrivatelawCourtadminCrudPlus1RolesOunurxAccess.class, CaseworkerPrivatelawSuperuserRAccess.class}
+    )
     @JsonProperty("accessCodeNotifications")
     private List<Element<DocumentsNotification>> accessCodeNotifications;
 }
