@@ -142,10 +142,11 @@ public class RefDataUserService {
         log.info("Evicting judicial user cache");
     }
 
-    @CacheEvict(allEntries = true, cacheNames = STAFF_REF_DATA_CACHE)
+    @CacheEvict(allEntries = true, cacheNames = STAFF_REF_DATA_CACHE, beforeInvocation = true)
     @Scheduled(fixedDelay = 1800000) // 30 minutes
     public void evictStaffRefDataCache() {
         log.info("Evicting staff ref data cache");
+        staffRefDataService.getAllStaffDetails();
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
