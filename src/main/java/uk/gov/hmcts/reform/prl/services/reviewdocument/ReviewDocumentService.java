@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,13 +17,14 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.DocumentCategoryService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -30,12 +33,17 @@ import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -45,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum.CAFCASS_CYMRU;
@@ -68,7 +77,7 @@ public class ReviewDocumentService {
     private final AllTabServiceImpl allTabService;
     private final ManageDocumentsService manageDocumentsService;
     private final ObjectMapper objectMapper;
-    private final SystemUserService systemUserService;
+    private final DocumentCategoryService documentCategoryService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
@@ -89,9 +98,6 @@ public class ReviewDocumentService {
     public static final String GOVUK_LIST_BULLET_LABEL = "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String SUBMITTED_BY_LABEL =
         "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>"
-            + GOVUK_LIST_BULLET_LABEL;
-    public static final String DOCUMENT_CATEGORY_LABEL =
-        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'>"
@@ -124,11 +130,19 @@ public class ReviewDocumentService {
             + GOVUK_LIST_BULLET_LABEL;
 
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
+    public static final String QUARANTINE_INFORMATION = "quarantineInformation";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
     public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
     public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
+
+    private record ReviewDocument(
+        List<Element<QuarantineLegalDoc>> quarantineDocs,
+        UserDetails userDetails,
+        String userType,
+        String quarantineDocList
+    ) {}
 
     public List<DynamicListElement> fetchDocumentDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -239,11 +253,22 @@ public class ReviewDocumentService {
         return dynamicListElements;
     }
 
-    public void getReviewedDocumentDetailsNew(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    public List<String> validateEvent(Map<String, Object> caseDataUpdated) {
+        String documentNewName = (String) caseDataUpdated.get("documentNewName");
+        List<String> errors = new ArrayList<>();
+        if (StringUtils.isNotBlank(documentNewName) && documentNewName.contains(".")) {
+            errors.add("Document name must not include the file type");
+        }
+        return errors;
+    }
+
+    public void getReviewedDocumentDetailsNew(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (null != caseData.getReviewDocuments().getReviewDocsDynamicList()
             && null != caseData.getReviewDocuments().getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = getTempQuarantineDocumentList(caseData);
+            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = emptyIfNull(getTempQuarantineDocumentList(caseData));
+            String uploaderRole = getUploaderRole(tempQuarantineDocumentList, uuid);
+            final DynamicList documentCategories = documentCategoryService.retrieveDocumentCategories(authorisation, caseData, uploaderRole);
 
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement =
                 getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
@@ -252,7 +277,7 @@ public class ReviewDocumentService {
                 quarantineLegalDocElement = resetUploaderRole(quarantineLegalDocElement);
             }
             quarantineLegalDocElement.ifPresent(legalDocElement -> updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                caseDataUpdated,
+                documentCategories, caseDataUpdated,
                 legalDocElement,
                 null != legalDocElement.getValue().getUploaderRole()
                     ? legalDocElement.getValue().getUploaderRole()
@@ -260,6 +285,8 @@ public class ReviewDocumentService {
             ));
         }
     }
+
+
 
     private List<Element<QuarantineLegalDoc>> getTempQuarantineDocumentList(CaseData caseData) {
         List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
@@ -315,19 +342,60 @@ public class ReviewDocumentService {
         return quarantineLegalDocElement;
     }
 
-    private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
+    private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(DynamicList documentCategories, Map<String, Object> caseDataUpdated,
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
 
-        String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
-
+        String docTobeReviewed = format(SUBMITTED_BY_LABEL, submittedBy) + "<br/>";
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+        if (nonNull(documentCategories)) {
+            documentCategories.setValue(DynamicListElement.builder()
+                                            .code(nonNull(quarantineLegalDoc) ? quarantineLegalDoc.getCategoryId() : null)
+                                            .label(nonNull(quarantineLegalDoc) ? quarantineLegalDoc.getCategoryName() : null)
+                                            .build());
+        }
+        caseDataUpdated.put("documentCategories", documentCategories);
+        String quarantineInfo = quarantineInformation(quarantineLegalDoc, submittedBy);
+        caseDataUpdated.put(QUARANTINE_INFORMATION, quarantineInfo);
         caseDataUpdated.put(DOC_LABEL, LABEL_WITH_HINT);
 
         Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
             submittedBy, quarantineLegalDoc);
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
+    }
+
+    private String quarantineInformation(QuarantineLegalDoc quarantineDoc, String submittedBy) {
+        StringBuilder quarantineDetailsBuilder = new StringBuilder();
+        //append quarantine document details for solicitor, cafcass & court staff
+        appendQuarantineDocumentDetails(quarantineDetailsBuilder, quarantineDoc, submittedBy);
+
+        //PRL-5006 bulk scan fields
+        if (BULK_SCAN.equals(submittedBy)) {
+            appendBulkScanDocumentDetails(quarantineDetailsBuilder, quarantineDoc);
+        }
+        quarantineDetailsBuilder.append("<br/>");
+        return quarantineDetailsBuilder.toString();
+
+    }
+
+    public void triggerAllDocsReviewedEvent(CaseData caseData) {
+        if (!hasDocumentsToBeReviewed(caseData)) {
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                String.valueOf(
+                    caseData.getId()),
+                C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
+                    ? CaseEvent.C100_ALL_DOCS_REVIEWED.getValue() : CaseEvent.FL401_ALL_DOCS_REVIEWED.getValue()
+            );
+            Map<String, Object> caseDataUpdated = startAllTabsUpdateDataContent.caseDataMap();
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                String.valueOf(caseData.getId()),
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                caseDataUpdated
+            );
+        }
     }
 
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
@@ -451,6 +519,20 @@ public class ReviewDocumentService {
                 .restrictedDetails(null)
                 .build();
         }
+
+        DynamicList documentCategories = caseData.getReviewDocuments().getDocumentCategories();
+        String categoryId = null;
+        String categoryName = null;
+        if (nonNull(documentCategories)) {
+            DynamicListElement value = documentCategories.getValue();
+            if (nonNull(value)) {
+                categoryId = value.getCode();
+                categoryName = value.getLabel();
+            }
+        }
+
+        String documentNewName = caseData.getReviewDocuments().getDocumentNewName();
+        tempQuarantineDoe = applyChanges(tempQuarantineDoe, documentNewName, categoryId, categoryName);
         manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
             tempQuarantineDoe,
             userDetails,
@@ -459,6 +541,62 @@ public class ReviewDocumentService {
             userRole
         );
     }
+
+    private QuarantineLegalDoc applyChanges(QuarantineLegalDoc quarantineLegalDoc, String documentNewName,
+                                            String categoryId, String categoryName) {
+
+        String categoryIdQuarantineDoc = quarantineLegalDoc.getCategoryId();
+
+        boolean sameCategory = isNull(categoryId) || Objects.equals(categoryIdQuarantineDoc, categoryId);
+        if (isNotBlank(documentNewName) || !sameCategory) {
+            Document document = manageDocumentsService.getQuarantineDocumentForUploader(
+                quarantineLegalDoc.getUploaderRole(),
+                quarantineLegalDoc
+            );
+            if (nonNull(document)) {
+                Document.DocumentBuilder documentBuilder = document.toBuilder();
+                if (isNotBlank(documentNewName)) {
+                    documentBuilder.documentFileName(determineChangedDocumentFileName(documentNewName, document));
+                }
+                if (!sameCategory) {
+                    documentBuilder.categoryId(categoryId);
+                }
+                Document renamedDocument = documentBuilder.build();
+                return updateQuarantineDocument(quarantineLegalDoc, renamedDocument, sameCategory, categoryId, categoryName);
+            }
+        }
+        return quarantineLegalDoc;
+    }
+
+    private String determineChangedDocumentFileName(String newDocumentName, Document document) {
+        String originalName = document.getDocumentFileName();
+        String extension = FilenameUtils.getExtension(originalName);
+        String newName = isNotBlank(extension) ? newDocumentName + "." + extension : newDocumentName;
+        log.info("Renaming document name {} with new name {}", originalName, newName);
+        return newName;
+    }
+
+    private QuarantineLegalDoc updateQuarantineDocument(QuarantineLegalDoc quarantineLegalDoc, Document renamedDocument,
+                                                        boolean sameCategory, String categoryId, String categoryName) {
+        final QuarantineLegalDoc.QuarantineLegalDocBuilder quarantineLegalDocBuilder = quarantineLegalDoc.toBuilder();
+        if (!sameCategory) {
+            quarantineLegalDocBuilder.categoryId(categoryId);
+            quarantineLegalDocBuilder.categoryName(categoryName);
+        }
+        return switch (quarantineLegalDoc.getUploaderRole()) {
+            case LEGAL_PROFESSIONAL -> quarantineLegalDocBuilder.document(renamedDocument).build();
+            case CAFCASS -> quarantineLegalDocBuilder.cafcassQuarantineDocument(renamedDocument).build();
+            case COURT_STAFF -> quarantineLegalDocBuilder.courtStaffQuarantineDocument(renamedDocument).build();
+            case BULK_SCAN -> quarantineLegalDocBuilder.url(renamedDocument).build();
+            case LOCAL_AUTHORITY ->
+                quarantineLegalDocBuilder.localAuthorityQuarantineDocument(renamedDocument).build();
+            case CITIZEN -> quarantineLegalDocBuilder.citizenQuarantineDocument(renamedDocument).build();
+            case COURTNAV -> quarantineLegalDocBuilder.courtNavQuarantineDocument(renamedDocument).build();
+            default -> quarantineLegalDoc;
+        };
+    }
+
+
 
     private void processBulkScanDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid, boolean isDocumentFound) {
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
@@ -534,6 +672,16 @@ public class ReviewDocumentService {
             .uploaderRole(BULK_SCAN);
     }
 
+    public boolean hasDocumentsToBeReviewed(CaseData caseData) {
+        return CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtNavQuarantineDocumentList())
+            || CollectionUtils.isNotEmpty(caseData.getScannedDocuments());
+    }
+
     public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
@@ -584,30 +732,11 @@ public class ReviewDocumentService {
             .filter(element -> element.getId().equals(uuid)).findFirst();
     }
 
-    private String formatDocumentTobeReviewed(String submittedBy,
-                                              QuarantineLegalDoc quarantineDoc) {
-        StringBuilder reviewDetailsBuilder = new StringBuilder();
-        reviewDetailsBuilder.append(format(SUBMITTED_BY_LABEL, submittedBy));
-        //append quarantine document details for solicitor, cafcass & court staff
-        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc, submittedBy);
 
-        //PRL-5006 bulk scan fields
-        if (BULK_SCAN.equals(submittedBy)) {
-            appendBulkScanDocumentDetails(reviewDetailsBuilder, quarantineDoc);
-        }
-        reviewDetailsBuilder.append("<br/>");
-        return reviewDetailsBuilder.toString();
-    }
 
     private void appendQuarantineDocumentDetails(StringBuilder reviewDetailsBuilder,
                                                  QuarantineLegalDoc quarantineDoc,
                                                  String submittedBy) {
-        if (CommonUtils.isNotEmpty(quarantineDoc.getCategoryName())) {
-            reviewDetailsBuilder.append(format(
-                DOCUMENT_CATEGORY_LABEL,
-                quarantineDoc.getCategoryName()
-            ));
-        }
         if (CommonUtils.isNotEmpty(quarantineDoc.getNotes())) {
             reviewDetailsBuilder.append(format(
                 DOCUMENT_COMMENTS_LABEL,
@@ -721,11 +850,77 @@ public class ReviewDocumentService {
         manageDocumentsService.deleteDocumentById(documentId);
     }
 
-    private record ReviewDocument(
-        List<Element<QuarantineLegalDoc>> quarantineDocs,
-        UserDetails userDetails,
-        String userType,
-        String quarantineDocList
-    ) {
+    public void removeReviewDocumentWithMissingDocument(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<ReviewDocument> reviewDocs = createReviewDocumentList(caseData);
+
+        reviewDocs.stream()
+            .filter(reviewDocument -> isNotEmpty(reviewDocument.quarantineDocs))
+            .forEach(reviewDocument -> {
+                List<Element<QuarantineLegalDoc>> quarantineLegalDocs = reviewDocument.quarantineDocs();
+                boolean removed = quarantineLegalDocs.removeIf(e -> {
+                    var legalDoc = e.getValue();
+                    Document document = manageDocumentsService.getQuarantineDocumentForUploader(
+                        legalDoc.getUploaderRole(),
+                        legalDoc
+                    );
+                    return document == null;
+                });
+                if (removed) {
+                    caseDataUpdated.put(reviewDocument.quarantineDocList, quarantineLegalDocs);
+                }
+            });
+    }
+
+
+    private String getUploaderRole(List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList, UUID uuid) {
+        Element<QuarantineLegalDoc> documentElement = tempQuarantineDocumentList.stream()
+            .filter(element -> uuid.equals(element.getId()))
+            .findFirst().orElse(null);
+        String uploaderRole = null;
+        if (nonNull(documentElement)) {
+            QuarantineLegalDoc doc = documentElement.getValue();
+            uploaderRole = nonNull(doc) ? doc.getUploaderRole() : null;
+        }
+        return uploaderRole;
+    }
+
+    private List<ReviewDocument> createReviewDocumentList(CaseData caseData) {
+        return List.of(
+            //solicitor uploaded docs
+            new ReviewDocument(
+                caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
+                UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
+                SOLICITOR,
+                LEGAL_PROF_QUARANTINE_DOCS_LIST
+            ),
+            //cafcass uploaded docs
+            new ReviewDocument(
+                caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
+                UserDetails.builder().roles(List.of(CAFCASS)).build(),
+                CAFCASS,
+                CAFCASS_QUARANTINE_DOCS_LIST
+            ),
+            //LA uploaded docs
+            new ReviewDocument(
+                caseData.getDocumentManagementDetails().getLocalAuthorityQuarantineDocsList(),
+                UserDetails.builder().roles(List.of(LOCAL_AUTHORITY)).build(),
+                LOCAL_AUTHORITY,
+                LOCAL_AUTHORITY_QUARANTINE_DOCS_LIST
+            ),
+            //court staff uploaded docs
+            new ReviewDocument(
+                caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
+                UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
+                COURT_STAFF,
+                COURT_STAFF_QUARANTINE_DOCS_LIST
+            ),
+            //citizen uploaded docs
+            new ReviewDocument(
+                caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
+                UserDetails.builder().roles(List.of(Roles.CITIZEN.getValue())).build(),
+                CITIZEN,
+                CITIZEN_QUARANTINE_DOCS_LIST
+            )
+        );
     }
 }

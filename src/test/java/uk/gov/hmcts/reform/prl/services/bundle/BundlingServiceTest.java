@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.bundle.BundleCreateRequestMapper;
+import uk.gov.hmcts.reform.prl.mapper.bundle.HearingDetailsMapperUtil;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -67,6 +68,9 @@ public class BundlingServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private HearingDetailsMapperUtil hearingDetailsMapperUtil;
 
     @Mock
     private CaseUtils caseUtils;
@@ -213,7 +217,7 @@ public class BundlingServiceTest {
             .bundleInformation(BundlingInformation.builder().build())
             //.home(homefull)
             .build();
-        bundleCreateRequestMapper = new BundleCreateRequestMapper();
+        bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil);
 
         c100CaseDataOther = CaseData.builder()
             .id(123456789123L)
