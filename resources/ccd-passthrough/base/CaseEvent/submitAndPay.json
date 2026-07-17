@@ -1,0 +1,6 @@
+[ {
+  "ID" : "submitAndPay",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/getSolicitorAndFeeDetails",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/generate-document-submit-application",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/payment-confirmation"
+} ]

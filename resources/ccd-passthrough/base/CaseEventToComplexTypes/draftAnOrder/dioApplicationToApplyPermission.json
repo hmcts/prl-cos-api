@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "draftAnOrder",
+  "CaseFieldID" : "dioApplicationToApplyPermission",
+  "ListElementCode" : "applyPermissionToEditSection",
+  "CaseTypeID" : "PRLAPPS"
+} ]

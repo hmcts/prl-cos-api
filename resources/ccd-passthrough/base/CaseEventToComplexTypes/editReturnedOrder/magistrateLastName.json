@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "editReturnedOrder",
+  "CaseFieldID" : "magistrateLastName",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+} ]

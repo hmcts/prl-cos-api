@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmC",
+  "CaseFieldID" : "respChildPsychologicalAbuse",
+  "ListElementCode" : "respAbuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmC",
+  "CaseFieldID" : "respChildPsychologicalAbuse",
+  "ListElementCode" : "respBehavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmC",
+  "CaseFieldID" : "respChildPsychologicalAbuse",
+  "ListElementCode" : "respBehavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolAllegationsOfHarmC",
+  "CaseFieldID" : "respChildPsychologicalAbuse",
+  "ListElementCode" : "respBehavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

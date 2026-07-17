@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "sdoGpApplicantName",
+  "ListElementCode" : "sdoNameOfApplicant",
+  "CaseTypeID" : "PRLAPPS"
+} ]

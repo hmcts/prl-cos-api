@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "dioApplicationToApplyPermission",
+  "ListElementCode" : "applyPermissionToEditSection",
+  "CaseTypeID" : "PRLAPPS"
+} ]

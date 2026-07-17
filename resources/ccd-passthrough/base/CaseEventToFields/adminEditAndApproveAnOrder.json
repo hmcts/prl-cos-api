@@ -1,0 +1,46 @@
+[ {
+  "CaseFieldID" : "draftOrdersDynamicList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order"
+}, {
+  "CaseFieldID" : "orderNameLabel10",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel11",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameLabel13",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "orderNameHearingLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "sdoDirectionsCaseNeedsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/pre-populate-standard-direction-order-other-fields"
+}, {
+  "CaseFieldID" : "sdoSdoLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "doYouWantToServeOrder",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-edit-approve/mid-event"
+}, {
+  "CaseFieldID" : "manageOrderHeaderLabel21",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-edit-approve/serve-order/mid-event"
+}, {
+  "CaseFieldID" : "serveOrgDetailsList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-orders/validate-additional-parties"
+}, {
+  "CaseFieldID" : "previewDraftOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order-common-fields"
+}, {
+  "CaseFieldID" : "orderNameLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order-custom-fields"
+}, {
+  "CaseFieldID" : "amendedOrderLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "parentalResponsibility",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+}, {
+  "CaseFieldID" : "appointedGuardianLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/generate-doc"
+} ]

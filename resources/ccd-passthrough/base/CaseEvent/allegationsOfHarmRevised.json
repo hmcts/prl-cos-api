@@ -1,0 +1,6 @@
+[ {
+  "ID" : "allegationsOfHarmRevised",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/pre-populate-child-data",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/allegation-of-harm/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

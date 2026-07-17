@@ -1,0 +1,27 @@
+[ {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childSexualAbuse",
+  "ListElementCode" : "typeOfAbuse",
+  "CaseTypeID" : "PRLAPPS",
+  "DefaultValue" : "sexualAbuse"
+}, {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childSexualAbuse",
+  "ListElementCode" : "abuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childSexualAbuse",
+  "ListElementCode" : "behavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childSexualAbuse",
+  "ListElementCode" : "behavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childSexualAbuse",
+  "ListElementCode" : "behavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

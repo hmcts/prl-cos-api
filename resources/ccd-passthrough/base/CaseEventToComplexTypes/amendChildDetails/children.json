@@ -1,0 +1,275 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "firstName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "lastName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "dateOfBirth",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "gender",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "DisplayContext" : "OPTIONAL",
+  "ListElementCode" : "otherGender",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "5",
+  "FieldShowCondition" : "children.gender=\"other\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "orderAppliedFor",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "applicantsRelationshipToChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "otherApplicantsRelationshipToChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "children.applicantsRelationshipToChild=\"other\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "respondentsRelationshipToChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "9",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "otherRespondentsRelationshipToChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "children.respondentsRelationshipToChild=\"other\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "childLiveWith",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "11",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "12",
+  "FieldShowCondition" : "children.childLiveWith CONTAINS \"anotherPerson\"",
+  "DisplayContext" : "COMPLEX"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.firstName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "13",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.lastName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "14",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.relationshipToamendChildDetails",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "15",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "16",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.AddressLine1",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "17",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.AddressLine2",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "18",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.AddressLine3",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "19",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.PostTown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "20",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.County",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "21",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.PostCode",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "22",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.address.Country",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "23",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "personWhoLivesWithChild.isPersonIdentityConfidential",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "24",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "parentalResponsibility",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "25",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "parentalResponsibilityDetails",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "26",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Child",
+  "CaseEventID" : "amendChildDetails",
+  "CaseFieldID" : "children",
+  "ListElementCode" : "addNewChildLabel",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "27",
+  "DisplayContext" : "MANDATORY"
+} ]

@@ -1,0 +1,6 @@
+[ {
+  "ID" : "documentRemoval",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/document-removal/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/document-removal/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/document-removal/submitted"
+} ]

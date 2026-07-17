@@ -1,0 +1,27 @@
+[ {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childPhysicalAbuse",
+  "ListElementCode" : "typeOfAbuse",
+  "CaseTypeID" : "PRLAPPS",
+  "DefaultValue" : "physicalAbuse"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childPhysicalAbuse",
+  "ListElementCode" : "abuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childPhysicalAbuse",
+  "ListElementCode" : "behavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childPhysicalAbuse",
+  "ListElementCode" : "behavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childPhysicalAbuse",
+  "ListElementCode" : "behavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

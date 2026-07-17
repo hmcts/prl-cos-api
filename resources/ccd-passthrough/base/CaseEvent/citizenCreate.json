@@ -1,0 +1,4 @@
+[ {
+  "ID" : "citizenCreate",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/citizen-case-creation-callback/submitted"
+} ]

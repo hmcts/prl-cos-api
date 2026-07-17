@@ -1,0 +1,12 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "FL400",
+  "CaseEventID" : "draftAnOrder",
+  "CaseFieldID" : "fl404SchoolDirections&Details",
+  "ListElementCode" : "fl404SchoolDirections&DetailsComplex",
+  "EventElementLabel" : " ",
+  "FieldDisplayOrder" : "58",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "createSelectOrderOptions=\"nonMolestation\""
+} ]

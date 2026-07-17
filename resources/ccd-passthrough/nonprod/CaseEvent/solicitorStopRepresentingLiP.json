@@ -1,0 +1,6 @@
+[ {
+  "ID" : "solicitorStopRepresentingLiP",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/noc/aboutToStartStopRepresentation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/noc/aboutToSubmitStopRepresentation",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/noc/submittedStopRepresentation"
+} ]

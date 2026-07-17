@@ -1,0 +1,267 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "firstName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "lastName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "previousName",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "isDateOfBirthKnown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "dateOfBirth",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "othersToNotify.isDateOfBirthKnown=\"Yes\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "gender",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "05/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "DisplayContext" : "OPTIONAL",
+  "ListElementCode" : "otherGender",
+  "EventElementLabel" : "*Gender",
+  "FieldDisplayOrder" : "7",
+  "FieldShowCondition" : "othersToNotify.gender=\"other\""
+}, {
+  "LiveFrom" : "16/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "isPlaceOfBirthKnown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "16/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "placeOfBirth",
+  "EventElementLabel" : "*Place of birth (town, county, country)",
+  "FieldDisplayOrder" : "9",
+  "FieldShowCondition" : "othersToNotify.isPlaceOfBirthKnown=\"Yes\"",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "isCurrentAddressKnown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "11",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "othersToNotify.isCurrentAddressKnown=\"Yes\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.AddressLine1",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "12",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.AddressLine2",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "13",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.AddressLine3",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "14",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.PostTown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "15",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.County",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "16",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.PostCode",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "17",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "address.Country",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "18",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "canYouProvideEmailAddress",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "19",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "email",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "20",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "othersToNotify.canYouProvideEmailAddress=\"Yes\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "canYouProvidePhoneNumber",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "21",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "phoneNumber",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "22",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "othersToNotify.canYouProvidePhoneNumber=\"Yes\""
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "personRelationshipToChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "otherPersonRelationshipToChildren",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "23",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "otherPersonRelationshipToChildren.personRelationshipToChild",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "24",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "PartyDetails",
+  "CaseEventID" : "amendOtherPeopleInTheCase",
+  "CaseFieldID" : "othersToNotify",
+  "ListElementCode" : "addNewApplicantLabel",
+  "EventElementLabel" : "Add new person",
+  "FieldDisplayOrder" : "25",
+  "DisplayContext" : "OPTIONAL"
+} ]

@@ -1,0 +1,4 @@
+[ {
+  "ID" : "changeCaseAccess",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/restricted-case-access/change-case-access"
+} ]

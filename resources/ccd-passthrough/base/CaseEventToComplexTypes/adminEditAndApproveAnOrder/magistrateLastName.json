@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "adminEditAndApproveAnOrder",
+  "CaseFieldID" : "magistrateLastName",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+} ]

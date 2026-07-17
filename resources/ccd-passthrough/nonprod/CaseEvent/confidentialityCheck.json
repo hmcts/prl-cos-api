@@ -1,0 +1,6 @@
+[ {
+  "ID" : "confidentialityCheck",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/confidentiality-check/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/confidentiality-check/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/confidentiality-check/submitted"
+} ]

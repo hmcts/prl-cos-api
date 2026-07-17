@@ -1,0 +1,31 @@
+[ {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401StmtOfTruth",
+  "ListElementCode" : "proceedingsLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401StmtOfTruth",
+  "ListElementCode" : "applicantConsent",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401StmtOfTruth",
+  "ListElementCode" : "date",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401StmtOfTruth",
+  "ListElementCode" : "fullname",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401StmtOfTruth",
+  "ListElementCode" : "nameOfFirm",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401StatementOfTruthAndSubmit",
+  "CaseFieldID" : "fl401StmtOfTruth",
+  "ListElementCode" : "signOnBehalf",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,157 @@
+[ {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "firstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "previousName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isDateOfBirthKnown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "gender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "otherGender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isPlaceOfBirthKnown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "placeOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "liveInRefuge",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "refugeConfidentialC8Info",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "refugeConfidentialityC8Form",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isCurrentAddressKnown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "address.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isAddressConfidential",
+  "CaseTypeID" : "PRLAPPS",
+  "RetainHiddenValue" : "N"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isAtAddressLessThan5Years",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "addressLivedLessThan5YearsDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "canYouProvideEmailAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "email",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isEmailAddressConfidential",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "canYouProvidePhoneNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "phoneNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "isPhoneNumberConfidential",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendOtherPeopleInTheCaseRevised",
+  "CaseFieldID" : "otherPartyInTheCaseRevised",
+  "ListElementCode" : "addNewApplicantLabel",
+  "CaseTypeID" : "PRLAPPS"
+} ]

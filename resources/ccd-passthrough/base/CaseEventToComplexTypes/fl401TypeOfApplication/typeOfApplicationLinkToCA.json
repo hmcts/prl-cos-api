@@ -1,0 +1,16 @@
+[ {
+  "CaseEventID" : "fl401TypeOfApplication",
+  "CaseFieldID" : "typeOfApplicationLinkToCA",
+  "ListElementCode" : "linkToCaApplication",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401TypeOfApplication",
+  "CaseFieldID" : "typeOfApplicationLinkToCA",
+  "ListElementCode" : "linkToCaYes",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "fl401TypeOfApplication",
+  "CaseFieldID" : "typeOfApplicationLinkToCA",
+  "ListElementCode" : "caApplicationNumber",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,51 @@
+[ {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "firstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "gender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "otherGender",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "orderAppliedFor",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "parentalResponsibility",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "parentalResponsibilityDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "whoDoesTheChildLiveWith",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "childDetailsRevised",
+  "CaseFieldID" : "newChildDetails",
+  "ListElementCode" : "addNewChildLabel",
+  "CaseTypeID" : "PRLAPPS"
+} ]

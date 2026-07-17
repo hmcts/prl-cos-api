@@ -1,0 +1,4 @@
+[ {
+  "ID" : "citizenCaseWithdraw",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/citizen-case-withdrawn-notification"
+} ]

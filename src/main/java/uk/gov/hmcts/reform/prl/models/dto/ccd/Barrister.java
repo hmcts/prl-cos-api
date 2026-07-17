@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Data
 @Builder(toBuilder = true)
@@ -15,11 +16,17 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Barrister {
 
+    @CCD(label = " ", searchable = false)
     private Organisation barristerOrg;
+    @CCD(label = "Barrister Id", searchable = false)
     private String barristerId;
+    @CCD(label = "Barrister first name", searchable = false)
     private final String barristerFirstName;
+    @CCD(label = "Barrister last name", searchable = false)
     private final String barristerLastName;
+    @CCD(label = "Barrister email", searchable = false)
     private final String barristerEmail;
+    @CCD(label = " ", searchable = false)
     private final String barristerRole;
 
     public static final String FULL_NAME_FORMAT = "%s %s";

@@ -1,0 +1,5 @@
+[ {
+  "ID" : "applyNocDecision",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/noc/aboutToSubmitNoCRequest",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/noc/submittedNoCRequest"
+} ]

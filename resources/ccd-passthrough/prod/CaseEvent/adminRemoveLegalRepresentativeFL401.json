@@ -1,0 +1,6 @@
+[ {
+  "ID" : "adminRemoveLegalRepresentativeFL401",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/noc/aboutToStartAdminRemoveLegalRepresentative",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/noc/aboutToSubmitAdminRemoveLegalRepresentative",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/noc/submittedAdminRemoveLegalRepresentative"
+} ]

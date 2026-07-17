@@ -1,0 +1,6 @@
+[ {
+  "ID" : "privateCaseAccess",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/restricted-case-access/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/restricted-case-access/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/restricted-case-access/submitted"
+} ]

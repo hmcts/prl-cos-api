@@ -1,0 +1,4 @@
+[ {
+  "ID" : "c100ResSolViewResponseDraftDocumentA",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/generate-c7response-document"
+} ]

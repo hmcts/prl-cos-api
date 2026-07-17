@@ -1,0 +1,19 @@
+[ {
+  "LiveFrom" : "01/02/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "NextHearingDetails",
+  "CaseEventID" : "UpdateNextHearingInfo",
+  "CaseFieldID" : "nextHearingDetails",
+  "ListElementCode" : "hearingID",
+  "EventElementLabel" : "",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "01/02/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "NextHearingDetails",
+  "CaseEventID" : "UpdateNextHearingInfo",
+  "CaseFieldID" : "nextHearingDetails",
+  "ListElementCode" : "hearingDateTime",
+  "EventElementLabel" : "",
+  "DisplayContext" : "MANDATORY"
+} ]

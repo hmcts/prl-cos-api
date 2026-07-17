@@ -1,0 +1,4 @@
+[ {
+  "ID" : "createBundle",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/bundle/createBundle"
+} ]

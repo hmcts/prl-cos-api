@@ -1,0 +1,6 @@
+[ {
+  "ID" : "uploadAdditionalApplications",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/pre-populate-applicants",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/upload-additional-application/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/upload-additional-application/submitted"
+} ]

@@ -1,0 +1,5 @@
+[ {
+  "ID" : "renameDocuments",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/rename-documents/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/rename-documents/about-to-submit"
+} ]

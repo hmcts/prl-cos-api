@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "serviceOfDocuments",
+  "CaseFieldID" : "sodDocumentsList",
+  "ListElementCode" : "documentsList",
+  "CaseTypeID" : "PRLAPPS"
+} ]

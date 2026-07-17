@@ -1,0 +1,5 @@
+[ {
+  "ID" : "childDetailsRevised",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/pre-populate-child-information",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

@@ -1,0 +1,27 @@
+[ {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childFinancialAbuse",
+  "ListElementCode" : "typeOfAbuse",
+  "CaseTypeID" : "PRLAPPS",
+  "DefaultValue" : "financialAbuse"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childFinancialAbuse",
+  "ListElementCode" : "abuseNatureDescription",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childFinancialAbuse",
+  "ListElementCode" : "behavioursStartDateAndLength",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childFinancialAbuse",
+  "ListElementCode" : "behavioursApplicantSoughtHelp",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendAllegationsOfHarmRevised",
+  "CaseFieldID" : "childFinancialAbuse",
+  "ListElementCode" : "behavioursApplicantHelpSoughtWho",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,6 @@
+[ {
+  "ID" : "editAndApproveAnOrder",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-populate-draft-order",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/judge-or-admin-edit-approve/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/edit-and-approve/submitted"
+} ]

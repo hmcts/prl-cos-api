@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "sodAdditionalDocumentsLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/service-of-documents/validate"
+}, {
+  "CaseFieldID" : "sodAdditionalRecipientsList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/service-of-documents/validate-additional-recipients"
+} ]

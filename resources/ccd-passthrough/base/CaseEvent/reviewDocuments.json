@@ -1,0 +1,6 @@
+[ {
+  "ID" : "reviewDocuments",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/review-documents/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/review-documents/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/review-documents/submitted"
+} ]

@@ -1,0 +1,121 @@
+[ {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCourtAddress.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bCaseNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bApplicantName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bApplicantReference",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentReference",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentDob",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bRespondentAddress.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "fl404bCustomFields",
+  "ListElementCode" : "fl404bHearingOutcome",
+  "CaseTypeID" : "PRLAPPS"
+} ]

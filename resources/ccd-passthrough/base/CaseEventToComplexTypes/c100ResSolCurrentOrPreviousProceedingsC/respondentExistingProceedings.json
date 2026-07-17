@@ -1,0 +1,132 @@
+[ {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "previousOrOngoingProceedings",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "caseNumber",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "dateStarted",
+  "EventElementLabel" : "Date started",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "dateEnded",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "typeOfOrder",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "otherTypeOfOrder",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "respondentExistingProceedings.typeOfOrder CONTAINS \"otherOrder\""
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "nameOfJudge",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "nameOfCourt",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "nameOfChildrenInvolved",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "9",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "nameOfGuardian",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "nameAndOffice",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "11",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "uploadRelevantOrder",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "12",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "21/11/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespondentProceedingDetails",
+  "CaseEventID" : "c100ResSolCurrentOrPreviousProceedingsC",
+  "CaseFieldID" : "respondentExistingProceedings",
+  "ListElementCode" : "addNewProceedingLabel",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "13",
+  "DisplayContext" : "READONLY"
+} ]

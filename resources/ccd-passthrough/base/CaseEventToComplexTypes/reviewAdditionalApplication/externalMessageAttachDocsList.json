@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "reviewAdditionalApplication",
+  "CaseFieldID" : "externalMessageAttachDocsList",
+  "ListElementCode" : "submittedDocsRefList",
+  "CaseTypeID" : "PRLAPPS"
+} ]

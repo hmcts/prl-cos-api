@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageObject",
+  "ListElementCode" : "senderEmail",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageObject",
+  "ListElementCode" : "recipientEmail",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageObject",
+  "ListElementCode" : "messageSubject",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "sendAndReplyToMessages",
+  "CaseFieldID" : "messageObject",
+  "ListElementCode" : "messageUrgency",
+  "CaseTypeID" : "PRLAPPS"
+} ]

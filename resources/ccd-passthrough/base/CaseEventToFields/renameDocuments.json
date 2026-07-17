@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "renameDocumentsList",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/rename-documents/mid-event"
+}, {
+  "CaseFieldID" : "newNameForDocument",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/rename-documents/validate-rename-field"
+} ]

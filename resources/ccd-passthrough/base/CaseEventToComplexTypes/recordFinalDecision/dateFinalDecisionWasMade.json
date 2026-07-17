@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "recordFinalDecision",
+  "CaseFieldID" : "dateFinalDecisionWasMade",
+  "ListElementCode" : "finalDecisionDate",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,5 @@
+[ {
+  "ID" : "amendRespondentsDetails",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/update-party-details",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

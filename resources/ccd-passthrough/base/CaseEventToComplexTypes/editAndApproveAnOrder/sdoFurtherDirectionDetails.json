@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "editAndApproveAnOrder",
+  "CaseFieldID" : "sdoFurtherDirectionDetails",
+  "ListElementCode" : "sdoFurtherDirectionTitle",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "editAndApproveAnOrder",
+  "CaseFieldID" : "sdoFurtherDirectionDetails",
+  "ListElementCode" : "sdoFurtherDirectionDescription",
+  "CaseTypeID" : "PRLAPPS"
+} ]

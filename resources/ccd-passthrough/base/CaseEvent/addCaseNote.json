@@ -1,0 +1,5 @@
+[ {
+  "ID" : "addCaseNote",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/populate-header-case-note",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/submit-case-note"
+} ]

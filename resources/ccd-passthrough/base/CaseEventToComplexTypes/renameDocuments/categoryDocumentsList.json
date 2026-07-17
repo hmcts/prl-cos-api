@@ -1,0 +1,11 @@
+[ {
+  "LiveFrom" : "01/09/2024",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "DocumentDynamicList",
+  "CaseEventID" : "renameDocuments",
+  "CaseFieldID" : "categoryDocumentsList",
+  "ListElementCode" : "documentsList",
+  "EventElementLabel" : "Select the document",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+} ]

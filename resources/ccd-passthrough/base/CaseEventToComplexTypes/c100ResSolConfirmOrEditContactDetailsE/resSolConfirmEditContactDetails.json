@@ -1,0 +1,156 @@
+[ {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "nameAndDateOfBirthLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "firstName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "lastName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "previousName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "dateOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "placeOfBirth",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "liveInRefuge",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "refugeConfidentialityC8Form",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "address.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.isAtAddressLessThan5Years",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.detailsOfAddressHistoryLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.AddressLine1",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.AddressLine2",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.AddressLine3",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.PostTown",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.County",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.PostCode",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "addressHistory.previousAddressHistory.Country",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "contactDetailsLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "contact",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "contact.phoneNumber",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConfirmOrEditContactDetailsE",
+  "CaseFieldID" : "resSolConfirmEditContactDetails",
+  "ListElementCode" : "contact.email",
+  "CaseTypeID" : "PRLAPPS"
+} ]

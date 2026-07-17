@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "isAdditionalApplicationReviewed",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/review-additional-application/mid-event"
+} ]

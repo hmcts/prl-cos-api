@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "hearingEditAndApproveAnOrder",
+  "CaseFieldID" : "sdoInstructionsFilingDetails",
+  "ListElementCode" : "sdoDioOtherDetails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

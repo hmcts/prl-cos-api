@@ -1,0 +1,490 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "addressLabel",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.AddressLine1",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.AddressLine2",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.AddressLine3",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.PostTown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.County",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.PostCode",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "address.Country",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "9",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "peopleLivingAtThisAddress",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "textAreaSomethingElse",
+  "FieldDisplayOrder" : "11",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "everLivedAtTheAddress",
+  "FieldDisplayOrder" : "12",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "intendToLiveAtTheAddress",
+  "FieldDisplayOrder" : "13",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "doAnyChildrenLiveAtAddress",
+  "FieldDisplayOrder" : "14",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "children",
+  "FieldDisplayOrder" : "15",
+  "DisplayContext" : "COMPLEX"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "children.keepChildrenInfoConfidential",
+  "FieldDisplayOrder" : "16",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "children.childFullName",
+  "FieldDisplayOrder" : "17",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "children.childsAge",
+  "FieldDisplayOrder" : "18",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "children.isRespondentResponsibleForChild",
+  "FieldDisplayOrder" : "19",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "isPropertyAdapted",
+  "FieldDisplayOrder" : "20",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "howIsThePropertyAdapted",
+  "FieldDisplayOrder" : "21",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "isThereMortgageOnProperty",
+  "FieldDisplayOrder" : "22",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages",
+  "FieldDisplayOrder" : "23",
+  "DisplayContext" : "COMPLEX"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.mortgageNamedAfter",
+  "FieldDisplayOrder" : "24",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.textAreaSomethingElse",
+  "FieldDisplayOrder" : "25",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.mortgageNumber",
+  "FieldDisplayOrder" : "26",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.mortgageLenderName",
+  "FieldDisplayOrder" : "27",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address",
+  "FieldDisplayOrder" : "28",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.AddressLine1",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "29",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.AddressLine2",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "30",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.AddressLine3",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "31",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.PostTown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "32",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.County",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "33",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.PostCode",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "34",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "mortgages.address.Country",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "35",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "isPropertyRented",
+  "FieldDisplayOrder" : "36",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords",
+  "FieldDisplayOrder" : "37",
+  "DisplayContext" : "COMPLEX"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.mortgageNamedAfterList",
+  "FieldDisplayOrder" : "38",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.textAreaSomethingElse",
+  "FieldDisplayOrder" : "39",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.landlordName",
+  "FieldDisplayOrder" : "40",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address",
+  "FieldDisplayOrder" : "41",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.AddressLine1",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "42",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.AddressLine2",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "43",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.AddressLine3",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "44",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.PostTown",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "45",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.County",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "46",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.PostCode",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "47",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "landlords.address.Country",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "48",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "doesApplicantHaveHomeRights",
+  "FieldDisplayOrder" : "49",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "livingSituation",
+  "FieldDisplayOrder" : "50",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "familyHome",
+  "FieldDisplayOrder" : "51",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Home",
+  "CaseEventID" : "fl401AmendHome",
+  "CaseFieldID" : "home",
+  "ListElementCode" : "furtherInformation",
+  "FieldDisplayOrder" : "52",
+  "DisplayContext" : "OPTIONAL"
+} ]

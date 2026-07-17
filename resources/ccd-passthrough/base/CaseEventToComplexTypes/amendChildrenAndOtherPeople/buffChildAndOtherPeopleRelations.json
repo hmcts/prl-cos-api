@@ -1,0 +1,41 @@
+[ {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "otherPeopleFullName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "childFullName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "childAndOtherPeopleRelation",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "childAndOtherPeopleRelationOtherDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "childLivesWith",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "isChildLivesWithPersonConfidential",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "otherPeopleId",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendChildrenAndOtherPeople",
+  "CaseFieldID" : "buffChildAndOtherPeopleRelations",
+  "ListElementCode" : "childId",
+  "CaseTypeID" : "PRLAPPS"
+} ]

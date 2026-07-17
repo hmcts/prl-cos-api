@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "c100ResSolKeepDetailsPrivateD",
+  "CaseFieldID" : "keepContactDetailsPrivate",
+  "ListElementCode" : "otherPeopleKnowYourContactDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolKeepDetailsPrivateD",
+  "CaseFieldID" : "keepContactDetailsPrivate",
+  "ListElementCode" : "confidentiality",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolKeepDetailsPrivateD",
+  "CaseFieldID" : "keepContactDetailsPrivate",
+  "ListElementCode" : "confidentialityListLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolKeepDetailsPrivateD",
+  "CaseFieldID" : "keepContactDetailsPrivate",
+  "ListElementCode" : "confidentialityList",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,5 @@
+[ {
+  "ID" : "otherProceedings",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/other-proceedings/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

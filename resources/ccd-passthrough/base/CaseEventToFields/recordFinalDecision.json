@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "recordChildrenLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/closing-case/mid-event"
+}, {
+  "CaseFieldID" : "addDecisionLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/closing-case/validate-child-details"
+} ]

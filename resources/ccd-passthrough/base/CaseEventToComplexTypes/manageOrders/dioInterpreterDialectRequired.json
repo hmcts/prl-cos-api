@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "dioInterpreterDialectRequired",
+  "ListElementCode" : "languageOrDialect",
+  "CaseTypeID" : "PRLAPPS"
+} ]

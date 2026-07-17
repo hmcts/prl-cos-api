@@ -1,0 +1,13 @@
+[ {
+  "CaseFieldID" : "chooseSendOrReply",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/mid-event-task"
+}, {
+  "CaseFieldID" : "sendingMessagesLabel",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/clear-dynamic-lists"
+}, {
+  "CaseFieldID" : "respondToMessage",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/mid-event-task"
+}, {
+  "CaseFieldID" : "replyMessageObject",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/send-and-reply-to-messages/send-or-reply-to-messages/clear-dynamic-lists"
+} ]

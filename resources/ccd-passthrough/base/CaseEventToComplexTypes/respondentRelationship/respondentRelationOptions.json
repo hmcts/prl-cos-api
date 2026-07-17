@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "respondentRelationship",
+  "CaseFieldID" : "respondentRelationOptions",
+  "ListElementCode" : "applicantRelationshipOptions",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "respondentRelationship",
+  "CaseFieldID" : "respondentRelationOptions",
+  "ListElementCode" : "relationOptionsOther",
+  "CaseTypeID" : "PRLAPPS"
+} ]

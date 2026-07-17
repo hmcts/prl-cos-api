@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "reviewDocsLabel1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/review-documents/mid-event"
+}, {
+  "CaseFieldID" : "reviewDocsLabel3",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/review-documents/validate-event"
+} ]

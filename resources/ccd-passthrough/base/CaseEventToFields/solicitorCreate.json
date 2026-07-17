@@ -1,0 +1,7 @@
+[ {
+  "CaseFieldID" : "fl401ConfidentialityDisclaimerLabel1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-initiation/populate-court-list"
+}, {
+  "CaseFieldID" : "c100ConfidentialityStatementDisclaimer",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/case-initiation/populate-court-list"
+} ]

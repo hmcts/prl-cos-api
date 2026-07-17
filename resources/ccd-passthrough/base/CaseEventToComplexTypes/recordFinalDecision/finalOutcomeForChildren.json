@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "recordFinalDecision",
+  "CaseFieldID" : "finalOutcomeForChildren",
+  "ListElementCode" : "childName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "recordFinalDecision",
+  "CaseFieldID" : "finalOutcomeForChildren",
+  "ListElementCode" : "caseClosingReason",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -1,0 +1,6 @@
+[ {
+  "ID" : "amendChildrenAndApplicants",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/pre-populate-amend-applicant-to-child-relation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/populate-applicant-to-child-relation",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

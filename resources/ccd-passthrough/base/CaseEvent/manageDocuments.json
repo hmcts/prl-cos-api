@@ -1,0 +1,5 @@
+[ {
+  "ID" : "manageDocuments",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/copy-manage-docs-for-tabs",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

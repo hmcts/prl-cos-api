@@ -1,0 +1,21 @@
+[ {
+  "LiveFrom" : "01/10/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SendReplyTempDoc",
+  "CaseEventID" : "reviewAdditionalApplication",
+  "CaseFieldID" : "internalMessageAttachDocsList",
+  "ListElementCode" : "attachedTime",
+  "EventElementLabel" : "Attached date time",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "01/10/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "SendReplyTempDoc",
+  "CaseEventID" : "reviewAdditionalApplication",
+  "CaseFieldID" : "internalMessageAttachDocsList",
+  "ListElementCode" : "document",
+  "EventElementLabel" : "Document",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "READONLY"
+} ]

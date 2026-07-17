@@ -1,0 +1,5 @@
+[ {
+  "ID" : "otherPeopleInTheCaseRevised",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/update-other-people-party-details",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

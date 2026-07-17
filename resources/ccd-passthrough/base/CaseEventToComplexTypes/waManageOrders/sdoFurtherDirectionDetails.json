@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "sdoFurtherDirectionDetails",
+  "ListElementCode" : "sdoFurtherDirectionTitle",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "sdoFurtherDirectionDetails",
+  "ListElementCode" : "sdoFurtherDirectionDescription",
+  "CaseTypeID" : "PRLAPPS"
+} ]

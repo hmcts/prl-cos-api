@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "amendWithoutNoticeOrderDetails",
+  "CaseFieldID" : "reasonForOrderWithoutGivingNotice",
+  "ListElementCode" : "reasonForOrderWithoutGivingNotice",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendWithoutNoticeOrderDetails",
+  "CaseFieldID" : "reasonForOrderWithoutGivingNotice",
+  "ListElementCode" : "futherDetails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

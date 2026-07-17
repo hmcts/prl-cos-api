@@ -1,0 +1,36 @@
+[ {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "childName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "cafcassOfficerLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "cafcassOfficerName",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "cafcassOfficerPosition",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "cafcassOfficerOtherPosition",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "cafcassOfficerEmailAddress",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "addCafcassOfficer",
+  "CaseFieldID" : "childAndCafcassOfficers",
+  "ListElementCode" : "cafcassOfficerPhoneNo",
+  "CaseTypeID" : "PRLAPPS"
+} ]

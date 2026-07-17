@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "manageDocuments",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/manage-documents/mid-event"
+} ]

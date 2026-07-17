@@ -1,0 +1,5 @@
+[ {
+  "ID" : "fl401resubmit",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/fl401/resubmit-application",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/updateTaskListOnly"
+} ]

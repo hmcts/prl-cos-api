@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "submissionRequiredFieldsInfo1",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/validate-miam-application-or-exemption"
+} ]

@@ -1,0 +1,48 @@
+[ {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "documentRelatedToCaseCheckbox",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "documentParty",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "documentCategories",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "document",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "isConfidential",
+  "CaseTypeID" : "PRLAPPS",
+  "ElementLabel" : "Does the document contain confidential information?"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "isRestricted",
+  "CaseTypeID" : "PRLAPPS",
+  "ElementLabel" : "Do you want to request this document is restricted?"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "restrictedDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "documentDetails",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocumentsNew",
+  "CaseFieldID" : "manageDocuments",
+  "ListElementCode" : "documentRestrictCheckbox",
+  "CaseTypeID" : "PRLAPPS"
+} ]

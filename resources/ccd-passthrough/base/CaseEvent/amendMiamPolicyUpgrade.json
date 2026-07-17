@@ -1,0 +1,5 @@
+[ {
+  "ID" : "amendMiamPolicyUpgrade",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/submit-miam-policy-upgrade",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-task-list/submitted"
+} ]

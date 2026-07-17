@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "editAndApproveAnOrder",
+  "CaseFieldID" : "sdoPartiesRaisedAbuseCollection",
+  "ListElementCode" : "partyName",
+  "CaseTypeID" : "PRLAPPS"
+} ]

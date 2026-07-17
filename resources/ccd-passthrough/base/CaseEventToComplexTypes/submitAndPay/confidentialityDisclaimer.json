@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "submitAndPay",
+  "CaseFieldID" : "confidentialityDisclaimer",
+  "ListElementCode" : "confidentialityStatementLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "submitAndPay",
+  "CaseFieldID" : "confidentialityDisclaimer",
+  "ListElementCode" : "confidentialityChecksLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "submitAndPay",
+  "CaseFieldID" : "confidentialityDisclaimer",
+  "ListElementCode" : "confidentialityChecksText",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "submitAndPay",
+  "CaseFieldID" : "confidentialityDisclaimer",
+  "ListElementCode" : "confidentialityChecksChecked",
+  "CaseTypeID" : "PRLAPPS"
+} ]

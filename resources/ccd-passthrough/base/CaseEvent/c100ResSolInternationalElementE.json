@@ -1,0 +1,6 @@
+[ {
+  "ID" : "c100ResSolInternationalElementE",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/update-res-task-list/submitted"
+} ]

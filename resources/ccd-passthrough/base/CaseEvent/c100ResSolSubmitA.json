@@ -1,0 +1,6 @@
+[ {
+  "ID" : "c100ResSolSubmitA",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/about-to-start-response-validation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/submit-c7-response",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/respondent-solicitor/submitted"
+} ]

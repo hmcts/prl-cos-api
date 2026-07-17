@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "sdoInterpreterDialectRequired",
+  "ListElementCode" : "interpreterNeedFor",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageOrders",
+  "CaseFieldID" : "sdoInterpreterDialectRequired",
+  "ListElementCode" : "languageOrDialect",
+  "CaseTypeID" : "PRLAPPS"
+} ]

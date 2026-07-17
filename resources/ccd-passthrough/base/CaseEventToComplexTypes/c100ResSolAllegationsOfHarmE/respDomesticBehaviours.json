@@ -1,0 +1,72 @@
+[ {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "respTypeOfAbuse",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "respAbuseNatureDescription",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "respBehavioursStartDateAndLength",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "respBehavioursApplicantSoughtHelp",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "respBehavioursApplicantHelpSoughtWho",
+  "FieldShowCondition" : "respDomesticBehaviours.respBehavioursApplicantSoughtHelp=\"Yes\"",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "OPTIONAL"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "addNewRespDomesticBehaviours",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "RespDomesticBehaviours",
+  "CaseEventID" : "c100ResSolAllegationsOfHarmE",
+  "CaseFieldID" : "respDomesticBehaviours",
+  "ListElementCode" : "addNewRespDomesticBehavioursLabel",
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "READONLY"
+} ]

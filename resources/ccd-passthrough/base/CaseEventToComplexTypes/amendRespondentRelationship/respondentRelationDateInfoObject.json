@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "amendRespondentRelationship",
+  "CaseFieldID" : "respondentRelationDateInfoObject",
+  "ListElementCode" : "relationStartAndEndComplexType",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendRespondentRelationship",
+  "CaseFieldID" : "respondentRelationDateInfoObject",
+  "ListElementCode" : "relationStartAndEndComplexType.relationshipDateComplexStartDate",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendRespondentRelationship",
+  "CaseFieldID" : "respondentRelationDateInfoObject",
+  "ListElementCode" : "relationStartAndEndComplexType.relationshipDateComplexEndDate",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "amendRespondentRelationship",
+  "CaseFieldID" : "respondentRelationDateInfoObject",
+  "ListElementCode" : "applicantRelationshipDate",
+  "CaseTypeID" : "PRLAPPS"
+} ]

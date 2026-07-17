@@ -1,0 +1,21 @@
+[ {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "mainApplicationDocument",
+  "ListElementCode" : "typeOfDocumentFurtherEvidence",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "mainApplicationDocument",
+  "ListElementCode" : "documentFurtherEvidence",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "mainApplicationDocument",
+  "ListElementCode" : "checkDocumentsConfidentialLabel",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "manageDocuments",
+  "CaseFieldID" : "mainApplicationDocument",
+  "ListElementCode" : "restrictCheckboxFurtherEvidence",
+  "CaseTypeID" : "PRLAPPS"
+} ]

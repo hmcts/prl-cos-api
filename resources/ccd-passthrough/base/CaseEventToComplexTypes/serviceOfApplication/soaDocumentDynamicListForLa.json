@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "serviceOfApplication",
+  "CaseFieldID" : "soaDocumentDynamicListForLa",
+  "ListElementCode" : "documentsListForLa",
+  "CaseTypeID" : "PRLAPPS"
+} ]

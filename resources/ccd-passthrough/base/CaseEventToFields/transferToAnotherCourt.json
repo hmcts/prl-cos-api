@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "transferCourtWarning",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/transfer-court/validate-court-fields"
+} ]

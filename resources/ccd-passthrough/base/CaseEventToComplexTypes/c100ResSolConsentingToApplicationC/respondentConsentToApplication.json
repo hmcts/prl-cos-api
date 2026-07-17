@@ -1,0 +1,26 @@
+[ {
+  "CaseEventID" : "c100ResSolConsentingToApplicationC",
+  "CaseFieldID" : "respondentConsentToApplication",
+  "ListElementCode" : "consentToTheApplication",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConsentingToApplicationC",
+  "CaseFieldID" : "respondentConsentToApplication",
+  "ListElementCode" : "noConsentReason",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConsentingToApplicationC",
+  "CaseFieldID" : "respondentConsentToApplication",
+  "ListElementCode" : "applicationReceivedDate",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConsentingToApplicationC",
+  "CaseFieldID" : "respondentConsentToApplication",
+  "ListElementCode" : "permissionFromCourt",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "c100ResSolConsentingToApplicationC",
+  "CaseFieldID" : "respondentConsentToApplication",
+  "ListElementCode" : "courtOrderDetails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

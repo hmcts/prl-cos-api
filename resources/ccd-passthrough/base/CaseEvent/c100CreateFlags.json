@@ -1,0 +1,5 @@
+[ {
+  "ID" : "c100CreateFlags",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/caseflags/check-wa-task-status",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/caseflags/setup-wa-task"
+} ]

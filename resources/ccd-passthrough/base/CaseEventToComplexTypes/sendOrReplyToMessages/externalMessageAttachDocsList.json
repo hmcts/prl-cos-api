@@ -1,0 +1,6 @@
+[ {
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "externalMessageAttachDocsList",
+  "ListElementCode" : "submittedDocsRefList",
+  "CaseTypeID" : "PRLAPPS"
+} ]

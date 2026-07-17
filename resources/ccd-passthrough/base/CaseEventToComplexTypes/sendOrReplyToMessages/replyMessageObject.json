@@ -1,0 +1,103 @@
+[ {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "internalMessageReplyTo",
+  "EventElementLabel" : "Who are you sending the message to?",
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "MANDATORY",
+  "Publish" : "True"
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "judicialOrMagistrateTierList",
+  "EventElementLabel" : "Select a judicial tier or enter a judge's name manually",
+  "EventHintText" : "Select Judicial tier",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "replyMessageObject.internalMessageReplyTo=\"JUDICIARY\""
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "sendReplyJudgeName",
+  "EventElementLabel" : "Enter name of Judge",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "replyMessageObject.internalMessageReplyTo=\"JUDICIARY\"",
+  "ShowSummaryChangeOption" : "Yes"
+}, {
+  "LiveFrom" : "08/12/2025",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "legalAdviserList",
+  "EventElementLabel" : "Select a legal adviser",
+  "EventHintText" : "Select a legal adviser",
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "replyMessageObject.internalMessageReplyTo=\"LEGAL_ADVISER\""
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "internalMessageUrgent",
+  "EventElementLabel" : "Is this urgent?",
+  "FieldDisplayOrder" : "4",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "yourMessageLabel",
+  "EventElementLabel" : "**Your message**",
+  "FieldDisplayOrder" : "5",
+  "DisplayContext" : "READONLY"
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "messageContent",
+  "EventElementLabel" : "Enter your message",
+  "EventHintText" : "Explain what you're requesting and why. Include answers and decisions you need.",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "MANDATORY"
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "sendReplyJudgeName.idamId",
+  "EventElementLabel" : "Enter name of Judge",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "replyMessageObject.internalMessageReplyTo=\"JUDICIARY\"",
+  "ShowSummaryChangeOption" : "Yes"
+}, {
+  "LiveFrom" : "31/03/2023",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "Message",
+  "CaseEventID" : "sendOrReplyToMessages",
+  "CaseFieldID" : "replyMessageObject",
+  "ListElementCode" : "sendReplyJudgeName.personalCode",
+  "EventElementLabel" : "Enter name of Judge",
+  "FieldDisplayOrder" : "8",
+  "DisplayContext" : "OPTIONAL",
+  "FieldShowCondition" : "replyMessageObject.internalMessageReplyTo=\"JUDICIARY\"",
+  "ShowSummaryChangeOption" : "Yes"
+} ]

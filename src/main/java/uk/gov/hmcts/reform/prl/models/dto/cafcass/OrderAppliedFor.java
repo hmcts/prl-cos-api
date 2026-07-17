@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +17,9 @@ import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 @Builder(toBuilder = true)
 public class OrderAppliedFor {
 
+    @CCD(label = "Order applied for", searchable = false)
     private String ordersApplyingFor;
+    @CCD(label = "Type of child arrangements order", searchable = false)
     private String typeOfChildArrangementsOrder;
 
     public void setTypeOfChildArrangementsOrder(String typeOfChildArrangementsOrder) {

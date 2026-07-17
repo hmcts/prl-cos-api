@@ -1,0 +1,4 @@
+[ {
+  "ID" : "updateRepresentation",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_AAC_URL}/noc/set-organisation-to-remove"
+} ]

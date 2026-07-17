@@ -1,0 +1,4 @@
+[ {
+  "ID" : "resetAccessCode",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/regenerate-access-code"
+} ]

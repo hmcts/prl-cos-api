@@ -1,0 +1,16 @@
+[ {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childPassportDetails",
+  "ListElementCode" : "newChildHasMultiplePassports",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childPassportDetails",
+  "ListElementCode" : "newChildPassportPossession",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "allegationsOfHarmRevised",
+  "CaseFieldID" : "childPassportDetails",
+  "ListElementCode" : "newChildPassportPossessionOtherDetails",
+  "CaseTypeID" : "PRLAPPS"
+} ]

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Data
 @AllArgsConstructor
@@ -14,5 +15,6 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 public class ConfidentialDetails {
+    @CCD(label = "Does any information need to be kept confidential?", searchable = false)
     private String isConfidentialDetailsAvailable;
 }

@@ -1,0 +1,6 @@
+[ {
+  "ID" : "transferToAnotherCourt",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/transfer-court/about-to-start",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/transfer-court/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/transfer-court/transfer-court-confirmation"
+} ]

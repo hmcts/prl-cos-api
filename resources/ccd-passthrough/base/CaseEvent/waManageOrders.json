@@ -1,0 +1,6 @@
+[ {
+  "ID" : "waManageOrders",
+  "CallBackURLAboutToStartEvent" : "${CCD_DEF_COS_URL}/populate-header-task",
+  "CallBackURLAboutToSubmitEvent" : "${CCD_DEF_COS_URL}/manage-orders/about-to-submit",
+  "CallBackURLSubmittedEvent" : "${CCD_DEF_COS_URL}/case-order-email-notification"
+} ]

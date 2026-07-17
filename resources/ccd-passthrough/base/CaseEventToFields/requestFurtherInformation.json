@@ -1,0 +1,4 @@
+[ {
+  "CaseFieldID" : "requestFurtherInformationDetails",
+  "CallBackURLMidEvent" : "${CCD_DEF_COS_URL}/validate-request-further-information"
+} ]

@@ -1,0 +1,11 @@
+[ {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "sdoAddNewPreambleCollection",
+  "ListElementCode" : "addNewPreambleTitle",
+  "CaseTypeID" : "PRLAPPS"
+}, {
+  "CaseEventID" : "waManageOrders",
+  "CaseFieldID" : "sdoAddNewPreambleCollection",
+  "ListElementCode" : "addNewPreambleDescription",
+  "CaseTypeID" : "PRLAPPS"
+} ]
