@@ -55,7 +55,7 @@ class HearingChasePolicy {
         return hearing.getHearingID() == null ? null : String.valueOf(hearing.getHearingID());
     }
 
-    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate today) {
+    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate cronDate) {
         String hearingId = hearingIdOf(hearing);
         if (hearingId == null) {
             return ChaseDecision.skipUnknownHearingId(hearing.getHmcStatus());
@@ -69,31 +69,29 @@ class HearingChasePolicy {
 
         LocalDate hearingEndDate = computeHearingEndDate(hearing);
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
-        Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
 
-        int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(today, hearingEndDate);
-        log.info("caseId={} hearingId={} hearingEndDate={} workingDaysSinceHearingEndDate={}", caseData.getId(),
-                 hearingId, hearingEndDate, workingDaysSinceHearingEndDate);
+        int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(hearingEndDate, cronDate);
         if (hearingEndDate != null && workingDaysSinceHearingEndDate != cadence) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
 
+        Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
         LocalDate lastCompletedDate = tracking.map(RequestOrderHearingTracking::getLastCompletedDate)
             .orElse(null);
         LocalDate lastFiredDate = tracking.map(RequestOrderHearingTracking::getLastFiredDate)
             .orElse(null);
-        if (today.equals(lastFiredDate)) {
+        if (cronDate.equals(lastFiredDate)) {
             return ChaseDecision.skipInFlight();
         }
 
         if (lastCompletedDate != null) {
-            int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, today);
+            int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, cronDate);
             if (workingDaysSinceLastCompletedDate != cadence) {
                 return ChaseDecision.skipInFlight();
             }
         }
         if (lastCompletedDate == null && lastFiredDate != null) {
-            int workingDaysSinceLastFired = workingDayIndicator.workingDaysBetween(lastFiredDate, today);
+            int workingDaysSinceLastFired = workingDayIndicator.workingDaysBetween(lastFiredDate, cronDate);
             if (workingDaysSinceLastFired < cadence) {
                 return ChaseDecision.skipInFlight();
             } else if (workingDaysSinceLastFired == cadence) {

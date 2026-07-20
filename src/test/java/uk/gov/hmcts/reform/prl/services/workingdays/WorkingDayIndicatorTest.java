@@ -27,9 +27,18 @@ class WorkingDayIndicatorTest {
         // 25 Dec 2026 (Fri) and 28 Dec 2026 (Mon, substitute Boxing Day) are the holidays in play
         lenient().when(publicHolidaysCollection.getPublicHolidays())
             .thenReturn(Set.of(
+                LocalDate.of(2026, 5, 25),
+                LocalDate.of(2026, 8, 31),
                 LocalDate.of(2026, 12, 25),
                 LocalDate.of(2026, 12, 28)
             ));
+    }
+
+    @Test
+    void workingDaysBetweenReturnsNonZeroWhenToAfterFrom() {
+        LocalDate from = LocalDate.of(2026, 6, 26);
+        LocalDate to = LocalDate.of(2026, 7, 8);
+        assertThat(workingDayIndicator.workingDaysBetween(from, to)).isEqualTo(8);
     }
 
     @Test
