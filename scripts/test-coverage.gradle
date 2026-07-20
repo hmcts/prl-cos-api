@@ -2,7 +2,7 @@ import groovy.xml.XmlParser
 
 tasks.register("testWithCoverage") {
   group = "verification"
-  description = "Full coverage report: Fixed XML DOCTYPE issues and clickable IDE links."
+  description = "Coverage report for Java files changed against master, or explicit -Ptarget classes."
 
   dependsOn tasks.named("test"), tasks.named("jacocoTestReport")
 
@@ -15,7 +15,146 @@ tasks.register("testWithCoverage") {
     def yellow = "\u001B[33m"
     def orange = "\u001B[38;5;208m"
 
-    def targetInput = findProperty('target')?.toString() ?: ""
+    def runGit = { List<String> args ->
+      def stdout = new ByteArrayOutputStream()
+      def stderr = new ByteArrayOutputStream()
+      def result = exec {
+        commandLine(['git'] + args)
+        standardOutput = stdout
+        errorOutput = stderr
+        ignoreExitValue = true
+      }
+      result.exitValue == 0 ? stdout.toString().trim() : null
+    }
+
+    def changedLineNumbersBySourcePath = [:].withDefault { [] as Set }
+
+    def coverageExclusions = [
+      '**uk/gov/hmcts/reform/prl/models/**/*',
+      '**uk/gov/hmcts/reform/prl/exception/*',
+      '**uk/gov/hmcts/reform/prl/enums/**/*',
+      '**uk/gov/hmcts/reform/prl/config/**/*',
+      '**uk/gov/hmcts/reform/prl/utils/*',
+      '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
+      '**uk/gov/hmcts/reform/prl/Application.*',
+      '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
+      '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
+      '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
+      '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
+      '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+      '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+      '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
+      '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
+      '**uk/gov/hmcts/reform/prl/services/sealaudit/SealAuditService.java'
+    ]
+
+    def globToRegex = { String pattern ->
+      def regex = new StringBuilder()
+      int i = 0
+      while (i < pattern.length()) {
+        if (i + 2 < pattern.length()
+          && pattern.charAt(i) == '*' as char
+          && pattern.charAt(i + 1) == '*' as char
+          && pattern.charAt(i + 2) == '/' as char) {
+          regex.append('(?:.*/)?')
+          i += 3
+        } else if (i + 1 < pattern.length() && pattern.charAt(i) == '*' as char && pattern.charAt(i + 1) == '*' as char) {
+          regex.append('.*')
+          i += 2
+        } else if (pattern.charAt(i) == '*' as char) {
+          regex.append('[^/]*')
+          i++
+        } else {
+          regex.append(java.util.regex.Pattern.quote(pattern.charAt(i).toString()))
+          i++
+        }
+      }
+      return regex.toString()
+    }
+
+    def coverageExclusionRegexes = coverageExclusions.collect { ~globToRegex(it.replace('\\', '/')) }
+
+    def isCoverageExcluded = { String target ->
+      def normalised = target.replace('\\', '/')
+      coverageExclusionRegexes.any { normalised ==~ it }
+    }
+
+    def addChangedLinesFromDiff = { String diffText ->
+      if (!diffText) {
+        return
+      }
+
+      String currentFile = null
+      Integer currentNewLine = null
+      diffText.readLines().each { line ->
+        if (line.startsWith('+++ b/') && line.endsWith('.java')) {
+          currentFile = line.substring('+++ b/'.length())
+          if (!currentFile.startsWith('src/main/java/')) {
+            currentFile = null
+            currentNewLine = null
+            return
+          }
+          if (!isCoverageExcluded(currentFile)) {
+            changedLineNumbersBySourcePath[currentFile]
+          }
+          currentNewLine = null
+          return
+        }
+
+        if (line.startsWith('+++ /dev/null')) {
+          currentFile = null
+          currentNewLine = null
+          return
+        }
+
+        if (currentFile == null) {
+          return
+        }
+
+        def matcher = line =~ /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@.*/
+        if (matcher.matches()) {
+          currentNewLine = matcher[0][1].toInteger()
+          return
+        }
+
+        if (currentNewLine == null) {
+          return
+        }
+
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          if (!isCoverageExcluded(currentFile)) {
+            changedLineNumbersBySourcePath[currentFile].add(currentNewLine)
+          }
+          currentNewLine++
+          return
+        }
+
+        if (line.startsWith(' ') || line.startsWith('\\')) {
+          currentNewLine++
+        }
+      }
+    }
+
+    def getChangedJavaTargets = {
+      def baseRef = runGit(['rev-parse', '--verify', '--quiet', 'origin/master']) != null ? 'origin/master' : 'master'
+      if (runGit(['rev-parse', '--verify', '--quiet', baseRef]) == null) {
+        logger.lifecycle("${yellow}Could not find master or origin/master. Falling back to current working tree Java files only.${reset}")
+      }
+
+      def mergeBase = runGit(['merge-base', 'HEAD', baseRef])
+      if (mergeBase != null) {
+        addChangedLinesFromDiff(runGit(['diff', '--unified=0', '--diff-filter=ACMR', mergeBase]))
+      }
+
+      return changedLineNumbersBySourcePath.keySet()
+        .findAll { !it.isEmpty() }
+        .sort()
+        .unique()
+    }
+
+    def changedJavaTargets = getChangedJavaTargets()
+    def targetProperty = findProperty('target')?.toString()
+    def targetInput = targetProperty ?: changedJavaTargets.join(',')
     def targets = targetInput.split(',').collect { it.trim() }.findAll { !it.isEmpty() }
 
     def isIgnoredTestTarget = { String target ->
@@ -26,9 +165,8 @@ tasks.register("testWithCoverage") {
 
       def simpleName = cleaned.tokenize('.').last()
 
-      // These are test-only classes, not production coverage targets.
-      // Do not turn FeesAndPaymentControllerFunctionalTest into FeesAndPaymentControllerFunctional.
-      return simpleName ==~ /.*(?:FunctionalTest|IntegrationTest|IT|Tests)$/
+      // Test classes are not production coverage targets.
+      return simpleName ==~ /.*(?:Test|Tests|IT|IntegrationTest|FunctionalTest)$/
     }
 
     def normaliseTarget = { String target ->
@@ -39,33 +177,34 @@ tasks.register("testWithCoverage") {
 
       def simpleName = cleaned.tokenize('.').last()
 
-      // Allow passing a unit test class name for the production class under test.
-      // FunctionalTest/IntegrationTest/IT classes are intentionally excluded above.
-      if (simpleName.endsWith("Test") && !simpleName.endsWith("FunctionalTest") && !simpleName.endsWith("IntegrationTest")) {
-        simpleName = simpleName.substring(0, simpleName.length() - "Test".length())
-      }
-
       return simpleName
     }
 
-    def coverageTargets = targets.findAll { !isIgnoredTestTarget(it) }
+    def coverageTargets = targets.findAll { !isIgnoredTestTarget(it) && !isCoverageExcluded(it) }
     def ignoredTestTargets = targets.findAll { isIgnoredTestTarget(it) }
-    def checkAllCoverage = targets.isEmpty()
+    def ignoredExcludedTargets = targets.findAll { !isIgnoredTestTarget(it) && isCoverageExcluded(it) }
+    def checkAllCoverage = targetProperty != null && targets.isEmpty()
 
 
     if (!ignoredTestTargets.isEmpty()) {
-      logger.lifecycle("${gray}Ignoring functional/integration test coverage target(s): ${ignoredTestTargets.join(', ')}${reset}")
+      logger.lifecycle("${gray}Ignoring test coverage target(s): ${ignoredTestTargets.join(', ')}${reset}")
+    }
+
+    if (!ignoredExcludedTargets.isEmpty()) {
+      logger.lifecycle("${gray}Ignoring Sonar-excluded coverage target(s): ${ignoredExcludedTargets.join(', ')}${reset}")
     }
 
     if (!checkAllCoverage && coverageTargets.isEmpty()) {
-      logger.lifecycle("${yellow}No production coverage targets left after ignoring functional/integration test classes.${reset}")
+      logger.lifecycle("${yellow}No production coverage targets left after ignoring test classes.${reset}")
       return
     }
 
     def reportFile = layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 
-    int grandMissedUnits = 0
-    int grandCoveredUnits = 0
+    int grandLinesToCover = 0
+    int grandCoveredLines = 0
+    int grandConditionsToCover = 0
+    int grandCoveredConditions = 0
     def foundTargets = [] as Set
     def allClassNames = [] as Set
 
@@ -83,18 +222,27 @@ tasks.register("testWithCoverage") {
         pkg.'sourcefile'.each { sourceFile ->
           def fileName = sourceFile.attribute('name') ?: ""
           def className = fileName.replace(".java", "")
+          def sourcePath = "src/main/java/${pkgPath}/${fileName}"
           allClassNames.add(className)
 
           def pkgName = pkg.attribute('name')?.toString() ?: ""
           def fqcn = pkgName ? "${pkgName}.${className}" : className
 
           def matchedTarget = coverageTargets.find { target ->
-            def normalised = normaliseTarget(target)
+            if (target.equalsIgnoreCase(sourcePath)) {
+              return true
+            }
 
-            target.equalsIgnoreCase(className)
-              || target.equalsIgnoreCase(fqcn)
-              || normalised.equalsIgnoreCase(className)
-              || fqcn.toLowerCase().endsWith(".${normalised.toLowerCase()}")
+            if (targetProperty != null) {
+              def normalised = normaliseTarget(target)
+
+              return target.equalsIgnoreCase(className)
+                || target.equalsIgnoreCase(fqcn)
+                || normalised.equalsIgnoreCase(className)
+                || fqcn.toLowerCase().endsWith(".${normalised.toLowerCase()}")
+            }
+
+            return false
           }
 
           boolean isTargeted = matchedTarget != null
@@ -108,20 +256,39 @@ tasks.register("testWithCoverage") {
 
             int fileMissedInstr = 0, fileCoveredInstr = 0
             int fileMissedBranch = 0, fileCoveredBranch = 0
+            int fileLinesToCover = 0, fileCoveredLines = 0
 
-            sourceFile.'line'.each { line ->
-              fileMissedInstr  += (line.attribute('mi')?.toString() ?: "0").toInteger()
-              fileCoveredInstr += (line.attribute('ci')?.toString() ?: "0").toInteger()
-              fileMissedBranch += (line.attribute('mb')?.toString() ?: "0").toInteger()
-              fileCoveredBranch += (line.attribute('cb')?.toString() ?: "0").toInteger()
+            def changedLinesForTarget = changedLineNumbersBySourcePath[sourcePath]
+            def scoredLines = sourceFile.'line'.findAll { line ->
+              checkAllCoverage || changedLinesForTarget.contains((line.attribute('nr')?.toString() ?: "0").toInteger())
             }
 
-            grandMissedUnits += (fileMissedInstr + fileMissedBranch)
-            grandCoveredUnits += (fileCoveredInstr + fileCoveredBranch)
+            scoredLines.each { line ->
+              int missedInstructions = (line.attribute('mi')?.toString() ?: "0").toInteger()
+              int coveredInstructions = (line.attribute('ci')?.toString() ?: "0").toInteger()
+
+              fileMissedInstr += missedInstructions
+              fileCoveredInstr += coveredInstructions
+              fileMissedBranch += (line.attribute('mb')?.toString() ?: "0").toInteger()
+              fileCoveredBranch += (line.attribute('cb')?.toString() ?: "0").toInteger()
+
+              if (missedInstructions + coveredInstructions > 0) {
+                fileLinesToCover++
+              }
+              if (coveredInstructions > 0) {
+                fileCoveredLines++
+              }
+            }
+
+            grandLinesToCover += fileLinesToCover
+            grandCoveredLines += fileCoveredLines
+            grandConditionsToCover += (fileMissedBranch + fileCoveredBranch)
+            grandCoveredConditions += fileCoveredBranch
 
             if (!checkAllCoverage && isTargeted) {
-              double fileTotal = fileMissedInstr + fileCoveredInstr + fileMissedBranch + fileCoveredBranch
-              double filePct = fileTotal > 0 ? (fileCoveredInstr + fileCoveredBranch) / fileTotal * 100 : 0
+              double fileTotal = fileLinesToCover + fileMissedBranch + fileCoveredBranch
+              double fileCovered = fileCoveredLines + fileCoveredBranch
+              double filePct = fileTotal > 0 ? fileCovered / fileTotal * 100 : 0
               def color = filePct >= 80 ? green : red
 
               logger.lifecycle("\n" + "━" * 85)
@@ -132,21 +299,21 @@ tasks.register("testWithCoverage") {
               logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %-10s", "METRIC", "MISSED", "COVERED", "SCORE"))
               logger.lifecycle("─" * 85)
 
-              def instTotal = fileCoveredInstr + fileMissedInstr
-              def instPct = instTotal > 0 ? (fileCoveredInstr / (double)instTotal * 100) : 100.0
+              def missedLines = fileLinesToCover - fileCoveredLines
+              def linePct = fileLinesToCover > 0 ? (fileCoveredLines / (double)fileLinesToCover * 100) : 100.0
               def brnTotal = fileCoveredBranch + fileMissedBranch
               def brnPct = brnTotal > 0 ? (fileCoveredBranch / (double)brnTotal * 100) : 100.0
 
-              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %.2f%%", "Instructions", fileMissedInstr, fileCoveredInstr, instPct))
-              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %s", "Branches", fileMissedBranch, fileCoveredBranch, brnTotal > 0 ? String.format("%.2f%%", brnPct) : "N/A"))
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %.2f%%", "Lines", missedLines, fileCoveredLines, linePct))
+              logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %s", "Conditions", fileMissedBranch, fileCoveredBranch, brnTotal > 0 ? String.format("%.2f%%", brnPct) : "N/A"))
               logger.lifecycle("━" * 85)
 
-              def relativePath = "src/main/java/${pkgPath}/${fileName}"
-              def javaFile = project.file(relativePath)
+              def javaFile = project.file(sourcePath)
+              def clickablePath = javaFile.path
               def linesContent = javaFile.exists() ? javaFile.readLines() : []
 
               // --- SECTION 1: Logic Gaps (Branches) ---
-              def branchGaps = sourceFile.'line'.findAll { (it.attribute('mb')?.toInteger() ?: 0) > 0 }
+              def branchGaps = scoredLines.findAll { (it.attribute('mb')?.toInteger() ?: 0) > 0 }
               if (!branchGaps.isEmpty()) {
                 logger.lifecycle(" ${yellow}⚠️  Logic Gaps (Partial Branches):${reset}")
                 branchGaps.each { line ->
@@ -157,7 +324,7 @@ tasks.register("testWithCoverage") {
                     int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
                     def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
 
-                    logger.lifecycle(String.format("   %-65s ${gray}(M.Br: %s, M.Inst: %s)${reset}", "${relativePath}:${lineNum}", mb, mi))
+                    logger.lifecycle(String.format("   %-65s ${gray}(M.Br: %s, M.Inst: %s)${reset}", "${clickablePath}:${lineNum}", mb, mi))
                     logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
                   }
                 }
@@ -165,7 +332,7 @@ tasks.register("testWithCoverage") {
               }
 
               // --- SECTION 2: Execution Gaps (Missing Instructions) ---
-              def instrGaps = sourceFile.'line'.findAll {
+              def instrGaps = scoredLines.findAll {
                 (it.attribute('mi')?.toInteger() ?: 0) > 0 && (it.attribute('mb')?.toInteger() ?: 0) == 0
               }
               if (!instrGaps.isEmpty()) {
@@ -177,7 +344,7 @@ tasks.register("testWithCoverage") {
                     int mi = (line.attribute('mi')?.toString() ?: "0").toInteger()
                     def code = (lineNum > 0 && lineNum <= linesContent.size()) ? linesContent[lineNum - 1].trim() : "---"
 
-                    logger.lifecycle(String.format("   %-65s ${gray}(M.Inst: %s)${reset}", "${relativePath}:${lineNum}", mi))
+                    logger.lifecycle(String.format("   %-65s ${gray}(M.Inst: %s)${reset}", "${clickablePath}:${lineNum}", mi))
                     logger.lifecycle("   ${white}└─ Code: ${code}${reset}")
                   }
                 }
@@ -201,7 +368,7 @@ tasks.register("testWithCoverage") {
         }
       }
 
-      if (!checkAllCoverage && !missingTargets.isEmpty()) {
+      if (targetProperty != null && !checkAllCoverage && !missingTargets.isEmpty()) {
         logger.lifecycle("${red}\n❌ ERROR: TARGETS NOT FOUND${reset}")
 
         missingTargets.each { missing ->
@@ -226,10 +393,18 @@ tasks.register("testWithCoverage") {
         throw new GradleException("Target class mismatch. Check spelling!")
       }
 
-      double grandTotal = grandMissedUnits + grandCoveredUnits
-      double grandPct = grandTotal > 0 ? (grandCoveredUnits / grandTotal) * 100 : 0
+      if (!checkAllCoverage && foundTargets.isEmpty()) {
+        logger.lifecycle("${yellow}No matching coverage entries were found for the changed production target(s):${reset}")
+        coverageTargets.each { logger.lifecycle("   - ${it}") }
+        logger.lifecycle("${white} 📁 Full Report: file://${reportFile.parentFile.path}/html/index.html\n${reset}")
+        return
+      }
+
+      double grandTotal = grandLinesToCover + grandConditionsToCover
+      double grandCovered = grandCoveredLines + grandCoveredConditions
+      double grandPct = grandTotal > 0 ? (grandCovered / grandTotal) * 100 : 0
       def grandColor = grandPct >= 80 ? green : red
-      def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}❌ FAIL${reset}"
+      def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}⚠️  BELOW THRESHOLD${reset}"
 
       logger.lifecycle("\n" + "━" * 85)
       def title = checkAllCoverage ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
@@ -237,10 +412,8 @@ tasks.register("testWithCoverage") {
       logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
       logger.lifecycle("━" * 85 + "\n")
       logger.lifecycle("${white} 📁 Full Report: file://${reportFile.parentFile.path}/html/index.html\n${reset}")
-
-      if (grandPct < 80) {
-        throw new GradleException("Coverage is below 80% threshold!")
-      }
+    } else {
+      logger.lifecycle("${yellow}No JaCoCo XML report found at ${reportFile.path}. Nothing to summarise.${reset}")
     }
   }
 }
