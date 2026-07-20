@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.caseflags;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -220,6 +221,135 @@ class PartyLevelCaseFlagsServiceTest {
     }
 
     @Test
+    void testRemovingSolicitorFlagsDoesNotClearOtherApplicantOrRespondentFlags() {
+        Flags applicantFlagToKeep = Flags.builder().partyName("applicant-keep").build();
+        Flags respondentFlagToKeep = Flags.builder().partyName("respondent-keep").build();
+        CaseData caseData = createFl401CaseData().toBuilder()
+            .allPartyFlags(AllPartyFlags.builder()
+                               .daApplicantExternalFlags(applicantFlagToKeep)
+                               .daRespondentExternalFlags(respondentFlagToKeep)
+                               .build())
+            .build();
+
+        when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenAnswer(invocation -> {
+                CaseData incomingCaseData = invocation.getArgument(0);
+                String caseDataField = invocation.getArgument(2);
+                AllPartyFlags currentFlags = incomingCaseData.getAllPartyFlags();
+                AllPartyFlags.AllPartyFlagsBuilder updatedFlagsBuilder = currentFlags.toBuilder();
+                Flags updatedFlag = Flags.builder().partyName("updated-" + caseDataField).build();
+                if ("daRespondentSolicitorExternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.daRespondentSolicitorExternalFlags(updatedFlag);
+                } else if ("daRespondentSolicitorInternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.daRespondentSolicitorInternalFlags(updatedFlag);
+                }
+                return incomingCaseData.toBuilder().allPartyFlags(updatedFlagsBuilder.build()).build();
+            });
+
+        CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            DARESPONDENTSOLICITOR,
+            false
+        );
+
+        assertThat(updatedCaseData.getAllPartyFlags().getDaApplicantExternalFlags())
+            .isEqualTo(applicantFlagToKeep);
+        assertThat(updatedCaseData.getAllPartyFlags().getDaRespondentExternalFlags())
+            .isEqualTo(respondentFlagToKeep);
+        assertEquals("updated-daRespondentSolicitorExternalFlags",
+                     updatedCaseData.getAllPartyFlags().getDaRespondentSolicitorExternalFlags().getPartyName());
+        assertEquals("updated-daRespondentSolicitorInternalFlags",
+                     updatedCaseData.getAllPartyFlags().getDaRespondentSolicitorInternalFlags().getPartyName());
+    }
+
+    @Test
+    void testRemovingC100SolicitorFlagsDoesNotClearOtherApplicantOrRespondentFlags() {
+        Flags applicantFlagToKeep = Flags.builder().partyName("c100-applicant-keep").build();
+        Flags respondentFlagToKeep = Flags.builder().partyName("c100-respondent-keep").build();
+        CaseData caseData = createC100CaseDataWithSolicitorRepresentative().toBuilder()
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(applicantFlagToKeep)
+                               .caRespondent1ExternalFlags(respondentFlagToKeep)
+                               .build())
+            .build();
+
+        when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenAnswer(invocation -> {
+                CaseData incomingCaseData = invocation.getArgument(0);
+                String caseDataField = invocation.getArgument(2);
+                AllPartyFlags currentFlags = incomingCaseData.getAllPartyFlags();
+                AllPartyFlags.AllPartyFlagsBuilder updatedFlagsBuilder = currentFlags.toBuilder();
+                Flags updatedFlag = Flags.builder().partyName("updated-" + caseDataField).build();
+                if ("caRespondentSolicitor1ExternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.caRespondentSolicitor1ExternalFlags(updatedFlag);
+                } else if ("caRespondentSolicitor1InternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.caRespondentSolicitor1InternalFlags(updatedFlag);
+                }
+                return incomingCaseData.toBuilder().allPartyFlags(updatedFlagsBuilder.build()).build();
+            });
+
+        CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            CARESPONDENTSOLICITOR,
+            false
+        );
+
+        assertThat(updatedCaseData.getAllPartyFlags().getCaApplicant1ExternalFlags())
+            .isEqualTo(applicantFlagToKeep);
+        assertThat(updatedCaseData.getAllPartyFlags().getCaRespondent1ExternalFlags())
+            .isEqualTo(respondentFlagToKeep);
+        assertEquals("updated-caRespondentSolicitor1ExternalFlags",
+                     updatedCaseData.getAllPartyFlags().getCaRespondentSolicitor1ExternalFlags().getPartyName());
+        assertEquals("updated-caRespondentSolicitor1InternalFlags",
+                     updatedCaseData.getAllPartyFlags().getCaRespondentSolicitor1InternalFlags().getPartyName());
+    }
+
+    @Test
+    void testRemovingC100ApplicantSolicitorFlagsDoesNotClearOtherApplicantOrRespondentFlags() {
+        Flags applicantFlagToKeep = Flags.builder().partyName("c100-applicant-keep").build();
+        Flags respondentFlagToKeep = Flags.builder().partyName("c100-respondent-keep").build();
+        CaseData caseData = createC100CaseDataWithSolicitorRepresentative().toBuilder()
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(applicantFlagToKeep)
+                               .caRespondent1ExternalFlags(respondentFlagToKeep)
+                               .build())
+            .build();
+
+        when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
+            .thenAnswer(invocation -> {
+                CaseData incomingCaseData = invocation.getArgument(0);
+                String caseDataField = invocation.getArgument(2);
+                AllPartyFlags currentFlags = incomingCaseData.getAllPartyFlags();
+                AllPartyFlags.AllPartyFlagsBuilder updatedFlagsBuilder = currentFlags.toBuilder();
+                Flags updatedFlag = Flags.builder().partyName("updated-" + caseDataField).build();
+                if ("caApplicantSolicitor1ExternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.caApplicantSolicitor1ExternalFlags(updatedFlag);
+                } else if ("caApplicantSolicitor1InternalFlags".equals(caseDataField)) {
+                    updatedFlagsBuilder.caApplicantSolicitor1InternalFlags(updatedFlag);
+                }
+                return incomingCaseData.toBuilder().allPartyFlags(updatedFlagsBuilder.build()).build();
+            });
+
+        CaseData updatedCaseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            CAAPPLICANTSOLICITOR,
+            false
+        );
+
+        assertThat(updatedCaseData.getAllPartyFlags().getCaApplicant1ExternalFlags())
+            .isEqualTo(applicantFlagToKeep);
+        assertThat(updatedCaseData.getAllPartyFlags().getCaRespondent1ExternalFlags())
+            .isEqualTo(respondentFlagToKeep);
+        assertEquals("updated-caApplicantSolicitor1ExternalFlags",
+                     updatedCaseData.getAllPartyFlags().getCaApplicantSolicitor1ExternalFlags().getPartyName());
+        assertEquals("updated-caApplicantSolicitor1InternalFlags",
+                     updatedCaseData.getAllPartyFlags().getCaApplicantSolicitor1InternalFlags().getPartyName());
+    }
+
+    @Test
     void testIndividualCaseFlagForC100CaseWhenSolicitorRepresent() {
         CaseData caseData = createC100CaseDataWithSolicitorRepresentative();
         when(partyLevelCaseFlagsGenerator.generatePartyFlags(any(), any(), any(), any(), Mockito.anyBoolean(), any()))
@@ -418,8 +548,11 @@ class PartyLevelCaseFlagsServiceTest {
             .allocatedBarrister(allocatedBarrister)
             .build();
 
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        mapper.registerModule(new Jdk8Module());
         PartyLevelCaseFlagsService localPartyLevelCaseFlagsService = new PartyLevelCaseFlagsService(
-            objectMapper,
+            mapper,
             new PartyLevelCaseFlagsGenerator(),
             systemUserService,
             coreCaseDataService
@@ -501,8 +634,11 @@ class PartyLevelCaseFlagsServiceTest {
             .allPartyFlags(allPartyFlags)
             .build();
 
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+        mapper.registerModule(new Jdk8Module());
         PartyLevelCaseFlagsService localPartyLevelCaseFlagsService = new PartyLevelCaseFlagsService(
-            objectMapper,
+            mapper,
             new PartyLevelCaseFlagsGenerator(),
             systemUserService,
             coreCaseDataService
@@ -677,6 +813,41 @@ class PartyLevelCaseFlagsServiceTest {
                 "caRespondentBarrister1InternalFlags",
                 "caRespondentBarrister1ExternalFlags"
             );
+    }
+
+    @Test
+    void testRemovingBarristerFlagsDoesNotClearOtherApplicantOrRespondentFlags() {
+        Flags applicantPartyFlagToKeep = Flags.builder().partyName("Applicant To Keep").build();
+        Flags respondentPartyFlagToKeep = Flags.builder().partyName("Respondent To Keep").build();
+        Flags barristerFlagToRemove = Flags.builder().partyName("Barrister To Remove").build();
+
+        CaseData caseData = createC100CaseDataWithSolicitorRepresentative().toBuilder()
+            .allPartyFlags(AllPartyFlags.builder()
+                               .caApplicant1ExternalFlags(applicantPartyFlagToKeep)
+                               .caRespondent1ExternalFlags(respondentPartyFlagToKeep)
+                               .caApplicantBarrister1ExternalFlags(barristerFlagToRemove)
+                               .caApplicantBarrister1InternalFlags(barristerFlagToRemove)
+                               .build())
+            .build();
+
+        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+            caseData,
+            ignoredCaseData -> {
+                Map<String, Object> updatedFlags = new java.util.HashMap<>();
+                updatedFlags.put("caApplicantBarrister1ExternalFlags", null);
+                updatedFlags.put("caApplicantBarrister1InternalFlags", null);
+                return updatedFlags;
+            }
+        );
+
+        assertThat(caseData.getAllPartyFlags().getCaApplicant1ExternalFlags())
+            .isEqualTo(applicantPartyFlagToKeep);
+        assertThat(caseData.getAllPartyFlags().getCaRespondent1ExternalFlags())
+            .isEqualTo(respondentPartyFlagToKeep);
+        assertThat(caseData.getAllPartyFlags().getCaApplicantBarrister1ExternalFlags())
+            .isNull();
+        assertThat(caseData.getAllPartyFlags().getCaApplicantBarrister1InternalFlags())
+            .isNull();
     }
 
     @Test
