@@ -93,6 +93,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -104,6 +105,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
+import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -242,6 +244,7 @@ public class ManageOrderService {
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
 
+    private static final String IS_CIR_UPDATE_FOLLOW_UP = "isCirUpdateFollowUp";
     private static final String WHEN_REPORTS_MUST_BE_FILED = "whenReportsMustBeFiled";
     private static final String WHEN_REPORTS_MUST_BE_FILED_BY_LOCAL_AUTHORITY = "whenReportsMustBeFiledByLocalAuthority";
 
@@ -664,6 +667,7 @@ public class ManageOrderService {
     private final CustomOrderService customOrderService;
     private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
     private final AllTabServiceImpl allTabService;
+    private final TaskUtils taskUtils;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -3984,6 +3988,20 @@ public class ManageOrderService {
         return waFieldsMap;
     }
 
+    public void reCreateCirDocumentsRequestedTask(CallbackRequest callbackRequest, String clientContext) {
+        Optional<Map<String, Object>> waFieldsMap = taskUtils.getTaskAdditionalProperties(clientContext)
+            .map(AdditionalProperties::getIsCirUpdateFollowUp)
+            .map(value -> Map.of(IS_CIR_UPDATE_FOLLOW_UP, Yes));
+
+        waFieldsMap.ifPresent(waFields ->
+            createCirDocumentsRequestedTask(
+                CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper),
+                true,
+                waFields
+            )
+        );
+    }
+
     public void orchestrateCirDocumentsRequestedTask(CaseData caseData, String authorisation) {
         LocalDate localAuthorityReportFiledByDate = caseData.getServeOrderData()
             .getWhenReportsMustBeFiledByLocalAuthority();
@@ -3991,10 +4009,13 @@ public class ManageOrderService {
         if (featureToggleService.isCreateRequestCirUpdateTaskEnabled()) {
             Map<String, Object> waFieldsMap = new HashMap<>();
             waFieldsMap.put(WA_PERFORMING_USER, getLoggedInUserType(authorisation));
+            waFieldsMap.put(IS_CIR_UPDATE_FOLLOW_UP, null);
             setFieldsForCirDocumentsRequestedForLaWaTask(caseData, waFieldsMap);
             setFieldsForCirDocumentsRequestedForCafcassWaTask(caseData, waFieldsMap);
             cancelCirDocumentsRequestedTask(caseData, waFieldsMap);
-            createCirDocumentsRequestedTask(caseData, waFieldsMap);
+            createCirDocumentsRequestedTask(caseData,
+                                            waFieldsMap.get(CIR_DOCUMENTS_REQUESTED) != null,
+                                            waFieldsMap);
         }
         cleanUpCirOrderRequestFields(caseData, localAuthorityReportFiledByDate, cafcassReportFiledByDate);
     }
@@ -4017,8 +4038,10 @@ public class ManageOrderService {
         }
     }
 
-    private void createCirDocumentsRequestedTask(CaseData caseData, Map<String, Object> waFieldsMap) {
-        if (waFieldsMap.get(CIR_DOCUMENTS_REQUESTED) != null) {
+    private void createCirDocumentsRequestedTask(CaseData caseData,
+                                                 boolean invoke,
+                                                 Map<String, Object> waFieldsMap) {
+        if (invoke) {
             String caseId = String.valueOf(caseData.getId());
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
                 caseId,
