@@ -224,18 +224,118 @@ class RespondentOrgPolicyServiceTest {
             .id(456L)
             .caseTypeOfApplication("FL401")
             .state(State.CASE_ISSUED)
-            .respondents(List.of(ElementUtils.element(respondent)))
+            .respondentsFL401(respondent)
             .build();
 
         Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
 
-        assertThat(updated).containsKey("daRespondent1Policy");
+        assertThat(updated).containsKey("daRespondentPolicy");
+        assertThat(updated).doesNotContainKey("daRespondent1Policy");
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> createdPolicy = (Map<String, Object>) updated.get("daRespondent1Policy");
+        Map<String, Object> createdPolicy = (Map<String, Object>) updated.get("daRespondentPolicy");
 
         assertThat(createdPolicy)
             .containsEntry("OrgPolicyCaseAssignedRole", "[FL401RESPONDENTSOLICITOR]");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> organisation = (Map<String, Object>) createdPolicy.get("Organisation");
+        assertThat(organisation)
+            .containsEntry("OrganisationID", "ORG456")
+            .containsEntry("OrganisationName", "DA Org");
+    }
+
+    @Test
+    void shouldPopulateOrganisationForExistingDaRespondentPolicy() {
+        Map<String, Object> policy = new HashMap<>();
+        policy.put("Organisation", new HashMap<>());
+        policy.put("OrgPolicyReference", "da-existing-ref");
+        policy.put("OrgPolicyCaseAssignedRole", "[FL401RESPONDENTSOLICITOR]");
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("daRespondentPolicy", policy);
+
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("DA-ORG-1")
+                              .organisationName("DA Existing Org")
+                              .build())
+            .solicitorEmail("da-existing@solicitor.org")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(457L)
+            .caseTypeOfApplication("FL401")
+            .state(State.CASE_ISSUED)
+            .respondentsFL401(respondent)
+            .build();
+
+        Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> updatedPolicy = (Map<String, Object>) updated.get("daRespondentPolicy");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> organisation = (Map<String, Object>) updatedPolicy.get("Organisation");
+
+        assertThat(organisation)
+            .containsEntry("OrganisationID", "DA-ORG-1")
+            .containsEntry("OrganisationName", "DA Existing Org");
+        assertThat(updatedPolicy)
+            .containsEntry("OrgPolicyCaseAssignedRole", "[FL401RESPONDENTSOLICITOR]")
+            .containsEntry("OrgPolicyReference", "da-existing-ref");
+    }
+
+    @Test
+    void shouldNotCreateDaPolicyWhenFl401RespondentNull() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        CaseData caseData = CaseData.builder()
+            .id(458L)
+            .caseTypeOfApplication("FL401")
+            .state(State.CASE_ISSUED)
+            .respondentsFL401(null)
+            .build();
+
+        Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
+
+        assertThat(updated).doesNotContainKey("daRespondentPolicy");
+        verify(assignCaseAccessService, never()).assignCaseAccessToUserWithRole(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString()
+        );
+    }
+
+    @Test
+    void shouldNotCreateDaPolicyWhenFl401RespondentHasNoLegalRep() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("DA-ORG-X")
+                              .organisationName("Ignored")
+                              .build())
+            .solicitorEmail("ignored@solicitor.org")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(459L)
+            .caseTypeOfApplication("FL401")
+            .state(State.CASE_ISSUED)
+            .respondentsFL401(respondent)
+            .build();
+
+        Map<String, Object> updated = service.populateRespondentOrganisations(caseDataMap, caseData);
+
+        assertThat(updated).doesNotContainKey("daRespondentPolicy");
+        verify(assignCaseAccessService, never()).assignCaseAccessToUserWithRole(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString()
+        );
     }
 
     @Test
@@ -329,7 +429,7 @@ class RespondentOrgPolicyServiceTest {
             .id(2020L)
             .caseTypeOfApplication("FL401")
             .state(State.CASE_ISSUED)
-            .respondents(List.of(ElementUtils.element(respondent)))
+            .respondentsFL401(respondent)
             .build();
 
         when(organisationService.findUserByEmail("da-resolvable@solicitor.org"))

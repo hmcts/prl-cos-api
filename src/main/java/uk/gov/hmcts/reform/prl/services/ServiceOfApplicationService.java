@@ -1930,8 +1930,11 @@ public class ServiceOfApplicationService {
         //PRL-3466 - auto link citizen case if conf check is not required
         autoLinkCitizenCase(caseData, caseDataMap, callbackRequest.getEventId());
 
-        //fill in the organisation details for respondents where assign case expects to see it
-        if (caseData.getRespondents() != null) {
+        //fill in the organisation details for respondents where assign case expects to see it.
+        //Only applies to C100: for FL401 (DA) the respondent solicitor is captured later in the
+        //journey (post-service), so we must not create/populate daRespondentPolicy here.
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && caseData.getRespondents() != null) {
 
             caseDataMap = respondentOrgPolicyService.populateRespondentOrganisations(
                 caseDataMap,
@@ -2172,8 +2175,9 @@ public class ServiceOfApplicationService {
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
                                                     + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Confidential details are present, case needs to be reviewed and served later");
-        // respondent sols access
-        caseDataMap = assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
+        // Respondent solicitor access is NOT granted here: confidential info is still present
+        // and the confidentiality check has not yet been completed. Access is granted in
+        // handleConfidentialCheckSuccessful once court admin approves the check.
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
@@ -4400,6 +4404,8 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
+        // respondent sols access - only granted now that the confidentiality check has passed
+        assignRespondentSolicitorsAccess(authorisation, caseDataMap, caseData);
         response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(confirmationHeader)
                           .confirmationBody(
@@ -4541,49 +4547,57 @@ public class ServiceOfApplicationService {
             return caseDataMap;
         }
 
-        if (caseData.getRespondents() == null) {
-            log.warn("No respondents on case id {}", caseData.getId());
-            return caseDataMap;
-        }
-
         boolean isC100 = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData));
+        String caseId = String.valueOf(caseData.getId());
 
-        for (int i = 0; i < caseData.getRespondents().size(); i++) {
-            PartyDetails party = caseData.getRespondents().get(i).getValue();
-
-            if (!YesNoDontKnow.yes.equals(party.getDoTheyHaveLegalRepresentation())) {
-                continue;
+        if (isC100) {
+            if (caseData.getRespondents() == null) {
+                log.warn("No respondents on case id {}", caseId);
+                return caseDataMap;
             }
-
-            var solicitorOrgObj = party.getSolicitorOrg();
-            String solicitorOrgId = solicitorOrgObj != null ? solicitorOrgObj.getOrganisationID() : null;
-            String solicitorEmail = party.getSolicitorEmail();
-
-            String caseId = String.valueOf(caseData.getId());
-
-            if (!isSolicitorEmailValid(solicitorEmail, caseId, i)
-                || !isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
-                continue;
+            for (int i = 0; i < caseData.getRespondents().size(); i++) {
+                assignForRespondent(caseData.getRespondents().get(i).getValue(), true, i, caseId);
             }
-
-            Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
-
-            if (userIdOpt.isPresent()) {
-                String caseRole = resolveRespondentSolicitorRole(isC100, i);
-                assignCaseAccessService.assignCaseAccessToUserWithRole(
-                    caseId,
-                    userIdOpt.get(),
-                    caseRole,
-                    solicitorOrgId
-                );
-            } else {
-                log.warn(
-                    "Unable to resolve IDAM user for respondent sol {} on case {}",
-                    maskEmail.mask(solicitorEmail), caseId
-                );
+        } else {
+            PartyDetails fl401Respondent = caseData.getRespondentsFL401();
+            if (fl401Respondent == null) {
+                log.warn("No FL401 respondent on case id {}", caseId);
+                return caseDataMap;
             }
+            assignForRespondent(fl401Respondent, false, 0, caseId);
         }
         return caseDataMap;
+    }
+
+    private void assignForRespondent(PartyDetails party, boolean isC100, int index, String caseId) {
+        if (party == null || !YesNoDontKnow.yes.equals(party.getDoTheyHaveLegalRepresentation())) {
+            return;
+        }
+
+        var solicitorOrgObj = party.getSolicitorOrg();
+        String solicitorOrgId = solicitorOrgObj != null ? solicitorOrgObj.getOrganisationID() : null;
+        String solicitorEmail = party.getSolicitorEmail();
+
+        if (!isSolicitorEmailValid(solicitorEmail, caseId, index)
+            || !isSolicitorOrgIdValid(solicitorOrgId, caseId)) {
+            return;
+        }
+
+        Optional<String> userIdOpt = organisationService.findUserByEmail(solicitorEmail);
+        if (userIdOpt.isPresent()) {
+            String caseRole = resolveRespondentSolicitorRole(isC100, index);
+            assignCaseAccessService.assignCaseAccessToUserWithRole(
+                caseId,
+                userIdOpt.get(),
+                caseRole,
+                solicitorOrgId
+            );
+        } else {
+            log.warn(
+                "Unable to resolve IDAM user for respondent sol {} on case {}",
+                maskEmail.mask(solicitorEmail), caseId
+            );
+        }
     }
 
     private String resolveRespondentSolicitorRole(boolean isC100, int respondentIndex) {

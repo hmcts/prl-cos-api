@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -34,32 +36,53 @@ public class RespondentOrgPolicyService {
     private final MaskEmail maskEmail;
 
     /**
-     * Updates {ca|da}Respondent{n}Policy.Organisation based on respondent solicitor org.
+     * Updates caRespondent{n}Policy.Organisation based on respondent solicitor org.
      * Preserves existing OrgPolicyCaseAssignedRole and OrgPolicyReference.
      *
      * @param caseDataMap full CCD case data map (existing values included)
      * @param caseData model
      */
     public Map<String, Object> populateRespondentOrganisations(Map<String, Object> caseDataMap, CaseData caseData) {
-        List<Element<PartyDetails>> respondents = caseData.getRespondents();
-        if (respondents == null || respondents.isEmpty()) {
-            return caseDataMap;
-        }
-
         String caseId = String.valueOf(caseData.getId());
-
         String caseType = CaseUtils.getCaseTypeOfApplication(caseData);
+
+        List<PartyDetails> respondents = getRespondents(caseData, caseType);
         for (int i = 0; i < respondents.size() && i < MAX_RESPONDENTS; i++) {
-            PartyDetails respondent = respondents.get(i).getValue();
-            if (isValidRespondent(respondent)) {
-                int index1Based = i + 1;
-                String policyKey = policyKey(caseType, index1Based);
-                Map<String, Object> updatedPolicy = updatePolicy(caseDataMap, policyKey, respondent, caseId, caseType, index1Based);
-                caseDataMap.put(policyKey, updatedPolicy);
-                assignRoleIfPossible(updatedPolicy, respondent, caseId, policyKey);
+            PartyDetails respondent = respondents.get(i);
+            if (!isValidRespondent(respondent)) {
+                continue;
             }
+            int index1Based = i + 1;
+            String policyKey = policyKey(caseType, index1Based);
+            Map<String, Object> updatedPolicy =
+                updatePolicy(caseDataMap, policyKey, respondent, caseId, caseType, index1Based);
+            caseDataMap.put(policyKey, updatedPolicy);
+            assignRoleIfPossible(updatedPolicy, respondent, caseId, policyKey);
         }
         return caseDataMap;
+    }
+
+    private List<PartyDetails> getRespondents(CaseData caseData, String caseType) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
+            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            if (respondents == null || respondents.isEmpty()) {
+                return List.of();
+            }
+            return respondents.stream()
+                .map(e -> e == null ? null : e.getValue())
+                .toList();
+        }
+        PartyDetails fl401Respondent = caseData.getRespondentsFL401();
+        return fl401Respondent == null ? List.of() : List.of(fl401Respondent);
+    }
+
+    private String policyKey(String caseType, int index1Based) {
+        Representing representing = C100_CASE_TYPE.equalsIgnoreCase(caseType)
+            ? Representing.CARESPONDENT
+            : Representing.DARESPONDENT;
+        String template = representing.getPolicyFieldTemplate();
+        // DA template contains no format specifier; String.format tolerates unused args.
+        return template.contains("%d") ? String.format(template, index1Based) : template;
     }
 
     private boolean isValidRespondent(PartyDetails respondent) {
@@ -98,12 +121,15 @@ public class RespondentOrgPolicyService {
         return policyMap;
     }
 
+
     private String getRespondentSolicitorRole(String caseType, int index1Based) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
-            return "[C100RESPONDENTSOLICITOR" + index1Based + "]";
-        } else {
-            return "[FL401RESPONDENTSOLICITOR]";
-        }
+        Representing representing = C100_CASE_TYPE.equalsIgnoreCase(caseType)
+            ? Representing.CARESPONDENT
+            : Representing.DARESPONDENT;
+        return SolicitorRole.fromRepresentingAndIndex(representing, index1Based)
+            .map(SolicitorRole::getCaseRoleLabel)
+            .orElseThrow(() -> new IllegalStateException(
+                "No SolicitorRole for " + representing + " index " + index1Based));
     }
 
     private void assignRoleIfPossible(Map<String, Object> updatedPolicy, PartyDetails respondent, String caseId, String policyKey) {
@@ -134,9 +160,5 @@ public class RespondentOrgPolicyService {
         );
     }
 
-    private String policyKey(String caseType, int index1Based) {
-        String prefix = C100_CASE_TYPE.equalsIgnoreCase(caseType) ? "caRespondent" : "daRespondent";
-        return prefix + index1Based + "Policy";
-    }
 
 }
