@@ -114,14 +114,7 @@ public class Fm5ReminderService {
                             caseDataUpdated.put("fm5RemindersSent", "YES");
                         }
                     }
-                    //Save case data
-//                    allTabService.submitAllTabsUpdate(
-//                        startAllTabsUpdateDataContent.authorisation(),
-//                        key,
-//                        startAllTabsUpdateDataContent.startEventResponse(),
-//                        startAllTabsUpdateDataContent.eventRequestData(),
-//                        caseDataUpdated
-//                    );
+
                 }
             );
         }
