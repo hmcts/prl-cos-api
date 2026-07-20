@@ -137,16 +137,31 @@ public class RefDataUserService {
     }
 
     @CacheEvict(allEntries = true, cacheNames = JUDICIAL_USER_CACHE)
-    @Scheduled(fixedDelay = 1800000) // 30 minutes
+    @Scheduled(fixedDelayString = "${judicialUsers.cache.refreshDelayMillis}")
     public void evictJudicialUserCache() {
         log.info("Evicting judicial user cache");
     }
 
-    @CacheEvict(allEntries = true, cacheNames = STAFF_REF_DATA_CACHE, beforeInvocation = true)
-    @Scheduled(fixedDelay = 1800000) // 30 minutes
-    public void evictStaffRefDataCache() {
-        log.info("Evicting staff ref data cache");
-        staffRefDataService.getAllStaffDetails();
+    @Scheduled(fixedDelayString = "${staffDetails.cache.refreshDelayMillis}")
+    public void refreshStaffRefDataCache() {
+        log.info("Refreshing staff ref data cache");
+        refreshStaffRefDataCache("warm-up");
+    }
+
+    private void refreshStaffRefDataCache(String reason) {
+        try {
+            staffRefDataService.refreshStaffDetailsCache();
+        } catch (NoStaffResponseException e) {
+            log.warn("Staff ref data cache {} failed - {}", reason, e.getMessage());
+        }
+    }
+
+    @Scheduled(fixedDelayString = "${staffDetails.cache.emptyRefreshDelayMillis}")
+    public void refreshEmptyStaffRefDataCache() {
+        if (staffRefDataService.isStaffDetailsCacheEmpty()) {
+            log.info("Staff ref data cache is empty, attempting refresh");
+            refreshStaffRefDataCache("empty-cache warm-up");
+        }
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {

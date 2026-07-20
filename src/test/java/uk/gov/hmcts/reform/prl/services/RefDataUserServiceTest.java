@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -91,7 +92,12 @@ public class RefDataUserServiceTest {
 
     @Before
     public void setUp() {
-        staffRefDataService = new StaffRefDataService(authTokenGenerator, staffResponseDetailsApi, idamClient);
+        staffRefDataService = new StaffRefDataService(
+            authTokenGenerator,
+            staffResponseDetailsApi,
+            idamClient,
+            new ConcurrentMapCacheManager(RefDataUserService.STAFF_REF_DATA_CACHE)
+        );
         refDataUserService = new RefDataUserService(
             authTokenGenerator,
             staffRefDataService,
@@ -104,30 +110,12 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetStaffDetailssWithNullStaffData() {
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            Integer.MAX_VALUE,
-            0
-        )).thenReturn(null);
         List<DynamicListElement> staffDetails = refDataUserService.getLegalAdvisorList();
         assertNull(staffDetails.getFirst().getCode());
     }
 
     @Test
     public void testStaffDynamicListWithNullStaffData() {
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            Integer.MAX_VALUE,
-            0
-        )).thenReturn(null);
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
         assertTrue(staffDetails.getListItems().isEmpty());
@@ -136,32 +124,12 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetStaffDetailsWithException() {
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            Integer.MAX_VALUE,
-            0
-        ))
-            .thenThrow(FeignException.class);
         List<DynamicListElement> legalAdvisor = refDataUserService.getLegalAdvisorList();
         assertNull(legalAdvisor.getFirst().getCode());
     }
 
     @Test
     public void testStaffDynamicListWithException() {
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            Integer.MAX_VALUE,
-            0
-        )).thenThrow(FeignException.class);
-
         StaffResponseToDynamicListElementFilter filter = mock(StaffResponseToDynamicListElementFilter.class);
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
         assertTrue(staffDetails.getListItems().isEmpty());
@@ -195,6 +163,7 @@ public class RefDataUserServiceTest {
             0
         )).thenReturn(staffResponse);
 
+        staffRefDataService.refreshStaffDetailsCache();
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
         assertNotNull(legalAdvisorList.getFirst().getCode());
         assertEquals("David(test2@com)",legalAdvisorList.getFirst().getCode());
@@ -241,6 +210,7 @@ public class RefDataUserServiceTest {
         when(filter.filter(staffResponse1)).thenReturn(Optional.of(mockDynamicListElement));
         when(filter.filter(staffResponse2)).thenReturn(Optional.empty());
 
+        staffRefDataService.refreshStaffDetailsCache();
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
         assertEquals(1, staffDetails.getListItems().size());
         assertEquals(mockDynamicListElement, staffDetails.getListItems().getFirst());
@@ -480,6 +450,7 @@ public class RefDataUserServiceTest {
             0
         )).thenReturn(staffResponseFirstPage);
 
+        staffRefDataService.refreshStaffDetailsCache();
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
 
         assertNotNull(legalAdvisorList.getFirst().getCode());
@@ -515,6 +486,7 @@ public class RefDataUserServiceTest {
         DynamicListElement mockDynamicListElement = mock(DynamicListElement.class);
         when(filter.filter(staffResponse)).thenReturn(Optional.of(mockDynamicListElement));
 
+        staffRefDataService.refreshStaffDetailsCache();
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
 
         assertEquals(1, staffDetails.getListItems().size());
@@ -547,6 +519,7 @@ public class RefDataUserServiceTest {
             0
         )).thenReturn(staffResponseFirstPage);
 
+        staffRefDataService.refreshStaffDetailsCache();
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
 
         assertNotNull(legalAdvisorList.getFirst().getCode());
@@ -586,6 +559,7 @@ public class RefDataUserServiceTest {
         when(filter.filter(staffResponse1)).thenReturn(Optional.of(mockDynamicListElement1));
         when(filter.filter(staffResponse2)).thenReturn(Optional.of(mockDynamicListElement2));
 
+        staffRefDataService.refreshStaffDetailsCache();
         DynamicList staffDetails = refDataUserService.getStaffDynamicList(filter);
 
         assertEquals(2, staffDetails.getListItems().size());

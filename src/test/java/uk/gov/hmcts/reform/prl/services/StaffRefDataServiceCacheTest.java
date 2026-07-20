@@ -17,17 +17,21 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.CacheConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
@@ -91,10 +95,11 @@ class StaffRefDataServiceCacheTest {
     }
 
     @Test
-    void shouldCacheStaffRefDataAfterFirstCall() {
+    void shouldReturnCachedStaffRefDataWithoutCallingRefData() {
         List<StaffResponse> staffResponse = List.of(staffResponse("cached@example.com"));
         whenStaffRefDataIsRequested().thenReturn(ResponseEntity.ok(staffResponse));
 
+        staffRefDataService.refreshStaffDetailsCache();
         List<StaffResponse> firstResponse = staffRefDataService.getAllStaffDetails();
         List<StaffResponse> secondResponse = staffRefDataService.getAllStaffDetails();
 
@@ -104,19 +109,127 @@ class StaffRefDataServiceCacheTest {
     }
 
     @Test
-    void shouldFetchStaffRefDataAgainAfterCacheEviction() {
+    void shouldCallRefDataWhenStaffRefDataCacheIsEmpty() {
+        List<StaffResponse> staffResponse = List.of(staffResponse("cache-miss@example.com"));
+        whenStaffRefDataIsRequested().thenReturn(ResponseEntity.ok(staffResponse));
+
+        List<StaffResponse> response = staffRefDataService.getAllStaffDetails();
+
+        assertThat(response).isEqualTo(staffResponse);
+        verifyStaffRefDataRequested(times(1));
+    }
+
+    @Test
+    void shouldRetryEmptyCacheRefreshAfterBadResponse() {
+        List<StaffResponse> staffResponse = List.of(staffResponse("retried@example.com"));
+        whenStaffRefDataIsRequested()
+            .thenReturn(ResponseEntity.ok(List.of()))
+            .thenReturn(ResponseEntity.ok(staffResponse));
+
+        refDataUserService.refreshStaffRefDataCache();
+        assertThat(staffRefDataService.isStaffDetailsCacheEmpty()).isTrue();
+
+        refDataUserService.refreshEmptyStaffRefDataCache();
+
+        assertThat(staffRefDataService.getAllStaffDetails()).isEqualTo(staffResponse);
+        verifyStaffRefDataRequested(times(2));
+    }
+
+    @Test
+    void shouldNotRefreshEmptyStaffRefDataCacheWhenCacheHasData() {
+        List<StaffResponse> staffResponse = List.of(staffResponse("cached@example.com"));
+        whenStaffRefDataIsRequested().thenReturn(ResponseEntity.ok(staffResponse));
+
+        staffRefDataService.refreshStaffDetailsCache();
+        refDataUserService.refreshEmptyStaffRefDataCache();
+
+        assertThat(staffRefDataService.getAllStaffDetails()).isEqualTo(staffResponse);
+        verifyStaffRefDataRequested(times(1));
+        verifyNoMoreInteractions(staffResponseDetailsApi);
+    }
+
+    @Test
+    void shouldRefreshStaffRefDataCache() {
         List<StaffResponse> firstStaffResponse = List.of(staffResponse("first@example.com"));
         List<StaffResponse> secondStaffResponse = List.of(staffResponse("second@example.com"));
         whenStaffRefDataIsRequested()
             .thenReturn(ResponseEntity.ok(firstStaffResponse))
             .thenReturn(ResponseEntity.ok(secondStaffResponse));
 
+        staffRefDataService.refreshStaffDetailsCache();
         List<StaffResponse> firstResponse = staffRefDataService.getAllStaffDetails();
-        refDataUserService.evictStaffRefDataCache();
+        refDataUserService.refreshStaffRefDataCache();
         List<StaffResponse> secondResponse = staffRefDataService.getAllStaffDetails();
 
         assertThat(firstResponse).isEqualTo(firstStaffResponse);
         assertThat(secondResponse).isEqualTo(secondStaffResponse);
+        verifyStaffRefDataRequested(times(2));
+    }
+
+    @Test
+    void shouldKeepExistingStaffRefDataCacheWhenRefreshReturnsEmptyResponse() {
+        List<StaffResponse> firstStaffResponse = List.of(staffResponse("first@example.com"));
+        List<StaffResponse> secondStaffResponse = List.of(staffResponse("second@example.com"));
+        whenStaffRefDataIsRequested()
+            .thenReturn(ResponseEntity.ok(firstStaffResponse))
+            .thenReturn(ResponseEntity.ok(List.of()))
+            .thenReturn(ResponseEntity.ok(secondStaffResponse));
+
+        staffRefDataService.refreshStaffDetailsCache();
+        List<StaffResponse> firstResponse = staffRefDataService.getAllStaffDetails();
+        assertThatCode(() -> refDataUserService.refreshStaffRefDataCache()).doesNotThrowAnyException();
+        List<StaffResponse> secondResponse = staffRefDataService.getAllStaffDetails();
+        refDataUserService.refreshStaffRefDataCache();
+        List<StaffResponse> thirdResponse = staffRefDataService.getAllStaffDetails();
+
+        assertThat(firstResponse).isEqualTo(firstStaffResponse);
+        assertThat(secondResponse).isEqualTo(firstStaffResponse);
+        assertThat(thirdResponse).isEqualTo(secondStaffResponse);
+        verifyStaffRefDataRequested(times(3));
+    }
+
+    @Test
+    void shouldNotCacheEmptyStaffRefDataWhenRefreshResponseIsNull() {
+        List<StaffResponse> staffResponse = List.of(staffResponse("retried@example.com"));
+        whenStaffRefDataIsRequested()
+            .thenReturn(null)
+            .thenReturn(ResponseEntity.ok(staffResponse));
+
+        assertThatThrownBy(() -> staffRefDataService.refreshStaffDetailsCache())
+            .isInstanceOf(NoStaffResponseException.class);
+        List<StaffResponse> secondResponse = staffRefDataService.getAllStaffDetails();
+
+        assertThat(secondResponse).isEqualTo(staffResponse);
+        verifyStaffRefDataRequested(times(2));
+    }
+
+    @Test
+    void shouldNotCacheEmptyStaffRefDataWhenRefreshResponseBodyIsNull() {
+        List<StaffResponse> staffResponse = List.of(staffResponse("retried@example.com"));
+        whenStaffRefDataIsRequested()
+            .thenReturn(ResponseEntity.ok(null))
+            .thenReturn(ResponseEntity.ok(staffResponse));
+
+        assertThatThrownBy(() -> staffRefDataService.refreshStaffDetailsCache())
+            .isInstanceOf(NoStaffResponseException.class);
+        List<StaffResponse> secondResponse = staffRefDataService.getAllStaffDetails();
+
+        assertThat(secondResponse).isEqualTo(staffResponse);
+        verifyStaffRefDataRequested(times(2));
+    }
+
+    @Test
+    void shouldNotCacheEmptyStaffRefDataWhenRefreshResponseBodyIsEmpty() {
+        List<StaffResponse> staffResponse = List.of(staffResponse("retried@example.com"));
+        whenStaffRefDataIsRequested()
+            .thenReturn(ResponseEntity.ok(List.of()))
+            .thenReturn(ResponseEntity.ok(staffResponse));
+
+        assertThatThrownBy(() -> staffRefDataService.refreshStaffDetailsCache())
+            .isInstanceOf(NoStaffResponseException.class);
+        List<StaffResponse> secondResponse = staffRefDataService.getAllStaffDetails();
+
+        assertThat(secondResponse).isEqualTo(staffResponse);
         verifyStaffRefDataRequested(times(2));
     }
 
