@@ -634,6 +634,58 @@ public class ManageOrderService {
     @Value("${hearing_component.hearingStatusesToFilter}")
     private String hearingStatusesToFilter;
 
+    // --------------------Notice of Hearing (CA) Start ----------------------------
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_draft_template}")
+    protected String noticeOfHearingC100DraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_draft_filename}")
+    protected String noticeOfHearingC100DraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_template}")
+    protected String noticeOfHearingC100Template;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_filename}")
+    protected String noticeOfHearingC100File;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_draft_template}")
+    protected String noticeOfHearingC100WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_draft_filename}")
+    protected String noticeOfHearingC100WelshDraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_template}")
+    protected String noticeOfHearingC100WelshTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_c100_welsh_filename}")
+    protected String noticeOfHearingC100WelshFile;
+    // --------------------Notice of Hearing (CA) End ----------------------------
+
+    // --------------------Notice of Hearing (DA) Start ----------------------------
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_draft_template}")
+    protected String noticeOfHearingFl402DraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_draft_filename}")
+    protected String noticeOfHearingFl402DraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_final_template}")
+    protected String noticeOfHearingFl402FinalTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_final_filename}")
+    protected String noticeOfHearingFl402FinalFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_draft_template}")
+    protected String noticeOfHearingFl402WelshDraftTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_draft_filename}")
+    protected String noticeOfHearingFl402WelshDraftFile;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_final_template}")
+    protected String noticeOfHearingFl402WelshFinalTemplate;
+
+    @Value("${document.templates.common.prl_notice_of_hearing_fl402_welsh_final_filename}")
+    protected String noticeOfHearingFl402WelshFinalFile;
+    // --------------------Notice of Hearing (DA) End ----------------------------
+
     private final DocumentLanguageService documentLanguageService;
 
     private final DgsService dgsService;
@@ -972,10 +1024,26 @@ public class ManageOrderService {
                 fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, nopNonPartiesWelshFile);
                 break;
             case noticeOfHearing:
-                // add templates from FPVTL-3133 when they exist
+                // Notice of Hearing (DA)
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, noticeOfHearingFl402DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, noticeOfHearingFl402DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, noticeOfHearingFl402FinalTemplate);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, noticeOfHearingFl402FinalFile);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, noticeOfHearingFl402WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, noticeOfHearingFl402WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, noticeOfHearingFl402WelshFinalTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, noticeOfHearingFl402WelshFinalFile);
                 break;
             case noticeOfHearingParties:
-                // add templates from FPVTL-3133 when they exist
+                // Notice of Hearing (CA)
+                fieldsMap.put(PrlAppsConstants.TEMPLATE, noticeOfHearingC100DraftTemplate);
+                fieldsMap.put(PrlAppsConstants.FILE_NAME, noticeOfHearingC100DraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_NAME, noticeOfHearingC100Template);
+                fieldsMap.put(PrlAppsConstants.GENERATE_FILE_NAME, noticeOfHearingC100File);
+                fieldsMap.put(PrlAppsConstants.DRAFT_TEMPLATE_WELSH, noticeOfHearingC100WelshDraftTemplate);
+                fieldsMap.put(PrlAppsConstants.DRAFT_WELSH_FILE_NAME, noticeOfHearingC100WelshDraftFile);
+                fieldsMap.put(PrlAppsConstants.FINAL_TEMPLATE_WELSH, noticeOfHearingC100WelshTemplate);
+                fieldsMap.put(PrlAppsConstants.WELSH_FILE_NAME, noticeOfHearingC100WelshFile);
                 break;
             default:
                 break;
