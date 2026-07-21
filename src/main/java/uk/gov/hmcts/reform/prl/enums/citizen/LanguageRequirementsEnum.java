@@ -14,9 +14,9 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum LanguageRequirementsEnum {
 
     @JsonProperty("speakwelsh")
-    speakwelsh("speakwelsh","I want to speak in Welsh"),
+    speakwelsh("speakwelsh","I need to speak in Welsh"),
     @JsonProperty("readandwritewelsh")
-    readandwritewelsh("readandwritewelsh","I want to read and write in Welsh"),
+    readandwritewelsh("readandwritewelsh","I need to read and write in Welsh"),
     @JsonProperty("languageinterpreter")
     languageinterpreter("languageinterpreter","I need an interpreter in a certain language"),
     @JsonProperty("nointerpreter")
