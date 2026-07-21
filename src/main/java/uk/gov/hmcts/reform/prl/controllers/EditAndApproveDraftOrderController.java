@@ -60,6 +60,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -233,6 +234,8 @@ public class EditAndApproveDraftOrderController {
                 if (draftOrderId == null) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(List.of(ERROR_RETRIEVE_DRAFT_ORDER)).build();
+                } else {
+                    caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderId);
                 }
                 editAndApproveOrder(
                     authorisation,
