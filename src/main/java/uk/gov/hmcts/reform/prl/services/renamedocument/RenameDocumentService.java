@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -21,8 +20,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CATEGORY_DOCUMENTS_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CATEGORY_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_URL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_NAME_FOR_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RENAME_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RENAME_DOCUMENTS_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RENAME_LIST_DOC_SELECTED;
 import static uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService.ARROW_SEPARATOR;
 
 @Service
@@ -35,10 +44,19 @@ public class RenameDocumentService {
     private final DocumentExtractor documentExtractor;
     private final DocumentCategoryService documentCategoryService;
 
+    private static final List<String> FIELDS_FOR_UNCATEGORISED_DOCUMENTS = List.of(
+        "finalServedApplicationDetailsList",
+        "internalMessageAttachDocs",
+        "externalMessageAttachDocs",
+        "servedDocumentsDetailsList",
+        "sodUnServedPack",
+        "unServedApplicantPack",
+        "unServedRespondentPack"
+    );
 
     public Map<String, Object> handleAboutToStart(String authorisation,
                                                   CallbackRequest callbackRequest) {
-        log.info("Entering RenameDocument Event handleAboutToStart for case: {}", callbackRequest.getCaseDetails().getId());
+        log.info("RenameDocument event handleAboutToStart for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -48,18 +66,18 @@ public class RenameDocumentService {
         );
 
         documentsList = createDynamicListForRenameDocuments(caseData, documentsList);
-        caseDataMap.put("renameDocumentsList", documentsList);
+        caseDataMap.put(RENAME_DOCUMENTS_LIST, documentsList);
 
 
         DynamicList categoriesAndDocumentsList = documentCategoryService.retrieveDocumentCategories(authorisation, caseData, null);
-        caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
+        caseDataMap.put(CATEGORY_DOCUMENTS_LIST, categoriesAndDocumentsList);
 
         return caseDataMap;
     }
 
     public Map<String, Object> handleMidEvent(String authorisation,
                                               CallbackRequest callbackRequest) {
-        log.info("Entering RenameDocument Event handleMidEvent for case: {}", callbackRequest.getCaseDetails().getId());
+        log.info("RenameDocument event handleMidEvent for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -67,108 +85,31 @@ public class RenameDocumentService {
 
         if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
             DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
-            if (null != selectedList.getValue() && isNotBlank(selectedList.getValue().getCode())) {
-
-                String documentName = selectedList.getValue().getLabel();
-                caseDataMap.put("renameListDocSelected", documentName);
-
-                String documentCode = selectedList.getValue().getCode();
-                log.info("Selected document code: {}", documentCode);
-                String[] codes = documentCode.split(ARROW_SEPARATOR);
-
-                if (codes.length >= 2) {
-                    String categoryIdFromCode = codes[codes.length - 2].trim();
-
-                    categoriesAndDocumentsList.getListItems().stream()
-                        .filter(element -> element.getCode().equals(categoryIdFromCode))
-                        .findFirst()
-                        .ifPresent(element -> {
-                            log.info("Matching category found in list for code: {}. Setting as pre-selected value.", element.getLabel());
-                            categoriesAndDocumentsList.setValue(element);
-                        });
-                }
-            }
+            addSelectedDocumentLabel(caseDataMap, selectedList);
+            prepopulateCategoryList(categoriesAndDocumentsList, selectedList);
         }
-        caseDataMap.put("categoryDocumentsList", categoriesAndDocumentsList);
+
+        caseDataMap.put(CATEGORY_DOCUMENTS_LIST, categoriesAndDocumentsList);
         return caseDataMap;
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
-        log.info("Entering RenameDocument Event handleAboutToSubmit for case: {}", callbackRequest.getCaseDetails().getId());
+        log.info("RenameDocument event handleAboutToSubmit for case: {}", callbackRequest.getCaseDetails().getId());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
-            DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
-            if (null != selectedList.getValue() && isNotBlank(selectedList.getValue().getCode())) {
-                String documentCode = selectedList.getValue().getCode();
-                String[] codes = documentCode.split(ARROW_SEPARATOR);
-                String documentId = codes[codes.length - 1].trim();
+        processRenamingDocument(caseData, caseDataMap);
 
-                String newName = caseData.getRenameDocument().getNewNameForDocument();
-                String categoryId = null;
-                if (caseData.getRenameDocument().getCategoryDocumentsList() != null
-                    && caseData.getRenameDocument().getCategoryDocumentsList().getValue() != null) {
-                    categoryId = caseData.getRenameDocument().getCategoryDocumentsList().getValue().getCode();
-                }
-
-                if (isNotBlank(newName)) {
-                    findAndRenameDocument(caseDataMap, newName, documentId, categoryId);
-                }
-            }
-        }
-
-        caseDataMap.remove("renameDocumentsList");
-        caseDataMap.remove("categoryDocumentsList");
-        caseDataMap.remove("newNameForDocument");
-        caseDataMap.remove("renameListDocSelected");
-        caseDataMap.remove("renameDocument");
+        caseDataMap.remove(RENAME_DOCUMENTS_LIST);
+        caseDataMap.remove(CATEGORY_DOCUMENTS_LIST);
+        caseDataMap.remove(NEW_NAME_FOR_DOCUMENT);
+        caseDataMap.remove(RENAME_LIST_DOC_SELECTED);
+        caseDataMap.remove(RENAME_DOCUMENT);
         return caseDataMap;
     }
 
-    private void findAndRenameDocument(Object data, String newName, String documentId, String categoryId) {
-        if (data instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) data;
-
-            if (map.containsKey("document_url") && map.get("document_url") instanceof String) {
-                String url = (String) map.get("document_url");
-                if (url.contains(documentId)) {
-                    String currentName = (String) map.get("document_filename");
-                    String extension = FilenameUtils.getExtension(currentName);
-                    String newUploadName;
-                    if (currentName.startsWith("Confidential_")) {
-                        String confidentialPrefix = "Confidential_";
-                        String nameWithoutPrefix = newName.startsWith(confidentialPrefix)
-                            ? newName.substring(confidentialPrefix.length())
-                            : newName;
-
-                        newUploadName = isNotBlank(extension)
-                            ? confidentialPrefix + nameWithoutPrefix + "." + extension
-                            : confidentialPrefix + nameWithoutPrefix;
-                    } else {
-                        newUploadName = isNotBlank(extension) ? newName + "." + extension : newName;
-                    }
-
-                    log.info("Renaming the document");
-                    map.put("document_filename", newUploadName);
-                    map.put("category_id", categoryId);
-                    return;
-                }
-            }
-            for (Object value : map.values()) {
-                findAndRenameDocument(value, newName, documentId, categoryId);
-            }
-
-        } else if (data instanceof List) {
-            List<?> list = (List<?>) data;
-            for (Object item : list) {
-                findAndRenameDocument(item, newName, documentId, categoryId);
-            }
-        }
-    }
-
     public List<String> validateRenamedField(Map<String, Object> caseDataUpdated) {
-        String newNameForDocument = (String) caseDataUpdated.get("newNameForDocument");
+        String newNameForDocument = (String) caseDataUpdated.get(NEW_NAME_FOR_DOCUMENT);
         List<String> errors = new ArrayList<>();
         if (StringUtils.isNotBlank(newNameForDocument) && newNameForDocument.contains(".")) {
             errors.add("Document name must not include the file type");
@@ -176,28 +117,157 @@ public class RenameDocumentService {
         return errors;
     }
 
-    private @NonNull DynamicList createDynamicListForRenameDocuments(CaseData caseData, DynamicList documentsList) {
-        List<uk.gov.hmcts.reform.prl.models.documents.Document> allDocuments = documentExtractor.getCaseDocuments(
-            caseData);
+    private void processRenamingDocument(CaseData caseData, Map<String, Object> caseDataMap) {
+        if (caseData.getRenameDocument() != null && caseData.getRenameDocument().getRenameDocumentsList() != null) {
+            DynamicList selectedList = caseData.getRenameDocument().getRenameDocumentsList();
+            if (selectedList.getValue() != null && isNotBlank(selectedList.getValue().getCode())) {
+                String documentId = getDocumentId(selectedList);
 
-        List<uk.gov.hmcts.reform.prl.models.documents.Document> quarantineDocuments = documentExtractor.getCaseDocuments(
-            CaseData.builder()
-                .documentManagementDetails(caseData.getDocumentManagementDetails())
-                .reviewDocuments(caseData.getReviewDocuments())
-                .scannedDocuments(caseData.getScannedDocuments())
-                .build()
-        );
+                Optional<String> categoryId = getCategoryId(caseData);
 
-        List<String> quarantineDocumentIds = quarantineDocuments.stream()
-            .map(uk.gov.hmcts.reform.prl.models.documents.Document::getDocumentId)
-            .toList();
+                String newName = caseData.getRenameDocument().getNewNameForDocument();
+                if (isNotBlank(newName)) {
+                    findAndRenameDocument(
+                        caseDataMap,
+                        null,
+                        false,
+                        newName,
+                        documentId,
+                        categoryId.orElse(null),
+                        isDocInstanceInCategories(caseDataMap, documentId, false));
+                }
+            }
+        }
+    }
 
-        List<String> existingDocumentIds = documentsList.getListItems().stream()
-            .map(item -> {
-                String[] codes = item.getCode().split(ARROW_SEPARATOR);
-                return codes[codes.length - 1];
-            })
-            .toList();
+    private Optional<String> getCategoryId(CaseData caseData) {
+        String categoryId = null;
+        if (caseData.getRenameDocument() != null
+            && caseData.getRenameDocument().getCategoryDocumentsList() != null
+            && caseData.getRenameDocument().getCategoryDocumentsList().getValue() != null) {
+            categoryId = caseData.getRenameDocument().getCategoryDocumentsList().getValue().getCode();
+        }
+        return Optional.ofNullable(categoryId);
+    }
+
+    private String getDocumentId(DynamicList selectedList) {
+        String documentCode = selectedList.getValue().getCode();
+        String[] codes = documentCode.split(ARROW_SEPARATOR);
+        return codes[codes.length - 1].trim();
+    }
+
+    private void findAndRenameDocument(Object data, String rootFieldName, boolean isDocInstanceInUncategorisedDocs,
+                                       String newName, String documentId, String categoryId,
+                                       boolean isAnyCategorisedDocInstancePresent) {
+        if (data instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) data;
+
+            if (map.containsKey(DOCUMENT_URL) && map.get(DOCUMENT_URL) instanceof String) {
+                String url = (String) map.get(DOCUMENT_URL);
+                if (url.contains(documentId)) {
+                    updateDocumentMetadata(map, rootFieldName, isDocInstanceInUncategorisedDocs,
+                                           newName, categoryId, isAnyCategorisedDocInstancePresent);
+                    return;
+                }
+            }
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                String currentRootField = (rootFieldName == null) ? key : rootFieldName;
+                boolean nextDocInstanceInUncategorisedDocs = isDocInstanceInUncategorisedDocs || FIELDS_FOR_UNCATEGORISED_DOCUMENTS.contains(key);
+                findAndRenameDocument(entry.getValue(),
+                                      currentRootField,
+                                      nextDocInstanceInUncategorisedDocs,
+                                      newName,
+                                      documentId,
+                                      categoryId,
+                                      isAnyCategorisedDocInstancePresent);
+            }
+
+        } else if (data instanceof List) {
+            List<?> list = (List<?>) data;
+            for (Object item : list) {
+                findAndRenameDocument(item, rootFieldName, isDocInstanceInUncategorisedDocs,
+                                      newName, documentId, categoryId, isAnyCategorisedDocInstancePresent);
+            }
+        }
+    }
+
+    private void updateDocumentMetadata(Map<String, Object> documentMap,
+                                     String rootFieldName,
+                                     boolean isDocInstanceInUncategorisedDocs,
+                                     String newName,
+                                     String categoryId,
+                                     boolean isAnyCategorisedDocInstancePresent) {
+        String currentName = (String) documentMap.get(DOCUMENT_FILENAME);
+        String extension = FilenameUtils.getExtension(currentName);
+        String newUploadName = checkForConfidentialPrefix(newName, currentName, extension);
+
+        log.info("Renaming the document in field: {}", rootFieldName);
+        documentMap.put(DOCUMENT_FILENAME, newUploadName);
+
+        if (!isDocInstanceInUncategorisedDocs || !isAnyCategorisedDocInstancePresent) {
+            log.info("About to add the category id for rootField: {}", rootFieldName);
+            documentMap.put(CATEGORY_ID, categoryId);
+        }
+    }
+
+    private boolean isDocInstanceInCategories(Object data, String documentId, boolean isDocInstanceInUncategorisedDocs) {
+        if (data instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) data;
+
+            if (map.containsKey(DOCUMENT_URL) && map.get(DOCUMENT_URL) instanceof String) {
+                String url = (String) map.get(DOCUMENT_URL);
+                if (url.contains(documentId)) {
+                    return !isDocInstanceInUncategorisedDocs;
+                }
+            }
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                boolean nextDocInstanceInUncategorisedDocs =
+                    isDocInstanceInUncategorisedDocs || FIELDS_FOR_UNCATEGORISED_DOCUMENTS.contains(entry.getKey());
+                if (isDocInstanceInCategories(entry.getValue(), documentId, nextDocInstanceInUncategorisedDocs)) {
+                    return true;
+                }
+            }
+        } else if (data instanceof List) {
+            List<?> list = (List<?>) data;
+            for (Object item : list) {
+                if (isDocInstanceInCategories(item, documentId, isDocInstanceInUncategorisedDocs)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private String checkForConfidentialPrefix(String newName, String currentName, String extension) {
+        String newUploadName;
+        if (currentName.startsWith(CONFIDENTIAL)) {
+            String nameWithoutPrefix = newName.startsWith(CONFIDENTIAL)
+                ? newName.substring(CONFIDENTIAL.length())
+                : newName;
+
+            newUploadName = isNotBlank(extension)
+                ? CONFIDENTIAL + nameWithoutPrefix + "." + extension
+                : CONFIDENTIAL + nameWithoutPrefix;
+        } else {
+            newUploadName = isNotBlank(extension) ? newName + "." + extension : newName;
+        }
+        return newUploadName;
+    }
+
+
+    private DynamicList createDynamicListForRenameDocuments(CaseData caseData, DynamicList documentsList) {
+        List<uk.gov.hmcts.reform.prl.models.documents.Document> allDocuments = documentExtractor.getCaseDocuments(caseData);
+        List<String> quarantineDocumentIds = getQuarantineDocumentIds(caseData);
+
+        List<String> existingDocumentIds = documentsList.getListItems() != null
+            ? documentsList.getListItems().stream()
+                .map(item -> {
+                    String[] codes = item.getCode().split(ARROW_SEPARATOR);
+                    return codes[codes.length - 1];
+                })
+                .toList()
+            : List.of();
 
         List<DynamicListElement> extraDocuments = allDocuments.stream()
             .filter(doc -> !quarantineDocumentIds.contains(doc.getDocumentId()))
@@ -208,23 +278,54 @@ public class RenameDocumentService {
                 .build())
             .toList();
 
-        List<DynamicListElement> allListItems = new ArrayList<>();
-        if (documentsList.getListItems() != null) {
-            allListItems.addAll(documentsList.getListItems().stream()
-                                   .filter(item -> !item.getLabel().startsWith("Documents to be reviewed"))
-                                   .toList());
-        }
+        List<DynamicListElement> filteredExistingItems = documentsList.getListItems() != null
+            ? documentsList.getListItems().stream()
+                .filter(item -> !item.getLabel().startsWith("Documents to be reviewed"))
+                .toList()
+            : List.of();
+
+        List<DynamicListElement> allListItems = new ArrayList<>(filteredExistingItems);
         allListItems.addAll(extraDocuments);
 
-        documentsList = documentsList.toBuilder()
+        return documentsList.toBuilder()
             .listItems(allListItems)
             .build()
             .withSortedListItemsByLabel();
+    }
 
-        log.info(
-            "Found {} documents for dynamic list",
-            documentsList.getListItems() != null ? documentsList.getListItems().size() : 0
-        );
-        return documentsList;
+    private List<String> getQuarantineDocumentIds(CaseData caseData) {
+        return documentExtractor.getCaseDocuments(
+            CaseData.builder()
+                .documentManagementDetails(caseData.getDocumentManagementDetails())
+                .reviewDocuments(caseData.getReviewDocuments())
+                .scannedDocuments(caseData.getScannedDocuments())
+                .build()
+        ).stream().map(uk.gov.hmcts.reform.prl.models.documents.Document::getDocumentId).toList();
+    }
+
+    private void addSelectedDocumentLabel(Map<String, Object> caseDataMap, DynamicList selectedList) {
+        if (selectedList.getValue() != null && isNotBlank(selectedList.getValue().getLabel())) {
+            caseDataMap.put(RENAME_LIST_DOC_SELECTED, selectedList.getValue().getLabel());
+        }
+    }
+
+    private void prepopulateCategoryList(DynamicList categoriesAndDocumentsList, DynamicList selectedList) {
+        if (selectedList.getValue() != null && isNotBlank(selectedList.getValue().getCode())) {
+            String documentCode = selectedList.getValue().getCode();
+            log.info("Selected document code: {}", documentCode);
+            String[] codes = documentCode.split(ARROW_SEPARATOR);
+
+            if (codes.length >= 2) {
+                String categoryIdFromCode = codes[codes.length - 2].trim();
+
+                categoriesAndDocumentsList.getListItems().stream()
+                    .filter(element -> element.getCode().equals(categoryIdFromCode))
+                    .findFirst()
+                    .ifPresent(element -> {
+                        log.info("Matching category found in list for code: {}. Setting as pre-selected value.", element.getLabel());
+                        categoriesAndDocumentsList.setValue(element);
+                    });
+            }
+        }
     }
 }
