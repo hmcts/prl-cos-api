@@ -91,7 +91,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -117,7 +116,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -5615,9 +5613,8 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated =
-            (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
-        assertEquals("No", caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
+        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
+        assertEquals(EMPTY_STRING,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
     @Test
@@ -5935,101 +5932,6 @@ public class ServiceOfApplicationServiceTest {
         );
         assertNull(caseDataMap1.get(APPLICANTS));
 
-    }
-
-    @Test
-    public void testAssignAccessWithMissingSolicitorEmail() {
-        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
-        PartyDetails party = PartyDetails.builder()
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .solicitorEmail("")
-            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
-            .build();
-        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
-        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(RESPONDENTS, caseData.getRespondents());
-        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseDataMap, caseData);
-
-        verifyNoInteractions(assignCaseAccessService);
-    }
-
-    @Test
-    public void testAssignAccessWithMissingSolicitorOrgId() {
-        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
-        PartyDetails party = PartyDetails.builder()
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .solicitorEmail("solicitor@example.com")
-            .solicitorOrg(Organisation.builder().organisationID("").build())
-            .build();
-        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
-        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(RESPONDENTS, caseData.getRespondents());
-        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseDataMap, caseData);
-
-        verifyNoInteractions(assignCaseAccessService);
-    }
-
-    @Test
-    public void testAssignAccessWithNoLegalRepresentation() {
-        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
-        PartyDetails party = PartyDetails.builder()
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .solicitorEmail("solicitor@example.com")
-            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
-            .build();
-        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
-        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(RESPONDENTS, caseData.getRespondents());
-        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseDataMap, caseData);
-
-        verifyNoInteractions(assignCaseAccessService);
-    }
-
-
-    @Test
-    public void testAssignAccessWithValidSolicitorDetails() {
-        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
-        PartyDetails party = PartyDetails.builder()
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .solicitorEmail("solicitor@example.com")
-            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
-            .build();
-        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
-        CaseData caseData = CaseData.builder().id(123L).caseTypeOfApplication("C100").respondents(List.of(respondent)).build();
-
-        when(organisationService.findUserByEmail("solicitor@example.com")).thenReturn(Optional.of("userId"));
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(RESPONDENTS, caseData.getRespondents());
-        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseDataMap, caseData);
-
-        verify(assignCaseAccessService).assignCaseAccessToUserWithRole(
-            any(), eq("userId"), eq("[C100RESPONDENTSOLICITOR1]"), eq("ORG123"));
-    }
-
-    @Test
-    public void testAssignAccessWhenOrganisationServiceReturnsEmpty() {
-        when(launchDarklyClient.isFeatureEnabled("assign-respondent-sols-case")).thenReturn(true);
-
-        PartyDetails party = PartyDetails.builder()
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .solicitorEmail("solicitor@example.com")
-            .solicitorOrg(Organisation.builder().organisationID("ORG123").build())
-            .build();
-        Element<PartyDetails> respondent = Element.<PartyDetails>builder().value(party).build();
-        CaseData caseData = CaseData.builder().id(123L).respondents(List.of(respondent)).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-
-        caseDataMap.put(RESPONDENTS, caseData.getRespondents());
-
-        when(organisationService.findUserByEmail("solicitor@example.com")).thenReturn(Optional.empty());
-
-        serviceOfApplicationService.assignRespondentSolicitorsAccess("auth-token", caseDataMap, caseData);
-
-        verifyNoInteractions(assignCaseAccessService);
 
     }
 }
