@@ -86,6 +86,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -303,7 +304,7 @@ public class NoticeOfChangePartiesServiceTest {
 
         Map<String, Object> test = noticeOfChangePartiesService.generate(caseDataForDa, role.getRepresenting(), strategy);
 
-        assertTrue(test.containsKey("caApplicant3Policy"));
+        assertFalse(test.containsKey("caApplicant3Policy"));
 
     }
 
@@ -1687,7 +1688,7 @@ public class NoticeOfChangePartiesServiceTest {
         PartyDetails updPartyDetails =
             updatePartyDetails(null, changeOrganisationRequest, partyDetails,TypeOfNocEventEnum.removeLegalRepresentation);
 
-        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn("test");
         when(systemUserService.getUserId("test")).thenReturn("test");
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
@@ -2029,5 +2030,198 @@ public class NoticeOfChangePartiesServiceTest {
             TypeOfNocEventEnum.removeLegalRepresentation
         );
         assertThat(result).isSameAs(cd);
+    }
+
+    @Test
+    public void shouldNotOverwriteDaRespondentPolicyWhenGeneratingForDaApplicant() {
+        Organisation respondentOrg = Organisation.builder()
+            .organisationID("RESP_ORG_ID")
+            .organisationName("Respondent Org")
+            .build();
+
+        PartyDetails fl401Respondent = PartyDetails.builder()
+            .representativeFirstName("Rep")
+            .representativeLastName("Solicitor")
+            .solicitorOrg(respondentOrg)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .firstName("Resp")
+            .lastName("Party")
+            .build();
+
+        Organisation applicantOrg = Organisation.builder()
+            .organisationID("APP_ORG_ID")
+            .organisationName("Applicant Org")
+            .build();
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .representativeFirstName("App")
+            .representativeLastName("Sol")
+            .solicitorOrg(applicantOrg)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .firstName("App")
+            .lastName("Party")
+            .build();
+
+        CaseData fl401CaseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(fl401Respondent)
+            .applicantsFL401(fl401Applicant)
+            .build();
+
+        OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
+            .organisation(respondentOrg)
+            .orgPolicyCaseAssignedRole("[FL401RESPONDENTSOLICITOR]")
+            .build();
+
+        OrganisationPolicy applicantPolicy = OrganisationPolicy.builder()
+            .organisation(applicantOrg)
+            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+            .build();
+
+        when(policyConverter.daGenerate(SolicitorRole.FL401RESPONDENTSOLICITOR, fl401Respondent))
+            .thenReturn(respondentPolicy);
+        when(policyConverter.daGenerate(SolicitorRole.FL401APPLICANTSOLICITOR, fl401Applicant))
+            .thenReturn(applicantPolicy);
+        when(partiesConverter.generateDaForSubmission(any(PartyDetails.class)))
+            .thenReturn(NoticeOfChangeParties.builder().build());
+
+        // Generate for DARESPONDENT first, then DAAPPLICANT - simulating what callers do
+        Map<String, Object> combined = new HashMap<>();
+        combined.putAll(noticeOfChangePartiesService.generate(
+            fl401CaseData, SolicitorRole.Representing.DARESPONDENT));
+        combined.putAll(noticeOfChangePartiesService.generate(
+            fl401CaseData, SolicitorRole.Representing.DAAPPLICANT));
+
+        // The respondent policy should still have the real org, not be overwritten with a blank
+        OrganisationPolicy resultRespondentPolicy =
+            (OrganisationPolicy) combined.get("daRespondentPolicy");
+        assertThat(resultRespondentPolicy).isNotNull();
+        assertThat(resultRespondentPolicy.getOrganisation()).isEqualTo(respondentOrg);
+
+        // The applicant policy should also have the real org
+        OrganisationPolicy resultApplicantPolicy =
+            (OrganisationPolicy) combined.get("applicantOrganisationPolicy");
+        assertThat(resultApplicantPolicy).isNotNull();
+        assertThat(resultApplicantPolicy.getOrganisation()).isEqualTo(applicantOrg);
+    }
+
+    @Test
+    public void shouldNotOverwriteDaApplicantPolicyWhenGeneratingForDaRespondent() {
+        Organisation applicantOrg = Organisation.builder()
+            .organisationID("APP_ORG_ID")
+            .organisationName("Applicant Org")
+            .build();
+
+        PartyDetails fl401Applicant = PartyDetails.builder()
+            .representativeFirstName("App")
+            .representativeLastName("Sol")
+            .solicitorOrg(applicantOrg)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .firstName("App")
+            .lastName("Party")
+            .build();
+
+        Organisation respondentOrg = Organisation.builder()
+            .organisationID("RESP_ORG_ID")
+            .organisationName("Respondent Org")
+            .build();
+
+        PartyDetails fl401Respondent = PartyDetails.builder()
+            .representativeFirstName("Rep")
+            .representativeLastName("Solicitor")
+            .solicitorOrg(respondentOrg)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .firstName("Resp")
+            .lastName("Party")
+            .build();
+
+        CaseData fl401CaseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(fl401Applicant)
+            .respondentsFL401(fl401Respondent)
+            .build();
+
+        OrganisationPolicy applicantPolicy = OrganisationPolicy.builder()
+            .organisation(applicantOrg)
+            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+            .build();
+
+        OrganisationPolicy respondentPolicy = OrganisationPolicy.builder()
+            .organisation(respondentOrg)
+            .orgPolicyCaseAssignedRole("[FL401RESPONDENTSOLICITOR]")
+            .build();
+
+        when(policyConverter.daGenerate(SolicitorRole.FL401APPLICANTSOLICITOR, fl401Applicant))
+            .thenReturn(applicantPolicy);
+        when(policyConverter.daGenerate(SolicitorRole.FL401RESPONDENTSOLICITOR, fl401Respondent))
+            .thenReturn(respondentPolicy);
+        when(partiesConverter.generateDaForSubmission(any(PartyDetails.class)))
+            .thenReturn(NoticeOfChangeParties.builder().build());
+
+        // Generate for DAAPPLICANT first, then DARESPONDENT - reversed order
+        Map<String, Object> combined = new HashMap<>();
+        combined.putAll(noticeOfChangePartiesService.generate(
+            fl401CaseData, SolicitorRole.Representing.DAAPPLICANT));
+        combined.putAll(noticeOfChangePartiesService.generate(
+            fl401CaseData, SolicitorRole.Representing.DARESPONDENT));
+
+        // Both policies should retain their real org data
+        OrganisationPolicy resultApplicantPolicy =
+            (OrganisationPolicy) combined.get("applicantOrganisationPolicy");
+        assertThat(resultApplicantPolicy).isNotNull();
+        assertThat(resultApplicantPolicy.getOrganisation()).isEqualTo(applicantOrg);
+
+        OrganisationPolicy resultRespondentPolicy =
+            (OrganisationPolicy) combined.get("daRespondentPolicy");
+        assertThat(resultRespondentPolicy).isNotNull();
+        assertThat(resultRespondentPolicy.getOrganisation()).isEqualTo(respondentOrg);
+    }
+
+    @Test
+    public void shouldNotCreateDaRespondentPolicyPlaceholderWhenGeneratingForCaRepresenting() {
+        Element<PartyDetails> respondent1 = element(UUID.randomUUID(), PartyDetails.builder()
+            .firstName("Bob")
+            .lastName("Jones")
+            .build());
+
+        CaseData c100CaseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(List.of(respondent1))
+            .build();
+
+        Map<String, Object> result = noticeOfChangePartiesService.generate(
+            c100CaseData, SolicitorRole.Representing.CARESPONDENT);
+
+        // DA respondent placeholder should NOT be created - it is handled by its own generate call
+        assertThat(result).doesNotContainKey("daRespondentPolicy");
+        assertThat(result).doesNotContainKey("applicantOrganisationPolicy");
+    }
+
+    @Test
+    public void shouldNotCreateCaPolicyPlaceholdersWhenGeneratingForDaRepresenting() {
+        PartyDetails fl401Respondent = PartyDetails.builder()
+            .representativeFirstName("Rep")
+            .representativeLastName("Solicitor")
+            .solicitorOrg(Organisation.builder().organisationID("ORG1").build())
+            .firstName("Resp")
+            .lastName("Party")
+            .build();
+
+        CaseData fl401CaseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(fl401Respondent)
+            .build();
+
+        when(policyConverter.daGenerate(SolicitorRole.FL401RESPONDENTSOLICITOR, fl401Respondent))
+            .thenReturn(OrganisationPolicy.builder().build());
+        when(partiesConverter.generateDaForSubmission(any(PartyDetails.class)))
+            .thenReturn(NoticeOfChangeParties.builder().build());
+
+        Map<String, Object> result = noticeOfChangePartiesService.generate(
+            fl401CaseData, SolicitorRole.Representing.DARESPONDENT);
+
+        // CA placeholder policies should NOT be created from FL401 generate
+        assertThat(result).doesNotContainKey("caApplicant1Policy");
+        assertThat(result).doesNotContainKey("caRespondent1Policy");
     }
 }

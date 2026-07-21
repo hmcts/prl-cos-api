@@ -238,8 +238,6 @@ public class NoticeOfChangePartiesService {
                 );
             }
         }
-
-        generateRequiredOrgPoliciesForNoc(representing, data);
     }
 
     private Optional<NoticeOfChangeParties> populateCaAnswer(NoticeOfChangeAnswersPopulationStrategy strategy,
@@ -654,11 +652,6 @@ public class NoticeOfChangePartiesService {
                         (solicitorRole.getIndex() + 1)
                     ), organisationPolicy
                 );
-            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())
-                || DAAPPLICANT.equals(solicitorRole.getRepresenting())) {
-                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
-                    solicitorRole, PartyDetails.builder().build());
-                data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
         }
     }
