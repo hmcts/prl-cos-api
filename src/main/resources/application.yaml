@@ -64,6 +64,7 @@ logging:
     org.springframework.integration: DEBUG
     org.springframework.integration.sftp: DEBUG
     com.jcraft.jsch: DEBUG
+    io.github.resilience4j.retry: DEBUG
   pattern:
     console: "%d{yyyy-MMM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{15} - %msg%n"
 
@@ -859,6 +860,19 @@ hwf-update-case-state-task:
 
 prepare-hearing-bundle:
   calendar-days-before-hearing: ${PREPARE_HEARING_BUNDLE_CALENDAR_DAYS_BEFORE_HEARING:7}
+
+resilience4j:
+  retry:
+    instances:
+      searchCasesRetryConfig:
+        maxAttempts: 3
+        waitDuration: 1s
+        retryExceptions:
+          - feign.FeignException
+        ignoreExceptions:
+          - org.springframework.web.server.ResponseStatusException
+          - feign.FeignException$Unauthorized
+          - feign.FeignException$BadRequest
 
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
