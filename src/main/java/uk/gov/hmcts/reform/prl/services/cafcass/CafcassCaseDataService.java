@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CANCELLED;
@@ -163,6 +164,7 @@ public class CafcassCaseDataService {
                     updateHearingResponse(authorisation, s2sToken, filteredCafcassData);
                     addSpecificDocumentsFromCaseFileViewBasedOnCategories(filteredCafcassData);
                     filteredCafcassData = removeUnnecessaryFieldsFromResponse(filteredCafcassData);
+                    removeRedactedDocumentsFromResponse(filteredCafcassData);
                     for (CafCassCaseDetail cafcassCase : filteredCafcassData.getCases()) {
                         log.info("Found case with id {} and courtName {} ",
                                  cafcassCase.getId(), cafcassCase.getCaseData().getCourtName()
@@ -208,6 +210,41 @@ public class CafcassCaseDataService {
         return filteredCafcassData;
     }
 
+    private void removeRedactedDocumentsFromResponse(CafCassResponse filteredCafcassData) {
+        filteredCafcassData.getCases().forEach(cafCassCaseDetail -> {
+            CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
+            if (caseData != null && CollectionUtils.isNotEmpty(caseData.getOtherDocuments())) {
+                caseData.setOtherDocuments(caseData.getOtherDocuments().stream()
+                                           .filter(element -> isNotRedactedDocument(element, this::getOtherDocumentId))
+                                           .toList());
+            }
+            if (caseData != null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
+                cafCassCaseDetail.setCaseData(caseData.toBuilder()
+                                                  .orderCollection(caseData.getOrderCollection().stream()
+                                                                       .filter(element -> isNotRedactedDocument(
+                                                                           element,
+                                                                           this::getOrderDocumentId
+                                                                       ))
+                                                                       .toList())
+                                                  .build());
+            }
+        });
+    }
+
+    private <T> boolean isNotRedactedDocument(Element<T> documentElement, Function<T, String> documentIdResolver) {
+        if (documentElement == null || documentElement.getValue() == null) {
+            return true;
+        }
+        return !REDACTED_DOCUMENT_UUID.equals(documentIdResolver.apply(documentElement.getValue()));
+    }
+
+    private String getOtherDocumentId(OtherDocuments otherDocument) {
+        return otherDocument.getDocumentOther() != null ? otherDocument.getDocumentOther().getDocumentId() : null;
+    }
+
+    private String getOrderDocumentId(CaseOrder order) {
+        return order.getOrderDocument() != null ? order.getOrderDocument().getDocumentId() : null;
+    }
 
     private List<Element<CaseOrder>> removeServeOrderDetails(List<Element<CaseOrder>> orderCollection) {
         if (!CollectionUtils.isEmpty(orderCollection)) {
@@ -266,6 +303,7 @@ public class CafcassCaseDataService {
                 .respondentCc8Documents(null)
                 .respondentDc8Documents(null)
                 .respondentEc8Documents(null)
+                .otherPartyC8Documents(null)
                 .c8FormDocumentsUploaded(null)
                 .bundleInformation(null)
                 .otherDocumentsUploaded(null)
@@ -541,6 +579,16 @@ public class CafcassCaseDataService {
                     otherDocsList
                 ));
         }
+        if (CollectionUtils.isNotEmpty(caseData.getOtherPartyC8Documents())) {
+            caseData.getOtherPartyC8Documents().parallelStream().forEach(
+                responseDocumentsElement ->
+                    populateRespondentDocument(
+                        responseDocumentsElement.getValue().getRespondentC8Document(),
+                        responseDocumentsElement.getValue().getRespondentC8DocumentWelsh(),
+                        CONFIDENTIAL,
+                        otherDocsList
+                    ));
+        }
     }
 
     private void populateRespondentDocument(uk.gov.hmcts.reform.prl.models.documents.Document responseDocumentEng,
@@ -616,10 +664,15 @@ public class CafcassCaseDataService {
         try {
             if (null != caseDocument && caseDocument.getDocumentUrl() != null
                 && !caseDocument.getDocumentUrl().endsWith(REDACTED_DOCUMENT_UUID)) {
-                otherDocsList.add(Element.<OtherDocuments>builder().id(
-                    UUID.randomUUID()).value(OtherDocuments.builder().documentOther(
-                    buildFromCaseDocument(caseDocument)).documentName(caseDocument.getDocumentFileName()).documentTypeOther(
-                    DocTypeOtherDocumentsEnum.getValue(category)).build()).build());
+                Document documentOther = buildFromCaseDocument(caseDocument);
+                otherDocsList.add(Element.<OtherDocuments>builder()
+                                      .id(UUID.randomUUID())
+                                      .value(OtherDocuments.builder()
+                                                 .documentOther(documentOther)
+                                                 .documentName(caseDocument.getDocumentFileName())
+                                                 .documentTypeOther(DocTypeOtherDocumentsEnum.getValue(category))
+                                                 .build())
+                                      .build());
             }
         } catch (MalformedURLException e) {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
@@ -901,6 +954,7 @@ public class CafcassCaseDataService {
             "data.respondentCc8Documents",
             "data.respondentDc8Documents",
             "data.respondentEc8Documents",
+            "data.otherPartyC8Documents",
             "data.c8FormDocumentsUploaded",
             "data.bundleInformation",
             "data.otherDocumentsUploaded",
