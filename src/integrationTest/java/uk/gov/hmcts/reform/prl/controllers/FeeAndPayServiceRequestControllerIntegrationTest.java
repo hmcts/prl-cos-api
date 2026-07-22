@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -17,7 +17,11 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -37,13 +41,16 @@ public class FeeAndPayServiceRequestControllerIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    @MockitoBean
+    @MockBean
     SolicitorEmailService solicitorEmailService;
 
-    @MockitoBean
+    @MockBean
+    FeeAndPayServiceRequestService feeAndPayServiceRequestService;
+
+    @MockBean
     AuthorisationService authorisationService;
 
-    @MockitoBean
+    @MockBean
     PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Before
@@ -57,6 +64,25 @@ public class FeeAndPayServiceRequestControllerIntegrationTest {
         String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
 
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        mockMvc.perform(
+                post(url)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(jsonRequest))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testValidateHelpWithFees() throws Exception {
+        String url = "/validate-help-with-fees";
+        String jsonRequest = ResourceLoader.loadJson("CallbackRequest.json");
+
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(any(), any())).thenReturn(List.of());
 
         mockMvc.perform(
                 post(url)
