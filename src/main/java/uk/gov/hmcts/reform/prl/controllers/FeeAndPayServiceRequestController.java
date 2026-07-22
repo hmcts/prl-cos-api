@@ -23,10 +23,15 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.payment.FeeAndPayServiceRequestService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -59,6 +64,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
 
     private final SolicitorEmailService solicitorEmailService;
+    private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final AuthorisationService authorisationService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
@@ -66,10 +72,12 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     protected FeeAndPayServiceRequestController(ObjectMapper objectMapper,
                                                 EventService eventPublisher,
                                                 SolicitorEmailService solicitorEmailService,
+                                                FeeAndPayServiceRequestService feeAndPayServiceRequestService,
                                                 AuthorisationService authorisationService,
                                                 PartyLevelCaseFlagsService partyLevelCaseFlagsService) {
         super(objectMapper, eventPublisher);
         this.solicitorEmailService = solicitorEmailService;
+        this.feeAndPayServiceRequestService = feeAndPayServiceRequestService;
         this.authorisationService = authorisationService;
         this.partyLevelCaseFlagsService = partyLevelCaseFlagsService;
     }
@@ -112,6 +120,25 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping(path = "/validate-help-with-fees", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback validate help with fees number .")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public CallbackResponse helpWithFeesValidator(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(value = PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        List<String> errorList =
+            feeAndPayServiceRequestService.validateSuppressedHelpWithFeesCheck(callbackRequest, CaseUtils.getLanguage(clientContext));
+        return CallbackResponse.builder()
+            .errors(errorList)
+            .build();
     }
 
     private SolicitorNotificationEmailEvent prepareAwaitingPaymentEvent(CallbackRequest callbackRequest) {
