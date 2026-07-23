@@ -27,6 +27,8 @@ public class AdditionalProperties {
     private String additionalApplicationId;
     @JsonProperty("hearingId")
     private String hearingId;
+    @JsonProperty("taskTriggeredBy")
+    private String taskTriggeredBy;
     @JsonProperty("messageIdentifier")
     private String messageIdentifier;
 }
