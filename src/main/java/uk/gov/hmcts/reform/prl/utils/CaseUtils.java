@@ -912,9 +912,9 @@ public class CaseUtils {
     public static WaMapper getWaMapper(String clientContext) {
         if (clientContext != null) {
             log.info("clientContext is present");
-            byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
-            String decodedString = new String(decodedBytes);
             try {
+                byte[] decodedBytes = Base64.getDecoder().decode(clientContext);
+                String decodedString = new String(decodedBytes);
                 return new ObjectMapper().readValue(decodedString, WaMapper.class);
             } catch (Exception ex) {
                 log.error("Exception while parsing the Client-Context {}", ex.getMessage());
@@ -958,6 +958,7 @@ public class CaseUtils {
     public static String getHearingId(WaMapper waMapper) {
         if (null != waMapper && null != waMapper.getClientContext().getUserTask()) {
             if (null != waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties()) {
+                log.info("getting hearingId for taskId={}", waMapper.getClientContext().getUserTask().getTaskData().getId());
                 return waMapper.getClientContext().getUserTask().getTaskData().getAdditionalProperties().getHearingId();
             }
         }

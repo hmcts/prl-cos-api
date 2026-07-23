@@ -29,6 +29,10 @@ public enum CafcassCymruDocumentsEnum {
     updateToSafeGuardingLetter("updateToSafeGuardingLetter", "Update to safeguarding letter"),
     @JsonProperty("s16RiskAssessment")
     s16RiskAssessment("s16RiskAssessment", "S16A risk assessment"),
+    @JsonProperty("enforcementOrderSuitabilityReport")
+    enforcementOrderSuitabilityReport("enforcementOrderSuitabilityReport", "Enforcement Order Suitability Report"),
+    @JsonProperty("parentalOrderReporterReport")
+    parentalOrderReporterReport("parentalOrderReporterReport", "Parental Order Reporter Report"),
     @JsonProperty("cirTransferRequest")
     cirTransferRequest("cirTransferRequest", "CIR Transfer Request"),
     @JsonProperty("cirExtensionRequest")
