@@ -556,7 +556,7 @@ public class PartyLevelCaseFlagsService {
                     groupId
                 );
             } else {
-                partyLevelCaseFlagsGenerator.generatePartyFlags(
+                caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                     caseData,
                     PrlAppsConstants.EMPTY_STRING,
                     caseDataExternalField,
@@ -564,7 +564,7 @@ public class PartyLevelCaseFlagsService {
                     false,
                     groupId
                 );
-                partyLevelCaseFlagsGenerator.generatePartyFlags(
+                caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                     caseData,
                     PrlAppsConstants.EMPTY_STRING,
                     caseDataInternalField,

@@ -9,12 +9,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.events.CaseFlagsEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -30,12 +32,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Component
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class CaseFlagsWaService {
     private static final String REQUESTED = "Requested";
+    private static final Pattern C100_APPLICANT_SOLICITOR_FLAGS = Pattern.compile("^caApplicantSolicitor(\\d+)(ExternalFlags|InternalFlags)$");
+    private static final Pattern C100_RESPONDENT_SOLICITOR_FLAGS = Pattern.compile("^caRespondentSolicitor(\\d+)(ExternalFlags|InternalFlags)$");
     private final EventService eventPublisher;
     private final ObjectMapper objectMapper;
     private final AllTabServiceImpl allTabService;
@@ -49,9 +55,12 @@ public class CaseFlagsWaService {
     }
 
     public void checkAllRequestedFlagsAndCloseTask(CaseData caseData) {
+        if (caseData == null || caseData.getReviewRaRequestWrapper() == null) {
+            return;
+        }
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
         addCaseFlags(caseData, allFlagsDetails);
-        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData));
 
         boolean allFlagsAreActioned = allFlagsDetails.stream()
             .filter(Objects::nonNull)
@@ -82,6 +91,9 @@ public class CaseFlagsWaService {
 
 
     public void checkCaseFlagsToCreateTask(CaseData caseData, CaseData caseDataBefore) {
+        if (caseData == null || caseData.getReviewRaRequestWrapper() == null) {
+            return;
+        }
 
         boolean anyExistingCaseFlags = isCaseHasNoRequestedFlags(caseDataBefore);
 
@@ -93,9 +105,12 @@ public class CaseFlagsWaService {
     }
 
     public boolean isCaseHasNoRequestedFlags(CaseData caseData) {
+        if (caseData == null) {
+            return true;
+        }
         List<Element<FlagDetail>> allFlagsDetails = new ArrayList<>();
         addCaseFlags(caseData, allFlagsDetails);
-        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData.getAllPartyFlags()));
+        allFlagsDetails.addAll(extractAllPartyFlagDetails(caseData));
 
         return allFlagsDetails.stream()
             .filter(Objects::nonNull)
@@ -103,7 +118,10 @@ public class CaseFlagsWaService {
     }
 
     public void setSelectedFlags(CaseData caseData) {
-        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
+        if (caseData == null || caseData.getReviewRaRequestWrapper() == null) {
+            return;
+        }
+        AllPartyFlags allPartyFlags = caseData.getAllPartyFlags() == null ? AllPartyFlags.builder().build() : caseData.getAllPartyFlags();
         List<Element<Flags>> selectedFlagsList = new ArrayList<>();
 
         Flags caseLevelFlag = deepCopy(caseData.getCaseFlags(), Flags.class);
@@ -112,8 +130,7 @@ public class CaseFlagsWaService {
             selectedFlagsList.add(ElementUtils.element(caseLevelFlag));
         }
 
-        Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
-            .filter(field -> field.getType().equals(Flags.class))
+        getRelevantAllPartyFlagFields(allPartyFlags, caseData).stream()
             .forEach(field -> addFlagsToList(field, allPartyFlags, selectedFlagsList));
 
         if (caseData.getCaseFlags() != null && caseData.getCaseFlags().getDetails() != null) {
@@ -124,7 +141,7 @@ public class CaseFlagsWaService {
                 }
             });
         }
-        List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags);
+        List<Element<FlagDetail>> allFlagsDetails = extractAllPartyFlagDetails(allPartyFlags, caseData);
 
         allFlagsDetails.forEach(flagDetail -> {
             if (!REQUESTED.equals(flagDetail.getValue().getStatus())) {
@@ -154,9 +171,15 @@ public class CaseFlagsWaService {
     }
 
     public Element<FlagDetail> validateAllFlags(CaseData caseData) {
+        if (caseData == null
+            || caseData.getReviewRaRequestWrapper() == null
+            || CollectionUtils.isEmpty(caseData.getReviewRaRequestWrapper().getSelectedFlags())) {
+            return null;
+        }
         List<Element<FlagDetail>> allFlagsDetails = caseData.getReviewRaRequestWrapper().getSelectedFlags().stream()
             .filter(e -> e != null && e.getValue() != null)
             .map(e -> e.getValue().getDetails())
+            .filter(Objects::nonNull)
             .flatMap(Collection::stream)
             .toList();
 
@@ -166,12 +189,15 @@ public class CaseFlagsWaService {
                                              detail.getValue().getDateTimeModified()).reversed())
             .toList();
 
-        return sortedAllFlagsDetails.getFirst();
+        return sortedAllFlagsDetails.isEmpty() ? null : sortedAllFlagsDetails.getFirst();
     }
 
     public void searchAndUpdateCaseFlags(CaseData caseData,
                                          Map<String, Object> caseDataMap,
                                          Element<FlagDetail> mostRecentlyModified) {
+        if (caseData == null || caseDataMap == null || mostRecentlyModified == null) {
+            return;
+        }
         if (caseData.getCaseFlags() != null && CollectionUtils.isNotEmpty(caseData.getCaseFlags().getDetails())) {
             List<Element<FlagDetail>> allCaseLevelFlagsDetails = new ArrayList<>(caseData.getCaseFlags().getDetails());
             allCaseLevelFlagsDetails.forEach(flagDetail -> {
@@ -184,11 +210,13 @@ public class CaseFlagsWaService {
         }
 
         AllPartyFlags allPartyFlags = caseData.getAllPartyFlags();
-        List<Element<FlagDetail>> allPartyLevelFlagsDetails = new ArrayList<>(extractAllPartyFlagDetails(allPartyFlags));
+        if (allPartyFlags == null) {
+            return;
+        }
+        List<Element<FlagDetail>> allPartyLevelFlagsDetails = new ArrayList<>(extractAllPartyFlagDetails(allPartyFlags, caseData));
         allPartyLevelFlagsDetails.forEach(flagDetail -> {
             if (mostRecentlyModified.getId().equals(flagDetail.getId())) {
-                Arrays.stream(caseData.getAllPartyFlags().getClass().getDeclaredFields())
-                    .filter(field -> field.getType().equals(Flags.class))
+                getRelevantAllPartyFlagFields(allPartyFlags, caseData).stream()
                     .forEach(field -> mapModifiedFieldToPartyFlags(mostRecentlyModified,
                                                                    flagDetail,
                                                                    field,
@@ -218,13 +246,16 @@ public class CaseFlagsWaService {
         }
     }
 
-    private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags) {
+    private List<Element<FlagDetail>> extractAllPartyFlagDetails(CaseData caseData) {
+        return caseData == null ? Collections.emptyList() : extractAllPartyFlagDetails(caseData.getAllPartyFlags(), caseData);
+    }
+
+    private List<Element<FlagDetail>> extractAllPartyFlagDetails(AllPartyFlags allPartyFlags, CaseData caseData) {
         if (allPartyFlags == null) {
             return Collections.emptyList();
         }
 
-        return Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
-            .filter(field -> field.getType().equals(Flags.class))
+        return getRelevantAllPartyFlagFields(allPartyFlags, caseData).stream()
             .map(field -> {
                 field.setAccessible(true);
                 try {
@@ -237,6 +268,59 @@ public class CaseFlagsWaService {
             .filter(Objects::nonNull)
             .flatMap(List::stream)
             .toList();
+    }
+
+    private List<Field> getRelevantAllPartyFlagFields(AllPartyFlags allPartyFlags, CaseData caseData) {
+        if (allPartyFlags == null) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(allPartyFlags.getClass().getDeclaredFields())
+            .filter(field -> field.getType().equals(Flags.class))
+            .filter(field -> shouldIncludeFieldForCurrentRepresentation(field.getName(), caseData))
+            .toList();
+    }
+
+    private boolean shouldIncludeFieldForCurrentRepresentation(String fieldName, CaseData caseData) {
+        if (caseData == null || !fieldName.contains("Solicitor")) {
+            return true;
+        }
+
+        Matcher applicantMatcher = C100_APPLICANT_SOLICITOR_FLAGS.matcher(fieldName);
+        if (applicantMatcher.matches()) {
+            return isC100PartyRepresented(caseData.getApplicants(), Integer.parseInt(applicantMatcher.group(1)));
+        }
+
+        Matcher respondentMatcher = C100_RESPONDENT_SOLICITOR_FLAGS.matcher(fieldName);
+        if (respondentMatcher.matches()) {
+            return isC100PartyRepresented(caseData.getRespondents(), Integer.parseInt(respondentMatcher.group(1)));
+        }
+
+        if ("daApplicantSolicitorExternalFlags".equals(fieldName) || "daApplicantSolicitorInternalFlags".equals(fieldName)) {
+            return isPartyRepresented(caseData.getApplicantsFL401());
+        }
+
+        if ("daRespondentSolicitorExternalFlags".equals(fieldName) || "daRespondentSolicitorInternalFlags".equals(fieldName)) {
+            return isPartyRepresented(caseData.getRespondentsFL401());
+        }
+
+        return true;
+    }
+
+    private boolean isC100PartyRepresented(List<Element<PartyDetails>> parties, int oneBasedIndex) {
+        if (CollectionUtils.isEmpty(parties) || oneBasedIndex <= 0 || oneBasedIndex > parties.size()) {
+            return false;
+        }
+        Element<PartyDetails> partyElement = parties.get(oneBasedIndex - 1);
+        return partyElement != null && isPartyRepresented(partyElement.getValue());
+    }
+
+    private boolean isPartyRepresented(PartyDetails partyDetails) {
+        if (partyDetails == null) {
+            return false;
+        }
+        return YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation())
+            || (partyDetails.getUser() != null && YesOrNo.Yes.equals(partyDetails.getUser().getSolicitorRepresented()));
     }
 
     private  <T> T deepCopy(T object, Class<T> objectClass) {

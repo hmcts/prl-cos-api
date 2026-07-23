@@ -792,7 +792,7 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
-        Map<Optional<SolicitorRole>, Element<PartyDetails>> oldDetailsMap = new HashMap<>(selectedPartyDetailsMap);
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> originalPartyDetailsMap = new HashMap<>(selectedPartyDetailsMap);
         for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
@@ -816,9 +816,9 @@ public class NoticeOfChangePartiesService {
                     TypeOfNocEventEnum.removeLegalRepresentation,
                     null
                 );
-                removeBarristerFlags(oldDetailsMap.get(removeSolicitorRole),
-                                     newPartyDetailsElement,
-                                     allTabsUpdateCaseData);
+                removeSolicitorAndBarristerFlags(originalPartyDetailsMap.get(removeSolicitorRole),
+                                                 newPartyDetailsElement,
+                                                 allTabsUpdateCaseData);
             }
         }
 
@@ -838,7 +838,7 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             sendEmailOnRemovalOfLegalRepresentation(
-                oldDetailsMap.get(removeSolicitorRole),
+                originalPartyDetailsMap.get(removeSolicitorRole),
                 newPartyDetailsElement,
                 removeSolicitorRole,
                 caseData
@@ -963,9 +963,9 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    void removeBarristerFlags(Element<PartyDetails> oldPartyDetails,
-                              Element<PartyDetails> newPartyDetails,
-                              CaseData caseData) {
+    void removeSolicitorAndBarristerFlags(Element<PartyDetails> oldPartyDetails,
+                                          Element<PartyDetails> newPartyDetails,
+                                          CaseData caseData) {
         barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getValue)
                                                   .orElseGet(newPartyDetails::getValue),
@@ -974,7 +974,7 @@ public class NoticeOfChangePartiesService {
                                                   .map(Element::getId)
                                                   .orElseGet(newPartyDetails::getId));
         partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(caseData,
-                                                                            partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
+                                                                            partyLevelCaseFlagsService::generatePartyCaseFlags);
     }
 
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,
