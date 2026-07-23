@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -24,6 +23,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
@@ -73,7 +73,7 @@ import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.NOT_STARTED;
 public class TaskListRendererTest {
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
-    private EventsChecker eventsChecker = Mockito.mock(EventsChecker.class);
+    private final EventsChecker eventsChecker = mock(EventsChecker.class);
 
 
     private final TaskListRenderer taskListRenderer = new TaskListRenderer(
@@ -275,40 +275,41 @@ public class TaskListRendererTest {
     @Test
     public void shouldRenderFl401TaskList() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
-            "src/test/resources/fl401-task-list-markdown.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(new FileReader(
+            "src/test/resources/fl401-task-list-markdown.md"))) {
 
-        List<String> lines = new ArrayList<>();
+            List<String> lines = new ArrayList<>();
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+            orderList.add(FL401OrderTypeEnum.occupationOrder);
+            orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+            orders = TypeOfApplicationOrders.builder()
+                .orderType(orderList)
+                .build();
+
+            linkToCA = LinkToCA.builder()
+                .linkToCaApplication(YesOrNo.Yes)
+                .caApplicationNumber("123")
+                .build();
+            CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                .typeOfApplicationOrders(orders)
+                .typeOfApplicationLinkToCA(linkToCA)
+                .build();
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
+
+            assertNotEquals(expectedTaskList, actualTaskList);
         }
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.occupationOrder);
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .build();
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
-
-        assertNotEquals(expectedTaskList, actualTaskList);
     }
 
     @Test
@@ -319,22 +320,24 @@ public class TaskListRendererTest {
             .build();
         List<String> lines = new ArrayList<>();
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-markdown.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(
+            new FileReader("src/test/resources/task-list-markdown.md"))) {
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(tasks, errors, true, caseData);
+
+            assertThat(expectedTaskList).isEqualTo(actualTaskList);
         }
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, errors, true, caseData);
-
-        assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
 
     @Test
-    public void shouldRenderTaskListIfResubmitted() throws IOException {
+    public void shouldRenderTaskListIfResubmitted() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
@@ -356,19 +359,20 @@ public class TaskListRendererTest {
 
         List<String> lines = new ArrayList<>();
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-no-errors.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(
+            new FileReader("src/test/resources/task-list-no-errors.md"))) {
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true, caseData);
+
+            assertEquals(expectedTaskList, actualTaskList);
         }
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(tasks, emptyErrors, true, caseData);
-
-        assertEquals(expectedTaskList, actualTaskList);
-
     }
 
     @Test
@@ -382,93 +386,98 @@ public class TaskListRendererTest {
 
         List<String> lines = new ArrayList<>();
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-allegations-revised-no-errors.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(
+            new FileReader("src/test/resources/task-list-allegations-revised-no-errors.md"))) {
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(taskC100V2, emptyErrors, true, caseData);
+
+            assertEquals(expectedTaskList, actualTaskList);
         }
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(taskC100V2, emptyErrors, true, caseData);
-
-        assertEquals(expectedTaskList, actualTaskList);
-
     }
 
     @Test
     public void shouldRenderFl401TaskListNonMolestationOrderType() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-markdown.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(
+            new FileReader("src/test/resources/fl401-task-list-markdown.md"))) {
 
-        List<String> lines = new ArrayList<>();
+            List<String> lines = new ArrayList<>();
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+            orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+            orders = TypeOfApplicationOrders.builder()
+                .orderType(orderList)
+                .build();
+
+            linkToCA = LinkToCA.builder()
+                .linkToCaApplication(YesOrNo.Yes)
+                .caApplicationNumber("123")
+                .build();
+            CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+                .typeOfApplicationOrders(orders)
+                .typeOfApplicationLinkToCA(linkToCA)
+                .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+                .build();
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
+
+            assertNotEquals(expectedTaskList, actualTaskList);
         }
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-            .build();
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(fl401Tasks, fl401Errors, false, caseData);
-
-        assertNotEquals(expectedTaskList, actualTaskList);
     }
 
     @Test
     public void shouldRenderFl401TaskWithResubmit() throws IOException {
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/fl401-task-list-resubmit.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(
+            new FileReader("src/test/resources/fl401-task-list-resubmit.md"))) {
 
-        List<String> lines = new ArrayList<>();
+            List<String> lines = new ArrayList<>();
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            List<FL401OrderTypeEnum> orderList = new ArrayList<>();
+            orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
+
+            orders = TypeOfApplicationOrders.builder()
+                .orderType(orderList)
+                .build();
+
+            linkToCA = LinkToCA.builder()
+                .linkToCaApplication(YesOrNo.Yes)
+                .caApplicationNumber("123")
+                .build();
+            CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+                .typeOfApplicationOrders(orders)
+                .typeOfApplicationLinkToCA(linkToCA)
+                .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
+                .build();
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(fl401TasksResubmit, fl401Errors, false, caseData);
+
+            assertEquals(expectedTaskList, actualTaskList);
         }
-
-        List<FL401OrderTypeEnum> orderList = new ArrayList<>();
-        orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
-
-        orders = TypeOfApplicationOrders.builder()
-            .orderType(orderList)
-            .build();
-
-        linkToCA = LinkToCA.builder()
-            .linkToCaApplication(YesOrNo.Yes)
-            .caApplicationNumber("123")
-            .build();
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
-            .typeOfApplicationOrders(orders)
-            .typeOfApplicationLinkToCA(linkToCA)
-            .state(State.AWAITING_RESUBMISSION_TO_HMCTS)
-            .build();
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(fl401TasksResubmit, fl401Errors, false, caseData);
-
-        assertEquals(expectedTaskList, actualTaskList);
     }
 
     @Test
@@ -480,22 +489,24 @@ public class TaskListRendererTest {
                 .build();
         List<String> lines = new ArrayList<>();
 
-        BufferedReader taskListMarkDown = new BufferedReader(new FileReader("src/test/resources/task-list-markdown-v2.md"));
+        try (BufferedReader taskListMarkDown = new BufferedReader(
+            new FileReader("src/test/resources/task-list-markdown-v2.md"))) {
 
-        String line = taskListMarkDown.readLine();
-        while (line != null) {
-            lines.add(line);
-            line = taskListMarkDown.readLine();
+            String line = taskListMarkDown.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = taskListMarkDown.readLine();
+            }
+
+            String expectedTaskList = String.join("\n", lines);
+            String actualTaskList = taskListRenderer.render(taskC100V2, errors, true, caseData);
+
+            assertThat(expectedTaskList).isEqualTo(actualTaskList);
         }
-
-        String expectedTaskList = String.join("\n", lines);
-        String actualTaskList = taskListRenderer.render(taskC100V2, errors, true, caseData);
-
-        assertThat(expectedTaskList).isEqualTo(actualTaskList);
     }
 
     @Test
-    public void shouldRenderC100V2TaskListResubmission() throws IOException {
+    public void shouldRenderC100V2TaskListResubmission() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .state(State.AWAITING_RESUBMISSION_TO_HMCTS)

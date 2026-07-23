@@ -624,10 +624,15 @@ fis_hearing:
 staffDetails:
   api:
     url: ${STAFF_DETAILS_API:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+  cache:
+    refreshDelayMillis: 1800000
+    emptyRefreshDelayMillis: 30000
 
 judicialUsers:
   api:
     url: ${JUDICIAL_USERS_API:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+  cache:
+    refreshDelayMillis: 1800000
 
 commonData:
   api:
