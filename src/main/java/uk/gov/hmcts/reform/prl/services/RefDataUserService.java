@@ -7,14 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
-import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
@@ -29,8 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,14 +35,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGALOFFICE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_FIRST_PAGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_PAGE_SIZE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_SECOND_PAGE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RD_STAFF_TOTAL_RECORDS_HEADER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVICE_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFORDERASC;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN;
 
 @Slf4j
 @Service
@@ -53,9 +43,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 public class RefDataUserService {
 
     public static final String JUDICIAL_USER_CACHE = "judicialUserCache";
+    public static final String STAFF_REF_DATA_CACHE = "staffRefDataCache";
 
     private final AuthTokenGenerator authTokenGenerator;
-    private final StaffResponseDetailsApi staffResponseDetailsApi;
+    private final StaffRefDataService staffRefDataService;
     private final JudicialUserDetailsApi judicialUserDetailsApi;
     private final IdamClient idamClient;
     private final CommonDataRefApi commonDataRefApi;
@@ -75,18 +66,8 @@ public class RefDataUserService {
     public DynamicList getStaffDynamicList(StaffResponseToDynamicListElementFilter filter) {
         List<DynamicListElement> listItems = new ArrayList<>();
         try {
-            ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
-            listItems.addAll(applyStaffResponseFilter(response.getBody(), filter));
-
-            Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders()
-                                                                       .getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
-            int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
-            if (totalRecords > RD_STAFF_PAGE_SIZE) {
-                int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
-                for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
-                    listItems.addAll(applyStaffResponseFilter(getStaffResponse(pageNumber).getBody(), filter));
-                }
-            }
+            List<StaffResponse> allStaff = staffRefDataService.getAllStaffDetails();
+            listItems.addAll(applyStaffResponseFilter(allStaff, filter));
         } catch (Exception e) {
             log.error("Error retrieving staff list - {}", e.getMessage());
         }
@@ -106,43 +87,12 @@ public class RefDataUserService {
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
-            ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
-            if (null != response) {
-                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(
-                    RD_STAFF_TOTAL_RECORDS_HEADER));
-                int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
-                if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
-                    return onlyLegalAdvisor(response.getBody());
-                } else {
-                    List<DynamicListElement> listOfLegalAdvisors = onlyLegalAdvisor(response.getBody());
-                    int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
-                    for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
-                        listOfLegalAdvisors.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
-                    }
-                    return listOfLegalAdvisors;
-                }
-
-            }
+            List<StaffResponse> allStaff = staffRefDataService.getAllStaffDetails();
+            return onlyLegalAdvisor(allStaff);
         } catch (NoStaffResponseException e) {
             log.error("Staff details Lookup Failed - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
-    }
-
-    public ResponseEntity<List<StaffResponse>> getStaffResponse(int pageNumber) {
-        try {
-            return staffResponseDetailsApi.getAllStaffResponseDetails(
-                idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
-                authTokenGenerator.generate(),
-                SERVICENAME,
-                STAFFSORTCOLUMN,
-                STAFFORDERASC,
-                RD_STAFF_PAGE_SIZE,
-                pageNumber
-            );
-        } catch (FeignException e) {
-            throw new NoStaffResponseException("Failed to retrieve staff response", e);
-        }
     }
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
@@ -179,7 +129,7 @@ public class RefDataUserService {
             requestBody
         );
         if (response != null && !response.isEmpty()) {
-            JudicialUsersApiResponse judge = response.get(0);
+            JudicialUsersApiResponse judge = response.getFirst();
             log.info("Judicial API response for sidamId {}: postNominals={}, appointments={}",
                 sidamId, judge.getPostNominals(), judge.getAppointments());
         }
@@ -187,13 +137,35 @@ public class RefDataUserService {
     }
 
     @CacheEvict(allEntries = true, cacheNames = JUDICIAL_USER_CACHE)
-    @Scheduled(fixedDelay = 1800000) // 30 minutes
+    @Scheduled(fixedDelayString = "${judicialUsers.cache.refreshDelayMillis}")
     public void evictJudicialUserCache() {
         log.info("Evicting judicial user cache");
     }
 
+    @Scheduled(fixedDelayString = "${staffDetails.cache.refreshDelayMillis}")
+    public void refreshStaffRefDataCache() {
+        log.info("Refreshing staff ref data cache");
+        refreshStaffRefDataCache("warm-up");
+    }
+
+    private void refreshStaffRefDataCache(String reason) {
+        try {
+            staffRefDataService.refreshStaffDetailsCache();
+        } catch (NoStaffResponseException e) {
+            log.warn("Staff ref data cache {} failed - {}", reason, e.getMessage());
+        }
+    }
+
+    @Scheduled(fixedDelayString = "${staffDetails.cache.emptyRefreshDelayMillis}")
+    public void refreshEmptyStaffRefDataCache() {
+        if (staffRefDataService.isStaffDetailsCacheEmpty()) {
+            log.info("Staff ref data cache is empty, attempting refresh");
+            refreshStaffRefDataCache("empty-cache warm-up");
+        }
+    }
+
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
-        if (null != listOfStaffResponse) {
+        if (null != listOfStaffResponse && !listOfStaffResponse.isEmpty()) {
             return listOfStaffResponse.stream()
                 .filter(response -> response.getStaffProfile().getUserType().equalsIgnoreCase(LEGALOFFICE))
                 .map(this::getDisplayEntry).collect(Collectors.toList());
@@ -219,7 +191,7 @@ public class RefDataUserService {
             );
 
         } catch (FeignException e) {
-            log.error("Category Values look up failed {} ", e);
+            log.error("Category Values look up failed", e);
         }
         return commonDataResponse;
     }
@@ -236,18 +208,18 @@ public class RefDataUserService {
                 flagType
             );
         } catch (Exception e) {
-            log.error("Case flags Values look up failed {} ", e);
+            log.error("Case flags Values look up failed", e);
         }
         return caseFlag;
     }
 
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         if (null != commonDataResponse) {
-            List<DynamicListElement> listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
+            return commonDataResponse.getCategoryValues().stream()
                 .filter(response -> response.getCategoryKey().equalsIgnoreCase(categoryId))
-                .map(this::getDisplayCategoryEntry).collect(Collectors.toList());
-            Collections.sort(listOfCategoryValues, (a, b) -> a.getCode().compareToIgnoreCase(b.getCode()));
-            return listOfCategoryValues;
+                .map(this::getDisplayCategoryEntry)
+                .sorted(Comparator.comparing(DynamicListElement::getCode, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
         }
 
         return List.of(DynamicListElement.builder().build());
@@ -266,11 +238,10 @@ public class RefDataUserService {
         if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
             listOfSubCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(categoryValues -> categoryValues.getChildNodes() != null && categoryValues.getValueEn().equalsIgnoreCase(hearingPlatform))
-                .map(CategoryValues::getChildNodes).toList().stream()
-                .flatMap(Collection::stream)
+                .flatMap(categoryValues -> categoryValues.getChildNodes().stream())
                 .map(this::displaySubChannelEntry)
+                .sorted(Comparator.comparing(DynamicListElement::getLabel, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
-            Collections.sort(listOfSubCategoryValues, (a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
             return listOfSubCategoryValues;
         }
 
@@ -285,6 +256,3 @@ public class RefDataUserService {
     }
 
 }
-
-
-
