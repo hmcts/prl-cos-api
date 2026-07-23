@@ -29,6 +29,9 @@ class CafcassDateTimeServiceTest {
     @Mock
     private FeatureToggleService featureToggleService;
 
+    @Mock
+    private CafcassCaseDataHelper cafcassCaseDataHelper;
+
     @InjectMocks
     private CafcassDateTimeService cafcassDateTimeService;
 
@@ -53,9 +56,29 @@ class CafcassDateTimeServiceTest {
             .build();
 
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            callbackRequest.getCaseDetails(),
+            callbackRequest.getCaseDetailsBefore()
+        )).thenReturn(true);
 
         Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
         assertNotNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
+    }
+
+    @Test
+    void shouldNotUpdateCafcassDateTimeWhenCafcassCaseDataHasNotChanged() {
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).state("DECISION_OUTCOME").build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("manageDocumentsNew")
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetails)
+            .build();
+
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(caseDetails, caseDetails)).thenReturn(false);
+
+        Map<String, Object> actual = cafcassDateTimeService.updateCafcassDateTime(callbackRequest);
+        assertNull(actual.get(PrlAppsConstants.CAFCASS_DATE_TIME));
     }
 
     @Test
