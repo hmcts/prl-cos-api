@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.OrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -56,6 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -71,6 +74,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 public class CafcassCaseDataService {
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
+    public static final String NOTICE_OF_HEARING = "noticeOfHearing";
+    private static final Set<String> NOTICE_OF_HEARING_ORDER_TYPES = Set.of(
+        "noticeOfHearing",
+        "noticeOfHearingParties"
+    );
+
     @Value("${cafcaas.search-case-type-id}")
     private String cafCassSearchCaseTypeId;
 
@@ -333,10 +342,31 @@ public class CafcassCaseDataService {
             ));
         }
         if (null != caseData.getUploadOrderDoc()) {
-            addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
+            String category = isNoticeOfHearingOrder(caseData, caseData.getUploadOrderDoc())
+                ? NOTICE_OF_HEARING
+                : ANY_OTHER_DOC;
+            addInOtherDocuments(category, caseData.getUploadOrderDoc(), otherDocsList);
         }
         populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
         populateStatementOfServiceDocs(caseData, otherDocsList);
+    }
+
+    private boolean isNoticeOfHearingOrder(CafCassCaseData caseData,
+                                           uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
+        if (CollectionUtils.isEmpty(caseData.getOrderCollection()) || null == uploadOrderDoc) {
+            return false;
+        }
+        return caseData.getOrderCollection().stream()
+            .map(Element::getValue)
+            .anyMatch(order ->
+                          matchesDocumentId(order.getOrderDocument(), uploadOrderDoc)
+                              && NOTICE_OF_HEARING_ORDER_TYPES.contains(order.getOrderType())
+            );
+    }
+
+    private boolean matchesDocumentId(OrderDocument orderDocument, uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
+        return null != orderDocument
+            && Objects.equals(orderDocument.getDocumentId(), uploadOrderDoc.getDocumentId());
     }
 
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
