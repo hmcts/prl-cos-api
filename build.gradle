@@ -35,11 +35,12 @@ def versions = [
   googleAuth                   : '1.5.0',
   gradlePitest                 : '1.15.0',
   guava                        : '33.6.0-jre',
-  hmctsNotify                  : '3.19.2-RELEASE',
+  hmctsNotify                  : '6.0.1-RELEASE',
   httpComponents               : '4.5.14',
   jackson                      : '2.17.2',
   jacksonDatatypeJsr           : '2.20.1',
   jsonAssert                   : '1.5.3',
+  jodaTime                     : '2.13.1',
   junit                        : '6.1.0',
   lombok                       : '1.18.46',
   pact                         : '4.1.11',
@@ -336,6 +337,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name:'ccd-case-document-am-client', version: versions.ccdCaseDocumentAmClient
   implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: versions.pdfbox
   implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.14.1'
+  implementation group: 'joda-time', name: 'joda-time', version: versions.jodaTime
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: '7.14.0'
   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '9.4.2'
   implementation group: 'javax.json', name: 'javax.json-api', version: '1.1.4'
