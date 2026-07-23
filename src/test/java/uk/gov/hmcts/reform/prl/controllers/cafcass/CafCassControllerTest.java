@@ -133,7 +133,7 @@ public class CafCassControllerTest {
         when(authorisationService.authoriseUser(any())).thenReturn(Optional.of(userInfo));
         when(userInfo.getRoles()).thenReturn(List.of(CAFCASS_USER_ROLE));
         when(cafcassCaseDataService.getCaseData(TEST_AUTHORIZATION, startDate,
-                                         endDate
+                                                endDate
         )).thenThrow(feignException(UNAUTHORIZED.value(), "Unauthorised"));
         final ResponseEntity<Object> response = cafCassController.searchCasesByDates(
             TEST_AUTHORIZATION,
