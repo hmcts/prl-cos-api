@@ -549,9 +549,9 @@ public class PrlAppsConstants {
     public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts and judgments";
     public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
     public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
-    public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
+    public static final String SECTION_7_REPORT = "Section 7 report";
     public static final String SECTION_37_REPORT = "Section 37 report";
-    public static final String GUARDIAN_REPORT = "Guardian report";
+    public static final String GUARDIAN_REPORT = "Section 16.4 Guardian Report";
     public static final String SPECIAL_GUARDIANSHIP_REPORT = "Special guardianship report";
     public static final String CAFCASS_OTHER_DOCUMENTS = "Cafcass/Cafcass Cymru other documents";
     public static final String LA_OTHER_DOCUMENTS = "Local Authority other documents";
@@ -1108,4 +1108,5 @@ public class PrlAppsConstants {
 
     public static final String TASK_TRIGGERED_BY = "RequestOrder";
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
+    public static final String NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS = "newTaskRequiredForUploadedDocs";
 }
