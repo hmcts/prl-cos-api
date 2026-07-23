@@ -300,6 +300,9 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+update-hearing-actuals:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+
 fees-register:
   api:
     url: ${FEE_REGISTER_API_URL:http://fees-register-api-aat.service.core-compute-aat.internal}
