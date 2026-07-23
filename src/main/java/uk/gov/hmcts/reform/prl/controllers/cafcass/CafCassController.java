@@ -62,11 +62,9 @@ public class CafCassController extends AbstractCallbackController {
         @RequestParam(name = "start_date") String startDate,  @RequestParam(name = "end_date") String endDate
     )  {
         try {
-            log.info("inside cafcass search cases before authorization");
             serviceAuthorisation = serviceAuthorisation.startsWith(BEARER)
                 ? serviceAuthorisation : BEARER.concat(serviceAuthorisation);
             Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
-            log.info("inside cafcass search cases after authorization userInfo: {}", userInfo);
             if (userInfo.isPresent() && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))) {
                 if (userInfo.get().getRoles().contains(CAFCASS_USER_ROLE)) {
