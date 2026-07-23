@@ -334,14 +334,16 @@ public class CafcassCaseDataService {
     }
 
     private void populateAnyOtherDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
-        System.out.println("-- inside populateAnyOtherDoc with these otherDocs: ");
-        System.out.println(otherDocsList);
+        System.out.println("-- inside populateAnyOtherDoc");
         if (CollectionUtils.isNotEmpty(caseData.getOtherDocumentsUploaded())) {
-            caseData.getOtherDocumentsUploaded().parallelStream().forEach(document -> addInOtherDocuments(
-                ANY_OTHER_DOC,
-                document,
-                otherDocsList
-            ));
+            System.out.println("-- other docs uploaded:");
+            System.out.println(caseData.getOtherDocumentsUploaded());
+            if (CollectionUtils.isNotEmpty(caseData.getOtherDocumentsUploaded())) {
+                caseData.getOtherDocumentsUploaded().parallelStream().forEach(document -> {
+                    String category = isNoticeOfHearingOrder(caseData, document) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
+                    addInOtherDocuments(category, document, otherDocsList);
+                });
+            }
         }
         if (null != caseData.getUploadOrderDoc()) {
             System.out.println("-- uploadOrderDoc not null");
@@ -356,6 +358,7 @@ public class CafcassCaseDataService {
 
     private boolean isNoticeOfHearingOrder(CafCassCaseData caseData,
                                            uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
+        System.out.println("-- isNoticeOfHearingOrder?");
         if (CollectionUtils.isEmpty(caseData.getOrderCollection()) || null == uploadOrderDoc) {
             return false;
         }
@@ -722,6 +725,8 @@ public class CafcassCaseDataService {
                 Document documentOther = buildFromCaseDocument(caseDocument);
                 System.out.println("-- inside addInOtherDocuments, adding: ");
                 System.out.println(caseDocument.getDocumentFileName());
+                System.out.println(category);
+                System.out.println(DocTypeOtherDocumentsEnum.getValue(category));
                 otherDocsList.add(Element.<OtherDocuments>builder()
                                       .id(UUID.randomUUID())
                                       .value(OtherDocuments.builder()
