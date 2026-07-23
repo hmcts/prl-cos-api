@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.ApplicationStat
 import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.PaymentStatus;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.Payment;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
@@ -48,6 +49,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 public class RequestUpdateCallbackService {
 
     public static final String PAID = "Paid";
+
+    private enum PaymentCallbackType {
+        ROOT,
+        AWP,
+        UNKNOWN
+    }
+
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
     private final SolicitorEmailService solicitorEmailService;
@@ -75,19 +83,12 @@ public class RequestUpdateCallbackService {
             return;
         }
 
-        boolean isCasePayment = isRootServiceRequest(
-            caseDetails,
-            serviceRequestUpdateDto.getServiceRequestReference()
-        );
-
-        CaseEvent caseEvent;
-        if (isCasePayment) {
-            caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
-                ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
-        } else {
-            caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
-                ? CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK : CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK;
+        PaymentCallbackType paymentCallbackType = resolvePaymentCallbackType(currentCaseData, serviceRequestUpdateDto);
+        if (paymentCallbackType == PaymentCallbackType.UNKNOWN) {
+            return;
         }
+
+        CaseEvent caseEvent = getPaymentCallbackEvent(paymentCallbackType, serviceRequestUpdateDto);
 
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
@@ -100,23 +101,11 @@ public class RequestUpdateCallbackService {
                 true
             );
 
-        CaseDataContent caseDataContent;
-        if (isCasePayment) {
-            caseDataContent = coreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                setCaseData(
-                    serviceRequestUpdateDto
-                )
-            );
-        } else {
-            caseDataContent = coreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                setAwPPaymentCaseData(
-                    startEventResponse,
-                    serviceRequestUpdateDto
-                )
-            );
-        }
+        CaseDataContent caseDataContent = createPaymentCallbackCaseDataContent(
+            paymentCallbackType,
+            startEventResponse,
+            serviceRequestUpdateDto
+        );
 
         coreCaseDataService.submitUpdate(
             systemAuthorisation,
@@ -126,59 +115,132 @@ public class RequestUpdateCallbackService {
             true
         );
 
-        if (isCasePayment) {
-            partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
-
-            EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
-                CaseEvent.UPDATE_ALL_TABS,
-                systemUpdateUserId
-            );
-            StartEventResponse allTabsUpdateStartEventResponse =
-                coreCaseDataService.startUpdate(
-                    systemAuthorisation,
-                    allTabsUpdateEventRequestData,
-                    serviceRequestUpdateDto.getCcdCaseNumber(),
-                    true
-                );
-
-            CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
-                allTabsUpdateStartEventResponse,
-                objectMapper
-            );
-            log.info(
-                "Refreshing tab based on the payment response for caseId {} ",
-                serviceRequestUpdateDto.getCcdCaseNumber()
-            );
-
-            allTabsUpdateCaseData = getCaseDataWithStateAndDateSubmitted(
-                serviceRequestUpdateDto,
-                allTabsUpdateCaseData
-            );
-
-            allTabService.mapAndSubmitAllTabsUpdate(
-                systemAuthorisation,
-                serviceRequestUpdateDto.getCcdCaseNumber(),
-                allTabsUpdateStartEventResponse,
-                allTabsUpdateEventRequestData,
-                allTabsUpdateCaseData
-            );
-
-            log.info(
-                "Updating the Case data with payment information for caseId {}",
-                serviceRequestUpdateDto.getCcdCaseNumber()
-            );
-
-            if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
-                solicitorEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
-                caseWorkerEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
-            }
+        if (paymentCallbackType == PaymentCallbackType.ROOT) {
+            updateRootPaymentCaseData(systemAuthorisation, systemUpdateUserId, serviceRequestUpdateDto);
         }
     }
 
-    private boolean isRootServiceRequest(CaseDetails caseDetails, String serviceRequestReference) {
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+    private PaymentCallbackType resolvePaymentCallbackType(CaseData caseData, ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        String serviceRequestReference = serviceRequestUpdateDto.getServiceRequestReference();
+        if (isRootServiceRequest(caseData, serviceRequestReference)) {
+            return PaymentCallbackType.ROOT;
+        }
+
+        if (isAwpServiceRequest(caseData, serviceRequestReference)) {
+            return PaymentCallbackType.AWP;
+        }
+
+        if (caseData.getState() == State.SUBMITTED_NOT_PAID) {
+            log.warn(
+                "Payment callback service request reference {} did not match root reference {} or AWP payment "
+                    + "references for case {}, but case is submitted not paid. Treating callback as root payment.",
+                serviceRequestReference,
+                caseData.getPaymentServiceRequestReferenceNumber(),
+                serviceRequestUpdateDto.getCcdCaseNumber()
+            );
+            return PaymentCallbackType.ROOT;
+        }
+
+        log.warn(
+            "Ignoring payment callback for case {}. Service request reference {} matched neither root payment "
+                + "reference {} nor AWP payment references.",
+            serviceRequestUpdateDto.getCcdCaseNumber(),
+            serviceRequestReference,
+            caseData.getPaymentServiceRequestReferenceNumber()
+        );
+        return PaymentCallbackType.UNKNOWN;
+    }
+
+    private CaseEvent getPaymentCallbackEvent(PaymentCallbackType paymentCallbackType,
+                                              ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        boolean isPaid = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus());
+        if (paymentCallbackType == PaymentCallbackType.ROOT) {
+            return isPaid ? CaseEvent.PAYMENT_SUCCESS_CALLBACK : CaseEvent.PAYMENT_FAILURE_CALLBACK;
+        }
+        return isPaid ? CaseEvent.AWP_PAYMENT_SUCCESS_CALLBACK : CaseEvent.AWP_PAYMENT_FAILURE_CALLBACK;
+    }
+
+    private CaseDataContent createPaymentCallbackCaseDataContent(PaymentCallbackType paymentCallbackType,
+                                                                 StartEventResponse startEventResponse,
+                                                                 ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        if (paymentCallbackType == PaymentCallbackType.ROOT) {
+            return coreCaseDataService.createCaseDataContent(startEventResponse, setCaseData(serviceRequestUpdateDto));
+        }
+        return coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            setAwPPaymentCaseData(startEventResponse, serviceRequestUpdateDto)
+        );
+    }
+
+    private void updateRootPaymentCaseData(String systemAuthorisation,
+                                           String systemUpdateUserId,
+                                           ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
+
+        EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
+            CaseEvent.UPDATE_ALL_TABS,
+            systemUpdateUserId
+        );
+        StartEventResponse allTabsUpdateStartEventResponse =
+            coreCaseDataService.startUpdate(
+                systemAuthorisation,
+                allTabsUpdateEventRequestData,
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                true
+            );
+
+        CaseData allTabsUpdateCaseData = CaseUtils.getCaseDataFromStartUpdateEventResponse(
+            allTabsUpdateStartEventResponse,
+            objectMapper
+        );
+        log.info(
+            "Refreshing tab based on the payment response for caseId {} ",
+            serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+
+        allTabsUpdateCaseData = getCaseDataWithStateAndDateSubmitted(
+            serviceRequestUpdateDto,
+            allTabsUpdateCaseData
+        );
+
+        allTabService.mapAndSubmitAllTabsUpdate(
+            systemAuthorisation,
+            serviceRequestUpdateDto.getCcdCaseNumber(),
+            allTabsUpdateStartEventResponse,
+            allTabsUpdateEventRequestData,
+            allTabsUpdateCaseData
+        );
+
+        log.info(
+            "Updating the Case data with payment information for caseId {}",
+            serviceRequestUpdateDto.getCcdCaseNumber()
+        );
+
+        if (PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())) {
+            solicitorEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
+            caseWorkerEmailService.sendEmail(allTabsUpdateStartEventResponse.getCaseDetails());
+        }
+    }
+
+    private boolean isRootServiceRequest(CaseData caseData, String serviceRequestReference) {
         return !StringUtils.isEmpty(serviceRequestReference)
             && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+    }
+
+    private boolean isAwpServiceRequest(CaseData caseData, String serviceRequestReference) {
+        if (StringUtils.isEmpty(serviceRequestReference) || caseData.getAdditionalApplicationsBundle() == null) {
+            return false;
+        }
+
+        return caseData.getAdditionalApplicationsBundle().stream()
+            .filter(Objects::nonNull)
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .map(AdditionalApplicationsBundle::getPayment)
+            .filter(Objects::nonNull)
+            .map(Payment::getPaymentServiceRequestReferenceNumber)
+            .filter(Objects::nonNull)
+            .anyMatch(serviceRequestReference::equalsIgnoreCase);
     }
 
     private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
@@ -187,7 +249,7 @@ public class RequestUpdateCallbackService {
         String incomingRef = paymentUpdateDto.getServiceRequestReference();
 
         // Root Case Payment Request
-        if (isRootServiceRequest(caseDetails, paymentUpdateDto.getServiceRequestReference())) {
+        if (isRootServiceRequest(caseData, paymentUpdateDto.getServiceRequestReference())) {
             // If the database already shows a recorded callback and it was successful, it's a duplicate
             return caseData.getPaymentCallbackServiceRequestUpdate() != null
                 && PAID.equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestStatus());
