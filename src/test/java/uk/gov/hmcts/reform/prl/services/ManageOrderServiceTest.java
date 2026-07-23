@@ -4008,11 +4008,11 @@ class ManageOrderServiceTest {
     }
 
     @Test
-    void testCleanUpSelectedManageOrderOptions() {
+    void testLeaveManageOrderOptionsOnCleanUp() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("manageOrdersOptions","manageOrdersOptions");
         manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-        assertNull(caseDataUpdated.get("manageOrdersOptions"));
+        assertEquals("manageOrdersOptions", caseDataUpdated.get("manageOrdersOptions"));
 
     }
 

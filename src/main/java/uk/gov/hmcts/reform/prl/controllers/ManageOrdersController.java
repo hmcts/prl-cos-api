@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrLegalAdvisorCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
+import uk.gov.hmcts.reform.prl.exception.InvalidCustomOrderDocumentException;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -61,6 +63,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -393,7 +396,7 @@ public class ManageOrdersController {
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse finalizeOrderSubmissionAndSendNotifications(
+    public ResponseEntity<SubmittedCallbackResponse> finalizeOrderSubmissionAndSendNotifications(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
@@ -415,14 +418,26 @@ public class ManageOrdersController {
             log.info("Submitted callback: caseDataUpdated (from DB) has orderCollection={}, draftOrderCollection={}",
                 caseDataUpdated.get(ORDER_COLLECTION) != null,
                 caseDataUpdated.get(DRAFT_ORDER_COLLECTION) != null);
-            boolean isCustomOrder = copyCustomOrderFieldsFromCallback(callbackData, caseDataUpdated);
+            boolean isCustomOrder = copyCustomOrderFieldsFromCallback(caseData, callbackData, caseDataUpdated);
             log.info("Submitted callback: isCustomOrder={}", isCustomOrder);
             if (isCustomOrder) {
+                String customOrderDocUrl = extractCustomOrderDocBinaryUrl(caseDataUpdated);
+
                 log.info("Submitted callback: calling processCustomOrder");
-                processCustomOrder(authorisation, caseData, caseDataUpdated);
-                log.info("Submitted callback: after processCustomOrder, orderCollection size={}",
-                    caseDataUpdated.get(ORDER_COLLECTION) != null
-                        ? ((List<?>) caseDataUpdated.get(ORDER_COLLECTION)).size() : "null");
+                try {
+                    processCustomOrder(authorisation, caseData, caseDataUpdated);
+                    log.info("Submitted callback: after processCustomOrder, orderCollection size={}",
+                        caseDataUpdated.get(ORDER_COLLECTION) != null
+                            ? ((List<?>) caseDataUpdated.get(ORDER_COLLECTION)).size() : "null");
+                } catch (InvalidCustomOrderDocumentException e) {
+                    return handleCustomOrderFailure(
+                        callbackRequest,
+                        startAllTabsUpdateDataContent,
+                        caseDataUpdated,
+                        customOrderDocUrl,
+                        e
+                    );
+                }
             } else {
                 // Skip addSealToOrders for custom orders - the combined document isn't CDAM-associated yet
                 // (association happens during submitAllTabsUpdate below). sealing is done inline in combineAndFinalizeCustomOrder.
@@ -493,7 +508,7 @@ public class ManageOrdersController {
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
 
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -516,6 +531,18 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
+
+            // Self-heal: if THIS event is not a custom-order event, wipe any persisted custom-order
+            // transient fields left over from a previously-failed custom-order event. Otherwise they
+            // would survive into the submitted callback and be mis-interpreted as an in-flight
+            // custom-order, causing the sealing/combining flow to run against stale data.
+            log.info("Self-heal check: manageOrdersOptions={}, customOrderNameOption={}, customOrderDoc={}",
+                caseData.getManageOrdersOptions(),
+                caseDataUpdated.get(CUSTOM_ORDER_NAME_OPTION),
+                caseDataUpdated.get(CUSTOM_ORDER_DOC) != null ? "present" : "absent");
+            if (!ManageOrdersOptionsEnum.createCustomOrder.equals(caseData.getManageOrdersOptions())) {
+                removeStaleCustomOrderFields(caseDataUpdated);
+            }
 
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
             // Clear doYouWantToServeOrder if order needs judge/manager review (stale value from previous order)
@@ -838,6 +865,10 @@ public class ManageOrdersController {
                 log.info("Custom order selected on Page 1, populating hearings dropdown");
                 caseDataUpdated.put("customOrderHearingsType",
                     manageOrderService.populateHearingsDropdown(authorisation, caseData));
+                // Always clear any previously persisted customOrderDoc at the start of a new
+                // custom order journey so a stale/rejected doc from a previous attempt cannot
+                // carry over and cause validation to fail on the next attempt.
+                caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
             } else {
                 // Clear custom order fields when a different option is selected
                 // This prevents stale data from a cancelled custom order flow affecting other flows
@@ -1043,10 +1074,25 @@ public class ManageOrdersController {
             .build();
     }
 
-    private boolean copyCustomOrderFieldsFromCallback(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
-        // Note: caseDataUpdated from allTabService is from the DATABASE (old data before this event).
-        // The callback request data has the CURRENT data from the aboutToSubmit response (not yet persisted).
-        // For custom order fields, we must use callbackRequest data.
+    private boolean copyCustomOrderFieldsFromCallback(CaseData caseData,
+                                                      Map<String, Object> callbackData,
+                                                      Map<String, Object> caseDataUpdated) {
+        // Check if this is a custom order by looking at performingAction in the callback data (this reflects the
+        // 'contents' page 1 option)
+        // We can't use any custom orders fields as they are sticky (persisted from previous orders)
+        boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
+        log.info("Submitted callback: isCustomOrder decision: manageOrdersOptions={}, customOrderNameOption(callback)={}, decided={}",
+                 caseData.getManageOrdersOptions(),
+                 callbackData.get(CUSTOM_ORDER_NAME_OPTION),
+                 isCustomOrder);
+        if (!isCustomOrder) {
+            // Backstop: if for any reason stale custom-order transient fields are still on
+            // the callback / persisted map, wipe them so they cannot mis-trigger anything
+            // downstream and so they don't get re-persisted.
+            removeStaleCustomOrderFields(callbackData, caseDataUpdated);
+            return false;
+        }
+
         String[] customOrderFields = {
             CUSTOM_ORDER_DOC, PREVIEW_ORDER_DOC, CUSTOM_ORDER_NAME_OPTION,
             NAME_OF_ORDER, AMEND_ORDER_SELECT_CHECK_OPTIONS, WHAT_DO_WITH_ORDER, DO_YOU_WANT_TO_SERVE_ORDER,
@@ -1060,22 +1106,76 @@ public class ManageOrdersController {
             }
         }
 
-        // Check if this is a custom order by looking at performingAction in the callback data (this reflects the
-        // 'contents' page 1 option)
-        // We can't use any custom orders fields as they are sticky (persisted from previous orders)
-        boolean isCustomOrder = createCustomOrder.getDisplayedValue().equals(callbackData.get(WA_PERFORMING_ACTION));
-        if (isCustomOrder) {
-            // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
-            copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
+        // Copy customOrderDateEnds to fl404CustomFields for FL404/FL404A/FL406 custom orders
+        copyCustomOrderDateEndsToFl404(callbackData, caseDataUpdated);
 
-            // Copy order collections from callbackData (aboutToSubmit response) since caseDataUpdated
-            // has old database data. combineAndFinalizeCustomOrder needs these to update the order doc.
-            // Only copy if callback has the collection and either db is empty or callback has more items
-            // (about-to-submit adds to existing, so callback should have existing + new order)
-            copyCollectionIfNeeded(callbackData, caseDataUpdated, ORDER_COLLECTION);
-            copyCollectionIfNeeded(callbackData, caseDataUpdated, DRAFT_ORDER_COLLECTION);
+        // Copy order collections from callbackData (aboutToSubmit response) since caseDataUpdated
+        // has old database data. combineAndFinalizeCustomOrder needs these to update the order doc.
+        // Only copy if callback has the collection and either db is empty or callback has more items
+        // (about-to-submit adds to existing, so callback should have existing + new order)
+        copyCollectionIfNeeded(callbackData, caseDataUpdated, ORDER_COLLECTION);
+        copyCollectionIfNeeded(callbackData, caseDataUpdated, DRAFT_ORDER_COLLECTION);
+
+        return true;
+    }
+
+    /**
+     * Wipes any transient custom-order fields that should never be persisted between events.
+     *
+     * <p>Used to clean up state from cases that hit the original combine-failure bug
+     * (which could leave {@code customOrderNameOption}, {@code customOrderDoc}, etc. on the case).
+     * Removing them from the supplied map ensures they don't survive the next
+     * {@code submitAllTabsUpdate} and cannot mis-trigger downstream custom-order logic.</p>
+     *
+     * <p>Note: {@code previewOrderDoc} is NOT in this list. It is regenerated fresh by
+     * the mid-event for every {@code createAnOrder} / {@code createCustomOrder} event,
+     * so its presence does not indicate stale state.</p>
+     */
+    private void removeStaleCustomOrderFields(Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated == null) {
+            return;
         }
-        return isCustomOrder;
+        String[] staleFields = {
+            CUSTOM_ORDER_DOC, CUSTOM_ORDER_NAME_OPTION,
+            CUSTOM_ORDER_DATE_ENDS, CUSTOM_ORDER_DATE_ENDS_OPTIONS
+        };
+        boolean foundStale = false;
+        for (String field : staleFields) {
+            if (caseDataUpdated.get(field) != null) {
+                foundStale = true;
+            }
+            // Explicitly null the field in the response. Map.remove() drops the key, which
+            // CCD interprets as "no change" and leaves the previously-persisted value on the
+            // case. Putting null tells CCD to wipe the field so the next event's submitted
+            // callback doesn't see stale custom-order state.
+            caseDataUpdated.put(field, null);
+        }
+        if (foundStale) {
+            log.info("Self-heal: cleared stale custom-order transient fields from a non-custom-order event");
+        }
+    }
+
+    /**
+     * Overload used from the submitted callback where the live CCD callback data and the
+     * to-be-persisted map are distinct. Clears stale transient fields from either source
+     * so they don't leak into the persisted case state.
+     */
+    private void removeStaleCustomOrderFields(Map<String, Object> callbackData, Map<String, Object> caseDataUpdated) {
+        if (callbackData == null) {
+            removeStaleCustomOrderFields(caseDataUpdated);
+            return;
+        }
+        // First wipe from the persisted map.
+        removeStaleCustomOrderFields(caseDataUpdated);
+        // Then ensure nothing left over in the callback view either (defensive — CCD ignores
+        // unknown fields in submitted responses but logs are cleaner this way).
+        String[] staleFields = {
+            CUSTOM_ORDER_DOC, CUSTOM_ORDER_NAME_OPTION,
+            CUSTOM_ORDER_DATE_ENDS, CUSTOM_ORDER_DATE_ENDS_OPTIONS
+        };
+        for (String field : staleFields) {
+            callbackData.remove(field);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -1177,19 +1277,177 @@ public class ManageOrdersController {
             || (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
                 && (!AmendOrderCheckEnum.noCheck.equals(amendCheck)
                     || manageOrderService.isSaveAsDraft(caseData)));
-        customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
+        try {
+            customOrderService.combineAndFinalizeCustomOrder(authorisation, caseData, caseDataUpdated, isDraftOrder);
+        } catch (IOException e) {
+            throw new InvalidCustomOrderDocumentException(
+                "Failed to process the uploaded custom order document. Please re-upload and try again.");
+        }
     }
 
     private void cleanupCustomOrderFields(Map<String, Object> caseDataUpdated) {
-        caseDataUpdated.remove(CUSTOM_ORDER_DOC);
-        caseDataUpdated.remove(PREVIEW_ORDER_DOC);
-        caseDataUpdated.remove(CUSTOM_ORDER_NAME_OPTION);
-        caseDataUpdated.remove(NAME_OF_ORDER);
-        caseDataUpdated.remove(AMEND_ORDER_SELECT_CHECK_OPTIONS);
-        caseDataUpdated.remove(WHAT_DO_WITH_ORDER);
-        caseDataUpdated.remove(DO_YOU_WANT_TO_SERVE_ORDER);
-        caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS);
-        caseDataUpdated.remove(CUSTOM_ORDER_DATE_ENDS_OPTIONS);
+        // Use put(null) rather than remove(): this map is passed to submitAllTabsUpdate -> CCD,
+        // and CCD interprets an absent key as "no change" (keeping the stale value). Explicit
+        // nulls tell CCD to wipe the field, so the next event's submitted callback won't see
+        // a sticky customOrderNameOption and mis-route an upload-order as a custom order.
+        caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
+        caseDataUpdated.put(PREVIEW_ORDER_DOC, null);
+        caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
+        caseDataUpdated.put(NAME_OF_ORDER, null);
+        caseDataUpdated.put(AMEND_ORDER_SELECT_CHECK_OPTIONS, null);
+        caseDataUpdated.put(WHAT_DO_WITH_ORDER, null);
+        caseDataUpdated.put(DO_YOU_WANT_TO_SERVE_ORDER, null);
+        caseDataUpdated.put(CUSTOM_ORDER_DATE_ENDS, null);
+        caseDataUpdated.put(CUSTOM_ORDER_DATE_ENDS_OPTIONS, null);
         log.info("Cleaned up custom order fields after processing");
+    }
+
+    /**
+     * Fail-fast handler for an invalid custom order document upload.
+     *
+     * <p>Skips all further forward activities (notifications, automated hearing
+     * management, CIR docs task). Clears the transient custom-order fields,
+     * removes the placeholder order/draft entry that referenced the bad upload,
+     * persists the cleaned-up case data, and returns a CCD submitted-callback
+     * response carrying a user-facing failure message via
+     * {@code confirmationHeader} / {@code confirmationBody} so it actually shows
+     * on screen instead of looking like a successful submit.</p>
+     */
+    private ResponseEntity<SubmittedCallbackResponse> handleCustomOrderFailure(
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest,
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent,
+        Map<String, Object> caseDataUpdated,
+        String customOrderDocUrl,
+        InvalidCustomOrderDocumentException failure
+    ) {
+        String caseId = String.valueOf(callbackRequest.getCaseDetails().getId());
+        log.error("Stopping custom order event for case {}: {}", caseId, failure.getMessage());
+
+        // Drop the placeholder order/draft entry that referenced this upload
+        // (the service has already cleared customOrderDoc / previewOrderDoc on the map).
+        removePlaceholderCustomOrderFromCollections(caseDataUpdated, customOrderDocUrl);
+
+        // Remove any leftover transient custom-order fields so they don't affect the next event.
+        cleanupCustomOrderFields(caseDataUpdated);
+
+        // Persist the cleanup so the case isn't left holding the bad doc / placeholder entry.
+        allTabService.submitAllTabsUpdate(
+            startAllTabsUpdateDataContent.authorisation(),
+            caseId,
+            startAllTabsUpdateDataContent.startEventResponse(),
+            startAllTabsUpdateDataContent.eventRequestData(),
+            caseDataUpdated
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(SubmittedCallbackResponse.builder()
+                .confirmationHeader("# Order could not be created")
+                .confirmationBody("**" + failure.getMessage() + "**\n\n"
+                    + "The uploaded file has been discarded. Please try the event again with a valid .docx file.")
+                .build());
+    }
+
+    /**
+     * Removes the placeholder order / draft order entry that the about-to-submit
+     * callback added for a custom order, so that an invalid upload (e.g. a PDF
+     * renamed to .docx) does not leave a half-formed order or draft on the case.
+     *
+     * <p>If we know the URL of the user's {@code customOrderDoc}, we only remove
+     * entries whose {@code orderDocument} (or {@code orderDocumentWelsh}) points at
+     * that URL. If we don't have a URL, we conservatively fall back to removing
+     * the most recently added entry (index 0), which the custom order journey
+     * always prepends.</p>
+     */
+    private void removePlaceholderCustomOrderFromCollections(Map<String, Object> caseDataUpdated,
+                                                             String customOrderDocUrl) {
+        removeMatchingEntry(caseDataUpdated, ORDER_COLLECTION, customOrderDocUrl);
+        removeMatchingEntry(caseDataUpdated, DRAFT_ORDER_COLLECTION, customOrderDocUrl);
+    }
+
+    private void removeMatchingEntry(Map<String, Object> caseDataUpdated, String collectionKey,
+                                     String customOrderDocUrl) {
+        Object collectionObj = caseDataUpdated.get(collectionKey);
+        if (!(collectionObj instanceof List<?> rawList) || rawList.isEmpty()) {
+            return;
+        }
+
+        List<Object> mutable = new ArrayList<>(rawList);
+
+        if (customOrderDocUrl != null && !customOrderDocUrl.isBlank()) {
+            int matchIndex = -1;
+            for (int i = 0; i < mutable.size(); i++) {
+                if (entryReferencesDoc(mutable.get(i), customOrderDocUrl)) {
+                    matchIndex = i;
+                    break;
+                }
+            }
+            if (matchIndex >= 0) {
+                mutable.remove(matchIndex);
+                caseDataUpdated.put(collectionKey, mutable);
+                log.info("Removed placeholder entry from {} at index {} after custom order failure (matched url={})",
+                    collectionKey, matchIndex, customOrderDocUrl);
+                return;
+            }
+            log.info("No entry in {} matched customOrderDoc url={} - leaving collection unchanged",
+                collectionKey, customOrderDocUrl);
+            return;
+        }
+
+        // Fallback: no url available, remove the most recently added entry (index 0).
+        Object removed = mutable.removeFirst();
+        caseDataUpdated.put(collectionKey, mutable);
+        log.info("Removed first entry from {} after custom order failure (no url to match, removed={})",
+            collectionKey, removed);
+    }
+
+    private boolean entryReferencesDoc(Object entry, String customOrderDocUrl) {
+        if (!(entry instanceof Map<?, ?> entryMap)) {
+            return false;
+        }
+        Object value = entryMap.get("value");
+        if (!(value instanceof Map<?, ?> valueMap)) {
+            return false;
+        }
+        return docUrlMatches(valueMap.get("orderDocument"), customOrderDocUrl)
+            || docUrlMatches(valueMap.get("orderDocumentWelsh"), customOrderDocUrl);
+    }
+
+    private boolean docUrlMatches(Object docObj, String customOrderDocUrl) {
+        if (!(docObj instanceof Map<?, ?> docMap)) {
+            return false;
+        }
+        Object binaryUrl = docMap.get("document_binary_url");
+        if (binaryUrl == null) {
+            binaryUrl = docMap.get("documentBinaryUrl");
+        }
+        Object docUrl = docMap.get("document_url");
+        if (docUrl == null) {
+            docUrl = docMap.get("documentUrl");
+        }
+        return customOrderDocUrl.equals(String.valueOf(binaryUrl))
+            || customOrderDocUrl.equals(String.valueOf(docUrl));
+    }
+
+    /**
+     * Returns the binary (or self) URL of the user's uploaded {@code customOrderDoc}
+     * from the supplied case data map, or {@code null} if it is not present.
+     */
+    private String extractCustomOrderDocBinaryUrl(Map<String, Object> caseDataUpdated) {
+        Object docObj = caseDataUpdated.get(CUSTOM_ORDER_DOC);
+        if (!(docObj instanceof Map<?, ?> docMap)) {
+            return null;
+        }
+        Object binaryUrl = docMap.get("document_binary_url");
+        if (binaryUrl == null) {
+            binaryUrl = docMap.get("documentBinaryUrl");
+        }
+        if (binaryUrl != null) {
+            return String.valueOf(binaryUrl);
+        }
+        Object docUrl = docMap.get("document_url");
+        if (docUrl == null) {
+            docUrl = docMap.get("documentUrl");
+        }
+        return docUrl != null ? String.valueOf(docUrl) : null;
     }
 }
