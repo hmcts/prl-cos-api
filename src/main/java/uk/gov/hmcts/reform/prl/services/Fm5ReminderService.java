@@ -114,14 +114,7 @@ public class Fm5ReminderService {
                             caseDataUpdated.put("fm5RemindersSent", "YES");
                         }
                     }
-                    //Save case data
-                    allTabService.submitAllTabsUpdate(
-                        startAllTabsUpdateDataContent.authorisation(),
-                        key,
-                        startAllTabsUpdateDataContent.startEventResponse(),
-                        startAllTabsUpdateDataContent.eventRequestData(),
-                        caseDataUpdated
-                    );
+
                 }
             );
         }
@@ -143,41 +136,13 @@ public class Fm5ReminderService {
         for (CaseDetails caseDetails : caseDetailsList) {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-            filteredCaseAndParties.putAll(validateNonHearingSystemRules(caseData));
-
-            if (!Fm5PendingParty.NOTIFICATION_NOT_REQUIRED.equals(filteredCaseAndParties.get(String.valueOf(caseData.getId())))) {
-                caseIdsForHearing.add(String.valueOf(caseData.getId()));
-            } else {
-                qualifiedCasesAndPartiesBeforeHearing.put(
-                    String.valueOf(caseData.getId()),
-                    Fm5PendingParty.NOTIFICATION_NOT_REQUIRED
-                );
-            }
-        }
-
-        if (isNotEmpty(caseIdsForHearing)) {
-            log.info("Fetching hearings for cases {}", caseIdsForHearing);
-            List<Hearings> hearingsForAllCaseIdsWithCourtVenue = hearingApiClient.getHearingsForAllCaseIdsWithCourtVenue(
-                systemUserService.getSysUserToken(),
-                authTokenGenerator.generate(),
-                caseIdsForHearing
+            qualifiedCasesAndPartiesBeforeHearing.put(
+                String.valueOf(caseData.getId()),
+                Fm5PendingParty.BOTH
             );
-
-            if (isNotEmpty(hearingsForAllCaseIdsWithCourtVenue)) {
-                hearingsForAllCaseIdsWithCourtVenue.forEach(
-                    hearing -> {
-                        if (isFirstListedHearingAwayForDays(hearing,
-                                                            null != hearingAwayDays ? hearingAwayDays : 18)) {
-                            log.info("Putting qualified case before hearing for case {}", hearing.getCaseRef());
-                            qualifiedCasesAndPartiesBeforeHearing.put(
-                                hearing.getCaseRef(),
-                                filteredCaseAndParties.get(hearing.getCaseRef())
-                            );
-                        }
-                    }
-                );
-            }
         }
+
+
         return qualifiedCasesAndPartiesBeforeHearing;
     }
 
