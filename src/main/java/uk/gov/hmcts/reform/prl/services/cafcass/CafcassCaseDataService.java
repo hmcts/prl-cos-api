@@ -421,7 +421,11 @@ public class CafcassCaseDataService {
         nullSafeList(caseData.getAdditionalOrderDocuments())
             .stream()
             .flatMap(el -> el.getValue().getAdditionalDocuments().stream())
-            .forEach(doc -> addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList));
+            .forEach(doc -> {
+                log.info("[DEBUG] populateAdditionalOrderDocuments -> category={}, filename={}",
+                         applicantApplication.getId(), doc.getValue().getDocumentFileName());
+                addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList);
+            });
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData,
@@ -456,13 +460,13 @@ public class CafcassCaseDataService {
                 servedApplicationDetails -> {
                     nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).forEach(
                         bulkPrintDetailsElement ->
-                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
+                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList, caseData)
                     );
                     nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails())
                         .forEach(
                             emailNotificationDetailsElement ->
                                 processServiceOfApplicationEmailedDocs(
-                                    emailNotificationDetailsElement.getValue(), otherDocsList)
+                                    emailNotificationDetailsElement.getValue(), otherDocsList, caseData)
                         );
                 }
             );
@@ -470,31 +474,28 @@ public class CafcassCaseDataService {
     }
 
     private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
-                                                          List<Element<OtherDocuments>> otherDocsList) {
+                                                          List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
         bulkPrintDetails.getPrintDocs().forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
-                    addInOtherDocuments(
-                        ANY_OTHER_DOC,
-                        docElement.getValue(),
-                        otherDocsList
-                    );
+                    String category = isNoticeOfHearingOrder(caseData, docElement.getValue()) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
+                    log.info("[DEBUG] processServiceOfApplicationBulkPrintDocs -> category={}, filename={}",
+                             category, docElement.getValue().getDocumentFileName());
+                    addInOtherDocuments(category, docElement.getValue(), otherDocsList);
                 }
             }
         );
     }
 
     private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
-                                                        List<Element<OtherDocuments>> otherDocsList) {
-
+                                                        List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
         nullSafeList(emailNotificationDetails.getDocs()).forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
-                    addInOtherDocuments(
-                        ANY_OTHER_DOC,
-                        docElement.getValue(),
-                        otherDocsList
-                    );
+                    String category = isNoticeOfHearingOrder(caseData, docElement.getValue()) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
+                    log.info("[DEBUG] processServiceOfApplicationEmailedDocs -> category={}, filename={}",
+                             category, docElement.getValue().getDocumentFileName());
+                    addInOtherDocuments(category, docElement.getValue(), otherDocsList);
                 }
             }
         );
@@ -741,7 +742,7 @@ public class CafcassCaseDataService {
             if (null != caseDocument && caseDocument.getDocumentUrl() != null
                 && !caseDocument.getDocumentUrl().endsWith(REDACTED_DOCUMENT_UUID)) {
                 Document documentOther = buildFromCaseDocument(caseDocument);
-                System.out.println("-- inside addInOtherDocuments, adding: ");
+                System.out.println("[DEBUG] inside addInOtherDocuments, adding: ");
                 System.out.println(caseDocument.getDocumentFileName());
                 System.out.println(category);
                 System.out.println(DocTypeOtherDocumentsEnum.getValue(category));
@@ -758,7 +759,6 @@ public class CafcassCaseDataService {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
         }
     }
-
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
         boolean isExcluded = false;
