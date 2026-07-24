@@ -340,19 +340,14 @@ public class CafcassCaseDataService {
 
     private void populateAnyOtherDoc(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
         if (CollectionUtils.isNotEmpty(caseData.getOtherDocumentsUploaded())) {
-            caseData.getOtherDocumentsUploaded().parallelStream().forEach(document -> {
-                String category = isNoticeOfHearingOrder(caseData, document) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                log.info("[DEBUG] otherDocumentsUploaded -> category={}, filename={}",
-                         category, document.getDocumentFileName());
-                addInOtherDocuments(category, document, otherDocsList);
-            });
+            caseData.getOtherDocumentsUploaded().parallelStream().forEach(document -> addInOtherDocuments(
+                ANY_OTHER_DOC,
+                document,
+                otherDocsList
+            ));
         }
         if (null != caseData.getUploadOrderDoc()) {
-            String category = isNoticeOfHearingOrder(caseData, caseData.getUploadOrderDoc())
-                ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-            log.info("[DEBUG] uploadOrderDoc -> category={}, filename={}",
-                     category, caseData.getUploadOrderDoc().getDocumentFileName());
-            addInOtherDocuments(category, caseData.getUploadOrderDoc(), otherDocsList);
+            addInOtherDocuments(ANY_OTHER_DOC, caseData.getUploadOrderDoc(), otherDocsList);
         }
         populateServiceOfApplicationUploadDocs(caseData, otherDocsList);
         populateStatementOfServiceDocs(caseData, otherDocsList);
@@ -361,65 +356,46 @@ public class CafcassCaseDataService {
     private boolean isNoticeOfHearingOrder(CafCassCaseData caseData,
                                            uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
         if (CollectionUtils.isEmpty(caseData.getOrderCollection()) || null == uploadOrderDoc) {
-            log.info("[DEBUG] isNoticeOfHearingOrder: no orderCollection or null document, filename={}",
-                     null != uploadOrderDoc ? uploadOrderDoc.getDocumentFileName() : "null");
             return false;
         }
-        boolean matched = caseData.getOrderCollection().stream()
+        return caseData.getOrderCollection().stream()
             .map(Element::getValue)
             .anyMatch(order ->
                           (matchesDocumentId(order.getOrderDocument(), uploadOrderDoc)
                               || matchesDocumentId(order.getOrderDocumentWelsh(), uploadOrderDoc))
                               && NOTICE_OF_HEARING_ORDER_TYPES.contains(order.getOrderType())
             );
-        log.info("[DEBUG] isNoticeOfHearingOrder: filename={}, documentId={}, matched={}",
-                 uploadOrderDoc.getDocumentFileName(), uploadOrderDoc.getDocumentId(), matched);
-        return matched;
     }
 
     private boolean matchesDocumentId(OrderDocument orderDocument, uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
-        boolean matched = null != orderDocument
+        return null != orderDocument
             && Objects.equals(orderDocument.getDocumentId(), uploadOrderDoc.getDocumentId());
-        if (null != orderDocument) {
-            log.info("[DEBUG] matchesDocumentId: orderDocId={}, uploadDocId={}, matched={}",
-                     orderDocument.getDocumentId(), uploadOrderDoc.getDocumentId(), matched);
-        }
-        return matched;
     }
 
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
         if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceForOrder())) {
             caseData.getStmtOfServiceForOrder().parallelStream().forEach(
-                stmtOfServiceAddRecipientElement -> {
-                    uk.gov.hmcts.reform.prl.models.documents.Document doc =
-                        stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument();
-                    String category = isNoticeOfHearingOrder(caseData, doc) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                    log.info("[DEBUG] stmtOfServiceForOrder -> category={}, filename={}",
-                             category, null != doc ? doc.getDocumentFileName() : "null");
-                    addInOtherDocuments(category, doc, otherDocsList);
-                });
+                stmtOfServiceAddRecipientElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
+                    otherDocsList
+                ));
         }
         if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceForApplication())) {
             caseData.getStmtOfServiceForApplication().parallelStream().forEach(
-                stmtOfServiceAddRecipientElement -> {
-                    uk.gov.hmcts.reform.prl.models.documents.Document doc =
-                        stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument();
-                    String category = isNoticeOfHearingOrder(caseData, doc) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                    log.info("[DEBUG] stmtOfServiceForApplication -> category={}, filename={}",
-                             category, null != doc ? doc.getDocumentFileName() : "null");
-                    addInOtherDocuments(category, doc, otherDocsList);
-                });
+                stmtOfServiceAddRecipientElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
+                    otherDocsList
+                ));
         }
         if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceAddRecipient())) {
             caseData.getStmtOfServiceAddRecipient().parallelStream().forEach(
-                stmtOfServiceAddRecipientElement -> {
-                    uk.gov.hmcts.reform.prl.models.documents.Document doc =
-                        stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument();
-                    String category = isNoticeOfHearingOrder(caseData, doc) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                    log.info("[DEBUG] stmtOfServiceAddRecipient -> category={}, filename={}",
-                             category, null != doc ? doc.getDocumentFileName() : "null");
-                    addInOtherDocuments(category, doc, otherDocsList);
-                });
+                stmtOfServiceAddRecipientElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    stmtOfServiceAddRecipientElement.getValue().getStmtOfServiceDocument(),
+                    otherDocsList
+                ));
         }
     }
 
@@ -427,38 +403,30 @@ public class CafcassCaseDataService {
         nullSafeList(caseData.getAdditionalOrderDocuments())
             .stream()
             .flatMap(el -> el.getValue().getAdditionalDocuments().stream())
-            .forEach(doc -> {
-                log.info("[DEBUG] populateAdditionalOrderDocuments -> category={}, filename={}",
-                         applicantApplication.getId(), doc.getValue().getDocumentFileName());
-                addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList);
-            });
+            .forEach(doc -> addInOtherDocuments(applicantApplication.getId(), doc.getValue(), otherDocsList));
     }
 
     private void populateServiceOfApplicationUploadDocs(CafCassCaseData caseData,
                                                         List<Element<OtherDocuments>> otherDocsList) {
         if (null != caseData.getSpecialArrangementsLetter()) {
-            String category = isNoticeOfHearingOrder(caseData, caseData.getSpecialArrangementsLetter())
-                ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-            log.info("[DEBUG] specialArrangementsLetter -> category={}, filename={}",
-                     category, caseData.getSpecialArrangementsLetter().getDocumentFileName());
-            addInOtherDocuments(category, caseData.getSpecialArrangementsLetter(), otherDocsList);
+            addInOtherDocuments(
+                ANY_OTHER_DOC,
+                caseData.getSpecialArrangementsLetter(),
+                otherDocsList
+            );
         }
         if (null != caseData.getAdditionalDocuments()) {
-            String category = isNoticeOfHearingOrder(caseData, caseData.getAdditionalDocuments())
-                ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-            log.info("[DEBUG] additionalDocuments -> category={}, filename={}",
-                     category, caseData.getAdditionalDocuments().getDocumentFileName());
-            addInOtherDocuments(category, caseData.getAdditionalDocuments(), otherDocsList);
+            addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(),
+                                otherDocsList
+            );
         }
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalDocumentsList())) {
             caseData.getAdditionalDocumentsList().parallelStream().forEach(
-                documentElement -> {
-                    String category = isNoticeOfHearingOrder(caseData, documentElement.getValue())
-                        ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                    log.info("[DEBUG] additionalDocumentsList -> category={}, filename={}",
-                             category, documentElement.getValue().getDocumentFileName());
-                    addInOtherDocuments(category, documentElement.getValue(), otherDocsList);
-                });
+                documentElement -> addInOtherDocuments(
+                    ANY_OTHER_DOC,
+                    documentElement.getValue(),
+                    otherDocsList
+                ));
         }
 
         if (ObjectUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
@@ -477,7 +445,6 @@ public class CafcassCaseDataService {
                 }
             );
         }
-
     }
 
     private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
@@ -486,8 +453,6 @@ public class CafcassCaseDataService {
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
                     String category = isNoticeOfHearingOrder(caseData, docElement.getValue()) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                    log.info("[DEBUG] processServiceOfApplicationBulkPrintDocs -> category={}, filename={}",
-                             category, docElement.getValue().getDocumentFileName());
                     addInOtherDocuments(category, docElement.getValue(), otherDocsList);
                 }
             }
@@ -500,8 +465,6 @@ public class CafcassCaseDataService {
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
                     String category = isNoticeOfHearingOrder(caseData, docElement.getValue()) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
-                    log.info("[DEBUG] processServiceOfApplicationEmailedDocs -> category={}, filename={}",
-                             category, docElement.getValue().getDocumentFileName());
                     addInOtherDocuments(category, docElement.getValue(), otherDocsList);
                 }
             }
@@ -541,60 +504,43 @@ public class CafcassCaseDataService {
     }
 
     private void populateReviewDocuments(List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
-        System.out.println("[DEBUG] in populateReviewDocuments");
         if (CollectionUtils.isNotEmpty(caseData.getCourtStaffUploadDocListDocTab())) {
-            System.out.println("court staff upload:");
-            System.out.println(caseData.getCourtStaffUploadDocListDocTab());
             parseQuarantineLegalDocs(
                 otherDocsList,
                 caseData.getCourtStaffUploadDocListDocTab(), caseData
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
-            System.out.println("LegalProfUpload:");
-            System.out.println(caseData.getLegalProfUploadDocListDocTab());
             parseQuarantineLegalDocs(
                 otherDocsList,
                 caseData.getLegalProfUploadDocListDocTab(), caseData
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
-            System.out.println("CafcassUploadDoc:");
-            System.out.println(caseData.getCafcassUploadDocListDocTab());
             parseQuarantineLegalDocs(
                 otherDocsList,
                 caseData.getCafcassUploadDocListDocTab(), caseData
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getLocalAuthorityUploadDocListDocTab())) {
-            System.out.println("LocalAuthorityUpload:");
-            System.out.println(caseData.getLocalAuthorityUploadDocListDocTab());
             parseQuarantineLegalDocs(
                 otherDocsList,
                 caseData.getLocalAuthorityUploadDocListDocTab(), caseData
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
-            System.out.println("CitizenUploaded:");
-            System.out.println(caseData.getCitizenUploadedDocListDocTab());
             parseQuarantineLegalDocs(
                 otherDocsList,
                 caseData.getCitizenUploadedDocListDocTab(), caseData
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
-            System.out.println("Confidential:");
-            System.out.println(caseData.getConfidentialDocuments());
             parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments(), caseData);
         }
         if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
-            System.out.println("BulkScanned:");
-            System.out.println(caseData.getBulkScannedDocListDocTab());
             parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab(), caseData);
         }
         if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
-            System.out.println("Restricted:");
-            System.out.println(caseData.getRestrictedDocuments());
             parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments(), caseData);
         }
     }
@@ -719,8 +665,7 @@ public class CafcassCaseDataService {
                 parseCategoryAndCreateList(
                     quarantineLegalDocElement.getValue().getCategoryId(),
                     document,
-                    otherDocsList,
-                    caseData
+                    otherDocsList
                 );
             }
         });
@@ -728,17 +673,14 @@ public class CafcassCaseDataService {
 
     private void parseCategoryAndCreateList(String category,
                                             uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
-                                            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList,
-                                            CafCassCaseData caseData) {
+                                            List<Element<uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments>> otherDocsList) {
         if ((CollectionUtils.isEmpty(excludedDocumentCategoryList) || !excludedDocumentCategoryList.contains(category))
             && (CollectionUtils.isEmpty(excludedDocumentList) || !checkIfDocumentsNeedToExclude(
             excludedDocumentList,
             caseDocument.getDocumentFileName()
         ))) {
-            String resolvedCategory = ANY_OTHER_DOC.equals(category) && isNoticeOfHearingOrder(caseData, caseDocument)
-                ? NOTICE_OF_HEARING
-                : category;
-            addInOtherDocuments(resolvedCategory, caseDocument, otherDocsList);
+            addInOtherDocuments(category, caseDocument, otherDocsList);
+
         }
     }
 
@@ -749,10 +691,6 @@ public class CafcassCaseDataService {
             if (null != caseDocument && caseDocument.getDocumentUrl() != null
                 && !caseDocument.getDocumentUrl().endsWith(REDACTED_DOCUMENT_UUID)) {
                 Document documentOther = buildFromCaseDocument(caseDocument);
-                System.out.println("[DEBUG] inside addInOtherDocuments, adding: ");
-                System.out.println(caseDocument.getDocumentFileName());
-                System.out.println(category);
-                System.out.println(DocTypeOtherDocumentsEnum.getValue(category));
                 otherDocsList.add(Element.<OtherDocuments>builder()
                                       .id(UUID.randomUUID())
                                       .value(OtherDocuments.builder()
