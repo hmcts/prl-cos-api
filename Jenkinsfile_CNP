@@ -31,6 +31,7 @@ def setPreviewEnvVars() {
   env.CORE_CASE_DATA_API_URL = "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
   env.CCD_CASE_DOCS_AM_API = "http://ccd-case-document-am-api-aat.service.core-compute-aat.internal"
   env.ACA_SERVICE_API_BASEURL = "http://aac-manage-case-assignment-aat.service.core-compute-aat.internal"
+  env.HEARING_API_BASEURL = "http://fis-hmc-api-aat.service.core-compute-aat.internal"
 
   def defsPrefix = "pr-defs:pr-"
   def label = githubApi
@@ -41,6 +42,7 @@ def setPreviewEnvVars() {
     env.CORE_CASE_DATA_API_URL = "https://ccd-data-store-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
     env.CCD_CASE_DOCS_AM_API = "https://ccd-case-document-am-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
     env.ACA_SERVICE_API_BASEURL = "https://aac-manage-case-assignment-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
+    env.HEARING_API_BASEURL = "https://fis-hmc-api-prl-ccd-definitions-pr-${defsPrNumber}.preview.platform.hmcts.net"
   }
 
   echo "CORE_CASE_DATA_API_URL ${env.CORE_CASE_DATA_API_URL}"
@@ -76,7 +78,8 @@ def secrets = [
       secret('judge-testuser-one', 'JUDGE_USER_NAME'),
       secret('judge-testpassword', 'JUDGE_PASSWORD'),
       secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
-      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD")
+      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD"),
+      secret("docmosis-api-key", "DOCMOSIS_ACCESS_KEY")
    ]
 ]
 

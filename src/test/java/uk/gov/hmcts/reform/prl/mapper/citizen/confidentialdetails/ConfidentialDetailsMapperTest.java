@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -75,7 +76,7 @@ public class ConfidentialDetailsMapperTest {
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
             .isAddressConfidential(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .currentRespondent(YesOrNo.Yes)
@@ -199,7 +200,7 @@ public class ConfidentialDetailsMapperTest {
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
             .isCurrentAddressKnown(YesOrNo.Yes)
-            .liveInRefuge(YesOrNo.Yes)
+            .liveInRefuge(YesNoIDontKnowV2.Yes)
             .isAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)
@@ -233,7 +234,7 @@ public class ConfidentialDetailsMapperTest {
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
             .isCurrentAddressKnown(YesOrNo.No)
-            .liveInRefuge(YesOrNo.No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .isAddressConfidential(YesOrNo.Yes)
             .isPhoneNumberConfidential(YesOrNo.Yes)
             .isEmailAddressConfidential(YesOrNo.Yes)

@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -52,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
@@ -76,6 +78,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -133,6 +136,9 @@ public class ManageOrderEmailServiceTest {
     private BulkPrintService bulkPrintService;
 
     @Mock
+    private DocumentGenService documentGenService;
+
+    @Mock
     OrganisationService organisationService;
     @Mock
     SystemUserService systemUserService;
@@ -146,6 +152,8 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+    @Captor
+    ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigArgumentCaptor;
 
     Document englishOrderDoc;
     Document welshOrderDoc;
@@ -154,8 +162,6 @@ public class ManageOrderEmailServiceTest {
 
     @Before
     public void setUp() {
-
-
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -1001,10 +1007,13 @@ public class ManageOrderEmailServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
-                                                                   anyString(),
-                                                                   any(SendgridEmailConfig.class))).thenReturn(true);
+                                                                                anyString(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture()))
+            .thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, dataMap);
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
 
         Mockito.verifyNoInteractions(emailService);
     }
@@ -1069,12 +1078,14 @@ public class ManageOrderEmailServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
-                                                                   anyString(),
-                                                                   any(SendgridEmailConfig.class))).thenReturn(true);
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class), anyString(),
+                                                                   sendgridEmailConfigArgumentCaptor.capture()))
+            .thenReturn(true);
 
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, dataMap);
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
         Mockito.verifyNoInteractions(emailService);
     }
 
@@ -1129,16 +1140,15 @@ public class ManageOrderEmailServiceTest {
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
-                                                                   anyString(),
-                                                                   any(SendgridEmailConfig.class)))
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class), anyString(),
+                                                                   sendgridEmailConfigArgumentCaptor.capture()))
             .thenReturn(true);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, dataMap);
 
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
         Mockito.verifyNoInteractions(emailService);
     }
-
 
     @Test
     public void testSendEmailWhenOrderServedShouldInvoke() throws Exception {
@@ -1177,8 +1187,10 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
-                                                                                               Mockito.any(),
-                                                                                               Mockito.any());
+            Mockito.any(),
+            sendgridEmailConfigArgumentCaptor.capture());
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1268,9 +1280,11 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
-                                                                                               Mockito.any(),
-                                                                                               Mockito.any());
+        Mockito.verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+            Mockito.any(),
+            sendgridEmailConfigArgumentCaptor.capture());
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
         Mockito.verifyNoInteractions(emailService);
     }
 
@@ -1333,9 +1347,11 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
-                                                                                               Mockito.any(),
-                                                                                               Mockito.any());
+        Mockito.verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+            Mockito.any(),
+            sendgridEmailConfigArgumentCaptor.capture());
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1388,8 +1404,10 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(sendgridService,Mockito.times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+        Mockito.verify(sendgridService)
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), sendgridEmailConfigArgumentCaptor.capture());
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1443,8 +1461,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(sendgridService,Mockito.times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+        Mockito.verify(sendgridService)
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1494,8 +1513,9 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(sendgridService,Mockito.times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+        Mockito.verify(sendgridService)
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1546,8 +1566,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(sendgridService,Mockito.times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+        Mockito.verify(sendgridService)
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1596,8 +1617,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(sendgridService,Mockito.times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+        Mockito.verify(sendgridService)
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -1648,8 +1670,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(sendgridService,Mockito.times(1))
-            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
+        Mockito.verify(sendgridService)
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -2141,7 +2164,11 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture());
+
+        sendgridEmailConfigArgumentCaptor.getAllValues()
+            .forEach(config -> verifySendGridConfigContainsCaseReference(config, caseData.getId()));
     }
 
     @Test
@@ -2235,7 +2262,11 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataEmailOption, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture());
+
+        sendgridEmailConfigArgumentCaptor.getAllValues()
+            .forEach(config -> verifySendGridConfigContainsCaseReference(config, caseData.getId()));
     }
 
     @Test
@@ -2330,7 +2361,11 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture());
+
+        sendgridEmailConfigArgumentCaptor.getAllValues()
+            .forEach(config -> verifySendGridConfigContainsCaseReference(config, caseData.getId()));
     }
 
     @Test
@@ -2424,7 +2459,11 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCourtBaliff, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture());
+
+        sendgridEmailConfigArgumentCaptor.getAllValues()
+            .forEach(config -> verifySendGridConfigContainsCaseReference(config, caseData.getId()));
     }
 
     @Test
@@ -2519,7 +2558,11 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture());
+
+        sendgridEmailConfigArgumentCaptor.getAllValues()
+            .forEach(config -> verifySendGridConfigContainsCaseReference(config, caseData.getId()));
     }
 
     @Test
@@ -2613,7 +2656,11 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCourtAdmin, dataMap);
-        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                                sendgridEmailConfigArgumentCaptor.capture());
+
+        sendgridEmailConfigArgumentCaptor.getAllValues()
+            .forEach(config -> verifySendGridConfigContainsCaseReference(config, caseData.getId()));
     }
 
     @Test
@@ -2663,10 +2710,10 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                      sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
-
-
 
     @Test
     public void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100Case() throws IOException {
@@ -2760,7 +2807,8 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -2855,7 +2903,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataC100Welsh, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                      sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -2950,11 +3000,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        );
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                      sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -3049,11 +3097,9 @@ public class ManageOrderEmailServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseDataCaWelsh, dataMap);
-        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        );
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                      sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -3130,11 +3176,9 @@ public class ManageOrderEmailServiceTest {
             orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId()
         );
 
-        Mockito.verify(sendgridService, Mockito.times(1)).sendEmailUsingTemplateWithAttachments(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
-        );
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(),
+                                                                      sendgridEmailConfigArgumentCaptor.capture());
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), caseData.getId());
     }
 
     @Test
@@ -4049,15 +4093,16 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, new HashMap<>());
 
-        ArgumentCaptor<SendgridEmailConfig> configCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
         verify(sendgridService, atLeastOnce())
-            .sendEmailUsingTemplateWithAttachments(any(), any(), configCaptor.capture());
+            .sendEmailUsingTemplateWithAttachments(any(), any(), sendgridEmailConfigArgumentCaptor.capture());
 
-        List<String> capturedEmails = configCaptor.getAllValues().stream()
+        List<String> capturedEmails = sendgridEmailConfigArgumentCaptor.getAllValues().stream()
             .map(SendgridEmailConfig::getToEmailAddress)
             .collect(Collectors.toList());
 
         assertTrue(capturedEmails.contains("respsol@law.com"));
+
+        verifySendGridConfigContainsCaseReference(sendgridEmailConfigArgumentCaptor.getValue(), cd.getId());
     }
 
     @Test
@@ -4295,8 +4340,7 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("Bearer token", cd, caseDataMap);
 
         // Verify no email sending was attempted since we returned early
-        verify(sendgridService, times(0)).sendEmailUsingTemplateWithAttachments(
-            any(), any(), any());
+        verifyNoInteractions(sendgridService);
     }
 
     @Test
@@ -4351,5 +4395,65 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("auth", cd, caseDataMap);
 
         verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
+    }
+
+    @Test
+    public void testSendOrderAndAdditionalDocsToOtherPersonViaPostIncludesAddressCoverLetter() throws Exception {
+        //Given
+        caseData = caseData.toBuilder()
+            .othersToNotify(List.of(element(uuid, otherPerson)))
+            .manageOrders(ManageOrders.builder()
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .otherParties(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(documentGenService.generateCoverLetter(
+            anyString(),
+            any(CaseData.class),
+            anyString(),
+            any(Address.class)
+        )).thenReturn(List.of(Document.builder()
+                          .documentUrl("coverLetterUrl")
+                          .documentBinaryUrl("coverLetterUrl")
+                          .documentFileName("coverLetter.pdf")
+                          .build()));
+
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, AUTH_TOKEN, otherPerson.getAddress(),
+                                                            otherPerson.getLabelForDynamicList(),
+                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            .thenReturn(List.of(coverLetterDoc));
+
+        when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()))
+            .thenReturn(uuid);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(caseData.getOrderCollection());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("orderCollection", caseData.getOrderCollection());
+
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
+
+        //Then
+        ArgumentCaptor<List<Document>> documentsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(bulkPrintService, atLeastOnce()).send(
+            anyString(),
+            anyString(),
+            anyString(),
+            documentsCaptor.capture(),
+            anyString()
+        );
+
+        List<Document> capturedDocs = documentsCaptor.getValue();
+        assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
+        assertEquals(coverLetterDoc.getDocumentFileName(), capturedDocs.get(1).getDocumentFileName());
+    }
+  
+    private void verifySendGridConfigContainsCaseReference(SendgridEmailConfig sendgridEmailConfig, long caseReference) {
+        assertEquals(String.valueOf(caseReference), sendgridEmailConfig.getCaseReference());
     }
 }

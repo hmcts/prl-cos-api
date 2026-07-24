@@ -78,7 +78,7 @@ public class FeeAndPayServiceRequestControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
     public static final String HWF_SUPPRESSION_ERROR_MESSAGE =
-        "Help with Fees is not yet available in Family Private Law digital service. Select 'No' to continue with your application";
+        "Help with Fees is not yet available in the Private Law digital service. Select 'No' to continue with your application.";
 
     @Before
     public void setUp() {

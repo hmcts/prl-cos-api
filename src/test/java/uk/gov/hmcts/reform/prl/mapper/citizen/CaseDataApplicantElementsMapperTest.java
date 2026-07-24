@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.ApplicantDto;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
@@ -134,7 +135,7 @@ class CaseDataApplicantElementsMapperTest {
     void shouldSetAllDetailsConfidentialWhenLiveInRefuge() {
         // given
         ApplicantDto applicant = buildBasicApplicantDto();
-        applicant.setLiveInRefuge(Yes);
+        applicant.setLiveInRefuge(YesNoIDontKnowV2.Yes);
         applicantDetails = buildApplicantDetailsElements(List.of(applicant));
 
         // when
@@ -191,7 +192,7 @@ class CaseDataApplicantElementsMapperTest {
             .contactDetailsPrivateAlternative(new String[]{})
             .detailsKnown("dontKnow")
             .relationshipDetails(new RelationshipDetails(List.of(ChildRelationship.builder().build())))
-            .liveInRefuge(No)
+            .liveInRefuge(YesNoIDontKnowV2.No)
             .startAlternative("No")
             .build();
     }
