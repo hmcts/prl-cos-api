@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -857,4 +858,111 @@ class CafcassCaseDataServiceTest {
         assertTrue(otherDocs.contains("testEmail"));
     }
 
+    @Test
+    void shouldCategoriseUploadOrderDocAsNoticeOfHearing() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String documentId = "11111111-1111-1111-1111-111111111111";
+        Document uploadOrderDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + documentId)
+            .documentFileName("NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(documentId)
+            .documentFilename("NoticeOfHearing(CA).pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("noticeOfHearingParties")
+            .orderDocument(orderDocument)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .uploadOrderDoc(uploadOrderDoc)
+            .orderCollection(List.of(uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                                         .id(UUID.randomUUID())
+                                         .value(caseOrder)
+                                         .build()
+            ))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().getFirst().getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.noticeOfHearing, otherDocuments.getFirst().getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldCategoriseUploadOrderDocAsAnyOtherDocWhenOrderTypeDoesNotMatch() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String documentId = "22222222-2222-2222-2222-222222222222";
+        Document uploadOrderDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + documentId)
+            .documentFileName("SomeOtherOrder.pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(documentId)
+            .documentFilename("SomeOtherOrder.pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("someOtherOrderType")
+            .orderDocument(orderDocument)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .uploadOrderDoc(uploadOrderDoc)
+            .orderCollection(List.of(uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                                         .id(UUID.randomUUID())
+                                         .value(caseOrder)
+                                         .build()
+            ))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().getFirst().getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.anyOtherDoc, otherDocuments.getFirst().getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldCategoriseUploadOrderDocAsAnyOtherDocWhenNoMatchingOrderInCollection() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String documentId = "33333333-3333-3333-3333-333333333333";
+        Document uploadOrderDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + documentId)
+            .documentFileName("StandaloneOrder.pdf")
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .uploadOrderDoc(uploadOrderDoc)
+            .orderCollection(null)
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().getFirst().getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.anyOtherDoc, otherDocuments.getFirst().getValue().getDocumentTypeOther());
+    }
 }
