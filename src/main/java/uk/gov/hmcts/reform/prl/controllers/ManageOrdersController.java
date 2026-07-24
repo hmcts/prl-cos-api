@@ -33,9 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -115,6 +113,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenVa
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.validateCustomOrderHearingDetails;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getDraftOrderId;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
 @Slf4j
 @RestController
@@ -504,7 +504,7 @@ public class ManageOrdersController {
             if (finalOrder) {
                 newDraftOrderCollectionId = getOrderId(caseDataUpdated);
             } else {
-                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated);
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated, loggedInUserType);
             }
 
             manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
@@ -563,10 +563,11 @@ public class ManageOrdersController {
             Boolean currentOrderADraftOrder = (Boolean) caseDataUpdated.get(CURRENT_ORDER_A_DRAFT_ORDER);
             boolean finalOrder = nonNull(currentOrderADraftOrder) && !currentOrderADraftOrder;
             UUID newDraftOrderCollectionId;
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             if (finalOrder) {
                 newDraftOrderCollectionId = getOrderId(caseDataUpdated);
             } else {
-                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated);
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated, loggedInUserType);
             }
             caseDataUpdated.remove(CURRENT_ORDER_A_DRAFT_ORDER);
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
@@ -590,41 +591,8 @@ public class ManageOrdersController {
     }
 
 
-    @SuppressWarnings("unchecked")
-    private UUID getDraftOrderId(String authorisation, Map<String, Object> caseDataUpdated) {
-        UUID newDraftOrderCollectionId = null;
-        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        if ((UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType))
-            && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
-            && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
-
-            var draftOrderCollection = (List) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
-            if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
-                Object first = draftOrderCollection.getFirst();
-                if (first instanceof Map<?, ?>) {
-                    List<Map<String, Object>> orders = (List<Map<String, Object>>) draftOrderCollection;
-                    newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                        ? UUID.fromString((String)orders.getFirst().get("id")) : null;
-                }
-                if (first instanceof  Element<?>) {
-                    List<Element<DraftOrder>> orders = (List<Element<DraftOrder>>) draftOrderCollection;
-                    newDraftOrderCollectionId = orders.getFirst().getId();
-                }
-            }
-        }
-        return newDraftOrderCollectionId;
-    }
 
 
-    @SuppressWarnings("unchecked")
-    private UUID getOrderId(Map<String, Object> caseDataUpdated) {
-        UUID orderCollectionId = null;
-        if (caseDataUpdated.containsKey(ORDER_COLLECTION) && null != caseDataUpdated.get(ORDER_COLLECTION)) {
-            List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataUpdated.get(ORDER_COLLECTION);
-            orderCollectionId = CollectionUtils.isNotEmpty(orderCollection) ? orderCollection.getFirst().getId() : null;
-        }
-        return orderCollectionId;
-    }
 
     /*
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection

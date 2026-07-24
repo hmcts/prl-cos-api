@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLEC
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
 @Slf4j
 @SuppressWarnings({"squid:S5665"})
@@ -553,7 +554,9 @@ public class EditAndApproveDraftOrderController {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 caseDataUpdated
             );
-            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+
+            UUID newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

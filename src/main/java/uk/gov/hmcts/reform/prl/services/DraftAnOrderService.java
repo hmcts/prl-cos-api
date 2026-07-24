@@ -649,6 +649,7 @@ public class DraftAnOrderService {
             }
         }
         return OrderDetails.builder()
+            .checkIsThisUrgent(draftOrder.getCheckIsThisUrgent())
             .orderType(String.valueOf(draftOrder.getOrderType()))
             .orderTypeId(draftOrder.getOrderTypeId())
             .typeOfOrder(typeOfOrder != null
