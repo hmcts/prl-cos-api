@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.exception.InvalidClientException;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
@@ -72,6 +73,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -79,6 +81,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AMEND_ORDER_SEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENT_ORDER_A_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DOC;
@@ -99,6 +102,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createCustomOrder;
@@ -256,7 +260,7 @@ public class ManageOrdersController {
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
-                JudgeOrMagistrateTitleEnum judgeTitle = null;
+                JudgeOrMagistrateTitleEnum judgeTitle;
 
                 // Legal advisers are not in JRD, so set title directly
                 if (userTypeDetails.isLegalAdviser()) {
@@ -460,7 +464,7 @@ public class ManageOrdersController {
                 List<?> orders = (List<?>) caseDataUpdated.get(ORDER_COLLECTION);
                 log.info("Before submitAllTabsUpdate: orderCollection size={}", orders.size());
                 if (!orders.isEmpty()) {
-                    Object firstOrder = orders.get(0);
+                    Object firstOrder = orders.getFirst();
                     if (firstOrder instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> orderMap = (Map<String, Object>) firstOrder;
@@ -487,8 +491,23 @@ public class ManageOrdersController {
                     startAllTabsUpdateDataContent.startEventResponse(),
                     startAllTabsUpdateDataContent.eventRequestData(),
                     caseDataUpdated);
+            boolean finalOrder = false;
+            boolean saveAsDraft = manageOrderService.isSaveAsDraft(caseData);
+            String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+            if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+                if (!(!noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) || saveAsDraft)) {
+                    finalOrder = true;
+                }
+            }
 
-            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+            UUID newDraftOrderCollectionId;
+            if (finalOrder) {
+                newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            } else {
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated);
+            }
+
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
 
             // Note: Custom orders are now sealed directly during combining (above), not here
             // This avoids issues with CDAM association timing
@@ -541,7 +560,15 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             //Add additional logged-in user check & empty check, to avoid null pointer & class cast exception, it needs refactoring in future
             //Refactoring should be done for each journey in manage order ie upload order along with the users ie court admin
-            UUID newDraftOrderCollectionId = getDraftOrderId(authorisation, caseData, caseDataUpdated);
+            Boolean currentOrderADraftOrder = (Boolean) caseDataUpdated.get(CURRENT_ORDER_A_DRAFT_ORDER);
+            boolean finalOrder = nonNull(currentOrderADraftOrder) && !currentOrderADraftOrder;
+            UUID newDraftOrderCollectionId;
+            if (finalOrder) {
+                newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            } else {
+                newDraftOrderCollectionId = getDraftOrderId(authorisation, caseDataUpdated);
+            }
+            caseDataUpdated.remove(CURRENT_ORDER_A_DRAFT_ORDER);
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation,
                                                                          caseData,
                                                                          callbackRequest.getEventId(),
@@ -562,21 +589,41 @@ public class ManageOrdersController {
         }
     }
 
-    private UUID getDraftOrderId(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+
+    @SuppressWarnings("unchecked")
+    private UUID getDraftOrderId(String authorisation, Map<String, Object> caseDataUpdated) {
         UUID newDraftOrderCollectionId = null;
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-            && !caseData.getManageOrdersOptions().equals(servedSavedOrders)
-            && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+        if ((UserRoles.COURT_ADMIN.name().equals(loggedInUserType) || UserRoles.JUDGE.name().equals(loggedInUserType))
             && caseDataUpdated.containsKey(DRAFT_ORDER_COLLECTION)
             && null != caseDataUpdated.get(DRAFT_ORDER_COLLECTION)) {
-            List<Element<DraftOrder>> draftOrderCollection = (List<Element<DraftOrder>>) caseDataUpdated.get(
-                DRAFT_ORDER_COLLECTION);
 
-            newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
-                ? draftOrderCollection.getFirst().getId() : null;
+            var draftOrderCollection = (List) caseDataUpdated.get(DRAFT_ORDER_COLLECTION);
+            if (CollectionUtils.isNotEmpty(draftOrderCollection)) {
+                Object first = draftOrderCollection.getFirst();
+                if (first instanceof Map<?, ?>) {
+                    List<Map<String, Object>> orders = (List<Map<String, Object>>) draftOrderCollection;
+                    newDraftOrderCollectionId = CollectionUtils.isNotEmpty(draftOrderCollection)
+                        ? UUID.fromString((String)orders.getFirst().get("id")) : null;
+                }
+                if (first instanceof  Element<?>) {
+                    List<Element<DraftOrder>> orders = (List<Element<DraftOrder>>) draftOrderCollection;
+                    newDraftOrderCollectionId = orders.getFirst().getId();
+                }
+            }
         }
         return newDraftOrderCollectionId;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private UUID getOrderId(Map<String, Object> caseDataUpdated) {
+        UUID orderCollectionId = null;
+        if (caseDataUpdated.containsKey(ORDER_COLLECTION) && null != caseDataUpdated.get(ORDER_COLLECTION)) {
+            List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataUpdated.get(ORDER_COLLECTION);
+            orderCollectionId = CollectionUtils.isNotEmpty(orderCollection) ? orderCollection.getFirst().getId() : null;
+        }
+        return orderCollectionId;
     }
 
     /*
@@ -769,6 +816,7 @@ public class ManageOrdersController {
                         caseData,
                         PrlAppsConstants.ENGLISH
                     ));
+                    caseDataUpdated.remove(CURRENT_ORDER_A_DRAFT_ORDER);
                 }
                 CaseData modifiedCaseData = objectMapper.convertValue(
                     caseDataUpdated,

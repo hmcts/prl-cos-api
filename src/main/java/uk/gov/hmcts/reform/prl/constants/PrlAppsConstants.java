@@ -1010,7 +1010,7 @@ public class PrlAppsConstants {
     public static final String CUSTOM_C43_ORDER_DETAILS = "customC43OrderDetails";
     public static final String CUSTOM_C21_ORDER_DETAILS = "customC21OrderDetails";
     public static final String LOGGED_IN_USER_TYPE = "loggedInUserType";
-
+    public static final String CURRENT_ORDER_A_DRAFT_ORDER = "currentOrderADraftOrder";
     public static final String CAFCASS_SERVED_OPTIONS = "cafcassServedOptions";
 
     public static final String COURTNAV_USER = "courtnav";
@@ -1106,6 +1106,5 @@ public class PrlAppsConstants {
     public static final String CATEGORY_ID = "category_id";
     public static final String DOCUMENT_FILENAME = "document_filename";
 
-    public static final String TASK_TRIGGERED_BY = "RequestOrder";
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
 }
