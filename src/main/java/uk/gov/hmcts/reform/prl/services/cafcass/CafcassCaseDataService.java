@@ -598,12 +598,12 @@ public class CafcassCaseDataService {
         }
         if (CollectionUtils.isNotEmpty(caseData.getC8FormDocumentsUploaded())) {
             caseData.getC8FormDocumentsUploaded().parallelStream().forEach(c8FormDocumentsUploaded ->
-                                                                               populateRespondentDocument(
-                                                                                   c8FormDocumentsUploaded,
-                                                                                   null,
-                                                                                   CONFIDENTIAL,
-                                                                                   otherDocsList
-                                                                               ));
+                populateRespondentDocument(
+                    c8FormDocumentsUploaded,
+                    null,
+                    CONFIDENTIAL,
+                    otherDocsList
+                ));
         }
         if (CollectionUtils.isNotEmpty(caseData.getOtherPartyC8Documents())) {
             caseData.getOtherPartyC8Documents().parallelStream().forEach(
