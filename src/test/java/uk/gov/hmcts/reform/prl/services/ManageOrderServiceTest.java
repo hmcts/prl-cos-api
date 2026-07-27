@@ -8419,4 +8419,34 @@ class ManageOrderServiceTest {
             .containsEntry("localAuthorityNeedToProvideReport", null)
             .containsEntry("cafcassOrCymruNeedToProvideReport", null);
     }
+
+    @Test
+    void testHandleFetchOrderDetailsForUpload() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails(
+            "testAuth", callbackRequest, ENGLISH, null);
+        assertTrue(caseDataUpdated.get("selectedOrder").toString().contains(ChildArrangementOrdersEnum.financialCompensationC82.getDisplayedValue()));
+
+    }
 }

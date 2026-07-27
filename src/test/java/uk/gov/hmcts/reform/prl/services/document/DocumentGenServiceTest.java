@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import feign.FeignException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -62,6 +60,8 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationRequest;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
@@ -86,6 +86,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
@@ -161,7 +162,7 @@ public class DocumentGenServiceTest {
     @Mock
     private CaseDocumentClient caseDocumentClient;
     @Mock
-    private DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
     @Mock
     private AuthTokenGenerator authTokenGenerator;
     @Mock
@@ -174,6 +175,7 @@ public class DocumentGenServiceTest {
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
+    private static final String CASE_ID = "1234345678934523";
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
     private GeneratedDocumentInfo generatedDocumentInfo;
     private CaseData c100CaseData;
@@ -1163,7 +1165,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoName() {
-        documentGenService.convertToPdf("auth", Document.builder().build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -1171,7 +1173,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoPeriods() {
-        documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().documentFileName("i").build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -2705,11 +2707,10 @@ public class DocumentGenServiceTest {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("FL401-Final.docx")
             .build();
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class))).thenReturn(document);
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenReturn(generatedDocumentInfo);
-
-        documentGenService.convertToPdf(AUTH_TOKEN, document);
+        Document result = documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document);
+        assertEquals(document, result);
 
         verify(caseDocumentClient).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
@@ -2738,16 +2739,14 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenReturn(generatedDocumentInfo);
-
         assertExpectedException(() -> documentGenService
-            .convertToPdf(AUTH_TOKEN, document), InvalidResourceException.class, "Doc name FL401-Final.docx");
+            .convertToPdf(CASE_ID, AUTH_TOKEN, document), InvalidResourceException.class,
+                                "Case ID 1234345678934523: Doc name FL401-Final.docx");
+        verifyNoInteractions(pdfGenerationService);
     }
 
-    // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
     @Test
-    public void testForConvertToPdfFeignException() {
+    public void testForConvertToPdfConversionException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2768,40 +2767,11 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenThrow(FeignException.class);
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class)))
+            .thenThrow(new PdfConversionException("Failed to generate and store PDF"));
 
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
-                                "PDF Conversion error");
-    }
-
-    @Test
-    public void testForConvertToPdfRuntimeException() {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("TestUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Resource expectedResource = new ClassPathResource("documents/document.pdf");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(authTokenGenerator.generate()).thenReturn("s2s token");
-        when(caseDocumentClient.getDocumentBinary(AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()))
-            .thenReturn(expectedResponse);
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("FL401-Final.docx")
-            .build();
-
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenThrow(RuntimeException.class);
-
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
-                                "PDF Conversion error");
+        assertExpectedException(() -> documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document), PdfConversionException.class,
+                                "Failed to generate and store PDF");
     }
 
     @Test

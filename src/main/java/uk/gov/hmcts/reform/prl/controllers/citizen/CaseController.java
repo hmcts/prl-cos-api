@@ -170,6 +170,7 @@ public class CaseController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Optional<UserInfo> userInfo = authorisationService.authoriseUser(authorisation);
             if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
+                log.info("Citizen Dashboard: retrieving cases for citizen user id: {}", userInfo.get().getUid());
                 caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
             } else {
                 throw (new RuntimeException(INVALID_ROLE));

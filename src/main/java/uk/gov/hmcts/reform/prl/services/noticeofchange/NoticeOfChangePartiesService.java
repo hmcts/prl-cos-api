@@ -147,6 +147,43 @@ public class NoticeOfChangePartiesService {
         return data;
     }
 
+    /**
+     * Method to sync the current applicant/respondent information into the NoC answer fields,
+     * clearing them first to avoid stale NoC answer field values.
+     * @param caseData the current case data.
+     * @param representing the solicitors representing litigants.
+     * @return {@code Map<String, Object>} updated map with the noc answers.
+     */
+    public Map<String, Object> syncNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
+        log.info("syncing noc answers");
+        Map<String, Object> nocAnswerUpdates = clearNocAnswerFields(caseData, representing);
+        nocAnswerUpdates.putAll(generate(caseData, representing));
+        return nocAnswerUpdates;
+    }
+
+    /**
+     * Method to clear all Noc answers fields, make them null, avoid stale values.
+     * @param caseData the current case data.
+     * @param representing the solicitors representing litigants.
+     * @return {@code Map<String, Object>} clean map with the empty noc answers.
+     */
+    private Map<String, Object> clearNocAnswerFields(CaseData caseData, SolicitorRole.Representing representing) {
+
+        Map<String, Object> nocAnswerUpdates = new HashMap<>();
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("clearing noc answers for C100 application");
+            List<SolicitorRole> roles = SolicitorRole.matchingRoles(representing);
+            for (int i = 0; i < roles.size(); i++) {
+                nocAnswerUpdates.put(
+                    String.format(representing.getNocAnswersTemplate(), i + 1),
+                    null
+                );
+            }
+        }
+
+        return nocAnswerUpdates;
+    }
+
     public void generateC100NocDetails(CaseData caseData, SolicitorRole.Representing representing,
                                        NoticeOfChangeAnswersPopulationStrategy strategy, Map<String, Object> data) {
 
