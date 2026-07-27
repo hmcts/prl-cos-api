@@ -76,7 +76,7 @@ public class CafcassCaseDataService {
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
     public static final String NOTICE_OF_HEARING = "noticeOfHearing";
     private static final Set<String> NOTICE_OF_HEARING_ORDER_TYPES = Set.of(
-        "noticeOfHearing",
+        NOTICE_OF_HEARING,
         "noticeOfHearingParties"
     );
 
@@ -507,41 +507,41 @@ public class CafcassCaseDataService {
         if (CollectionUtils.isNotEmpty(caseData.getCourtStaffUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCourtStaffUploadDocListDocTab(), caseData
+                caseData.getCourtStaffUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getLegalProfUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getLegalProfUploadDocListDocTab(), caseData
+                caseData.getLegalProfUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCafcassUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCafcassUploadDocListDocTab(), caseData
+                caseData.getCafcassUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getLocalAuthorityUploadDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getLocalAuthorityUploadDocListDocTab(), caseData
+                caseData.getLocalAuthorityUploadDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadedDocListDocTab())) {
             parseQuarantineLegalDocs(
                 otherDocsList,
-                caseData.getCitizenUploadedDocListDocTab(), caseData
+                caseData.getCitizenUploadedDocListDocTab()
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getConfidentialDocuments())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments(), caseData);
+            parseQuarantineLegalDocs(otherDocsList, caseData.getConfidentialDocuments());
         }
         if (CollectionUtils.isNotEmpty(caseData.getBulkScannedDocListDocTab())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab(), caseData);
+            parseQuarantineLegalDocs(otherDocsList, caseData.getBulkScannedDocListDocTab());
         }
         if (CollectionUtils.isNotEmpty(caseData.getRestrictedDocuments())) {
-            parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments(), caseData);
+            parseQuarantineLegalDocs(otherDocsList, caseData.getRestrictedDocuments());
         }
     }
 
@@ -646,8 +646,7 @@ public class CafcassCaseDataService {
     }
 
     private void parseQuarantineLegalDocs(List<Element<OtherDocuments>> otherDocsList,
-                                          List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs,
-                                          CafCassCaseData caseData) {
+                                          List<uk.gov.hmcts.reform.prl.models.Element<QuarantineLegalDoc>> quarantineLegalDocs) {
         quarantineLegalDocs.parallelStream().forEach(quarantineLegalDocElement -> {
             uk.gov.hmcts.reform.prl.models.documents.Document document = null;
             if (!StringUtils.isEmpty(quarantineLegalDocElement.getValue().getCategoryId())) {
