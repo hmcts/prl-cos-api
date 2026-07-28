@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -187,6 +188,40 @@ class PartyLevelCaseFlagsServiceTest {
             caseData, 0, DARESPONDENTSOLICITOR, false);
 
         assertEquals(FL401_CASE_TYPE, updatedCaseData.getCaseTypeOfApplication());
+    }
+
+    @Test
+    void testGenerateTargetedLegalRepresentativeFlagUpdatesForC100Respondent() {
+        CaseData caseData = createC100CaseDataWithSolicitorRepresentative();
+
+        Map<String, Object> updates = partyLevelCaseFlagsService.generateTargetedLegalRepresentativeFlagUpdates(
+            caseData,
+            SolicitorRole.C100RESPONDENTSOLICITOR1
+        );
+
+        assertThat(updates)
+            .containsEntry("caRespondentSolicitor1ExternalFlags", null)
+            .containsEntry("caRespondentSolicitor1InternalFlags", null)
+            .containsEntry("caRespondentBarrister1ExternalFlags", null)
+            .containsEntry("caRespondentBarrister1InternalFlags", null)
+            .hasSize(4);
+    }
+
+    @Test
+    void testGenerateTargetedLegalRepresentativeFlagUpdatesForFl401Applicant() {
+        CaseData caseData = createFl401CaseDataWithSolicitorRepresentative();
+
+        Map<String, Object> updates = partyLevelCaseFlagsService.generateTargetedLegalRepresentativeFlagUpdates(
+            caseData,
+            SolicitorRole.FL401APPLICANTSOLICITOR
+        );
+
+        assertThat(updates)
+            .containsEntry("daApplicantSolicitorExternalFlags", null)
+            .containsEntry("daApplicantSolicitorInternalFlags", null)
+            .containsEntry("daApplicantBarristerExternalFlags", null)
+            .containsEntry("daApplicantBarristerInternalFlags", null)
+            .hasSize(4);
     }
 
     @Test

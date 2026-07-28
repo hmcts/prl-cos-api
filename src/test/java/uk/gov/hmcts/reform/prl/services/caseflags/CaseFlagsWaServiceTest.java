@@ -175,6 +175,25 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
+    public void testCheckAllRequestedFlagsAndCloseTaskWhenCaseDataIsNull() {
+        caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(null);
+
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
+    public void testCheckAllRequestedFlagsAndCloseTaskWhenReviewWrapperIsNull() {
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .caseFlags(getCaseLevelFlags(ACTIVE))
+            .build();
+
+        caseFlagsWaService.checkAllRequestedFlagsAndCloseTask(caseData);
+
+        verifyNoInteractions(allTabService);
+    }
+
+    @Test
     public void testCheckAllRequestedFlagsAndCloseTasksWhenCaseFlagsAreNotInRequestedState() {
 
         Flags caseLevelFlags = getCaseLevelFlags(ACTIVE);
@@ -426,6 +445,29 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
+    public void testSetSelectedFlagsIgnoresStaleC100RespondentSolicitorFlagsWhenUnrepresented() throws IOException {
+        Flags staleSolicitorFlags = getApplicant1ExternalFlag1();
+        PartyDetails unrepresentedRespondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .respondents(List.of(ElementUtils.element(unrepresentedRespondent)))
+            .allPartyFlags(AllPartyFlags.builder().caRespondentSolicitor1ExternalFlags(staleSolicitorFlags).build())
+            .reviewRaRequestWrapper(ReviewRaRequestWrapper.builder().selectedFlags(new ArrayList<>()).build())
+            .build();
+
+        when(objectMapper.writeValueAsString(staleSolicitorFlags)).thenReturn("staleC100Resp");
+        when(objectMapper.readValue("staleC100Resp", Flags.class)).thenReturn(staleSolicitorFlags);
+
+        caseFlagsWaService.setSelectedFlags(caseData);
+
+        assertTrue(caseData.getReviewRaRequestWrapper().getSelectedFlags().isEmpty());
+    }
+
+    @Test
     public void testValidateAllFlags() {
         List<Element<Flags>> selectedFlags = new ArrayList<>();
         selectedFlags.add(ElementUtils.element(getApplicant1ExternalFlag1()));
@@ -481,6 +523,13 @@ public class CaseFlagsWaServiceTest {
             .build();
 
         boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsWhenCaseDataIsNull() {
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(null);
 
         assertTrue(actual);
     }
@@ -543,6 +592,25 @@ public class CaseFlagsWaServiceTest {
     }
 
     @Test
+    public void testIsCaseHasNoRequestedFlagsIgnoresStaleC100RespondentSolicitorFlagsWhenUnrepresented() {
+        Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
+        PartyDetails unrepresentedRespondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+            .user(User.builder().solicitorRepresented(YesOrNo.No).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .respondents(List.of(ElementUtils.element(unrepresentedRespondent)))
+            .allPartyFlags(AllPartyFlags.builder().caRespondentSolicitor1ExternalFlags(solicitorFlags).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertTrue(actual);
+    }
+
+    @Test
     public void testIsCaseHasNoRequestedFlagsKeepsC100SolicitorFlagsWhenRepresented() {
         Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
         PartyDetails representedApplicant = PartyDetails.builder()
@@ -554,6 +622,25 @@ public class CaseFlagsWaServiceTest {
             .id(123)
             .applicants(List.of(ElementUtils.element(representedApplicant)))
             .allPartyFlags(AllPartyFlags.builder().caApplicantSolicitor1ExternalFlags(solicitorFlags).build())
+            .build();
+
+        boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
+
+        assertFalse(actual);
+    }
+
+    @Test
+    public void testIsCaseHasNoRequestedFlagsKeepsC100RespondentSolicitorFlagsWhenRepresented() {
+        Flags solicitorFlags = getCaseLevelFlags(REQUESTED);
+        PartyDetails representedRespondent = PartyDetails.builder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .user(User.builder().solicitorRepresented(YesOrNo.Yes).build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .respondents(List.of(ElementUtils.element(representedRespondent)))
+            .allPartyFlags(AllPartyFlags.builder().caRespondentSolicitor1ExternalFlags(solicitorFlags).build())
             .build();
 
         boolean actual = caseFlagsWaService.isCaseHasNoRequestedFlags(caseData);
