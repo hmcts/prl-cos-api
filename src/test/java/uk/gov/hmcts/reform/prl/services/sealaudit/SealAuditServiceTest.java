@@ -668,4 +668,73 @@ class SealAuditServiceTest {
         );
         verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
     }
+
+    @Test
+    void shouldStillSendSummaryEmailWhenSearchThrows() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("CCD unavailable"));
+
+        sealAuditService.runAudit();
+
+        // finally block should still attempt to send a summary email with zero counts
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test@example.com"),
+            any(),
+            anyString()
+        );
+    }
+
+    @Test
+    void shouldStillSendSummaryEmailWhenLoopThrowsError() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        // Simulate a Throwable (Error) escaping from the search
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new OutOfMemoryError("simulated"));
+
+        sealAuditService.runAudit();
+
+        // finally block should still attempt to send a summary email even for Error
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test@example.com"),
+            any(),
+            anyString()
+        );
+    }
+
+    @Test
+    void shouldSwallowUnexpectedExceptionFromNotificationClient() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of()).build());
+
+        // Non-NotificationClientException failure inside sendEmail must not propagate
+        when(notificationClient.sendEmail(anyString(), anyString(), any(), anyString()))
+            .thenThrow(new RuntimeException("notify broken"));
+
+        // Should not throw
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(anyString(), anyString(), any(), anyString());
+    }
 }

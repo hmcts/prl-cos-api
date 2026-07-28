@@ -234,27 +234,30 @@ public class SealAuditService {
 
             if (!foundAnyCases) {
                 log.info("No cases with served orders found");
-                sendSummaryEmail(0, 0, 0, 0, 0, csvRows);
-                return;
             }
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("Seal audit interrupted", e);
-        } catch (Exception e) {
-            log.error("Error running seal audit", e);
+        } catch (Throwable t) {
+            log.error("Fatal error running seal audit (processed {} cases before failure)",
+                totalCasesProcessed, t);
+        } finally {
+            long duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime);
+            log.info("*** Seal Audit Complete ***");
+            log.info("Total cases processed: {}", totalCasesProcessed);
+            log.info("Total orders checked: {}", totalOrders);
+            log.info("Seals present: {}", presentSeals);
+            log.info("Seals missing: {}", missingSeals);
+            log.info("Errors: {}", errors);
+            log.info("Duration: {}s", duration);
+
+            try {
+                sendSummaryEmail(totalOrders, presentSeals, missingSeals, errors, duration, csvRows);
+            } catch (Throwable emailErr) {
+                log.error("Failed to send seal audit summary email", emailErr);
+            }
         }
-
-        long duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime);
-        log.info("*** Seal Audit Complete ***");
-        log.info("Total cases processed: {}", totalCasesProcessed);
-        log.info("Total orders checked: {}", totalOrders);
-        log.info("Seals present: {}", presentSeals);
-        log.info("Seals missing: {}", missingSeals);
-        log.info("Errors: {}", errors);
-        log.info("Duration: {}s", duration);
-
-        sendSummaryEmail(totalOrders, presentSeals, missingSeals, errors, duration, csvRows);
     }
 
     private SearchResult searchServedOrders(
@@ -501,6 +504,8 @@ public class SealAuditService {
             templateVars.put("duration", String.valueOf(durationSeconds));
 
             byte[] csvBytes = csvContent.toString().getBytes();
+            log.info("Preparing seal audit email: rows={}, csvBytes={}, recipients={}",
+                csvRows.size(), csvBytes.length, recipients.size());
             Object fileUpload = prepareUpload(csvBytes, true, false, "26 weeks");
             templateVars.put("link_to_file", fileUpload);
 
@@ -517,6 +522,8 @@ public class SealAuditService {
 
         } catch (NotificationClientException e) {
             log.error("Error sending seal audit summary email via Gov Notify", e);
+        } catch (Exception e) {
+            log.error("Unexpected error sending seal audit summary email", e);
         }
     }
 }
