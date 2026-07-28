@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -122,6 +123,80 @@ public class PartyLevelCaseFlagsService {
         AllPartyFlags allPartyFlags = objectMapper.convertValue(existingPartyFlags,
                                                                new TypeReference<>() {});
         caseData.setAllPartyFlags(allPartyFlags);
+    }
+
+    public Map<String, Object> generateTargetedLegalRepresentativeFlagUpdates(CaseData caseData,
+                                                                               SolicitorRole removedSolicitorRole) {
+        Map<String, Object> updates = new HashMap<>();
+        Optional<TargetedLegalRepresentativeFlagConfig> config = getTargetedLegalRepresentativeFlagConfig(
+            removedSolicitorRole
+        );
+        if (config.isEmpty()) {
+            log.warn("No targeted legal representative flag mapping found for role {}", removedSolicitorRole);
+            return updates;
+        }
+
+        TargetedLegalRepresentativeFlagConfig targetedConfig = config.get();
+        String caseType = caseData.getCaseTypeOfApplication();
+        updates.put(
+            getPartyCaseDataExternalField(caseType, targetedConfig.solicitorRepresenting(), targetedConfig.partyIndex()),
+            null
+        );
+        updates.put(
+            getPartyCaseDataInternalField(caseType, targetedConfig.solicitorRepresenting(), targetedConfig.partyIndex()),
+            null
+        );
+        updates.put(
+            getPartyCaseDataExternalField(caseType, targetedConfig.barristerRepresenting(), targetedConfig.partyIndex()),
+            null
+        );
+        updates.put(
+            getPartyCaseDataInternalField(caseType, targetedConfig.barristerRepresenting(), targetedConfig.partyIndex()),
+            null
+        );
+        log.info(
+            "Targeted legal representative flag removal prepared for case {} and role {}: {}",
+            caseData.getId(),
+            removedSolicitorRole,
+            updates.keySet()
+        );
+        return updates;
+    }
+
+    private Optional<TargetedLegalRepresentativeFlagConfig> getTargetedLegalRepresentativeFlagConfig(SolicitorRole solicitorRole) {
+        switch (solicitorRole.getRepresenting()) {
+            case CAAPPLICANT:
+                return Optional.of(new TargetedLegalRepresentativeFlagConfig(
+                    CAAPPLICANTSOLICITOR,
+                    CAAPPLICANTBARRISTER,
+                    solicitorRole.getIndex()
+                ));
+            case CARESPONDENT:
+                return Optional.of(new TargetedLegalRepresentativeFlagConfig(
+                    CARESPONDENTSOLICITOR,
+                    CARESPONDENTBARRISTER,
+                    solicitorRole.getIndex()
+                ));
+            case DAAPPLICANT:
+                return Optional.of(new TargetedLegalRepresentativeFlagConfig(
+                    DAAPPLICANTSOLICITOR,
+                    DAAPPLICANTBARRISTER,
+                    solicitorRole.getIndex()
+                ));
+            case DARESPONDENT:
+                return Optional.of(new TargetedLegalRepresentativeFlagConfig(
+                    DARESPONDENTSOLICITOR,
+                    DARESPONDENTBARRISTER,
+                    solicitorRole.getIndex()
+                ));
+            default:
+                return Optional.empty();
+        }
+    }
+
+    private record TargetedLegalRepresentativeFlagConfig(PartyRole.Representing solicitorRepresenting,
+                                                          PartyRole.Representing barristerRepresenting,
+                                                          int partyIndex) {
     }
 
 
@@ -729,6 +804,13 @@ public class PartyLevelCaseFlagsService {
             representing.getCaseDataExternalField(),
             partyIndex + 1
         ) : representing.getCaseDataExternalField();
+    }
+
+    private String getPartyCaseDataInternalField(String caseType, PartyRole.Representing representing, int partyIndex) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseType) ? String.format(
+            representing.getCaseDataInternalField(),
+            partyIndex + 1
+        ) : representing.getCaseDataInternalField();
     }
 
     public void amendCaseFlags(Map<String, Object> oldCaseDataMap, Map<String, Object> updatedCaseDataMap, String eventId) {

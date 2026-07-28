@@ -818,7 +818,8 @@ public class NoticeOfChangePartiesService {
                 );
                 removeSolicitorAndBarristerFlags(originalPartyDetailsMap.get(removeSolicitorRole),
                                                  newPartyDetailsElement,
-                                                 allTabsUpdateCaseData);
+                                                 allTabsUpdateCaseData,
+                                                 removeSolicitorRole.get());
             }
         }
 
@@ -965,7 +966,9 @@ public class NoticeOfChangePartiesService {
 
     void removeSolicitorAndBarristerFlags(Element<PartyDetails> oldPartyDetails,
                                           Element<PartyDetails> newPartyDetails,
-                                          CaseData caseData) {
+                                          CaseData caseData,
+                                          SolicitorRole removedSolicitorRole) {
+        log.info("Removing solicitor/barrister flags for case {} and role {}", caseData.getId(), removedSolicitorRole);
         barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getValue)
                                                   .orElseGet(newPartyDetails::getValue),
@@ -973,8 +976,11 @@ public class NoticeOfChangePartiesService {
                                               Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getId)
                                                   .orElseGet(newPartyDetails::getId));
-        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(caseData,
-                                                                            partyLevelCaseFlagsService::generatePartyCaseFlags);
+        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+            caseData,
+            cd -> partyLevelCaseFlagsService.generateTargetedLegalRepresentativeFlagUpdates(cd, removedSolicitorRole)
+        );
+        log.info("Completed targeted solicitor/barrister flag removal for case {} and role {}", caseData.getId(), removedSolicitorRole);
     }
 
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,

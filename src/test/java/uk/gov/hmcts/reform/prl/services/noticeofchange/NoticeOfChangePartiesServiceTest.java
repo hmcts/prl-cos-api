@@ -1474,7 +1474,10 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generateTargetedLegalRepresentativeFlagUpdates(
+            isA(CaseData.class),
+            isA(SolicitorRole.class)
+        );
         verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
     }
 
@@ -1753,7 +1756,10 @@ public class NoticeOfChangePartiesServiceTest {
                                                  isA(UUID.class));
         verify(barristerRemoveService).notifyBarrister(isA(CaseData.class));
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generateTargetedLegalRepresentativeFlagUpdates(
+            isA(CaseData.class),
+            isA(SolicitorRole.class)
+        );
         verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
     }
 
@@ -1826,7 +1832,10 @@ public class NoticeOfChangePartiesServiceTest {
         assertThat(updatedCaseData.getAllPartyFlags().getDaApplicantSolicitorInternalFlags()).isNull();
 
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generateTargetedLegalRepresentativeFlagUpdates(
+            isA(CaseData.class),
+            isA(SolicitorRole.class)
+        );
         verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
     }
 
@@ -1905,12 +1914,18 @@ public class NoticeOfChangePartiesServiceTest {
         assertThat(updatedCaseData.getAllPartyFlags().getCaRespondentSolicitor1InternalFlags()).isNull();
 
         verify(partyLevelCaseFlagsService).updateCaseDataWithGeneratePartyCaseFlags(isA(CaseData.class), any());
-        verify(partyLevelCaseFlagsService).generatePartyCaseFlags(isA(CaseData.class));
+        verify(partyLevelCaseFlagsService).generateTargetedLegalRepresentativeFlagUpdates(
+            isA(CaseData.class),
+            isA(SolicitorRole.class)
+        );
         verify(partyLevelCaseFlagsService, never()).generatePartyCaseFlagsForBarristerOnly(any(CaseData.class));
     }
 
     private void stubPartyFlagRefresh(Map<String, Object> refreshedFlags) {
-        when(partyLevelCaseFlagsService.generatePartyCaseFlags(any(CaseData.class))).thenReturn(refreshedFlags);
+        when(partyLevelCaseFlagsService.generateTargetedLegalRepresentativeFlagUpdates(
+            any(CaseData.class),
+            any(SolicitorRole.class)
+        )).thenReturn(refreshedFlags);
         doAnswer(invocation -> {
             CaseData caseDataToUpdate = invocation.getArgument(0);
             Function<CaseData, Map<String, Object>> flagUpdater = invocation.getArgument(1);
