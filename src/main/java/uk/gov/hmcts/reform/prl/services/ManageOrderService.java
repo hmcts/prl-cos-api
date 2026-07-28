@@ -3829,10 +3829,12 @@ public class ManageOrderService {
         if (null == caseData.getManageOrders()) {
             return emptyString;
         }
-        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
+        if (caseData.getCreateSelectOrderOptions() != null
+            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             return BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END;
         }
-        if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.uploadAnOrder) {
+        if (caseData.getChildArrangementOrders() != null
+            && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.uploadAnOrder) {
             return BOLD_BEGIN + caseData.getChildArrangementOrders().getDisplayedValue() + BOLD_END;
         }
         return emptyString;
