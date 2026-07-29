@@ -358,19 +358,4 @@ public class SendAndReplyController extends AbstractCallbackController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         return CaseUtils.getCaseData(caseDetails, objectMapper);
     }
-
-    private AboutToStartOrSubmitCallbackResponse processSendAndReplyAboutToSubmit(String authorisation,
-                                                                                  CaseData caseData, Map<String, Object> caseDataMap) {
-        if (caseData.getChooseSendOrReply().equals(SEND)) {
-            sendAndReplyCommonService.sendMessages(authorisation, caseData, caseDataMap);
-        } else {
-            sendAndReplyCommonService.replyMessages(authorisation, caseData, caseDataMap);
-        }
-
-        //clear temp fields
-        sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
-        caseDataMap.put(CASE_ACCESS_CATEGORY, caseData.getCaseTypeOfApplication());
-
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
-    }
 }
