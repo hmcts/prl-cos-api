@@ -74,17 +74,21 @@ public enum DocTypeOtherDocumentsEnum {
     @JsonProperty("safeguardingLetter")
     safeguardingLetter("safeguardingLetter","Safeguarding letter/Safeguarding Enquiries Report (SER)"),
     @JsonProperty("section7Report")
-    section7Report("section7Report","Section 7 report/Child Impact Analysis"),
+    section7Report("section7Report","Section 7 report"),
     @JsonProperty("section37Report")
     section37Report("section37Report","Section 37 report"),
     @JsonProperty("16ariskAssessment")
-    riskAssessment("16aRiskAssessment","16a risk assessment"),
+    riskAssessment("16aRiskAssessment","Section 16A risk assessment"),
+    @JsonProperty("enforcementOrderSuitabilityReport")
+    enforcementOrderSuitabilityReport("enforcementOrderSuitabilityReport","Enforcement Order Suitability Report"),
+    @JsonProperty("parentalOrderReporterReport")
+    parentalOrderReporterReport("parentalOrderReporterReport","Parental Order Reporter Report"),
     @JsonProperty("cirTransferRequest")
     cirTransferRequest("cirTransferRequest","CIR Transfer Request"),
     @JsonProperty("cirExtensionRequest")
     cirExtensionRequest("cirExtensionRequest","CIR Extension Request"),
     @JsonProperty("guardianReport")
-    guardianReport("guardianReport","Guardian report"),
+    guardianReport("guardianReport","Section 16.4 Guardian Report"),
     @JsonProperty("specialGuardianshipReport")
     specialGuardianshipReport("specialGuardianshipReport","Special guardianship report"),
     @JsonProperty("otherDocs")
