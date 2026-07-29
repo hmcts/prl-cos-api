@@ -42,6 +42,7 @@ public class DocmosisRenderService {
         String templateFilename = getTemplateFilename(generateDocumentRequest);
         log.info("Case ID {}: Generating document {}", generateDocumentRequest.getCaseId(), templateFilename);
         applyRtfValues(generateDocumentRequest);
+        log.info("generateDocumentRequest.rtfValue: {}", generateDocumentRequest.getValues().get("rtfValue"));
 
         Map<String, Object> placeholders = templateDataMapper.map(generateDocumentRequest.getValues());
         log.info("placeholders.rtfValue: {}", placeholders.get("rtfValue"));
