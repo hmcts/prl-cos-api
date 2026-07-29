@@ -63,8 +63,8 @@ public class DocmosisRenderService {
             Map<String, Object> caseDataMap = ((Map<String, Object>) caseDetailsMap
                 .get("caseData"));
             if (caseDataMap != null) {
-                String rtfValue = caseDataMap.get("recitalsOrPreamble") == null ?
-                    "" : caseDataMap.get("recitalsOrPreamble").toString();
+                String rtfValue = caseDataMap.get("recitalsOrPreamble") == null
+                    ? "" : caseDataMap.get("recitalsOrPreamble").toString();
                 if (StringUtils.isEmpty(rtfValue)) {
                     rtfValue = "<p><strong>This is sample Bold text for demonstration purposes. "
                         + "It can be used to verify formatting, layout, and content rendering within the application.</strong></p>"
