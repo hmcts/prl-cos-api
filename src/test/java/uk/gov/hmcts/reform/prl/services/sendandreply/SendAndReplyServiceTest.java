@@ -2874,6 +2874,87 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testSendEmailNotificationPrefersDatedSavedExternalMessageAttachmentsOverNullUpdatedTime() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document nullUpdatedTimeDoc = internalMessageDoc.toBuilder()
+            .documentFileName("null-updated-time-doc.pdf")
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document datedDoc = internalMessageDoc.toBuilder()
+            .documentFileName("dated-doc.pdf")
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("same msg content")
+            .messageSubject("same message subject")
+            .build();
+        Message nullUpdatedTimeSavedMessage = sendMessageObject.toBuilder()
+            .updatedTime(null)
+            .externalMessageAttachDocs(List.of(element(nullUpdatedTimeDoc)))
+            .build();
+        Message datedSavedMessage = sendMessageObject.toBuilder()
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(datedDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("same msg content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(nullUpdatedTimeSavedMessage), element(datedSavedMessage)))
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(1, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals("dated-doc.pdf",
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+    }
+
+    @Test
     public void testSendEmailNotificationToCafcassAndOthersC100Case() {
 
         PartyDetails applicant = PartyDetails.builder()
