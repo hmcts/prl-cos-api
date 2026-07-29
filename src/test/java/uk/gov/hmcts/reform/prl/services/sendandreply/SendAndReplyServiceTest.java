@@ -2955,6 +2955,72 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testSendEmailNotificationDoesNotUseSavedExternalMessageAttachmentsWhenSubjectOrContentDoesNotMatch() {
+        PartyDetails applicant = getApplicant().toBuilder()
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .contactPreferences(ContactPreferences.email)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("matching content")
+            .messageSubject("matching subject")
+            .build();
+        Message subjectMismatchSavedMessage = sendMessageObject.toBuilder()
+            .messageSubject("different subject")
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(internalMessageDoc)))
+            .build();
+        Message contentMismatchSavedMessage = sendMessageObject.toBuilder()
+            .messageContent("different content")
+            .updatedTime(dateTime.plusMinutes(1))
+            .externalMessageAttachDocs(List.of(element(internalMessageDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("matching content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(subjectMismatchSavedMessage), element(contentMismatchSavedMessage)))
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertTrue(sendgridEmailConfig.getListOfAttachments().isEmpty());
+        assertEquals(0, sendgridEmailConfig.getDynamicTemplateData().get("documentSize"));
+    }
+
+    @Test
     public void testSendEmailNotificationToCafcassAndOthersC100Case() {
 
         PartyDetails applicant = PartyDetails.builder()
