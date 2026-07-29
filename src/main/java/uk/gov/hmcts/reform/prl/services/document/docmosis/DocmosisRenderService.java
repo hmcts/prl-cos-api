@@ -61,7 +61,7 @@ public class DocmosisRenderService {
             (generateDocumentRequest.getValues().get("caseDetails"))));
         if (caseDetailsMap != null) {
             Map<String, Object> caseDataMap = ((Map<String, Object>) caseDetailsMap
-                .get("caseData"));
+                .get("case_data"));
             if (caseDataMap != null) {
                 String rtfValue = caseDataMap.get("recitalsOrPreamble") == null
                     ? "" : caseDataMap.get("recitalsOrPreamble").toString();

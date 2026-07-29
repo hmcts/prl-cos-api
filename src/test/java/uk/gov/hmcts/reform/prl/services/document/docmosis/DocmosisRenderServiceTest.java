@@ -171,7 +171,7 @@ class DocmosisRenderServiceTest {
     void shouldThrowException_forRtfTwo() {
         Map<String, Object> values = new HashMap<>();
         values.put("caseDetails", new HashMap<String, Object>());
-        ((HashMap<String, Object>)values.get("caseDetails")).put("caseData", new HashMap<String, Object>());
+        ((HashMap<String, Object>)values.get("caseDetails")).put("case_data", new HashMap<String, Object>());
         GenerateDocumentRequest request = GenerateDocumentRequest.builder()
             .template("template1")
             .values(values)
@@ -208,7 +208,7 @@ class DocmosisRenderServiceTest {
         HashMap<String, Object> caseDetailsMap = new HashMap<>();
         HashMap<String, Object> caseDataMap = new HashMap<>();
         values.put("caseDetails", caseDetailsMap);
-        caseDetailsMap.put("caseData", caseDataMap);
+        caseDetailsMap.put("case_data", caseDataMap);
         caseDataMap.put("recitalsOrPreamble", "RECITAL");
         GenerateDocumentRequest request = GenerateDocumentRequest.builder()
             .template("template1")
