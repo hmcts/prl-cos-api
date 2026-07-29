@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -80,6 +81,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -209,6 +211,18 @@ public class ServiceOfApplicationServiceTest {
     @Mock
     private HearingService hearingService;
 
+    @Mock
+    private OrganisationService organisationService;
+
+    @Mock
+    private MaskEmail maskEmail;
+
+    @Mock
+    private AssignCaseAccessService assignCaseAccessService;
+
+    @Mock
+    private RespondentOrgPolicyService respondentOrgPolicyService;
+
     private final String authorization = "authToken";
     private final String testString = "test";
     private DynamicMultiSelectList dynamicMultiSelectList;
@@ -249,7 +263,8 @@ public class ServiceOfApplicationServiceTest {
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
         dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code(testUuid.toString()).label(authorization).build()))
+            .value(List.of(DynamicMultiselectListElement.builder().code(testUuid.toString()).label(authorization)
+                               .build()))
             .build();
         parties = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty).build());
         caseInvite = CaseInvite.builder().partyId(testUuid).isApplicant(YesOrNo.Yes).accessCode(testString)
@@ -257,26 +272,32 @@ public class ServiceOfApplicationServiceTest {
             .hasLinked(testString)
             .build();
         coverletterMap = new ArrayList<>();
-        coverletterMap.add(element(UUID.fromString(TEST_UUID), CoverLetterMap.builder()
-            .coverLetters(List.of(element(Document.builder().build())))
-            .build()));
+        coverletterMap.add(element(
+            UUID.fromString(TEST_UUID), CoverLetterMap.builder()
+                .coverLetters(List.of(element(Document.builder().build())))
+                .build()
+        ));
         caseInvite1 = CaseInvite.builder()
             .caseInviteEmail("inviteemail@test.com")
             .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
             .isApplicant(Yes)
             .build();
-        when(dgsService.generateDocument(Mockito.anyString(),Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(GeneratedDocumentInfo.builder().build());
-        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder().isGenEng(true)
-                                                                                                  .isGenWelsh(true).build());
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(DocumentLanguage.builder()
+                                                                                                  .isGenEng(true)
+                                                                                                  .isGenWelsh(true)
+                                                                                                  .build());
         when(authTokenGenerator.generate()).thenReturn("");
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.any())).thenReturn(DynamicList.builder().build());
-
+        when(sendAndReplyService.getCategoriesAndDocuments(
+            Mockito.anyString(),
+            Mockito.any()
+        )).thenReturn(DynamicList.builder().build());
 
 
         partyIdsSoa = new ArrayList<>();
-        partyIdsSoa.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
-        partyIdsSoa.add(element(UUID.randomUUID(),TEST_UUID));
+        partyIdsSoa.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+        partyIdsSoa.add(element(UUID.randomUUID(), TEST_UUID));
         serviceOfApplicationSoa = ServiceOfApplication.builder()
             .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                       .builder()
@@ -309,27 +330,30 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testListOfOrdersCreated() {
-        List<String> createdOrders = List.of("Blank order (FL404B)",
-                                             "Standard directions order",
-                                             "Blank order or directions (C21)",
-                                             "Blank order or directions (C21) - to withdraw application",
-                                             "Child arrangements, specific issue or prohibited steps order (C43)",
-                                             "Parental responsibility order (C45A)",
-                                             "Special guardianship order (C43A)",
-                                             "Notice of proceedings (C6) (Notice to parties)",
-                                             "Notice of proceedings (C6a) (Notice to non-parties)",
-                                             "Transfer of case to another court (C49)",
-                                             "Appointment of a guardian (C47A)",
-                                             "Non-molestation order (FL404A)",
-                                             "Occupation order (FL404)",
-                                             "Power of arrest (FL406)",
-                                             "Amended, discharged or varied order (FL404B)",
-                                             "General form of undertaking (N117)",
-                                             "Notice of proceedings (FL402)",
-                                             "Blank order (FL404B)",
-                                             "Other (upload an order)");
-        Map<String, Object> responseMap = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
-        assertEquals(18,responseMap.values().size());
+        List<String> createdOrders = List.of(
+            "Blank order (FL404B)",
+            "Standard directions order",
+            "Blank order or directions (C21)",
+            "Blank order or directions (C21) - to withdraw application",
+            "Child arrangements, specific issue or prohibited steps order (C43)",
+            "Parental responsibility order (C45A)",
+            "Special guardianship order (C43A)",
+            "Notice of proceedings (C6) (Notice to parties)",
+            "Notice of proceedings (C6a) (Notice to non-parties)",
+            "Transfer of case to another court (C49)",
+            "Appointment of a guardian (C47A)",
+            "Non-molestation order (FL404A)",
+            "Occupation order (FL404)",
+            "Power of arrest (FL406)",
+            "Amended, discharged or varied order (FL404B)",
+            "General form of undertaking (N117)",
+            "Notice of proceedings (FL402)",
+            "Blank order (FL404B)",
+            "Other (upload an order)"
+        );
+        Map<String, Object> responseMap =
+            serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
+        assertEquals(18, responseMap.values().size());
         assertEquals("1", responseMap.get("option1"));
     }
 
@@ -351,8 +375,8 @@ public class ServiceOfApplicationServiceTest {
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTyoeOfApplication","C100");
+        Map<String, Object> casedata = new HashMap<>();
+        casedata.put("caseTyoeOfApplication", "C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         verifyNoInteractions(serviceOfApplicationPostService);
     }
@@ -381,13 +405,16 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authorization,
-            callbackRequest
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseData, null
         );
+        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
+        final ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.processConfidentialityCheck(
+                authorization,
+                callbackRequest
+            );
         assertNotNull(response);
         assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, response.getBody().getConfirmationHeader());
     }
@@ -401,15 +428,18 @@ public class ServiceOfApplicationServiceTest {
                              .data(caseDetailsSoa).build()).build();
         when(objectMapper.convertValue(caseDetailsSoa, CaseData.class)).thenReturn(caseDataSoa);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                              EventRequestData.builder().build(), StartEventResponse.builder().build(),
-                                              caseDetailsSoa, caseDataSoa, null);
+            new StartAllTabsUpdateDataContent(
+                authorization,
+                EventRequestData.builder().build(), StartEventResponse.builder().build(),
+                caseDetailsSoa, caseDataSoa, null
+            );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
-            authorization,
-            callbackRequestSoa
-        );
+        final ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.processConfidentialityCheck(
+                authorization,
+                callbackRequestSoa
+            );
 
         assertNotNull(response);
 
@@ -449,14 +479,17 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseDataSoa);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), caseDetails, caseDataSoa, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        final ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.processConfidentialityCheck(
-            authorization,
-            callbackRequest
-        );
+        final ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.processConfidentialityCheck(
+                authorization,
+                callbackRequest
+            );
 
         assertNotNull(response);
 
@@ -641,17 +674,21 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .coverLettersMap(coverletterMap)
                                                                  .build())
                                       .unservedCitizenRespondentPack(SoaPack.builder()
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                                                    .documentFileName("").build())))
-                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
-                                                                                         .courtAdmin.toString()).build())
+                                                                         .packDocument(List.of(element(Document.builder()
+                                                                                                           .documentFileName(
+                                                                                                               "")
+                                                                                                           .build())))
+                                                                         .personalServiceBy(
+                                                                             SoaSolicitorServingRespondentsEnum
+                                                                                 .courtAdmin.toString()).build())
                                       .unServedOthersPack(SoaPack.builder().build())
                                       .applicationServedYesNo(No)
                                       .soaCafcassCymruServedOptions(Yes)
@@ -664,7 +701,10 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseDataSoa);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseDataSoa, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(
+            caseDataSoa,
+            authorization
+        ));
     }
 
     @Test
@@ -677,7 +717,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedLaPack(SoaPack.builder()
                                                           .partyIds(List.of(element("test12345")))
@@ -696,7 +737,10 @@ public class ServiceOfApplicationServiceTest {
                              .id(12345L)
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(
+            caseData,
+            authorization
+        ));
     }
 
     @Test
@@ -714,13 +758,17 @@ public class ServiceOfApplicationServiceTest {
             .finalServedApplicationDetailsList(servedApplDetailsList)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .unServedRespondentPack(SoaPack.builder()
-                                                          .partyIds(List.of(element("test12345")))
-                                                          .packDocument(List.of(element(Document.builder().build())))
-                                                          .build())
+                                                                  .partyIds(List.of(element("test12345")))
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .build())))
+                                                                  .build())
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(
+            caseData,
+            authorization
+        ));
     }
 
     @Test
@@ -734,7 +782,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .coverLettersMap(coverletterMap)
@@ -749,7 +798,10 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(
+            caseData,
+            authorization
+        ));
     }
 
     @Test
@@ -763,7 +815,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .soaServeToRespondentOptions(YesNoNotApplicable.No)
                                       .soaRecipientsOptions(dynamicMultiSelectList)
@@ -786,7 +839,8 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testgeneratePacksForConfidentialCheckPersonal() {
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+        DynamicList documentList =
+            DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
 
@@ -799,7 +853,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
@@ -826,7 +881,8 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testgeneratePacksForConfidentialCitizenPersonal() {
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+        DynamicList documentList =
+            DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
 
@@ -839,7 +895,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaCitizenServingRespondentsOptions(unrepresentedApplicant)
@@ -866,7 +923,8 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testgeneratePacksForConfidentialCheckPersonalApplicantLegalRep() {
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+        DynamicList documentList =
+            DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
 
@@ -879,7 +937,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
@@ -917,7 +976,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
         List<Element<PartyDetails>> otherParities = new ArrayList<>();
@@ -935,8 +995,10 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(authorization, caseData,parties.get(0),
-                                                                           caseInvite, template));
+        assertNotNull(serviceOfApplicationService.generateAccessCodeLetter(
+            authorization, caseData, parties.get(0),
+            caseInvite, template
+        ));
     }
 
     @Test
@@ -1016,7 +1078,7 @@ public class ServiceOfApplicationServiceTest {
                 .build();
             when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
             when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-            when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(hearings);
+            when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(hearings);
             CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
             assertNotNull(serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         }
@@ -1058,7 +1120,8 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
         caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
@@ -1072,7 +1135,8 @@ public class ServiceOfApplicationServiceTest {
             .finalWelshDocument(Document.builder().documentFileName("").build())
             .c1AWelshDocument(Document.builder().documentFileName("").build())
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .orderTypeId(
+                                                                                   "Blank order or directions (C21)")
                                                                                .build())
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1082,26 +1146,28 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement)).build()).build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .othersToNotify(otherParities)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
+        Map<String, Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication", "C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
+        when(c100CaseInviteService.generateCaseInvite(any(), any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                casedata
+            );
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
@@ -1147,10 +1213,12 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
 
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+        DynamicList documentList =
+            DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
 
         DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
 
@@ -1161,7 +1229,8 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .c8Document(Document.builder().build())
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .orderTypeId(
+                                                                                   "Blank order or directions (C21)")
                                                                                .build())
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1177,7 +1246,8 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement)).build()).build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .othersToNotify(otherParities)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1185,9 +1255,9 @@ public class ServiceOfApplicationServiceTest {
             .finalDocument(Document.builder().build())
             .c1ADocument(Document.builder().documentFileName("C1A_Blank.pdf").build())
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(serviceOfApplicationPostService.getStaticDocs(authorization,PrlAppsConstants.C100_CASE_TYPE, caseData))
+        Map<String, Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication", "C100");
+        when(serviceOfApplicationPostService.getStaticDocs(authorization, PrlAppsConstants.C100_CASE_TYPE, caseData))
             .thenReturn(c100StaticDocs);
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
@@ -1198,15 +1268,17 @@ public class ServiceOfApplicationServiceTest {
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(documents));
         when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("test");
         when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
             .thenReturn(categoriesAndDocuments);
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                casedata
+            );
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
@@ -1245,7 +1317,8 @@ public class ServiceOfApplicationServiceTest {
         Element applicantElement = element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails);
         partyList.add(applicantElement);
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
 
         CaseData caseData = CaseData.builder()
@@ -1254,7 +1327,8 @@ public class ServiceOfApplicationServiceTest {
             .respondents(partyList)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
+                                                                               .orderTypeId(
+                                                                                   "Blank order or directions (C21)")
                                                                                .build())
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1264,7 +1338,8 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement)).build()).build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .othersToNotify(otherParities)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1272,18 +1347,19 @@ public class ServiceOfApplicationServiceTest {
             .finalDocument(Document.builder().build())
             .c1ADocument(Document.builder().build())
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
+        Map<String, Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication", "C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                casedata
+            );
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
@@ -1305,7 +1381,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .solicitorEmail("solicitor@email.com")
             .build();
@@ -1343,23 +1420,25 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement)).build()).build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .othersToNotify(otherParities)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
+        Map<String, Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication", "C100");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                casedata
+            );
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
@@ -1381,7 +1460,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .solicitorEmail("solicitor@email.com")
             .build();
@@ -1406,21 +1486,22 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
             .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","FL401");
+        Map<String, Object> casedata = new HashMap<>();
+        casedata.put("caseTypeOfApplication", "FL401");
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
         List<Document> staticDocs = new ArrayList<>();
         staticDocs.add(Document.builder().documentBinaryUrl("testUrl").documentFileName("Blank.pdf").build());
-        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString(), Mockito.any(CaseData.class)))
+        when(serviceOfApplicationPostService.getStaticDocs(anyString(), anyString(), Mockito.any(CaseData.class)))
             .thenReturn(staticDocs);
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                casedata
+            );
 
         assertNotNull(servedApplicationDetails);
         assertEquals(SERVED_PARTY_APPLICANT_SOLICITOR, servedApplicationDetails.getWhoIsResponsible());
@@ -1441,7 +1522,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -1472,11 +1554,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
     }
 
@@ -1493,7 +1576,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -1519,11 +1603,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -1540,7 +1625,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -1567,15 +1653,16 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
-        assertEquals("Applicant solicitor",servedApplicationDetails.getWhoIsResponsible());
-        assertEquals("By email",servedApplicationDetails.getModeOfService());
-        assertEquals("first test",servedApplicationDetails.getServedBy());
+        assertEquals("Applicant solicitor", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("first test", servedApplicationDetails.getServedBy());
     }
 
     @Test
@@ -1603,11 +1690,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -1624,7 +1712,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -1641,7 +1730,8 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail(null)
                                       .soaCitizenServingRespondentsOptions(unrepresentedApplicant)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(Collections.emptyList()).build())
+                                      .soaOtherParties(DynamicMultiSelectList.builder().value(Collections.emptyList())
+                                                           .build())
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
@@ -1651,11 +1741,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -1700,7 +1791,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(caseDatatMap).build();
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -1708,10 +1799,11 @@ public class ServiceOfApplicationServiceTest {
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("Confidential-").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1783,7 +1875,7 @@ public class ServiceOfApplicationServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(caseDatatMap).build();
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -1791,10 +1883,11 @@ public class ServiceOfApplicationServiceTest {
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("Confidential-").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1850,7 +1943,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -1859,12 +1952,13 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("Confidential").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1924,7 +2018,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -1933,11 +2027,12 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1998,7 +2093,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -2007,18 +2102,22 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(
+            ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES,
+            soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT)
+        );
     }
 
     @Test
@@ -2071,7 +2170,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -2080,11 +2179,12 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -2144,7 +2244,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -2153,13 +2253,14 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -2220,7 +2321,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -2229,11 +2330,12 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -2304,7 +2406,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .data(caseDatatMap).build();
 
-        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseDatatMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -2313,13 +2415,14 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         dynamicListElements.add(DynamicListElement.builder().label("").build());
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
-        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+        final Map<String, Object> soaCaseFieldsMap =
+            serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -2354,7 +2457,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -2362,11 +2465,14 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application has been served", response.getBody().getConfirmationHeader());
     }
 
@@ -2412,7 +2518,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -2421,13 +2527,19 @@ public class ServiceOfApplicationServiceTest {
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.reGeneratePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                              EventRequestData.builder().build(),
-                                              StartEventResponse.builder().build(), dataMap, caseData, null);
+            new StartAllTabsUpdateDataContent(
+                authorization,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(), dataMap, caseData, null
+            );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals(
+            "# The application will be reviewed for confidential details",
+            response.getBody().getConfirmationHeader()
+        );
     }
 
     @Test
@@ -2457,7 +2569,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -2465,12 +2577,18 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals(
+            "# The application will be reviewed for confidential details",
+            response.getBody().getConfirmationHeader()
+        );
     }
 
     @Test
@@ -2482,8 +2600,8 @@ public class ServiceOfApplicationServiceTest {
                                  .partyId(testUuid)
                                  .build())
             .respondentsFL401(PartyDetails.builder()
-                                 .partyId(testUuid)
-                                 .build())
+                                  .partyId(testUuid)
+                                  .build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(YesNoNotApplicable.Yes)
@@ -2502,7 +2620,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
 
 
         when(CaseUtils.getCaseData(
@@ -2512,11 +2630,14 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
@@ -2549,7 +2670,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -2557,12 +2678,18 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals(
+            "# The application will be reviewed for confidential details",
+            response.getBody().getConfirmationHeader()
+        );
     }
 
     @Test
@@ -2572,11 +2699,13 @@ public class ServiceOfApplicationServiceTest {
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(documents));
         when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("test");
         when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
             .thenReturn(categoriesAndDocuments);
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+        DynamicList documentList =
+            DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
             .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
 
@@ -2591,12 +2720,16 @@ public class ServiceOfApplicationServiceTest {
         Category blankCategory = new Category("categoryId", "categoryName", 2, List.of(documents), null);
         Category category = new Category("categoryId", "categoryName", 2, null, List.of(blankCategory));
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
-        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("5be65243-f199-4edb-8565-f837ba46f1e6");
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn(
+            "5be65243-f199-4edb-8565-f837ba46f1e6");
         when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
             .thenReturn(categoriesAndDocuments);
         DynamicList documentList = DynamicList.builder().value(DynamicListElement
-                                                                   .builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
+                                                                   .builder()
+                                                                   .code("5be65243-f199-4edb-8565-f837ba46f1e6")
+                                                                   .build()).build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
             .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
 
@@ -2611,12 +2744,16 @@ public class ServiceOfApplicationServiceTest {
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
         Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
-        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("5be65243-f199-4edb-8565-f837ba46f1e6");
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn(
+            "5be65243-f199-4edb-8565-f837ba46f1e6");
         when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
             .thenReturn(categoriesAndDocuments);
         DynamicList documentList = DynamicList.builder().value(DynamicListElement
-                                                                   .builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
+                                                                   .builder()
+                                                                   .code("5be65243-f199-4edb-8565-f837ba46f1e6")
+                                                                   .build()).build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
             .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
 
@@ -2657,15 +2794,15 @@ public class ServiceOfApplicationServiceTest {
         partyElementList.add(partyDetailsElement1);
 
         List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
+        partyIds.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+        partyIds.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0024cae"));
         caseInvite = caseInvite.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
         caseInvite1 = caseInvite1.toBuilder()
             .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0024cae")).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite1));
+        caseInviteList.add(element(UUID.randomUUID(), caseInvite));
+        caseInviteList.add(element(UUID.randomUUID(), caseInvite1));
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
@@ -2683,7 +2820,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds).build())
@@ -2699,8 +2837,14 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         System.out.println(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals(
+            "solicitorResp test",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+        );
+        assertEquals(
+            "Court",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+        );
     }
 
     @Test
@@ -2717,9 +2861,9 @@ public class ServiceOfApplicationServiceTest {
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.fromString(TEST_UUID)).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
+        caseInviteList.add(element(UUID.randomUUID(), caseInvite));
         List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString(TEST_UUID),TEST_UUID));
+        partyIds.add(element(UUID.fromString(TEST_UUID), TEST_UUID));
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -2729,7 +2873,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
@@ -2737,13 +2882,13 @@ public class ServiceOfApplicationServiceTest {
                                                                  .personalServiceBy(unrepresentedApplicant.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy(unrepresentedApplicant.toString())
-                                                                 .build())
-                                      .unservedCitizenRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIds)
                                                                   .personalServiceBy(unrepresentedApplicant.toString())
                                                                   .build())
+                                      .unservedCitizenRespondentPack(SoaPack.builder()
+                                                                         .partyIds(partyIds)
+                                                                         .personalServiceBy(unrepresentedApplicant.toString())
+                                                                         .build())
                                       .applicationServedYesNo(Yes)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
@@ -2751,7 +2896,10 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals(
+            UNREPRESENTED_APPLICANT,
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+        );
     }
 
     @Test
@@ -2768,9 +2916,9 @@ public class ServiceOfApplicationServiceTest {
         CaseInvite caseInvite = CaseInvite.builder()
             .partyId(UUID.fromString(TEST_UUID)).build();
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.randomUUID(),caseInvite));
+        caseInviteList.add(element(UUID.randomUUID(), caseInvite));
         List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString(TEST_UUID),TEST_UUID));
+        partyIds.add(element(UUID.fromString(TEST_UUID), TEST_UUID));
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .caseTypeOfApplication(FL401_CASE_TYPE)
@@ -2780,7 +2928,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
@@ -2792,9 +2941,9 @@ public class ServiceOfApplicationServiceTest {
                                                                   .personalServiceBy(unrepresentedApplicant.toString())
                                                                   .build())
                                       .unservedCitizenRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .personalServiceBy(unrepresentedApplicant.toString())
-                                                                  .build())
+                                                                         .partyIds(partyIds)
+                                                                         .personalServiceBy(unrepresentedApplicant.toString())
+                                                                         .build())
                                       .applicationServedYesNo(Yes)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
@@ -2802,8 +2951,14 @@ public class ServiceOfApplicationServiceTest {
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(UNREPRESENTED_APPLICANT, updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals(
+            UNREPRESENTED_APPLICANT,
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+        );
+        assertEquals(
+            "By post",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+        );
     }
 
     @Test
@@ -2894,9 +3049,11 @@ public class ServiceOfApplicationServiceTest {
                                  .data(caseDetails).build()).build();
             when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
             StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-                new StartAllTabsUpdateDataContent(authorization,
-                                                  EventRequestData.builder().build(),
-                                                  StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
+                new StartAllTabsUpdateDataContent(
+                    authorization,
+                    EventRequestData.builder().build(),
+                    StartEventResponse.builder().build(), caseDetails, caseDataSoa, null
+                );
             when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
             CaseData updatedcaseData = serviceOfApplicationService
                 .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
@@ -2946,8 +3103,8 @@ public class ServiceOfApplicationServiceTest {
         partyElementList.add(partyDetailsElement1);
 
         List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
+        partyIds.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+        partyIds.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0024cae"));
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
@@ -2976,7 +3133,7 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
+        when(c100CaseInviteService.generateCaseInvite(any(), any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
         when(serviceOfApplicationEmailService
@@ -2985,13 +3142,23 @@ public class ServiceOfApplicationServiceTest {
                      Mockito.any(),
                      anyString(),
                      Mockito.any(),
-                     anyString())).thenReturn(emailNotificationDetails);
+                     anyString()
+                 )).thenReturn(emailNotificationDetails);
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals(
+            "solicitorResp test",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+        );
+        assertEquals(
+            "By email",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+        );
+        assertEquals(
+            "Court",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+        );
     }
 
     @Test
@@ -3025,8 +3192,8 @@ public class ServiceOfApplicationServiceTest {
         partyElementList.add(partyDetailsElement1);
 
         List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0025cae"));
-        partyIds.add(element(UUID.randomUUID(),"4f854707-91bf-4fa0-98ec-893ae0024cae"));
+        partyIds.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0025cae"));
+        partyIds.add(element(UUID.randomUUID(), "4f854707-91bf-4fa0-98ec-893ae0024cae"));
 
         CaseData caseData = CaseData.builder().id(12345L)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
@@ -3043,7 +3210,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIds)
@@ -3051,27 +3219,38 @@ public class ServiceOfApplicationServiceTest {
                                                                                         .applicantLegalRepresentative.toString())
                                                                  .build())
                                       .unServedRespondentPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy(SoaSolicitorServingRespondentsEnum
-                                                                                        .applicantLegalRepresentative.toString())
-                                                                 .build())
+                                                                  .partyIds(partyIds)
+                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
+                                                                                         .applicantLegalRepresentative.toString())
+                                                                  .build())
                                       .applicationServedYesNo(No)
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
+        when(c100CaseInviteService.generateCaseInvite(any(), any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
-                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
-                                                                                    Mockito.anyString()))
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+            Mockito.anyString(), Mockito.anyString(),
+            Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.anyString()
+        ))
             .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
-        assertEquals("Applicant solicitor", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
+        assertEquals(
+            "solicitorResp test",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
+        );
+        assertEquals(
+            "By email",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService()
+        );
+        assertEquals(
+            "Applicant solicitor",
+            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
+        );
     }
 
     @Test
@@ -3093,7 +3272,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum
-                                                                          .applicantLegalRepresentative)
+                                                                        .applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
@@ -3104,7 +3283,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -3112,12 +3291,18 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals(
+            "# The application will be reviewed for confidential details",
+            response.getBody().getConfirmationHeader()
+        );
     }
 
     @Test
@@ -3133,7 +3318,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -3162,11 +3348,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -3179,20 +3366,26 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
-            .orderCollection(List.of(element(UUID.fromString(TEST_UUID), OrderDetails.builder().orderTypeId("Blank order or directions (C21)")
-                .orderDocument(Document.builder().documentFileName("Test").build())
-                .orderDocumentWelsh(Document.builder().documentFileName("Test").build())
-                .build())))
+            .orderCollection(List.of(element(
+                UUID.fromString(TEST_UUID), OrderDetails.builder().orderTypeId("Blank order or directions (C21)")
+                    .orderDocument(Document.builder().documentFileName("Test").build())
+                    .orderDocumentWelsh(Document.builder().documentFileName("Test").build())
+                    .build()
+            )))
             .serviceOfApplicationScreen1(dynamicMultiSelectListNotifications)
             .serviceOfApplication(ServiceOfApplication.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
         for (String i : new ArrayList<>(Arrays.asList("E", "F", "H", "I", "L", "M", "O", "P", "Z"))) {
-            List<Document> documentPack = serviceOfApplicationService.getNotificationPack(caseData,i,List.of(Document.builder()
-                                                                                   .documentFileName(SOA_FL415_FILENAME).build(),
-                                                                               Document.builder()
-                                                                                   .documentFileName(SOA_FL416_FILENAME).build()));
+            List<Document> documentPack = serviceOfApplicationService.getNotificationPack(
+                caseData, i, List.of(
+                    Document.builder()
+                        .documentFileName(SOA_FL415_FILENAME).build(),
+                    Document.builder()
+                        .documentFileName(SOA_FL416_FILENAME).build()
+                )
+            );
             assertFalse(documentPack.isEmpty());
         }
     }
@@ -3210,7 +3403,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -3257,16 +3451,16 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
 
-
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -3283,7 +3477,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .contactPreferences(ContactPreferences.email)
             .build();
@@ -3334,11 +3529,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -3355,7 +3551,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .contactPreferences(ContactPreferences.email)
             .user(User.builder().idamId("12334566").build())
@@ -3407,11 +3604,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -3428,7 +3626,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .user(User.builder().idamId("12334566").build())
             .build();
@@ -3480,11 +3679,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -3501,7 +3701,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -3532,11 +3733,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
     }
 
@@ -3595,11 +3797,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
     }
 
@@ -3826,10 +4029,13 @@ public class ServiceOfApplicationServiceTest {
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
             dynamicMultiSelectList).build();
 
-        OrderDetails orderDetails = OrderDetails.builder().orderTypeId(CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()).build();
+        OrderDetails orderDetails =
+            OrderDetails.builder().orderTypeId(CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString())
+                .build();
         Element<OrderDetails> element = element(UUID.randomUUID(), orderDetails);
 
-        DynamicMultiSelectList soaScreen1 = DynamicMultiSelectList.builder().value(List.of(dynamicMultiselectListElement)).build();
+        DynamicMultiSelectList soaScreen1 =
+            DynamicMultiSelectList.builder().value(List.of(dynamicMultiselectListElement)).build();
 
 
         CaseData caseData = CaseData.builder()
@@ -3865,10 +4071,12 @@ public class ServiceOfApplicationServiceTest {
         ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().soaOtherParties(
             dynamicMultiSelectList).build();
 
-        OrderDetails orderDetails = OrderDetails.builder().orderTypeId(CreateSelectOrderOptionsEnum.appointmentOfGuardian.toString()).build();
+        OrderDetails orderDetails =
+            OrderDetails.builder().orderTypeId(CreateSelectOrderOptionsEnum.appointmentOfGuardian.toString()).build();
         Element<OrderDetails> element = element(UUID.randomUUID(), orderDetails);
 
-        DynamicMultiSelectList soaScreen1 = DynamicMultiSelectList.builder().value(List.of(dynamicMultiselectListElement)).build();
+        DynamicMultiSelectList soaScreen1 =
+            DynamicMultiSelectList.builder().value(List.of(dynamicMultiselectListElement)).build();
 
 
         CaseData caseData = CaseData.builder()
@@ -3893,7 +4101,8 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testSoaValidationWhenSoaServeToRespondentOptionsIsNA() {
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,No,null,null);
+        AboutToStartOrSubmitCallbackResponse response =
+            testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null, null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
@@ -3901,8 +4110,10 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testSoaValidationWhenNoCafcassServedOptions() {
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null,
-                                                                          ManageOrders.builder().cafcassServedOptions(No).build());
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(
+            YesNoNotApplicable.NotApplicable, No, No, null,
+            ManageOrders.builder().cafcassServedOptions(No).build()
+        );
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
@@ -3910,22 +4121,26 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testSoaValidationWhenCafcassServedOptionsSelected() {
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, null,
-                                                                          ManageOrders.builder().cafcassServedOptions(Yes).build());
+        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(
+            YesNoNotApplicable.NotApplicable, No, No, null,
+            ManageOrders.builder().cafcassServedOptions(Yes).build()
+        );
         assertNotNull(response);
         assertNull(response.getErrors());
     }
 
     @Test
     public void testSoaValidationWhenSoaCafcassCymruServedOptionsIsYes() {
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,Yes,No,null,null);
+        AboutToStartOrSubmitCallbackResponse response =
+            testSoaValidation(YesNoNotApplicable.NotApplicable, Yes, No, null, null);
         assertNotNull(response);
         assertNull(response.getErrors());
     }
 
     @Test
     public void testSoaValidationWhensoaServeLocalAuthorityIsYes() {
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable,No,Yes,null,null);
+        AboutToStartOrSubmitCallbackResponse response =
+            testSoaValidation(YesNoNotApplicable.NotApplicable, No, Yes, null, null);
         assertNotNull(response);
         assertNull(response.getErrors());
     }
@@ -3937,7 +4152,8 @@ public class ServiceOfApplicationServiceTest {
 
         DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().value(List.of(
             dynamicMultiselectListElement)).build();
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
+        AboutToStartOrSubmitCallbackResponse response =
+            testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, soaOtherParties, null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
@@ -3946,7 +4162,8 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandSoaOtherPartiesValuesIsEmpty() {
         DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
+        AboutToStartOrSubmitCallbackResponse response =
+            testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, soaOtherParties, null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
     }
@@ -3954,15 +4171,18 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testSoaValidationWhenSoaServeToRespondentOptionsIsNAandNoValueForSoaOtherParties() {
         DynamicMultiSelectList soaOtherParties = DynamicMultiSelectList.builder().build();
-        AboutToStartOrSubmitCallbackResponse response = testSoaValidation(YesNoNotApplicable.NotApplicable, No,No,soaOtherParties,null);
+        AboutToStartOrSubmitCallbackResponse response =
+            testSoaValidation(YesNoNotApplicable.NotApplicable, No, No, soaOtherParties, null);
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE, response.getErrors().get(0));
     }
 
     private AboutToStartOrSubmitCallbackResponse testSoaValidation(YesNoNotApplicable yesOrNOforSoaServeToRespOptions,
-                                                                   YesOrNo yesOrNoSoaCafcassCymruServedOptions, YesOrNo soaServeLocalAuthorityYesOrNo,
-                                                                   DynamicMultiSelectList soaOtherParties,ManageOrders manageOrders) {
+                                                                   YesOrNo yesOrNoSoaCafcassCymruServedOptions,
+                                                                   YesOrNo soaServeLocalAuthorityYesOrNo,
+                                                                   DynamicMultiSelectList soaOtherParties,
+                                                                   ManageOrders manageOrders) {
         CaseData caseData1 = CaseData.builder()
             .id(12345L)
             .manageOrders(manageOrders)
@@ -3997,7 +4217,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -4024,11 +4245,12 @@ public class ServiceOfApplicationServiceTest {
                                                                        .forename("first")
                                                                        .surname("test").build());
 
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                authorization,
+                new HashMap<>()
+            );
         assertNotNull(servedApplicationDetails);
         assertEquals("first test", servedApplicationDetails.getServedBy());
         assertEquals("Court - court bailiff", servedApplicationDetails.getWhoIsResponsible());
@@ -4049,7 +4271,8 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder()
                                                                  .partyIds(partyIdsSoa)
@@ -4058,9 +4281,11 @@ public class ServiceOfApplicationServiceTest {
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIdsSoa)
                                                                   .packDocument(List.of(element(Document.builder()
-                                                                                                    .documentFileName("").build())))
+                                                                                                    .documentFileName("")
+                                                                                                    .build())))
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
-                                                                                         .courtBailiff.toString()).build())
+                                                                                         .courtBailiff.toString())
+                                                                  .build())
                                       .unServedOthersPack(SoaPack.builder()
                                                               .partyIds(partyIdsSoa)
                                                               .build())
@@ -4076,9 +4301,11 @@ public class ServiceOfApplicationServiceTest {
                              .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                              EventRequestData.builder().build(),
-                                              StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
+            new StartAllTabsUpdateDataContent(
+                authorization,
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(), caseDetails, caseDataSoa, null
+            );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
         assertNotNull(serviceOfApplicationService.processConfidentialityCheck(authorization, callbackRequest));
@@ -4111,7 +4338,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -4119,12 +4346,18 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals(
+            "# The application will be reviewed for confidential details",
+            response.getBody().getConfirmationHeader()
+        );
     }
 
     @Test
@@ -4150,22 +4383,29 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            dataMap,
+            caseData,
+            null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application will be reviewed for confidential details",
-                     Objects.requireNonNull(response.getBody()).getConfirmationHeader());
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        assertEquals(
+            "# The application will be reviewed for confidential details",
+            Objects.requireNonNull(response.getBody()).getConfirmationHeader()
+        );
     }
 
     @Test
@@ -4192,7 +4432,7 @@ public class ServiceOfApplicationServiceTest {
             .state(CASE_ISSUED.getValue())
             .data(dataMap)
             .build();
-        when(objectMapper.convertValue(dataMap,  CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(dataMap, CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
@@ -4200,11 +4440,14 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null);
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(), StartEventResponse.builder().build(), dataMap, caseData, null
+        );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
-        ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
+        ResponseEntity<SubmittedCallbackResponse> response =
+            serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
@@ -4228,15 +4471,18 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .confidentialityCheckRejectReason(
+                                                                                    "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().partyIds(partyIdsSoa).build())
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .partyIds(partyIdsSoa)
                                                                   .packDocument(List.of(element(Document.builder()
-                                                                                                    .documentFileName("").build())))
+                                                                                                    .documentFileName("")
+                                                                                                    .build())))
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
-                                                                                         .applicantLegalRepresentative.toString()).build())
+                                                                                         .applicantLegalRepresentative.toString())
+                                                                  .build())
                                       .unServedOthersPack(SoaPack.builder().partyIds(partyIdsSoa).build())
                                       .applicationServedYesNo(No)
                                       .soaCafcassCymruServedOptions(Yes)
@@ -4244,7 +4490,10 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization));
+        assertNotNull(serviceOfApplicationService.sendNotificationsAfterConfidentialCheckSuccessful(
+            caseData,
+            authorization
+        ));
     }
 
     @Test
@@ -4260,7 +4509,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -4269,7 +4519,7 @@ public class ServiceOfApplicationServiceTest {
         applicants.add(element(partyDetails));
         List<Element<ResponseDocuments>> c8Docs = List.of(Element.<ResponseDocuments>builder()
                                                               .value(ResponseDocuments.builder().build())
-            .build());
+                                                              .build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
@@ -4289,41 +4539,48 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaLaEmailAddress("cymruemail@test.com")
                                       .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
-                                                                               .documentsListForLa(DynamicList.builder()
-                                                                                                       .value(
-                                                                                                           DynamicListElement.builder()
-                                                                                                               .code(TEST_UUID)
+                                                                                       .documentsListForLa(DynamicList.builder()
+                                                                                                               .value(
+                                                                                                                   DynamicListElement.builder()
+                                                                                                                       .code(
+                                                                                                                           TEST_UUID)
+                                                                                                                       .build())
                                                                                                                .build())
-                                                                                                       .build())
-                                                                               .build())))
+                                                                                       .build())))
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
                                       .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtBailiff)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
-                                                                                                                   "fileName",
-                                                                                                                   "binaryUrl",
-                                                                                                                   "attributePath",
-                                                                                                                   LocalDateTime.now());
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL",
+            "fileName",
+            "binaryUrl",
+            "attributePath",
+            LocalDateTime.now()
+        );
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
-        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(categoriesAndDocuments);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                    .forename("first")
                                                                    .surname("test").build());
-        when(serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority(Mockito.anyString(),
-                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
-                                                                                    Mockito.anyString()))
+        when(serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority(
+            Mockito.anyString(),
+            Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.anyString()
+        ))
             .thenReturn(EmailNotificationDetails.builder().build());
         when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn(TEST_UUID);
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
@@ -4342,7 +4599,8 @@ public class ServiceOfApplicationServiceTest {
             .partyId(UUID.randomUUID())
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -4363,7 +4621,8 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServeLocalAuthorityYesOrNo(No)
                                       .soaLaEmailAddress("cymruemail@test.com")
                                       .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
-                                                                                       .documentsListForLa(DynamicList.builder().build())
+                                                                                       .documentsListForLa(DynamicList.builder()
+                                                                                                               .build())
                                                                                        .build())))
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
                                       .soaCitizenServingRespondentsOptions(SoaCitizenServingRespondentsEnum.courtBailiff)
@@ -4371,86 +4630,104 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
-        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
-                                                                                                                   "fileName",
-                                                                                                                   "binaryUrl",
-                                                                                                                   "attributePath",
-                                                                                                                   LocalDateTime.now());
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL",
+            "fileName",
+            "binaryUrl",
+            "attributePath",
+            LocalDateTime.now()
+        );
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
-        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(categoriesAndDocuments);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                    .forename("first")
                                                                    .surname("test").build());
         when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(Mockito.anyString(),Mockito.any(),Mockito.anyString(),
-                                                        Mockito.any(),Mockito.anyString())).thenThrow(
+                 .sendEmailNotificationToLocalAuthority(
+                     Mockito.anyString(), Mockito.any(), Mockito.anyString(),
+                     Mockito.any(), Mockito.anyString()
+                 )).thenThrow(
             SendGridNotificationException.class);
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 
     @Test
     public void testgetSelectedDocumentFromDynamicList() {
-        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
-                                                                                                                   "fileName",
-                                                                                                                   "binaryUrl",
-                                                                                                                   "attributePath",
-                                                                                                                   LocalDateTime.now());
-        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
-        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
-        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
-            .thenReturn(categoriesAndDocuments);
-        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
-            TEST_AUTH,
-            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL",
+            "fileName",
+            "binaryUrl",
+            "attributePath",
+            LocalDateTime.now()
         );
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument =
+            serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+                TEST_AUTH,
+                DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+            );
         assertNotNull(fetchedDocument);
     }
 
     @Test
     public void testgetSelectedDocumentUncategorisedDocs() {
-        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
-                                                                                                                   "fileName",
-                                                                                                                   "binaryUrl",
-                                                                                                                   "attributePath",
-                                                                                                                   LocalDateTime.now());
-        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, Collections.emptyList(), List.of(document));
-        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test1");
-        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
-            .thenReturn(categoriesAndDocuments);
-        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
-            TEST_AUTH,
-            DynamicList.builder().value(DynamicListElement.builder().code("test1").build()).build(), ""
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL",
+            "fileName",
+            "binaryUrl",
+            "attributePath",
+            LocalDateTime.now()
         );
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, Collections.emptyList(), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test1");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument =
+            serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+                TEST_AUTH,
+                DynamicList.builder().value(DynamicListElement.builder().code("test1").build()).build(), ""
+            );
         assertNotNull(fetchedDocument);
     }
 
     @Test
     public void testgetSelectedDocumentForSubCategoriesDocs() {
-        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
-                                                                                                                   "fileName",
-                                                                                                                   "binaryUrl",
-                                                                                                                   "attributePath",
-                                                                                                                   LocalDateTime.now());
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document(
+            "documentURL",
+            "fileName",
+            "binaryUrl",
+            "attributePath",
+            LocalDateTime.now()
+        );
         Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
         Category category1 = new Category("categoryId", "categoryName", 2, Collections.emptyList(), List.of(category));
 
-        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category1), List.of(document));
+        CategoriesAndDocuments categoriesAndDocuments =
+            new CategoriesAndDocuments(1, List.of(category1), List.of(document));
         when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
-        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
             .thenReturn(categoriesAndDocuments);
-        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
-            TEST_AUTH,
-            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
-        );
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument =
+            serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+                TEST_AUTH,
+                DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+            );
         assertNotNull(fetchedDocument);
         assertEquals("fileName", fetchedDocument.getDocumentFilename());
     }
@@ -4467,8 +4744,9 @@ public class ServiceOfApplicationServiceTest {
         Element applicantElement = element(partyDetails);
         partyDetailsList.add(applicantElement);
 
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
-            YesNoNotApplicable.No).build();
+        ServiceOfApplication serviceOfApplication =
+            ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
+                YesNoNotApplicable.No).build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .serviceOfApplication(serviceOfApplication)
@@ -4488,7 +4766,8 @@ public class ServiceOfApplicationServiceTest {
     public void checkC100SoaWaFieldsWhenConfidentialDetailsPresent() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -4496,8 +4775,10 @@ public class ServiceOfApplicationServiceTest {
         Element applicantElement = element(partyDetails);
         partyDetailsList.add(applicantElement);
 
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
-            YesNoNotApplicable.Yes).soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
+        ServiceOfApplication serviceOfApplication =
+            ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
+                    YesNoNotApplicable.Yes).soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .serviceOfApplication(serviceOfApplication)
@@ -4521,7 +4802,8 @@ public class ServiceOfApplicationServiceTest {
     public void checkFL401SoaWaFieldsWhenConfidentialDetailsPresent() {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln")
+            .user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
 
@@ -4552,8 +4834,9 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void checkFL401ConfidentialCheckWaFieldsWhenConfidentialDetailsPresent() {
 
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
-            SoaPack.builder().build()).build();
+        ServiceOfApplication serviceOfApplication =
+            ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+                SoaPack.builder().build()).build();
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .serviceOfApplication(serviceOfApplication)
@@ -4569,8 +4852,9 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderSelected() {
 
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
-            SoaPack.builder().build()).build();
+        ServiceOfApplication serviceOfApplication =
+            ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+                SoaPack.builder().build()).build();
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
                 FL401OrderTypeEnum.occupationOrder)).build())
@@ -4588,8 +4872,9 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderNotSelected() {
 
-        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
-            SoaPack.builder().build()).build();
+        ServiceOfApplication serviceOfApplication =
+            ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+                SoaPack.builder().build()).build();
         CaseData caseData = CaseData.builder()
             .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
                 FL401OrderTypeEnum.nonMolestationOrder)).build())
@@ -4757,12 +5042,13 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         when(caseInviteManager.sendAccessCodeNotificationEmail(caseData)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(authorization,
-                                                                                                        EventRequestData.builder().build(),
-                                                                                                        StartEventResponse.builder().build(),
-                                                                                                        dataMap,
-                                                                                                        caseData,
-                                                                                                        null
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            authorization,
+            EventRequestData.builder().build(),
+            StartEventResponse.builder().build(),
+            dataMap,
+            caseData,
+            null
         );
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
 
@@ -4799,15 +5085,18 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(UNREPRESENTED_APPLICANT, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationEmailService).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
-                                                                                       Mockito.any(),Mockito.any(),
-                                                                                       Mockito.any(),Mockito.anyString());
+        verify(serviceOfApplicationEmailService).sendEmailUsingTemplateWithAttachments(
+            Mockito.anyString(), Mockito.anyString(),
+            Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        );
     }
 
     @Test
@@ -4838,13 +5127,19 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(UNREPRESENTED_APPLICANT, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
+        );
     }
 
     @Test
@@ -4875,14 +5170,17 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(UNREPRESENTED_APPLICANT, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationPostService).sendPostNotificationToParty(Mockito.any(), Mockito.anyString(),Mockito.any(),Mockito.any(),
-                                                                            Mockito.anyString());
+        verify(serviceOfApplicationPostService).sendPostNotificationToParty(
+            Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.any(),
+            Mockito.anyString()
+        );
     }
 
     @Test
@@ -4913,14 +5211,17 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationPostService).sendPostNotificationToParty(Mockito.any(), Mockito.anyString(),Mockito.any(),Mockito.any(),
-                                                                            Mockito.anyString());
+        verify(serviceOfApplicationPostService).sendPostNotificationToParty(
+            Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.any(),
+            Mockito.anyString()
+        );
     }
 
     @Test
@@ -4949,15 +5250,18 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationEmailService).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
-                                                                                       Mockito.any(),Mockito.any(),
-                                                                                       Mockito.any(),Mockito.anyString());
+        verify(serviceOfApplicationEmailService).sendEmailUsingTemplateWithAttachments(
+            Mockito.anyString(), Mockito.anyString(),
+            Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.anyString()
+        );
     }
 
     @Test
@@ -4990,13 +5294,19 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
+        );
     }
 
     @Test
@@ -5042,15 +5352,18 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationEmailService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.anyString(),
-                                                                                       Mockito.anyString(), Mockito.any(),
-                                                                                       Mockito.any(),Mockito.any(), Mockito.anyString());
+        verify(serviceOfApplicationEmailService, times(2)).sendEmailUsingTemplateWithAttachments(
+            Mockito.anyString(),
+            Mockito.anyString(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.anyString()
+        );
     }
 
     @Test
@@ -5067,7 +5380,8 @@ public class ServiceOfApplicationServiceTest {
             .user(User.builder().idamId(TEST_UUID).build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
-        List<Element<PartyDetails>> partiesSoa = List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build());
+        List<Element<PartyDetails>> partiesSoa =
+            List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partiesSoa)
@@ -5091,23 +5405,29 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(COURT, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(Mockito.any(), Mockito.anyString(), Mockito.any(),Mockito.any());
+        verify(serviceOfApplicationEmailService).sendGovNotifyEmail(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any()
+        );
     }
 
     @Test
     public void testSendNotificationCouertNavDaPersonalCourtAdminPost() {
         QuarantineLegalDoc courtNavDocument = QuarantineLegalDoc.builder().documentType("WITNESS_STATEMENT").build();
-        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs =  new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedDocListDocs = new ArrayList<>();
         courtNavUploadedDocListDocs.add(element(courtNavDocument));
         QuarantineLegalDoc courtNavRestrictedDocument = QuarantineLegalDoc.builder().documentType("WITNESS_STATEMENT")
             .uploadedBy(COURTNAV).build();
-        List<Element<QuarantineLegalDoc>> courtNavUploadedRestrictedDocsList =  new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> courtNavUploadedRestrictedDocsList = new ArrayList<>();
         courtNavUploadedRestrictedDocsList.add(element(courtNavRestrictedDocument));
         ReviewDocuments reviewDocuments = ReviewDocuments.builder()
             .courtNavUploadedDocListDocTab(courtNavUploadedDocListDocs)
@@ -5141,14 +5461,17 @@ public class ServiceOfApplicationServiceTest {
             .reviewDocuments(reviewDocuments)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .build();
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            TEST_AUTH,
-            new HashMap<>()
-        );
+        final ServedApplicationDetails servedApplicationDetails =
+            serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH,
+                new HashMap<>()
+            );
         assertEquals(COURT_COURT_ADMIN, servedApplicationDetails.getWhoIsResponsible());
-        verify(serviceOfApplicationPostService).sendPostNotificationToParty(Mockito.any(), Mockito.anyString(),Mockito.any(),Mockito.any(),
-                                                                            Mockito.anyString());
+        verify(serviceOfApplicationPostService).sendPostNotificationToParty(
+            Mockito.any(), Mockito.anyString(), Mockito.any(), Mockito.any(),
+            Mockito.anyString()
+        );
     }
 
     @Test
@@ -5194,7 +5517,8 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
+        Map<String, Object> caseDataUpdated =
+            (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertEquals(YES, caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
@@ -5241,8 +5565,9 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
-        assertEquals(NO,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
+        Map<String, Object> caseDataUpdated =
+            (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
+        assertEquals(NO, caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
     @Test
@@ -5319,9 +5644,10 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
+        Map<String, Object> caseDataUpdated =
+            (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
-        assertEquals(YES,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
+        assertEquals(YES, caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
     @Test
@@ -5349,9 +5675,10 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
+        Map<String, Object> caseDataUpdated =
+            (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
-        assertEquals(NO,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
+        assertEquals(NO, caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
     @Test
@@ -5380,9 +5707,10 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-        Map<String, Object> caseDataUpdated = (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
+        Map<String, Object> caseDataUpdated =
+            (serviceOfApplicationService.handleAboutToSubmit(callBackRequest, "testAuth"));
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
-        assertEquals(EMPTY_STRING,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
+        assertEquals(EMPTY_STRING, caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
 
     @Test
@@ -5422,8 +5750,8 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testAutoLinkCitizenCase() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
-        caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, NO);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED, NO);
         PartyDetails testParty1 = PartyDetails.builder()
             .email("partyEmail@email")
             .firstName(testString).lastName(testString).representativeFirstName(testString)
@@ -5459,50 +5787,58 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
 
-        List<Element<PartyDetails>> partiesList = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty1).build(),
-                                                          Element.<PartyDetails>builder().id(testUuid).value(testParty2).build(),
-                                                          Element.<PartyDetails>builder().id(testUuid).value(testParty3).build());
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
-                                                                UserInfo.builder().emailAddress(testParty1.getEmail()).build()).build()))
-                                                            .applicants(partiesList)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .isApplicantRepresented(YES)
-                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-                                                            .othersToNotify(partiesList)
-                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-                                                            .build(),
-                                                        caseDataMap1,Event.SOA.getId());
+        List<Element<PartyDetails>> partiesList = List.of(
+            Element.<PartyDetails>builder().id(testUuid).value(testParty1).build(),
+            Element.<PartyDetails>builder().id(testUuid).value(testParty2).build(),
+            Element.<PartyDetails>builder().id(testUuid).value(testParty3).build()
+        );
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                    UserInfo.builder().emailAddress(testParty1.getEmail()).build()).build()))
+                .applicants(partiesList)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .isApplicantRepresented(YES)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(partiesList)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .build(),
+            caseDataMap1, Event.SOA.getId()
+        );
         assertNotNull(caseDataMap1.get(APPLICANTS));
 
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
-        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
-                                                                UserInfo.builder().emailAddress(testParty2.getEmail()).build()).build()))
-                                                            .applicants(partiesList)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .isApplicantRepresented(YES)
-                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-                                                            .othersToNotify(partiesList)
-                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-                                                            .build(),
-                                                        caseDataMap1,Event.SOA.getId());
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED, YES);
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                    UserInfo.builder().emailAddress(testParty2.getEmail()).build()).build()))
+                .applicants(partiesList)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .isApplicantRepresented(YES)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(partiesList)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .build(),
+            caseDataMap1, Event.SOA.getId()
+        );
         assertNotNull(caseDataMap1.get(APPLICANTS));
 
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
-        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
-                                                                UserInfo.builder().emailAddress(testParty1.getEmail()).build()).build()))
-                                                            .applicants(partiesList)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .isApplicantRepresented(YES)
-                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-                                                            .othersToNotify(partiesList)
-                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-                                                            .build(),
-                                                        caseDataMap1,Event.CONFIDENTIAL_CHECK.getId());
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED, YES);
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                    UserInfo.builder().emailAddress(testParty1.getEmail()).build()).build()))
+                .applicants(partiesList)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .isApplicantRepresented(YES)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(partiesList)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .build(),
+            caseDataMap1, Event.CONFIDENTIAL_CHECK.getId()
+        );
         assertNotNull(caseDataMap1.get(APPLICANTS));
 
     }
@@ -5510,19 +5846,21 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testAutoLinkCitizenCaseWhenUserAndPartyEmaildIdIsDifferent() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
-        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
-                                                                UserInfo.builder().emailAddress("email").build()).build()))
-                                                            .applicants(parties)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .isApplicantRepresented(YES)
-                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-                                                            .othersToNotify(parties)
-                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-                                                            .build(),
-                                                        caseDataMap1,Event.SOA.getId());
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED, YES);
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                    UserInfo.builder().emailAddress("email").build()).build()))
+                .applicants(parties)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .isApplicantRepresented(YES)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(parties)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .build(),
+            caseDataMap1, Event.SOA.getId()
+        );
         assertNull(caseDataMap1.get(APPLICANTS));
 
     }
@@ -5530,19 +5868,21 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testAutoLinkCitizenCaseWhenC8CheckNeededAndApproved() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,YES);
-        caseDataMap1.put(IS_C8_CHECK_APPROVED,YES);
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
-                                                                UserInfo.builder().emailAddress("email").build()).build()))
-                                                            .applicants(parties)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .isApplicantRepresented(YES)
-                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-                                                            .othersToNotify(parties)
-                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-                                                            .build(),
-                                                        caseDataMap1,Event.CONFIDENTIAL_CHECK.getId());
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, YES);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED, YES);
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .userInfo(List.of(Element.<UserInfo>builder().id(testUuid).value(
+                    UserInfo.builder().emailAddress("email").build()).build()))
+                .applicants(parties)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .isApplicantRepresented(YES)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(parties)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .build(),
+            caseDataMap1, Event.CONFIDENTIAL_CHECK.getId()
+        );
         assertNull(caseDataMap1.get(APPLICANTS));
 
     }
@@ -5550,7 +5890,7 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testAutoLinkCitizenCaseWhenUserInfoIsNotPresent() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put(IS_C8_CHECK_APPROVED,NO);
+        caseDataMap1.put(IS_C8_CHECK_APPROVED, NO);
         PartyDetails testParty1 = PartyDetails.builder()
             .email("partyEmail@email")
             .firstName(testString).lastName(testString).representativeFirstName(testString)
@@ -5561,16 +5901,19 @@ public class ServiceOfApplicationServiceTest {
             .representativeLastName(testString)
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
-        List<Element<PartyDetails>> partiesList = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty1).build());
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .applicants(partiesList)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .isApplicantRepresented(YES)
-                                                            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-                                                            .othersToNotify(partiesList)
-                                                            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-                                                            .build(),
-                                                        caseDataMap1,Event.CONFIDENTIAL_CHECK.getId());
+        List<Element<PartyDetails>> partiesList =
+            List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty1).build());
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .applicants(partiesList)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .isApplicantRepresented(YES)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(partiesList)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .build(),
+            caseDataMap1, Event.CONFIDENTIAL_CHECK.getId()
+        );
         assertNull(caseDataMap1.get(APPLICANTS));
 
     }
@@ -5578,1148 +5921,18 @@ public class ServiceOfApplicationServiceTest {
     @Test
     public void testAutoLinkCitizenCaseWhenCaseCreatedBySolicitor() {
         Map<String, Object> caseDataMap1 = new HashMap<>();
-        caseDataMap1.put(IS_C8_CHECK_NEEDED,NO);
-        serviceOfApplicationService.autoLinkCitizenCase(CaseData.builder().id(12345L)
-                                                            .caseTypeOfApplication(C100_CASE_TYPE)
-                                                            .caseCreatedBy(CaseCreatedBy.SOLICITOR)
-                                                            .applicants(parties)
-                                                            .build(),
-                                                        caseDataMap1,Event.SOA.getId());
+        caseDataMap1.put(IS_C8_CHECK_NEEDED, NO);
+        serviceOfApplicationService.autoLinkCitizenCase(
+            CaseData.builder().id(12345L)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+                .applicants(parties)
+                .build(),
+            caseDataMap1, Event.SOA.getId()
+        );
         assertNull(caseDataMap1.get(APPLICANTS));
 
-    }
-
-    @Test
-    public void testSendGridEmailWhenPreferenceSetToEmailForSoaToRespondentC100() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
-            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testPostNotificationWhenNoAddressLineSetForSoaToRespondentC100() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
-            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testPostNotificationWhenNoPreferenceSetForSoaToRespondentC100() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
-            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testPostNotificationWhenPreferenceSetToEmailButNoEmailPopulatedForRespondentC100() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
-            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testPostNotificationWhenPreferenceSetToPostForSoaToRespondentC100() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.randomUUID())
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.post)
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-        when(c100CaseInviteService.generateCaseInvite(any(),any()))
-            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-
-    @Test
-    public void testEmailToRespondentSolicitorNonPersonalAfterConfSuccessC100() {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"),
-                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
-
-        caseInvite = caseInvite.toBuilder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), caseInvite));
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication("C100")
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy("courtAdmin")
-                                                                 .coverLettersMap(coverletterMap)
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                                    .documentFileName("").build())))
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
-        when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(
-                     anyString(),
-                     Mockito.any(),
-                     anyString(),
-                     Mockito.any(),
-                     anyString()
-                 )).thenReturn(emailNotificationDetails);
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                      EventRequestData.builder().build(),
-                                      StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(
-            "solicitorResp test",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
-        );
-        assertEquals(
-            "Court",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-        );
 
     }
-
-    @Test
-    public void testPostToRespondentAfterConfSuccessC100WhenPreferenceIsPost() {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.post)
-            .build();
-
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"),
-                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
-
-        caseInvite = caseInvite.toBuilder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), caseInvite));
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication("C100")
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy("courtAdmin")
-                                                                 .coverLettersMap(coverletterMap)
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                  .documentFileName("").build())))
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
-        when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(
-                     anyString(),
-                     Mockito.any(),
-                     anyString(),
-                     Mockito.any(),
-                     anyString()
-                 )).thenReturn(emailNotificationDetails);
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                  EventRequestData.builder().build(),
-                                  StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
-
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(
-            "solicitorResp test",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
-        );
-        assertEquals(
-            "Court",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-        );
-
-    }
-
-    @Test
-    public void testSendGridEmailToRespondentAfterConfSuccessWhenPreferenceIsEmail() {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .email("abc@xyz.com")
-            .build();
-
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"),
-                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
-
-        caseInvite = caseInvite.toBuilder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), caseInvite));
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication("C100")
-            .respondents(partyElementList)
-            .applicants(parties)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy("courtAdmin")
-                                                                 .coverLettersMap(coverletterMap)
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                                                    .documentFileName("").build())))
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
-        when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(
-                     anyString(),
-                     Mockito.any(),
-                     anyString(),
-                     Mockito.any(),
-                     anyString()
-                 )).thenReturn(emailNotificationDetails);
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                              EventRequestData.builder().build(),
-                                              StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
-
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(
-            "solicitorResp test",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
-        );
-        assertEquals(
-            "Court",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-        );
-
-    }
-
-    @Test
-    public void testPostToRespondentAfterConfSuccessWhenPreferenceIsEmailButNoEmailSet() {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .build();
-
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"),
-                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
-
-        caseInvite = caseInvite.toBuilder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), caseInvite));
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication("C100")
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy("courtAdmin")
-                                                                 .coverLettersMap(coverletterMap)
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                  .documentFileName("").build())))
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
-        when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(
-                     anyString(),
-                     Mockito.any(),
-                     anyString(),
-                     Mockito.any(),
-                     anyString()
-                 )).thenReturn(emailNotificationDetails);
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                  EventRequestData.builder().build(),
-                                  StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
-
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(
-            "solicitorResp test",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
-        );
-        assertEquals(
-            "Court",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-        );
-
-    }
-
-    @Test
-    public void testPostToRespondentAfterConfSuccessWhenPreferenceIsPostWithAddress() {
-
-        PartyDetails partyDetails1 = PartyDetails.builder()
-            .user(User.builder()
-                      .idamId("4f854707-91bf-4fa0-98ec-893ae0025cae").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.post)
-            .address(Address.builder().addressLine1("line1").build())
-            .build();
-
-        Element<PartyDetails> partyDetailsElement = Element.<PartyDetails>builder()
-            .id(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"))
-            .value(partyDetails1)
-            .build();
-
-        List<Element<PartyDetails>> partyElementList = new ArrayList<>();
-        partyElementList.add(partyDetailsElement);
-
-        List<Element<String>> partyIds = new ArrayList<>();
-        partyIds.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"),
-                             "4f854707-91bf-4fa0-98ec-893ae0025cae"));
-
-        caseInvite = caseInvite.toBuilder()
-            .partyId(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae")).build();
-
-        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
-        caseInviteList.add(element(UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), caseInvite));
-
-        CaseData caseData = CaseData.builder().id(12345L)
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .caseTypeOfApplication("C100")
-            .respondents(partyElementList)
-            .caseInvites(caseInviteList)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder()
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .pd36qLetter(Document.builder().build())
-                                                .additionalDocuments(Document.builder().build())
-                                                .specialArrangementsLetter(Document.builder().build())
-                                                .noticeOfSafetySupportLetter(Document.builder().build())
-                                                .build())
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason(
-                                                                                    "pack contain confidential info")
-                                                                                .build()))
-                                      .unServedApplicantPack(SoaPack.builder()
-                                                                 .partyIds(partyIds)
-                                                                 .personalServiceBy("courtAdmin")
-                                                                 .coverLettersMap(coverletterMap)
-                                                                 .build())
-                                      .unServedRespondentPack(SoaPack.builder()
-                                                                  .partyIds(partyIds)
-                                                                  .packDocument(List.of(element(Document.builder()
-                                                                                                    .documentFileName("").build())))
-                                                                  .build())
-                                      .applicationServedYesNo(No)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
-        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder().build();
-        when(serviceOfApplicationEmailService
-                 .sendEmailNotificationToLocalAuthority(
-                     anyString(),
-                     Mockito.any(),
-                     anyString(),
-                     Mockito.any(),
-                     anyString()
-                 )).thenReturn(emailNotificationDetails);
-
-        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            new StartAllTabsUpdateDataContent(authorization,
-                                              EventRequestData.builder().build(),
-                                              StartEventResponse.builder().build(), caseDetails, caseDataSoa, null);
-        when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        CaseData updatedcaseData = serviceOfApplicationService
-            .sendNotificationsAfterConfidentialCheckSuccessful(caseData, authorization);
-
-        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
-        assertEquals(
-            "solicitorResp test",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy()
-        );
-        assertEquals(
-            "Court",
-            updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible()
-        );
-
-    }
-
-    @Test
-    public void testSendGridEmailWhenPreferenceSetToEmailForSoaToRespondentFL401() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"))
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.email)
-            .firstName("John")
-            .lastName("McGareth")
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantsFL401(partyDetails)
-            .respondentsFL401(partyDetails)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaServeToRespondentOptionsDA(No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","FL401");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testPostWhenPreferenceSetToPostForSoaToRespondentFL401() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"))
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.post)
-            .firstName("John")
-            .lastName("McGareth")
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantsFL401(partyDetails)
-            .respondentsFL401(partyDetails)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaServeToRespondentOptionsDA(No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","FL401");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-    @Test
-    public void testEmailWhenThePartyHasLegalRepForFL401() {
-        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
-            .representativeLastName("repLastName")
-            .gender(Gender.male)
-            .email("abc@xyz.com")
-            .phoneNumber("1234567890")
-            .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .partyId(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"))
-            .address(Address.builder().addressLine1("line1").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .contactPreferences(ContactPreferences.post)
-            .firstName("John")
-            .lastName("McGareth")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .solicitorEmail("sol@xyz.com")
-            .build();
-
-        List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element<PartyDetails> partyDetailsElement = element(partyDetails);
-        otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
-        List<Element<PartyDetails>> partyList = new ArrayList<>();
-        partyList.add(element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails));
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
-                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
-        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .applicants(partyList)
-            .respondents(partyList)
-            .applicantsFL401(partyDetails)
-            .respondentsFL401(partyDetails)
-            .applicantCaseName("Test Case 45678")
-            .caseInvites(caseInvites)
-            .finalDocument(Document.builder().documentFileName("").build())
-            .finalWelshDocument(Document.builder().documentFileName("").build())
-            .c1AWelshDocument(Document.builder().documentFileName("").build())
-            .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
-                                                                               .orderTypeId("Blank order or directions (C21)")
-                                                                               .build())
-                                         .build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaServeToRespondentOptions(YesNoNotApplicable.No)
-                                      .soaServeToRespondentOptionsDA(No)
-                                      .soaCafcassCymruServedOptions(Yes)
-                                      .soaCafcassEmailId("cymruemail@test.com")
-                                      .soaCafcassCymruEmail("cymruemail@test.com")
-                                      .soaServingRespondentsOptions(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
-                                      .soaRecipientsOptions(soaRecipientsOptions)
-                                      .soaOtherParties(DynamicMultiSelectList.builder().value(List.of(dynamicListElement)).build()).build())
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(otherParities)
-            .caseTypeOfApplication(FL401_CASE_TYPE)
-            .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","FL401");
-        when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
-        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
-                                                                       .forename("first")
-                                                                       .surname("test").build());
-
-        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
-            caseData,
-            authorization,
-            casedata
-        );
-
-        assertNotNull(servedApplicationDetails);
-        assertEquals("By email", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
-    }
-
-
 }
+
