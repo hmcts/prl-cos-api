@@ -216,7 +216,7 @@ public class SealAuditService {
 
                     if (totalCasesProcessed % batchSize == 0) {
                         log.info(
-                            "Processed {} cases, pausing for {} seconds",
+                            "Processed {}  {} seconds",
                             totalCasesProcessed,
                             batchDelaySeconds
                         );
