@@ -44,6 +44,7 @@ public class DocmosisRenderService {
         applyRtfValues(generateDocumentRequest);
 
         Map<String, Object> placeholders = templateDataMapper.map(generateDocumentRequest.getValues());
+        log.info("placeholders.rtfValue: {}", placeholders.get("rtfValue"));
         placeholders.put(CURRENT_DATE_KEY, dateTimeFormatter.format(ZonedDateTime.now(clock)));
 
         DocmosisRenderRequest request = DocmosisRenderRequest.builder()
