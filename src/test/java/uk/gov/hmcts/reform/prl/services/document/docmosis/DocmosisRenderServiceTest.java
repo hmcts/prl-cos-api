@@ -133,6 +133,113 @@ class DocmosisRenderServiceTest {
             .hasMessageContaining("missingTemplate template not found");
     }
 
+    @Test
+    void shouldThrowException_forRtfOne() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("caseDetails", new HashMap<String, Object>());
+        GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+            .template("template1")
+            .values(values)
+            .caseId("123")
+            .build();
+
+        byte[] pdfBytes = new byte[]{1, 2, 3};
+        when(templatesConfig.getFilenameByTemplateName("template1")).thenReturn(Optional.of("file1.pdf"));
+        when(docmosisClient.render(any(DocmosisRenderRequest.class))).thenReturn(pdfBytes);
+
+        var uploadedDocument = mockUploadedDocument();
+        when(uploadDocumentService.uploadDocument(any(), any(), any(), any())).thenReturn(uploadedDocument);
+
+        // Act
+        GeneratedDocumentInfo result = docmosisRenderService.renderAndStoreDocument("auth", request);
+
+        // Assert
+        assertThat(result.getUrl()).isEqualTo("http://doc/self");
+        assertThat(result.getMimeType()).isEqualTo(MediaType.APPLICATION_PDF_VALUE);
+        assertThat(result.getHashToken()).isEqualTo("hash123");
+        assertThat(result.getBinaryUrl()).isEqualTo("http://doc/binary");
+        assertThat(result.getDocName()).isEqualTo("file1.pdf");
+
+        // Check that current_date is added to placeholders
+        ArgumentCaptor<DocmosisRenderRequest> captor = ArgumentCaptor.forClass(DocmosisRenderRequest.class);
+        verify(docmosisClient).render(captor.capture());
+        Map<String, Object> data = captor.getValue().getData();
+        assertThat(data).contains(entry("current_date", "2026-05-02T11:15:30.000"));
+    }
+
+    @Test
+    void shouldThrowException_forRtfTwo() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("caseDetails", new HashMap<String, Object>());
+        ((HashMap<String, Object>)values.get("caseDetails")).put("caseData", new HashMap<String, Object>());
+        GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+            .template("template1")
+            .values(values)
+            .caseId("123")
+            .build();
+
+        byte[] pdfBytes = new byte[]{1, 2, 3};
+        when(templatesConfig.getFilenameByTemplateName("template1")).thenReturn(Optional.of("file1.pdf"));
+        when(docmosisClient.render(any(DocmosisRenderRequest.class))).thenReturn(pdfBytes);
+
+        var uploadedDocument = mockUploadedDocument();
+        when(uploadDocumentService.uploadDocument(any(), any(), any(), any())).thenReturn(uploadedDocument);
+
+        // Act
+        GeneratedDocumentInfo result = docmosisRenderService.renderAndStoreDocument("auth", request);
+
+        // Assert
+        assertThat(result.getUrl()).isEqualTo("http://doc/self");
+        assertThat(result.getMimeType()).isEqualTo(MediaType.APPLICATION_PDF_VALUE);
+        assertThat(result.getHashToken()).isEqualTo("hash123");
+        assertThat(result.getBinaryUrl()).isEqualTo("http://doc/binary");
+        assertThat(result.getDocName()).isEqualTo("file1.pdf");
+
+        // Check that current_date is added to placeholders
+        ArgumentCaptor<DocmosisRenderRequest> captor = ArgumentCaptor.forClass(DocmosisRenderRequest.class);
+        verify(docmosisClient).render(captor.capture());
+        Map<String, Object> data = captor.getValue().getData();
+        assertThat(data).contains(entry("current_date", "2026-05-02T11:15:30.000"));
+    }
+
+    @Test
+    void shouldThrowException_forRtfThree() {
+        Map<String, Object> values = new HashMap<>();
+        HashMap<String, Object> caseDetailsMap = new HashMap<>();
+        HashMap<String, Object> caseDataMap = new HashMap<>();
+        values.put("caseDetails", caseDetailsMap);
+        caseDetailsMap.put("caseData", caseDataMap);
+        caseDataMap.put("recitalsOrPreamble", "RECITAL");
+        GenerateDocumentRequest request = GenerateDocumentRequest.builder()
+            .template("template1")
+            .values(values)
+            .caseId("123")
+            .build();
+
+        byte[] pdfBytes = new byte[]{1, 2, 3};
+        when(templatesConfig.getFilenameByTemplateName("template1")).thenReturn(Optional.of("file1.pdf"));
+        when(docmosisClient.render(any(DocmosisRenderRequest.class))).thenReturn(pdfBytes);
+
+        var uploadedDocument = mockUploadedDocument();
+        when(uploadDocumentService.uploadDocument(any(), any(), any(), any())).thenReturn(uploadedDocument);
+
+        // Act
+        GeneratedDocumentInfo result = docmosisRenderService.renderAndStoreDocument("auth", request);
+
+        // Assert
+        assertThat(result.getUrl()).isEqualTo("http://doc/self");
+        assertThat(result.getMimeType()).isEqualTo(MediaType.APPLICATION_PDF_VALUE);
+        assertThat(result.getHashToken()).isEqualTo("hash123");
+        assertThat(result.getBinaryUrl()).isEqualTo("http://doc/binary");
+        assertThat(result.getDocName()).isEqualTo("file1.pdf");
+
+        // Check that current_date is added to placeholders
+        ArgumentCaptor<DocmosisRenderRequest> captor = ArgumentCaptor.forClass(DocmosisRenderRequest.class);
+        verify(docmosisClient).render(captor.capture());
+        Map<String, Object> data = captor.getValue().getData();
+        assertThat(data).contains(entry("current_date", "2026-05-02T11:15:30.000"));
+    }
+
     private uk.gov.hmcts.reform.ccd.document.am.model.Document mockUploadedDocument() {
         var links = new Document.Links();
         links.self = new Document.Link();
