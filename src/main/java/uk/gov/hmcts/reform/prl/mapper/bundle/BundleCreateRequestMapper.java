@@ -44,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CHILD_IMPACT_REPORT2;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ENFORCEMENT_ORDER_SUITABILITY_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.FM5_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LA_OTHER_DOCS;
@@ -53,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PARENTAL_ORDER_REPORTER_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POSITION_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
@@ -625,11 +627,23 @@ public class BundleCreateRequestMapper implements IBundleCreateRequestMapper {
                 .documentGroup(BundlingDocGroupEnum.cafcassSection37Report).build() : null
         );
         bundleMap.put(
-            OTHER_DOCS, Objects.nonNull(doc.getOtherDocsDocument()) ? BundlingRequestDocument.builder()
-                .documentLink(doc.getOtherDocsDocument())
-                .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
-                .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null
+            ENFORCEMENT_ORDER_SUITABILITY_REPORT,
+            Objects.nonNull(doc.getEnforcementOrderSuitabilityReportDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getEnforcementOrderSuitabilityReportDocument())
+                .documentFileName(doc.getEnforcementOrderSuitabilityReportDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.enforcementOrderSuitabilityReport).build() : null
         );
+        bundleMap.put(
+            PARENTAL_ORDER_REPORTER_REPORT,
+            Objects.nonNull(doc.getParentalOrderReporterReportDocument()) ? BundlingRequestDocument.builder()
+                .documentLink(doc.getParentalOrderReporterReportDocument())
+                .documentFileName(doc.getParentalOrderReporterReportDocument().getDocumentFileName())
+                .documentGroup(BundlingDocGroupEnum.parentalOrderReporterReport).build() : null
+        );
+        bundleMap.put(OTHER_DOCS, Objects.nonNull(doc.getOtherDocsDocument()) ? BundlingRequestDocument.builder()
+            .documentLink(doc.getOtherDocsDocument())
+            .documentFileName(doc.getOtherDocsDocument().getDocumentFileName())
+            .documentGroup(BundlingDocGroupEnum.cafcassOtherDocuments).build() : null);
 
     }
 
