@@ -903,11 +903,24 @@ public class SendAndReplyService {
             .replyHistory(null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
             .messageIdentifier(SEND.equals(caseData.getChooseSendOrReply()) ? String.valueOf(UUID.randomUUID()) : null)
-            .externalMessageAttachDocs(getAttachedDocsForExternalMessage(
+            .externalMessageAttachDocs(getExternalMessageAttachedDocs(caseData, message, authorization))
+            .build();
+    }
+
+    private List<Element<Document>> getExternalMessageAttachedDocs(CaseData caseData, Message message, String authorization) {
+        List<Element<Document>> externalMessageAttachDocs = new ArrayList<>();
+        if (SEND.equals(caseData.getChooseSendOrReply())) {
+            externalMessageAttachDocs.addAll(getSendAttachedDocs(caseData, message, authorization));
+        }
+
+        if (caseData.getSendOrReplyMessage() != null) {
+            externalMessageAttachDocs.addAll(getAttachedDocsForExternalMessage(
                 authorization,
                 caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
-            ))
-            .build();
+            ));
+        }
+
+        return externalMessageAttachDocs;
     }
 
     private List<Element<Document>> getSendAttachedDocs(CaseData caseData, Message message, String authorization) {
@@ -1877,22 +1890,27 @@ public class SendAndReplyService {
     }
 
     private List<Document> getExternalMessageSelectedDocumentList(CaseData caseData, String authorization, Message message) {
-        List<Document> selectedDocList = new ArrayList<>();
+        Optional<Message> savedMessageWithAttachments = getSavedExternalMessageWithAttachments(caseData, message);
+        return savedMessageWithAttachments
+            .map(Message::getExternalMessageAttachDocs)
+            .orElseGet(() -> getExternalMessageAttachedDocs(caseData, message, authorization)).stream()
+            .map(Element::getValue)
+            .filter(Objects::nonNull)
+            .toList();
+    }
 
-        Document selectedDoc = getSelectedDocument(authorization, message.getSubmittedDocumentsList());
-        if (null != selectedDoc) {
-            selectedDocList.add(selectedDoc);
+    private Optional<Message> getSavedExternalMessageWithAttachments(CaseData caseData, Message message) {
+        if (caseData.getSendOrReplyMessage() == null) {
+            return Optional.empty();
         }
 
-        List<Element<Document>> externalMessageDocList = getAttachedDocsForExternalMessage(
-            authorization,
-            caseData.getSendOrReplyMessage().getExternalMessageAttachDocsList()
-        );
-        if (null != externalMessageDocList && !externalMessageDocList.isEmpty()) {
-            externalMessageDocList.forEach(element -> selectedDocList.add(element.getValue()));
-
-        }
-        return selectedDocList;
+        return nullSafeCollection(caseData.getSendOrReplyMessage().getMessages()).stream()
+            .map(Element::getValue)
+            .filter(savedMessage -> InternalExternalMessageEnum.EXTERNAL.equals(savedMessage.getInternalOrExternalMessage()))
+            .filter(savedMessage -> isNotEmpty(savedMessage.getExternalMessageAttachDocs()))
+            .filter(savedMessage -> Objects.equals(savedMessage.getMessageSubject(), message.getMessageSubject()))
+            .filter(savedMessage -> Objects.equals(savedMessage.getMessageContent(), message.getMessageContent()))
+            .max(Comparator.comparing(Message::getUpdatedTime, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 
     private Document getMessageDocument(String authorization, CaseData caseData, Message message,

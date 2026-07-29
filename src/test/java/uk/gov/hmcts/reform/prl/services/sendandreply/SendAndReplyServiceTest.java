@@ -1000,6 +1000,83 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testBuildSendMessageAttachesSelectedSubmittedDocumentToExternalMessage() {
+        UUID selectedDocumentId = UUID.randomUUID();
+        DynamicList selectedDocumentList = dynamicDocumentList(selectedDocumentId, "Selected Document.pdf");
+
+        CaseData data = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+                            .submittedDocumentsList(selectedDocumentList)
+                            .build()
+                    ).build())
+            .build();
+
+        when(caseDocumentClient.getMetadataForDocument(eq(auth), eq(serviceAuthToken), eq(selectedDocumentId)))
+            .thenReturn(testDocument());
+
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            data,
+            data.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
+
+        List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> attachedDocs = message.getExternalMessageAttachDocs();
+        assertEquals(1, attachedDocs.size());
+        assertEquals("Selected Document.pdf", attachedDocs.getFirst().getValue().getDocumentFileName());
+    }
+
+    @Test
+    public void testBuildSendMessageCombinesSelectedSubmittedDocumentAndExternalAttachments() {
+        UUID selectedDocumentId = UUID.randomUUID();
+        UUID externalAttachmentId = UUID.randomUUID();
+        DynamicList selectedDocumentList = dynamicDocumentList(selectedDocumentId, "Selected Document.pdf");
+        DynamicList externalAttachmentList = dynamicDocumentList(externalAttachmentId, "Extra Attachment.pdf");
+
+        CaseData data = CaseData.builder()
+            .messageContent("some message while sending")
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(
+                        Message.builder()
+                            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+                            .submittedDocumentsList(selectedDocumentList)
+                            .build()
+                    )
+                    .externalMessageAttachDocsList(List.of(element(SendAndReplyDynamicDoc.builder()
+                        .submittedDocsRefList(externalAttachmentList)
+                        .build())))
+                    .build())
+            .build();
+
+        when(caseDocumentClient.getMetadataForDocument(eq(auth), eq(serviceAuthToken), eq(selectedDocumentId)))
+            .thenReturn(testDocument());
+        when(caseDocumentClient.getMetadataForDocument(eq(auth), eq(serviceAuthToken), eq(externalAttachmentId)))
+            .thenReturn(testDocument());
+
+        Message message = sendAndReplyService.buildSendReplyMessage(
+            data,
+            data.getSendOrReplyMessage().getSendMessageObject(),
+            auth
+        );
+
+        List<Element<uk.gov.hmcts.reform.prl.models.documents.Document>> attachedDocs = message.getExternalMessageAttachDocs();
+        assertEquals(2, attachedDocs.size());
+        assertEquals("Selected Document.pdf", attachedDocs.getFirst().getValue().getDocumentFileName());
+        assertEquals("Extra Attachment.pdf", attachedDocs.get(1).getValue().getDocumentFileName());
+    }
+
+    @Test
     public void testBuildSendMessageWithMessageForNoRolesinUserDetails() {
         CaseData caseData = CaseData.builder()
             .messageContent("some message while sending")
@@ -2554,6 +2631,166 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
+    public void testSendEmailNotificationToExternalPartiesC100CaseIncludesSelectedApplicationDocument() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        DynamicList applicationsList = DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(awpOtherCode)
+                       .label("test-document")
+                       .build())
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("some msg content")
+            .additionalApplicationsBundle(List.of(element(AdditionalApplicationsBundle.builder()
+                .otherApplicationsBundle(OtherApplicationsBundle.builder()
+                                             .applicationStatus(AWP_STATUS_SUBMITTED)
+                                             .applicationType(OtherApplicationType.FC600_COMMITTAL_APPLICATION)
+                                             .uploadedDateTime(dateSent)
+                                             .finalDocument(List.of(element(internalMessageDoc)))
+                                             .build())
+                .build())))
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(Message.builder()
+                                           .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+                                           .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+                                           .messageAbout(MessageAboutEnum.APPLICATION)
+                                           .applicationsList(applicationsList)
+                                           .messageContent("some msg content")
+                                           .messageSubject("message subject")
+                                           .build()
+                    )
+                    .respondToMessage(YesOrNo.No)
+                    .messages(messages)
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(1, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals(internalMessageDoc.getDocumentFileName(),
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+        assertEquals(1, sendgridEmailConfig.getDynamicTemplateData().get("documentSize"));
+    }
+
+    @Test
+    public void testSendEmailNotificationUsesSavedExternalMessageAttachmentsWhenTemporaryAttachListRemoved() {
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .phoneNumber("1234567890")
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(applicant.getPartyId()).value(
+            applicant).build();
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .code(wrappedApplicant.getId().toString())
+                               .label(applicant.getFirstName() + " " + applicant.getLastName())
+                               .build()))
+            .build();
+        uk.gov.hmcts.reform.prl.models.documents.Document manuallyAddedDoc = internalMessageDoc.toBuilder()
+            .documentFileName("manually-added-doc.pdf")
+            .build();
+
+        Message sendMessageObject = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.REVIEW_SUBMITTED_DOCUMENTS)
+            .messageContent("some msg content")
+            .messageSubject("message subject")
+            .build();
+        Message savedMessage = sendMessageObject.toBuilder()
+            .updatedTime(dateTime)
+            .externalMessageAttachDocs(List.of(element(internalMessageDoc), element(manuallyAddedDoc)))
+            .build();
+
+        CaseData caseDataC100Message = CaseData.builder().id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .replyMessageDynamicList(DynamicList.builder().build())
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .messageContent("some msg content")
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(sendMessageObject)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(List.of(element(savedMessage)))
+                    .build())
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(caseDataC100Message, "authorisation");
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor = ArgumentCaptor.forClass(SendgridEmailConfig.class);
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+        SendgridEmailConfig sendgridEmailConfig = sendgridEmailConfigCaptor.getValue();
+        assertEquals(2, sendgridEmailConfig.getListOfAttachments().size());
+        assertEquals(internalMessageDoc.getDocumentFileName(),
+                     sendgridEmailConfig.getListOfAttachments().getFirst().getDocumentFileName());
+        assertEquals("manually-added-doc.pdf",
+                     sendgridEmailConfig.getListOfAttachments().get(1).getDocumentFileName());
+        assertEquals(2, sendgridEmailConfig.getDynamicTemplateData().get("documentSize"));
+    }
+
+    @Test
     public void testSendEmailNotificationToCafcassAndOthersC100Case() {
 
         PartyDetails applicant = PartyDetails.builder()
@@ -3860,5 +4097,14 @@ public class SendAndReplyServiceTest {
         document.originalDocumentName = RANDOM_ALPHA_NUMERIC;
 
         return document;
+    }
+
+    private DynamicList dynamicDocumentList(UUID documentId, String documentName) {
+        return DynamicList.builder()
+            .value(DynamicListElement.builder()
+                       .code(documentId)
+                       .label(documentName)
+                       .build())
+            .build();
     }
 }
