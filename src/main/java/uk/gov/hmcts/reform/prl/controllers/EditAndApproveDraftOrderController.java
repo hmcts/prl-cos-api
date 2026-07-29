@@ -50,10 +50,10 @@ import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -158,6 +158,8 @@ public class EditAndApproveDraftOrderController {
         }
 
     }
+
+
 
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
@@ -322,19 +324,28 @@ public class EditAndApproveDraftOrderController {
             caseData.getDraftOrderCollection(),
             UUID.fromString(draftOrderId)
         );
+
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
         );
 
-        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
+
+        Map<String, Object> dataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
             callbackRequest.getEventId(),
-            draftOrderId
-        ));
+            draftOrderId,
+            caseDataUpdated
+        );
+
+        caseDataUpdated.putAll(dataMap);
+
+
 
     }
+
+
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
@@ -485,7 +496,7 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
                 && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
-                if (Objects.nonNull(caseData.getStandardDirectionOrder())
+                if (nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(
                         authorisation,

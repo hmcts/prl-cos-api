@@ -95,6 +95,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -774,7 +775,7 @@ public class DraftAnOrderService {
         updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
-
+        caseDataMap.put("checkIsThisUrgent", selectedOrder.getCheckIsThisUrgent());
 
         return caseDataMap;
     }
@@ -1166,6 +1167,11 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId, String draftOrderId) {
+        return updateDraftOrderCollection(caseData, authorisation, eventId, draftOrderId, null);
+    }
+
+    public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId,
+                                                          String draftOrderId, Map<String, Object> caseDataUpdated) {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId;
@@ -1207,6 +1213,12 @@ public class DraftAnOrderService {
                 } else {
                     log.info("No edit draft order");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    if (nonNull(caseDataUpdated)) {
+                        String checkIsThisUrgent = (String) caseDataUpdated.get("checkIsThisUrgent");
+                        if (nonNull(checkIsThisUrgent)) {
+                            draftOrder = draftOrder.toBuilder().checkIsThisUrgent((YesOrNo.valueOf(checkIsThisUrgent))).build();
+                        }
+                    }
                     //PRL-7018 - Fix to trigger AHR when Judge/Manager approves without editing order
                     caseData.getManageOrders().setOrdersHearingDetails(draftOrder.getManageOrderHearingDetails());
                 }
@@ -2387,20 +2399,20 @@ public class DraftAnOrderService {
             && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
             caseData))) {
-            if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
+            if (nonNull(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.populateCustomOrderFields(
                     caseData,
                     caseData.getCreateSelectOrderOptions(),
                     language
                 );
             }
-            if (Objects.nonNull(caseData.getManageOrders())) {
+            if (nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
-            if (Objects.nonNull(caseData.getSelectedOrder())) {
+            if (nonNull(caseData.getSelectedOrder())) {
                 caseDataUpdated.put(SELECTED_ORDER, BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             }
-            if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+            if (nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
@@ -2418,10 +2430,10 @@ public class DraftAnOrderService {
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
             }
             caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData, clientContext, language);
-            if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+            if (nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
-            if (Objects.nonNull(caseData.getManageOrders())) {
+            if (nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());
