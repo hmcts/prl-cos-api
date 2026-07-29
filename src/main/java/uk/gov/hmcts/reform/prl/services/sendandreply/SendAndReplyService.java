@@ -1628,6 +1628,12 @@ public class SendAndReplyService {
         }
         addJudgeIdamIdIfMessageSentToJudge(caseData, newMessage, caseDataMap);
         applyMessageHandlers(caseData, caseDataMap, newMessage);
+        caseDataMap.put("sendMessageObject", caseData.getSendOrReplyMessage().getSendMessageObject()
+            .toBuilder()
+            .messageContent(caseData.getMessageContent())
+            .messageIdentifier(newMessage.getMessageIdentifier())
+            .build()
+        );
 
         messages.add(element(newMessage));
         messages.sort(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()));
@@ -1738,7 +1744,7 @@ public class SendAndReplyService {
                 );
                 if (party.isPresent()) {
 
-                    handleExternalMessageNotifications(caseData, auth, party);
+                    handleExternalMessageNotifications(caseData, auth, party, message);
                 }
             }
             );
@@ -1753,18 +1759,19 @@ public class SendAndReplyService {
             if (StringUtils.isNotEmpty(message.getOtherPartiesEmailAddress())) {
                 emails.addAll(List.of(StringUtils.split(message.getOtherPartiesEmailAddress(), ",")));
             }
-            sendEmailNotificationToCafcassAndOtherParties(caseData, emails, auth);
+            sendEmailNotificationToCafcassAndOtherParties(caseData, message, emails, auth);
 
         }
 
 
     }
 
-    private void handleExternalMessageNotifications(CaseData caseData, String auth, Optional<Element<PartyDetails>> party) {
+    private void handleExternalMessageNotifications(CaseData caseData, String auth, Optional<Element<PartyDetails>> party,
+                                                    Message message) {
         PartyDetails partyDetails = party.get().getValue();
         if (externalMessageToBeSentInEmail(partyDetails)) {
             try {
-                sendEmailNotification(caseData, partyDetails, auth);
+                sendEmailNotification(caseData, partyDetails, message, auth);
             } catch (Exception e) {
                 log.error("Error while sending email notification Case id {} ", caseData.getId(), e);
             }
@@ -1772,7 +1779,7 @@ public class SendAndReplyService {
 
             try {
                 sendPostNotificationToExternalParties(caseData, partyDetails,
-                                                      caseData.getSendOrReplyMessage().getSendMessageObject(), auth
+                                                      message, auth
                 );
 
                 log.info("Message sent as post to external parties");
@@ -1843,12 +1850,11 @@ public class SendAndReplyService {
     }
 
 
-    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, String authorization) {
+    private void sendEmailNotification(CaseData caseData, PartyDetails partyDetails, Message message, String authorization) {
         String emailAddress = isSolicitorRepresentative(partyDetails) ? partyDetails.getSolicitorEmail() : partyDetails.getEmail();
 
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
-        Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, allSelectedDocuments);
+        Map<String, Object> dynamicDataForEmail = getDynamicDataForEmail(caseData, partyDetails, message, allSelectedDocuments);
 
         sendgridService.sendEmailUsingTemplateWithAttachments(
             SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY,
@@ -1861,8 +1867,8 @@ public class SendAndReplyService {
                 .build());
     }
 
-    private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, List<String> emails, String authorization) {
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+    private void sendEmailNotificationToCafcassAndOtherParties(CaseData caseData, Message message, List<String> emails,
+                                                               String authorization) {
         List<Document>  allSelectedDocuments = getExternalMessageSelectedDocumentList(caseData, authorization, message);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         setMessageDataForEmail(caseData,message,allSelectedDocuments,dynamicData);
@@ -1903,21 +1909,20 @@ public class SendAndReplyService {
         if (caseData.getSendOrReplyMessage() == null) {
             return Optional.empty();
         }
+        if (StringUtils.isBlank(message.getMessageIdentifier())) {
+            log.warn(
+                "Cannot resolve saved external message attachments because messageIdentifier is missing for caseReference={}",
+                caseData.getId()
+            );
+            return Optional.empty();
+        }
 
         return nullSafeCollection(caseData.getSendOrReplyMessage().getMessages()).stream()
             .map(Element::getValue)
             .filter(savedMessage -> InternalExternalMessageEnum.EXTERNAL.equals(savedMessage.getInternalOrExternalMessage()))
             .filter(savedMessage -> isNotEmpty(savedMessage.getExternalMessageAttachDocs()))
-            .filter(savedMessage -> isMatchingExternalMessage(savedMessage, message))
+            .filter(savedMessage -> Objects.equals(savedMessage.getMessageIdentifier(), message.getMessageIdentifier()))
             .max(Comparator.comparing(Message::getUpdatedTime, Comparator.nullsFirst(Comparator.naturalOrder())));
-    }
-
-    private boolean isMatchingExternalMessage(Message savedMessage, Message message) {
-        if (StringUtils.isNotBlank(message.getMessageIdentifier())) {
-            return Objects.equals(savedMessage.getMessageIdentifier(), message.getMessageIdentifier());
-        }
-        return Objects.equals(savedMessage.getMessageSubject(), message.getMessageSubject())
-            && Objects.equals(savedMessage.getMessageContent(), message.getMessageContent());
     }
 
     private Document getMessageDocument(String authorization, CaseData caseData, Message message,
@@ -2075,8 +2080,8 @@ public class SendAndReplyService {
         return applicantsRespondentInCase;
     }
 
-    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, List<Document>  allSelectedDocuments) {
-        Message message = caseData.getSendOrReplyMessage().getSendMessageObject();
+    private Map<String, Object> getDynamicDataForEmail(CaseData caseData, PartyDetails partyDetails, Message message,
+                                                       List<Document> allSelectedDocuments) {
         // get selected Document size
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         String receiverFullName = getReceiverFullName(partyDetails);
