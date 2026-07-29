@@ -45,6 +45,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURTNAV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
@@ -149,6 +150,7 @@ public class CourtNavCaseService {
                 COURTNAV,
                 courtNavQuarantineLegalDoc
             );
+            fields.remove(NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS);
 
             //Changes to generate one WA task for courtnav upload document
             if (!fields.containsKey(MANAGE_DOCUMENTS_TRIGGERED_BY)) {
