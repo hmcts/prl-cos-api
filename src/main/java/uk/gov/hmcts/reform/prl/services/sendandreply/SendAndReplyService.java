@@ -1908,9 +1908,16 @@ public class SendAndReplyService {
             .map(Element::getValue)
             .filter(savedMessage -> InternalExternalMessageEnum.EXTERNAL.equals(savedMessage.getInternalOrExternalMessage()))
             .filter(savedMessage -> isNotEmpty(savedMessage.getExternalMessageAttachDocs()))
-            .filter(savedMessage -> Objects.equals(savedMessage.getMessageSubject(), message.getMessageSubject()))
-            .filter(savedMessage -> Objects.equals(savedMessage.getMessageContent(), message.getMessageContent()))
-            .max(Comparator.comparing(Message::getUpdatedTime, Comparator.nullsLast(Comparator.naturalOrder())));
+            .filter(savedMessage -> isMatchingExternalMessage(savedMessage, message))
+            .max(Comparator.comparing(Message::getUpdatedTime, Comparator.nullsFirst(Comparator.naturalOrder())));
+    }
+
+    private boolean isMatchingExternalMessage(Message savedMessage, Message message) {
+        if (StringUtils.isNotBlank(message.getMessageIdentifier())) {
+            return Objects.equals(savedMessage.getMessageIdentifier(), message.getMessageIdentifier());
+        }
+        return Objects.equals(savedMessage.getMessageSubject(), message.getMessageSubject())
+            && Objects.equals(savedMessage.getMessageContent(), message.getMessageContent());
     }
 
     private Document getMessageDocument(String authorization, CaseData caseData, Message message,
