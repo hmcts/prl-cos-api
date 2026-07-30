@@ -80,8 +80,8 @@ public class DocmosisRenderService {
                         + "<ul><li><p>Design the solution.</p></li><li><p>Implement the changes.</p></li><li><p>Perform testing.</p></li><"
                         + "li><p>Deploy to production.</p></li></ul><p></p>";
 
-                    caseDataMap.put("rtfValue", rtfValue);
                 }
+                caseDataMap.put("rtfValue", rtfValue);
             }
         }
     }
