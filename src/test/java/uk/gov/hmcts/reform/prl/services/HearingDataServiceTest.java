@@ -632,11 +632,14 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        LocalDateTime hearingStartDateTime = LocalDateTime.now().plusDays(7);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
-            .nextHearingDate(LocalDateTime.of(2023, 11, 8, 9, 0))
             .hearingID(123L)
             .hearingTypeValue("test")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                    .hearingStartDateTime(hearingStartDateTime)
+                                    .build()))
             .build();
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(caseHearing);
@@ -664,7 +667,10 @@ public class HearingDataServiceTest {
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
         assertEquals("1677767515750127_123",expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.get(0).getLabel());
+        assertEquals(
+            "1677767515750127_test - " + hearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
     }
 
     @Test()
@@ -676,11 +682,14 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        LocalDateTime hearingStartDateTime = LocalDateTime.now().plusDays(7);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
-            .nextHearingDate(LocalDateTime.of(2023, 11, 8, 9, 0))
             .hearingID(123L)
             .hearingTypeValue("test")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                    .hearingStartDateTime(hearingStartDateTime)
+                                    .build()))
             .build();
 
         List<CaseHearing> caseHearings = new ArrayList<>();
@@ -709,7 +718,77 @@ public class HearingDataServiceTest {
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
         assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.get(0).getLabel());
+        assertEquals(
+            "1677767515750127_test - " + hearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
+    }
+
+    @Test()
+    public void testGetLinkedCasesSelectsNextScheduledListedHearing() {
+        List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
+        CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
+            .caseName("CaseName-Test10")
+            .caseReference("1677767515750127")
+            .build();
+        caseLinkedDataList.add(caseLinkedData);
+        when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        LocalDateTime pastHearingStartDateTime = LocalDateTime.now().minusDays(2);
+        LocalDateTime nextHearingStartDateTime = LocalDateTime.now().plusDays(3);
+        LocalDateTime laterHearingStartDateTime = LocalDateTime.now().plusDays(8);
+        CaseHearing pastHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingID(123L)
+            .hearingTypeValue("past")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                    .hearingStartDateTime(pastHearingStartDateTime)
+                                    .build()))
+            .build();
+        CaseHearing laterHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingID(456L)
+            .hearingTypeValue("later")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                    .hearingStartDateTime(laterHearingStartDateTime)
+                                    .build()))
+            .build();
+        CaseHearing nextHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingID(789L)
+            .hearingTypeValue("next")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                    .hearingStartDateTime(nextHearingStartDateTime)
+                                    .build()))
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("1677767515750127")
+            .caseHearings(List.of(pastHearing, laterHearing, nextHearing))
+            .build();
+
+        when(hearingService.getHearings(any(), any())).thenReturn(hearings);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .baseLocationId("123")
+                                        .regionId("1111")
+                                        .build()).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1677767515750127L).data(stringObjectMap).build();
+
+        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
+        assertEquals(1, expectedResponse.size());
+        assertEquals("1677767515750127_789", expectedResponse.get(0).getCode());
+        assertEquals(
+            "1677767515750127_next - " + nextHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
     }
 
     @Test()

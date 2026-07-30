@@ -102,6 +102,8 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.HearingSelectionUtils.getNextScheduledHearingDay;
+import static uk.gov.hmcts.reform.prl.utils.HearingSelectionUtils.getNextScheduledListedHearing;
 
 @Slf4j
 @Service
@@ -229,19 +231,20 @@ public class HearingDataService {
                     );
 
                     if (hearingsList != null) {
-                        hearingsList.getCaseHearings().stream()
-                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus()))
-                            .forEach(
-                                hearingFromHmc ->
-                                    dynamicListElements.add(
-                                        DynamicListElement
-                                            .builder()
-                                            .code(caseLinkedData.getCaseReference() + UNDERSCORE + hearingFromHmc.getHearingID())
-                                            .label(caseLinkedData.getCaseReference() + UNDERSCORE + hearingFromHmc.getHearingTypeValue()
-                                                       + HYPHEN_SEPARATOR
-                                                       + hearingFromHmc.getNextHearingDate().format(
-                                                customDateTimeFormatter))
-                                            .build()));
+                        getNextScheduledListedHearing(hearingsList.getCaseHearings())
+                            .ifPresent(hearingFromHmc -> getNextScheduledHearingDay(hearingFromHmc).ifPresent(
+                                hearingDaySchedule ->
+                                           dynamicListElements.add(
+                                               DynamicListElement
+                                                   .builder()
+                                                   .code(caseLinkedData.getCaseReference() + UNDERSCORE
+                                                             + hearingFromHmc.getHearingID())
+                                                   .label(caseLinkedData.getCaseReference() + UNDERSCORE
+                                                              + hearingFromHmc.getHearingTypeValue()
+                                                              + HYPHEN_SEPARATOR
+                                                              + hearingDaySchedule.getHearingStartDateTime().format(
+                                                       customDateTimeFormatter))
+                                                   .build())));
                     }
                 });
 

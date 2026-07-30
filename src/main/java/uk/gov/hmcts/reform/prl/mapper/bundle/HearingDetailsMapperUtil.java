@@ -5,15 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleHearingInfo;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.utils.HearingSelectionUtils;
 
-import java.util.List;
-
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getBundleDateTime;
+import static uk.gov.hmcts.reform.prl.utils.HearingSelectionUtils.getNextScheduledListedHearing;
 
 @Slf4j
 @Component
@@ -22,17 +19,13 @@ public class HearingDetailsMapperUtil {
 
     public BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
         if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
-            List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
-                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
-            if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
-                List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
-                if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
-                    return BundleHearingInfo.builder().hearingVenueAddress(getHearingVenueAddress(hearingDaySchedules.get(0)))
-                        .hearingDateAndTime(null != hearingDaySchedules.get(0).getHearingStartDateTime()
-                            ? getBundleDateTime(hearingDaySchedules.get(0).getHearingStartDateTime()) : BLANK_STRING)
-                        .hearingJudgeName(hearingDaySchedules.get(0).getHearingJudgeName()).build();
-                }
-            }
+            return getNextScheduledListedHearing(hearingDetails.getCaseHearings())
+                .flatMap(HearingSelectionUtils::getNextScheduledHearingDay)
+                .map(hearingDaySchedule -> BundleHearingInfo.builder()
+                    .hearingVenueAddress(getHearingVenueAddress(hearingDaySchedule))
+                    .hearingDateAndTime(getBundleDateTime(hearingDaySchedule.getHearingStartDateTime()))
+                    .hearingJudgeName(hearingDaySchedule.getHearingJudgeName()).build())
+                .orElse(BundleHearingInfo.builder().build());
         }
         return BundleHearingInfo.builder().build();
     }

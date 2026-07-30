@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
+import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 
 @Slf4j
 @Service
@@ -35,7 +36,7 @@ public class BundlingService {
     public BundleCreateResponse createBundleServiceRequest(CaseData caseData,String eventId,
                                                            String authorization) {
         Hearings hearingDetails = null;
-        if (DECISION_OUTCOME.equals(caseData.getState())) {
+        if (DECISION_OUTCOME.equals(caseData.getState()) || PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
             hearingDetails = hearingService.getHearings(authorization, String.valueOf(caseData.getId()));
         }
         return createBundle(authorization,authTokenGenerator.generate(),
