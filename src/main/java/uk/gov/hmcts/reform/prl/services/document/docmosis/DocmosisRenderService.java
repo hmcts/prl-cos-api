@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.document.docmosis;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.DocmosisClient;
