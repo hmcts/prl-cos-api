@@ -50,7 +50,7 @@ docmosis:
       filename: FL401C8WelshDocument.pdf
     - templateName: FL-PRL-GOR-ENG-C21-Blank-Order-Final.docx
       filename: Blank_Order_Directions_C21.pdf
-    - templateName: FL-PRL-GOR-ENG-C21-Blank-Order-Draft.docx
+    - templateName: FL-PRL-GOR-ENG-C21-Blank-Order-Draft-FPVTL-3394.docx
       filename: Blank_Order_Directions_C21_Draft.pdf
     - templateName: FL-PRL-GOR-WEL-C21-Blank-Order-Draft.docx
       filename: Welsh_Blank_Order_Directions_C21_Draft.pdf
