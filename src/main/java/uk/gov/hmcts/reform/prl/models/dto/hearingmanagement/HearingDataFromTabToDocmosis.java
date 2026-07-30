@@ -18,4 +18,5 @@ public class HearingDataFromTabToDocmosis {
     private String hearingLocation;
     private String hearingEstimatedDuration;
     private DynamicList hearingArrangementsFromHmc;
+    private DynamicList hearingArrangementsFromHmcInWelsh;
 }

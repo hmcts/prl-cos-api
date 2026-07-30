@@ -739,7 +739,8 @@ public class HearingDataService {
                                .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
                                .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
                                .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
-                               .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData))
+                               .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData, false))
+                               .hearingArrangementsFromHmcInWelsh(getHearingArrangementsData(hearingDaySchedules, caseData, true))
                                .build());
         }).toList();
     }
@@ -776,15 +777,21 @@ public class HearingDataService {
             .findFirst();
     }
 
-    private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData) {
+    private DynamicList getHearingArrangementsData(List<HearingDaySchedule> hearingDaySchedules, CaseData caseData, boolean isWelsh) {
         DynamicList dynamicList = DynamicList.builder().build();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         for (Attendee attendee : hearingDaySchedules.get(0).getAttendees()) {
             String partyName = CaseUtils.getPartyFromPartyId(attendee.getPartyID(), caseData);
             if (!partyName.isBlank() && null != attendee.getHearingSubChannel()) {
-                dynamicListElements.add(DynamicListElement.builder().code(partyName)
-                                            .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
-                                            .build());
+                if (isWelsh) {
+                    dynamicListElements.add(DynamicListElement.builder().code(partyName)
+                                                .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValueWelsh())
+                                                .build());
+                } else {
+                    dynamicListElements.add(DynamicListElement.builder().code(partyName)
+                                                .label(HearingChannelsEnum.getValue(attendee.getHearingSubChannel()).getDisplayedValue())
+                                                .build());
+                }
             }
         }
         dynamicList.setListItems(dynamicListElements);
