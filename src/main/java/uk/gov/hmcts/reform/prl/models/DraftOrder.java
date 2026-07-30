@@ -61,6 +61,9 @@ public class DraftOrder {
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
+    private final String recitalsOrPreambleRtf;
+    @JsonProperty("orderDirectionsRtf")
+    private final String orderDirectionsRtf;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
     @JsonProperty("furtherInformationIfRequired")

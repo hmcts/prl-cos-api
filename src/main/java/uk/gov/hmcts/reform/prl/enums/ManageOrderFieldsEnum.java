@@ -98,6 +98,8 @@ public enum ManageOrderFieldsEnum {
     isTheOrderAboutChildren("isTheOrderAboutChildren"),
     recitalsOrPreamble("recitalsOrPreamble"),
     orderDirections("orderDirections"),
+    recitalsOrPreambleRtf("recitalsOrPreambleRtf"),
+    orderDirectionsRtf("orderDirectionsRtf"),
     furtherDirectionsIfRequired("furtherDirectionsIfRequired"),
     furtherInformationIfRequired("furtherInformationIfRequired"),
 

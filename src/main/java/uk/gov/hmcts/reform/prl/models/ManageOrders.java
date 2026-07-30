@@ -24,6 +24,10 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
+    @JsonProperty("recitalsOrPreambleRtf")
+    private final String recitalsOrPreambleRtf;
+    @JsonProperty("orderDirectionsRtf")
+    private final String orderDirectionsRtf;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
     @JsonProperty("furtherInformationIfRequired")
