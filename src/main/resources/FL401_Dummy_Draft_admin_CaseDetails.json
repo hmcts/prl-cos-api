@@ -568,8 +568,8 @@
         "AddressLine2": null,
         "AddressLine3": null
       },
-      "solicitorOrgUuid": null,
-      "solicitorPartyId": null,
+      "solicitorOrgUuid": "a2328a03-0000-4000-8000-000000000002",
+      "solicitorPartyId": "a2328a03-0000-4000-8000-000000000001",
       "currentRespondent": null,
       "contactPreferences": null,
       "isDateOfBirthKnown": "No",

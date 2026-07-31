@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassCcdDataStoreService {
@@ -21,10 +24,11 @@ public class CafcassCcdDataStoreService {
      * @param  caseType e.g. PRLAPPS
      * @return SearchResult object.
      */
-    public SearchResult searchCases(String authorisation, String searchString, String serviceAuthorisation, String caseType) {
-
-        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, caseType,
-                                           searchString);
-
+    @Retry(name = "searchCasesRetryConfig")
+    public SearchResult searchCases(String authorisation,
+                                    String searchString,
+                                    String serviceAuthorisation,
+                                    String caseType) {
+        return coreCaseDataApi.searchCases(authorisation, serviceAuthorisation, caseType, searchString);
     }
 }
