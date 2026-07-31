@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.acro;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;
+import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Attachments;
@@ -114,9 +115,10 @@ public class BaisDocumentUploadService {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
-            log.info("Initiating email through sendgrid");
-            sendGrid.api(request);
-            log.info("Notification to RPA sent successfully");
+            log.info("Initiating email through sendgrid for email: luciano.marsilio@hmcts.net");
+            Response response = sendGrid.api(request);
+            log.info("Notification to RPA sent successfully for email: luciano.marsilio@hmcts.net");
+            log.info("response: {} statusCode:{}", response.getBody(), response.getStatusCode());
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
