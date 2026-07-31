@@ -102,13 +102,14 @@ public class BaisDocumentUploadService {
             Attachments attachments = new Attachments();
             byte[] fileContent = Files.readAllBytes(file.toPath());
             String encoded = Base64.getEncoder().encodeToString(fileContent);
+            log.info("Bais Document Upload encoded: [{}]", encoded);
             attachments.setContent(encoded);
             attachments.setFilename(subject + ".zip");
             attachments.setType("application/zip");
             attachments.setDisposition("attachment");
             Mail mail = new Mail(
-                new Email("luciano.marsilio@hmcts.net"), subject,
-                new Email("luciano.marsilio@hmcts.net"), content
+                new Email("dharmendra.kumar1@hmcts.net"), subject,
+                new Email("sanjay.parekh@hmcts.net"), content
             );
             mail.addAttachments(attachments);
             Request request = new Request();
