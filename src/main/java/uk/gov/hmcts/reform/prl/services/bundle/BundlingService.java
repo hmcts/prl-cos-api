@@ -38,6 +38,13 @@ public class BundlingService {
         Hearings hearingDetails = null;
         if (DECISION_OUTCOME.equals(caseData.getState()) || PREPARE_FOR_HEARING_CONDUCT_HEARING.equals(caseData.getState())) {
             hearingDetails = hearingService.getHearings(authorization, String.valueOf(caseData.getId()));
+            log.info(
+                "Bundle creation fetched hearing details for case {}, hearingCount={}",
+                caseData.getId(),
+                hearingDetails != null && hearingDetails.getCaseHearings() != null
+                    ? hearingDetails.getCaseHearings().size()
+                    : 0
+            );
         }
         return createBundle(authorization,authTokenGenerator.generate(),
             bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(

@@ -25,8 +25,18 @@ public class HearingDetailsMapperUtil {
                     .hearingVenueAddress(getHearingVenueAddress(hearingDaySchedule))
                     .hearingDateAndTime(getBundleDateTime(hearingDaySchedule.getHearingStartDateTime()))
                     .hearingJudgeName(hearingDaySchedule.getHearingJudgeName()).build())
+                .map(bundleHearingInfo -> {
+                    log.info(
+                        "Selected bundle hearing details hearingDateAndTime={}, hearingJudgeName={}, hearingVenueAddress={}",
+                        bundleHearingInfo.getHearingDateAndTime(),
+                        bundleHearingInfo.getHearingJudgeName(),
+                        bundleHearingInfo.getHearingVenueAddress()
+                    );
+                    return bundleHearingInfo;
+                })
                 .orElse(BundleHearingInfo.builder().build());
         }
+        log.info("No hearing details available for bundle hearing selection");
         return BundleHearingInfo.builder().build();
     }
 
