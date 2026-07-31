@@ -2,17 +2,14 @@ package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.ResourceUtils;
@@ -21,6 +18,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
@@ -57,11 +55,8 @@ import static uk.gov.hmcts.reform.prl.utils.TestConstants.SERVICE_AUTHORISATION_
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_AUTH_TOKEN;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.TEST_SERVICE_AUTH_TOKEN;
 
-
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CafCassControllerFunctionalTest {
 
     private static final String USER_TOKEN = "Bearer testToken";
@@ -96,7 +91,7 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private RefDataService refDataService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -143,7 +138,7 @@ public class CafCassControllerFunctionalTest {
         );
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void givenDatetimeWindowWhenGetRequestToSearchCasesByCafCassControllerThen200Response() throws Exception {
         String cafcassResponseStr = new String(Files.readAllBytes(ResourceUtils.getFile(CREATE_SERVICE_RESPONSE).toPath()));
@@ -166,7 +161,6 @@ public class CafCassControllerFunctionalTest {
         Mockito.when(refDataService.getRefDataCategoryValueMap("authorisation", authTokenGenerator.generate(), "ABA5", "HearingType")).thenReturn(
             refDataMap);
         Mockito.when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString())).thenReturn(expectedSearchResult);
-
 
         MvcResult mvcResult = mockMvc.perform(get(SEARCH_CASE_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)

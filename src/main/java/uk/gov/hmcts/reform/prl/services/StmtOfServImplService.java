@@ -63,6 +63,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -830,34 +831,32 @@ public class StmtOfServImplService {
                                                                      String template) {
         if (!CaseUtils.hasDashboardAccess(respondent)
             && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
-            try {
-                //cover sheets
-                List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
-                                                .getCoverSheets(caseData, authorization,
-                                                                respondent.getValue().getAddress(),
-                                                                respondent.getValue().getLabelForDynamicList(),
-                                                                respondent.getValue().getLabelForDynamicList()
-                                                ));
 
+            try {
                 //cover letters
                 CaseInvite caseInvite = null;
                 if (!CaseUtils.hasDashboardAccess(respondent)
                     && !CaseUtils.hasLegalRepresentation(respondent.getValue())) {
                     caseInvite = CaseUtils.getCaseInvite(respondent.getId(), caseData.getCaseInvites());
                 }
-                List<Document> coverLetters = serviceOfApplicationService.generateAccessCodeLetter(authorization,
+                List<Document> documentsAndCovers = serviceOfApplicationService.generateAccessCodeLetter(authorization,
                                                                                                    caseData, respondent,
                                                                                                    caseInvite,
                                                                                                    template);
-
-                documents.addAll(coverLetters);
-
+                //cover sheets
+                List<Document> coverSheets = serviceOfApplicationPostService
+                                                .getCoverSheets(caseData, authorization,
+                                                                respondent.getValue().getAddress(),
+                                                                respondent.getValue().getLabelForDynamicList(),
+                                                                DOCUMENT_COVER_SHEET_HINT
+                                                );
+                documentsAndCovers.addAll(coverSheets);
                 //post letters via bulk print
                 BulkPrintDetails bulkPrintDetails = serviceOfApplicationPostService.sendPostNotificationToParty(
                     caseData,
                     authorization,
                     respondent,
-                    documents,
+                    documentsAndCovers,
                     respondent.getValue().getLabelForDynamicList()
                 );
                 log.info(
@@ -872,7 +871,7 @@ public class StmtOfServImplService {
                                                      .partyType(PartyType.RESPONDENT)
                                                      .sentDateTime(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                                                      .build())
-                                   .documents(ElementUtils.wrapElements(coverLetters))
+                                   .documents(ElementUtils.wrapElements(documentsAndCovers))
                                    .build());
             } catch (Exception e) {
                 log.error(

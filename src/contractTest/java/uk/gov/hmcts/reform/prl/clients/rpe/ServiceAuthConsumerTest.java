@@ -33,7 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
         "fis_hearing.api.url=",
         "refdata.api.url=",
         "courtfinder.api.url=",
-        "prl-dgs-api.url=",
         "fees-register.api.url=",
         "judicialUsers.api.url=",
         "locationfinder.api.url=",

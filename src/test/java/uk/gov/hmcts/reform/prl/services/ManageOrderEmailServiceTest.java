@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
@@ -133,6 +134,9 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     private BulkPrintService bulkPrintService;
+
+    @Mock
+    private DocumentGenService documentGenService;
 
     @Mock
     OrganisationService organisationService;
@@ -4393,6 +4397,62 @@ public class ManageOrderEmailServiceTest {
         verify(objectMapper, times(0)).convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class));
     }
 
+    @Test
+    public void testSendOrderAndAdditionalDocsToOtherPersonViaPostIncludesAddressCoverLetter() throws Exception {
+        //Given
+        caseData = caseData.toBuilder()
+            .othersToNotify(List.of(element(uuid, otherPerson)))
+            .manageOrders(ManageOrders.builder()
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .otherParties(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(documentGenService.generateCoverLetter(
+            anyString(),
+            any(CaseData.class),
+            anyString(),
+            any(Address.class)
+        )).thenReturn(List.of(Document.builder()
+                          .documentUrl("coverLetterUrl")
+                          .documentBinaryUrl("coverLetterUrl")
+                          .documentFileName("coverLetter.pdf")
+                          .build()));
+
+        when(serviceOfApplicationPostService.getCoverSheets(caseData, AUTH_TOKEN, otherPerson.getAddress(),
+                                                            otherPerson.getLabelForDynamicList(),
+                                                            PrlAppsConstants.DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT))
+            .thenReturn(List.of(coverLetterDoc));
+
+        when(bulkPrintService.send(anyString(), anyString(), anyString(), anyList(), anyString()))
+            .thenReturn(uuid);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(Boolean.TRUE).isGenWelsh(Boolean.FALSE).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(objectMapper.convertValue(any(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+            .thenReturn(caseData.getOrderCollection());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("orderCollection", caseData.getOrderCollection());
+
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(AUTH_TOKEN, caseData, caseDataMap);
+
+        //Then
+        ArgumentCaptor<List<Document>> documentsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(bulkPrintService, atLeastOnce()).send(
+            anyString(),
+            anyString(),
+            anyString(),
+            documentsCaptor.capture(),
+            anyString()
+        );
+
+        List<Document> capturedDocs = documentsCaptor.getValue();
+        assertEquals("coverLetter.pdf", capturedDocs.get(0).getDocumentFileName());
+        assertEquals(coverLetterDoc.getDocumentFileName(), capturedDocs.get(1).getDocumentFileName());
+    }
+  
     private void verifySendGridConfigContainsCaseReference(SendgridEmailConfig sendgridEmailConfig, long caseReference) {
         assertEquals(String.valueOf(caseReference), sendgridEmailConfig.getCaseReference());
     }

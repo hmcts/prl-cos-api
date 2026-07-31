@@ -549,9 +549,9 @@ public class PrlAppsConstants {
     public static final String TRANSCRIPTS_OF_JUDGEMENTS = "Transcripts and judgments";
     public static final String MAGISTRATES_FACTS_AND_REASONS = "Magistrates facts and reasons";
     public static final String SAFEGUARDING_LETTER = "Safeguarding letter/Safeguarding Enquiries Report (SER)";
-    public static final String SECTION_7_REPORT = "Section 7 report/Child Impact Analysis";
+    public static final String SECTION_7_REPORT = "Section 7 report";
     public static final String SECTION_37_REPORT = "Section 37 report";
-    public static final String GUARDIAN_REPORT = "Guardian report";
+    public static final String GUARDIAN_REPORT = "Section 16.4 Guardian Report";
     public static final String SPECIAL_GUARDIANSHIP_REPORT = "Special guardianship report";
     public static final String CAFCASS_OTHER_DOCUMENTS = "Cafcass/Cafcass Cymru other documents";
     public static final String LA_OTHER_DOCUMENTS = "Local Authority other documents";
@@ -959,6 +959,7 @@ public class PrlAppsConstants {
     public static final String CITIZEN = "Citizen";
     public static final String SUCCESS = "Success";
     public static final String DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT = "DOCUMENT_COVER_SHEET_SERVE_ORDER";
+    public static final String DOCUMENT_BLANK_COVER_SHEET_HINT = "DOCUMENT_BLANK_COVER_SHEET_HINT";
 
     public static final String FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION = "fl401listOnNoticeHearingInstruction";
 
@@ -1086,6 +1087,7 @@ public class PrlAppsConstants {
     public static final String DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE = "documentRemovalDocumentToRemove";
     public static final String DOCUMENT_REMOVAL_CONFIRM_OPTIONS = "documentRemovalConfirmOptions";
 
+    public static final String C_8_FILENAME_PATTERN = "Confidential_C8 of %s %s%s%s.pdf";
     public static final String CHILD_IMPACT_REPORT_1_LA = "childImpactReport1La";
     public static final String CHILD_IMPACT_REPORT_2_LA = "childImpactReport2La";
     public static final String SECTION_7_REPORT_LA = "section7ReportLa";
@@ -1095,5 +1097,16 @@ public class PrlAppsConstants {
     public static final String CIR_EXTENSION_REQUEST_LA = "cirExtensionRequestLa";
     public static final String CIR_TRANSFER_REQUEST_LA = "cirTransferRequestLa";
 
+    //Rename Document event
+    public static final String RENAME_DOCUMENT = "renameDocument";
+    public static final String RENAME_DOCUMENTS_LIST = "renameDocumentsList";
+    public static final String CATEGORY_DOCUMENTS_LIST = "categoryDocumentsList";
+    public static final String NEW_NAME_FOR_DOCUMENT = "newNameForDocument";
+    public static final String RENAME_LIST_DOC_SELECTED = "renameListDocSelected";
+    public static final String CATEGORY_ID = "category_id";
+    public static final String DOCUMENT_FILENAME = "document_filename";
+
+    public static final String TASK_TRIGGERED_BY = "RequestOrder";
     public static final String TASK_ASSIGNEE_IDAM_ID = "taskAssigneeIdamId";
+    public static final String NEW_TASK_REQUIRED_FOR_UPLOADED_DOCS = "newTaskRequiredForUploadedDocs";
 }

@@ -5,17 +5,17 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -26,9 +26,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 @Slf4j
-@SpringBootTest
-@ContextConfiguration
-@Ignore
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+
+@Disabled
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class CaseApplicationResponseControllerFunctionalTest {
 
@@ -48,7 +48,6 @@ public class CaseApplicationResponseControllerFunctionalTest {
 
     private static final String PATH_CORE = SLASH.concat("cases").concat(SLASH);
 
-
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
@@ -67,7 +66,6 @@ public class CaseApplicationResponseControllerFunctionalTest {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @BeforeAll
     public void setUp() {

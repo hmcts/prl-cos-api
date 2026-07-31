@@ -1,14 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.Application;
@@ -25,13 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-
 /*
    These test cases will be enabled once we have merged and integrated with Fee and Pay on Demo environment.
 */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
-@Ignore
+@Disabled
 public class FeeAndPayServiceRequestControllerFunctionalTest {
 
     private MockMvc mockMvc;
@@ -44,7 +41,7 @@ public class FeeAndPayServiceRequestControllerFunctionalTest {
 
     private static final String CREATE_SERVICE_REQUEST = "requests/call-back-controller-about-to-submit-case-creation.json";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
@@ -58,7 +55,6 @@ public class FeeAndPayServiceRequestControllerFunctionalTest {
 
         when(paymentRequestService.createServiceRequest(any(CallbackRequest.class), any(String.class), any(FeeResponse.class)))
             .thenReturn(paymentServiceResponse);
-
 
         mockMvc.perform(post("/create-payment-service-request")
                             .contentType(MediaType.APPLICATION_JSON)

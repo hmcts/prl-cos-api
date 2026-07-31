@@ -19,8 +19,9 @@ public class GenerateDocumentRequest {
     @Schema(description = "Name of the template", required = true)
     @JsonProperty(value = "template", required = true)
     @NotBlank
-    private final String template;
+    String template;
     @JsonProperty(value = "values", required = true)
     @Schema(description = "Placeholder key / value pairs", required = true)
-    private final Map<String, Object> values;
+    Map<String, Object> values;
+    String caseId;
 }
