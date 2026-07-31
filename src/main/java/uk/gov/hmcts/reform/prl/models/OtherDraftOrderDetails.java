@@ -32,4 +32,5 @@ public class OtherDraftOrderDetails {
     private String orderCreatedByEmailId;
     private final String additionalRequirementsForHearingReq;
     private final String instructionsToLegalRepresentative;
+    private String rejectionInstructionsHistory;
 }

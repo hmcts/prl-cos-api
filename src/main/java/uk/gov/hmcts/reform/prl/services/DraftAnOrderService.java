@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -95,6 +96,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -1251,11 +1253,26 @@ public class DraftAnOrderService {
                 instructionssToLegalRep = "";
             }
         }
+
+
+        OtherDraftOrderDetails otherDetails = draftOrder.getOtherDetails();
+        String instructionsToLegalRepresentative = otherDetails.getInstructionsToLegalRepresentative();
+        String rejectionInstructionsHistory = otherDetails.getRejectionInstructionsHistory();
+        if (StringUtils.isNotBlank(instructionsToLegalRepresentative)) {
+            if (StringUtils.isNotBlank(instructionsToLegalRepresentative)) {
+                rejectionInstructionsHistory = Objects.toString(rejectionInstructionsHistory, "") + ", "
+                    + Objects.toString(instructionsToLegalRepresentative, "");
+            } else {
+                rejectionInstructionsHistory = instructionsToLegalRepresentative;
+            }
+        }
+
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
+                              .rejectionInstructionsHistory(rejectionInstructionsHistory)
                               .instructionsToLegalRepresentative(instructionssToLegalRep)
                               .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
                               //PRL-4857 - clear this field as order is reviewed by judge/manager already.
@@ -2386,20 +2403,20 @@ public class DraftAnOrderService {
             && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
             caseData))) {
-            if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
+            if (nonNull(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.populateCustomOrderFields(
                     caseData,
                     caseData.getCreateSelectOrderOptions(),
                     language
                 );
             }
-            if (Objects.nonNull(caseData.getManageOrders())) {
+            if (nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
-            if (Objects.nonNull(caseData.getSelectedOrder())) {
+            if (nonNull(caseData.getSelectedOrder())) {
                 caseDataUpdated.put(SELECTED_ORDER, BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             }
-            if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+            if (nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
         } else {
@@ -2417,10 +2434,10 @@ public class DraftAnOrderService {
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
             }
             caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData, clientContext, language);
-            if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
+            if (nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
-            if (Objects.nonNull(caseData.getManageOrders())) {
+            if (nonNull(caseData.getManageOrders())) {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());

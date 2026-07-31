@@ -121,6 +121,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -2468,7 +2469,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenReturn(standardDirectionOrder);
         when(objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class)).thenReturn(standardDirectionOrder);
-        when(objectMapper.convertValue(any(), Mockito.eq(Map.class))).thenReturn(standardDirectionOrderMap);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(standardDirectionOrderMap);
         when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
         when(hearingService.getHearings(
             Mockito.anyString(),
@@ -2574,7 +2575,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenReturn(standardDirectionOrder);
         when(objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class)).thenReturn(standardDirectionOrder);
-        when(objectMapper.convertValue(any(), Mockito.eq(Map.class))).thenReturn(standardDirectionOrderMap);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(standardDirectionOrderMap);
         when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
         when(hearingService.getHearings(
             Mockito.anyString(),
@@ -2680,7 +2681,7 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenReturn(standardDirectionOrder);
         when(objectMapper.readValue(sdoDetailsJson, StandardDirectionOrder.class)).thenReturn(standardDirectionOrder);
-        when(objectMapper.convertValue(any(), Mockito.eq(Map.class))).thenReturn(standardDirectionOrderMap);
+        when(objectMapper.convertValue(any(), eq(Map.class))).thenReturn(standardDirectionOrderMap);
         when(locationRefDataService.getCourtLocations("test-token")).thenReturn(new ArrayList<>());
         when(hearingService.getHearings(
             Mockito.anyString(),
@@ -5454,7 +5455,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
-        when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData)).thenReturn(caseData);
+        when(manageOrderService.updateOrderFieldsForDocmosis(any(DraftOrder.class), eq(caseData))).thenReturn(caseData);
         when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
         when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         Map<String, Object> caseDataMap = new HashMap<>();
