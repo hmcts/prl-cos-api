@@ -108,7 +108,7 @@ public class BaisDocumentUploadService {
             attachments.setType("application/zip");
             attachments.setDisposition("attachment");
             Mail mail = new Mail(
-                new Email("dharmendra.kumar1@hmcts.net"), subject,
+                new Email("ca@mail-prl-nonprod.preview.platform.hmcts.net"), subject,
                 new Email("sanjay.parekh@hmcts.net"), content
             );
             mail.addAttachments(attachments);
