@@ -145,6 +145,11 @@ public class ResubmitApplicationController {
                                             Map<String, Object> caseDataUpdated,
                                             Optional<String> previousStates) throws Exception {
         if (previousStates.isPresent()) {
+            boolean isC100Case = C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData));
+            if (isC100Case) {
+                caseData = organisationService.getApplicantOrganisationDetails(caseData);
+                caseData = organisationService.getRespondentOrganisationDetails(caseData);
+            }
             if (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get())) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
                 caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
@@ -169,8 +174,10 @@ public class ResubmitApplicationController {
             }
             if (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
                 || State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())) {
-                caseData = organisationService.getApplicantOrganisationDetails(caseData);
-                caseData = organisationService.getRespondentOrganisationDetails(caseData);
+                if (!isC100Case) {
+                    caseData = organisationService.getApplicantOrganisationDetails(caseData);
+                    caseData = organisationService.getRespondentOrganisationDetails(caseData);
+                }
                 caseData = caseData.setIssueDate();
                 caseData = caseData.toBuilder().state(State.fromValue((previousStates.get()))).build();
 
@@ -184,12 +191,17 @@ public class ResubmitApplicationController {
                 eventPublisher.publishEvent(courtAdminNotificationEmailEvent);
             }
             // All docs will be regenerated in both issue and submitted state jira FPET-21
-            caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
-            if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (isC100Case) {
+                caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocumentsForC100Resubmission(
+                    authorisation,
+                    caseData
+                ));
                 caseDataUpdated.putAll(documentGenService.generateDraftDocumentsForC100CaseResubmission(
                     authorisation,
                     caseData
                 ));
+            } else {
+                caseDataUpdated.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authorisation, caseData, true));
             }
             caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));

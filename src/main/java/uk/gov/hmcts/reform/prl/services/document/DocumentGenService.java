@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -56,12 +57,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorConfig.RESUBMISSION_DOCUMENT_EXECUTOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
@@ -370,6 +376,14 @@ public class DocumentGenService {
     private final PdfGenerationService pdfGenerationService;
     private final AuthTokenGenerator authTokenGenerator;
     private final Time dateTime;
+    private Executor resubmissionDocumentExecutor = Runnable::run;
+
+    @Autowired
+    public void setResubmissionDocumentExecutor(
+        @Qualifier(RESUBMISSION_DOCUMENT_EXECUTOR) Executor resubmissionDocumentExecutor
+    ) {
+        this.resubmissionDocumentExecutor = resubmissionDocumentExecutor;
+    }
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
@@ -429,7 +443,18 @@ public class DocumentGenService {
      */
     public Map<String, Object> createUpdatedCaseDataWithDocuments(String authorisation, CaseData caseData,
                                                                   boolean overrideC100CaseLock) throws Exception {
-        caseData = populateOrganisationDetailsInCaseData(caseData);
+        return createUpdatedCaseDataWithDocuments(
+            authorisation,
+            populateOrganisationDetailsInCaseData(caseData),
+            overrideC100CaseLock,
+            false
+        );
+    }
+
+    private Map<String, Object> createUpdatedCaseDataWithDocuments(String authorisation,
+                                                                   CaseData caseData,
+                                                                   boolean overrideC100CaseLock,
+                                                                   boolean generateConcurrently) throws Exception {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
@@ -439,11 +464,15 @@ public class DocumentGenService {
             authorisation, caseData,
             new HashMap<>(), overrideC100CaseLock
         );
-        if (documentLanguage.isGenEng()) {
-            addEnglishDocumentsToUpdatedCaseData(documentUpdateContext);
-        }
-        if (documentLanguage.isGenWelsh()) {
-            addWelshDocumentsToUpdatedCaseData(documentUpdateContext);
+        if (generateConcurrently) {
+            addResubmissionDocumentsConcurrently(documentUpdateContext, documentLanguage);
+        } else {
+            if (documentLanguage.isGenEng()) {
+                addEnglishDocumentsToUpdatedCaseData(documentUpdateContext);
+            }
+            if (documentLanguage.isGenWelsh()) {
+                addWelshDocumentsToUpdatedCaseData(documentUpdateContext);
+            }
         }
 
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
@@ -456,6 +485,84 @@ public class DocumentGenService {
             documentUpdateContext.updatedCaseData.put(DOCUMENT_FIELD_C1A, null);
         }
         return documentUpdateContext.updatedCaseData;
+    }
+
+    public Map<String, Object> createUpdatedCaseDataWithDocumentsForC100Resubmission(String authorisation,
+                                                                                     CaseData enrichedCaseData) throws Exception {
+        return createUpdatedCaseDataWithDocuments(authorisation, enrichedCaseData, true, true);
+    }
+
+    private void addResubmissionDocumentsConcurrently(DocumentUpdateContext documentUpdateContext,
+                                                       DocumentLanguage documentLanguage) throws Exception {
+        List<Supplier<Map<String, Object>>> documentTasks = new ArrayList<>();
+        boolean caseNotLocked = isCaseNotLocked(documentUpdateContext);
+
+        if (documentLanguage.isGenEng()) {
+            documentUpdateContext.updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            documentTasks.add(documentUpdateTask(documentUpdateContext, this::addEnglishC8DocumentToUpdatedCaseData));
+            if (caseNotLocked) {
+                documentTasks.add(documentUpdateTask(documentUpdateContext, this::addEnglishC1ADocumentToUpdatedCaseData));
+                documentTasks.add(documentUpdateTask(documentUpdateContext, this::addEnglishC100FinalDocumentToUpdatedCaseData));
+            }
+        }
+        if (documentLanguage.isGenWelsh()) {
+            documentUpdateContext.updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
+            documentTasks.add(documentUpdateTask(documentUpdateContext, this::addWelshC8DocumentToUpdatedCaseData));
+            if (caseNotLocked) {
+                documentTasks.add(documentUpdateTask(documentUpdateContext, this::addWelshC1ADocumentToUpdatedCaseData));
+                documentTasks.add(documentUpdateTask(documentUpdateContext, this::addWelshC100FinalDocumentToUpdatedCaseData));
+            }
+        }
+
+        mergeDocumentTaskResults(documentUpdateContext.updatedCaseData, documentTasks);
+    }
+
+    private Supplier<Map<String, Object>> documentUpdateTask(DocumentUpdateContext sourceContext,
+                                                              DocumentUpdateOperation operation) {
+        return () -> {
+            Map<String, Object> taskResult = new HashMap<>();
+            DocumentUpdateContext taskContext = new DocumentUpdateContext(
+                sourceContext.authorisation,
+                sourceContext.caseData,
+                taskResult,
+                sourceContext.overrideC100CaseLock
+            );
+            try {
+                operation.update(taskContext);
+                return taskResult;
+            } catch (Exception exception) {
+                throw new CompletionException(exception);
+            }
+        };
+    }
+
+    private void mergeDocumentTaskResults(Map<String, Object> updatedCaseData,
+                                          List<Supplier<Map<String, Object>>> documentTasks) throws Exception {
+        List<CompletableFuture<Map<String, Object>>> futures = documentTasks.stream()
+            .map(task -> CompletableFuture.supplyAsync(task, resubmissionDocumentExecutor))
+            .toList();
+        try {
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
+            futures.forEach(future -> updatedCaseData.putAll(future.join()));
+        } catch (CompletionException completionException) {
+            futures.forEach(future -> future.cancel(true));
+            Throwable cause = completionException;
+            while (cause instanceof CompletionException && cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+            if (cause instanceof Exception exception) {
+                throw exception;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw completionException;
+        }
+    }
+
+    @FunctionalInterface
+    private interface DocumentUpdateOperation {
+        void update(DocumentUpdateContext documentUpdateContext) throws Exception;
     }
 
     private void addWelshDocumentsToUpdatedCaseData(DocumentUpdateContext documentUpdateContext) throws Exception {
@@ -713,79 +820,115 @@ public class DocumentGenService {
             || (caseData.getAllegationOfHarmRevised() != null
             && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmYesNo()));
 
-        Map<String, Object> updatedCaseData = new HashMap<>(generateC100DraftDocuments(authorisation, caseData));
-        generateDraftEngC1aAndC8DocumentsForResubmission(
+        CaseData applicationDraftCaseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
+        DocumentLanguage applicationDraftLanguage = documentLanguageService.docGenerateLang(applicationDraftCaseData);
+        Map<String, Object> updatedCaseData = new HashMap<>();
+        List<Supplier<Map<String, Object>>> documentTasks = new ArrayList<>();
+
+        if (applicationDraftLanguage.isGenEng()) {
+            updatedCaseData.put(ENGDOCGEN, Yes.toString());
+            documentTasks.add(documentValueTask(
+                DRAFT_APPLICATION_DOCUMENT_FIELD,
+                () -> getDocument(authorisation, applicationDraftCaseData, DRAFT_HINT, false)
+            ));
+        }
+        if (applicationDraftLanguage.isGenWelsh()) {
+            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
+            documentTasks.add(documentValueTask(
+                DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+                () -> getDocument(authorisation, applicationDraftCaseData, DRAFT_HINT, true)
+            ));
+        }
+        addEnglishResubmissionDraftTasks(
             authorisation,
             caseData,
             updatedCaseData,
+            documentTasks,
             documentLanguage,
             isConfidentialInformationPresentForC100,
             isC1aPresentForC100
         );
-        generateDraftWelshC1aAndC8DocumentsForResubmission(
+        addWelshResubmissionDraftTasks(
             authorisation,
             caseData,
             updatedCaseData,
+            documentTasks,
             documentLanguage,
             isConfidentialInformationPresentForC100,
             isC1aPresentForC100
         );
+        try {
+            mergeDocumentTaskResults(updatedCaseData, documentTasks);
+        } catch (RuntimeException runtimeException) {
+            throw runtimeException;
+        } catch (Exception exception) {
+            throw new DocumentGenerationException("Error generating draft documents for resubmission", exception);
+        }
         return updatedCaseData;
     }
 
-    private void generateDraftWelshC1aAndC8DocumentsForResubmission(String authorisation,
-                                                                    CaseData caseData,
-                                                                    Map<String, Object> updatedCaseData,
-                                                                    DocumentLanguage documentLanguage,
-                                                                    boolean isConfidentialInformationPresentForC100,
-                                                                    boolean isC1aPresentForC100) {
-        if (documentLanguage.isGenWelsh()) {
-            if (isConfidentialInformationPresentForC100) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_C8_DRAFT_WELSH,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
-                );
-            } else {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_C8_DRAFT_WELSH, null);
-            }
-            if (isC1aPresentForC100) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_C1A_DRAFT_WELSH,
-                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
-                );
-            } else {
-                updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
-            }
+    private void addEnglishResubmissionDraftTasks(String authorisation,
+                                                  CaseData caseData,
+                                                  Map<String, Object> updatedCaseData,
+                                                  List<Supplier<Map<String, Object>>> documentTasks,
+                                                  DocumentLanguage documentLanguage,
+                                                  boolean confidentialInformationPresent,
+                                                  boolean c1aPresent) {
+        if (!documentLanguage.isGenEng()) {
+            return;
+        }
+        if (confidentialInformationPresent) {
+            documentTasks.add(documentValueTask(
+                DOCUMENT_FIELD_DRAFT_C8,
+                () -> getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
+            ));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C8, null);
+        }
+        if (c1aPresent) {
+            documentTasks.add(documentValueTask(
+                DOCUMENT_FIELD_DRAFT_C1A,
+                () -> getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
+            ));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
         }
     }
 
-    private void generateDraftEngC1aAndC8DocumentsForResubmission(String authorisation,
-                                                                  CaseData caseData,
-                                                                  Map<String, Object> updatedCaseData,
-                                                                  DocumentLanguage documentLanguage,
-                                                                  boolean isConfidentialInformationPresentForC100,
-                                                                  boolean isC1aPresentForC100) {
-        if (documentLanguage.isGenEng()) {
-            if (isConfidentialInformationPresentForC100) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_DRAFT_C8,
-                    getDocument(authorisation, caseData, C8_DRAFT_HINT, false)
-                );
-            } else {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_DRAFT_C8, null);
-            }
-            if (isC1aPresentForC100) {
-                updatedCaseData.put(
-                    DOCUMENT_FIELD_DRAFT_C1A,
-                    getDocument(authorisation, caseData, C1A_DRAFT_HINT, false)
-                );
-
-            } else {
-                updatedCaseData.put(DOCUMENT_FIELD_DRAFT_C1A, null);
-            }
+    private void addWelshResubmissionDraftTasks(String authorisation,
+                                                CaseData caseData,
+                                                Map<String, Object> updatedCaseData,
+                                                List<Supplier<Map<String, Object>>> documentTasks,
+                                                DocumentLanguage documentLanguage,
+                                                boolean confidentialInformationPresent,
+                                                boolean c1aPresent) {
+        if (!documentLanguage.isGenWelsh()) {
+            return;
         }
+        if (confidentialInformationPresent) {
+            documentTasks.add(documentValueTask(
+                DOCUMENT_FIELD_C8_DRAFT_WELSH,
+                () -> getDocument(authorisation, caseData, C8_DRAFT_HINT, true)
+            ));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C8_DRAFT_WELSH, null);
+        }
+        if (c1aPresent) {
+            documentTasks.add(documentValueTask(
+                DOCUMENT_FIELD_C1A_DRAFT_WELSH,
+                () -> getDocument(authorisation, caseData, C1A_DRAFT_HINT, true)
+            ));
+        } else {
+            updatedCaseData.put(DOCUMENT_FIELD_C1A_DRAFT_WELSH, null);
+        }
+    }
+
+    private Supplier<Map<String, Object>> documentValueTask(String fieldName, Supplier<Object> documentSupplier) {
+        return () -> {
+            Map<String, Object> taskResult = new HashMap<>();
+            taskResult.put(fieldName, documentSupplier.get());
+            return taskResult;
+        };
     }
 
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh,

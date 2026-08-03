@@ -229,6 +229,10 @@ public class ResubmitApplicationControllerTest {
             .countyLocationCode(123)
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(organisationService.getApplicantOrganisationDetails(any(CaseData.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organisationService.getRespondentOrganisationDetails(any(CaseData.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -267,6 +271,15 @@ public class ResubmitApplicationControllerTest {
                                                                                                           S2S_TOKEN, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
+        verify(organisationService).getApplicantOrganisationDetails(caseDataGateKeepingMiam);
+        verify(organisationService).getRespondentOrganisationDetails(caseDataGateKeepingMiam);
+        verify(documentGenService).createUpdatedCaseDataWithDocumentsForC100Resubmission(
+            AUTH_TOKEN,
+            caseDataGateKeepingMiam.toBuilder()
+                .state(State.SUBMITTED_PAID)
+                .dateSubmitted(CURRENT_DATE)
+                .build()
+        );
     }
 
     @Test

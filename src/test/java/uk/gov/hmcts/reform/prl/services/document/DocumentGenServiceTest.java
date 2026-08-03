@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -71,6 +72,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -81,6 +87,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -2940,6 +2947,73 @@ public class DocumentGenServiceTest {
 
         verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
                                DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+    }
+
+    @Test
+    public void c100ResubmissionUsesFourWorkersForMaximumBilingualCase() throws Exception {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(any(CaseData.class))).thenReturn(c100CaseData);
+
+        AtomicInteger renderCalls = new AtomicInteger();
+        AtomicInteger rendersInFlight = new AtomicInteger();
+        AtomicInteger maximumRendersInFlight = new AtomicInteger();
+        CyclicBarrier firstFourRenders = new CyclicBarrier(4);
+        org.mockito.stubbing.Answer<GeneratedDocumentInfo> concurrentRender = invocation -> {
+            int call = renderCalls.incrementAndGet();
+            int inFlight = rendersInFlight.incrementAndGet();
+            maximumRendersInFlight.accumulateAndGet(inFlight, Math::max);
+            try {
+                if (call <= 4) {
+                    firstFourRenders.await(5, TimeUnit.SECONDS);
+                }
+                return generatedDocumentInfo;
+            } finally {
+                rendersInFlight.decrementAndGet();
+            }
+        };
+
+        doAnswer(concurrentRender).when(dgsService).generateDocument(
+            anyString(), any(CaseDetails.class), any(), any()
+        );
+        doAnswer(concurrentRender).when(dgsService).generateWelshDocument(
+            anyString(), any(CaseDetails.class), any(), any()
+        );
+
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        documentGenService.setResubmissionDocumentExecutor(executor);
+        try {
+            documentGenService.createUpdatedCaseDataWithDocumentsForC100Resubmission(AUTH_TOKEN, c100CaseData);
+            documentGenService.generateDraftDocumentsForC100CaseResubmission(AUTH_TOKEN, c100CaseData);
+        } finally {
+            executor.shutdownNow();
+        }
+
+        assertEquals(12, renderCalls.get());
+        assertEquals(4, maximumRendersInFlight.get());
+        verifyNoInteractions(organisationService);
+    }
+
+    @Test
+    public void concurrentResubmissionPreservesDocumentGenerationFailure() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(any(CaseData.class))).thenReturn(c100CaseData);
+        doThrow(new DocumentGenerationException("render failed")).when(dgsService).generateDocument(
+            anyString(), any(CaseDetails.class), any(), any()
+        );
+
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        documentGenService.setResubmissionDocumentExecutor(executor);
+        try {
+            DocumentGenerationException exception = assertThrows(
+                DocumentGenerationException.class,
+                () -> documentGenService.createUpdatedCaseDataWithDocumentsForC100Resubmission(AUTH_TOKEN, c100CaseData)
+            );
+            assertEquals("render failed", exception.getMessage());
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test
