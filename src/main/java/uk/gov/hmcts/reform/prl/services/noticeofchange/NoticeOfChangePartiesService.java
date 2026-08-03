@@ -652,6 +652,10 @@ public class NoticeOfChangePartiesService {
                         (solicitorRole.getIndex() + 1)
                     ), organisationPolicy
                 );
+            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                    solicitorRole, PartyDetails.builder().build());
+                data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
         }
     }

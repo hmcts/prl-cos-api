@@ -2178,7 +2178,7 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    public void shouldNotCreateDaRespondentPolicyPlaceholderWhenGeneratingForCaRepresenting() {
+    public void shouldCreateDaRespondentPolicyPlaceholderWhenGeneratingForCaRepresenting() {
         Element<PartyDetails> respondent1 = element(UUID.randomUUID(), PartyDetails.builder()
             .firstName("Bob")
             .lastName("Jones")
@@ -2189,11 +2189,16 @@ public class NoticeOfChangePartiesServiceTest {
             .respondents(List.of(respondent1))
             .build();
 
+        OrganisationPolicy daRespondentPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole("[FL401RESPONDENTSOLICITOR]")
+            .build();
+        when(policyConverter.daGenerate(eq(SolicitorRole.FL401RESPONDENTSOLICITOR), any(PartyDetails.class)))
+            .thenReturn(daRespondentPolicy);
+
         Map<String, Object> result = noticeOfChangePartiesService.generate(
             c100CaseData, SolicitorRole.Representing.CARESPONDENT);
 
-        // DA respondent placeholder should NOT be created - it is handled by its own generate call
-        assertThat(result).doesNotContainKey("daRespondentPolicy");
+        assertThat(result).containsEntry("daRespondentPolicy", daRespondentPolicy);
         assertThat(result).doesNotContainKey("applicantOrganisationPolicy");
     }
 
