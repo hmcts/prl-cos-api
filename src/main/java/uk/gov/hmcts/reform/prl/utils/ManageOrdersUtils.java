@@ -611,12 +611,14 @@ public class ManageOrdersUtils {
                 && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                 isOrderEdited = true;
             }
-        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
-            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
-            .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
-            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && (caseData.getManageOrders() != null
+            && ((No.equals(caseData.getManageOrders().getIsOrderCreatedBySolicitor())
+                && OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe.equals(
+                    caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()))
+            || (Yes.equals(caseData.getManageOrders().getIsOrderCreatedBySolicitor())
+                && OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe.equals(
+                    caseData.getManageOrders().getWhatToDoWithOrderSolicitor()))))) {
             isOrderEdited = true;
         } else if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
             isOrderEdited = true;//default true for edit returned order
