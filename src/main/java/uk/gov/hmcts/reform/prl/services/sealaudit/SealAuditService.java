@@ -97,6 +97,8 @@ public class SealAuditService {
         int presentSeals = 0;
         int errors = 0;
         boolean foundAnyCases = false;
+        boolean completed = false;
+        String failureReason = null;
         List<String> csvRows = new ArrayList<>();
 
         try {
@@ -216,7 +218,7 @@ public class SealAuditService {
 
                     if (totalCasesProcessed % batchSize == 0) {
                         log.info(
-                            "Processed {} cases, pausing for {} seconds",
+                            "Processed {}  {} seconds",
                             totalCasesProcessed,
                             batchDelaySeconds
                         );
@@ -234,27 +236,35 @@ public class SealAuditService {
 
             if (!foundAnyCases) {
                 log.info("No cases with served orders found");
-                sendSummaryEmail(0, 0, 0, 0, 0, csvRows);
-                return;
             }
+            completed = true;
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("Seal audit interrupted", e);
-        } catch (Exception e) {
-            log.error("Error running seal audit", e);
+            failureReason = "Audit was interrupted before it could finish";
+            log.warn("Seal audit interrupted after processing {} cases", totalCasesProcessed, e);
+        } catch (Throwable t) {
+            failureReason = "Audit stopped early due to a fatal error: " + t.getClass().getSimpleName()
+                + (t.getMessage() != null ? " - " + t.getMessage() : "");
+            log.error("Fatal error running seal audit (processed {} cases before failure)",
+                totalCasesProcessed, t);
+        } finally {
+            long duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime);
+            log.info("*** Seal Audit Complete ***");
+            log.info("Total cases processed: {}", totalCasesProcessed);
+            log.info("Total orders checked: {}", totalOrders);
+            log.info("Seals present: {}", presentSeals);
+            log.info("Seals missing: {}", missingSeals);
+            log.info("Errors: {}", errors);
+            log.info("Duration: {}s", duration);
+
+            try {
+                sendSummaryEmail(totalOrders, presentSeals, missingSeals, errors, duration, csvRows,
+                    completed, failureReason, totalCasesProcessed);
+            } catch (Throwable emailErr) {
+                log.error("Failed to send seal audit summary email", emailErr);
+            }
         }
-
-        long duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime);
-        log.info("*** Seal Audit Complete ***");
-        log.info("Total cases processed: {}", totalCasesProcessed);
-        log.info("Total orders checked: {}", totalOrders);
-        log.info("Seals present: {}", presentSeals);
-        log.info("Seals missing: {}", missingSeals);
-        log.info("Errors: {}", errors);
-        log.info("Duration: {}s", duration);
-
-        sendSummaryEmail(totalOrders, presentSeals, missingSeals, errors, duration, csvRows);
     }
 
     private SearchResult searchServedOrders(
@@ -459,7 +469,10 @@ public class SealAuditService {
         int missingSeals,
         int errors,
         long durationSeconds,
-        List<String> csvRows
+        List<String> csvRows,
+        boolean completed,
+        String failureReason,
+        int casesProcessed
     ) {
         if (!emailEnabled || toEmailAddress == null || toEmailAddress.isBlank()) {
             log.info("Email not enabled or no recipient configured, skipping email");
@@ -483,7 +496,16 @@ public class SealAuditService {
 
         try {
             String dateStr = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
-            String statusSummary = missingSeals == 0 && errors == 0 ? "All seals present" : "Issues found";
+            String statusSummary;
+            if (!completed) {
+                statusSummary = "INCOMPLETE RUN - " + (failureReason != null ? failureReason
+                    : "audit did not finish") + ". Partial results below (processed "
+                    + casesProcessed + " cases before stopping). Totals and attached CSV are NOT a full report.";
+            } else if (missingSeals == 0 && errors == 0) {
+                statusSummary = "All seals present";
+            } else {
+                statusSummary = "Issues found";
+            }
 
             StringBuilder csvContent = new StringBuilder();
             csvContent.append(CSV_HEADER).append("\n");
@@ -501,6 +523,8 @@ public class SealAuditService {
             templateVars.put("duration", String.valueOf(durationSeconds));
 
             byte[] csvBytes = csvContent.toString().getBytes();
+            log.info("Preparing seal audit email: rows={}, csvBytes={}, recipients={}",
+                csvRows.size(), csvBytes.length, recipients.size());
             Object fileUpload = prepareUpload(csvBytes, true, false, "26 weeks");
             templateVars.put("link_to_file", fileUpload);
 
@@ -517,6 +541,8 @@ public class SealAuditService {
 
         } catch (NotificationClientException e) {
             log.error("Error sending seal audit summary email via Gov Notify", e);
+        } catch (Exception e) {
+            log.error("Unexpected error sending seal audit summary email", e);
         }
     }
 }
