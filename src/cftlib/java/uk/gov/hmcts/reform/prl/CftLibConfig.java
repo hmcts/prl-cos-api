@@ -17,7 +17,7 @@ public class CftLibConfig implements CFTLibConfigurer {
     public void configure(CFTLib lib) throws Exception {
         createCcdRoles(lib);
         configureRoleAssignments(lib);
-        importCcdDefinitions(lib);
+//        importCcdDefinitions(lib);
     }
 
     private void createCcdRoles(CFTLib lib) {
