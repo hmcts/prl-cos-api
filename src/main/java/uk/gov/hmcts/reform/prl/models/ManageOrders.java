@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 import java.util.List;
 
@@ -28,6 +29,12 @@ public class ManageOrders {
     private final String recitalsOrPreambleRtf;
     @JsonProperty("orderDirectionsRtf")
     private final String orderDirectionsRtf;
+    @JsonProperty("scheduleToOrderRtf")
+    private final String scheduleToOrderRtf;
+    @JsonProperty("penalNoticeNeeded")
+    private final YesOrNo penalNoticeNeeded;
+    @JsonProperty("penalNoticeRtf")
+    private final String penalNoticeRtf;
     @JsonProperty("furtherDirectionsIfRequired")
     private final String furtherDirectionsIfRequired;
     @JsonProperty("furtherInformationIfRequired")

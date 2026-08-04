@@ -1010,6 +1010,9 @@ public class DraftAnOrderService {
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
         caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
+        caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
+        caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
+        caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
         caseDataMap.put("furtherInformationIfRequired", selectedOrder.getFurtherInformationIfRequired());
@@ -1344,6 +1347,10 @@ public class DraftAnOrderService {
                 .childOption(manageOrderService.getChildOption(caseData))
                 .orderDirections(caseData.getManageOrders().getOrderDirections())
                 .orderDirectionsRtf(caseData.getManageOrders().getOrderDirectionsRtf())
+                .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
+                .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
+                .penalNoticeRtf(caseData.getManageOrders().getPenalNoticeRtf())
+                .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
                 .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                 .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                 .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
