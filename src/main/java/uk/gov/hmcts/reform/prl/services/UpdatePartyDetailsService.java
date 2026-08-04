@@ -545,12 +545,11 @@ public class UpdatePartyDetailsService {
     }
 
     private void setRespondentSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
-        List<Element<PartyDetails>> wrapped =
-            Optional.ofNullable(caseData.getRespondents()).orElseGet(List::of);
-
-        wrapped.forEach(e -> CommonUtils.generatePartyUuidForC100(e.getValue()));
-        // put actual list, not Optional
-        caseDetails.put(RESPONDENTS, wrapped);
+        List<Element<PartyDetails>> wrapped = caseData.getRespondents();
+        if (CollectionUtils.isNotEmpty(wrapped)) {
+            wrapped.forEach(e -> CommonUtils.generatePartyUuidForC100(e.getValue()));
+            caseDetails.put(RESPONDENTS, wrapped);
+        }
     }
 
     public void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
