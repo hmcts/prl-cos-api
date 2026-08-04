@@ -663,6 +663,7 @@ public class DraftAnOrderService {
             .otherDetails(
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
                     .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
+                    .rejectionInstructionsHistory(draftOrder.getOtherDetails().getRejectionInstructionsHistory())
                     .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                         PrlAppsConstants.D_MMM_YYYY,
@@ -1259,7 +1260,7 @@ public class DraftAnOrderService {
         String instructionsToLegalRepresentative = otherDetails.getInstructionsToLegalRepresentative();
         String rejectionInstructionsHistory = otherDetails.getRejectionInstructionsHistory();
         if (StringUtils.isNotBlank(instructionsToLegalRepresentative)) {
-            if (StringUtils.isNotBlank(instructionsToLegalRepresentative)) {
+            if (StringUtils.isNotBlank(rejectionInstructionsHistory)) {
                 rejectionInstructionsHistory = Objects.toString(rejectionInstructionsHistory, "") + ", "
                     + Objects.toString(instructionsToLegalRepresentative, "");
             } else {

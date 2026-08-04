@@ -22,5 +22,5 @@ public class OtherOrderDetails {
     private final String orderCreatedBy;
     private String orderCreatedByEmailId;
     private final String additionalRequirementsForHearingReq;
-
+    private String rejectionInstructionsHistory;
 }
