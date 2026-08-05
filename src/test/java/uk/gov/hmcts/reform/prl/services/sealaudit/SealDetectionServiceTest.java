@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.sealaudit;
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -178,6 +180,13 @@ class SealDetectionServiceTest {
         }
     }
 
+    @Test
+    void shouldReturnPresentForSealNestedInsideFormXObject() throws IOException {
+        byte[] pdf = createPdfWithSealInsideFormXObject();
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream(pdf));
+        assertEquals(SealStatus.PRESENT, status);
+    }
+
     private byte[] createPdfWithRectangularImage() throws IOException {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
@@ -189,6 +198,30 @@ class SealDetectionServiceTest {
             try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
                 contentStream.drawImage(rectangularImage, 50, 700, 200, 80);
             }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            document.save(baos);
+            return baos.toByteArray();
+        }
+    }
+
+    private byte[] createPdfWithSealInsideFormXObject() throws IOException {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+
+            // Create a square seal image (square ratio = seal)
+            BufferedImage sealImage = new BufferedImage(71, 71, BufferedImage.TYPE_INT_RGB);
+            PDImageXObject pdSealImage = LosslessFactory.createFromImage(document, sealImage);
+
+            // Wrap it in a form XObject
+            PDFormXObject formXObject = new PDFormXObject(document);
+            formXObject.setResources(new org.apache.pdfbox.pdmodel.PDResources());
+            formXObject.getResources().put(COSName.getPDFName("Seal"), pdSealImage);
+            formXObject.setBBox(new PDRectangle(71, 71));
+
+            // Add the form XObject to the page resources
+            page.getResources().put(COSName.getPDFName("Form1"), formXObject);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             document.save(baos);
