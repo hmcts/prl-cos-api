@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PenalNoticeOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
@@ -65,7 +66,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("orderDirections")
     private final String orderDirections;
     @JsonProperty("penalNoticeNeeded")
-    private final YesOrNo penalNoticeNeeded;
+    private final PenalNoticeOptionEnum penalNoticeNeeded;
     @JsonProperty("penalNoticeRtf")
     private final String penalNoticeRtf;
     @JsonProperty("orderDirectionsRtf")
