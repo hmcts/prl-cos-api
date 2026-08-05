@@ -79,13 +79,6 @@ public class SendAndReplyCommonService {
             );
         }
 
-        // ensure the message content is set in sendMessageObject for access in submitted cb
-        caseDataMap.put("sendMessageObject", caseData.getSendOrReplyMessage().getSendMessageObject()
-            .toBuilder()
-                .messageContent(caseData.getMessageContent())
-            .build()
-        );
-
         //WA - clear reply field in case of SEND
         sendAndReplyService.removeTemporaryFields(caseDataMap, "replyMessageObject");
     }
