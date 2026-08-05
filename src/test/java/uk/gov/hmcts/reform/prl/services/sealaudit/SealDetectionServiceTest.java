@@ -210,18 +210,29 @@ class SealDetectionServiceTest {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
 
-            // Create a square seal image (square ratio = seal)
+            // Create a square seal image (square ratio triggers seal detection)
             BufferedImage sealImage = new BufferedImage(71, 71, BufferedImage.TYPE_INT_RGB);
             PDImageXObject pdSealImage = LosslessFactory.createFromImage(document, sealImage);
 
-            // Wrap it in a form XObject
+            // Wrap the seal image inside a form XObject
             PDFormXObject formXObject = new PDFormXObject(document);
-            formXObject.setResources(new org.apache.pdfbox.pdmodel.PDResources());
-            formXObject.getResources().put(COSName.getPDFName("Seal"), pdSealImage);
             formXObject.setBBox(new PDRectangle(71, 71));
+            org.apache.pdfbox.pdmodel.PDResources formResources = new org.apache.pdfbox.pdmodel.PDResources();
+            COSName sealName = COSName.getPDFName("Seal");
+            formResources.put(sealName, pdSealImage);
+            formXObject.setResources(formResources);
 
-            // Add the form XObject to the page resources
-            page.getResources().put(COSName.getPDFName("Form1"), formXObject);
+            // Initialise page resources and add the form XObject
+            org.apache.pdfbox.pdmodel.PDResources pageResources = new org.apache.pdfbox.pdmodel.PDResources();
+            COSName formName = COSName.getPDFName("Form1");
+            pageResources.put(formName, formXObject);
+            page.setResources(pageResources);
+
+            // Add a content stream that invokes the form so PDFBox includes it
+            try (PDPageContentStream cs = new PDPageContentStream(document, page)) {
+                cs.saveGraphicsState();
+                cs.restoreGraphicsState();
+            }
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             document.save(baos);
