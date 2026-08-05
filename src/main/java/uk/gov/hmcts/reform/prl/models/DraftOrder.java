@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.PenalNoticeOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -62,7 +63,7 @@ public class DraftOrder {
     @JsonProperty("orderDirections")
     private final String orderDirections;
     @JsonProperty("penalNoticeNeeded")
-    private final YesOrNo penalNoticeNeeded;
+    private final PenalNoticeOptionEnum penalNoticeNeeded;
     @JsonProperty("penalNoticeRtf")
     private final String penalNoticeRtf;
     @JsonProperty("orderDirectionsRtf")
