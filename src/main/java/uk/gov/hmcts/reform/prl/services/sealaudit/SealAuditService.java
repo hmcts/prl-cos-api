@@ -388,8 +388,9 @@ public class SealAuditService {
                 return SealStatus.ERROR;
             }
 
-            byte[] pdfBytes = response.getBody().getInputStream().readAllBytes();
-            return sealDetectionService.detectSeal(pdfBytes);
+            try (var inputStream = response.getBody().getInputStream()) {
+                return sealDetectionService.detectSeal(inputStream);
+            }
 
         } catch (Exception e) {
             log.error("Failed to download/check document for case {}: {}", caseRef, e.getMessage());

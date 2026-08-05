@@ -125,6 +125,8 @@ public class RefDataUserService {
             }
         } catch (NoStaffResponseException e) {
             log.error("Staff details Lookup Failed - {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Staff details Lookup Failed unexpectedly - {}", e.getMessage());
         }
         return List.of(DynamicListElement.builder().build());
     }

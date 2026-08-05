@@ -623,7 +623,7 @@ class SealAuditServiceTest {
         when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
             .thenReturn(ResponseEntity.ok(resource));
 
-        when(sealDetectionService.detectSeal(mockPdfBytes)).thenReturn(sealStatus);
+        when(sealDetectionService.detectSeal(any(java.io.InputStream.class))).thenReturn(sealStatus);
     }
 
     @Test

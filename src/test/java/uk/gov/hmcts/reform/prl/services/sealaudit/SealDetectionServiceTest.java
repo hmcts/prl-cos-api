@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.services.sealaudit.SealDetectionService.SealStatus;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,14 +36,14 @@ class SealDetectionServiceTest {
 
     @Test
     void shouldReturnErrorForEmptyBytes() {
-        SealStatus status = sealDetectionService.detectSeal(new byte[0]);
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream(new byte[0]));
         assertEquals(SealStatus.ERROR, status);
     }
 
     @Test
     void shouldReturnMissingForBlankPdf() throws IOException {
         byte[] blankPdf = createBlankPdf();
-        SealStatus status = sealDetectionService.detectSeal(blankPdf);
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream(blankPdf));
         assertEquals(SealStatus.MISSING, status);
     }
 
@@ -50,8 +51,7 @@ class SealDetectionServiceTest {
     void shouldReturnMissingForOrderWithoutSeal() throws IOException {
         try (InputStream pdfStream = getClass().getResourceAsStream("/documents/testOrderWithoutSeal.pdf")) {
             assertNotNull(pdfStream, "Test PDF not found - run TestPdfGenerator.main() to create it");
-            byte[] pdfBytes = pdfStream.readAllBytes();
-            SealStatus status = sealDetectionService.detectSeal(pdfBytes);
+            SealStatus status = sealDetectionService.detectSeal(pdfStream);
             assertEquals(SealStatus.MISSING, status);
         }
     }
@@ -59,7 +59,7 @@ class SealDetectionServiceTest {
     @Test
     void shouldReturnPresentForPdfWithSeal() throws IOException {
         byte[] sealedPdf = createPdfWithSeal();
-        SealStatus status = sealDetectionService.detectSeal(sealedPdf);
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream(sealedPdf));
         assertEquals(SealStatus.PRESENT, status);
     }
 
@@ -67,8 +67,7 @@ class SealDetectionServiceTest {
     void shouldReturnPresentForRealOrderWithBilingualSeal() throws IOException {
         try (InputStream pdfStream = getClass().getResourceAsStream("/documents/exampleOrderWithSeal.pdf")) {
             assertNotNull(pdfStream, "Test PDF not found");
-            byte[] pdfBytes = pdfStream.readAllBytes();
-            SealStatus status = sealDetectionService.detectSeal(pdfBytes);
+            SealStatus status = sealDetectionService.detectSeal(pdfStream);
             assertEquals(SealStatus.PRESENT, status);
         }
     }
@@ -77,8 +76,7 @@ class SealDetectionServiceTest {
     void shouldReturnPresentForRealOrderWithEnglishSeal() throws IOException {
         try (InputStream pdfStream = getClass().getResourceAsStream("/documents/exampleOrderWithEnglishSeal.pdf")) {
             assertNotNull(pdfStream, "Test PDF not found");
-            byte[] pdfBytes = pdfStream.readAllBytes();
-            SealStatus status = sealDetectionService.detectSeal(pdfBytes);
+            SealStatus status = sealDetectionService.detectSeal(pdfStream);
             assertEquals(SealStatus.PRESENT, status);
         }
     }
@@ -87,8 +85,7 @@ class SealDetectionServiceTest {
     void shouldReturnPresentForCreateOrderC21() throws IOException {
         try (InputStream pdfStream = getClass().getResourceAsStream("/documents/exampleCreateOrder_Blank_Order_Directions_C21.pdf")) {
             assertNotNull(pdfStream, "Test PDF not found");
-            byte[] pdfBytes = pdfStream.readAllBytes();
-            SealStatus status = sealDetectionService.detectSeal(pdfBytes);
+            SealStatus status = sealDetectionService.detectSeal(pdfStream);
             assertEquals(SealStatus.PRESENT, status);
         }
     }
@@ -97,8 +94,7 @@ class SealDetectionServiceTest {
     void shouldReturnPresentForCreateOrderC43A() throws IOException {
         try (InputStream pdfStream = getClass().getResourceAsStream("/documents/exampleCreateOrder_Special_Guardianship_Order_C43A.pdf")) {
             assertNotNull(pdfStream, "Test PDF not found");
-            byte[] pdfBytes = pdfStream.readAllBytes();
-            SealStatus status = sealDetectionService.detectSeal(pdfBytes);
+            SealStatus status = sealDetectionService.detectSeal(pdfStream);
             assertEquals(SealStatus.PRESENT, status);
         }
     }
@@ -107,8 +103,7 @@ class SealDetectionServiceTest {
     void shouldReturnPresentForSamplePdf() throws IOException {
         try (InputStream pdfStream = getClass().getResourceAsStream("/documents/sample.pdf")) {
             assertNotNull(pdfStream, "Test PDF not found");
-            byte[] pdfBytes = pdfStream.readAllBytes();
-            SealStatus status = sealDetectionService.detectSeal(pdfBytes);
+            SealStatus status = sealDetectionService.detectSeal(pdfStream);
             assertEquals(SealStatus.PRESENT, status);
         }
     }
@@ -157,26 +152,21 @@ class SealDetectionServiceTest {
 
     @Test
     void shouldReturnErrorForInvalidPdfBytes() {
-        SealStatus status = sealDetectionService.detectSeal("not-a-pdf".getBytes());
-
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream("not-a-pdf".getBytes()));
         assertEquals(SealStatus.ERROR, status);
     }
 
     @Test
     void shouldReturnErrorForPdfWithNoPages() throws IOException {
         byte[] pdfWithNoPages = createPdfWithNoPages();
-
-        SealStatus status = sealDetectionService.detectSeal(pdfWithNoPages);
-
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream(pdfWithNoPages));
         assertEquals(SealStatus.ERROR, status);
     }
 
     @Test
     void shouldReturnMissingForPdfWithRectangularImageOnly() throws IOException {
         byte[] pdfWithRectangularImage = createPdfWithRectangularImage();
-
-        SealStatus status = sealDetectionService.detectSeal(pdfWithRectangularImage);
-
+        SealStatus status = sealDetectionService.detectSeal(new ByteArrayInputStream(pdfWithRectangularImage));
         assertEquals(SealStatus.MISSING, status);
     }
 
