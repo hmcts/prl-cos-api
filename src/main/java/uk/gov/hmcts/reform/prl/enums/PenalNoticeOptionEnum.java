@@ -12,9 +12,8 @@ import lombok.RequiredArgsConstructor;
 public enum PenalNoticeOptionEnum {
 
     @JsonProperty("Yes")
-    Yes("Yes", "Yes, a Penal Notice is needed");
+    Yes("Yes, a Penal Notice is needed");
 
-    private final String id;
     private final String displayedValue;
 
     @JsonValue
