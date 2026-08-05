@@ -499,6 +499,73 @@ class SealAuditServiceTest {
     }
 
     @Test
+    void shouldSendEmailWithIncompleteStatusWhenSearchFails() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("CCD unavailable"));
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+
+        String status = (String) templateVarsCaptor.getValue().get("status");
+        assertNotNull(status);
+        assertTrue(status.startsWith("INCOMPLETE RUN"),
+            "Expected INCOMPLETE RUN prefix, got: " + status);
+        assertTrue(status.contains("fatal error"),
+            "Expected fatal error reason, got: " + status);
+        assertTrue(status.contains("CCD unavailable"),
+            "Expected underlying error message, got: " + status);
+        assertTrue(status.contains("NOT a full report"),
+            "Expected caveat about partial results, got: " + status);
+    }
+
+    @Test
+    void shouldSendEmailWithAllSealsPresentStatusWhenNoIssues() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of()).build());
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+        assertEquals("All seals present", templateVarsCaptor.getValue().get("status"));
+    }
+
+    @Test
+    void shouldSendEmailWithIssuesFoundStatusWhenMissingSeals() throws NotificationClientException, IOException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of(createCaseDetailsWithServedOrder())).build());
+
+        mockDocumentSealStatus(SealStatus.MISSING);
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+        assertEquals("Issues found", templateVarsCaptor.getValue().get("status"));
+    }
+
+    @Test
     void shouldBuildCsvRowAndEscapeCommasAndQuotes() {
         String result = ReflectionTestUtils.invokeMethod(
             sealAuditService,
@@ -667,5 +734,117 @@ class SealAuditServiceTest {
             anyString()
         );
         verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void shouldSendSummaryEmailToMultipleRecipients() throws Exception {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(
+            sealAuditService,
+            "toEmailAddress",
+            "test1@example.com, test2@example.com, test3@example.com"
+        );
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test1@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test2@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test3@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void shouldStillSendSummaryEmailWhenSearchThrows() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("CCD unavailable"));
+
+        sealAuditService.runAudit();
+
+        // finally block should still attempt to send a summary email with zero counts
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test@example.com"),
+            any(),
+            anyString()
+        );
+    }
+
+    @Test
+    void shouldStillSendSummaryEmailWhenLoopThrowsError() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        // Simulate a Throwable (Error) escaping from the search
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new OutOfMemoryError("simulated"));
+
+        sealAuditService.runAudit();
+
+        // finally block should still attempt to send a summary email even for Error
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test@example.com"),
+            any(),
+            anyString()
+        );
+    }
+
+    @Test
+    void shouldSwallowUnexpectedExceptionFromNotificationClient() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of()).build());
+
+        // Non-NotificationClientException failure inside sendEmail must not propagate
+        when(notificationClient.sendEmail(anyString(), anyString(), any(), anyString()))
+            .thenThrow(new RuntimeException("notify broken"));
+
+        // Should not throw
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(anyString(), anyString(), any(), anyString());
     }
 }
