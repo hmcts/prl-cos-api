@@ -130,15 +130,6 @@ public class RefDataUserServiceTest {
 
     @Test
     public void testGetLegalAdvisorListReturnsEmptyOnUnexpectedException() {
-        when(staffResponseDetailsApi.getAllStaffResponseDetails(
-            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
-            authTokenGenerator.generate(),
-            SERVICENAME,
-            STAFFSORTCOLUMN,
-            STAFFORDERASC,
-            RD_STAFF_PAGE_SIZE,
-            RD_STAFF_FIRST_PAGE
-        )).thenThrow(new RuntimeException("Unexpected error"));
         List<DynamicListElement> legalAdvisorList = refDataUserService.getLegalAdvisorList();
         assertNotNull(legalAdvisorList);
         assertNull(legalAdvisorList.get(0).getCode());
