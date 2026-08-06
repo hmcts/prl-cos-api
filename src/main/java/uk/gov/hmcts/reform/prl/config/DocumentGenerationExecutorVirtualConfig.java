@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadFactory;
 public class DocumentGenerationExecutorVirtualConfig {
 
     public static final String DOCUMENT_EXECUTOR_FACTORY = "documentVirtualThreadFactory";
-    public static final String DOCUMENT_EXECUTOR_SERVICE = "documentVirtualExecutorService";
+    public static final String DOCUMENT_EXECUTOR_SERVICE = "documentVirtualThreadExecutorService";
 
     /**
      * Method that returns a factory of virtual threads with a custom name for the virtual threads
@@ -29,7 +29,7 @@ public class DocumentGenerationExecutorVirtualConfig {
      * @return ExecutorService
      */
     @Bean(name = DOCUMENT_EXECUTOR_SERVICE, destroyMethod = "close")
-    public ExecutorService documentVirtualExecutorService(
+    public ExecutorService documentVirtualThreadExecutorService(
         ThreadFactory documentVirtualThreadFactory
     ) {
         return Executors.newThreadPerTaskExecutor(documentVirtualThreadFactory);
