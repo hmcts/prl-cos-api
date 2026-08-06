@@ -259,6 +259,9 @@ public class ManageOrderService {
         + " people's address is given.";
     public static final String INVALID_EMAIL_ADDRESS_ERROR = "Invalid email address. Please check the email address entered. "
         + "To send to multiple recipients please use the add new button.";
+    public static final String STATIC_PENAL_NOTICE_RTF = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
+        + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
+        + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
 
     public static final String EMAIL = "email";
     public static final String POST = "post";
@@ -1417,15 +1420,17 @@ public class ManageOrderService {
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .recitalsOrPreambleRtf(caseData.getManageOrders().getRecitalsOrPreambleRtf())
+            .recitalsOrPreambleRtf(getRecitalsOrPreambleRtf(caseData.getManageOrders().getRecitalsOrPreamble(),
+                                                            caseData.getManageOrders().getRecitalsOrPreambleRtf()))
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
             .orderDirections(caseData.getManageOrders().getOrderDirections())
-            .orderDirectionsRtf(caseData.getManageOrders().getOrderDirectionsRtf())
+            .orderDirectionsRtf(getOrderDirectionsRtf(caseData.getManageOrders().getOrderDirections(),
+                                                      caseData.getManageOrders().getOrderDirectionsRtf()))
             .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
             .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
-            .penalNoticeRtf(caseData.getManageOrders().getPenalNoticeRtf())
+            .penalNoticeRtf(getPenalNotice(caseData.getManageOrders().getPenalNoticeRtf()))
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
@@ -1476,6 +1481,27 @@ public class ManageOrderService {
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
             .judgeNotes(caseData.getJudgeDirectionsToAdmin())
             .build();
+    }
+
+    private String getPenalNotice(String penalNoticeRtf) {
+        if (StringUtils.isNotBlank(penalNoticeRtf)) {
+            return penalNoticeRtf;
+        }
+        return STATIC_PENAL_NOTICE_RTF;
+    }
+
+    private String getRecitalsOrPreambleRtf(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
+        if (StringUtils.isNotBlank(recitalsOrPreamble)) {
+            return recitalsOrPreamble;
+        }
+        return recitalsOrPreambleRtf;
+    }
+
+    private String getOrderDirectionsRtf(String orderDirections, String orderDirectionsRtf) {
+        if (StringUtils.isNotBlank(orderDirections)) {
+            return orderDirections;
+        }
+        return orderDirectionsRtf;
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
@@ -2241,15 +2267,10 @@ public class ManageOrderService {
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .recitalsOrPreambleRtf(caseData.getManageOrders().getRecitalsOrPreambleRtf())
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
             .orderDirections(caseData.getManageOrders().getOrderDirections())
-            .orderDirectionsRtf(caseData.getManageOrders().getOrderDirectionsRtf())
-            .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
-            .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
-            .penalNoticeRtf(caseData.getManageOrders().getPenalNoticeRtf())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
             .manageOrdersCourtName(null != caseData.getCourtName() ? caseData.getCourtName() : null)
