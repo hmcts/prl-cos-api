@@ -1,5 +1,4 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd;
-import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -11,6 +10,7 @@ import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 import uk.gov.hmcts.ccd.sdk.type.AddressUK;
 import uk.gov.hmcts.ccd.sdk.type.Document;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnowV2;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 

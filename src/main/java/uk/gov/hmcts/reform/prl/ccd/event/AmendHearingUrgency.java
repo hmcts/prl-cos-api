@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -41,9 +40,8 @@ public class AmendHearingUrgency implements CCDConfig<CaseData, State, UserRole>
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .readonly(CaseDataExtra::getHearingUrgencyLabel).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
+        fields.readonly(CaseData::getHearingUrgencyLabel);
         fields.mandatory(CaseData::getIsCaseUrgent);
         fields.mandatory(CaseData::getCaseUrgencyTimeAndReason)
                     .fieldShowCondition("isCaseUrgent=\"Yes\"");

@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -44,7 +43,6 @@ public class CafcassDocumentUpload implements CCDConfig<CaseData, State, UserRol
                     .optionalNoSummary(DocumentManagementDetails::getManageDocumentsRestrictedFlag)
                     .optionalNoSummary(DocumentManagementDetails::getManageDocumentsTriggeredBy).done();
         fields.optionalNoSummary(CaseData::getCaseTypeOfApplication);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getManageDocUploadedCategory).done();
+        fields.optionalNoSummary(CaseData::getManageDocUploadedCategory);
     }
 }

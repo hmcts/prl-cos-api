@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,18 +25,14 @@ public final class ManageDocumentsPage4 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("4");
         fields.showCondition("documentCategoryChecklist=\"documentCategoryChecklistEnumValue3\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOtherDocumentsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getOtherDocumentsLabel)
+                    .publish(false);
         fields.complex(CaseData::getOtherDocuments).done();
         fields.complex(CaseData::getOtherDocuments, OtherDocuments.class)
                     .mandatory(OtherDocuments::getDocumentName)
-                    .noHintText()
                     .optional(OtherDocuments::getNotes)
                     .mandatory(OtherDocuments::getDocumentOther)
                     .mandatory(OtherDocuments::getDocumentTypeOther)
-                    .readonly(OtherDocuments::getCheckDocumentsConfidentialLabel)
-                    .eventLabel("<br /><div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!</span><strong class='govuk-warning-text__text'>Check if documents are confidential</strong></div><br>")
                     .optional(OtherDocuments::getRestrictCheckboxOtherDocuments)
                     .eventLabel("Tick to restrict to Cafcass and HMCTS staff").done();
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)

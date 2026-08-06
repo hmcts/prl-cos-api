@@ -2,11 +2,5 @@
   "CaseEventID" : "requestFurtherInformation",
   "CaseFieldID" : "requestFurtherInformationDetails",
   "ListElementCode" : "reviewByDate",
-  "CaseTypeID" : "PRLAPPS",
   "Publish" : "True"
-}, {
-  "CaseEventID" : "requestFurtherInformation",
-  "CaseFieldID" : "requestFurtherInformationDetails",
-  "ListElementCode" : "requestFurtherInformationReasonList",
-  "CaseTypeID" : "PRLAPPS"
 } ]

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,13 +24,11 @@ public final class EditAndApproveAnOrderPage21 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("21");
         fields.showCondition("whatToDoWithOrderSolicitor!=\"sendToAdminToServe\" AND whatToDoWithOrderCourtAdmin!=\"sendToAdminToServe\" AND whatToDoWithOrderSolicitor!=\"askLegalRepToMakeChanges\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderNameDirectionsToAdminLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getOrderNameDirectionsToAdminLabel)
+                    .publish(false);
         fields.optional(CaseData::getJudgeDirectionsToAdmin)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsOrderCompleteToServe)
-                    .fieldShowCondition("[STATE] = \"JUDICIAL_REVIEW\" OR [STATE] = \"CASE_ISSUED\"").done();
+        fields.mandatoryNoSummary(CaseData::getIsOrderCompleteToServe)
+                    .fieldShowCondition("[STATE] = \"JUDICIAL_REVIEW\" OR [STATE] = \"CASE_ISSUED\"");
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,10 +23,9 @@ public final class Fl401ListOnNoticePage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getFl401ListOnNoticeHearingInstructionLabel)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getFl401listOnNoticeHearingInstruction)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getFl401ListOnNoticeHearingInstructionLabel)
+                    .publish(false);
+        fields.mandatory(CaseData::getFl401listOnNoticeHearingInstruction)
+                    .publish(false);
     }
 }

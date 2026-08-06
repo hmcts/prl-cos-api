@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,9 +25,8 @@ public final class WaManageOrdersPage23 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("23");
         fields.showCondition("manageOrdersOptions=\"amendOrderUnderSlipRule\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getAmendOrderReplaceOrderLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getAmendOrderReplaceOrderLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getManageOrdersAmendedOrder)
                     .publish(false).done();

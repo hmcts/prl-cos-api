@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,27 +25,24 @@ public final class WaManageOrdersPage25 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("25");
         fields.showCondition("manageOrdersOptions!=\"amendOrderUnderSlipRule\" AND manageOrdersOptions!=\"servedSavedOrders\" AND manageOrdersOptions!=\"uploadAnOrder\" AND manageOrdersOptions!=\"createAnOrder\" AND manageOrdersOptions!=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManageOrderHeaderLabel19)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCheckOrderRestrictionsLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOrderRecipientsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getManageOrderHeaderLabel19)
+                    .publish(false);
+        fields.readonly(CaseData::getCheckOrderRestrictionsLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOrderRecipientsLabel)
+                    .publish(false);
         fields.mandatory(CaseData::getOrderRecipients)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getOtherOrderRecipients)
-                    .publish(false)
-                    .optional(CaseDataExtra::getCafcassRecipient)
-                    .publish(false).done();
+        fields.optional(CaseData::getOtherOrderRecipients)
+                    .publish(false);
+        fields.optional(CaseData::getCafcassRecipient)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getCafcassEmailAddress)
                     .fieldShowCondition("cafcassRecipient=\"cafcass\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getOtherRecipient)
-                    .publish(false).done();
+        fields.optional(CaseData::getOtherRecipient)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getOtherEmailAddress)
                     .fieldShowCondition("otherRecipient=\"other\"")

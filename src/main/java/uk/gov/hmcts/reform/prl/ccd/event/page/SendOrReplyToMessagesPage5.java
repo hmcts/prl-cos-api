@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 
@@ -29,9 +28,8 @@ public final class SendOrReplyToMessagesPage5 {
         fields.complex(CaseData::getSendOrReplyMessage)
                     .optional(SendOrReplyMessage::getReplyMessageObject)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getMessageReplyTableLabel2)
+        fields.readonlyNoSummary(CaseData::getMessageReplyTableLabel2)
                     .fieldShowCondition("respondToMessage=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

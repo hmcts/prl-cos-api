@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "manageOrders",
-  "CaseFieldID" : "magistrateLastName",
-  "ListElementCode" : "lastName",
-  "CaseTypeID" : "PRLAPPS"
-} ]

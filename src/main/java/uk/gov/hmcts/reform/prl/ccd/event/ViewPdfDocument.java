@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -41,13 +40,11 @@ public class ViewPdfDocument implements CCDConfig<CaseData, State, UserRole> {
             .grant(Permission.CRU, UserRole.APPLICANTSOLICITOR, UserRole.CASEWORKER_PRIVATELAW_SYSTEMUPDATE, UserRole.CITIZEN, UserRole.CREATOR)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getDownloadApplicationLabel)
-                    .readonlyNoSummary(CaseDataExtra::getLinkToDownloadApplicationLabel).done();
+        fields.readonlyNoSummary(CaseData::getDownloadApplicationLabel);
+        fields.readonlyNoSummary(CaseData::getLinkToDownloadApplicationLabel);
         fields.readonly(CaseData::getIsEngDocGen)
                     .fieldShowCondition("linkToDownloadApplicationLabel=\"DO NOT SHOW\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getViewPDFlinkLabel).done();
+        fields.readonlyNoSummary(CaseData::getViewPDFlinkLabel);
         fields.readonly(CaseData::getSubmitAndPayDownloadApplicationLink)
                     .fieldShowCondition("isEngDocGen=\"Yes\"");
         fields.readonly(CaseData::getIsWelshDocGen)

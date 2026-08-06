@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,12 +24,11 @@ public final class AllegationsOfHarmRevisedPage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getNewAllegationsOfHarmHint)
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1)
+                    .publish(false);
+        fields.readonly(CaseData::getNewAllegationsOfHarmHint)
                     .fieldShowCondition("newAllegationsOfHarmYesNo=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmYesNo).done();
     }

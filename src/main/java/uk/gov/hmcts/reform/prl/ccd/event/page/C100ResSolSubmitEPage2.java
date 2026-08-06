@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
@@ -26,27 +25,24 @@ public final class C100ResSolSubmitEPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmitAndPayDeclaration)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSubmitAndPayAgreeStmtLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getSubmitAndPayDeclaration)
+                    .publish(false);
+        fields.readonly(CaseData::getSubmitAndPayAgreeStmtLabel)
+                    .publish(false);
         fields.readonly(CaseData::getRespondentSolicitorName)
                     .fieldShowCondition("submitAndPayAgreeStmtLabel=\"never_show\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getC100ResSolSubmitAndPayAgreeSignStmtLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getC100ResSolSubmitAndPayAgreeSignStmtLabel)
+                    .publish(false);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .mandatory(RespondentSolicitorData::getRespondentAgreeStatement)
                     .publish(false)
                     .readonly(RespondentSolicitorData::getDraftC7ResponseDoc)
                     .fieldShowCondition("respondentAgreeStatement=\"agree\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDraftC7WelshResponseDoc)
+        fields.readonly(CaseData::getDraftC7WelshResponseDoc)
                     .fieldShowCondition("respondentAgreeStatement=\"agree\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getDraftC1ADoc)
                     .fieldShowCondition("respondentAgreeStatement=\"agree\"")

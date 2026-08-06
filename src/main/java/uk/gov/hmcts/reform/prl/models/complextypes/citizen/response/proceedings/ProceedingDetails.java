@@ -1,6 +1,4 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings;
-import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +8,8 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import java.time.LocalDate;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.prl.enums.ProceedingsEnum;
+import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 
 @Data
 @Builder(toBuilder = true)

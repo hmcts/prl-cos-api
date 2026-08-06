@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,21 +25,19 @@ public final class AdminEditAndApproveAnOrderPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("orderUploadedAsDraftFlag=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDownloadOrderLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getJudgeNotesEmptyUploadJourney)
+        fields.readonly(CaseData::getDownloadOrderLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getJudgeNotesEmptyUploadJourney)
                     .fieldShowCondition("downloadOrderLabel=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .readonly(ManageOrders::getPreviewUploadedOrder)
                     .publish(false)
                     .mandatory(ManageOrders::getMakeChangesToUploadedOrder)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getUploadOrAmendDirectionsFromJudge)
+        fields.readonly(CaseData::getUploadOrAmendDirectionsFromJudge)
                     .fieldShowCondition("judgeNotesEmptyUploadJourney!=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getManageOrdersOptions)
                     .fieldShowCondition("makeChangesToUploadedOrder=\"DO_NOT_SHOW\"")
                     .publish(false);

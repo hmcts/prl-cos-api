@@ -1,61 +1,21 @@
 [ {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "party",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "nameLabel",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "name",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "language",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "addNewInterpreterNeedLabel",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "otherAssistance",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "party",
-  "CaseTypeID" : "PRLAPPS"
-}, {
+  "LiveFrom" : "13/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "InterpreterNeed",
   "CaseEventID" : "amendAttendingTheHearing",
   "CaseFieldID" : "interpreterNeeds",
   "ListElementCode" : "nameLabel",
-  "CaseTypeID" : "PRLAPPS"
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "READONLY"
 }, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "name",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "language",
-  "CaseTypeID" : "PRLAPPS"
-}, {
+  "LiveFrom" : "13/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "InterpreterNeed",
   "CaseEventID" : "amendAttendingTheHearing",
   "CaseFieldID" : "interpreterNeeds",
   "ListElementCode" : "addNewInterpreterNeedLabel",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendAttendingTheHearing",
-  "CaseFieldID" : "interpreterNeeds",
-  "ListElementCode" : "otherAssistance",
-  "CaseTypeID" : "PRLAPPS"
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "6",
+  "DisplayContext" : "READONLY"
 } ]

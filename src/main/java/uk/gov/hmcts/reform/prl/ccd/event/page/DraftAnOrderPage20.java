@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,21 +24,19 @@ public final class DraftAnOrderPage20 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("20");
         fields.showCondition("draftOrderOptions!=\"uploadAnOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSelectedOrderSummaryLabel)
+        fields.readonly(CaseData::getSelectedOrderSummaryLabel)
                     .fieldShowCondition("createSelectOrderOptions!=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCheckYourOrder)
-                    .publish(false).done();
+                    .publish(false);
+        fields.readonly(CaseData::getCheckYourOrder)
+                    .publish(false);
         fields.readonly(CaseData::getPreviewOrderDocWelsh)
                     .publish(false);
         fields.readonly(CaseData::getPreviewOrderDoc)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCheckYourOrderLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectedC21OrderLabel2)
+        fields.readonly(CaseData::getCheckYourOrderLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectedC21OrderLabel2)
                     .fieldShowCondition("createSelectOrderOptions=\"blankOrderOrDirections\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

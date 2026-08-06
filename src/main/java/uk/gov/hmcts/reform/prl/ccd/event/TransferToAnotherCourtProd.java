@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.EnvironmentFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -45,13 +44,12 @@ public class TransferToAnotherCourtProd implements CCDConfig<CaseData, State, Us
         fields.readonly(CaseData::getCourtName)
                     .fieldShowCondition("courtList=\"NEVER_SHOW\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getTransferCourtWarning)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getTransferCourtChangeWarning)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCourtDetailsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getTransferCourtWarning)
+                    .publish(false);
+        fields.readonly(CaseData::getTransferCourtChangeWarning)
+                    .publish(false);
+        fields.readonly(CaseData::getCourtDetailsLabel)
+                    .publish(false);
         fields.optional(CaseData::getCourtList)
                     .publish(false);
         fields.optional(CaseData::getCantFindCourtCheck)

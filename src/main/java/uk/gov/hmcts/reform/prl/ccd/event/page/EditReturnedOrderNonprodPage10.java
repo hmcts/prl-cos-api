@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,11 +25,10 @@ public final class EditReturnedOrderNonprodPage10 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("10");
         fields.showCondition("orderType=\"generalForm\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderNameLabel11)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectedOrder2)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOrderNameLabel11)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectedOrder2)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getManageOrdersUnderTakingRepr)
                     .publish(false)

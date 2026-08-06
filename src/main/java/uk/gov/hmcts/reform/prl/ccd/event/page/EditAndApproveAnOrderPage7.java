@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,11 +25,10 @@ public final class EditAndApproveAnOrderPage7 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("7");
         fields.showCondition("orderUploadedAsDraftFlag!=\"Yes\" AND (whatToDoWithOrderSolicitor=\"editTheOrderAndServe\" OR whatToDoWithOrderCourtAdmin=\"editTheOrderAndServe\") AND orderType=\"childArrangementsSpecificProhibitedOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderNameLabel7)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getAddOrderDetailsLabel)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOrderNameLabel7)
+                    .publish(false);
+        fields.readonly(CaseData::getAddOrderDetailsLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getChildArrangementsOrdersToIssue)
                     .publish(false)

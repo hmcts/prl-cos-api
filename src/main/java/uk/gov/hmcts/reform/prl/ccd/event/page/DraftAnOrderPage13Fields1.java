@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -22,73 +21,67 @@ public final class DraftAnOrderPage13Fields1 {
      */
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSdoLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoPreamblesLabel)
+        fields.readonly(CaseData::getSdoSdoLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoPreamblesLabel)
                     .fieldShowCondition("sdoPreamblesList CONTAINS \"rightToAskCourt\" OR sdoPreamblesList CONTAINS \"partyRaisedDomesticAbuse\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoRightToAskCourtLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoRightToAskCourtLabel)
                     .fieldShowCondition("sdoPreamblesList CONTAINS \"rightToAskCourt\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoRightToAskCourt)
                     .fieldShowCondition("sdoPreamblesList CONTAINS \"rightToAskCourt\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoPartiesRaisedAbuseLabel)
+        fields.readonly(CaseData::getSdoPartiesRaisedAbuseLabel)
                     .fieldShowCondition("sdoPreamblesList CONTAINS \"partyRaisedDomesticAbuse\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoPartiesRaisedAbuseCollection)
                     .fieldShowCondition("sdoPreamblesList CONTAINS \"partyRaisedDomesticAbuse\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoHearingsAndNextStepsLabel)
+        fields.readonly(CaseData::getSdoHearingsAndNextStepsLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"nextStepsAfterGateKeeping\" OR sdoHearingsAndNextStepsList CONTAINS \"allocationDecision\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoNextStepsAfterSecondGKLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoNextStepsAfterSecondGKLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"nextStepsAfterGateKeeping\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoNextStepsAfterSecondGK)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"nextStepsAfterGateKeeping\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoAllocationDecisionLabel)
+        fields.readonly(CaseData::getSdoAllocationDecisionLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"allocationDecision\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoNextStepsAllocationTo)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"allocationDecision\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoUrgentHearingLabel)
+        fields.readonly(CaseData::getSdoUrgentHearingLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoUrgentHearingPlaceLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoUrgentHearingPlaceLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoUrgentHearingDate)
+                    .publish(false);
+        fields.optional(CaseData::getSdoUrgentHearingDate)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoUrgentHearingTimeEstimate)
+                    .publish(false);
+        fields.optional(CaseData::getSdoUrgentHearingTimeEstimate)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoUrgentHearingCourtDynamicList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoUrgentHearingCourtDynamicList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoHearingUrgentBecauseLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoHearingUrgentBecauseLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoHearingUrgentCheckList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getSdoHearingUrgentDetails)
+        fields.mandatory(CaseData::getSdoHearingUrgentDetails)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoHearingUrgentCourtConsider)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
@@ -99,47 +92,44 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoHearingUrgentMustBeServedBy)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getSdoHearingUrgentByWayOf)
+        fields.mandatory(CaseData::getSdoHearingUrgentByWayOf)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"urgentHearing\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoHearingNotNeededLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoHearingNotNeededLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"hearingNotNeeded\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoHearingNotNeeded)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"hearingNotNeeded\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoFhdraLabel)
+        fields.readonly(CaseData::getSdoFhdraLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"fhdra\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoFhdraHearingDisputeLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoFhdraHearingDisputeLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"fhdra\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoFhdraStartDateTime)
+                    .publish(false);
+        fields.optional(CaseData::getSdoFhdraStartDateTime)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"fhdra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoFhdraCourtDynamicList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoFhdraCourtDynamicList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"fhdra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoFhdraBeforeAList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoFhdraBeforeAList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"fhdra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoFhdraByWayOf)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoFhdraByWayOf)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"fhdra\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoParticipationDirectionsLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoParticipationDirectionsLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"participationDirections\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoParticipationDirections)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"participationDirections\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoPositionStatementLabel)
+        fields.readonly(CaseData::getSdoPositionStatementLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"positionStatement\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoPositionStatementDeadlineDate)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"positionStatement\"")
@@ -147,74 +137,71 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoPositionStatementWritten)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"positionStatement\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoMiamAttendanceLabel)
+        fields.readonly(CaseData::getSdoMiamAttendanceLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"miamAttendance\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoMiamAttendingPerson)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"miamAttendance\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoPermissionHearingLabel)
+        fields.readonly(CaseData::getSdoPermissionHearingLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoPermissionHearingOn)
+                    .publish(false);
+        fields.optional(CaseData::getSdoPermissionHearingOn)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoPermissionHearingTimeEstimate)
+                    .publish(false);
+        fields.optional(CaseData::getSdoPermissionHearingTimeEstimate)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoPermissionHearingBeforeAList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoPermissionHearingBeforeAList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoDirectionsForDraLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoDirectionsForDraLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"directionForDra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoDirectionsDraDecideBy)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoDirectionsDraDecideBy)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"directionForDra\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoDirectionsDraStartDateAndTime)
+                    .publish(false);
+        fields.optional(CaseData::getSdoDirectionsDraStartDateAndTime)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"directionForDra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoDirectionsDraHearing)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoDirectionsDraHearing)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"directionForDra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoDirectionsDraCourtDynamicList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoDirectionsDraCourtDynamicList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"directionForDra\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoDirectionsDraHearingByWayOf)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoDirectionsDraHearingByWayOf)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"directionForDra\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoSettlementConferenceLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoSettlementConferenceLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"settlementConference\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoSettlementConferenceList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoSettlementConferenceList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"settlementConference\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoSettlementConferenceDateTime)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoSettlementConferenceDateTime)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"settlementConference\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoSettlementConferenceTimeEstimate)
+                    .publish(false);
+        fields.optional(CaseData::getSdoSettlementConferenceTimeEstimate)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"settlementConference\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoSettlementConferenceCourtDynamicList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoSettlementConferenceCourtDynamicList)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"settlementConference\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoSettlementConferenceByWayOf)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoSettlementConferenceByWayOf)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"settlementConference\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoJoiningInstructionsForRHLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoJoiningInstructionsForRHLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"joiningInstructions\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoJoiningInstructionsForRH)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"joiningInstructions\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoDirectionsForFactFindingHearingLabel)
+        fields.readonly(CaseData::getSdoDirectionsForFactFindingHearingLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"factFindingHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoHearingAllegationsMadeBy)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"factFindingHearing\"")
@@ -228,10 +215,9 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoWrittenResponseDeadlineDate)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"factFindingHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getSdoHearingReportsSentTo)
+        fields.mandatory(CaseData::getSdoHearingReportsSentTo)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"factFindingHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoHearingReportsAlsoSentTo)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"factFindingHearing\"")
@@ -242,29 +228,26 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoHearingHowManyWitnessEvidence)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"factFindingHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoArrangeInterpretersLabel)
+        fields.readonly(CaseData::getSdoArrangeInterpretersLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"interpreters\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoInterpreterDialectRequired)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"interpreters\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoUpdateContactDetailsLabel)
+        fields.readonly(CaseData::getSdoUpdateContactDetailsLabel)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"updateContactDetails\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoUpdateContactDetails)
                     .fieldShowCondition("sdoHearingsAndNextStepsList CONTAINS \"updateContactDetails\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoCafcassOrCafcassCymruLabel)
+        fields.readonly(CaseData::getSdoCafcassOrCafcassCymruLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassOnly\" OR sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassCymru\" OR sdoCafcassOrCymruList CONTAINS \"partyToProvideDetailsOnly\" OR sdoCafcassOrCymruList CONTAINS \"section7Report\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoSafeGuardingNextStepsLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoSafeGuardingNextStepsLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassOnly\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoCafcassFileAndServe)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassOnly\"")
@@ -272,10 +255,9 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoCafcassNextStepEditContent)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassOnly\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSafeGuardingNextStepsCymruLabel)
+        fields.readonly(CaseData::getSdoSafeGuardingNextStepsCymruLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassCymru\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoCafcassCymruFileAndServe)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassCymru\"")
@@ -283,18 +265,16 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoCafcassCymruNextStepEditContent)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"safeguardingCafcassCymru\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSafeGuardingNewPartnerLabel)
+        fields.readonly(CaseData::getSdoSafeGuardingNewPartnerLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"partyToProvideDetailsOnly\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoNewPartnersToCafcass)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"partyToProvideDetailsOnly\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSectionReportOrChildImpactLabel)
+        fields.readonly(CaseData::getSdoSectionReportOrChildImpactLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoSection7EditContent)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\"")
@@ -302,18 +282,16 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoSection7ImpactAnalysisOptions)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSection7FactsLabel)
+        fields.readonly(CaseData::getSdoSection7FactsLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\" AND sdoSection7ImpactAnalysisOptions CONTAINS \"interimOrders\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoSection7FactsEditContent)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\" AND sdoSection7ImpactAnalysisOptions CONTAINS \"interimOrders\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSection7daOccuredLabel)
+        fields.readonly(CaseData::getSdoSection7daOccuredLabel)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\" AND sdoSection7ImpactAnalysisOptions CONTAINS \"daOccured\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoSection7daOccuredEditContent)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\" AND sdoSection7ImpactAnalysisOptions CONTAINS \"daOccured\"")
@@ -327,13 +305,12 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoCafcassCymruReportSentByDate)
                     .fieldShowCondition("sdoCafcassOrCymruList CONTAINS \"section7Report\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoLocalAuthorityLabel)
+        fields.readonly(CaseData::getSdoLocalAuthorityLabel)
                     .fieldShowCondition("sdoLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoLocalAuthorityLetterLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoLocalAuthorityLetterLabel)
                     .fieldShowCondition("sdoLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoLocalAuthorityName)
                     .fieldShowCondition("sdoLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
@@ -344,13 +321,12 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoLocalAuthorityReportSubmitByDate)
                     .fieldShowCondition("sdoLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoCourtLabel)
+        fields.readonly(CaseData::getSdoCourtLabel)
                     .fieldShowCondition("sdoCourtList CONTAINS \"transferApplication\" OR sdoCourtList CONTAINS \"crossExaminationProhibition\" OR sdoCourtList CONTAINS \"crossExaminationEx740\" OR sdoCourtList CONTAINS \"crossExaminationQualifiedLegal\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoTransferApplicationLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoTransferApplicationLabel)
                     .fieldShowCondition("sdoCourtList CONTAINS \"transferApplication\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoTransferApplicationCourtDynamicList)
                     .fieldShowCondition("sdoCourtList CONTAINS \"transferApplication\"")
@@ -361,51 +337,46 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoTransferApplicationSpecificReason)
                     .fieldShowCondition("sdoTransferApplicationReason CONTAINS \"other\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoCrossExaminationProhibitionLabel)
+        fields.readonly(CaseData::getSdoCrossExaminationProhibitionLabel)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationProhibition\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoCrossExaminationEditContent)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationProhibition\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getSdoCrossExaminationSittingBeforeOptions)
+        fields.mandatory(CaseData::getSdoCrossExaminationSittingBeforeOptions)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationProhibition\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSdoCrossExaminationCourtDynamicList)
+                    .publish(false);
+        fields.mandatory(CaseData::getSdoCrossExaminationCourtDynamicList)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationProhibition\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getSdoCrossExaminationStartDateTime)
+                    .publish(false);
+        fields.optional(CaseData::getSdoCrossExaminationStartDateTime)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationProhibition\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoCrossExaminationCourtHavingHeard)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationProhibition\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoCrossExaminationEx740Label)
+        fields.readonly(CaseData::getSdoCrossExaminationEx740Label)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationEx740\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoCrossExaminationEx740)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationEx740\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoCrossExaminationQualifiedLegalLabel)
+        fields.readonly(CaseData::getSdoCrossExaminationQualifiedLegalLabel)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationQualifiedLegal\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoCrossExaminationQualifiedLegal)
                     .fieldShowCondition("sdoCourtList CONTAINS \"crossExaminationQualifiedLegal\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoDocumentationAndEvidenceLabel)
+        fields.readonly(CaseData::getSdoDocumentationAndEvidenceLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"witnessStatements\" OR sdoDocumentationAndEvidenceList CONTAINS \"specifiedDocuments\" OR sdoDocumentationAndEvidenceList CONTAINS \"instructionsFiling\" OR sdoDocumentationAndEvidenceList CONTAINS \"spipAttendance\" OR sdoDocumentationAndEvidenceList CONTAINS \"medicalDisclosure\" OR sdoDocumentationAndEvidenceList CONTAINS \"letterFromGP\" OR sdoDocumentationAndEvidenceList CONTAINS \"letterFromSchool\" OR sdoDocumentationAndEvidenceList CONTAINS \"scheduleOfAllegations\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoWitnessStatementsLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoWitnessStatementsLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"witnessStatements\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoWitnessStatementsDeadlineDate)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"witnessStatements\"")
@@ -416,17 +387,15 @@ public final class DraftAnOrderPage13Fields1 {
                     .mandatory(StandardDirectionOrder::getSdoWitnessStatementsCopiesSentTo)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"witnessStatements\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getSdoWitnessStatementsCopiesSentToCafcass)
+        fields.mandatory(CaseData::getSdoWitnessStatementsCopiesSentToCafcass)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"witnessStatements\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoWitnessStatementsMaximumPages)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"witnessStatements\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSpecifiedDocumentsLabel)
+        fields.readonly(CaseData::getSdoSpecifiedDocumentsLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"specifiedDocuments\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

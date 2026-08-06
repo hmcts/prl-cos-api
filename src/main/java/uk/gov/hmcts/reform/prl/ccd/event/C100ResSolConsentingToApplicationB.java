@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -45,10 +45,17 @@ public class C100ResSolConsentingToApplicationB implements CCDConfig<CaseData, S
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getRespondentConsentToApplication).done();
+        fields.complex(CaseData::getRespondentSolicitorData)
+                    .complexScope(RespondentSolicitorData::getRespondentConsentToApplication)
+                    .optional(Consent::getConsentToTheApplication)
+                    .eventLabel(" ")
+                    .optional(Consent::getNoConsentReason)
+                    .optional(Consent::getApplicationReceivedDate)
+                    .optional(Consent::getPermissionFromCourt)
+                    .optional(Consent::getCourtOrderDetails).done().done();
     }
 }

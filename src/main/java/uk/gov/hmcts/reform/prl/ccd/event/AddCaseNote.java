@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,12 +40,14 @@ public class AddCaseNote implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_WA_TASK_CONFIGURATION)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getAddCaseNoteHeaderCaseNameText)
-                    .publish(false).done();
+        fields.readonly(CaseData::getAddCaseNoteHeaderCaseNameText)
+                    .publish(false);
         fields.mandatory(CaseData::getSubject)
                     .publish(false);
         fields.mandatory(CaseData::getCaseNote)
                     .publish(false);
+        fields.complex(CaseData::getCaseNotes, CaseNoteDetails.class)
+                    .mandatory(CaseNoteDetails::getSubject)
+                    .mandatory(CaseNoteDetails::getCaseNote).done();
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -31,13 +30,12 @@ public final class ManageOrdersPage28 {
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT-SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManageOrderHeaderLabel22)
+        fields.readonly(CaseData::getManageOrderHeaderLabel22)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getManageOrderHeaderLabel23)
+                    .publish(false);
+        fields.readonly(CaseData::getManageOrderHeaderLabel23)
                     .fieldShowCondition("caseTypeOfApplication=\"FL401\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getServeToRespondentOptions)
                     .publish(false)
@@ -47,13 +45,12 @@ public final class ManageOrdersPage28 {
                     .mandatory(ManageOrders::getServingOptionsForNonLegalRep)
                     .fieldShowCondition("serveToRespondentOptions=\"Yes\" AND displayLegalRepOption=\"No\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCourtAdminText)
+        fields.readonly(CaseData::getCourtAdminText)
                     .fieldShowCondition("servingOptionsForNonLegalRep=\"courtAdmin\" OR personallyServeRespondentsOptions=\"courtAdmin\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCourtBailiffText)
+                    .publish(false);
+        fields.readonly(CaseData::getCourtBailiffText)
                     .fieldShowCondition("servingOptionsForNonLegalRep=\"courtBailiff\" OR personallyServeRespondentsOptions=\"courtBailiff\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getRecipientsOptions)
                     .fieldShowCondition("serveToRespondentOptions=\"No\"")

@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,15 +25,13 @@ public final class AllegationsOfHarmRevisedPage11 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("11");
         fields.showCondition("newAllegationsOfHarmYesNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOthersConcernsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getOthersConcernsLabel)
+                    .publish(false);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmOtherConcernsCourtActions)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getNewAllegationsOfHarmChildContactLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getNewAllegationsOfHarmChildContactLabel)
+                    .publish(false);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewAgreeChildUnsupervisedTime)
                     .publish(false)

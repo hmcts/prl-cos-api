@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "adminEditAndApproveAnOrder",
-  "CaseFieldID" : "sdoLsApplicantName",
-  "ListElementCode" : "sdoNameOfApplicant",
-  "CaseTypeID" : "PRLAPPS"
-} ]

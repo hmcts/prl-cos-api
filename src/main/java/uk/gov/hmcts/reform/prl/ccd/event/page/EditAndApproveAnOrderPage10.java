@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,13 +25,12 @@ public final class EditAndApproveAnOrderPage10 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("10");
         fields.showCondition("orderUploadedAsDraftFlag!=\"Yes\" AND (whatToDoWithOrderSolicitor=\"editTheOrderAndServe\" OR whatToDoWithOrderCourtAdmin=\"editTheOrderAndServe\") AND orderType=\"appointmentOfGuardian\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderNameLabel10)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectedOrder1)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCaffcassOfficeName)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOrderNameLabel10)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectedOrder1)
+                    .publish(false);
+        fields.readonly(CaseData::getCaffcassOfficeName)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getCafcassOfficeDetails)
                     .publish(false).done();

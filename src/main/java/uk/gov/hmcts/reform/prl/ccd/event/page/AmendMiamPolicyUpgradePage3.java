@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,15 +25,13 @@ public final class AmendMiamPolicyUpgradePage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("mpuClaimingExemptionMiam=\"Yes\" AND mpuApplicantAttendedMiam=\"No\" AND mpuChildInvolvedInMiam=\"No\" AND mpuExemptionReasons CONTAINS \"mpuDomesticAbuse\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo3)
-                    .readonlyNoSummary(CaseDataExtra::getMiamExemptionLabel1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo3);
+        fields.readonlyNoSummary(CaseData::getMiamExemptionLabel1);
         fields.complex(CaseData::getMiamPolicyUpgradeDetails)
                     .mandatory(MiamPolicyUpgradeDetails::getMpuDomesticAbuseEvidences)
                     .mandatory(MiamPolicyUpgradeDetails::getMpuIsDomesticAbuseEvidenceProvided).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getMpuAddEvidenceLabel)
-                    .fieldShowCondition("mpuIsDomesticAbuseEvidenceProvided=\"Yes\"").done();
+        fields.readonlyNoSummary(CaseData::getMpuAddEvidenceLabel)
+                    .fieldShowCondition("mpuIsDomesticAbuseEvidenceProvided=\"Yes\"");
         fields.complex(CaseData::getMiamPolicyUpgradeDetails)
                     .optional(MiamPolicyUpgradeDetails::getMpuDomesticAbuseEvidenceDocument)
                     .fieldShowCondition("mpuIsDomesticAbuseEvidenceProvided=\"Yes\"")

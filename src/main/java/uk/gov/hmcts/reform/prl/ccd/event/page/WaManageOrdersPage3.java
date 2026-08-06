@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,9 +24,8 @@ public final class WaManageOrdersPage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("manageOrdersOptions=\"uploadAnOrder\" OR createSelectOrderOptions=\"other\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getUploadAnOrder)
-                    .publish(false).done();
+        fields.readonly(CaseData::getUploadAnOrder)
+                    .publish(false);
         fields.optional(CaseData::getChildArrangementOrders)
                     .publish(false);
         fields.optional(CaseData::getDomesticAbuseOrders)
@@ -39,8 +37,7 @@ public final class WaManageOrdersPage3 {
         fields.mandatory(CaseData::getNameOfOrder)
                     .fieldShowCondition("otherOrdersOption=\"other\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getIsTheOrderUploadedByConsent)
-                    .publish(false).done();
+        fields.mandatory(CaseData::getIsTheOrderUploadedByConsent)
+                    .publish(false);
     }
 }

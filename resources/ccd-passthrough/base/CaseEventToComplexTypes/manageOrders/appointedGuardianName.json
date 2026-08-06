@@ -4,16 +4,6 @@
   "ID" : "appointedGuardianFullName",
   "CaseEventID" : "manageOrders",
   "CaseFieldID" : "appointedGuardianName",
-  "ListElementCode" : "guardianFullName",
-  "EventElementLabel" : " ",
-  "FieldDisplayOrder" : "1",
-  "DisplayContext" : "MANDATORY"
-}, {
-  "LiveFrom" : "19/01/2022",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "appointedGuardianFullName",
-  "CaseEventID" : "manageOrders",
-  "CaseFieldID" : "appointedGuardianName",
   "ListElementCode" : "addNewFullNameLabel",
   "EventElementLabel" : " ",
   "FieldDisplayOrder" : "2",

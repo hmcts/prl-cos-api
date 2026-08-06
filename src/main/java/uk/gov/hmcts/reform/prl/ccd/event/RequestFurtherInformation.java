@@ -8,7 +8,7 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestFurtherInformationDetailsType;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,8 +42,8 @@ public class RequestFurtherInformation implements CCDConfig<CaseData, State, Use
             .grant(Set.of(Permission.R), UserRole.APPLICANTSOLICITOR, UserRole.C100_APPLICANTSOLICITOR1, UserRole.C100_APPLICANTSOLICITOR2, UserRole.C100_APPLICANTSOLICITOR3, UserRole.C100_APPLICANTSOLICITOR4, UserRole.C100_APPLICANTSOLICITOR5, UserRole.C100_RESPONDENTBARRISTER1, UserRole.C100_RESPONDENTBARRISTER2, UserRole.C100_RESPONDENTBARRISTER3, UserRole.C100_RESPONDENTBARRISTER4, UserRole.C100_RESPONDENTBARRISTER5, UserRole.C100_RESPONDENTSOLICITOR1, UserRole.C100_RESPONDENTSOLICITOR2, UserRole.C100_RESPONDENTSOLICITOR3, UserRole.C100_RESPONDENTSOLICITOR4, UserRole.C100_RESPONDENTSOLICITOR5, UserRole.CASEWORKER_PRIVATELAW_CAFCASS, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_SOLICITOR, UserRole.FL401_APPLICANTBARRISTER, UserRole.FL401_APPLICANTSOLICITOR, UserRole.FL401_RESPONDENTBARRISTER, UserRole.FL401_RESPONDENTSOLICITOR)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getRequestFurtherInformationDetails)
-                    .publish(false).done();
+        fields.complex(CaseData::getRequestFurtherInformationDetails)
+                    .mandatory(RequestFurtherInformationDetailsType::getReviewByDate)
+                    .mandatory(RequestFurtherInformationDetailsType::getRequestFurtherInformationReasonList).done();
     }
 }

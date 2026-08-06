@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,9 +25,8 @@ public final class AmendAllegationsOfHarmPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("allegationsOfHarmYesNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo2)
-                    .readonly(CaseDataExtra::getAllegationsOfHarmLabel).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo2);
+        fields.readonly(CaseData::getAllegationsOfHarmLabel);
         fields.complex(CaseData::getAllegationOfHarm)
                     .optional(AllegationOfHarm::getAllegationsOfHarmDomesticAbuseYesNo)
                     .optional(AllegationOfHarm::getPhysicalAbuseVictim)
@@ -65,9 +63,8 @@ public final class AmendAllegationsOfHarmPage2 {
                     .optional(AllegationOfHarm::getAllegationsOfHarmChildAbuseYesNo)
                     .optional(AllegationOfHarm::getAllegationsOfHarmSubstanceAbuseYesNo)
                     .optional(AllegationOfHarm::getAllegationsOfHarmOtherConcernsYesNo).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getAllegationOfHarmOrdersLabel)
-                    .readonly(CaseDataExtra::getAllegationOfHarmOrdersLabelDetail).done();
+        fields.readonly(CaseData::getAllegationOfHarmOrdersLabel);
+        fields.readonly(CaseData::getAllegationOfHarmOrdersLabelDetail);
         fields.complex(CaseData::getAllegationOfHarm)
                     .optional(AllegationOfHarm::getOrdersNonMolestation)
                     .optional(AllegationOfHarm::getOrdersNonMolestationDateIssued)

@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,12 +25,10 @@ public final class AmendWithoutNoticeOrderDetailsPage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("orderWithoutGivingNoticeToRespondent.orderWithoutGivingNotice=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo3).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo3);
         fields.complex(CaseData::getBailDetails)
                     .mandatory(RespondentBailConditionDetails::getIsRespondentAlreadyInBailCondition)
                     .optional(RespondentBailConditionDetails::getBailConditionEndDate)
-                    .fieldShowCondition("bailDetails.isRespondentAlreadyInBailCondition=\"yes\"")
-                    .noHintText().done();
+                    .fieldShowCondition("bailDetails.isRespondentAlreadyInBailCondition=\"yes\"").done();
     }
 }

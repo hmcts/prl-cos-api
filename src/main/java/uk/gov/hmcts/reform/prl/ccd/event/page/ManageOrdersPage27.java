@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,15 +25,13 @@ public final class ManageOrdersPage27 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("27");
         fields.showCondition("(manageOrdersOptions=\"servedSavedOrders\" OR doYouWantToServeOrder=\"Yes\") AND loggedInUserType!=\"JUDGE\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManageOrderHeaderLabel21)
-                    .publish(false).done();
+        fields.readonly(CaseData::getManageOrderHeaderLabel21)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getServeOrderDynamicList)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getServeOrderAdditionalDocumentsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getServeOrderAdditionalDocumentsLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .optional(ManageOrders::getServeOrderAdditionalDocuments)
                     .publish(false)
@@ -56,9 +53,8 @@ public final class ManageOrdersPage27 {
                     .fieldShowCondition("manageOrderHeaderLabel22=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsInHearingState)
+        fields.mandatoryNoSummary(CaseData::getIsInHearingState)
                     .fieldShowCondition("manageOrderHeaderLabel21=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

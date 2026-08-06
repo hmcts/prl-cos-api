@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.EnvironmentFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
@@ -44,9 +43,8 @@ public class ServiceOfDocumentsConfCheckProd implements CCDConfig<CaseData, Stat
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getServiceOfDocumentsConfCheckWarningText)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getServiceOfDocumentsConfCheckWarningText)
+                    .publish(false);
         fields.complex(CaseData::getServiceOfDocuments)
                     .readonlyNoSummary(ServiceOfDocuments::getSodUnServedPack)
                     .publish(false).done();
@@ -54,42 +52,40 @@ public class ServiceOfDocumentsConfCheckProd implements CCDConfig<CaseData, Stat
                     .publish(false);
         fields.readonlyNoSummary(CaseData::getC8WelshDocument)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getRespAC8EngDocument)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespAC8WelDocument)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespBC8EngDocument)
+        fields.readonlyNoSummary(CaseData::getRespAC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespAC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespBC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespBC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespBC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespCC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespCC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespCC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespCC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespDC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespDC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespDC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespDC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespEC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespEC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespEC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespEC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfDocuments)
                     .mandatory(ServiceOfDocuments::getCanDocumentsBeServed)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsC8CheckApproved)
+        fields.mandatoryNoSummary(CaseData::getIsC8CheckApproved)
                     .fieldShowCondition("canDocumentsBeServed=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("canDocumentsBeServed=\"DO_NOT_SHOW\"")
                     .publish(false);

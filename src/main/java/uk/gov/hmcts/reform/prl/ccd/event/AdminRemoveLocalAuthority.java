@@ -6,6 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -40,6 +42,17 @@ public class AdminRemoveLocalAuthority implements CCDConfig<CaseData, State, Use
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getLocalAuthoritySolicitorOrganisationPolicy).done();
+        fields.complex(CaseData::getLocalAuthoritySolicitorOrganisationPolicy)
+                    .readonly(OrganisationPolicy::getOrganisation)
+                    .complex(OrganisationPolicy::getOrganisation)
+                    .readonly(Organisation::getOrganisationID)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done()
+                    .complex(OrganisationPolicy::getOrganisation)
+                    .readonly(Organisation::getOrganisationName)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done()
+                    .readonly(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .readonly(OrganisationPolicy::getOrgPolicyReference)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done();
     }
 }

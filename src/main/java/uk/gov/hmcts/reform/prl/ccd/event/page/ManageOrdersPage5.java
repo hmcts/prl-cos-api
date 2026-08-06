@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CustomC21OrderDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CustomC43OrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -34,28 +35,32 @@ public final class ManageOrdersPage5 {
                     .readonly(ManageOrders::getTypeOfC21Order)
                     .fieldShowCondition("createSelectOrderOptions=\"DO_NOT_SHOW\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getTypeOfC21OrderLabel)
+        fields.readonly(CaseData::getTypeOfC21OrderLabel)
                     .fieldShowCondition("createSelectOrderOptions=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectedOrderLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectedOrderLabel)
                     .fieldShowCondition("createSelectOrderOptions!=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getCustomOrderNameOption)
+                    .publish(false);
+        fields.mandatory(CaseData::getCustomOrderNameOption)
                     .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getCustomC43OrderDetails)
-                    .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" AND customOrderNameOption=\"childArrangementsSpecificProhibitedOrder\"")
-                    .publish(false)
-                    .optional(CaseDataExtra::getCustomC21OrderDetails)
-                    .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" AND customOrderNameOption=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getCustomOrderDateEndsOptions)
+                    .publish(false);
+        fields.complex(CaseData::getCustomC43OrderDetails)
+                    .mandatory(CustomC43OrderDetails::getOrdersToIssue)
+                    .eventLabel("Select orders to issue")
+                    .mandatory(CustomC43OrderDetails::getChildArrangementsOrderType)
+                    .fieldShowCondition("customC43OrderDetails.ordersToIssue CONTAINS \"childArrangementsOrder\"")
+                    .eventLabel("Select type of child arrangements order").done()
+                    .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" AND customOrderNameOption=\"childArrangementsSpecificProhibitedOrder\"");
+        fields.complex(CaseData::getCustomC21OrderDetails)
+                    .mandatory(CustomC21OrderDetails::getOrderOptions)
+                    .eventLabel("Select the type of order").done()
+                    .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" AND customOrderNameOption=\"blankOrderOrDirections\"");
+        fields.mandatory(CaseData::getCustomOrderDateEndsOptions)
                     .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" AND (customOrderNameOption=\"nonMolestation\" OR customOrderNameOption=\"occupation\" OR customOrderNameOption=\"powerOfArrest\")")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getCustomOrderDateEnds)
+                    .publish(false);
+        fields.mandatory(CaseData::getCustomOrderDateEnds)
                     .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" AND (customOrderNameOption=\"nonMolestation\" OR customOrderNameOption=\"occupation\" OR customOrderNameOption=\"powerOfArrest\") AND customOrderDateEndsOptions=\"specifiedDateAndTime\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getNameOfOrder)
                     .fieldShowCondition("otherOrdersOption=\"other\"")
                     .retainHiddenValue()
@@ -77,10 +82,9 @@ public final class ManageOrdersPage5 {
         fields.mandatory(CaseData::getWasTheOrderApprovedAtHearing)
                     .fieldShowCondition("(manageOrdersOptions=\"createAnOrder\" OR manageOrdersOptions=\"uploadAnOrder\") AND isSdoSelected=\"No\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getHearingType)
+        fields.optional(CaseData::getHearingType)
                     .fieldShowCondition("wasTheOrderApprovedAtHearing=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getHearingsType)
                     .fieldShowCondition("wasTheOrderApprovedAtHearing=\"Yes\" AND manageOrdersOptions!=\"createCustomOrder\"")
@@ -88,13 +92,12 @@ public final class ManageOrdersPage5 {
         fields.optional(CaseData::getApprovalDate)
                     .fieldShowCondition("manageOrdersOptions=\"uploadAnOrder\" OR createSelectOrderOptions=\"other\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderMadeByLabel)
+        fields.readonly(CaseData::getOrderMadeByLabel)
                     .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\" OR manageOrdersOptions=\"createAnOrder\" AND createSelectOrderOptions!=\"other\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getJudgeLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getJudgeLabel)
                     .fieldShowCondition("manageOrdersOptions!=\"amendOrderUnderSlipRule\" AND manageOrdersOptions!=\"servedSavedOrders\" AND createSelectOrderOptions!=\"other\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getJudgeOrMagistrateTitle)
                     .fieldShowCondition("manageOrdersOptions!=\"amendOrderUnderSlipRule\" AND manageOrdersOptions!=\"servedSavedOrders\" AND createSelectOrderOptions!=\"other\" OR manageOrdersOptions=\"createCustomOrder\"")

@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -28,17 +28,20 @@ public final class C100ResSolMiamBPage1 {
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getWhatIsMiamPlaceHolder)
                     .fieldShowCondition("respondentSolicitorHaveYouAttendedMiam=\"DO NOT SHOW\"")
                     .retainHiddenValue().done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getWhatIsMiamLabel)
-                    .optional(CaseDataExtra::getRespondentSolicitorHaveYouAttendedMiam)
-                    .fieldShowCondition("respondentNameForResponseLabel=\"DO_NOT_SHOW\"").done();
+        fields.readonly(CaseData::getWhatIsMiamLabel);
+        fields.complex(CaseData::getRespondentSolicitorHaveYouAttendedMiam)
+                    .mandatory(Miam::getAttendedMiam)
+                    .mandatory(Miam::getWillingToAttendMiam)
+                    .fieldShowCondition("respondentSolicitorHaveYouAttendedMiam.attendedMiam=\"No\"")
+                    .mandatory(Miam::getReasonNotAttendingMiam)
+                    .fieldShowCondition("respondentSolicitorHaveYouAttendedMiam.attendedMiam=\"No\" AND respondentSolicitorHaveYouAttendedMiam.willingToAttendMiam=\"No\"").done()
+                    .fieldShowCondition("respondentNameForResponseLabel=\"DO_NOT_SHOW\"");
         fields.complex(CaseData::getRespondentSolicitorData)
                     .mandatory(RespondentSolicitorData::getHasRespondentAttendedMiam).done();
     }

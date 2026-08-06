@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -31,9 +30,8 @@ public final class EditReturnedOrderProdPage3 {
                     .readonlyNoSummary(ManageOrders::getDaOrderForCaCase)
                     .fieldShowCondition("orderType=\"DO_NOT_SHOW\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderNameLabel)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOrderNameLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getIsTheOrderByConsent)
                     .fieldShowCondition("orderType!=\"standardDirectionsOrder\" AND orderUploadedAsDraftFlag!=\"Yes\"")
@@ -41,21 +39,19 @@ public final class EditReturnedOrderProdPage3 {
         fields.mandatory(CaseData::getWasTheOrderApprovedAtHearing)
                     .fieldShowCondition("orderType!=\"standardDirectionsOrder\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getHearingType)
+        fields.optional(CaseData::getHearingType)
                     .fieldShowCondition("wasTheOrderApprovedAtHearing=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getHearingsType)
                     .fieldShowCondition("wasTheOrderApprovedAtHearing=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderMadeByLabel)
+        fields.readonlyNoSummary(CaseData::getOrderMadeByLabel)
                     .fieldShowCondition("orderUploadedAsDraftFlag!=\"Yes\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getJudgeLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getJudgeLabel)
                     .fieldShowCondition("orderUploadedAsDraftFlag!=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .optional(ManageOrders::getJudgeOrMagistrateTitle)
                     .fieldShowCondition("orderUploadedAsDraftFlag!=\"Yes\"")

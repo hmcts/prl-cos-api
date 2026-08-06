@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -43,10 +42,9 @@ public class C100ManageFlags implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_WA_TASK_CONFIGURATION)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getFlagLauncherInternal)
+        fields.optional(CaseData::getFlagLauncherInternal)
                     .displayContextParameter("#ARGUMENT(UPDATE,VERSION2.1)")
-                    .publish(false).done();
+                    .publish(false);
         fields.optional(CaseData::getCaseFlags)
                     .fieldShowCondition("flagLauncherInternal=\"DUMMY_VALUE_TO_HIDE_FIELD\"")
                     .retainHiddenValue()

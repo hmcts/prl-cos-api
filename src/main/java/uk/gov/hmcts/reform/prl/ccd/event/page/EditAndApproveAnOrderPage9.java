@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,12 +25,14 @@ public final class EditAndApproveAnOrderPage9 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("9");
         fields.showCondition("orderUploadedAsDraftFlag!=\"Yes\" AND (whatToDoWithOrderSolicitor=\"editTheOrderAndServe\" OR whatToDoWithOrderCourtAdmin=\"editTheOrderAndServe\") AND orderType=\"specialGuardianShip\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderNameLabel9)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getAppointedGuardianLabel)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOrderNameLabel9)
+                    .publish(false);
+        fields.readonly(CaseData::getAppointedGuardianLabel)
+                    .publish(false);
         fields.complex(CaseData::getAppointedGuardianName).done()
                     .fieldShowCondition("orderType=\"specialGuardianShip\"");
+        fields.complex(CaseData::getAppointedGuardianName, AppointedGuardianFullName.class)
+                    .mandatory(AppointedGuardianFullName::getGuardianFullName)
+                    .eventLabel(" ").done();
     }
 }

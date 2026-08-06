@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,9 +25,8 @@ public final class ManageOrdersPage24 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("24");
         fields.showCondition("manageOrdersOptions!=\"servedSavedOrders\" AND loggedInUserType!=\"JUDGE\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getAmendOrderCheckOrderLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getAmendOrderCheckOrderLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getAmendOrderSelectCheckOptions)
                     .publish(false)
@@ -47,9 +45,8 @@ public final class ManageOrdersPage24 {
                     .mandatory(ManageOrders::getNameOfLaToReviewOrder)
                     .fieldShowCondition("amendOrderSelectCheckOptions=\"judgeOrLegalAdvisorCheck\" AND amendOrderSelectJudgeOrLa=\"legalAdvisor\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManagerCheckAmendOrder)
+        fields.readonly(CaseData::getManagerCheckAmendOrder)
                     .fieldShowCondition("amendOrderSelectCheckOptions=\"managerCheck\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -30,10 +29,9 @@ public final class AdminEditAndApproveAnOrderPage21 {
         fields.mandatory(CaseData::getDoesOrderClosesCase)
                     .fieldShowCondition("selectTypeOfOrder=\"finl\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCloseCaseDoableActions)
+        fields.readonly(CaseData::getCloseCaseDoableActions)
                     .fieldShowCondition("doesOrderClosesCase=\"Yes\" AND selectTypeOfOrder=\"finl\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServeOrderData)
                     .mandatory(ServeOrderData::getCafcassOrCymruNeedToProvideReport)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")

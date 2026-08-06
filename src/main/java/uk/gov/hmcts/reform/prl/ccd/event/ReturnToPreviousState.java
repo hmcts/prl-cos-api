@@ -6,7 +6,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -37,8 +36,7 @@ public class ReturnToPreviousState implements CCDConfig<CaseData, State, UserRol
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getReturnToPreviousStateLabel)
-                    .fieldShowCondition("[STATE] = \"DECISION_OUTCOME\"").done();
+        fields.readonlyNoSummary(CaseData::getReturnToPreviousStateLabel)
+                    .fieldShowCondition("[STATE] = \"DECISION_OUTCOME\"");
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -25,16 +24,15 @@ public final class EditReturnedOrderNonprodPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderType)
+        fields.readonly(CaseData::getOrderType)
                     .fieldShowCondition("rejectedOrdersDynamicList=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOrderName)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOrderName)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getOrderNameInstructionsFromJudgeLabel)
-                    .publish(false).done();
+                    .publish(false);
+        fields.readonly(CaseData::getOrderNameInstructionsFromJudgeLabel)
+                    .publish(false);
         fields.readonly(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("rejectedOrdersDynamicList=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
@@ -52,9 +50,8 @@ public final class EditReturnedOrderNonprodPage2 {
                     .fieldShowCondition("rejectedOrdersDynamicList=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getEditOrderTextInstructionsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getEditOrderTextInstructionsLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .readonly(ManageOrders::getPreviewUploadedOrder)
                     .publish(false).done();

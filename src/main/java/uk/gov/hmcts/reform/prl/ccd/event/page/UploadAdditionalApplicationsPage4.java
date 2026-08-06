@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -30,10 +29,9 @@ public final class UploadAdditionalApplicationsPage4 {
                     .readonlyNoSummary(UploadAdditionalApplicationData::getAdditionalApplicationFeesToPay)
                     .fieldShowCondition("additionalApplicationsApplyingFor=\"DO_NOT_SHOW\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getAdditionalApplicationFeesToPayText)
+        fields.readonlyNoSummary(CaseData::getAdditionalApplicationFeesToPayText)
                     .fieldShowCondition("additionalApplicationFeesToPay != \"\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getUploadAdditionalApplicationData)
                     .mandatory(UploadAdditionalApplicationData::getAdditionalApplicationsHelpWithFees)
                     .publish(false)

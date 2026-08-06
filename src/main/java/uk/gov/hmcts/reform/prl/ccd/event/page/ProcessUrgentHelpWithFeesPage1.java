@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ProcessUrgentHelpWithFees;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -28,12 +27,11 @@ public final class ProcessUrgentHelpWithFeesPage1 {
         fields.complex(CaseData::getProcessUrgentHelpWithFees)
                     .mandatory(ProcessUrgentHelpWithFees::getHwfAppList)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getAdditionalApplicationsBundleId)
+        fields.optionalNoSummary(CaseData::getAdditionalApplicationsBundleId)
                     .fieldShowCondition("hwfAppList=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .readonlyNoSummary(CaseDataExtra::getHwfApplicationDynamicData)
+                    .retainHiddenValue();
+        fields.readonlyNoSummary(CaseData::getHwfApplicationDynamicData)
                     .fieldShowCondition("hwfAppList=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

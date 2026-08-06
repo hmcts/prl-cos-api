@@ -4,57 +4,6 @@
   "ID" : "DomesticBehaviours",
   "CaseEventID" : "amendAllegationsOfHarmRevised",
   "CaseFieldID" : "domesticBehaviours",
-  "ListElementCode" : "typeOfAbuse",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "1",
-  "DisplayContext" : "OPTIONAL"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "DomesticBehaviours",
-  "CaseEventID" : "amendAllegationsOfHarmRevised",
-  "CaseFieldID" : "domesticBehaviours",
-  "ListElementCode" : "newAbuseNatureDescription",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "2",
-  "DisplayContext" : "OPTIONAL"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "DomesticBehaviours",
-  "CaseEventID" : "amendAllegationsOfHarmRevised",
-  "CaseFieldID" : "domesticBehaviours",
-  "ListElementCode" : "newBehavioursStartDateAndLength",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "3",
-  "DisplayContext" : "OPTIONAL"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "DomesticBehaviours",
-  "CaseEventID" : "amendAllegationsOfHarmRevised",
-  "CaseFieldID" : "domesticBehaviours",
-  "ListElementCode" : "newBehavioursApplicantSoughtHelp",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "4",
-  "DisplayContext" : "OPTIONAL"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "DomesticBehaviours",
-  "CaseEventID" : "amendAllegationsOfHarmRevised",
-  "CaseFieldID" : "domesticBehaviours",
-  "ListElementCode" : "newBehavioursApplicantHelpSoughtWho",
-  "FieldShowCondition" : "domesticBehaviours.newBehavioursApplicantSoughtHelp=\"Yes\"",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "5",
-  "DisplayContext" : "OPTIONAL"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "DomesticBehaviours",
-  "CaseEventID" : "amendAllegationsOfHarmRevised",
-  "CaseFieldID" : "domesticBehaviours",
   "ListElementCode" : "addNewDomesticBehaviours",
   "EventElementLabel" : "",
   "FieldDisplayOrder" : "6",

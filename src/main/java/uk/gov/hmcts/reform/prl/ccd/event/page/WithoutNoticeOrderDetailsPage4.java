@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,8 +25,7 @@ public final class WithoutNoticeOrderDetailsPage4 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("4");
         fields.showCondition("orderWithoutGivingNoticeToRespondent.orderWithoutGivingNotice=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo4).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo4);
         fields.complex(CaseData::getAnyOtherDtailsForWithoutNoticeOrder)
                     .optional(OtherDetailsOfWithoutNoticeOrder::getOtherDetails).done();
     }

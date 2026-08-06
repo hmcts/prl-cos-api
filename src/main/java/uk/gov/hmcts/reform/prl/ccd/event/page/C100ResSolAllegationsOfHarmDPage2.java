@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -27,9 +26,8 @@ public final class C100ResSolAllegationsOfHarmDPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("respAohYesOrNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel1)
-                    .readonly(CaseDataExtra::getRespAohLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel1);
+        fields.readonly(CaseData::getRespAohLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .mandatory(RespondentAllegationsOfHarmData::getRespAohDomesticAbuseYesNo).done().done();
@@ -53,9 +51,8 @@ public final class C100ResSolAllegationsOfHarmDPage2 {
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .mandatory(RespondentAllegationsOfHarmData::getRespAohOtherConcernsDetails)
                     .fieldShowCondition("respAohOtherConcerns=\"Yes\"").done().done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespAohOrdersLabel)
-                    .readonly(CaseDataExtra::getRespAohOrdersLabelDetail).done();
+        fields.readonly(CaseData::getRespAohOrdersLabel);
+        fields.readonly(CaseData::getRespAohOrdersLabelDetail);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .mandatory(RespondentAllegationsOfHarmData::getRespOrdersNonMolestation).done().done();

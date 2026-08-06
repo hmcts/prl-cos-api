@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,27 +24,26 @@ public final class SafeguardingAndRiskOfHarmPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("childAbduction=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getParaChildAbduction)
-                    .mandatory(CaseDataExtra::getChildAtRiskOfAbduction)
-                    .mandatory(CaseDataExtra::getPoliceNotified)
-                    .mandatory(CaseDataExtra::getChildHasPassport)
-                    .mandatory(CaseDataExtra::getChildHasMultiplePassports)
-                    .fieldShowCondition("childHasPassport=\"Yes\"")
-                    .mandatory(CaseDataExtra::getChildPassportPossession)
-                    .fieldShowCondition("childHasPassport=\"Yes\"")
-                    .mandatory(CaseDataExtra::getChildPassportPossessionOtherDetails)
-                    .fieldShowCondition("childHasPassport=\"Yes\" AND childPassportPossession CONTAINS \"otherPerson\"")
-                    .mandatory(CaseDataExtra::getChildAbductedBefore)
-                    .mandatory(CaseDataExtra::getChildAbductionDetails)
-                    .fieldShowCondition("childAbductedBefore=\"Yes\"")
-                    .mandatory(CaseDataExtra::getAbductionPoliceInvolved)
-                    .fieldShowCondition("childAbductedBefore=\"Yes\"")
-                    .mandatory(CaseDataExtra::getAbductionPoliceInvolvedDetails)
-                    .fieldShowCondition("childAbductedBefore=\"Yes\" AND abductionPoliceInvolved=\"Yes\"")
-                    .mandatory(CaseDataExtra::getChildAtRiskOfAbductionReason)
-                    .fieldShowCondition("childAbductedBefore=\"Yes\"")
-                    .mandatory(CaseDataExtra::getChildWhereabouts)
-                    .fieldShowCondition("childAbductedBefore=\"Yes\"").done();
+        fields.readonly(CaseData::getParaChildAbduction);
+        fields.mandatory(CaseData::getChildAtRiskOfAbduction);
+        fields.mandatory(CaseData::getPoliceNotified);
+        fields.mandatory(CaseData::getChildHasPassport);
+        fields.mandatory(CaseData::getChildHasMultiplePassports)
+                    .fieldShowCondition("childHasPassport=\"Yes\"");
+        fields.mandatory(CaseData::getChildPassportPossession)
+                    .fieldShowCondition("childHasPassport=\"Yes\"");
+        fields.mandatory(CaseData::getChildPassportPossessionOtherDetails)
+                    .fieldShowCondition("childHasPassport=\"Yes\" AND childPassportPossession CONTAINS \"otherPerson\"");
+        fields.mandatory(CaseData::getChildAbductedBefore);
+        fields.mandatory(CaseData::getChildAbductionDetails)
+                    .fieldShowCondition("childAbductedBefore=\"Yes\"");
+        fields.mandatory(CaseData::getAbductionPoliceInvolved)
+                    .fieldShowCondition("childAbductedBefore=\"Yes\"");
+        fields.mandatory(CaseData::getAbductionPoliceInvolvedDetails)
+                    .fieldShowCondition("childAbductedBefore=\"Yes\" AND abductionPoliceInvolved=\"Yes\"");
+        fields.mandatory(CaseData::getChildAtRiskOfAbductionReason)
+                    .fieldShowCondition("childAbductedBefore=\"Yes\"");
+        fields.mandatory(CaseData::getChildWhereabouts)
+                    .fieldShowCondition("childAbductedBefore=\"Yes\"");
     }
 }

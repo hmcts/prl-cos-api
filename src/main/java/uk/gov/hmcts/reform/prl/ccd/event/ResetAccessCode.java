@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,7 +41,6 @@ public class ResetAccessCode implements CCDConfig<CaseData, State, UserRole> {
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getResetAccessCodeReason).done();
+        fields.mandatoryNoSummary(CaseData::getResetAccessCodeReason);
     }
 }

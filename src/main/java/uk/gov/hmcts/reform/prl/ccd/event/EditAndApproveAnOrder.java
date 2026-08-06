@@ -20,6 +20,14 @@ import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderPage6;
 import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderPage7;
 import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderPage8;
 import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderPage9;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes1;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes2;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes3;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes4;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes5;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes6;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes7;
+import uk.gov.hmcts.reform.prl.ccd.event.page.EditAndApproveAnOrderScopes8;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -69,5 +77,13 @@ public class EditAndApproveAnOrder implements CCDConfig<CaseData, State, UserRol
         EditAndApproveAnOrderPage7.apply(fields);
         EditAndApproveAnOrderPage8.apply(fields);
         EditAndApproveAnOrderPage9.apply(fields);
+        EditAndApproveAnOrderScopes1.apply(fields);
+        EditAndApproveAnOrderScopes2.apply(fields);
+        EditAndApproveAnOrderScopes3.apply(fields);
+        EditAndApproveAnOrderScopes4.apply(fields);
+        EditAndApproveAnOrderScopes5.apply(fields);
+        EditAndApproveAnOrderScopes6.apply(fields);
+        EditAndApproveAnOrderScopes7.apply(fields);
+        EditAndApproveAnOrderScopes8.apply(fields);
     }
 }

@@ -1,12 +1,11 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -27,9 +26,8 @@ public final class RespondentsDetailsPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("caseTypeOfApplication=\"FL401\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo2)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo2)
+                    .publish(false);
         fields.complex(CaseData::getRespondentsFL401)
                     .optional(PartyDetails::getFirstName)
                     .optional(PartyDetails::getLastName)
@@ -38,7 +36,6 @@ public final class RespondentsDetailsPage2 {
                     .eventLabel("*Is date of birth known?")
                     .optional(PartyDetails::getDateOfBirth)
                     .fieldShowCondition("respondentsFL401.isDateOfBirthKnown=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getRespondentLivedWithApplicant)
                     .optional(PartyDetails::getIsCurrentAddressKnown)
                     .optional(PartyDetails::getAddress)

@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.Correspondence;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,13 +25,11 @@ public final class ManageDocumentsPage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("documentCategoryChecklist=\"documentCategoryChecklistEnumValue2\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCorrespondenceLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getCorrespondenceLabel)
+                    .publish(false);
         fields.complex(CaseData::getCorrespondence).done();
         fields.complex(CaseData::getCorrespondence, Correspondence.class)
                     .mandatory(Correspondence::getDocumentName)
-                    .noHintText()
                     .optional(Correspondence::getNotes)
                     .mandatory(Correspondence::getDocumentCorrespondence)
                     .readonly(Correspondence::getCheckDocumentsConfidentialLabel)

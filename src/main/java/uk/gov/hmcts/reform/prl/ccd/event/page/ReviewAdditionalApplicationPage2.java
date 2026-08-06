@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 
@@ -25,11 +24,10 @@ public final class ReviewAdditionalApplicationPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSendingMessagesLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSendingMessagesHint)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getSendingMessagesLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSendingMessagesHint)
+                    .publish(false);
         fields.complex(CaseData::getSendOrReplyMessage)
                     .optional(SendOrReplyMessage::getSendMessageObject)
                     .publish(false).done();

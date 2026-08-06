@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -28,9 +27,8 @@ public final class AmendRespondentsDetailsPage1 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
         fields.showCondition("caseTypeOfApplication=\"C100\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1)
+                    .publish(false);
         fields.complex(CaseData::getRespondents).done();
         fields.complex(CaseData::getRespondents, PartyDetails.class)
                     .optional(PartyDetails::getFirstName)
@@ -40,7 +38,6 @@ public final class AmendRespondentsDetailsPage1 {
                     .eventLabel("*Is date of birth known?")
                     .optional(PartyDetails::getDateOfBirth)
                     .fieldShowCondition("respondents.isDateOfBirthKnown=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getGender)
                     .optional(PartyDetails::getOtherGender)
                     .fieldShowCondition("respondents.gender=\"other\"")
@@ -55,7 +52,6 @@ public final class AmendRespondentsDetailsPage1 {
                     .fieldShowCondition("respondents.liveInRefuge=\"Yes\"")
                     .mandatory(PartyDetails::getRefugeConfidentialityC8Form)
                     .fieldShowCondition("respondents.isCurrentAddressKnown=\"DO_NOT_SHOW\"")
-                    .noHintText()
                     .optional(PartyDetails::getIsCurrentAddressKnown)
                     .optional(PartyDetails::getAddress)
                     .fieldShowCondition("respondents.isCurrentAddressKnown=\"Yes\"")
@@ -75,7 +71,6 @@ public final class AmendRespondentsDetailsPage1 {
                     .optional(Address::getCountry).done()
                     .mandatory(PartyDetails::getIsAddressConfidential)
                     .fieldShowCondition("respondents.isCurrentAddressKnown=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getIsAtAddressLessThan5YearsWithDontKnow)
                     .eventLabel("*Has respondent lived at this address for less than  5 years?")
                     .optional(PartyDetails::getAddressLivedLessThan5YearsDetails)
@@ -85,16 +80,13 @@ public final class AmendRespondentsDetailsPage1 {
                     .fieldShowCondition("respondents.canYouProvideEmailAddress=\"Yes\"")
                     .mandatory(PartyDetails::getIsEmailAddressConfidential)
                     .fieldShowCondition("respondents.canYouProvideEmailAddress=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getContactPreferences)
                     .fieldShowCondition("respondents.canYouProvideEmailAddress=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getCanYouProvidePhoneNumber)
                     .optional(PartyDetails::getPhoneNumber)
                     .fieldShowCondition("respondents.canYouProvidePhoneNumber=\"Yes\"")
                     .mandatory(PartyDetails::getIsPhoneNumberConfidential)
                     .fieldShowCondition("respondents.canYouProvidePhoneNumber=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getDoTheyHaveLegalRepresentation)
                     .optional(PartyDetails::getSolicitorDetails)
                     .fieldShowCondition("respondents.doTheyHaveLegalRepresentation=\"yes\"")

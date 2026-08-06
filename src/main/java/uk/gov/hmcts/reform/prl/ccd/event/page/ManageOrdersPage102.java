@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,13 +24,12 @@ public final class ManageOrdersPage102 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("102");
         fields.showCondition("manageOrdersOptions=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getCustomOrderSelectedHearingLabel)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getCustomOrderWasApprovedAtHearing)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getCustomOrderHearingsType)
+        fields.readonlyNoSummary(CaseData::getCustomOrderSelectedHearingLabel)
+                    .publish(false);
+        fields.mandatory(CaseData::getCustomOrderWasApprovedAtHearing)
+                    .publish(false);
+        fields.mandatory(CaseData::getCustomOrderHearingsType)
                     .fieldShowCondition("customOrderWasApprovedAtHearing=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

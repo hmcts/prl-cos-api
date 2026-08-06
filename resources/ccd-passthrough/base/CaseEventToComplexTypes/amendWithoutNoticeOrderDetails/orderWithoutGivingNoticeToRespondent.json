@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "amendWithoutNoticeOrderDetails",
-  "CaseFieldID" : "orderWithoutGivingNoticeToRespondent",
-  "ListElementCode" : "orderWithoutGivingNotice",
-  "CaseTypeID" : "PRLAPPS"
-} ]

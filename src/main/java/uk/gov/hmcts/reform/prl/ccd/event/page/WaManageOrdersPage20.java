@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,27 +24,25 @@ public final class WaManageOrdersPage20 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("20");
         fields.showCondition("manageOrdersOptions=\"createAnOrder\" OR manageOrdersOptions=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSelectedC21OrderLabel2)
+        fields.readonly(CaseData::getSelectedC21OrderLabel2)
                     .fieldShowCondition("createSelectOrderOptions=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCustomOrderHeaderPreviewLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getCustomOrderHeaderPreviewLabel)
                     .fieldShowCondition("manageOrdersOptions=\"createCustomOrder\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectedOrderSummaryLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectedOrderSummaryLabel)
                     .fieldShowCondition("createSelectOrderOptions!=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCheckYourOrder)
+                    .publish(false);
+        fields.readonly(CaseData::getCheckYourOrder)
                     .fieldShowCondition("manageOrdersOptions=\"createAnOrder\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.readonly(CaseData::getPreviewOrderDoc)
                     .fieldShowCondition("manageOrdersOptions=\"createAnOrder\" OR manageOrdersOptions=\"createCustomOrder\"")
                     .retainHiddenValue()
                     .publish(false);
         fields.readonly(CaseData::getPreviewOrderDocWelsh)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCheckYourOrderLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getCheckYourOrderLabel)
+                    .publish(false);
     }
 }

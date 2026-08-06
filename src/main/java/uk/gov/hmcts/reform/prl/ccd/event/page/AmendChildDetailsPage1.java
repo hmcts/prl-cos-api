@@ -3,8 +3,10 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,8 +26,54 @@ public final class AmendChildDetailsPage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getChildren).done();
+        fields.complex(CaseData::getChildren, Child.class)
+                    .optional(Child::getFirstName)
+                    .optional(Child::getLastName)
+                    .optional(Child::getDateOfBirth)
+                    .optional(Child::getGender)
+                    .optional(Child::getOtherGender)
+                    .fieldShowCondition("children.gender=\"other\"")
+                    .optional(Child::getOrderAppliedFor)
+                    .optional(Child::getApplicantsRelationshipToChild)
+                    .optional(Child::getOtherApplicantsRelationshipToChild)
+                    .fieldShowCondition("children.applicantsRelationshipToChild=\"other\"")
+                    .optional(Child::getRespondentsRelationshipToChild)
+                    .optional(Child::getOtherRespondentsRelationshipToChild)
+                    .fieldShowCondition("children.respondentsRelationshipToChild=\"other\"")
+                    .optional(Child::getChildLiveWith)
+                    .complexMember(Child::getPersonWhoLivesWithChild)
+                    .fieldShowCondition("children.childLiveWith CONTAINS \"anotherPerson\"")
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .optional(OtherPersonWhoLivesWithChild::getFirstName).done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .optional(OtherPersonWhoLivesWithChild::getLastName).done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .optional(OtherPersonWhoLivesWithChild::getAddress).done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getAddressLine1).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getAddressLine2).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getAddressLine3).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getPostTown).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getCounty).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getPostCode).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .complex(OtherPersonWhoLivesWithChild::getAddress)
+                    .optional(Address::getCountry).done().done()
+                    .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
+                    .optional(OtherPersonWhoLivesWithChild::getIsPersonIdentityConfidential).done()
+                    .optional(Child::getParentalResponsibilityDetails).done();
     }
 }

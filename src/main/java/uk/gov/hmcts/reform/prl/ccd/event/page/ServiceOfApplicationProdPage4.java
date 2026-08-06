@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -26,10 +25,9 @@ public final class ServiceOfApplicationProdPage4 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("4");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getMissingAddressWarningTextLabel)
+        fields.readonlyNoSummary(CaseData::getMissingAddressWarningTextLabel)
                     .fieldShowCondition("missingAddressWarningText!=\"\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplication)
                     .mandatoryNoSummary(ServiceOfApplication::getSoaServeToRespondentOptions)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
@@ -79,10 +77,9 @@ public final class ServiceOfApplicationProdPage4 {
                     .mandatory(ServiceOfApplication::getSoaServeC8ToLocalAuthorityYesOrNo)
                     .fieldShowCondition("soaServeLocalAuthorityYesOrNo=\"Yes\" AND isConfidential=\"Yes\" AND caseTypeOfApplication=\"C100\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getAddDocumentsForLaLabel)
+        fields.readonly(CaseData::getAddDocumentsForLaLabel)
                     .fieldShowCondition("soaServeLocalAuthorityYesOrNo=\"Yes\" AND caseTypeOfApplication=\"C100\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplication)
                     .optional(ServiceOfApplication::getSoaDocumentDynamicListForLa)
                     .fieldShowCondition("soaServeLocalAuthorityYesOrNo=\"Yes\" AND caseTypeOfApplication=\"C100\"")

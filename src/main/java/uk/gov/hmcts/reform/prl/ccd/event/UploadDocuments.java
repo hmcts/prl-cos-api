@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,23 +39,20 @@ public class UploadDocuments implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelPleaseUploadDocuments)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getLabelDocumentsRequired)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getLabelContactOrResidenceOrder)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLabelPleaseUploadDocuments)
+                    .publish(false);
+        fields.readonly(CaseData::getLabelDocumentsRequired)
+                    .publish(false);
+        fields.readonly(CaseData::getLabelContactOrResidenceOrder)
+                    .publish(false);
         fields.optional(CaseData::getContactOrderDocumentsUploaded)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelC8FormForConfidentiality)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLabelC8FormForConfidentiality)
+                    .publish(false);
         fields.optional(CaseData::getC8FormDocumentsUploaded)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelUploadOtherDocuments)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLabelUploadOtherDocuments)
+                    .publish(false);
         fields.optional(CaseData::getOtherDocumentsUploaded)
                     .publish(false);
     }

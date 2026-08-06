@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.OrdersHearingPageFieldShowParams;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -27,36 +26,34 @@ public final class AdminEditAndApproveAnOrderPage4 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("4");
         fields.showCondition("orderUploadedAsDraftFlag!=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderName)
+        fields.readonlyNoSummary(CaseData::getOrderName)
                     .fieldShowCondition("doYouWantToEditTheOrder=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getJudgeNotesEmptyDraftJourney)
+                    .publish(false);
+        fields.readonly(CaseData::getJudgeNotesEmptyDraftJourney)
                     .fieldShowCondition("orderName=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getPreviewDraftOrderLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getPreviewDraftOrderWelsh)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getPreviewDraftOrder)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getOrderNameEditScreenLabel)
-                    .publish(false).done();
+                    .publish(false);
+        fields.readonly(CaseData::getPreviewDraftOrderLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getPreviewDraftOrderWelsh)
+                    .publish(false);
+        fields.readonly(CaseData::getPreviewDraftOrder)
+                    .publish(false);
+        fields.readonly(CaseData::getOrderNameEditScreenLabel)
+                    .publish(false);
         fields.mandatory(CaseData::getDoYouWantToEditTheOrder)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getInstructionsFromJudge)
+        fields.readonly(CaseData::getInstructionsFromJudge)
                     .fieldShowCondition("judgeNotesEmptyDraftJourney!=\"Yes\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getOrderType)
+                    .publish(false);
+        fields.readonly(CaseData::getOrderType)
                     .fieldShowCondition("doYouWantToEditTheOrder=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getIsOrderCreatedBySolicitor)
+                    .publish(false);
+        fields.mandatory(CaseData::getIsOrderCreatedBySolicitor)
                     .fieldShowCondition("doYouWantToEditTheOrder=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .mandatoryNoSummary(CaseDataExtra::getIsHearingPageNeeded)
+                    .publish(false);
+        fields.mandatoryNoSummary(CaseData::getIsHearingPageNeeded)
                     .fieldShowCondition("doYouWantToEditTheOrder=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getOrdersHearingPageFieldShowParams)
                     .optionalNoSummary(OrdersHearingPageFieldShowParams::getIsCafcassCymru)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")

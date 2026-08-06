@@ -36,6 +36,17 @@ import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersPage6;
 import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersPage7;
 import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersPage8;
 import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersPage9;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes1;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes10;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes11;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes2;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes3;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes4;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes5;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes6;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes7;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes8;
+import uk.gov.hmcts.reform.prl.ccd.event.page.ManageOrdersScopes9;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -99,5 +110,16 @@ public class ManageOrders implements CCDConfig<CaseData, State, UserRole> {
         ManageOrdersPage17.apply(fields);
         ManageOrdersPage18.apply(fields);
         ManageOrdersPage19.apply(fields);
+        ManageOrdersScopes1.apply(fields);
+        ManageOrdersScopes2.apply(fields);
+        ManageOrdersScopes3.apply(fields);
+        ManageOrdersScopes4.apply(fields);
+        ManageOrdersScopes5.apply(fields);
+        ManageOrdersScopes6.apply(fields);
+        ManageOrdersScopes7.apply(fields);
+        ManageOrdersScopes8.apply(fields);
+        ManageOrdersScopes9.apply(fields);
+        ManageOrdersScopes10.apply(fields);
+        ManageOrdersScopes11.apply(fields);
     }
 }

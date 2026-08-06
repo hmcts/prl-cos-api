@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.ccd.event.page.AllegationsOfHarmPage2;
 import uk.gov.hmcts.reform.prl.ccd.event.page.AllegationsOfHarmPage3;
 import uk.gov.hmcts.reform.prl.ccd.event.page.AllegationsOfHarmPage4;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -46,5 +48,17 @@ public class AllegationsOfHarm implements CCDConfig<CaseData, State, UserRole> {
         AllegationsOfHarmPage2.apply(fields);
         AllegationsOfHarmPage3.apply(fields);
         AllegationsOfHarmPage4.apply(fields);
+        fields.complex(CaseData::getAllegationOfHarm)
+                    .complex(AllegationOfHarm::getBehaviours, Behaviours.class)
+                    .optional(Behaviours::getBehavioursDescriptionLabel)
+                    .optional(Behaviours::getAbuseNatureDescription)
+                    .optional(Behaviours::getBehavioursStartDateAndLength)
+                    .optional(Behaviours::getBehavioursNature)
+                    .optional(Behaviours::getBehavioursApplicantSoughtHelp)
+                    .optional(Behaviours::getBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("behaviours.behavioursApplicantSoughtHelp=\"Yes\"")
+                    .optional(Behaviours::getBehavioursApplicantHelpAction)
+                    .fieldShowCondition("behaviours.behavioursApplicantSoughtHelp=\"Yes\"")
+                    .readonly(Behaviours::getAddNewBehaviourLabel).done().done();
     }
 }

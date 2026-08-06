@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 
 import java.time.LocalDate;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "respondentBailConditionDetails", generate = true)
 @Data
 @Builder(toBuilder = true)
 public class RespondentBailConditionDetails {

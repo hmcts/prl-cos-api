@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "draftAnOrder",
-  "CaseFieldID" : "sdoDisclosureOfPapersCaseNumbers",
-  "ListElementCode" : "caseNumber",
-  "CaseTypeID" : "PRLAPPS"
-} ]

@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -42,10 +42,21 @@ public class AmendChildrenAndRespondents implements CCDConfig<CaseData, State, U
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getChildAndRespondentRelationsLabel)
-                    .readonlyNoSummary(CaseDataExtra::getChildAndRespondentRelationsSubLabel).done();
+        fields.readonlyNoSummary(CaseData::getChildAndRespondentRelationsLabel);
+        fields.readonlyNoSummary(CaseData::getChildAndRespondentRelationsSubLabel);
         fields.complex(CaseData::getRelations)
                     .optional(Relations::getBuffChildAndRespondentRelations).done();
+        fields.complex(CaseData::getRelations)
+                    .complex(Relations::getBuffChildAndRespondentRelations, ChildrenAndRespondentRelation.class)
+                    .readonly(ChildrenAndRespondentRelation::getRespondentFullName)
+                    .readonly(ChildrenAndRespondentRelation::getChildFullName)
+                    .mandatory(ChildrenAndRespondentRelation::getChildAndRespondentRelation)
+                    .mandatory(ChildrenAndRespondentRelation::getChildAndRespondentRelationOtherDetails)
+                    .fieldShowCondition("buffChildAndRespondentRelations.childAndRespondentRelation=\"other\"")
+                    .mandatory(ChildrenAndRespondentRelation::getChildLivesWith)
+                    .mandatory(ChildrenAndRespondentRelation::getRespondentId)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .mandatory(ChildrenAndRespondentRelation::getChildId)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done().done();
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -26,15 +25,13 @@ public final class C100ResSolKeepDetailsPrivateCPage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("keepContactDetailsPrivate.confidentiality=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel2)
-                    .readonlyNoSummary(CaseDataExtra::getKeepDetailsPrivateSummaryHeading).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel2);
+        fields.readonlyNoSummary(CaseData::getKeepDetailsPrivateSummaryHeading);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getConfidentialListDetails)
                     .fieldShowCondition("keepDetailsPrivateSummary=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getKeepDetailsPrivateSummary)
-                    .readonlyNoSummary(CaseDataExtra::getCourtActionHeading)
-                    .readonlyNoSummary(CaseDataExtra::getCourtAction).done();
+        fields.readonlyNoSummary(CaseData::getKeepDetailsPrivateSummary);
+        fields.readonlyNoSummary(CaseData::getCourtActionHeading);
+        fields.readonlyNoSummary(CaseData::getCourtAction);
     }
 }

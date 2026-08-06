@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Value;
-import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "BundleFolder", generate = false)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Value
 @Builder(toBuilder = true)
 public class BundleFolder {
-    @CCD(ignore = true)
     private BundleFolderDetails value;
 
     @JsonCreator

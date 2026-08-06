@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,19 +41,18 @@ public class Fl401SendToGateKeeper implements CCDConfig<CaseData, State, UserRol
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER, UserRole.CASEWORKER_WA_TASK_CONFIGURATION, UserRole.CITIZEN, UserRole.COURTNAV)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLetGateKeepersKnowLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSendToGateKeeperHint)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getIsSpecificGateKeeperNeeded)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getIsJudgeOrLegalAdviserGatekeeping)
+        fields.readonly(CaseData::getLetGateKeepersKnowLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSendToGateKeeperHint)
+                    .publish(false);
+        fields.mandatory(CaseData::getIsSpecificGateKeeperNeeded)
+                    .publish(false);
+        fields.mandatory(CaseData::getIsJudgeOrLegalAdviserGatekeeping)
                     .fieldShowCondition("isSpecificGateKeeperNeeded=\"Yes\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getJudgeName)
+                    .publish(false);
+        fields.mandatory(CaseData::getJudgeName)
                     .fieldShowCondition("isSpecificGateKeeperNeeded=\"Yes\" AND isJudgeOrLegalAdviserGatekeeping=\"judge\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getLegalAdviserList)
                     .fieldShowCondition("isSpecificGateKeeperNeeded=\"Yes\" AND isJudgeOrLegalAdviserGatekeeping=\"legalAdviser\"")
                     .publish(false);

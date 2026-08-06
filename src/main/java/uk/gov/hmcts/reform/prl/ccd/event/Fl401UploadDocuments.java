@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,12 +39,10 @@ public class Fl401UploadDocuments implements CCDConfig<CaseData, State, UserRole
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getFl401UploadDocumentWitness)
-                    .readonly(CaseDataExtra::getFl401UploadDocumentWitnessLabel).done();
+        fields.readonly(CaseData::getFl401UploadDocumentWitness);
+        fields.readonly(CaseData::getFl401UploadDocumentWitnessLabel);
         fields.mandatory(CaseData::getFl401UploadWitnessDocuments);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getFl401UploadDocumentSupport).done();
+        fields.readonly(CaseData::getFl401UploadDocumentSupport);
         fields.optional(CaseData::getFl401UploadSupportDocuments);
     }
 }

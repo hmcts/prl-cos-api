@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,15 +25,13 @@ public final class AmendMiamPolicyUpgradePage8 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("8");
         fields.showCondition("mpuApplicantAttendedMiam=\"Yes\" AND mpuChildInvolvedInMiam=\"No\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo7)
-                    .readonlyNoSummary(CaseDataExtra::getMiamCertificationPageLabel).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo7);
+        fields.readonlyNoSummary(CaseData::getMiamCertificationPageLabel);
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getMediatorRegistrationNumber)
                     .mandatory(MiamDetails::getFamilyMediatorServiceName)
                     .mandatory(MiamDetails::getSoleTraderName).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getMiamCertificationPageMessage).done();
+        fields.readonlyNoSummary(CaseData::getMiamCertificationPageMessage);
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getMiamCertificationDocumentUpload).done();
     }

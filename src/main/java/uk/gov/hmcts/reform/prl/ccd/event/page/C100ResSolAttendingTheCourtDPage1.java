@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -28,9 +27,8 @@ public final class C100ResSolAttendingTheCourtDPage1 {
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getRespondentAttendingTheCourt).done();
     }

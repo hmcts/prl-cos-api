@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -29,11 +28,10 @@ public final class EditReturnedOrderProdPage1 {
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getRejectedOrdersDynamicList)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getIsHearingPageNeeded)
+        fields.optionalNoSummary(CaseData::getIsHearingPageNeeded)
                     .fieldShowCondition("rejectedOrdersDynamicList=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .readonly(StandardDirectionOrder::getSdoPreamblesTempList)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
@@ -71,9 +69,8 @@ public final class EditReturnedOrderProdPage1 {
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getDraftOrderCollectionId)
+        fields.optionalNoSummary(CaseData::getDraftOrderCollectionId)
                     .fieldShowCondition("rejectedOrdersDynamicList=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
     }
 }

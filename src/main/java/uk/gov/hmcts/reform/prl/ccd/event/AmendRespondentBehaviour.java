@@ -1,5 +1,4 @@
 package uk.gov.hmcts.reform.prl.ccd.event;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -7,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -41,8 +40,7 @@ public class AmendRespondentBehaviour implements CCDConfig<CaseData, State, User
             .grant(Permission.CRUD, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentBehaviourData)
                     .optional(RespondentBehaviour::getApplicantWantToStopFromRespondentDoing)
                     .optional(RespondentBehaviour::getApplicantWantToStopFromRespondentDoingToChild)

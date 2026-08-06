@@ -1,26 +1,28 @@
 [ {
+  "LiveFrom" : "29/01/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "withDrawApplicationObject",
   "CaseEventID" : "WithdrawApplication_Event",
   "CaseFieldID" : "withDrawApplicationData",
   "ListElementCode" : "withDrawApplicationHeadingLabel",
-  "CaseTypeID" : "PRLAPPS"
+  "FieldDisplayOrder" : "1",
+  "DisplayContext" : "MANDATORY"
 }, {
+  "LiveFrom" : "29/01/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "withDrawApplicationObject",
   "CaseEventID" : "WithdrawApplication_Event",
   "CaseFieldID" : "withDrawApplicationData",
   "ListElementCode" : "withDrawApplicationWarning",
-  "CaseTypeID" : "PRLAPPS"
+  "FieldDisplayOrder" : "2",
+  "DisplayContext" : "MANDATORY"
 }, {
+  "LiveFrom" : "29/01/2022",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "withDrawApplicationObject",
   "CaseEventID" : "WithdrawApplication_Event",
   "CaseFieldID" : "withDrawApplicationData",
   "ListElementCode" : "withDrawApplicationCourtInfo",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "WithdrawApplication_Event",
-  "CaseFieldID" : "withDrawApplicationData",
-  "ListElementCode" : "withDrawApplication",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "WithdrawApplication_Event",
-  "CaseFieldID" : "withDrawApplicationData",
-  "ListElementCode" : "withDrawApplicationReason",
-  "CaseTypeID" : "PRLAPPS"
+  "FieldDisplayOrder" : "3",
+  "DisplayContext" : "MANDATORY"
 } ]

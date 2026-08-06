@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.EnvironmentFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -43,10 +42,8 @@ public class AdminRemoveLegalRepresentativeC100Prod implements CCDConfig<CaseDat
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER, UserRole.CASEWORKER_WA_TASK_CONFIGURATION, UserRole.CITIZEN)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getRemoveLegalRepHeader).done();
+        fields.readonlyNoSummary(CaseData::getRemoveLegalRepHeader);
         fields.mandatory(CaseData::getRemoveLegalRepAndPartiesList);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getRemoveLegalRepInfo).done();
+        fields.readonlyNoSummary(CaseData::getRemoveLegalRepInfo);
     }
 }

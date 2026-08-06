@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,19 +25,18 @@ public final class EditAndApproveAnOrderPage6 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("6");
         fields.showCondition("doYouWantToEditTheOrder=\"Yes\" AND orderType!=\"childArrangementsSpecificProhibitedOrder\" AND  orderType!=\"parentalResponsibility\" AND orderType!=\"specialGuardianShip\" AND orderType!=\"appointmentOfGuardian\" AND orderType!=\"generalForm\" AND orderType!=\"noticeOfProceedings\" AND orderType!=\"blankOrderOrDirections\" AND orderType!=\"blankOrderOrDirectionsWithdraw\" AND orderType!=\"standardDirectionsOrder\" AND orderType!=\"noticeOfProceedingsParties\" AND orderType!=\"noticeOfProceedingsNonParties\" AND orderUploadedAsDraftFlag!=\"Yes\" AND orderUploadedAsDraftFlag!=\"\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getAmendedOrderLabel)
+        fields.readonlyNoSummary(CaseData::getAmendedOrderLabel)
                     .fieldShowCondition("orderType=\"amendDischargedVaried\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getBlankOrderLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getBlankOrderLabel)
                     .fieldShowCondition("orderType=\"blank\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getFl404OccupationLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getFl404OccupationLabel)
                     .fieldShowCondition("orderType=\"occupation\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getFl404nonMolestationLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getFl404nonMolestationLabel)
                     .fieldShowCondition("orderType=\"nonMolestation\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .optional(ManageOrders::getFl404CustomFields)
                     .publish(false).done();

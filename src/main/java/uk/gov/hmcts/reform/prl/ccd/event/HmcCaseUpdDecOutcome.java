@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -45,8 +44,7 @@ public class HmcCaseUpdDecOutcome implements CCDConfig<CaseData, State, UserRole
                     .fieldShowCondition("courtName=\"DO_NOT_SHOW\"");
         fields.mandatoryNoSummary(CaseData::getCourtName)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getPerformingUser)
-                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"").done();
+        fields.mandatoryNoSummary(CaseData::getPerformingUser)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"");
     }
 }

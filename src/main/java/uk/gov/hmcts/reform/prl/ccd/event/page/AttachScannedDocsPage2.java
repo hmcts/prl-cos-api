@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,9 +25,8 @@ public final class AttachScannedDocsPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.pageLabel("BulkScanning");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getEvidenceHandled)
-                    .publish(false).done();
+        fields.mandatoryNoSummary(CaseData::getEvidenceHandled)
+                    .publish(false);
         fields.complex(CaseData::getDocumentManagementDetails)
                     .optionalNoSummary(DocumentManagementDetails::getManageDocumentsRestrictedFlag)
                     .fieldShowCondition("scannedDocuments = \"DO_NOT_SHOW\"").done();

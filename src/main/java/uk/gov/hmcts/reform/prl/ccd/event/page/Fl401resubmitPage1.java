@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,8 +24,18 @@ public final class Fl401resubmitPage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getFl401StmtOfTruthResubmit)
-                    .publish(false).done();
+        fields.complex(CaseData::getFl401StmtOfTruthResubmit)
+                    .readonly(StatementOfTruth::getProceedingsLabel)
+                    .eventLabel(" ")
+                    .mandatory(StatementOfTruth::getApplicantConsent)
+                    .eventLabel(" ")
+                    .mandatory(StatementOfTruth::getDate)
+                    .eventLabel(" ")
+                    .mandatory(StatementOfTruth::getFullname)
+                    .eventLabel(" ")
+                    .mandatory(StatementOfTruth::getNameOfFirm)
+                    .eventLabel(" ")
+                    .mandatory(StatementOfTruth::getSignOnBehalf)
+                    .eventLabel(" ").done();
     }
 }

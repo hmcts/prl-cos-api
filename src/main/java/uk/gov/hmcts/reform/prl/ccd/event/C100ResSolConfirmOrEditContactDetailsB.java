@@ -6,8 +6,11 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -45,10 +48,67 @@ public class C100ResSolConfirmOrEditContactDetailsB implements CCDConfig<CaseDat
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getResSolConfirmEditContactDetails).done();
+        fields.complex(CaseData::getRespondentSolicitorData)
+                    .complexScope(RespondentSolicitorData::getResSolConfirmEditContactDetails)
+                    .optional(CitizenDetails::getFirstName)
+                    .optional(CitizenDetails::getLastName)
+                    .optional(CitizenDetails::getPreviousName)
+                    .optional(CitizenDetails::getDateOfBirth)
+                    .optional(CitizenDetails::getPlaceOfBirth)
+                    .mandatory(CitizenDetails::getLiveInRefuge)
+                    .mandatory(CitizenDetails::getRefugeConfidentialityC8Form)
+                    .fieldShowCondition("resSolConfirmEditContactDetails.liveInRefuge=\"DO_NOT_SHOW\"")
+                    .optional(CitizenDetails::getAddress)
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getAddressLine1).done()
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getAddressLine2).done()
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getAddressLine3).done()
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getPostTown).done()
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getCounty).done()
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getPostCode).done()
+                    .complex(CitizenDetails::getAddress)
+                    .optional(Address::getCountry).done()
+                    .optional(CitizenDetails::getAddressHistory)
+                    .complex(CitizenDetails::getAddressHistory)
+                    .optional(AddressHistory::getIsAtAddressLessThan5Years).done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .readonly(AddressHistory::getDetailsOfAddressHistoryLabel).done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .optional(AddressHistory::getPreviousAddressHistory).done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getAddressLine1).done().done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getAddressLine2).done().done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getAddressLine3).done().done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getPostTown).done().done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getCounty).done().done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getPostCode).done().done()
+                    .complex(CitizenDetails::getAddressHistory)
+                    .complex(AddressHistory::getPreviousAddressHistory, Address.class)
+                    .optional(Address::getCountry).done().done()
+                    .optional(CitizenDetails::getContact)
+                    .complex(CitizenDetails::getContact)
+                    .optional(Contact::getPhoneNumber).done()
+                    .complex(CitizenDetails::getContact)
+                    .optional(Contact::getEmail).done().done().done();
     }
 }

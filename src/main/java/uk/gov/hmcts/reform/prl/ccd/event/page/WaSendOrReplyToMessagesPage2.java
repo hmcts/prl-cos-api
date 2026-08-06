@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 
@@ -26,12 +25,11 @@ public final class WaSendOrReplyToMessagesPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("chooseSendOrReply=\"SEND\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSendingMessagesLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSendingMessagesHint)
+        fields.readonlyNoSummary(CaseData::getSendingMessagesLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSendingMessagesHint)
                     .fieldShowCondition("chooseSendOrReply=\"SEND\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getSendOrReplyMessage)
                     .optional(SendOrReplyMessage::getSendMessageObject)
                     .fieldShowCondition("chooseSendOrReply=\"SEND\"")

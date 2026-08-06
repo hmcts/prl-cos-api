@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -42,10 +42,23 @@ public class AmendChildrenAndOtherPeople implements CCDConfig<CaseData, State, U
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getChildAndOtherPeopleRelationsLabel)
-                    .readonlyNoSummary(CaseDataExtra::getChildAndOtherPeopleRelationsSubLabel).done();
+        fields.readonlyNoSummary(CaseData::getChildAndOtherPeopleRelationsLabel);
+        fields.readonlyNoSummary(CaseData::getChildAndOtherPeopleRelationsSubLabel);
         fields.complex(CaseData::getRelations)
                     .optional(Relations::getBuffChildAndOtherPeopleRelations).done();
+        fields.complex(CaseData::getRelations)
+                    .complex(Relations::getBuffChildAndOtherPeopleRelations, ChildrenAndOtherPeopleRelation.class)
+                    .readonly(ChildrenAndOtherPeopleRelation::getOtherPeopleFullName)
+                    .readonly(ChildrenAndOtherPeopleRelation::getChildFullName)
+                    .mandatory(ChildrenAndOtherPeopleRelation::getChildAndOtherPeopleRelation)
+                    .mandatory(ChildrenAndOtherPeopleRelation::getChildAndOtherPeopleRelationOtherDetails)
+                    .fieldShowCondition("buffChildAndOtherPeopleRelations.childAndOtherPeopleRelation=\"other\"")
+                    .mandatory(ChildrenAndOtherPeopleRelation::getChildLivesWith)
+                    .mandatory(ChildrenAndOtherPeopleRelation::getIsChildLivesWithPersonConfidential)
+                    .fieldShowCondition("buffChildAndOtherPeopleRelations.childLivesWith=\"Yes\"")
+                    .mandatory(ChildrenAndOtherPeopleRelation::getOtherPeopleId)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .mandatory(ChildrenAndOtherPeopleRelation::getChildId)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done().done();
     }
 }

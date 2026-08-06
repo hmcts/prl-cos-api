@@ -1,7 +1,4 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder;
-import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
-import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -14,9 +11,12 @@ import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 
 import java.util.List;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotApplicable;
+import uk.gov.hmcts.reform.prl.enums.serveorder.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
+import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 
 @Data
 @AllArgsConstructor

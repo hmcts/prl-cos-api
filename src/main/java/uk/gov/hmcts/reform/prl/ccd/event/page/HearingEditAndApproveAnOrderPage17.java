@@ -27,5 +27,11 @@ public final class HearingEditAndApproveAnOrderPage17 {
         HearingEditAndApproveAnOrderPage17Fields1.apply(fields);
         HearingEditAndApproveAnOrderPage17Fields2.apply(fields);
         HearingEditAndApproveAnOrderPage17Fields3.apply(fields);
+        HearingEditAndApproveAnOrderPage17Fields4.apply(fields);
+        HearingEditAndApproveAnOrderPage17Fields5.apply(fields);
+        HearingEditAndApproveAnOrderPage17Fields6.apply(fields);
+        HearingEditAndApproveAnOrderPage17Fields7.apply(fields);
+        HearingEditAndApproveAnOrderPage17Fields8.apply(fields);
+        HearingEditAndApproveAnOrderPage17Fields9.apply(fields);
     }
 }

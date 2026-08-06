@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,15 +25,14 @@ public final class AdminEditAndApproveAnOrderPage16 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("16");
         fields.showCondition("doYouWantToEditTheOrder=\"Yes\" AND orderType=\"standardDirectionsOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoDirectionsCaseNeedsLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSdoFactFindingFlag)
+        fields.readonly(CaseData::getSdoDirectionsCaseNeedsLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSdoFactFindingFlag)
                     .fieldShowCondition("sdoDirectionsCaseNeedsLabel=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSdoFactFindingHintText)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSdoFactFindingHintText)
                     .fieldShowCondition("sdoFactFindingFlag!=\"\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoPreamblesList)
                     .publish(false)

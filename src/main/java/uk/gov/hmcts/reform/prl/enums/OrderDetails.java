@@ -1,6 +1,4 @@
 package uk.gov.hmcts.reform.prl.enums;
-import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,6 +13,8 @@ import uk.gov.hmcts.ccd.sdk.type.FieldType;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildArrangementOrderTypeEnum2;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.FL400;

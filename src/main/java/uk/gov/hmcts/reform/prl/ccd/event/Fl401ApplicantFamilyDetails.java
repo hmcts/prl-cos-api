@@ -1,5 +1,4 @@
 package uk.gov.hmcts.reform.prl.ccd.event;
-import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -7,9 +6,9 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantFamilyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.FL401ApplicantChildDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -43,17 +42,16 @@ public class Fl401ApplicantFamilyDetails implements CCDConfig<CaseData, State, U
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getApplicantFamilyDetails)
                     .mandatory(ApplicantFamilyDetails::getDoesApplicantHaveChildren).done();
         fields.complex(CaseData::getApplicantChildDetails).done()
                     .fieldShowCondition("applicantFamilyDetails.doesApplicantHaveChildren = \"Yes\"");
-        fields.complex(CaseData::getApplicantChildDetails, FL401ApplicantChildDetails.class)
-                    .optional(FL401ApplicantChildDetails::getFullName)
-                    .optional(FL401ApplicantChildDetails::getDateOfBirth)
-                    .optional(FL401ApplicantChildDetails::getApplicantChildRelationship)
-                    .optional(FL401ApplicantChildDetails::getApplicantRespondentShareParental)
-                    .optional(FL401ApplicantChildDetails::getRespondentChildRelationship).done();
+        fields.complex(CaseData::getApplicantChildDetails, ApplicantChild.class)
+                    .optional(ApplicantChild::getFullName)
+                    .optional(ApplicantChild::getDateOfBirth)
+                    .optional(ApplicantChild::getApplicantChildRelationship)
+                    .optional(ApplicantChild::getApplicantRespondentShareParental)
+                    .optional(ApplicantChild::getRespondentChildRelationship).done();
     }
 }

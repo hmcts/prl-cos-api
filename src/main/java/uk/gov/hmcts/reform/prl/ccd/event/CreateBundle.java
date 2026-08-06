@@ -7,7 +7,7 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CreateBundleTransitionDetailsObject;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,12 +40,15 @@ public class CreateBundle implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getCreateBundleSubmitLabel)
-                    .fieldShowCondition("[STATE] = \"PREPARE_FOR_HEARING_CONDUCT_HEARING\" OR [STATE] = \"DECISION_OUTCOME\"")
-                    .readonlyNoSummary(CaseDataExtra::getBundleCreationSubmittedWhatHappensNext)
-                    .fieldShowCondition("[STATE] = \"PREPARE_FOR_HEARING_CONDUCT_HEARING\" OR [STATE] = \"DECISION_OUTCOME\"")
-                    .readonlyNoSummary(CaseDataExtra::getBundleCreationSubmittedWhatHappensNextLabel)
-                    .fieldShowCondition("[STATE] = \"PREPARE_FOR_HEARING_CONDUCT_HEARING\" OR [STATE] = \"DECISION_OUTCOME\"").done();
+        fields.readonlyNoSummary(CaseData::getCreateBundleSubmitLabel)
+                    .fieldShowCondition("[STATE] = \"PREPARE_FOR_HEARING_CONDUCT_HEARING\" OR [STATE] = \"DECISION_OUTCOME\"");
+        fields.readonlyNoSummary(CaseData::getBundleCreationSubmittedWhatHappensNext)
+                    .fieldShowCondition("[STATE] = \"PREPARE_FOR_HEARING_CONDUCT_HEARING\" OR [STATE] = \"DECISION_OUTCOME\"");
+        fields.readonlyNoSummary(CaseData::getBundleCreationSubmittedWhatHappensNextLabel)
+                    .fieldShowCondition("[STATE] = \"PREPARE_FOR_HEARING_CONDUCT_HEARING\" OR [STATE] = \"DECISION_OUTCOME\"");
+        fields.complexScope(CaseData::getCreateBundleTransitionDetails)
+                    .readonly(CreateBundleTransitionDetailsObject::getCreateBundleSubmitLabel)
+                    .readonly(CreateBundleTransitionDetailsObject::getBundleCreationSubmittedWhatHappensNext)
+                    .readonly(CreateBundleTransitionDetailsObject::getBundleCreationSubmittedWhatHappensNextLabel).done();
     }
 }

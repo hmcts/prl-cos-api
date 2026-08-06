@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,10 +24,9 @@ public final class DraftAnOrderPage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("draftOrderOptions=\"uploadAnOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getUploadAnOrder)
+        fields.readonly(CaseData::getUploadAnOrder)
                     .fieldShowCondition("draftOrderOptions=\"uploadAnOrder\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.optional(CaseData::getChildArrangementOrders)
                     .fieldShowCondition("draftOrderOptions=\"uploadAnOrder\"")
                     .publish(false);
@@ -44,9 +42,8 @@ public final class DraftAnOrderPage3 {
         fields.mandatory(CaseData::getNameOfOrder)
                     .fieldShowCondition("otherOrdersOption=\"other\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getIsTheOrderUploadedByConsent)
+        fields.mandatory(CaseData::getIsTheOrderUploadedByConsent)
                     .fieldShowCondition("draftOrderOptions=\"uploadAnOrder\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

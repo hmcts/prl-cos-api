@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -45,17 +44,15 @@ public class C100ResSolViewResponseDraftDocumentD implements CCDConfig<CaseData,
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonlyNoSummary(CaseDataExtra::getViewPdfResponseLabel)
-                    .readonlyNoSummary(CaseDataExtra::getLinkToDownloadC7Response)
-                    .readonlyNoSummary(CaseDataExtra::getLinkToDownloadC7ResponseLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonlyNoSummary(CaseData::getViewPdfResponseLabel);
+        fields.readonlyNoSummary(CaseData::getLinkToDownloadC7Response);
+        fields.readonlyNoSummary(CaseData::getLinkToDownloadC7ResponseLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getDraftC1ADoc)
                     .fieldShowCondition("linkToDownloadC7ResponseLabel=\"DO NOT SHOW\"")
                     .readonly(RespondentSolicitorData::getDraftC7ResponseDoc).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDraftC7WelshResponseDoc).done();
+        fields.readonly(CaseData::getDraftC7WelshResponseDoc);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getDraftC1ADocWelsh)
                     .fieldShowCondition("linkToDownloadC7ResponseLabel=\"DO NOT SHOW\"").done();

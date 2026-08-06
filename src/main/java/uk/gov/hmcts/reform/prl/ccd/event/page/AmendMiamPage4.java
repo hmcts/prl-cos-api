@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,10 +25,9 @@ public final class AmendMiamPage4 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("4");
         fields.showCondition("claimingExemptionMiam=\"Yes\" AND applicantAttendedMiam=\"No\" AND familyMediatorMiam=\"No\" AND miamExemptionsChecklist  CONTAINS \"urgency\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo4)
-                    .readonly(CaseDataExtra::getMiamUrgencyReasonLabel)
-                    .readonly(CaseDataExtra::getMiamUrgencyReasonSelectAll).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo4);
+        fields.readonly(CaseData::getMiamUrgencyReasonLabel);
+        fields.readonly(CaseData::getMiamUrgencyReasonSelectAll);
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getMiamUrgencyReasonChecklist).done();
     }

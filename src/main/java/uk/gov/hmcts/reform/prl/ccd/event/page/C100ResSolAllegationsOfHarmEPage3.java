@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -27,10 +26,9 @@ public final class C100ResSolAllegationsOfHarmEPage3 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
         fields.showCondition("respAohDomesticAbuseYesNo=\"Yes\" AND respAohYesOrNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel2)
-                    .readonly(CaseDataExtra::getRespDomesticAbuseBehavioursLabel)
-                    .readonly(CaseDataExtra::getRespDomesticAbuseBehavioursSubLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel2);
+        fields.readonly(CaseData::getRespDomesticAbuseBehavioursLabel);
+        fields.readonly(CaseData::getRespDomesticAbuseBehavioursSubLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .optional(RespondentAllegationsOfHarmData::getRespDomesticBehaviours).done().done();

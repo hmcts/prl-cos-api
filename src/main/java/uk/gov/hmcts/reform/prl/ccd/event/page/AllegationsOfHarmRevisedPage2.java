@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,9 +25,8 @@ public final class AllegationsOfHarmRevisedPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("newAllegationsOfHarmYesNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getNewAllegationsOfHarmLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getNewAllegationsOfHarmLabel)
+                    .publish(false);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmDomesticAbuseYesNo)
                     .publish(false)
@@ -46,11 +44,10 @@ public final class AllegationsOfHarmRevisedPage2 {
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmOtherConcernsDetails)
                     .fieldShowCondition("newAllegationsOfHarmOtherConcerns=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getNewAllegationOfHarmOrdersLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getNewAllegationOfHarmOrdersLabelDetail)
-                    .publish(false).done();
+        fields.readonly(CaseData::getNewAllegationOfHarmOrdersLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getNewAllegationOfHarmOrdersLabelDetail)
+                    .publish(false);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewOrdersNonMolestation)
                     .publish(false)

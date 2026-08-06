@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewRaRequestWrapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -41,9 +40,8 @@ public class C100ReviewRARequest implements CCDConfig<CaseData, State, UserRole>
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_WA_TASK_CONFIGURATION)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getFlagLauncherInternal)
-                    .displayContextParameter("#ARGUMENT(UPDATE,VERSION2.1)").done();
+        fields.optional(CaseData::getFlagLauncherInternal)
+                    .displayContextParameter("#ARGUMENT(UPDATE,VERSION2.1)");
         fields.complex(CaseData::getReviewRaRequestWrapper)
                     .optional(ReviewRaRequestWrapper::getSelectedFlags)
                     .fieldShowCondition("flagLauncherInternal=\"DUMMY_VALUE_TO_HIDE_FIELD\"")

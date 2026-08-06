@@ -96,9 +96,9 @@ public class Response {
   @CCD(label = " ", searchable = false)
   private KeepDetailsPrivate respKeepDetailsPrivateConfidentiality;
   @CCD(label = " ", searchable = false)
-  private uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam respSolHaveYouAttendedMiam;
+  private Miam respSolHaveYouAttendedMiam;
   @CCD(label = " ", searchable = false)
-  private uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Miam respSolWillingnessToAttendMiam;
+  private Miam respSolWillingnessToAttendMiam;
   @CCD(label = " ", searchable = false)
   private RespondentAllegationsOfHarm respAllegationsOfHarmInfo;
   @CCD(label = " ", searchable = false)

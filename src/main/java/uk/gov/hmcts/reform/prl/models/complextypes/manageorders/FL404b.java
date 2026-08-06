@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import java.time.LocalDate;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FL404B", generate = true)
 @Builder(toBuilder = true)
 @Data
 public class FL404b {

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,14 +23,12 @@ public final class SelectApplicationTypePage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.mandatory(CaseData::getOrdersApplyingFor);
         fields.mandatory(CaseData::getTypeOfChildArrangementsOrder)
                     .fieldShowCondition("ordersApplyingFor CONTAINS \"childArrangementsOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getNatureOfOrderLabel)
-                    .fieldShowCondition("ordersApplyingFor!=\"\"").done();
+        fields.readonly(CaseData::getNatureOfOrderLabel)
+                    .fieldShowCondition("ordersApplyingFor!=\"\"");
         fields.mandatory(CaseData::getNatureOfOrder)
                     .fieldShowCondition("ordersApplyingFor!=\"\"");
     }

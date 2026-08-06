@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -25,23 +24,20 @@ public final class ReviewDocumentsPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getReviewDocsLabel3)
-                    .readonly(CaseDataExtra::getReviewDocsLabel4).done();
+        fields.readonly(CaseData::getReviewDocsLabel3);
+        fields.readonly(CaseData::getReviewDocsLabel4);
         fields.complex(CaseData::getReviewDocuments)
                     .readonly(ReviewDocuments::getDocToBeReviewed)
                     .fieldShowCondition("[STATE]=\"DONT_SHOW\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDocToBeReviewedLabel).done();
+        fields.readonly(CaseData::getDocToBeReviewedLabel);
         fields.complex(CaseData::getReviewDocuments)
                     .mandatory(ReviewDocuments::getDocumentCategories).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getQuarantineInformation)
-                    .fieldShowCondition("[STATE]=\"DONT_SHOW\"")
-                    .readonly(CaseDataExtra::getQuarantineInformationLabel)
-                    .readonly(CaseDataExtra::getDocLabel)
-                    .fieldShowCondition("[STATE]=\"DONT_SHOW\"")
-                    .readonly(CaseDataExtra::getShowLabel).done();
+        fields.readonly(CaseData::getQuarantineInformation)
+                    .fieldShowCondition("[STATE]=\"DONT_SHOW\"");
+        fields.readonly(CaseData::getQuarantineInformationLabel);
+        fields.readonly(CaseData::getDocLabel)
+                    .fieldShowCondition("[STATE]=\"DONT_SHOW\"");
+        fields.readonly(CaseData::getShowLabel);
         fields.complex(CaseData::getReviewDocuments)
                     .readonly(ReviewDocuments::getReviewDoc)
                     .optional(ReviewDocuments::getDocumentNewName)

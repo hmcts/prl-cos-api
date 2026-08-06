@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,11 +24,10 @@ public final class WaManageOrdersPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("manageOrdersOptions=\"createAnOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCreateAnOrderLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getUploadHintLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getCreateAnOrderLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getUploadHintLabel)
+                    .publish(false);
         fields.mandatory(CaseData::getCreateSelectOrderOptions)
                     .publish(false);
         fields.readonly(CaseData::getSelectedOrder)

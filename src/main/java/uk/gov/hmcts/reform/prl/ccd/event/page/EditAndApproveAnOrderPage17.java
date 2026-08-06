@@ -27,5 +27,11 @@ public final class EditAndApproveAnOrderPage17 {
         EditAndApproveAnOrderPage17Fields1.apply(fields);
         EditAndApproveAnOrderPage17Fields2.apply(fields);
         EditAndApproveAnOrderPage17Fields3.apply(fields);
+        EditAndApproveAnOrderPage17Fields4.apply(fields);
+        EditAndApproveAnOrderPage17Fields5.apply(fields);
+        EditAndApproveAnOrderPage17Fields6.apply(fields);
+        EditAndApproveAnOrderPage17Fields7.apply(fields);
+        EditAndApproveAnOrderPage17Fields8.apply(fields);
+        EditAndApproveAnOrderPage17Fields9.apply(fields);
     }
 }

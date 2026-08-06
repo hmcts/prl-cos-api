@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,8 +39,7 @@ public class DeleteApplication implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDeleteApplicationNote)
-                    .mandatory(CaseDataExtra::getDeletionConsent).done();
+        fields.readonly(CaseData::getDeleteApplicationNote);
+        fields.mandatory(CaseData::getDeletionConsent);
     }
 }

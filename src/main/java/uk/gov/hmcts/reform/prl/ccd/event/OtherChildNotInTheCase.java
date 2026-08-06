@@ -6,9 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,20 +41,18 @@ public class OtherChildNotInTheCase implements CCDConfig<CaseData, State, UserRo
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.mandatory(CaseData::getChildrenNotPartInTheCaseYesNo);
         fields.complex(CaseData::getChildrenNotInTheCase).done()
                     .fieldShowCondition("childrenNotPartInTheCaseYesNo=\"Yes\"");
-        fields.complex(CaseData::getChildrenNotInTheCase, ChildrenNotInTheCase.class)
-                    .mandatory(ChildrenNotInTheCase::getFirstName)
-                    .mandatory(ChildrenNotInTheCase::getLastName)
-                    .mandatory(ChildrenNotInTheCase::getGender)
-                    .optional(ChildrenNotInTheCase::getOtherGender)
+        fields.complex(CaseData::getChildrenNotInTheCase, OtherChildrenNotInTheCase.class)
+                    .mandatory(OtherChildrenNotInTheCase::getFirstName)
+                    .mandatory(OtherChildrenNotInTheCase::getLastName)
+                    .mandatory(OtherChildrenNotInTheCase::getGender)
+                    .optional(OtherChildrenNotInTheCase::getOtherGender)
                     .fieldShowCondition("childrenNotInTheCase.gender=\"other\"")
-                    .mandatory(ChildrenNotInTheCase::getIsDateOfBirthKnown)
-                    .mandatory(ChildrenNotInTheCase::getDateOfBirth)
-                    .fieldShowCondition("childrenNotInTheCase.isDateOfBirthKnown=\"Yes\"")
-                    .noHintText().done();
+                    .mandatory(OtherChildrenNotInTheCase::getIsDateOfBirthKnown)
+                    .mandatory(OtherChildrenNotInTheCase::getDateOfBirth)
+                    .fieldShowCondition("childrenNotInTheCase.isDateOfBirthKnown=\"Yes\"").done();
     }
 }

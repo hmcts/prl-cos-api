@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -43,10 +42,9 @@ public class C100ManageSupport implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_WA_TASK_CONFIGURATION)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getFlagLauncherExternal)
+        fields.optional(CaseData::getFlagLauncherExternal)
                     .displayContextParameter("#ARGUMENT(UPDATE,EXTERNAL)")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getAllPartyFlags)
                     .optional(AllPartyFlags::getCaApplicant1ExternalFlags)
                     .fieldShowCondition("flagLauncherExternal=\"DUMMY_VALUE_TO_HIDE_FIELD\"")

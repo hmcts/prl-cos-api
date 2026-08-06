@@ -6,9 +6,10 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.InterpreterNeed;
+import uk.gov.hmcts.reform.prl.models.complextypes.WelshNeed;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,60 +43,56 @@ public class AmendAttendingTheHearing implements CCDConfig<CaseData, State, User
             .grant(Permission.CRUD, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getLabelLanguageRequirements)
-                    .publish(false).done();
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1)
+                    .publish(false);
+        fields.readonly(CaseData::getLabelLanguageRequirements)
+                    .publish(false);
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getIsWelshNeeded)
                     .publish(false)
                     .optional(AttendHearing::getWelshNeeds)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\" AND isWelshNeeded=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getFl401WelshNeeds)
-                    .fieldShowCondition("caseTypeOfApplication=\"FL401\" AND isWelshNeeded=\"Yes\"")
-                    .publish(false).done();
+        fields.complex(CaseData::getFl401WelshNeeds).done()
+                    .fieldShowCondition("caseTypeOfApplication=\"FL401\" AND isWelshNeeded=\"Yes\"");
+        fields.complex(CaseData::getFl401WelshNeeds, WelshNeed.class)
+                    .mandatory(WelshNeed::getWhoNeedsWelsh)
+                    .mandatory(WelshNeed::getFl401SpokenOrWritten)
+                    .readonly(WelshNeed::getAddNewWelshNeedLabel).done();
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getIsInterpreterNeeded)
                     .publish(false)
                     .optional(AttendHearing::getInterpreterNeeds)
                     .fieldShowCondition("isInterpreterNeeded=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelAccessibility)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLabelAccessibility)
+                    .publish(false);
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getIsDisabilityPresent)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelAdjustmentsRequired)
+        fields.readonly(CaseData::getLabelAdjustmentsRequired)
                     .fieldShowCondition("isDisabilityPresent=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getAdjustmentsRequired)
                     .fieldShowCondition("isDisabilityPresent=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelSpecialArrangements)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getLabelSpecialArrangementsDescription)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLabelSpecialArrangements)
+                    .publish(false);
+        fields.readonly(CaseData::getLabelSpecialArrangementsDescription)
+                    .publish(false);
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getIsSpecialArrangementsRequired)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelSpecialArrangementsRequired)
+        fields.readonly(CaseData::getLabelSpecialArrangementsRequired)
                     .fieldShowCondition("isSpecialArrangementsRequired=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getSpecialArrangementsRequired)
                     .fieldShowCondition("isSpecialArrangementsRequired=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLabelIntermediaryDescription)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLabelIntermediaryDescription)
+                    .publish(false);
         fields.complex(CaseData::getAttendHearing)
                     .mandatory(AttendHearing::getIsIntermediaryNeeded)
                     .publish(false)
@@ -104,5 +101,16 @@ public class AmendAttendingTheHearing implements CCDConfig<CaseData, State, User
                     .publish(false).done();
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("labelLanguageRequirements=\"DO_NOT_SHOW\"");
+        fields.complex(CaseData::getAttendHearing)
+                    .complex(AttendHearing::getInterpreterNeeds, InterpreterNeed.class)
+                    .mandatory(InterpreterNeed::getParty)
+                    .mandatory(InterpreterNeed::getName)
+                    .mandatory(InterpreterNeed::getLanguage)
+                    .optional(InterpreterNeed::getOtherAssistance).done().done();
+        fields.complex(CaseData::getAttendHearing)
+                    .complex(AttendHearing::getWelshNeeds, WelshNeed.class)
+                    .mandatory(WelshNeed::getWhoNeedsWelsh)
+                    .mandatory(WelshNeed::getSpokenOrWritten)
+                    .readonly(WelshNeed::getAddNewWelshNeedLabel).done().done();
     }
 }

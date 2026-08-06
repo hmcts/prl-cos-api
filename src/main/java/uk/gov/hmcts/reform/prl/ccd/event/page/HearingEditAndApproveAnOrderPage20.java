@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,18 +24,16 @@ public final class HearingEditAndApproveAnOrderPage20 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("20");
         fields.showCondition("doYouWantToEditTheOrder=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderNameSummaryLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCheckYourOrder)
-                    .publish(false).done();
+        fields.readonly(CaseData::getOrderNameSummaryLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getCheckYourOrder)
+                    .publish(false);
         fields.readonly(CaseData::getPreviewOrderDocWelsh)
                     .publish(false);
         fields.readonly(CaseData::getPreviewOrderDoc)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCheckYourOrderLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getCheckYourOrderLabel)
+                    .publish(false);
         fields.optional(CaseData::getCourtAdminNotes)
                     .publish(false);
     }

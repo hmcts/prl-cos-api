@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -39,7 +38,6 @@ public class HandleEvidence implements CCDConfig<CaseData, State, UserRole> {
             .fields();
         fields.page("1");
         fields.pageLabel("BulkScanning");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getEvidenceHandled).done();
+        fields.mandatoryNoSummary(CaseData::getEvidenceHandled);
     }
 }

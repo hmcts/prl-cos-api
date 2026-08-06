@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.closingcases.ClosingCaseOptions;
 
@@ -25,12 +24,10 @@ public final class RecordFinalDecisionPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getAddDecisionLabel).done();
+        fields.readonlyNoSummary(CaseData::getAddDecisionLabel);
         fields.complex(CaseData::getClosingCaseOptions)
                     .optional(ClosingCaseOptions::getDateFinalDecisionWasMade).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getFinalOutComeLabel).done();
+        fields.readonly(CaseData::getFinalOutComeLabel);
         fields.complex(CaseData::getClosingCaseOptions)
                     .optional(ClosingCaseOptions::getFinalOutcomeForChildren).done();
     }

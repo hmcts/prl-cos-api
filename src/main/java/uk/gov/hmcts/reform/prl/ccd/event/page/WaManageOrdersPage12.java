@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,9 +25,8 @@ public final class WaManageOrdersPage12 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("12");
         fields.showCondition("(createSelectOrderOptions=\"powerOfArrest\" OR createSelectOrderOptions=\"nonMolestation\" OR createSelectOrderOptions=\"occupation\" OR createSelectOrderOptions=\"blank\" OR createSelectOrderOptions=\"amendDischargedVaried\") AND manageOrdersOptions!=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSelectedOrderLabel1)
-                    .publish(false).done();
+        fields.readonly(CaseData::getSelectedOrderLabel1)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .optional(ManageOrders::getFl404CustomFields)
                     .publish(false).done();

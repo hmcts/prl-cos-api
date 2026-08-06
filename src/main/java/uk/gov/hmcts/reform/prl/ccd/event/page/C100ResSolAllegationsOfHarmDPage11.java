@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -27,14 +26,12 @@ public final class C100ResSolAllegationsOfHarmDPage11 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("11");
         fields.showCondition("respAohYesOrNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel10)
-                    .readonly(CaseDataExtra::getRespOthersConcernsLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel10);
+        fields.readonly(CaseData::getRespOthersConcernsLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .mandatory(RespondentAllegationsOfHarmData::getRespAohOtherConcernsCourtActions).done().done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespAllegationsOfHarmChildContactLabel).done();
+        fields.readonly(CaseData::getRespAllegationsOfHarmChildContactLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .mandatory(RespondentAllegationsOfHarmData::getRespAgreeChildUnsupervisedTime).done().done();

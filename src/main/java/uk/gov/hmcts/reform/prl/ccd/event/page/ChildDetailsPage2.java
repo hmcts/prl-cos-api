@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,9 +23,8 @@ public final class ChildDetailsPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo2)
-                    .readonly(CaseDataExtra::getChildDetailsAdditionalQuestionsLabel).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo2);
+        fields.readonly(CaseData::getChildDetailsAdditionalQuestionsLabel);
         fields.optional(CaseData::getChildrenKnownToLocalAuthority);
         fields.optional(CaseData::getChildrenKnownToLocalAuthorityTextArea)
                     .fieldShowCondition("childrenKnownToLocalAuthority=\"yes\"");

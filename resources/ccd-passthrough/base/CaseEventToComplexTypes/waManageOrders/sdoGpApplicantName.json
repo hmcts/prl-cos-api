@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "waManageOrders",
-  "CaseFieldID" : "sdoGpApplicantName",
-  "ListElementCode" : "sdoNameOfApplicant",
-  "CaseTypeID" : "PRLAPPS"
-} ]

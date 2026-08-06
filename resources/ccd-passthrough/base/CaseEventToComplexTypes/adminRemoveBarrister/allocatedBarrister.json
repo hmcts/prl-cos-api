@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "adminRemoveBarrister",
-  "CaseFieldID" : "allocatedBarrister",
-  "ListElementCode" : "partyList",
-  "CaseTypeID" : "PRLAPPS"
-} ]

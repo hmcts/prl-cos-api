@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,20 +25,18 @@ public final class ManageOrdersPage26 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("26");
         fields.showCondition("amendOrderSelectCheckOptions !=\"judgeOrLegalAdvisorCheck\" AND amendOrderSelectCheckOptions !=\"managerCheck\" AND manageOrdersOptions!=\"servedSavedOrders\" AND loggedInUserType!=\"JUDGE\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManageOrderHeaderLabel20)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getWhenToServeOrderLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getManageOrderHeaderLabel20)
+                    .publish(false);
+        fields.readonly(CaseData::getWhenToServeOrderLabel)
+                    .publish(false);
         fields.mandatory(CaseData::getSelectTypeOfOrder)
                     .publish(false);
         fields.mandatory(CaseData::getDoesOrderClosesCase)
                     .fieldShowCondition("selectTypeOfOrder=\"finl\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getCloseCaseDoableActions)
+        fields.readonly(CaseData::getCloseCaseDoableActions)
                     .fieldShowCondition("doesOrderClosesCase=\"Yes\" AND selectTypeOfOrder=\"finl\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServeOrderData)
                     .mandatory(ServeOrderData::getCafcassOrCymruNeedToProvideReport)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")

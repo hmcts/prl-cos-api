@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "fl401AmendApplicantFamilyDetails",
-  "CaseFieldID" : "applicantFamilyDetails",
-  "ListElementCode" : "doesApplicantHaveChildren",
-  "CaseTypeID" : "PRLAPPS"
-} ]

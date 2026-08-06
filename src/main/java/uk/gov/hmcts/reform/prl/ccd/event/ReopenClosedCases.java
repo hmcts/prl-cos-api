@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,14 +39,12 @@ public class ReopenClosedCases implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_EXTERNALUSER_VIEWONLY, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SOLICITOR, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER, UserRole.CASEWORKER_WA_TASK_CONFIGURATION, UserRole.CITIZEN, UserRole.COURTNAV)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getCurrentStatusLabel)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getCurrentStatusLabel)
+                    .publish(false);
         fields.mandatory(CaseData::getChangeStatusOptions)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOtherStatusMsg)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOtherStatusMsg)
+                    .publish(false);
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("otherStatusMsg=\"DO_NOT_SHOW\"")
                     .retainHiddenValue();

@@ -1,5 +1,4 @@
 package uk.gov.hmcts.reform.prl.ccd.event;
-import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -7,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,9 +41,8 @@ public class AmendOtherProceedings implements CCDConfig<CaseData, State, UserRol
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .readonly(CaseDataExtra::getOtherProceedingsLabel).done();
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
+        fields.readonly(CaseData::getOtherProceedingsLabel);
         fields.optional(CaseData::getPreviousOrOngoingProceedingsForChildren);
         fields.complex(CaseData::getExistingProceedings).done()
                     .fieldShowCondition("previousOrOngoingProceedingsForChildren=\"yes\"");

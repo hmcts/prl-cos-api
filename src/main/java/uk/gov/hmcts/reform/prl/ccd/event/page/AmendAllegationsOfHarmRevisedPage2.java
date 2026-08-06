@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,8 +25,7 @@ public final class AmendAllegationsOfHarmRevisedPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("newAllegationsOfHarmYesNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getNewAllegationsOfHarmLabel).done();
+        fields.readonly(CaseData::getNewAllegationsOfHarmLabel);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmDomesticAbuseYesNo)
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmChildAbuseYesNo)
@@ -38,9 +36,8 @@ public final class AmendAllegationsOfHarmRevisedPage2 {
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmOtherConcerns)
                     .mandatory(AllegationOfHarmRevised::getNewAllegationsOfHarmOtherConcernsDetails)
                     .fieldShowCondition("newAllegationsOfHarmOtherConcerns=\"Yes\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getNewAllegationOfHarmOrdersLabel)
-                    .readonly(CaseDataExtra::getNewAllegationOfHarmOrdersLabelDetail).done();
+        fields.readonly(CaseData::getNewAllegationOfHarmOrdersLabel);
+        fields.readonly(CaseData::getNewAllegationOfHarmOrdersLabelDetail);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .mandatory(AllegationOfHarmRevised::getNewOrdersNonMolestation)
                     .optional(AllegationOfHarmRevised::getNewOrdersNonMolestationDateIssued)

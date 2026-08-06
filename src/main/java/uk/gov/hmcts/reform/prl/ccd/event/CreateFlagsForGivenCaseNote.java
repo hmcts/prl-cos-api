@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,15 +41,14 @@ public class CreateFlagsForGivenCaseNote implements CCDConfig<CaseData, State, U
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_WA_TASK_CONFIGURATION)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSelectedReviewLangAndSmReq)
-                    .publish(false)
-                    .mandatoryNoSummary(CaseDataExtra::getIsReviewLangAndSmReqReviewed)
-                    .publish(false)
-                    .optional(CaseDataExtra::getFlagLauncherInternal)
+        fields.readonlyNoSummary(CaseData::getSelectedReviewLangAndSmReq)
+                    .publish(false);
+        fields.mandatoryNoSummary(CaseData::getIsReviewLangAndSmReqReviewed)
+                    .publish(false);
+        fields.optional(CaseData::getFlagLauncherInternal)
                     .fieldShowCondition("isReviewLangAndSmReqReviewed=\"Yes\"")
                     .displayContextParameter("#ARGUMENT(CREATE,VERSION2.1)")
-                    .publish(false).done();
+                    .publish(false);
         fields.optional(CaseData::getCaseFlags)
                     .fieldShowCondition("flagLauncherInternal=\"DUMMY_VALUE_TO_HIDE_FIELD\"")
                     .retainHiddenValue()

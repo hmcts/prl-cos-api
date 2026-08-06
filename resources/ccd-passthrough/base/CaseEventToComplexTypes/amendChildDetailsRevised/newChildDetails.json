@@ -1,51 +1,11 @@
 [ {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "firstName",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "lastName",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "dateOfBirth",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "gender",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "otherGender",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "orderAppliedFor",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "parentalResponsibility",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "parentalResponsibilityDetails",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "amendChildDetailsRevised",
-  "CaseFieldID" : "newChildDetails",
-  "ListElementCode" : "whoDoesTheChildLiveWith",
-  "CaseTypeID" : "PRLAPPS"
-}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "NewChildDetails",
   "CaseEventID" : "amendChildDetailsRevised",
   "CaseFieldID" : "newChildDetails",
   "ListElementCode" : "addNewChildLabel",
-  "CaseTypeID" : "PRLAPPS"
+  "EventElementLabel" : "",
+  "FieldDisplayOrder" : "10",
+  "DisplayContext" : "MANDATORY"
 } ]

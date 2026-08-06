@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.ReasonForOrderWithoutGivingNoticeEnum;
 import java.util.List;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "reasonForWithoutNoticeOrder", generate = true)
 @Data
 @Builder(toBuilder = true)
 public class ReasonForWithoutNoticeOrder {

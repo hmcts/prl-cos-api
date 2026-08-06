@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewAdditionalApplicationWrapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -28,10 +27,9 @@ public final class ReviewAdditionalApplicationPage1 {
         fields.complex(CaseData::getReviewAdditionalApplicationWrapper)
                     .readonlyNoSummary(ReviewAdditionalApplicationWrapper::getSelectedAdditionalApplicationsBundle)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getTaskAssigneeIdamId)
+        fields.optionalNoSummary(CaseData::getTaskAssigneeIdamId)
                     .fieldShowCondition("selectedAdditionalApplicationsBundle=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.complex(CaseData::getReviewAdditionalApplicationWrapper)
                     .optionalNoSummary(ReviewAdditionalApplicationWrapper::getIsAdditionalApplicationReviewed)
                     .publish(false).done();

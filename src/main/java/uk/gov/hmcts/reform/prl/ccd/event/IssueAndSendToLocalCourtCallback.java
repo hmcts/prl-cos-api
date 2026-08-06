@@ -7,8 +7,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -45,10 +45,12 @@ public class IssueAndSendToLocalCourtCallback implements CCDConfig<CaseData, Sta
         fields.readonly(CaseData::getCourtName)
                     .fieldShowCondition("courtList=\"NEVER_SHOW\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getLocalCourtHint)
-                    .publish(false).done();
+        fields.readonly(CaseData::getLocalCourtHint)
+                    .publish(false);
         fields.mandatory(CaseData::getCourtList)
                     .publish(false);
+        fields.complex(CaseData::getLocalCourtAdmin, LocalCourtAdminEmail.class)
+                    .mandatory(LocalCourtAdminEmail::getEmail)
+                    .mandatory(LocalCourtAdminEmail::getAddNewEmailLabel).done();
     }
 }

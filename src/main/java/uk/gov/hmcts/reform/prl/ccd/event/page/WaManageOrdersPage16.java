@@ -27,5 +27,11 @@ public final class WaManageOrdersPage16 {
         WaManageOrdersPage16Fields1.apply(fields);
         WaManageOrdersPage16Fields2.apply(fields);
         WaManageOrdersPage16Fields3.apply(fields);
+        WaManageOrdersPage16Fields4.apply(fields);
+        WaManageOrdersPage16Fields5.apply(fields);
+        WaManageOrdersPage16Fields6.apply(fields);
+        WaManageOrdersPage16Fields7.apply(fields);
+        WaManageOrdersPage16Fields8.apply(fields);
+        WaManageOrdersPage16Fields9.apply(fields);
     }
 }

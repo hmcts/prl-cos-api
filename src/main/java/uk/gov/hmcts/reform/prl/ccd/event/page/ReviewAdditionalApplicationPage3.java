@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 
@@ -25,10 +24,9 @@ public final class ReviewAdditionalApplicationPage3 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("3");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getExternalMessagesHint)
+        fields.readonlyNoSummary(CaseData::getExternalMessagesHint)
                     .fieldShowCondition("sendMessageObject.internalOrExternalMessage=\"EXTERNAL\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getSendOrReplyMessage)
                     .optional(SendOrReplyMessage::getExternalMessageAttachDocsList)
                     .fieldShowCondition("sendMessageObject.internalOrExternalMessage=\"EXTERNAL\"")

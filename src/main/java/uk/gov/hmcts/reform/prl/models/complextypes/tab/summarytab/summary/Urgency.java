@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary;
-import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.UrgencyTimeFrameType;
 
 @Builder
 @Data

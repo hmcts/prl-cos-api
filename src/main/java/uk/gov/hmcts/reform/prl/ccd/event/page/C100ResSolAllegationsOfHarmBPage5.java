@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -27,10 +26,9 @@ public final class C100ResSolAllegationsOfHarmBPage5 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("5");
         fields.showCondition("respChildAbuses CONTAINS \"physicalAbuse\" AND respAohYesOrNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel4)
-                    .readonly(CaseDataExtra::getRespChildPhysicalAbuseLabel)
-                    .readonly(CaseDataExtra::getRespChildPhysicalAbuseSubLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel4);
+        fields.readonly(CaseData::getRespChildPhysicalAbuseLabel);
+        fields.readonly(CaseData::getRespChildPhysicalAbuseSubLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .optional(RespondentAllegationsOfHarmData::getRespAllChildrenAreRiskPhysicalAbuse).done().done();

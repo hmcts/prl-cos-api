@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 
@@ -26,13 +25,12 @@ public final class WaSendOrReplyToMessagesPage1 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
         fields.showCondition("taskAssociatedWithMessage=\"No\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getTaskAssociatedWithMessage)
+        fields.readonlyNoSummary(CaseData::getTaskAssociatedWithMessage)
                     .fieldShowCondition("chooseSendOrReply = \"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .optionalNoSummary(CaseDataExtra::getTaskAssigneeIdamId)
+                    .publish(false);
+        fields.optionalNoSummary(CaseData::getTaskAssigneeIdamId)
                     .fieldShowCondition("chooseSendOrReply=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.mandatory(CaseData::getChooseSendOrReply)
                     .fieldShowCondition("taskAssociatedWithMessage=\"No\"")
                     .retainHiddenValue()

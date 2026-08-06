@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ProcessUrgentHelpWithFees;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -25,17 +24,16 @@ public final class ProcessUrgentHelpWithFeesPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getBeforeYouStart)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getUpdatePayBubble)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getApproveDeliveryManagerOrSeniorManager)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getCheckthehelpwithfeesapplication)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getApplicationHelpwithfeesreferenceApplicantApplication)
-                    .publish(false).done();
+        fields.readonly(CaseData::getBeforeYouStart)
+                    .publish(false);
+        fields.readonly(CaseData::getUpdatePayBubble)
+                    .publish(false);
+        fields.readonly(CaseData::getApproveDeliveryManagerOrSeniorManager)
+                    .publish(false);
+        fields.readonly(CaseData::getCheckthehelpwithfeesapplication)
+                    .publish(false);
+        fields.readonly(CaseData::getApplicationHelpwithfeesreferenceApplicantApplication)
+                    .publish(false);
         fields.complex(CaseData::getProcessUrgentHelpWithFees)
                     .mandatory(ProcessUrgentHelpWithFees::getOutstandingBalance)
                     .publish(false)

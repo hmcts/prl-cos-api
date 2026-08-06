@@ -3,9 +3,8 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.NewChildDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,22 +24,18 @@ public final class ChildDetailsRevisedPage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getNewChildDetails).done();
-        fields.complex(CaseData::getNewChildDetails, NewChildDetails.class)
-                    .optional(NewChildDetails::getFirstName)
-                    .optional(NewChildDetails::getLastName)
-                    .optional(NewChildDetails::getDateOfBirth)
-                    .noHintText()
-                    .optional(NewChildDetails::getGender)
-                    .optional(NewChildDetails::getOtherGender)
+        fields.complex(CaseData::getNewChildDetails, ChildDetailsRevised.class)
+                    .optional(ChildDetailsRevised::getFirstName)
+                    .optional(ChildDetailsRevised::getLastName)
+                    .optional(ChildDetailsRevised::getDateOfBirth)
+                    .optional(ChildDetailsRevised::getGender)
+                    .optional(ChildDetailsRevised::getOtherGender)
                     .fieldShowCondition("newChildDetails.gender=\"other\"")
-                    .optional(NewChildDetails::getOrderAppliedFor)
-                    .readonly(NewChildDetails::getParentalResponsibility)
-                    .optional(NewChildDetails::getParentalResponsibilityDetails)
-                    .optional(NewChildDetails::getWhoDoesTheChildLiveWith)
-                    .noHintText()
-                    .mandatory(NewChildDetails::getAddNewChildLabel).done();
+                    .optional(ChildDetailsRevised::getOrderAppliedFor)
+                    .readonly(ChildDetailsRevised::getParentalResponsibility)
+                    .optional(ChildDetailsRevised::getParentalResponsibilityDetails)
+                    .optional(ChildDetailsRevised::getWhoDoesTheChildLiveWith).done();
     }
 }

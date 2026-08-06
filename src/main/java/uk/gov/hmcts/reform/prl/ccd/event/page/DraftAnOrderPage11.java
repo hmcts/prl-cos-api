@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,11 +25,10 @@ public final class DraftAnOrderPage11 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("11");
         fields.showCondition("createSelectOrderOptions=\"generalForm\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManageOrderHeaderLabel5)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectedOrder2)
-                    .publish(false).done();
+        fields.readonly(CaseData::getManageOrderHeaderLabel5)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectedOrder2)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getManageOrdersUnderTakingRepr)
                     .publish(false)

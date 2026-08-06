@@ -1,5 +1,4 @@
 package uk.gov.hmcts.reform.prl.ccd.event;
-import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -7,6 +6,7 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.dto.barrister.AllocatedBarrister;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 

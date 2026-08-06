@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "FL401OtherProceedingsDetails", generate = true)
 @Builder
 @Data
 public class Fl401OtherProceedingsDetails {

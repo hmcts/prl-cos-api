@@ -6,8 +6,10 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonRelationshipToChild;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -42,8 +44,50 @@ public class AmendOtherPeopleInTheCase implements CCDConfig<CaseData, State, Use
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getOthersToNotify).done();
+        fields.complex(CaseData::getOthersToNotify, PartyDetails.class)
+                    .optional(PartyDetails::getFirstName)
+                    .optional(PartyDetails::getLastName)
+                    .optional(PartyDetails::getPreviousName)
+                    .optional(PartyDetails::getIsDateOfBirthKnown)
+                    .optional(PartyDetails::getDateOfBirth)
+                    .fieldShowCondition("othersToNotify.isDateOfBirthKnown=\"Yes\"")
+                    .optional(PartyDetails::getGender)
+                    .optional(PartyDetails::getOtherGender)
+                    .fieldShowCondition("othersToNotify.gender=\"other\"")
+                    .eventLabel("*Gender")
+                    .optional(PartyDetails::getIsPlaceOfBirthKnown)
+                    .optional(PartyDetails::getPlaceOfBirth)
+                    .fieldShowCondition("othersToNotify.isPlaceOfBirthKnown=\"Yes\"")
+                    .eventLabel("*Place of birth (town, county, country)")
+                    .optional(PartyDetails::getIsCurrentAddressKnown)
+                    .optional(PartyDetails::getAddress)
+                    .fieldShowCondition("othersToNotify.isCurrentAddressKnown=\"Yes\"")
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getAddressLine1).done()
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getAddressLine2).done()
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getAddressLine3).done()
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getPostTown).done()
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getCounty).done()
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getPostCode).done()
+                    .complex(PartyDetails::getAddress)
+                    .optional(Address::getCountry).done()
+                    .optional(PartyDetails::getCanYouProvideEmailAddress)
+                    .optional(PartyDetails::getEmail)
+                    .fieldShowCondition("othersToNotify.canYouProvideEmailAddress=\"Yes\"")
+                    .optional(PartyDetails::getCanYouProvidePhoneNumber)
+                    .optional(PartyDetails::getPhoneNumber)
+                    .fieldShowCondition("othersToNotify.canYouProvidePhoneNumber=\"Yes\"")
+                    .optional(PartyDetails::getOtherPersonRelationshipToChildren)
+                    .complex(PartyDetails::getOtherPersonRelationshipToChildren, OtherPersonRelationshipToChild.class)
+                    .optional(OtherPersonRelationshipToChild::getPersonRelationshipToChild).done()
+                    .optional(PartyDetails::getAddNewApplicantLabel)
+                    .eventLabel("Add new person").done();
     }
 }

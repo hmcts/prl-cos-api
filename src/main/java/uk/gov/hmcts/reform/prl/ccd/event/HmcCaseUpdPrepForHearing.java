@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingTaskData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -45,11 +44,10 @@ public class HmcCaseUpdPrepForHearing implements CCDConfig<CaseData, State, User
                     .fieldShowCondition("courtName=\"DO_NOT_SHOW\"");
         fields.mandatoryNoSummary(CaseData::getCourtName)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getPerformingUser)
-                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .mandatoryNoSummary(CaseDataExtra::getHearingListed)
-                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"").done();
+        fields.mandatoryNoSummary(CaseData::getPerformingUser)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"");
+        fields.mandatoryNoSummary(CaseData::getHearingListed)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"");
         fields.complex(CaseData::getHearingTaskData)
                     .mandatoryNoSummary(HearingTaskData::getCurrentHearingId)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"").done();

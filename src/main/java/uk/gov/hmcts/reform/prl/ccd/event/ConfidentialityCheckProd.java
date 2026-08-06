@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.EnvironmentFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -44,9 +43,8 @@ public class ConfidentialityCheckProd implements CCDConfig<CaseData, State, User
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getConfidentialityCheckWarningText)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getConfidentialityCheckWarningText)
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplication)
                     .readonlyNoSummary(ServiceOfApplication::getUnServedApplicantPack)
                     .publish(false)
@@ -64,94 +62,92 @@ public class ConfidentialityCheckProd implements CCDConfig<CaseData, State, User
                     .publish(false);
         fields.readonlyNoSummary(CaseData::getC8WelshDocument)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getRespAC8EngDocument)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespAC8WelDocument)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespBC8EngDocument)
+        fields.readonlyNoSummary(CaseData::getRespAC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespAC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespBC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespBC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespBC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespCC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespCC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespCC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespCC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespDC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespDC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespDC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespDC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespEC8EngDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespEC8EngDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespEC8WelDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespEC8WelDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAppAC8RefugeDocument)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAppBC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAppAC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAppBC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAppCC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAppCC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAppDC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAppDC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAppEC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAppEC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespAC8RefugeDocument)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespBC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespAC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespBC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespCC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespCC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespDC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespDC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getRespEC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getRespEC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOtherAC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOtherAC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOtherBC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOtherBC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOtherCC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOtherCC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOtherDC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOtherDC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getOtherEC8RefugeDocument)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getOtherEC8RefugeDocument)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplication)
                     .mandatory(ServiceOfApplication::getApplicationServedYesNo)
                     .publish(false)
                     .mandatory(ServiceOfApplication::getRejectionReason)
                     .fieldShowCondition("applicationServedYesNo=\"No\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsC8CheckApproved)
+        fields.mandatoryNoSummary(CaseData::getIsC8CheckApproved)
                     .fieldShowCondition("applicationServedYesNo=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getResponsibleForService)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getResponsibleForService)
                     .fieldShowCondition("applicationServedYesNo=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsOccupationOrderSelected)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsOccupationOrderSelected)
                     .fieldShowCondition("applicationServedYesNo=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("applicationServedYesNo=\"DO_NOT_SHOW\"")
                     .publish(false);

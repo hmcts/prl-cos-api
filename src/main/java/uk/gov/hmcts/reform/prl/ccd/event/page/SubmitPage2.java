@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,19 +23,17 @@ public final class SubmitPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmitAndPayDeclaration)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSubmitAndPayAgreeStmtLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getSubmitAndPayDeclaration)
+                    .publish(false);
+        fields.readonly(CaseData::getSubmitAndPayAgreeStmtLabel)
+                    .publish(false);
         fields.readonly(CaseData::getSolicitorName)
                     .fieldShowCondition("submitAndPayAgreeStmtLabel=\"never_show\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmitAndPayAgreeSignStmtLabel)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getSubmitAgreeStatement)
-                    .publish(false).done();
+        fields.readonly(CaseData::getSubmitAndPayAgreeSignStmtLabel)
+                    .publish(false);
+        fields.mandatory(CaseData::getSubmitAgreeStatement)
+                    .publish(false);
         fields.mandatory(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("submitAndPayAgreeStmtLabel=\"DO_NOT_SHOW\"");
     }

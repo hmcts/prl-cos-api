@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.serviceofdocuments.ServiceOfDocuments;
@@ -26,10 +25,9 @@ public final class ServiceOfDocumentsProdPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getMissingAddressWarningTextLabel)
+        fields.readonlyNoSummary(CaseData::getMissingAddressWarningTextLabel)
                     .fieldShowCondition("missingAddressWarningText!=\"\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfDocuments)
                     .mandatory(ServiceOfDocuments::getSodServeToRespondentOptions)
                     .publish(false)

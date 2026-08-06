@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
@@ -27,44 +26,40 @@ public final class ServiceOfApplicationNonprodPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getServiceOfApplicationHeader)
-                    .publish(false).done();
+        fields.readonly(CaseData::getServiceOfApplicationHeader)
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplication)
                     .optionalNoSummary(ServiceOfApplication::getIsConfidential)
                     .fieldShowCondition("serviceOfApplicationHeader=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getServeTheseOrdersLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getConfidentialDetailsArePresentBanner)
+        fields.readonly(CaseData::getServeTheseOrdersLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getConfidentialDetailsArePresentBanner)
                     .fieldShowCondition("isConfidential=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplicationUploadDocs)
                     .optional(ServiceOfApplicationUploadDocs::getSentDocumentPlaceHolder)
                     .fieldShowCondition("serviceOfApplicationScreen1=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSentDocumentsLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSelectOrdersLabel1)
+        fields.readonly(CaseData::getSentDocumentsLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSelectOrdersLabel1)
                     .fieldShowCondition("soaIsOrderListEmpty=\"No\" AND caseTypeOfApplication=\"C100\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getServiceOfApplicationScreen1)
                     .fieldShowCondition("soaIsOrderListEmpty=\"No\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getPd36qLetterLabel)
+        fields.readonlyNoSummary(CaseData::getPd36qLetterLabel)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSpecialArrangementsLetterLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSpecialArrangementsLetterLabel)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAdditionalDocumentsLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAdditionalDocumentsLabel)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getServiceOfApplicationUploadDocs)
                     .optional(ServiceOfApplicationUploadDocs::getPd36qLetter)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"")
@@ -80,34 +75,31 @@ public final class ServiceOfApplicationNonprodPage2 {
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("serveTheseOrdersLabel=\"DO_NOT_SHOW\"")
                     .retainHiddenValue();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSoaIsOrderListEmpty)
+        fields.readonly(CaseData::getSoaIsOrderListEmpty)
                     .fieldShowCondition("serveTheseOrdersLabel=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getMissingAddressWarningText)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getMissingAddressWarningText)
                     .fieldShowCondition("serveTheseOrdersLabel=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatoryNoSummary(ManageOrders::getDisplayLegalRepOption)
                     .fieldShowCondition("serveTheseOrdersLabel=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsC8CheckNeeded)
+        fields.mandatoryNoSummary(CaseData::getIsC8CheckNeeded)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getResponsibleForService)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getResponsibleForService)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsOccupationOrderSelected)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsOccupationOrderSelected)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.optionalNoSummary(CaseData::getIsApplicantRepresented)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
                     .retainHiddenValue();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getProductHearingBundleOn)
+        fields.optionalNoSummary(CaseData::getProductHearingBundleOn)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,55 +25,49 @@ public final class DraftAnOrderPage15 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("15");
         fields.showCondition("createSelectOrderOptions=\"directionOnIssue\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioPreamblesLabel)
+        fields.readonly(CaseData::getDioPreamblesLabel)
                     .fieldShowCondition("dioPreamblesList CONTAINS \"rightToAskCourt\" OR dioPreamblesList CONTAINS \"partyRaisedDomesticAbuse\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioRightToAskCourtLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioRightToAskCourtLabel)
                     .fieldShowCondition("dioPreamblesList CONTAINS \"rightToAskCourt\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioRightToAskCourt)
                     .fieldShowCondition("dioPreamblesList CONTAINS \"rightToAskCourt\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioPartiesRaisedAbuseLabel)
+        fields.readonly(CaseData::getDioPartiesRaisedAbuseLabel)
                     .fieldShowCondition("dioPreamblesList CONTAINS \"partyRaisedDomesticAbuse\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .optional(DirectionOnIssue::getDioPartiesRaisedAbuseCollection)
                     .fieldShowCondition("dioPreamblesList CONTAINS \"partyRaisedDomesticAbuse\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioHearingsAndNextStepsLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioCaseReviewLabel)
+        fields.readonly(CaseData::getDioHearingsAndNextStepsLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioCaseReviewLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"caseReviewAtSecondGateKeeping\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioCaseReviewAtSecondGateKeeping)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"caseReviewAtSecondGateKeeping\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioAllocationDecisionLabel)
+        fields.readonly(CaseData::getDioAllocationDecisionLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"allocationDecision\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioNextStepsAllocationTo)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"allocationDecision\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioAllocateNamedJudgeLabel)
+        fields.readonly(CaseData::getDioAllocateNamedJudgeLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"allocateNamedJudge\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioApplicationIsReservedTo)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"allocateNamedJudge\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioHearingPermissionLabel)
+        fields.readonly(CaseData::getDioHearingPermissionLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioPermissionHearingOn)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
@@ -88,21 +81,19 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioPermissionHearingBeforeAList)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"permissionHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioUrgentFirstHearingLabel)
+        fields.readonly(CaseData::getDioUrgentFirstHearingLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentFirstHearing\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioUrgentFirstHearingPlaceLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioUrgentFirstHearingPlaceLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentFirstHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioUrgentFirstHearingDate)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentFirstHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioHearingUrgentBecauseLabel)
+        fields.readonly(CaseData::getDioHearingUrgentBecauseLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentFirstHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioHearingUrgentCheckList)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentFirstHearing\"")
@@ -122,13 +113,12 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioHearingUrgentByWayOf)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentFirstHearing\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioUrgentHearingRefusedLabel)
+        fields.readonly(CaseData::getDioUrgentHearingRefusedLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentHearingRefused\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioUrgentHearingRefusedCourtLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioUrgentHearingRefusedCourtLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentHearingRefused\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioUrgentHearingRefusedCheckList)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentHearingRefused\"")
@@ -136,13 +126,12 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioHearingUrgencyRefusedDetails)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"urgentHearingRefused\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioWithoutNoticeFirstHearingLabel)
+        fields.readonly(CaseData::getDioWithoutNoticeFirstHearingLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"withoutNoticeFirstHearing\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioWithoutNoticeApprovedApplicationLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioWithoutNoticeApprovedApplicationLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"withoutNoticeFirstHearing\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioWithoutNoticeFirstHearingCheckList)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"withoutNoticeFirstHearing\"")
@@ -150,13 +139,12 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioWithoutNoticeFirstHearingDetails)
                     .fieldShowCondition("dioWithoutNoticeFirstHearingCheckList CONTAINS \"anotherReason\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioWithoutNoticeHearingRefusedLabel)
+        fields.readonly(CaseData::getDioWithoutNoticeHearingRefusedLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"withoutNoticeHearingRefused\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioWithoutNoticeNotApprovedLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioWithoutNoticeNotApprovedLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"withoutNoticeHearingRefused\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioWithoutNoticeHearingRefusedCheckList)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"withoutNoticeHearingRefused\"")
@@ -164,13 +152,12 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioWithoutNoticeHearingRefusedDetails)
                     .fieldShowCondition("dioWithoutNoticeFirstHearingCheckList CONTAINS \"anotherReason\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioFhdraLabel)
+        fields.readonly(CaseData::getDioFhdraLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"firstHearingDisputeResolution\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioFhdraHearingDisputeLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioFhdraHearingDisputeLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"firstHearingDisputeResolution\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioFhdraStartDateTime)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"firstHearingDisputeResolution\"")
@@ -184,18 +171,16 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioFhdraByWayOf)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"firstHearingDisputeResolution\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioParticipationDirectionsLabel)
+        fields.readonly(CaseData::getDioParticipationDirectionsLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"participationDirections\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioParticipationDirections)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"participationDirections\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioPositionStatementLabel)
+        fields.readonly(CaseData::getDioPositionStatementLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"positionStatement\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioPositionStatementDeadlineDate)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"positionStatement\"")
@@ -203,18 +188,16 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioPositionStatementWritten)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"positionStatement\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioAttendanceAtMiamLabel)
+        fields.readonly(CaseData::getDioAttendanceAtMiamLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"attendanceAtMIAM\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioMiamAttendingPerson)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"attendanceAtMIAM\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioCourtToInterpretersLabel)
+        fields.readonly(CaseData::getDioCourtToInterpretersLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"arrangeInterpreters\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioPersonWhoRequiresInterpreter)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"arrangeInterpreters\"")
@@ -222,40 +205,36 @@ public final class DraftAnOrderPage15 {
                     .optional(DirectionOnIssue::getDioInterpreterDialectRequired)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"arrangeInterpreters\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioUpdateContactDetailsLabel)
+        fields.readonly(CaseData::getDioUpdateContactDetailsLabel)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"updateContactDetails\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioUpdateContactDetails)
                     .fieldShowCondition("dioHearingsAndNextStepsList CONTAINS \"updateContactDetails\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioCafcassOrCafcassCymruLabel)
+        fields.readonly(CaseData::getDioCafcassOrCafcassCymruLabel)
                     .fieldShowCondition("dioCafcassOrCymruList CONTAINS \"cafcassSafeguarding\" OR dioCafcassOrCymruList CONTAINS \"cafcassCymruSafeguarding\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioSafeGuardingOnIssueLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioSafeGuardingOnIssueLabel)
                     .fieldShowCondition("dioCafcassOrCymruList CONTAINS \"cafcassSafeguarding\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioCafcassSafeguardingIssue)
                     .fieldShowCondition("dioCafcassOrCymruList CONTAINS \"cafcassSafeguarding\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioSafeGuardingOnIssueCymruLabel)
+        fields.readonly(CaseData::getDioSafeGuardingOnIssueCymruLabel)
                     .fieldShowCondition("dioCafcassOrCymruList CONTAINS \"cafcassSafeguarding\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioCafcassCymruSafeguardingIssue)
                     .fieldShowCondition("dioCafcassOrCymruList CONTAINS \"cafcassSafeguarding\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioLocalAuthorityLabel)
+        fields.readonly(CaseData::getDioLocalAuthorityLabel)
                     .fieldShowCondition("dioLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioLocalAuthorityLetterLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioLocalAuthorityLetterLabel)
                     .fieldShowCondition("dioLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioLocalAuthorityName)
                     .fieldShowCondition("dioLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
@@ -263,13 +242,12 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioLocalAuthorityReportSubmitByDate)
                     .fieldShowCondition("dioLocalAuthorityList CONTAINS \"localAuthorityLetter\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioCourtLabel)
+        fields.readonly(CaseData::getDioCourtLabel)
                     .fieldShowCondition("dioCourtList CONTAINS \"transferApplication\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioTransferApplicationLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioTransferApplicationLabel)
                     .fieldShowCondition("dioCourtList CONTAINS \"transferApplication\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioTransferApplicationCourtDynamicList)
                     .fieldShowCondition("dioCourtList CONTAINS \"transferApplication\"")
@@ -280,29 +258,26 @@ public final class DraftAnOrderPage15 {
                     .mandatory(DirectionOnIssue::getDioTransferApplicationSpecificReason)
                     .fieldShowCondition("dioCourtList CONTAINS \"transferApplication\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioOtherLabel)
+        fields.readonly(CaseData::getDioOtherLabel)
                     .fieldShowCondition("dioOtherList CONTAINS \"disclosureOfPapers\" OR dioOtherList CONTAINS \"parentWithCare\" OR dioOtherList CONTAINS \"applicationToApplyPermission\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioDisclosureOfPapersLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioDisclosureOfPapersLabel)
                     .fieldShowCondition("dioOtherList CONTAINS \"disclosureOfPapers\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .optional(DirectionOnIssue::getDioDisclosureOfPapersCaseNumbers)
                     .fieldShowCondition("dioOtherList CONTAINS \"disclosureOfPapers\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioParentWithCareLabel)
+        fields.readonly(CaseData::getDioParentWithCareLabel)
                     .fieldShowCondition("dioOtherList CONTAINS \"parentWithCare\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .mandatory(DirectionOnIssue::getDioParentWithCare)
                     .fieldShowCondition("dioOtherList CONTAINS \"parentWithCare\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioApplicationToApplyPermissionLabel)
+        fields.readonly(CaseData::getDioApplicationToApplyPermissionLabel)
                     .fieldShowCondition("dioOtherList CONTAINS \"applicationToApplyPermission\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .optional(DirectionOnIssue::getDioApplicationToApplyPermission)
                     .fieldShowCondition("dioOtherList CONTAINS \"applicationToApplyPermission\"")

@@ -3,8 +3,9 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,13 +25,21 @@ public final class AdminCreateProdPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getCaseTypeOfApplicationLabel).done();
+        fields.readonlyNoSummary(CaseData::getCaseTypeOfApplicationLabel);
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getCaseFromCourtNav)
-                    .fieldShowCondition("caseTypeOfApplication=\"FL401\"").done();
-        fields.complex(CaseData::getApplicantOrganisationPolicy).done()
+        fields.mandatoryNoSummary(CaseData::getCaseFromCourtNav)
+                    .fieldShowCondition("caseTypeOfApplication=\"FL401\"");
+        fields.complex(CaseData::getApplicantOrganisationPolicy)
+                    .complex(OrganisationPolicy::getOrganisation)
+                    .mandatory(Organisation::getOrganisationID)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done()
+                    .complex(OrganisationPolicy::getOrganisation)
+                    .mandatory(Organisation::getOrganisationName)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done()
+                    .optional(OrganisationPolicy::getOrgPolicyCaseAssignedRole)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .optional(OrganisationPolicy::getOrgPolicyReference)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"").done()
                     .fieldShowCondition("applicantCaseName=\"NEVER_SHOW\" OR applicantOrRespondentCaseName=\"NEVER_SHOW\"");
     }
 }

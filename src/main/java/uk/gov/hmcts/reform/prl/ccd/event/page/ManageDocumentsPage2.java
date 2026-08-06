@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.FurtherEvidence;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,9 +25,8 @@ public final class ManageDocumentsPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("documentCategoryChecklist=\"documentCategoryChecklistEnumValue1\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getFurtherEvidenceLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getFurtherEvidenceLabel)
+                    .publish(false);
         fields.complex(CaseData::getFurtherEvidences).done();
         fields.complex(CaseData::getFurtherEvidences, FurtherEvidence.class)
                     .mandatory(FurtherEvidence::getTypeOfDocumentFurtherEvidence)
@@ -37,10 +35,19 @@ public final class ManageDocumentsPage2 {
                     .eventLabel("<br /><div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!</span><strong class='govuk-warning-text__text'>Check if documents are confidential</strong></div><br>")
                     .optional(FurtherEvidence::getRestrictCheckboxFurtherEvidence)
                     .eventLabel("Tick to restrict to Cafcass and HMCTS staff").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getMainApplicationDocument)
-                    .fieldShowCondition("furtherEvidenceLabel = \"DO_NOT_SHOW\"")
-                    .publish(false).done();
+        fields.complex(CaseData::getMainApplicationDocument).done()
+                    .fieldShowCondition("furtherEvidenceLabel = \"DO_NOT_SHOW\"");
+        fields.complex(CaseData::getMainApplicationDocument, FurtherEvidence.class)
+                    .mandatory(FurtherEvidence::getTypeOfDocumentFurtherEvidence)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .mandatory(FurtherEvidence::getDocumentFurtherEvidence)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .readonly(FurtherEvidence::getCheckDocumentsConfidentialLabel)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .eventLabel("<br /><div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!</span><strong class='govuk-warning-text__text'>Check if documents are confidential</strong></div><br>")
+                    .optional(FurtherEvidence::getRestrictCheckboxFurtherEvidence)
+                    .fieldShowCondition("caseTypeOfApplication = \"DO_NOT_SHOW\"")
+                    .eventLabel("Tick to restrict to Cafcass and HMCTS staff").done();
         fields.mandatory(CaseData::getGiveDetails)
                     .fieldShowCondition("documentCategoryChecklist=\"documentCategoryChecklistEnumValue1\"")
                     .publish(false);

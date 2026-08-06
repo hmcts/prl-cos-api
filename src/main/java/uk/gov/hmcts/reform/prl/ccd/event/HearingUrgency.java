@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -41,11 +40,10 @@ public class HearingUrgency implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER, UserRole.CASEWORKER_WA_TASK_CONFIGURATION)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getHearingUrgencyLabel)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1)
+                    .publish(false);
+        fields.readonly(CaseData::getHearingUrgencyLabel)
+                    .publish(false);
         fields.mandatory(CaseData::getIsCaseUrgent);
         fields.mandatory(CaseData::getCaseUrgencyTimeAndReason)
                     .fieldShowCondition("isCaseUrgent=\"Yes\"")

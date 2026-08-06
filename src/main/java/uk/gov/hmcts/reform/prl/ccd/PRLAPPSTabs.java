@@ -171,11 +171,11 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("bundleInformation");
         builder.tab("caseFileView", "Case File View")
             .showCondition("[STATE]!=\"AWAITING_SUBMISSION_TO_HMCTS\" AND [STATE]!=\"SUBMITTED_NOT_PAID\"")
-            .field("componentLauncher", "");
+            .field(CaseData::getComponentLauncher, "", "#ARGUMENT(CaseFileView)");
         builder.tab("caseLinksTab", "Linked cases")
             .field(CaseData::getCaseLinks, "LinkedCasesComponentLauncher!=\"\"", "#ARGUMENT(LinkedCases)")
             .field("caseNameHmctsInternal", "caseLinks=\"DUMMY_VALUE\"")
-            .field("linkedCasesComponentLauncher", "");
+            .field(CaseData::getLinkedCasesComponentLauncher, "", "#ARGUMENT(LinkedCases)");
         builder.tab("Tasks", "Tasks")
             .showCondition("[STATE] = \"AWAITING_SUBMISSION_TO_HMCTS\" OR [STATE] = \"AWAITING_RESUBMISSION_TO_HMCTS\"")
             .forRoles(UserRole.CASEWORKER_PRIVATELAW_SOLICITOR)
@@ -218,8 +218,8 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("cafcassUploadDocListConfTab")
             .field("courtStaffUploadDocListConfTab")
             .field("bulkScannedDocListConfTab")
-            .field("restrictedDocuments", "")
-            .field("confidentialDocuments", "")
+            .field(CaseData::getRestrictedDocuments, "", "#TABLE(categoryName, documentParty, documentUploadedDate)")
+            .field(CaseData::getConfidentialDocuments, "", "#TABLE(categoryName, documentParty, documentUploadedDate)")
             .field("refugeDocuments")
             .field("daApplicantContactInstructions");
         builder.tab("CATasks", "CA Tasks")
@@ -287,10 +287,10 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("closedMessageLabel", "closedMessages!=\"\"")
             .field("closedMessages")
             .field("sendOrReplyEventLink")
-            .field("messages", "");
+            .field(CaseData::getMessages, "", "#TABLE(senderRole,internalOrExternalSentTo, internalMessageUrgent, dateSent, updatedTime, status)");
         builder.tab("Orders", "Orders")
             .field("orderCollection")
-            .field("additionalOrderDocuments", "");
+            .field(CaseData::getAdditionalOrderDocuments, "", "#TABLE(uploadedDateTime, uploadedBy, servedOrders)");
         builder.tab("OtherApplicationsTab", "Other applications")
             .showCondition("additionalApplicationsBundle!=\"\"")
             .field("uploadC2Link")
@@ -374,7 +374,7 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("servedPackLabel", "finalServedApplicationDetailsList!=\"\"")
             .field(CaseData::getFinalServedApplicationDetailsList, "", "#TABLE(servedBy,servedAt,modeOfService,whoIsResponsible)")
             .field("confidentialCheckFailedLabel", "confidentialCheckFailed!=\"\"")
-            .field("confidentialCheckFailed", "")
+            .field(CaseData::getConfidentialCheckFailed, "", "#TABLE(confidentialityCheckRejectReason,dateRejected)")
             .field("stmtOfServiceLabel", "stmtOfServiceForApplication!=\"\"")
             .field("stmtOfServiceForApplication");
         builder.tab("ServiceOfDocuments", "Service of documents")
@@ -383,7 +383,7 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("unServedDocumentsLabel", "sodUnServedPack.documents!=\"\"")
             .field("sodUnServedPack", "sodUnServedPack.documents!=\"\"")
             .field("servedDocumentsLabel", "servedDocumentsDetailsList!=\"\"")
-            .field("servedDocumentsDetailsList", "");
+            .field(CaseData::getServedDocumentsDetailsList, "", "#TABLE(servedBy,servedAt,modeOfService,whoIsResponsible)");
         builder.tab("ServiceRequestTab", "Service Request")
             .field("ServiceRequest");
         builder.tab("Summary", "Summary")
@@ -435,7 +435,7 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
         builder.tab("support", "Support")
             .showCondition("[STATE]!=\"AWAITING_SUBMISSION_TO_HMCTS\" AND [STATE]!=\"AWAITING_RESUBMISSION_TO_HMCTS\" AND [STATE]!=\"SUBMITTED_NOT_PAID\"")
             .forRoles(UserRole.CASEWORKER_PRIVATELAW_SOLICITOR)
-            .field("flagLauncherExternal", "")
+            .field(CaseData::getFlagLauncherExternal, "", "#ARGUMENT(READ)")
             .field("caApplicant1ExternalFlags", "caApplicant1ExternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant2ExternalFlags", "caApplicant2ExternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant3ExternalFlags", "caApplicant3ExternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
@@ -479,7 +479,7 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("daRespondentBarristerExternalFlags", "daRespondentBarristerExternalFlags=\"DUMMY_FIELD_TO_HIDE\"");
         builder.tab("caCaseFlagsViewTab", "Case Flags")
             .forRoles(UserRole.CASEWORKER_PRIVATELAW_COURTADMIN)
-            .field("flagLauncherInternal", "")
+            .field(CaseData::getFlagLauncherInternal, "", "#ARGUMENT(READ,VERSION2.1)")
             .field("caseFlags", "flagLauncherInternal=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant1InternalFlags", "caApplicant1InternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant2InternalFlags", "caApplicant2InternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
@@ -565,7 +565,7 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("daRespondentBarristerExternalFlags", "daRespondentBarristerExternalFlags=\"DUMMY_FIELD_TO_HIDE\"");
         builder.tab("judgesCaseFlagsViewTab", "Case Flags")
             .forRoles(UserRole.CASEWORKER_PRIVATELAW_JUDGE)
-            .field("flagLauncherInternal", "")
+            .field(CaseData::getFlagLauncherInternal, "", "#ARGUMENT(READ,VERSION2.1)")
             .field("caseFlags", "flagLauncherInternal=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant1InternalFlags", "caApplicant1InternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant2InternalFlags", "caApplicant2InternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
@@ -651,7 +651,7 @@ public class PRLAPPSTabs implements CCDConfig<CaseData, State, UserRole> {
             .field("daRespondentBarristerExternalFlags", "daRespondentBarristerExternalFlags=\"DUMMY_FIELD_TO_HIDE\"");
         builder.tab("laCaseFlagsViewTab", "Case Flags")
             .forRoles(UserRole.CASEWORKER_PRIVATELAW_LA)
-            .field("flagLauncherInternal", "")
+            .field(CaseData::getFlagLauncherInternal, "", "#ARGUMENT(READ,VERSION2.1)")
             .field("caseFlags", "flagLauncherInternal=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant1InternalFlags", "caApplicant1InternalFlags=\"DUMMY_FIELD_TO_HIDE\"")
             .field("caApplicant2InternalFlags", "caApplicant2InternalFlags=\"DUMMY_FIELD_TO_HIDE\"")

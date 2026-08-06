@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -39,8 +38,7 @@ public class WelshLanguageRequirements implements CCDConfig<CaseData, State, Use
             .grant(Permission.CRU, UserRole.APPLICANTSOLICITOR, UserRole.CASEWORKER_PRIVATELAW_SYSTEMUPDATE, UserRole.CITIZEN, UserRole.CREATOR)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.optional(CaseData::getWelshLanguageRequirement);
         fields.optional(CaseData::getWelshLanguageRequirementApplication)
                     .fieldShowCondition("welshLanguageRequirement=\"Yes\"");

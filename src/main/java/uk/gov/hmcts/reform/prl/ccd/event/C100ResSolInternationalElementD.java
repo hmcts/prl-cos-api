@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -45,10 +45,18 @@ public class C100ResSolInternationalElementD implements CCDConfig<CaseData, Stat
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getInternationalElementChild).done();
+        fields.complex(CaseData::getRespondentSolicitorData)
+                    .complexScope(RespondentSolicitorData::getInternationalElementChild)
+                    .optional(CitizenInternationalElements::getChildrenLiveOutsideOfEnWl)
+                    .optional(CitizenInternationalElements::getChildrenLiveOutsideOfEnWlDetails)
+                    .optional(CitizenInternationalElements::getParentsAnyOneLiveOutsideEnWlDetails)
+                    .optional(CitizenInternationalElements::getAnotherPersonOrderOutsideEnWl)
+                    .optional(CitizenInternationalElements::getAnotherPersonOrderOutsideEnWlDetails)
+                    .optional(CitizenInternationalElements::getAnotherCountryAskedInformation)
+                    .optional(CitizenInternationalElements::getAnotherCountryAskedInformationDetaails).done().done();
     }
 }

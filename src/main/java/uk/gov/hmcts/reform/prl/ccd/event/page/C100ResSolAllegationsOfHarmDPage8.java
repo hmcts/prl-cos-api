@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -27,10 +26,9 @@ public final class C100ResSolAllegationsOfHarmDPage8 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("8");
         fields.showCondition("respChildAbuses CONTAINS \"emotionalAbuse\" AND respAohYesOrNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel7)
-                    .readonly(CaseDataExtra::getRespChildEmotionalAbuseLabel)
-                    .readonly(CaseDataExtra::getRespChildEmotionalAbuseSubLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel7);
+        fields.readonly(CaseData::getRespChildEmotionalAbuseLabel);
+        fields.readonly(CaseData::getRespChildEmotionalAbuseSubLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .optional(RespondentAllegationsOfHarmData::getRespAllChildrenAreRiskEmotionalAbuse).done().done();

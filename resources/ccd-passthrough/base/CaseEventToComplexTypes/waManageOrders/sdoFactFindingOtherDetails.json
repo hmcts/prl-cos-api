@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "waManageOrders",
-  "CaseFieldID" : "sdoFactFindingOtherDetails",
-  "ListElementCode" : "sdoDioOtherDetails",
-  "CaseTypeID" : "PRLAPPS"
-} ]

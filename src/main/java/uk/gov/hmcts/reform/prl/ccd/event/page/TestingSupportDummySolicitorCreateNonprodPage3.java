@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,8 +25,7 @@ public final class TestingSupportDummySolicitorCreateNonprodPage3 {
         fields.page("3");
         fields.mandatory(CaseData::getApplicantCaseName)
                     .fieldShowCondition("caseTypeOfApplication=\"C100\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getApplicantOrRespondentCaseName)
-                    .fieldShowCondition("caseTypeOfApplication=\"FL401\"").done();
+        fields.mandatory(CaseData::getApplicantOrRespondentCaseName)
+                    .fieldShowCondition("caseTypeOfApplication=\"FL401\"");
     }
 }

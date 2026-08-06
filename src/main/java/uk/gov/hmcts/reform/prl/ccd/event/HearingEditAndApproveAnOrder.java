@@ -25,6 +25,14 @@ import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderPage6;
 import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderPage7;
 import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderPage8;
 import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderPage9;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes1;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes2;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes3;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes4;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes5;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes6;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes7;
+import uk.gov.hmcts.reform.prl.ccd.event.page.HearingEditAndApproveAnOrderScopes8;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -79,5 +87,13 @@ public class HearingEditAndApproveAnOrder implements CCDConfig<CaseData, State, 
         HearingEditAndApproveAnOrderPage7.apply(fields);
         HearingEditAndApproveAnOrderPage8.apply(fields);
         HearingEditAndApproveAnOrderPage9.apply(fields);
+        HearingEditAndApproveAnOrderScopes1.apply(fields);
+        HearingEditAndApproveAnOrderScopes2.apply(fields);
+        HearingEditAndApproveAnOrderScopes3.apply(fields);
+        HearingEditAndApproveAnOrderScopes4.apply(fields);
+        HearingEditAndApproveAnOrderScopes5.apply(fields);
+        HearingEditAndApproveAnOrderScopes6.apply(fields);
+        HearingEditAndApproveAnOrderScopes7.apply(fields);
+        HearingEditAndApproveAnOrderScopes8.apply(fields);
     }
 }

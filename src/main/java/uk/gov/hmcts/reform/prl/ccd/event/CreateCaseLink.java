@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -47,15 +46,13 @@ public class CreateCaseLink implements CCDConfig<CaseData, State, UserRole> {
                     .displayContextParameter("#ARGUMENT(CREATE)")
                     .retainHiddenValue()
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getCaseLinksFlag)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getCaseLinksFlag)
+                    .publish(false);
         fields.readonlyNoSummary(CaseData::getCaseNameHmctsInternal)
                     .fieldShowCondition("caseLinksFlag=\"DUMMY_VALUE_TO_HIDE_FIELD\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getLinkedCasesComponentLauncher)
+        fields.optionalNoSummary(CaseData::getLinkedCasesComponentLauncher)
                     .displayContextParameter("#ARGUMENT(CREATE,LinkedCases)")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

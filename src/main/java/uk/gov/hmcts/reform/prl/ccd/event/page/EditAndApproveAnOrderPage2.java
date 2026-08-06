@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.OrdersHearingPageFieldShowParams;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -27,51 +26,47 @@ public final class EditAndApproveAnOrderPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderNameEditScreenLabel)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getOrderNameEditScreenLabel)
+                    .publish(false);
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("orderNameEditScreenLabel=\"DO_NOT_SHOW\"")
                     .retainHiddenValue();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getOrderName)
+        fields.readonlyNoSummary(CaseData::getOrderName)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .optionalNoSummary(ManageOrders::getOrderUploadedAsDraftFlag)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getIsOrderCreatedBySolicitor)
+        fields.optional(CaseData::getIsOrderCreatedBySolicitor)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getDoYouWantToEditTheOrder)
                     .fieldShowCondition("isOrderCreatedBySolicitor=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getCheckTheOrderLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getLegalRepInstructionsPlaceHolder)
+        fields.readonlyNoSummary(CaseData::getCheckTheOrderLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getLegalRepInstructionsPlaceHolder)
                     .fieldShowCondition("previewUploadedOrder=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getYourInstructionsToLrLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getYourInstructionsToLrLabel)
                     .fieldShowCondition("legalRepInstructionsPlaceHolder!=\"\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getInstructionsToLegalRepresentativeLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getInstructionsToLegalRepresentativeLabel)
                     .fieldShowCondition("legalRepInstructionsPlaceHolder!=\"\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getOpenOrderAndReviewContentLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getPreviewDraftOrderWelsh)
+                    .publish(false);
+        fields.readonly(CaseData::getOpenOrderAndReviewContentLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getPreviewDraftOrderWelsh)
                     .fieldShowCondition("orderUploadedAsDraftFlag!=\"Yes\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getPreviewDraftOrder)
+                    .publish(false);
+        fields.readonly(CaseData::getPreviewDraftOrder)
                     .fieldShowCondition("orderUploadedAsDraftFlag!=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .readonly(ManageOrders::getPreviewUploadedOrder)
                     .fieldShowCondition("orderUploadedAsDraftFlag=\"Yes\"")
@@ -88,14 +83,13 @@ public final class EditAndApproveAnOrderPage2 {
                     .fieldShowCondition("whatToDoWithOrderSolicitor=\"askLegalRepToMakeChanges\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderType)
+        fields.readonly(CaseData::getOrderType)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
-                    .publish(false)
-                    .mandatoryNoSummary(CaseDataExtra::getIsHearingPageNeeded)
+                    .publish(false);
+        fields.mandatoryNoSummary(CaseData::getIsHearingPageNeeded)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getOrdersHearingPageFieldShowParams)
                     .optionalNoSummary(OrdersHearingPageFieldShowParams::getIsCafcassCymru)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
@@ -201,25 +195,24 @@ public final class EditAndApproveAnOrderPage2 {
                     .readonly(ManageOrders::getC21OrderOptions)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsHearingTaskNeeded)
+        fields.mandatoryNoSummary(CaseData::getIsHearingTaskNeeded)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getHearingOptionSelected)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getHearingOptionSelected)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsOrderApproved)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsOrderApproved)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getWhoApprovedTheOrder)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getWhoApprovedTheOrder)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsMultipleHearingSelected)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsMultipleHearingSelected)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getJudgeLaManagerReviewRequired)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getJudgeLaManagerReviewRequired)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.complex(CaseData::getStandardDirectionOrder)
                     .readonly(StandardDirectionOrder::getSdoPreamblesTempList)
                     .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -26,9 +25,8 @@ public final class ReviewDocumentsPage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getReviewDocsLabel1)
-                    .readonly(CaseDataExtra::getReviewDocsLabel2).done();
+        fields.readonly(CaseData::getReviewDocsLabel1);
+        fields.readonly(CaseData::getReviewDocsLabel2);
         fields.complex(CaseData::getReviewDocuments)
                     .mandatory(ReviewDocuments::getReviewDocsDynamicList).done();
         fields.complex(CaseData::getDocumentManagementDetails)

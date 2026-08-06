@@ -27,5 +27,11 @@ public final class ManageOrdersPage16 {
         ManageOrdersPage16Fields1.apply(fields);
         ManageOrdersPage16Fields2.apply(fields);
         ManageOrdersPage16Fields3.apply(fields);
+        ManageOrdersPage16Fields4.apply(fields);
+        ManageOrdersPage16Fields5.apply(fields);
+        ManageOrdersPage16Fields6.apply(fields);
+        ManageOrdersPage16Fields7.apply(fields);
+        ManageOrdersPage16Fields8.apply(fields);
+        ManageOrdersPage16Fields9.apply(fields);
     }
 }

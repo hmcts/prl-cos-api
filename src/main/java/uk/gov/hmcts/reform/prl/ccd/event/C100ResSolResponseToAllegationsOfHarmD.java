@@ -8,7 +8,6 @@ import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -45,9 +44,8 @@ public class C100ResSolResponseToAllegationsOfHarmD implements CCDConfig<CaseDat
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonlyNoSummary(CaseDataExtra::getResponseToAllegationsOfHarmLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonlyNoSummary(CaseData::getResponseToAllegationsOfHarmLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getResponseToAllegationsOfHarm)
                     .mandatory(ResponseToAllegationsOfHarm::getResponseToAllegationsOfHarmYesOrNoResponse).done().done();

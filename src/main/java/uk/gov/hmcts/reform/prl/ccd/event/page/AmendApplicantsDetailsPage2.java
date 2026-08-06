@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.Address;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -28,15 +27,13 @@ public final class AmendApplicantsDetailsPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("caseTypeOfApplication=\"FL401\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo2)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo2)
+                    .publish(false);
         fields.complex(CaseData::getApplicantsFL401)
                     .mandatory(PartyDetails::getFirstName)
                     .mandatory(PartyDetails::getLastName)
                     .optional(PartyDetails::getPreviousName)
                     .mandatory(PartyDetails::getDateOfBirth)
-                    .noHintText()
                     .mandatory(PartyDetails::getGender)
                     .mandatory(PartyDetails::getOtherGender)
                     .fieldShowCondition("applicantsFL401.gender=\"other\"")
@@ -44,7 +41,6 @@ public final class AmendApplicantsDetailsPage2 {
                     .eventLabel("*Does the applicant currently live in a refuge?")
                     .mandatory(PartyDetails::getRefugeConfidentialityC8Form)
                     .fieldShowCondition("applicantsFL401.liveInRefuge=\"DO_NOT_SHOW\"")
-                    .noHintText()
                     .mandatory(PartyDetails::getAddress)
                     .complex(PartyDetails::getAddress)
                     .mandatory(Address::getAddressLine1).done()
@@ -64,19 +60,15 @@ public final class AmendApplicantsDetailsPage2 {
                     .fieldShowCondition("applicantsFL401.firstName=\"\" OR applicantsFL401.firstName=\"*\"")
                     .eventLabel("If you fill out this section you do not need to send a separate C8 form.")
                     .mandatory(PartyDetails::getIsAddressConfidential)
-                    .noHintText()
                     .mandatory(PartyDetails::getCanYouProvideEmailAddress)
                     .mandatory(PartyDetails::getEmail)
                     .fieldShowCondition("applicantsFL401.canYouProvideEmailAddress=\"Yes\"")
                     .mandatory(PartyDetails::getIsEmailAddressConfidential)
                     .fieldShowCondition("applicantsFL401.canYouProvideEmailAddress=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getContactPreferences)
                     .fieldShowCondition("applicantsFL401.canYouProvideEmailAddress=\"Yes\"")
-                    .noHintText()
                     .mandatory(PartyDetails::getPhoneNumber)
                     .mandatory(PartyDetails::getIsPhoneNumberConfidential)
-                    .noHintText()
                     .readonly(PartyDetails::getSolicitorDetails)
                     .optional(PartyDetails::getRepresentativeFirstName)
                     .optional(PartyDetails::getRepresentativeLastName)

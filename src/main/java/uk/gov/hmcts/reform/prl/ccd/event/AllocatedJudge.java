@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,25 +39,23 @@ public class AllocatedJudge implements CCDConfig<CaseData, State, UserRole> {
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_READONLY)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getAllocatedJudeLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getAllocatedJudgeInfo)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getIsSpecificJudgeOrLegalAdviserNeeded)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getIsJudgeOrLegalAdviser)
+        fields.readonly(CaseData::getAllocatedJudeLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getAllocatedJudgeInfo)
+                    .publish(false);
+        fields.mandatory(CaseData::getIsSpecificJudgeOrLegalAdviserNeeded)
+                    .publish(false);
+        fields.mandatory(CaseData::getIsJudgeOrLegalAdviser)
                     .fieldShowCondition("isSpecificJudgeOrLegalAdviserNeeded=\"Yes\"")
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getJudgeNameAndEmail)
+                    .publish(false);
+        fields.mandatory(CaseData::getJudgeNameAndEmail)
                     .fieldShowCondition("isSpecificJudgeOrLegalAdviserNeeded=\"Yes\" AND isJudgeOrLegalAdviser=\"judge\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getLegalAdviserList)
                     .fieldShowCondition("isSpecificJudgeOrLegalAdviserNeeded=\"Yes\" AND isJudgeOrLegalAdviser=\"legalAdviser\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getTierOfJudiciary)
+        fields.mandatory(CaseData::getTierOfJudiciary)
                     .fieldShowCondition("isSpecificJudgeOrLegalAdviserNeeded=\"No\"")
-                    .publish(false).done();
+                    .publish(false);
     }
 }

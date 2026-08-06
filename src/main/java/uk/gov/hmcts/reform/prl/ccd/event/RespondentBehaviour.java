@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,8 +39,7 @@ public class RespondentBehaviour implements CCDConfig<CaseData, State, UserRole>
             .grant(Permission.CRU, UserRole.APPLICANTSOLICITOR, UserRole.CASEWORKER_PRIVATELAW_SYSTEMUPDATE, UserRole.CITIZEN, UserRole.CREATOR)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getRespondentBehaviourData)
                     .optional(uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour::getApplicantWantToStopFromRespondentDoing)
                     .optional(uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour::getApplicantWantToStopFromRespondentDoingToChild)

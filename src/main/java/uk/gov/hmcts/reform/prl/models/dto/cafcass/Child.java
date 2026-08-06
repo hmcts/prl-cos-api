@@ -1,5 +1,4 @@
 package uk.gov.hmcts.reform.prl.models.dto.cafcass;
-import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnum;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.prl.enums.addcafcassofficer.CafcassOfficerPositionEnum;
 
 @Data
 @AllArgsConstructor

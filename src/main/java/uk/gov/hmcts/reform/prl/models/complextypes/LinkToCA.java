@@ -26,8 +26,23 @@ public class LinkToCA {
     private final String caApplicationNumber;
 
     @JsonCreator
-    public LinkToCA(YesOrNo linkToCaApplication, String childArrangementsApplicationNumber) {
+    public LinkToCA(YesOrNo linkToCaApplication, String childArrangementsApplicationNumber, @JsonProperty("linkToCaYes") String linkToCaYes) {
         this.linkToCaApplication = linkToCaApplication;
         this.caApplicationNumber = childArrangementsApplicationNumber;
+        this.linkToCaYes = linkToCaYes;
     }
+
+    /** Retained so existing positional call sites still compile. */
+    public LinkToCA(YesOrNo linkToCaApplication, String childArrangementsApplicationNumber) {
+        this(linkToCaApplication, childArrangementsApplicationNumber, null);
+    }
+
+  // ==== ccd-definition-converter: synthesised definition-only fields (retrofit) ====
+  @CCD(
+          label = "If you have also completed a Child Arrangements Order application enter the case number below.",
+          searchable = false,
+          typeOverride = FieldType.Label
+  )
+  private String linkToCaYes;
+  // ==== end synthesised definition-only fields ====
 }

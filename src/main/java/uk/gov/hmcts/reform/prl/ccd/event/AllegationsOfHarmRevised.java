@@ -17,7 +17,11 @@ import uk.gov.hmcts.reform.prl.ccd.event.page.AllegationsOfHarmRevisedPage7;
 import uk.gov.hmcts.reform.prl.ccd.event.page.AllegationsOfHarmRevisedPage8;
 import uk.gov.hmcts.reform.prl.ccd.event.page.AllegationsOfHarmRevisedPage9;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildAbuse;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseBehaviours;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildPassportDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -61,5 +65,64 @@ public class AllegationsOfHarmRevised implements CCDConfig<CaseData, State, User
         AllegationsOfHarmRevisedPage9.apply(fields);
         AllegationsOfHarmRevisedPage10.apply(fields);
         AllegationsOfHarmRevisedPage11.apply(fields);
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complex(AllegationOfHarmRevised::getDomesticBehaviours, DomesticAbuseBehaviours.class)
+                    .optional(DomesticAbuseBehaviours::getTypeOfAbuse)
+                    .optional(DomesticAbuseBehaviours::getNewAbuseNatureDescription)
+                    .optional(DomesticAbuseBehaviours::getNewBehavioursStartDateAndLength)
+                    .optional(DomesticAbuseBehaviours::getNewBehavioursApplicantSoughtHelp)
+                    .optional(DomesticAbuseBehaviours::getNewBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("domesticBehaviours.newBehavioursApplicantSoughtHelp=\"Yes\"").done().done();
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complexScope(AllegationOfHarmRevised::getChildPassportDetails)
+                    .mandatory(ChildPassportDetails::getNewChildHasMultiplePassports)
+                    .mandatory(ChildPassportDetails::getNewChildPassportPossession)
+                    .mandatory(ChildPassportDetails::getNewChildPassportPossessionOtherDetails)
+                    .fieldShowCondition("childPassportDetails.newChildPassportPossession CONTAINS \"otherPerson\"").done().done();
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complexScope(AllegationOfHarmRevised::getChildPhysicalAbuse)
+                    .optional(ChildAbuse::getTypeOfAbuse)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
+                    .optional(ChildAbuse::getAbuseNatureDescription)
+                    .optional(ChildAbuse::getBehavioursStartDateAndLength)
+                    .optional(ChildAbuse::getBehavioursApplicantSoughtHelp)
+                    .optional(ChildAbuse::getBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("childPhysicalAbuse.behavioursApplicantSoughtHelp=\"Yes\"").done().done();
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complexScope(AllegationOfHarmRevised::getChildPsychologicalAbuse)
+                    .optional(ChildAbuse::getTypeOfAbuse)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
+                    .optional(ChildAbuse::getAbuseNatureDescription)
+                    .optional(ChildAbuse::getBehavioursStartDateAndLength)
+                    .optional(ChildAbuse::getBehavioursApplicantSoughtHelp)
+                    .optional(ChildAbuse::getBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("childPsychologicalAbuse.behavioursApplicantSoughtHelp=\"Yes\"").done().done();
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complexScope(AllegationOfHarmRevised::getChildSexualAbuse)
+                    .optional(ChildAbuse::getTypeOfAbuse)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
+                    .optional(ChildAbuse::getAbuseNatureDescription)
+                    .optional(ChildAbuse::getBehavioursStartDateAndLength)
+                    .optional(ChildAbuse::getBehavioursApplicantSoughtHelp)
+                    .optional(ChildAbuse::getBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("childSexualAbuse.behavioursApplicantSoughtHelp=\"Yes\"").done().done();
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complexScope(AllegationOfHarmRevised::getChildEmotionalAbuse)
+                    .optional(ChildAbuse::getTypeOfAbuse)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
+                    .optional(ChildAbuse::getAbuseNatureDescription)
+                    .optional(ChildAbuse::getBehavioursStartDateAndLength)
+                    .optional(ChildAbuse::getBehavioursApplicantSoughtHelp)
+                    .optional(ChildAbuse::getBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("childEmotionalAbuse.behavioursApplicantSoughtHelp=\"Yes\"").done().done();
+        fields.complex(CaseData::getAllegationOfHarmRevised)
+                    .complexScope(AllegationOfHarmRevised::getChildFinancialAbuse)
+                    .optional(ChildAbuse::getTypeOfAbuse)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
+                    .optional(ChildAbuse::getAbuseNatureDescription)
+                    .optional(ChildAbuse::getBehavioursStartDateAndLength)
+                    .optional(ChildAbuse::getBehavioursApplicantSoughtHelp)
+                    .optional(ChildAbuse::getBehavioursApplicantHelpSoughtWho)
+                    .fieldShowCondition("childFinancialAbuse.behavioursApplicantSoughtHelp=\"Yes\"").done().done();
     }
 }

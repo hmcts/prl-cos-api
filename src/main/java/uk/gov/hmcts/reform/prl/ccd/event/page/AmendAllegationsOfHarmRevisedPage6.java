@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,9 +25,8 @@ public final class AmendAllegationsOfHarmRevisedPage6 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("6");
         fields.showCondition("childAbuses CONTAINS \"psychologicalAbuse\"  AND newAllegationsOfHarmChildAbuseYesNo=\"Yes\" AND  newAllegationsOfHarmYesNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getChildPsychologicalAbuseLabel)
-                    .readonly(CaseDataExtra::getChildPsychologicalAbuseSubLabel).done();
+        fields.readonly(CaseData::getChildPsychologicalAbuseLabel);
+        fields.readonly(CaseData::getChildPsychologicalAbuseSubLabel);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .optional(AllegationOfHarmRevised::getAllChildrenAreRiskPsychologicalAbuse)
                     .optional(AllegationOfHarmRevised::getWhichChildrenAreRiskPsychologicalAbuse)

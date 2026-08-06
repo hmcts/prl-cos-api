@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -24,10 +23,9 @@ public final class SelectApplicationTypePage4 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("4");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo4)
-                    .readonly(CaseDataExtra::getParaWhyMakingApplication2)
-                    .readonly(CaseDataExtra::getParaApplicationDetails).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo4);
+        fields.readonly(CaseData::getParaWhyMakingApplication2);
+        fields.readonly(CaseData::getParaApplicationDetails);
         fields.mandatory(CaseData::getApplicationDetails);
     }
 }

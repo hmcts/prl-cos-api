@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,11 +25,10 @@ public final class HearingEditAndApproveAnOrderPage8 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("8");
         fields.showCondition("orderType=\"parentalResponsibility\" AND doYouWantToEditTheOrder=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderNameLabel8)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getParentalResponsibility)
-                    .publish(false).done();
+        fields.readonly(CaseData::getOrderNameLabel8)
+                    .publish(false);
+        fields.readonly(CaseData::getParentalResponsibility)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getParentName)
                     .publish(false).done();

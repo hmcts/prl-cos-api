@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,9 +25,8 @@ public final class DraftAnOrderPage12 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("12");
         fields.showCondition("createSelectOrderOptions=\"standardDirectionsOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoDirectionsCaseNeedsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getSdoDirectionsCaseNeedsLabel)
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoPreamblesList)
                     .publish(false)

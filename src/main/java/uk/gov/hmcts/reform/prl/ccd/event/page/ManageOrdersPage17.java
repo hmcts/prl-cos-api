@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,11 +25,10 @@ public final class ManageOrdersPage17 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("17");
         fields.showCondition("createSelectOrderOptions=\"directionOnIssue\" AND manageOrdersOptions!=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getDioListLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getDioDirectionsCaseNeedsLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getDioListLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getDioDirectionsCaseNeedsLabel)
+                    .publish(false);
         fields.complex(CaseData::getDirectionOnIssue)
                     .optional(DirectionOnIssue::getDioPreamblesList)
                     .publish(false)
@@ -44,8 +42,7 @@ public final class ManageOrdersPage17 {
                     .publish(false)
                     .optional(DirectionOnIssue::getDioOtherList)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getDioFurtherList)
-                    .publish(false).done();
+        fields.optional(CaseData::getDioFurtherList)
+                    .publish(false);
     }
 }

@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -42,10 +42,21 @@ public class ChildrenAndApplicants implements CCDConfig<CaseData, State, UserRol
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getChildAndApplicantRelationsLabel)
-                    .readonlyNoSummary(CaseDataExtra::getChildAndApplicantRelationsSubLabel).done();
+        fields.readonlyNoSummary(CaseData::getChildAndApplicantRelationsLabel);
+        fields.readonlyNoSummary(CaseData::getChildAndApplicantRelationsSubLabel);
         fields.complex(CaseData::getRelations)
                     .optional(Relations::getBuffChildAndApplicantRelations).done();
+        fields.complex(CaseData::getRelations)
+                    .complex(Relations::getBuffChildAndApplicantRelations, ChildrenAndApplicantRelation.class)
+                    .readonly(ChildrenAndApplicantRelation::getApplicantFullName)
+                    .readonly(ChildrenAndApplicantRelation::getChildFullName)
+                    .mandatory(ChildrenAndApplicantRelation::getChildAndApplicantRelation)
+                    .mandatory(ChildrenAndApplicantRelation::getChildAndApplicantRelationOtherDetails)
+                    .fieldShowCondition("buffChildAndApplicantRelations.childAndApplicantRelation=\"other\"")
+                    .mandatory(ChildrenAndApplicantRelation::getChildLivesWith)
+                    .mandatory(ChildrenAndApplicantRelation::getApplicantId)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"")
+                    .mandatory(ChildrenAndApplicantRelation::getChildId)
+                    .fieldShowCondition("caseTypeOfApplication=\"DO_NOT_SHOW\"").done().done();
     }
 }

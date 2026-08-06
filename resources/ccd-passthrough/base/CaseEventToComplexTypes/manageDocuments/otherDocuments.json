@@ -1,31 +1,11 @@
 [ {
-  "CaseEventID" : "manageDocuments",
-  "CaseFieldID" : "otherDocuments",
-  "ListElementCode" : "documentName",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "manageDocuments",
-  "CaseFieldID" : "otherDocuments",
-  "ListElementCode" : "notes",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "manageDocuments",
-  "CaseFieldID" : "otherDocuments",
-  "ListElementCode" : "documentOther",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "manageDocuments",
-  "CaseFieldID" : "otherDocuments",
-  "ListElementCode" : "documentTypeOther",
-  "CaseTypeID" : "PRLAPPS"
-}, {
+  "LiveFrom" : "20/08/2021",
+  "CaseTypeID" : "PRLAPPS",
+  "ID" : "OtherDocuments",
   "CaseEventID" : "manageDocuments",
   "CaseFieldID" : "otherDocuments",
   "ListElementCode" : "checkDocumentsConfidentialLabel",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "manageDocuments",
-  "CaseFieldID" : "otherDocuments",
-  "ListElementCode" : "restrictCheckboxOtherDocuments",
-  "CaseTypeID" : "PRLAPPS"
+  "EventElementLabel" : "<br /><div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!</span><strong class='govuk-warning-text__text'>Check if documents are confidential</strong></div><br>",
+  "FieldDisplayOrder" : "7",
+  "DisplayContext" : "READONLY"
 } ]

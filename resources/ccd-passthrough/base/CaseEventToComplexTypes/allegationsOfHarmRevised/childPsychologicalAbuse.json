@@ -2,26 +2,6 @@
   "CaseEventID" : "allegationsOfHarmRevised",
   "CaseFieldID" : "childPsychologicalAbuse",
   "ListElementCode" : "typeOfAbuse",
-  "CaseTypeID" : "PRLAPPS",
+  "FieldShowCondition" : "caseTypeOfApplication=\"DO_NOT_SHOW\"",
   "DefaultValue" : "psychologicalAbuse"
-}, {
-  "CaseEventID" : "allegationsOfHarmRevised",
-  "CaseFieldID" : "childPsychologicalAbuse",
-  "ListElementCode" : "abuseNatureDescription",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "allegationsOfHarmRevised",
-  "CaseFieldID" : "childPsychologicalAbuse",
-  "ListElementCode" : "behavioursStartDateAndLength",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "allegationsOfHarmRevised",
-  "CaseFieldID" : "childPsychologicalAbuse",
-  "ListElementCode" : "behavioursApplicantSoughtHelp",
-  "CaseTypeID" : "PRLAPPS"
-}, {
-  "CaseEventID" : "allegationsOfHarmRevised",
-  "CaseFieldID" : "childPsychologicalAbuse",
-  "ListElementCode" : "behavioursApplicantHelpSoughtWho",
-  "CaseTypeID" : "PRLAPPS"
 } ]

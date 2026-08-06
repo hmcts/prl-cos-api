@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -26,15 +25,13 @@ public final class C100ResSolMiamAPage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("hasRespondentAttendedMiam = \"No\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel1)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo2).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel1);
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo2);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getHelpMiamCostsExemptionsPlaceHolder)
                     .fieldShowCondition("respondentSolicitorHaveYouAttendedMiam=\"DO NOT SHOW\"")
                     .retainHiddenValue().done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getHelpMiamCostsExemptionsLabel).done();
+        fields.readonly(CaseData::getHelpMiamCostsExemptionsLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .mandatory(RespondentSolicitorData::getRespondentWillingToAttendMiam)
                     .mandatory(RespondentSolicitorData::getRespondentReasonNotAttendingMiam)

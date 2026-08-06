@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -26,11 +25,10 @@ public final class AllegationsOfHarmRevisedPage7 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("7");
         fields.showCondition("childAbuses CONTAINS \"sexualAbuse\" AND newAllegationsOfHarmChildAbuseYesNo=\"Yes\" AND newAllegationsOfHarmYesNo=\"Yes\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getChildSexualAbuseLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getChildSexualAbuseSubLabel)
-                    .publish(false).done();
+        fields.readonly(CaseData::getChildSexualAbuseLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getChildSexualAbuseSubLabel)
+                    .publish(false);
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .optional(AllegationOfHarmRevised::getAllChildrenAreRiskSexualAbuse)
                     .publish(false)

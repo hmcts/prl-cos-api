@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -29,10 +28,9 @@ public final class ManageOrdersPage4 {
         fields.readonly(CaseData::getSelectedC21Order)
                     .fieldShowCondition("createSelectOrderOptions=\"DO_NOT_SHOW\"")
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSelectedC21OrderLabel)
+        fields.readonly(CaseData::getSelectedC21OrderLabel)
                     .fieldShowCondition("createSelectOrderOptions=\"blankOrderOrDirections\" OR childArrangementOrders=\"blankOrderOrDirections\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getC21OrderOptions)
                     .publish(false).done();

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -27,8 +26,7 @@ public final class WaManageOrdersPage30 {
         fields.showCondition("manageOrdersOptions!=\"servedSavedOrders\" AND loggedInUserType=\"JUDGE\"");
         fields.optionalNoSummary(CaseData::getJudgeDirectionsToAdmin)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getIsOrderCompleteToServe)
-                    .fieldShowCondition("[STATE] = \"JUDICIAL_REVIEW\" OR [STATE] = \"CASE_ISSUED\"").done();
+        fields.mandatoryNoSummary(CaseData::getIsOrderCompleteToServe)
+                    .fieldShowCondition("[STATE] = \"JUDICIAL_REVIEW\" OR [STATE] = \"CASE_ISSUED\"");
     }
 }

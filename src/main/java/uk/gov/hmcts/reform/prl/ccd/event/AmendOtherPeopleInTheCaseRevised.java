@@ -1,6 +1,4 @@
 package uk.gov.hmcts.reform.prl.ccd.event;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.Set;
 import org.springframework.stereotype.Component;
@@ -8,8 +6,9 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -43,8 +42,7 @@ public class AmendOtherPeopleInTheCaseRevised implements CCDConfig<CaseData, Sta
             .grant(Permission.CRU, UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1).done();
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
         fields.complex(CaseData::getOtherPartyInTheCaseRevised).done();
         fields.complex(CaseData::getOtherPartyInTheCaseRevised, PartyDetails.class)
                     .optional(PartyDetails::getFirstName)
@@ -53,7 +51,6 @@ public class AmendOtherPeopleInTheCaseRevised implements CCDConfig<CaseData, Sta
                     .optional(PartyDetails::getIsDateOfBirthKnown)
                     .optional(PartyDetails::getDateOfBirth)
                     .fieldShowCondition("otherPartyInTheCaseRevised.isDateOfBirthKnown=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getGender)
                     .optional(PartyDetails::getOtherGender)
                     .fieldShowCondition("otherPartyInTheCaseRevised.gender=\"other\"")
@@ -68,7 +65,6 @@ public class AmendOtherPeopleInTheCaseRevised implements CCDConfig<CaseData, Sta
                     .fieldShowCondition("otherPartyInTheCaseRevised.liveInRefuge=\"Yes\"")
                     .mandatory(PartyDetails::getRefugeConfidentialityC8Form)
                     .fieldShowCondition("otherPartyInTheCaseRevised.isCurrentAddressKnown=\"DO NOT SHOW\"")
-                    .noHintText()
                     .optional(PartyDetails::getIsCurrentAddressKnown)
                     .optional(PartyDetails::getAddress)
                     .fieldShowCondition("otherPartyInTheCaseRevised.isCurrentAddressKnown=\"Yes\"")
@@ -88,7 +84,6 @@ public class AmendOtherPeopleInTheCaseRevised implements CCDConfig<CaseData, Sta
                     .optional(Address::getCountry).done()
                     .mandatory(PartyDetails::getIsAddressConfidential)
                     .fieldShowCondition("otherPartyInTheCaseRevised.isCurrentAddressKnown=\"Yes\"")
-                    .noHintText()
                     .mandatory(PartyDetails::getIsAtAddressLessThan5Years)
                     .mandatory(PartyDetails::getAddressLivedLessThan5YearsDetails)
                     .fieldShowCondition("otherPartyInTheCaseRevised.isAtAddressLessThan5Years=\"Yes\"")
@@ -99,13 +94,11 @@ public class AmendOtherPeopleInTheCaseRevised implements CCDConfig<CaseData, Sta
                     .fieldShowCondition("otherPartyInTheCaseRevised.canYouProvideEmailAddress=\"Yes\"")
                     .mandatory(PartyDetails::getIsEmailAddressConfidential)
                     .fieldShowCondition("otherPartyInTheCaseRevised.canYouProvideEmailAddress=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getCanYouProvidePhoneNumber)
                     .optional(PartyDetails::getPhoneNumber)
                     .fieldShowCondition("otherPartyInTheCaseRevised.canYouProvidePhoneNumber=\"Yes\"")
                     .mandatory(PartyDetails::getIsPhoneNumberConfidential)
                     .fieldShowCondition("otherPartyInTheCaseRevised.canYouProvidePhoneNumber=\"Yes\"")
-                    .noHintText()
                     .optional(PartyDetails::getAddNewApplicantLabel)
                     .eventLabel("Add new person").done();
     }

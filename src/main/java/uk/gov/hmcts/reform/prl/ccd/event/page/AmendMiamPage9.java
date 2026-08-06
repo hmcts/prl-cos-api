@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,8 +25,7 @@ public final class AmendMiamPage9 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("9");
         fields.showCondition("claimingExemptionMiam=\"Yes\" AND applicantAttendedMiam=\"No\" AND familyMediatorMiam=\"No\" AND miamExemptionsChecklist  CONTAINS \"childProtectionConcern\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getMiamChildProtectionConcernLabel).done();
+        fields.readonly(CaseData::getMiamChildProtectionConcernLabel);
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getMiamChildProtectionConcernList).done();
     }

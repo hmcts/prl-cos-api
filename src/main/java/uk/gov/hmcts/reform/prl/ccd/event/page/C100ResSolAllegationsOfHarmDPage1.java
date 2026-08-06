@@ -5,7 +5,6 @@ import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -29,11 +28,10 @@ public final class C100ResSolAllegationsOfHarmDPage1 {
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .readonly(CaseDataExtra::getRespAohHint)
-                    .fieldShowCondition("respAohYesOrNo=\"Yes\"").done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
+        fields.readonly(CaseData::getRespAohHint)
+                    .fieldShowCondition("respAohYesOrNo=\"Yes\"");
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .mandatory(RespondentAllegationsOfHarmData::getRespAohYesOrNo).done().done();

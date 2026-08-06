@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -48,7 +47,6 @@ public class CreateRequestCirUpdateTask implements CCDConfig<CaseData, State, Us
                     .optionalNoSummary(ServeOrderData::getWhenReportsMustBeFiledByLocalAuthority)
                     .optionalNoSummary(ServeOrderData::getWhenReportsMustBeFiled).done();
         fields.optionalNoSummary(CaseData::getCaseTypeOfApplication);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getPerformingUser).done();
+        fields.optionalNoSummary(CaseData::getPerformingUser);
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,9 +25,8 @@ public final class MiamPolicyUpgradePage2 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
         fields.showCondition("mpuClaimingExemptionMiam=\"Yes\" AND mpuApplicantAttendedMiam=\"No\" AND mpuChildInvolvedInMiam=\"No\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo2)
-                    .readonlyNoSummary(CaseDataExtra::getMiamPolicyUpgradeExemptionsLabel).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo2);
+        fields.readonlyNoSummary(CaseData::getMiamPolicyUpgradeExemptionsLabel);
         fields.complex(CaseData::getMiamPolicyUpgradeDetails)
                     .optional(MiamPolicyUpgradeDetails::getMpuExemptionReasons).done();
     }

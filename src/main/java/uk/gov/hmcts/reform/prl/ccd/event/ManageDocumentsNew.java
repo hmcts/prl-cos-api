@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -44,19 +44,17 @@ public class ManageDocumentsNew implements CCDConfig<CaseData, State, UserRole> 
         fields.complex(CaseData::getDocumentManagementDetails)
                     .optional(DocumentManagementDetails::getManageDocuments)
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getManageDocumentsWarningText)
+        fields.readonlyNoSummary(CaseData::getManageDocumentsWarningText)
                     .fieldShowCondition("isC8DocumentPresent=\"No\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getManageDocumentsWarningText2)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getManageDocumentsWarningText2)
                     .fieldShowCondition("isC8DocumentPresent=\"Yes\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getDocumentManagementDetails)
                     .readonlyNoSummary(DocumentManagementDetails::getManageDocumentsTriggeredBy)
                     .fieldShowCondition("manageDocumentsWarningText = \"DO_NOT_SHOW\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getManageDocUploadedCategory)
-                    .fieldShowCondition("manageDocumentsWarningText = \"DO_NOT_SHOW\"").done();
+        fields.readonlyNoSummary(CaseData::getManageDocUploadedCategory)
+                    .fieldShowCondition("manageDocumentsWarningText = \"DO_NOT_SHOW\"");
         fields.readonlyNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("manageDocumentsWarningText = \"DO_NOT_SHOW\"");
         fields.complex(CaseData::getDocumentManagementDetails)
@@ -64,5 +62,29 @@ public class ManageDocumentsNew implements CCDConfig<CaseData, State, UserRole> 
                     .fieldShowCondition("manageDocumentsWarningText = \"DO_NOT_SHOW\"")
                     .readonlyNoSummary(DocumentManagementDetails::getIsC8DocumentPresent)
                     .fieldShowCondition("manageDocumentsWarningText = \"DO_NOT_SHOW\"").done();
+        fields.complex(CaseData::getDocumentManagementDetails)
+                    .complex(DocumentManagementDetails::getManageDocuments, ManageDocuments.class)
+                    .mandatory(ManageDocuments::getDocumentRelatedToCaseCheckbox)
+                    .mandatory(ManageDocuments::getDocumentParty)
+                    .eventLabel("Submitting document on behalf of")
+                    .eventHint("Select a party")
+                    .mandatory(ManageDocuments::getDocumentCategories)
+                    .eventLabel("Document category")
+                    .eventHint("Select a document category")
+                    .mandatory(ManageDocuments::getDocument)
+                    .eventLabel("Document")
+                    .hintText("File size must be under 1GB")
+                    .mandatory(ManageDocuments::getIsConfidential)
+                    .hintText("Only HMCTS staff and the judiciary will be able to see it.")
+                    .mandatory(ManageDocuments::getIsRestricted)
+                    .hintText("The court will only restrict a document if there is a very good reason.Only court staff and the judiciary will be able to see it.")
+                    .optional(ManageDocuments::getRestrictedDetails)
+                    .eventLabel("Explain why you want to restrict access to the document")
+                    .optional(ManageDocuments::getDocumentDetails)
+                    .eventLabel("Details")
+                    .eventHint("Give further details. For example, why you may need to restrict access to the document.")
+                    .optional(ManageDocuments::getDocumentRestrictCheckbox)
+                    .eventLabel("Do you need to restrict access to the document?")
+                    .eventHint("You may need to restrict access because it is a sensitive document, or because it contains confidential details. Once it is restricted the file can only be viewed by Cafcass or Cafcass Cymru, HMCTS staff and the Judiciary.").done().done();
     }
 }

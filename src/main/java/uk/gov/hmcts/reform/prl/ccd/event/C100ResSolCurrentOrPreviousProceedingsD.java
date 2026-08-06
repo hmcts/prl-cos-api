@@ -6,8 +6,8 @@ import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
 
@@ -45,13 +45,28 @@ public class C100ResSolCurrentOrPreviousProceedingsD implements CCDConfig<CaseDa
         fields.complex(CaseData::getRespondentSolicitorData)
                     .readonly(RespondentSolicitorData::getRespondentNameForResponse)
                     .fieldShowCondition("respondentNameForResponseLabel=\"never_show\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getRespondentNameForResponseLabel)
-                    .readonly(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .readonly(CaseDataExtra::getOtherProceedingsLabel).done();
+        fields.readonly(CaseData::getRespondentNameForResponseLabel);
+        fields.readonly(CaseData::getSubmissionRequiredFieldsInfo1);
+        fields.readonly(CaseData::getOtherProceedingsLabel);
         fields.complex(CaseData::getRespondentSolicitorData)
                     .optional(RespondentSolicitorData::getCurrentOrPastProceedingsForChildren)
                     .optional(RespondentSolicitorData::getRespondentExistingProceedings)
                     .fieldShowCondition("currentOrPastProceedingsForChildren=\"yes\"").done();
+        fields.complex(CaseData::getRespondentSolicitorData)
+                    .complex(RespondentSolicitorData::getRespondentExistingProceedings, RespondentProceedingDetails.class)
+                    .optional(RespondentProceedingDetails::getPreviousOrOngoingProceedings)
+                    .optional(RespondentProceedingDetails::getCaseNumber)
+                    .optional(RespondentProceedingDetails::getDateStarted)
+                    .eventLabel("Date started")
+                    .optional(RespondentProceedingDetails::getDateEnded)
+                    .optional(RespondentProceedingDetails::getTypeOfOrder)
+                    .optional(RespondentProceedingDetails::getOtherTypeOfOrder)
+                    .fieldShowCondition("respondentExistingProceedings.typeOfOrder CONTAINS \"otherOrder\"")
+                    .optional(RespondentProceedingDetails::getNameOfJudge)
+                    .optional(RespondentProceedingDetails::getNameOfCourt)
+                    .optional(RespondentProceedingDetails::getNameOfChildrenInvolved)
+                    .optional(RespondentProceedingDetails::getNameOfGuardian)
+                    .optional(RespondentProceedingDetails::getNameAndOffice)
+                    .optional(RespondentProceedingDetails::getUploadRelevantOrder).done().done();
     }
 }

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,17 +25,16 @@ public final class WaManageOrdersPage15 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("15");
         fields.showCondition("createSelectOrderOptions=\"standardDirectionsOrder\" AND manageOrdersOptions!=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSdoListLabel)
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoDirectionsCaseNeedsLabel)
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSdoFactFindingFlag)
+        fields.readonly(CaseData::getSdoSdoListLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoDirectionsCaseNeedsLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSdoFactFindingFlag)
                     .fieldShowCondition("sdoDirectionsCaseNeedsLabel=\"DO_NOT_SHOW\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSdoFactFindingHintText)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSdoFactFindingHintText)
                     .fieldShowCondition("sdoFactFindingFlag!=\"\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoPreamblesList)
                     .publish(false)

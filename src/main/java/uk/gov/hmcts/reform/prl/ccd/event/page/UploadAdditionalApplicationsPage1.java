@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UploadAdditionalApplicationData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -27,10 +26,9 @@ public final class UploadAdditionalApplicationsPage1 {
         fields.page("1");
         fields.complex(CaseData::getUploadAdditionalApplicationData)
                     .mandatory(UploadAdditionalApplicationData::getAdditionalApplicationsApplyingFor).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getAdditionalApplicationsBundleId)
+        fields.optionalNoSummary(CaseData::getAdditionalApplicationsBundleId)
                     .fieldShowCondition("additionalApplicationsApplyingFor=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.complex(CaseData::getUploadAdditionalApplicationData)
                     .mandatory(UploadAdditionalApplicationData::getTypeOfC2Application)
                     .fieldShowCondition("additionalApplicationsApplyingFor=\"c2Order\"")
@@ -50,9 +48,8 @@ public final class UploadAdditionalApplicationsPage1 {
                     .fieldShowCondition("additionalApplicationsApplyingFor=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getAwpWaTaskToBeCreated)
+        fields.optionalNoSummary(CaseData::getAwpWaTaskToBeCreated)
                     .fieldShowCondition("additionalApplicationsApplyingFor=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
     }
 }

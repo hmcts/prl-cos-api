@@ -7,7 +7,6 @@ import uk.gov.hmcts.ccd.sdk.api.ConfigBuilder;
 import uk.gov.hmcts.ccd.sdk.api.Permission;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -40,9 +39,8 @@ public class KeepYourDetailsPrivate implements CCDConfig<CaseData, State, UserRo
             .grant(Set.of(Permission.R), UserRole.CASEWORKER_PRIVATELAW_COURTADMIN, UserRole.CASEWORKER_PRIVATELAW_JUDGE, UserRole.CASEWORKER_PRIVATELAW_LA, UserRole.CASEWORKER_PRIVATELAW_READONLY, UserRole.CASEWORKER_PRIVATELAW_SUPERUSER)
             .fields();
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getOtherPeopleKnowYourContactDetails)
-                    .mandatory(CaseDataExtra::getConfidentiality)
-                    .mandatoryNoSummary(CaseDataExtra::getConfidentialityList).done();
+        fields.mandatory(CaseData::getOtherPeopleKnowYourContactDetails);
+        fields.mandatory(CaseData::getConfidentiality);
+        fields.mandatoryNoSummary(CaseData::getConfidentialityList);
     }
 }

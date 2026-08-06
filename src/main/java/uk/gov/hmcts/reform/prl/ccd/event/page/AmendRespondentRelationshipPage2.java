@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
-import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.RelationshipDateComplex;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -27,8 +26,7 @@ public final class AmendRespondentRelationshipPage2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("2");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo2).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo2);
         fields.complex(CaseData::getRespondentRelationDateInfoObject)
                     .optional(RespondentRelationDateInfo::getRelationStartAndEndComplexType)
                     .complex(RespondentRelationDateInfo::getRelationStartAndEndComplexType)

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -25,20 +24,17 @@ public final class MiamPage1 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getSubmissionRequiredFieldsInfo1)
-                    .readonly(CaseDataExtra::getApplicantAttendedMIAMLabel).done();
+        fields.readonlyNoSummary(CaseData::getSubmissionRequiredFieldsInfo1);
+        fields.readonly(CaseData::getApplicantAttendedMIAMLabel);
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getApplicantAttendedMiam).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getClaimingExemptionMIAMLabel)
-                    .fieldShowCondition("applicantAttendedMiam=\"No\"").done();
+        fields.readonly(CaseData::getClaimingExemptionMIAMLabel)
+                    .fieldShowCondition("applicantAttendedMiam=\"No\"");
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getClaimingExemptionMiam)
                     .fieldShowCondition("applicantAttendedMiam=\"No\"").done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getFamilyMediatorMIAMLabel)
-                    .fieldShowCondition("claimingExemptionMiam=\"Yes\" AND applicantAttendedMiam=\"No\"").done();
+        fields.readonly(CaseData::getFamilyMediatorMIAMLabel)
+                    .fieldShowCondition("claimingExemptionMiam=\"Yes\" AND applicantAttendedMiam=\"No\"");
         fields.complex(CaseData::getMiamDetails)
                     .mandatory(MiamDetails::getFamilyMediatorMiam)
                     .fieldShowCondition("claimingExemptionMiam=\"Yes\" AND applicantAttendedMiam=\"No\"").done();

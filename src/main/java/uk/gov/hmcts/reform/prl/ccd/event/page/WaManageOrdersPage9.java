@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,18 +24,16 @@ public final class WaManageOrdersPage9 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("9");
         fields.showCondition("createSelectOrderOptions=\"transferOfCaseToAnotherCourt\" AND manageOrdersOptions!=\"createCustomOrder\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getTransferCase)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getCaseTransferOptions)
+        fields.readonly(CaseData::getTransferCase)
+                    .publish(false);
+        fields.mandatory(CaseData::getCaseTransferOptions)
                     .fieldShowCondition("createSelectOrderOptions=\"transferOfCaseToAnotherCourt\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getCourtName)
                     .fieldShowCondition("createSelectOrderOptions=\"transferOfCaseToAnotherCourt\"");
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatory(CaseDataExtra::getReasonsForTransfer)
+        fields.mandatory(CaseData::getReasonsForTransfer)
                     .fieldShowCondition("createSelectOrderOptions=\"transferOfCaseToAnotherCourt\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.mandatory(CaseData::getGiveDetails)
                     .fieldShowCondition("createSelectOrderOptions=\"transferOfCaseToAnotherCourt\" AND reasonsForTransfer CONTAINS \"transferReason7\"")
                     .publish(false);

@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.prl.ccd.event.page.AmendMiamPolicyUpgradePage6;
 import uk.gov.hmcts.reform.prl.ccd.event.page.AmendMiamPolicyUpgradePage7;
 import uk.gov.hmcts.reform.prl.ccd.event.page.AmendMiamPolicyUpgradePage8;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.DomesticAbuseEvidenceDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamPolicyUpgradeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -54,5 +56,9 @@ public class AmendMiamPolicyUpgrade implements CCDConfig<CaseData, State, UserRo
         AmendMiamPolicyUpgradePage6.apply(fields);
         AmendMiamPolicyUpgradePage7.apply(fields);
         AmendMiamPolicyUpgradePage8.apply(fields);
+        fields.complex(CaseData::getMiamPolicyUpgradeDetails)
+                    .complex(MiamPolicyUpgradeDetails::getMpuDomesticAbuseEvidenceDocument, DomesticAbuseEvidenceDocument.class)
+                    .optional(DomesticAbuseEvidenceDocument::getDomesticAbuseDocument)
+                    .eventLabel(" ").done().done();
     }
 }

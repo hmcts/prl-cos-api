@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -26,26 +25,23 @@ public final class DraftAnOrderPage13Fields2 {
                     .mandatory(StandardDirectionOrder::getSdoSpecifiedDocuments)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"specifiedDocuments\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoInstructionsFilingLabel)
+        fields.readonly(CaseData::getSdoInstructionsFilingLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"instructionsFiling\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoInstructionsFilingPartiesDynamicList)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"instructionsFiling\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoSpipAttendanceLabel)
+        fields.readonly(CaseData::getSdoSpipAttendanceLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"spipAttendance\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoSpipAttendance)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"spipAttendance\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoMedicalDisclosureLabel)
+        fields.readonly(CaseData::getSdoMedicalDisclosureLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"medicalDisclosure\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoHospitalRecordsDeadlineDate)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"medicalDisclosure\"")
@@ -53,10 +49,9 @@ public final class DraftAnOrderPage13Fields2 {
                     .mandatory(StandardDirectionOrder::getSdoMedicalDisclosureUploadedBy)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"medicalDisclosure\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoLetterFromGpLabel)
+        fields.readonly(CaseData::getSdoLetterFromGpLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"letterFromGP\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoLetterFromGpDeadlineDate)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"letterFromGP\"")
@@ -64,10 +59,9 @@ public final class DraftAnOrderPage13Fields2 {
                     .mandatory(StandardDirectionOrder::getSdoLetterFromGpUploadedBy)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"letterFromGP\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoLetterFromSchoolLabel)
+        fields.readonly(CaseData::getSdoLetterFromSchoolLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"letterFromSchool\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoLetterFromSchoolDeadlineDate)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"letterFromSchool\"")
@@ -75,29 +69,26 @@ public final class DraftAnOrderPage13Fields2 {
                     .mandatory(StandardDirectionOrder::getSdoLetterFromSchoolUploadedBy)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"letterFromSchool\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoScheduleOfAllegationsLabel)
+        fields.readonly(CaseData::getSdoScheduleOfAllegationsLabel)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"scheduleOfAllegations\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoScheduleOfAllegationsOption)
                     .fieldShowCondition("sdoDocumentationAndEvidenceList CONTAINS \"scheduleOfAllegations\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoOtherLabel)
+        fields.readonly(CaseData::getSdoOtherLabel)
                     .fieldShowCondition("sdoOtherList CONTAINS \"disclosureOfPapers\" OR sdoOtherList CONTAINS \"parentWithCare\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getSdoDisclosureOfPapersLabel)
+                    .publish(false);
+        fields.readonly(CaseData::getSdoDisclosureOfPapersLabel)
                     .fieldShowCondition("sdoOtherList CONTAINS \"disclosureOfPapers\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .optional(StandardDirectionOrder::getSdoDisclosureOfPapersCaseNumbers)
                     .fieldShowCondition("sdoOtherList CONTAINS \"disclosureOfPapers\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getSdoParentWithCareLabel)
+        fields.readonly(CaseData::getSdoParentWithCareLabel)
                     .fieldShowCondition("sdoOtherList CONTAINS \"parentWithCare\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getStandardDirectionOrder)
                     .mandatory(StandardDirectionOrder::getSdoParentWithCare)
                     .fieldShowCondition("sdoOtherList CONTAINS \"parentWithCare\"")

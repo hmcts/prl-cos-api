@@ -1,6 +1,0 @@
-[ {
-  "CaseEventID" : "hearingEditAndApproveAnOrder",
-  "CaseFieldID" : "sdoMedicalDiscRespondentName",
-  "ListElementCode" : "sdoNameOfRespondent",
-  "CaseTypeID" : "PRLAPPS"
-} ]

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
 
@@ -30,10 +29,9 @@ public final class Fl401ListOnNoticePage1 {
                     .optional(Fl401ListOnNotice::getIsFl401CaseCreatedForWithOutNotice)
                     .fieldShowCondition("fl401RejectListWithoutNoticeHearingRequestLabel=\"DO_NOT_SHOW\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonlyNoSummary(CaseDataExtra::getFl401RejectListWithoutNoticeHearingRequestLabel)
-                    .publish(false)
-                    .mandatory(CaseDataExtra::getFl401ReasonsForListWithoutNoticeRequested)
-                    .publish(false).done();
+        fields.readonlyNoSummary(CaseData::getFl401RejectListWithoutNoticeHearingRequestLabel)
+                    .publish(false);
+        fields.mandatory(CaseData::getFl401ReasonsForListWithoutNoticeRequested)
+                    .publish(false);
     }
 }

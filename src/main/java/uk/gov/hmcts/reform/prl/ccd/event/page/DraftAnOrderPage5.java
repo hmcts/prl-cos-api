@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.ccd.event.page;
-import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
@@ -34,33 +33,30 @@ public final class DraftAnOrderPage5 {
                     .readonly(ManageOrders::getTypeOfC21Order)
                     .fieldShowCondition("createSelectOrderOptions=\"DO_NOT_SHOW\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getTypeOfC21OrderLabel)
+        fields.readonly(CaseData::getTypeOfC21OrderLabel)
                     .fieldShowCondition("createSelectOrderOptions=\"blankOrderOrDirections\"")
-                    .publish(false)
-                    .readonlyNoSummary(CaseDataExtra::getSelectedOrderLabel)
+                    .publish(false);
+        fields.readonlyNoSummary(CaseData::getSelectedOrderLabel)
                     .fieldShowCondition("createSelectOrderOptions!=\"blankOrderOrDirections\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getIsTheOrderByConsent)
                     .fieldShowCondition("draftOrderOptions!=\"uploadAnOrder\"")
                     .publish(false).done();
         fields.mandatory(CaseData::getWasTheOrderApprovedAtHearing)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optional(CaseDataExtra::getHearingType)
+        fields.optional(CaseData::getHearingType)
                     .fieldShowCondition("wasTheOrderApprovedAtHearing=\"DO_NOT_SHOW\"")
-                    .publish(false).done();
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .mandatory(ManageOrders::getHearingsType)
                     .fieldShowCondition("wasTheOrderApprovedAtHearing=\"Yes\"")
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getOrderMadeByLabel)
+        fields.readonly(CaseData::getOrderMadeByLabel)
                     .fieldShowCondition("draftOrderOptions!=\"uploadAnOrder\"")
-                    .publish(false)
-                    .readonly(CaseDataExtra::getJudgeLabel)
-                    .publish(false).done();
+                    .publish(false);
+        fields.readonly(CaseData::getJudgeLabel)
+                    .publish(false);
         fields.complex(CaseData::getManageOrders)
                     .optional(ManageOrders::getJudgeOrMagistrateTitle)
                     .publish(false).done();

@@ -4,7 +4,6 @@ import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDataExtra;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
@@ -29,39 +28,37 @@ public final class ManageOrdersPage1 {
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
                     .retainHiddenValue();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .readonly(CaseDataExtra::getManageOrderHeader1)
-                    .publish(false).done();
+        fields.readonly(CaseData::getManageOrderHeader1)
+                    .publish(false);
         fields.mandatory(CaseData::getManageOrdersOptions)
                     .publish(false);
-        fields.complex(CaseData::getCaseDataExtra)
-                    .mandatoryNoSummary(CaseDataExtra::getPerformingUser)
+        fields.mandatoryNoSummary(CaseData::getPerformingUser)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getPerformingAction)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getPerformingAction)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getJudgeLaReviewRequired)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getJudgeLaReviewRequired)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsHearingTaskNeeded)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsHearingTaskNeeded)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getHearingOptionSelected)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getHearingOptionSelected)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsOrderApproved)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsOrderApproved)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getWhoApprovedTheOrder)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getWhoApprovedTheOrder)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getIsMultipleHearingSelected)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getIsMultipleHearingSelected)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getJudgeLaManagerReviewRequired)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getJudgeLaManagerReviewRequired)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.readonlyNoSummary(CaseData::getIsSdoSelected)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
                     .publish(false);
@@ -98,25 +95,23 @@ public final class ManageOrdersPage1 {
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getDraftOrderCollectionId)
+        fields.optionalNoSummary(CaseData::getDraftOrderCollectionId)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getRequestSafeGuardingLetterUpdate)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getRequestSafeGuardingLetterUpdate)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue()
-                    .mandatoryNoSummary(CaseDataExtra::getSafeGuardingLetterUploadDueDate)
+                    .retainHiddenValue();
+        fields.mandatoryNoSummary(CaseData::getSafeGuardingLetterUploadDueDate)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
-                    .retainHiddenValue().done();
+                    .retainHiddenValue();
         fields.complex(CaseData::getManageOrders)
                     .optionalNoSummary(ManageOrders::getLoggedInUserType)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
                     .publish(false).done();
-        fields.complex(CaseData::getCaseDataExtra)
-                    .optionalNoSummary(CaseDataExtra::getIsInvokedFromTask)
+        fields.optionalNoSummary(CaseData::getIsInvokedFromTask)
                     .fieldShowCondition("manageOrderHeader1=\"DO_NOT_SHOW\"")
                     .retainHiddenValue()
-                    .publish(false).done();
+                    .publish(false);
     }
 }
