@@ -259,7 +259,10 @@ public class ManageOrderService {
         + " people's address is given.";
     public static final String INVALID_EMAIL_ADDRESS_ERROR = "Invalid email address. Please check the email address entered. "
         + "To send to multiple recipients please use the add new button.";
-    public static final String STATIC_PENAL_NOTICE_RTF = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
+    public static final String STATIC_PENAL_NOTICE_RTF_ENG = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
+        + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
+        + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
+    public static final String STATIC_PENAL_NOTICE_RTF_WEL = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
         + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
         + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
 
@@ -1487,7 +1490,7 @@ public class ManageOrderService {
         if (StringUtils.isNotBlank(penalNoticeRtf)) {
             return penalNoticeRtf;
         }
-        return STATIC_PENAL_NOTICE_RTF;
+        return STATIC_PENAL_NOTICE_RTF_ENG;
     }
 
     private String getRecitalsOrPreambleRtf(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
