@@ -326,6 +326,7 @@ class SealAuditServiceTest {
         assertEquals(sealsPresent, templateVars.get("seals_present"));
         assertEquals(sealsMissing, templateVars.get("seals_missing"));
         assertEquals(errors, templateVars.get("errors"));
+        assertEquals("2025-01-15", templateVars.get("fromDateStr"));
     }
 
     private static Stream<Arguments> provideSealStatusesForEmailTest() {

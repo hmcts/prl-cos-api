@@ -515,6 +515,7 @@ public class SealAuditService {
             }
 
             Map<String, Object> templateVars = new HashMap<>();
+            templateVars.put("fromDateStr", fromDateStr);
             templateVars.put("date", dateStr);
             templateVars.put("status", statusSummary);
             templateVars.put("total_orders", String.valueOf(totalOrders));
