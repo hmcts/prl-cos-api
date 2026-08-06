@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.PenalNoticeOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -262,7 +263,7 @@ public class ManageOrderService {
     public static final String STATIC_PENAL_NOTICE_RTF_ENG = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
         + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
         + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
-    public static final String STATIC_PENAL_NOTICE_RTF_WEL = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
+    public static final String STATIC_PENAL_NOTICE_RTF_WEL = "WELSH <STRONG>IMPORTANT WARNING TO [NAME]\n\n"
         + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
         + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
 
@@ -1422,18 +1423,20 @@ public class ManageOrderService {
             .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
-            .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-            .recitalsOrPreambleRtf(getRecitalsOrPreambleRtf(caseData.getManageOrders().getRecitalsOrPreamble(),
-                                                            caseData.getManageOrders().getRecitalsOrPreambleRtf()))
+            .recitalsOrPreamble(getRecitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble(),
+                                                      caseData.getManageOrders().getRecitalsOrPreambleRtf()))
+            .recitalsOrPreambleRtf(getRecitalsOrPreambleForRtf(caseData.getManageOrders().getRecitalsOrPreamble(),
+                                                               caseData.getManageOrders().getRecitalsOrPreambleRtf()))
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
             .childOption(getChildOption(caseData))
-            .orderDirections(caseData.getManageOrders().getOrderDirections())
-            .orderDirectionsRtf(getOrderDirectionsRtf(caseData.getManageOrders().getOrderDirections(),
-                                                      caseData.getManageOrders().getOrderDirectionsRtf()))
+            .orderDirections(getOrderDirections(caseData.getManageOrders().getOrderDirections(),
+                                                   caseData.getManageOrders().getOrderDirectionsRtf()))
+            .orderDirectionsRtf(getOrderDirectionsForRtf(caseData.getManageOrders().getOrderDirections(),
+                                                         caseData.getManageOrders().getOrderDirectionsRtf()))
             .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
             .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
-            .penalNoticeRtf(getPenalNotice(caseData.getManageOrders().getPenalNoticeRtf()))
+            .penalNoticeRtf(getPenalNotice(caseData.getManageOrders().getPenalNoticeNeeded(), caseData.getManageOrders().getPenalNoticeRtf()))
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
             .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
@@ -1486,21 +1489,36 @@ public class ManageOrderService {
             .build();
     }
 
-    private String getPenalNotice(String penalNoticeRtf) {
-        if (StringUtils.isNotBlank(penalNoticeRtf)) {
+    private String getPenalNotice(List<PenalNoticeOptionEnum> penalNoticeNeeded, String penalNoticeRtf) {
+        if (penalNoticeNeeded != null && !penalNoticeNeeded.isEmpty()
+            && penalNoticeNeeded.get(0).getDisplayedValue().equals("Yes")) {
             return penalNoticeRtf;
         }
-        return STATIC_PENAL_NOTICE_RTF_ENG;
+        return "";
     }
 
-    private String getRecitalsOrPreambleRtf(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
+    private String getRecitalsOrPreamble(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
+        if (StringUtils.isNotBlank(recitalsOrPreambleRtf)) {
+            return "";
+        }
+        return recitalsOrPreamble;
+    }
+
+    private String getRecitalsOrPreambleForRtf(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
         if (StringUtils.isNotBlank(recitalsOrPreamble)) {
             return recitalsOrPreamble;
         }
         return recitalsOrPreambleRtf;
     }
 
-    private String getOrderDirectionsRtf(String orderDirections, String orderDirectionsRtf) {
+    private String getOrderDirections(String orderDirections, String orderDirectionsRtf) {
+        if (StringUtils.isNotBlank(orderDirectionsRtf)) {
+            return "";
+        }
+        return orderDirections;
+    }
+
+    private String getOrderDirectionsForRtf(String orderDirections, String orderDirectionsRtf) {
         if (StringUtils.isNotBlank(orderDirections)) {
             return orderDirections;
         }
