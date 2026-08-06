@@ -135,6 +135,16 @@ public class NoticeOfChangePartiesService {
         return generate(caseData, representing, POPULATE);
     }
 
+    public Map<String, Object> generate(CaseData caseData,
+                                        SolicitorRole.Representing representing,
+                                        Map<String, Object> existingCaseData) {
+        Map<String, Object> data = generate(caseData, representing);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            removeExistingCaOrgPolicyPlaceholders(data, existingCaseData);
+        }
+        return data;
+    }
+
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy) {
         Map<String, Object> data = new HashMap<>();
@@ -236,6 +246,41 @@ public class NoticeOfChangePartiesService {
                 possibleAnswer.ifPresent(answer ->
                                              data.put(representing.getNocAnswersTemplate(), answer)
                 );
+            }
+        }
+
+        generateRequiredCaOrgPoliciesForNoc(data);
+    }
+
+    private void generateRequiredCaOrgPoliciesForNoc(Map<String, Object> data) {
+        List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(CAAPPLICANT));
+        solicitorRoles.addAll(SolicitorRole.matchingRoles(CARESPONDENT));
+        for (SolicitorRole solicitorRole : solicitorRoles) {
+            OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                solicitorRole, Optional.empty());
+            data.put(
+                String.format(
+                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                    (solicitorRole.getIndex() + 1)
+                ), organisationPolicy
+            );
+        }
+    }
+
+    private void removeExistingCaOrgPolicyPlaceholders(Map<String, Object> data,
+                                                       Map<String, Object> existingCaseData) {
+        if (existingCaseData == null) {
+            return;
+        }
+        List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(CAAPPLICANT));
+        solicitorRoles.addAll(SolicitorRole.matchingRoles(CARESPONDENT));
+        for (SolicitorRole solicitorRole : solicitorRoles) {
+            String policyField = String.format(
+                solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                (solicitorRole.getIndex() + 1)
+            );
+            if (existingCaseData.containsKey(policyField)) {
+                data.remove(policyField);
             }
         }
     }
@@ -652,6 +697,10 @@ public class NoticeOfChangePartiesService {
                         (solicitorRole.getIndex() + 1)
                     ), organisationPolicy
                 );
+            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                    solicitorRole, PartyDetails.builder().build());
+                data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
         }
     }
