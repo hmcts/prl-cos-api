@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,7 +31,7 @@ public class DocumentGenerationExecutorVirtualConfig {
      */
     @Bean(name = DOCUMENT_EXECUTOR_SERVICE, destroyMethod = "close")
     public ExecutorService documentVirtualThreadExecutorService(
-        ThreadFactory documentVirtualThreadFactory
+        @Qualifier(DOCUMENT_EXECUTOR_FACTORY) ThreadFactory documentVirtualThreadFactory
     ) {
         return Executors.newThreadPerTaskExecutor(documentVirtualThreadFactory);
     }
