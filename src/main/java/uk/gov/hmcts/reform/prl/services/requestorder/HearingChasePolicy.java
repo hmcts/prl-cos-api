@@ -148,34 +148,28 @@ class HearingChasePolicy {
 
         Long caseId = caseData.getId();
         return isHearingReferencedByManageOrderHearingDetails(caseId, caseData.getDraftOrderCollection(),
-                                                              DraftOrder::getManageOrderHearingDetails, hearingId)
+                                                              DraftOrder::getManageOrderHearingDetails, hearing)
             || isHearingReferencedByManageOrderHearingDetails(caseId, caseData.getOrderCollection(),
-                                                              OrderDetails::getManageOrderHearingDetails, hearingId)
-            || isDraftOrderReferencedByHearingsType(caseId, caseData.getDraftOrderCollection(),
+                                                              OrderDetails::getManageOrderHearingDetails, hearing)
+            || isDraftOrderReferencedByHearingsType(caseId, caseData.getDraftOrderCollection(), hearing,
                                                     hearingLabels, hearingDateSuffixes)
-
-            || isFinalisedOrderReferencedByHearingsType(caseId, caseData.getOrderCollection(), hearingLabels)
-            || isCustomOrderHearingsType(caseId, caseData.getCustomOrderHearingsType(), hearingLabels);
-    }
-
-    private static boolean isCustomOrderHearingsType(Long caseId, DynamicList customOrderHearingsType,
-                                                     Set<String> hearingLabels) {
-        log.info("Evaluating CustomOrderHearingsType for the caseId={}, hearings {}", caseId, hearingLabels);
-        return Optional.ofNullable(customOrderHearingsType)
-            .map(DynamicList::getValue)
-            .map(DynamicListElement::getCode)
-            .filter(hearingLabels::contains)
-            .isPresent();
+            || isFinalisedOrderReferencedByHearingsType(caseId, caseData.getOrderCollection(), hearing, hearingLabels);
     }
 
     private static <T> boolean isHearingReferencedByManageOrderHearingDetails(Long caseId,
             List<Element<T>> orders,
             Function<T, List<Element<HearingData>>> hearingDetailsExtractor,
-            String hearingId) {
+            CaseHearing hearing) {
+        String hearingId = hearingIdOf(hearing);
         log.info("trying isHearingReferencedByManageOrderHearingDetails for caseId={}, hearingId={}",
                  caseId, hearingId);
         return nullSafeCollection(orders).stream()
             .map(Element::getValue)
+            .filter(o -> hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
+                .isBefore(o instanceof DraftOrder draft && draft.getOtherDetails().getDateCreated() != null
+                    ? draft.getOtherDetails().getDateCreated()
+                    : o instanceof OrderDetails or && or.getDateCreated() != null ? or.getDateCreated()
+                    : LocalDateTime.now()))
             .anyMatch(order -> orderReferencesHearing(order, hearingDetailsExtractor, hearingId));
     }
 
@@ -194,6 +188,7 @@ class HearingChasePolicy {
     }
 
     private static boolean isDraftOrderReferencedByHearingsType(Long caseId, List<Element<DraftOrder>> draftOrders,
+                                                                 CaseHearing hearing,
                                                                  Set<String> hearingLabels,
                                                                  Set<String> hearingDateSuffixes) {
         log.info("trying isDraftOrderReferencedByHearingsType for caseId={}", caseId);
@@ -202,6 +197,10 @@ class HearingChasePolicy {
         }
         return nullSafeCollection(draftOrders).stream()
             .map(Element::getValue)
+            .filter(o -> hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
+            .isBefore(o.getOtherDetails().getDateCreated() != null
+                          ? o.getOtherDetails().getDateCreated()
+                          : LocalDateTime.now()))
             .map(DraftOrder::getHearingsType)
             .filter(Objects::nonNull)
             .map(DynamicList::getValue)
@@ -213,6 +212,7 @@ class HearingChasePolicy {
     }
 
     private static boolean isFinalisedOrderReferencedByHearingsType(Long caseId, List<Element<OrderDetails>> orderDetails,
+                                                                CaseHearing hearing,
                                                                 Set<String> hearingLabels) {
         log.info("trying isFinalisedOrderReferencedByHearingsType for caseId={}", caseId);
         if (hearingLabels.isEmpty()) {
@@ -221,6 +221,10 @@ class HearingChasePolicy {
         return nullSafeCollection(orderDetails).stream()
             .map(Element::getValue)
             .filter(order -> order.getFinalisationDetails() != null)
+            .filter(o -> hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
+                .isBefore(o.getDateCreated() != null
+                              ? o.getDateCreated()
+                              : LocalDateTime.now()))
             .map(OrderDetails::getSelectedHearingType)
             .filter(Objects::nonNull)
             .anyMatch(code -> hearingLabels.contains(code));

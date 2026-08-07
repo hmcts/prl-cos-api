@@ -9,6 +9,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +35,7 @@ class HearingChasePolicyTest {
 
     private static final String HEARING_ID = "1";
     private static final LocalDate CRON_DATE = LocalDate.of(2026, 4, 24);//Friday
+    private static final LocalDate FUTURE_HEARING_DATE = LocalDate.now();
 
     @Mock WorkingDayIndicator workingDayIndicator;
 
@@ -107,6 +110,19 @@ class HearingChasePolicyTest {
     }
 
     @Test
+    void decideShouldNotSkipsWhenHearingDateInFutureAndMappedToDraftOrder() {
+        CaseData caseData = fl401Case()
+            .draftOrderCollection(List.of(draftOrderForHearing(HEARING_ID)))
+            .build();
+
+        ChaseDecision decision = policy.decide(
+            hearing("COMPLETED", FUTURE_HEARING_DATE.plusDays(1)), caseData, emptyLedger(), LocalDate.now());
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isNotEqualTo("skipped - linked order exists (cycle complete)");
+    }
+
+    @Test
     void decideSkipsWhenDraftOrderUsesHearingsTypeLinkage() {
         // Solicitor draft-an-order flow stores the hearing as the dropdown label, not the
         // HMC UUID. Format: "<hearingTypeValue> - dd/MM/yyyy hh:mm:ss".
@@ -130,6 +146,32 @@ class HearingChasePolicyTest {
 
         assertThat(decision.shouldFire()).isFalse();
         assertThat(decision.description()).isEqualTo("skipped - linked order exists (cycle complete)");
+    }
+
+    @Test
+    void decideSkipsWhenDraftOrderUsesHearingsTypeLinkageButHearingIsInFuture() {
+        // Solicitor draft-an-order flow stores the hearing as the dropdown label, not the
+        // HMC UUID. Format: "<hearingTypeValue> - dd/MM/yyyy hh:mm:ss".
+        LocalDate hearingDate = CRON_DATE.minusDays(2);
+        String label = "Allocation - " + hearingDate.atTime(9, 0).format(
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss"));
+        CaseHearing hearingWithType = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf(HEARING_ID))
+            .hmcStatus("COMPLETED")
+            .hearingTypeValue("Allocation")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                            .hearingStartDateTime(FUTURE_HEARING_DATE.atTime(9, 0))
+                                            .hearingEndDateTime(FUTURE_HEARING_DATE.atTime(16, 0))
+                                            .build()))
+            .build();
+        CaseData caseData = fl401Case()
+            .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(label)))
+            .build();
+
+        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), CRON_DATE);
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isNotEqualTo("skipped - linked order exists (cycle complete)");
     }
 
     @Test
@@ -321,6 +363,7 @@ class HearingChasePolicyTest {
     private static Element<DraftOrder> draftOrderForHearing(String hearingId) {
         return Element.<DraftOrder>builder().value(
             DraftOrder.builder()
+                .otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build())
                 .manageOrderHearingDetails(List.of(
                     Element.<HearingData>builder().value(
                         HearingData.builder()
@@ -336,6 +379,7 @@ class HearingChasePolicyTest {
     private static Element<DraftOrder> draftOrderForHearingsTypeLabel(String label) {
         return Element.<DraftOrder>builder().value(
             DraftOrder.builder()
+                .otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build())
                 .hearingsType(DynamicList.builder()
                     .value(DynamicListElement.builder().code(label).label(label).build())
                     .build())
