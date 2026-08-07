@@ -653,7 +653,7 @@ public class ManageOrdersControllerTest {
             .uploadOrderDoc(Document.builder().build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .dateOrderMade(LocalDate.now())
-            .isWelshDocGen("Yes")
+            .welshLanguageRequirement(YesOrNo.Yes)
             .build();
 
         ObjectMapper objectMapper1 = new ObjectMapper();
@@ -683,8 +683,7 @@ public class ManageOrdersControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
         assertNotNull(callbackResponse);
-        assertEquals(ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL,
-                     callbackRequest.getCaseDetails().getData().get("penalNoticeRtf"));
+        verify(manageOrderService).updatePrefilledOrderFields(any(), any());
     }
 
     @Test

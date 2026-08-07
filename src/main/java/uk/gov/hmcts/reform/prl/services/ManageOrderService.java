@@ -167,6 +167,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NAME_OF_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
@@ -199,6 +200,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum.noCheck;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
@@ -1523,6 +1525,17 @@ public class ManageOrderService {
             return orderDirections;
         }
         return orderDirectionsRtf;
+    }
+
+    public void updatePrefilledOrderFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
+            ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
+            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+            if (Yes.equals(caseData.getWelshLanguageRequirement())) {
+                penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
+            }
+            caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
+        }
     }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
