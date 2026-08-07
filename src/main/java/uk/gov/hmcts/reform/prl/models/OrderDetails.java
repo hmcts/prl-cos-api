@@ -82,6 +82,8 @@ public class OrderDetails {
     //PRL-6046 - persist FL404 order data fields
     private FL404 fl404CustomFields;
 
+    private final YesOrNo miamForOrder;
+
     @JsonIgnore
     public String getLabelForDynamicList() {
         String date = this.getOtherDetails() != null ? this.getOtherDetails().getOrderCreatedDate() : "";
