@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.documentremoval.submittedaction.Document
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,7 @@ class DocumentRemovalServiceTest {
 
     private DocumentRemovalService documentRemovalService;
 
-    @Mock private CaseDetails caseDetails;
+    private CaseDetails caseDetails;
 
     private Document document;
     private CaseData caseData;
@@ -71,6 +73,12 @@ class DocumentRemovalServiceTest {
                                                             deleteDocumentService, systemUserService,
                                                             List.of(documentRemovalAboutToSubmitAction),
                                                             List.of(documentRemovalSubmittedAction));
+
+        caseDetails = CaseDetails.builder()
+            .id(1234123412341234L)
+            .data(new HashMap<>())
+            .build();
+
         document = Document.builder()
             .documentUrl("http://someserver/doc1")
             .documentFileName("file1.pdf")
@@ -185,16 +193,21 @@ class DocumentRemovalServiceTest {
             any(QuarantineLegalDoc.class),
             ArgumentMatchers.<TypeReference<Map<String, Object>>>any()
         )).thenReturn(courtStaffUploadDoc);
-        when(documentRemover.removeDocument(anyMap(), eq("doc1"))).thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
+        ArgumentCaptor<Map> caseDataMapCaptor = ArgumentCaptor.forClass(Map.class);
+        when(documentRemover.removeDocument(caseDataMapCaptor.capture(), eq("doc1")))
+            .thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
 
         Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
 
         assertFalse(result.containsKey("documentToRemove"));
         assertFalse(result.containsKey("documentRemovalConfirmOptions"));
         assertEquals("someValue", result.get("someKey"));
-        assertEquals("[]", result.get("courtStaffUploadDocListDocTab").toString());
 
         verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
+
+        // Verify document removed from the collection
+        Map<String, Object> caseDataMap = caseDataMapCaptor.getValue();
+        assertEquals(Collections.emptyList(), caseDataMap.get("courtStaffUploadDocListDocTab"));
     }
 
     @Test

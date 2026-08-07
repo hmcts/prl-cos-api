@@ -105,14 +105,16 @@ public class DocumentRemovalService {
         DocumentRemovalWrapper wrapper = caseData.getDocumentRemovalWrapper();
         String documentIdToRemove = wrapper.getDocumentRemovalCaseDocuments().getValueCode();
 
+        // Remove documents where the parent collection item should also be removed
+        // as it serves no purpose without a document
+        // e.g. Documents to be reviewed, Draft orders
         DocumentManagementDetails docMgmt = Optional.ofNullable(caseData.getDocumentManagementDetails())
             .orElseGet(() -> DocumentManagementDetails.builder().build());
         ReviewDocuments reviewDocs = Optional.ofNullable(caseData.getReviewDocuments())
             .orElseGet(() -> ReviewDocuments.builder().build());
+        updateDocumentCollections(caseDetails.getData(), docMgmt, reviewDocs, documentIdToRemove);
 
         Map<String, Object> updatedCaseData = documentRemover.removeDocument(caseDetails.getData(), documentIdToRemove);
-
-        updateDocumentCollections(updatedCaseData, docMgmt, reviewDocs, documentIdToRemove);
 
         updatedCaseData.remove(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE);
         updatedCaseData.remove(DOCUMENT_REMOVAL_CONFIRM_OPTIONS);
@@ -160,23 +162,25 @@ public class DocumentRemovalService {
                      reviewDocs.getConfidentialDocuments(), documentIdToRemove);
     }
 
-    private void putIfNotNull(Map<String, Object> data, String key,
-                          List<Element<QuarantineLegalDoc>> source, String documentIdToRemove) {
+    private void putIfNotNull(Map<String, Object> data, String key, List<Element<QuarantineLegalDoc>> source,
+                              String documentIdToRemove) {
         if (source != null) {
-            data.put(key, removeById(source, documentIdToRemove));
+            List<Element<QuarantineLegalDoc>> updatedDocs = removeById(source, documentIdToRemove);
+            if (source.size() != updatedDocs.size()) {
+                data.put(key, updatedDocs);
+                log.info("Updated {} collection in case data after removing document with id {}", key, documentIdToRemove);
+            }
         }
     }
 
     private List<Element<QuarantineLegalDoc>> removeById(List<Element<QuarantineLegalDoc>> source, String toRemove) {
-        log.info("Removing document {} from document collection", toRemove);
-
         return source.stream()
             .filter(doc -> getDocumentFieldFromCollection(doc) == null || !getDocumentFieldFromCollection(doc)
                 .getDocumentId().equals(toRemove))
             .toList();
     }
 
-    Document getDocumentFieldFromCollection(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
+    private Document getDocumentFieldFromCollection(Element<QuarantineLegalDoc> quarantineLegalDocElement) {
         QuarantineLegalDoc quarantineLegalDoc = quarantineLegalDocElement.getValue();
 
         Map<String, Object> docObject = objectMapper.convertValue(quarantineLegalDoc, new TypeReference<>() {});
@@ -190,6 +194,10 @@ public class DocumentRemovalService {
 
         try {
             document = objectMapper.convertValue(docObject.get(documentFieldName), Document.class);
+            if (document == null) {
+                documentFieldName = "document";
+                document = objectMapper.convertValue(docObject.get(documentFieldName), Document.class);
+            }
         } catch (NullPointerException e) {
             log.error("Field {} did not exist in QuarantineLegalDoc", documentFieldName, e);
             return null;
