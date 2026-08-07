@@ -99,8 +99,6 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createCustomOrder;
@@ -172,7 +170,7 @@ public class ManageOrdersController {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
-            updatePrefilledOrderFields(caseData, caseDataUpdated);
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
 
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
@@ -189,17 +187,6 @@ public class ManageOrdersController {
             )).build();
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
-        }
-    }
-
-    private void updatePrefilledOrderFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
-            ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
-            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
-            if (Yes.toString().equals(caseData.getIsWelshDocGen())) {
-                penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
-            }
-            caseDataUpdated.put("penalNoticeRtf", penalNoticeRtfValue);
         }
     }
 

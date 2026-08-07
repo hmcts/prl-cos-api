@@ -198,6 +198,8 @@ import static uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEn
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.INVALID_EMAIL_ADDRESS_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -8616,5 +8618,61 @@ class ManageOrderServiceTest {
             "testAuth", callbackRequest, ENGLISH, null);
         assertNotNull(caseDataUpdated.get("selectedOrder"));
 
+    }
+
+    @Test
+    void testCreateOrderPrefillForEng() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .uploadOrderDoc(Document.builder().build())
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .judgeDirectionsToAdmin("Test Direction")
+            .wasTheOrderApprovedAtHearing(No)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .judgeOrMagistratesLastName("Test Judge Name")
+            .justiceLegalAdviserFullName("Test LA Name")
+            .welshLanguageRequirement(No)
+            .build();
+
+        HashMap<String, Object> dataMap = new HashMap<>();
+        manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
+        assertTrue(dataMap.get("penalNoticeRtf").toString().equals(STATIC_PENAL_NOTICE_RTF_ENG));
+    }
+
+    @Test
+    void testCreateOrderPrefillForWelsh() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .uploadOrderDoc(Document.builder().build())
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .judgeDirectionsToAdmin("Test Direction")
+            .wasTheOrderApprovedAtHearing(No)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .judgeOrMagistratesLastName("Test Judge Name")
+            .justiceLegalAdviserFullName("Test LA Name")
+            .welshLanguageRequirement(Yes)
+            .build();
+
+        HashMap<String, Object> dataMap = new HashMap<>();
+        manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
+        assertTrue(dataMap.get("penalNoticeRtf").toString().equals(STATIC_PENAL_NOTICE_RTF_WEL));
     }
 }
