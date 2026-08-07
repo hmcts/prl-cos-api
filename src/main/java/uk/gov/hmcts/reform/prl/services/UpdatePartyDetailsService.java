@@ -171,8 +171,10 @@ public class UpdatePartyDetailsService {
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
+                caseData, DARESPONDENT, updatedCaseData));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
+                caseData, DAAPPLICANT, updatedCaseData));
 
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
