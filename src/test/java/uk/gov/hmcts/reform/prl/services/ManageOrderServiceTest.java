@@ -8621,6 +8621,35 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    void testCreateOrderPrefillForNotNull() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .uploadOrderDoc(Document.builder().build())
+            .dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .judgeDirectionsToAdmin("Test Direction")
+            .wasTheOrderApprovedAtHearing(No)
+            .isSdoSelected(Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .judgeOrMagistratesLastName("Test Judge Name")
+            .justiceLegalAdviserFullName("Test LA Name")
+            .welshLanguageRequirement(No)
+            .build();
+
+        HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("penalNoticeRtf", "originalValue");
+        manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
+        assertTrue(dataMap.get("penalNoticeRtf").toString().equals("originalValue"));
+    }
+
+    @Test
     void testCreateOrderPrefillForEng() {
         CaseData caseData = CaseData.builder()
             .id(12345L)

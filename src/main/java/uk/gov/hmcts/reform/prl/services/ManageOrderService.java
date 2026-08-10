@@ -1528,13 +1528,15 @@ public class ManageOrderService {
     }
 
     public void updatePrefilledOrderFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
-            ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
-            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
-            if (Yes.equals(caseData.getWelshLanguageRequirement())) {
-                penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
+        if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null) {
+            if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
+                ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+                if (Yes.equals(caseData.getWelshLanguageRequirement())) {
+                    penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
+                }
+                caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
             }
-            caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
         }
     }
 
