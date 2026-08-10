@@ -900,6 +900,7 @@ public class PrlAppsConstants {
         + "sgrin flaenorol ac uwchlwytho gorchymyn oherwydd bod gan yr achos hwn nifer o geiswyr neu atebwyr.";
 
     public static final String ORDER_COLLECTION = "orderCollection";
+    public static final String PENAL_NOTICE_RTF = "penalNoticeRtf";
 
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";

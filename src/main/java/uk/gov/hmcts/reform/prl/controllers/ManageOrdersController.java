@@ -170,6 +170,8 @@ public class ManageOrdersController {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
+
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
