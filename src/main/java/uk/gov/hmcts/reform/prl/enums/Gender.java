@@ -5,15 +5,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum Gender {
 
+    @CCD(label = "Female")
     @JsonProperty("female")
     female("female", "Female"),
+    @CCD(label = "Male")
     @JsonProperty("male")
     male("male", "Male"),
+    @CCD(label = "They identify in another way")
     @JsonProperty("other")
     other("other", "They identify in another way");
 

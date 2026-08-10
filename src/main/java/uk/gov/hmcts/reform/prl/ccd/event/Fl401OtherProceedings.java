@@ -56,6 +56,8 @@ public class Fl401OtherProceedings implements CCDConfig<CaseData, State, UserRol
                     .complex(FL401OtherProceedingDetails::getFl401OtherProceedings, FL401Proceedings.class)
                     .mandatory(FL401Proceedings::getAnyOtherDetails).done()
                     .complex(FL401OtherProceedingDetails::getFl401OtherProceedings, FL401Proceedings.class)
-                    .optional(FL401Proceedings::getUploadRelevantOrder).done().done();
+                    .optional(FL401Proceedings::getUploadRelevantOrder).done()
+                    .complex(FL401OtherProceedingDetails::getFl401OtherProceedings, FL401Proceedings.class)
+                    .optional(FL401Proceedings::getAddNewProceedingLabel).done().done();
     }
 }

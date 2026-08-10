@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import java.util.List;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication.C2AdditionalOrdersRequestedDa;
 
 @Slf4j
 @Data
@@ -43,7 +44,8 @@ public class C2DocumentBundle {
             hint = "Select all that apply",
             searchable = false,
             typeOverride = FieldType.MultiSelectList,
-            typeParameterOverride = "C2AdditionalOrdersRequestedDa"
+            typeParameterOverride = "C2AdditionalOrdersRequestedDa",
+            typeParameterClass = C2AdditionalOrdersRequestedDa.class
     )
     private final List<C2AdditionalOrdersRequestedCa> daReasonsForC2Application;
     @CCD(label = "Reason for application", hint = "Select all that apply", searchable = false)

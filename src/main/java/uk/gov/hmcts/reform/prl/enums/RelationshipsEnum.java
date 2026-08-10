@@ -6,26 +6,35 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RelationshipsEnum {
 
+    @CCD(label = "Father")
     @JsonProperty("father")
     father("father", "Father"),
+    @CCD(label = "Mother")
     @JsonProperty("mother")
     mother("mother", "Mother"),
+    @CCD(label = "Step-father")
     @JsonProperty("stepFather")
     stepFather("stepFather", "Step-father"),
+    @CCD(label = "Step-mother")
     @JsonProperty("stepMother")
     stepMother("stepMother", "Step-mother"),
+    @CCD(label = "Grandparent")
     @JsonProperty("grandParent")
     grandParent("grandParent", "Grandparent"),
+    @CCD(label = "Guardian")
     @JsonProperty("guardian")
     guardian("guardian", "Guardian"),
+    @CCD(label = "Special Guardian")
     @JsonProperty("specialGuardian")
     specialGuardian("specialGuardian", "Special Guardian"),
+    @CCD(label = "Other")
     @JsonProperty("other")
     other("other", "Other");
 

@@ -409,6 +409,7 @@ public class ManageOrders implements MappableObject {
             searchable = false,
             typeOverride = FieldType.FixedRadioList,
             typeParameterOverride = "OrderNoticeEnum",
+            typeParameterClass = OrderNoticeEnum.class,
             access = {DefaultAccess.class, CaseworkerWaTaskConfigurationCourtnavCruAccess.class, CaseworkerPrivatelawSolicitorRAccess.class}
     )
     private final String orderNotice;

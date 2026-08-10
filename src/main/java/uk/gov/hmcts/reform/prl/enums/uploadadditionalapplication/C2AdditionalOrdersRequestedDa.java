@@ -6,17 +6,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 @Getter
 public enum C2AdditionalOrdersRequestedDa {
 
+    @CCD(label = "Requesting an adjournment for a scheduled hearing")
     @JsonProperty("REQUESTING_ADJOURNMENT")
     REQUESTING_ADJOURNMENT(
         "REQUESTING_ADJOURNMENT",
             "Requesting an adjournment for a scheduled hearing"
     ),
+    @CCD(label = "Other")
     @JsonProperty("OTHER")
     OTHER(
         "OTHER",

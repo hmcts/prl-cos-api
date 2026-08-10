@@ -5,23 +5,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum TypeOfAbuseEnum {
 
+    @CCD(label = "Physical abuse")
     @JsonProperty("TypeOfAbuseEnum_value_1")
     TypeOfAbuseEnum_value_1("TypeOfAbuseEnum_value_1","Physical abuse"),
 
+    @CCD(label = "Psychological abuse")
     @JsonProperty("TypeOfAbuseEnum_value_2")
     TypeOfAbuseEnum_value_2("TypeOfAbuseEnum_value_2","Psychological abuse"),
 
+    @CCD(label = "Sexual abuse")
     @JsonProperty("TypeOfAbuseEnum_value_3")
     TypeOfAbuseEnum_value_3("TypeOfAbuseEnum_value_3","Sexual abuse"),
 
+    @CCD(label = "Emotional abuse")
     @JsonProperty("TypeOfAbuseEnum_value_4")
     TypeOfAbuseEnum_value_4("TypeOfAbuseEnum_value_4","Emotional abuse"),
 
+    @CCD(label = "Financial abuse")
     @JsonProperty("TypeOfAbuseEnum_value_5")
     TypeOfAbuseEnum_value_5("TypeOfAbuseEnum_value_5","Financial  abuse");
 

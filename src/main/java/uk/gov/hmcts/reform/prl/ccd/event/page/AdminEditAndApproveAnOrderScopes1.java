@@ -138,6 +138,9 @@ public final class AdminEditAndApproveAnOrderScopes1 {
                     .mandatory(FL404::getFl404bAddressOfProperty)
                     .fieldShowCondition("orderType=\"nonMolestation\" AND fl404CustomFields.fl404bMentionedProperty=\"Yes\"")
                     .eventLabel("Add the address of the property")
+                    .mandatory(FL404::getFl404bRespondentLabel)
+                    .fieldShowCondition("orderType=\"nonMolestation\"")
+                    .eventLabel("# The respondent must not do the following:")
                     .optional(FL404::getFl404bRespondentNotToThreat)
                     .fieldShowCondition("orderType=\"nonMolestation\"")
                     .eventLabel("Select any that apply")
@@ -198,6 +201,12 @@ public final class AdminEditAndApproveAnOrderScopes1 {
                     .optional(FL404::getOrderSpecifiedDateTime)
                     .fieldShowCondition("orderType=\"nonMolestation\" AND fl404CustomFields.orderEndDateAndTimeOptions=\"specifiedDateAndTime\"")
                     .eventLabel(" ")
+                    .optional(FL404::getFl404bDateAndTimeOfNextHearing)
+                    .fieldShowCondition("fl404bDateAndTimeOfNextHearing=\"DO_NOT_SHOW\"")
+                    .eventLabel(" ")
+                    .mandatory(FL404::getFl404bApplicantLabel)
+                    .fieldShowCondition("orderType=\"occupation\"")
+                    .eventLabel(" ")
                     .optional(FL404::getFl404bApplicantIsEntitledToOccupy)
                     .fieldShowCondition("orderType=\"occupation\"")
                     .eventLabel(" ")
@@ -215,6 +224,9 @@ public final class AdminEditAndApproveAnOrderScopes1 {
                     .eventLabel(" ")
                     .mandatory(FL404::getFl404bApplicantOtherInstruction)
                     .fieldShowCondition("fl404CustomFields.fl404bApplicantHasOtherInstruction=\"other1\"")
+                    .eventLabel(" ")
+                    .mandatory(FL404::getFl404bRespondentCheckListLabel)
+                    .fieldShowCondition("orderType=\"occupation\"")
                     .eventLabel(" ")
                     .optional(FL404::getFl404bApplicantAllowedToOccupy)
                     .fieldShowCondition("orderType=\"occupation\"")
@@ -345,12 +357,6 @@ public final class AdminEditAndApproveAnOrderScopes1 {
                     .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
         fields.complex(CaseData::getStandardDirectionOrder)
                     .complex(StandardDirectionOrder::getSdoFactFindingOtherDetails, SdoDioProvideOtherDetails.class)
-                    .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
-        fields.complex(CaseData::getStandardDirectionOrder)
-                    .complex(StandardDirectionOrder::getSdoInterpreterOtherDetails, SdoDioProvideOtherDetails.class)
-                    .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
-        fields.complex(CaseData::getStandardDirectionOrder)
-                    .complex(StandardDirectionOrder::getSdoCafcassFileAndServeDetails, SdoDioProvideOtherDetails.class)
                     .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
     }
 }

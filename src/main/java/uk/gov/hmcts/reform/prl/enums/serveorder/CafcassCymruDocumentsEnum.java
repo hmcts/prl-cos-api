@@ -7,32 +7,43 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CafcassCymruDocumentsEnum {
+    @CCD(label = "Safeguarding letter")
     @JsonProperty("safeGuardingLetter")
     safeGuardingLetter("safeGuardingLetter", "Safeguarding letter"),
+    @CCD(label = "Child Impact report")
     @JsonProperty("childImpactReport")
     childImpactReport("childImpactReport", "Child Impact report"),
+    @CCD(label = "Child Impact Report 1")
     @JsonProperty("childImpactReport1")
     childImpactReport1("childImpactReport1", "Child Impact Report 1"),
+    @CCD(label = "Child Impact Report 2")
     @JsonProperty("childImpactReport2")
     childImpactReport2("childImpactReport2", "Child Impact Report 2"),
+    @CCD(label = "Section 7 report")
     @JsonProperty("section7Report")
     section7Report("section7Report", "Section 7 report"),
+    @CCD(label = "S7 addendum report")
     @JsonProperty("s7AddendumReport")
     s7AddendumReport("s7AddendumReport", "S7 addendum report"),
+    @CCD(label = "16.4 report")
     @JsonProperty("report164")
     report164("report164", "16.4 report"),
+    @CCD(label = "Update to safeguarding letter")
     @JsonProperty("updateToSafeGuardingLetter")
     updateToSafeGuardingLetter("updateToSafeGuardingLetter", "Update to safeguarding letter"),
+    @CCD(label = "S16A risk assessment")
     @JsonProperty("s16RiskAssessment")
     s16RiskAssessment("s16RiskAssessment", "S16A risk assessment"),
     @JsonProperty("cirTransferRequest")
     cirTransferRequest("cirTransferRequest", "CIR Transfer Request"),
     @JsonProperty("cirExtensionRequest")
     cirExtensionRequest("cirExtensionRequest", "CIR Extension Request"),
+    @CCD(label = "Other reports")
     @JsonProperty("otherReports")
     otherReports("otherReports", "Other reports");
 

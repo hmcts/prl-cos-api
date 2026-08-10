@@ -5,23 +5,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum LivingSituationEnum {
 
+    @CCD(label = "The applicant wants to be able to stay in their home")
     @JsonProperty("ableToStayInHome")
     ableToStayInHome("ableToStayInHome", "The applicant wants to be able to stay in their home"),
 
+    @CCD(label = "The applicant wants to be able to return home")
     @JsonProperty("ableToReturnHome")
     ableToReturnHome("ableToReturnHome", "The applicant wants to be able to return home"),
 
+    @CCD(label = "The applicant doesn’t want the respondent to be able to enter the home")
     @JsonProperty("restrictFromEnteringHome")
     restrictFromEnteringHome("restrictFromEnterHome", "The applicant doesn’t want the respondent to be able to enter the home"),
 
+    @CCD(label = "The applicant wants to keep the respondent away from the area surrounding their home")
     @JsonProperty("awayFromHome")
     awayFromHome("awayFromHome", "The applicant wants to keep the respondent away from the area surrounding their home"),
 
+    @CCD(label = "The applicant wants to limit where in their home the respondent can go")
     @JsonProperty("limitRespondentInHome")
     limitRespondentInHome("limitRespondentInHome", "The applicant wants to limit where in their home the respondent can go");
 

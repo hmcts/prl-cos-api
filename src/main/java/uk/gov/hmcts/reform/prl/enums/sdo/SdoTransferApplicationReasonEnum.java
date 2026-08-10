@@ -6,15 +6,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoTransferApplicationReasonEnum {
 
+    @CCD(label = "Another court is in the area where the child usually lives")
     @JsonProperty("courtInAreaChildLives")
     courtInAreaChildLives("courtInAreaChildLives", "Another court is in the area where the child usually lives"),
+    @CCD(label = "There are ongoing proceedings in another court")
     @JsonProperty("ongoingProceedings")
     ongoingProceedings("ongoingProceedings", "There are ongoing proceedings in another court"),
+    @CCD(label = "Other")
     @JsonProperty("other")
     other("other", "Other");
 

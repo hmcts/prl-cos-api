@@ -7,16 +7,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum AttendingToCourtEnum {
 
+    @CCD(label = "Yes, I can take part in video hearings")
     @JsonProperty("videohearings")
     videohearings("videohearings","Yes, I can take part in video hearings"),
+    @CCD(label = "Yes, I can take part in phone hearings")
     @JsonProperty("readandwritewelsh")
     phonehearings("readandwritewelsh","Yes, I can take part in phone hearings"),
+    @CCD(label = "No, I cannot take part in either video or phone hearings")
     @JsonProperty("languageinterpreter")
     nohearings("languageinterpreter","No, I cannot take part in either video or phone hearings");
 

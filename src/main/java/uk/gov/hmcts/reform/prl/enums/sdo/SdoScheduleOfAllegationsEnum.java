@@ -6,14 +6,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoScheduleOfAllegationsEnum {
 
+    @CCD(label = "Include example of schedule of allegation and responses for fact-finding")
     @JsonProperty("includeScheduleAllegationAndResponse")
     includeScheduleAllegationAndResponse("includeScheduleAllegationAndResponse",
                                          "Include example of schedule of allegation and responses for fact-finding"),
+    @CCD(label = "Other direction for example schedule of allegations and responses for fact-finding")
     @JsonProperty("other")
     other("other","Other direction for example schedule of allegations and responses for fact-finding");
 

@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @Getter
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SubmitConsentEnum {
 
+    @CCD(label = "I agree with this statement")
     @JsonProperty("agree")
     agree("agree", "I agree with this statement");
 

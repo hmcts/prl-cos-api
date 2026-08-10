@@ -6,16 +6,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum MiamPolicyUpgradeChildProtectionConcernEnum {
 
+    @CCD(label = "The subject of enquiries by a local authority under section 47 of the Children Act 1989 Act")
     @JsonProperty("mpuChildProtectionConcern_value_1")
     mpuChildProtectionConcern_value_1(
         "mpuChildProtectionConcern_value_1",
         "The subject of enquiries by a local authority under section 47 of the Children Act 1989 Act"
     ),
+    @CCD(label = "The subject of a child protection plan put in place by a local authority")
     @JsonProperty("mpuChildProtectionConcern_value_2")
     mpuChildProtectionConcern_value_2(
         "MIAMChildProtectionConcernChecklistEnum_value_2",

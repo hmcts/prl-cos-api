@@ -6,15 +6,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoWrittenStatementEnum {
 
+    @CCD(label = "Cafcass")
     @JsonProperty("cafcass")
     cafcass("cafcass", "Cafcass"),
+    @CCD(label = "Cafcass Cymru")
     @JsonProperty("cafcassCymru")
     cafcassCymru("cafcassCymru", "Cafcass Cymru"),
+    @CCD(label = "Local authority")
     @JsonProperty("localAuthority")
     localAuthority("localAuthority", "Local authority");
 

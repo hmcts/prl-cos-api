@@ -7,20 +7,26 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CourtComfortEnum {
 
+    @CCD(label = "Appropriate lighting")
     @JsonProperty("appropriatelighting")
     appropriatelighting("appropriatelighting","Appropriate lighting"),
+    @CCD(label = "Regular breaks")
     @JsonProperty("breaks")
     breaks("breaks", "Regular breaks"),
+    @CCD(label = "Space to be able to get up and move around")
     @JsonProperty("space")
     space("space","Space to be able to get up and move around"),
+    @CCD(label = "Other")
     @JsonProperty("other")
     other("other","Other"),
+    @CCD(label = "No, I do not need any extra support at this time")
     @JsonProperty("nosupport")
     nosupport("nosupport", "No, I do not need any support at this time");
 

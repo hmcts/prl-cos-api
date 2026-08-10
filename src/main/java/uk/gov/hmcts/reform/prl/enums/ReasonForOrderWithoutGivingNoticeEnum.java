@@ -4,15 +4,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "ReasonForWithoutGivingNoticeEnum", generate = true)
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ReasonForOrderWithoutGivingNoticeEnum {
 
+    @CCD(
+            label = "There is risk of significant harm to the applicant or a relevant child, attributable to conduct of the respondent, if the order is not made immediately"
+    )
     harmToApplicantOrChild("There is risk of significant harm to the applicant or a relevant child, "
                                + "attributable to conduct of the respondent, if the order is not made immediately"),
+    @CCD(
+            label = "It is likely that the applicant will be deterred or prevented from pursuing the application if an order is not made immediately"
+    )
     deferringApplicationIfNotImmediate("It is likely that the applicant will be deterred or prevented "
                                            + "from pursuing the application if order is not made immediately"),
+    @CCD(
+            label = "The applicant believes that the respondent is aware of the proceedings but is deliberately evading service and that the applicant or a relevant child will be seriously prejudiced by the delay in effecting substituted service"
+    )
     prejudiced("The applicant believes that the respondent is aware of the proceedings but "
                    + "is deliberately evading service and that the applicant or a relevant child "
                    + "will be seriously prejudiced by the delay in effecting substituted service");

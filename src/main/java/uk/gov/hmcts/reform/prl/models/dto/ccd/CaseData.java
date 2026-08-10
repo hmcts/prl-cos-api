@@ -344,7 +344,6 @@ import uk.gov.hmcts.reform.prl.ccd.access.PuiCaseManagerCruAccess;
 import uk.gov.hmcts.reform.prl.ccd.access.CaseworkerPrivatelawSuperuserCourtnavRAccess;
 import uk.gov.hmcts.reform.prl.ccd.access.APPLICANTSOLICITORCruPlus30RolesEzpiauAccess;
 import uk.gov.hmcts.reform.prl.ccd.access.CaseworkerApproverRPlus6RolesXmoyviAccess;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.AddCaseNoteType;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -383,7 +382,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildDetailsRevisedExtraInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildExtraInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ApplicantFamily;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HomeChild;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildToBeProtected;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401SolicitorDetails;
@@ -425,7 +424,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CaseTransferOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CafcassEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DateOrderEndsTimeEnum2;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.SchoolDirectionsDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CustomC21OrderDetails;
@@ -437,7 +436,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ConfidentialityDisclaimerObject;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.CafcassServiceApplicationEnum;
@@ -528,7 +526,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
             searchable = false,
             access = {CaseworkerPrivatelawLaRPlus3RolesHjqxmqAccess.class, CaseworkerPrivatelawSolicitorCitizenCrudAccess.class, CaseworkerPrivatelawCourtadminCrudCaseworkerPrivatelawJudgeRAccess.class}
     )
-    private final ConfidentialityDisclaimerObject confidentialityDisclaimer;
+    private final ConfidentialityDisclaimer confidentialityDisclaimer;
 
     /**
      * C100 Help with Fees.
@@ -2263,7 +2261,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
           searchable = false,
           access = {CaseworkerPrivatelawCourtadminCrudPlus3RolesYwsmkiAccess.class, CaseworkerPrivatelawSuperuserCrudPlus1RolesYyzdhqAccess.class, CaseworkerWaTaskConfigurationCrudAccess.class}
   )
-  private java.util.List<uk.gov.hmcts.ccd.sdk.type.ListValue<AddCaseNoteType>> addCaseNoteTable;
+  private java.util.List<uk.gov.hmcts.ccd.sdk.type.ListValue<CaseNoteDetails>> addCaseNoteTable;
   @CCD(
           label = "## Select a legal representative to remove",
           searchable = false,
@@ -2833,7 +2831,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
           searchable = false,
           access = {CaseworkerPrivatelawJudgeRPlus2RolesBmwiooAccess.class, CaseworkerPrivatelawSuperuserCaseworkerWaTaskConfigurationRAccess.class, CaseworkerPrivatelawSolicitorCrudCitizenRAccess.class, CaseworkerPrivatelawCourtadminRAccess.class, CaseworkerPrivatelawSystemupdateCrudAccess.class}
   )
-  private ChildInfo childInfoTable;
+  private HomeChild childInfoTable;
   @CCD(
           label = "## Child to be protected",
           searchable = false,
@@ -6975,7 +6973,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
           searchable = false,
           access = {CaseworkerWaTaskConfigurationCourtnavCruAccess.class, CaseworkerPrivatelawCourtadminCruPlus3RolesMtnfliAccess.class, CaseworkerPrivatelawSolicitorCruAccess.class}
   )
-  private DateOrderEndsTimeEnum2 customOrderDateEndsOptions;
+  private DateOrderEndsTimeEnum customOrderDateEndsOptions;
   @CCD(
           label = "Date order ends",
           hint = "Please enter date and time",
@@ -8151,7 +8149,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
           searchable = false,
           access = {CaseworkerPrivatelawLaRPlus3RolesHjqxmqAccess.class, CaseworkerPrivatelawSolicitorCitizenCrudAccess.class, CaseworkerPrivatelawCourtadminCaseworkerPrivatelawJudgeRAccess.class}
   )
-  private ConfidentialityDisclaimerObject resSolConfidentialityDisclaimerSubmit;
+  private ConfidentialityDisclaimer resSolConfidentialityDisclaimerSubmit;
   @CCD(
           label = "The respondent believes that the facts stated in this form and any continuation sheets are true. ${respondentSolicitorName}  is authorised by the respondent to sign this statement. ",
           typeOverride = FieldType.Label,
@@ -8774,7 +8772,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
           searchable = false,
           access = {CaseworkerPrivatelawLaRPlus3RolesHjqxmqAccess.class, CaseworkerPrivatelawSolicitorCitizenCrudAccess.class, CaseworkerPrivatelawCourtadminCrudCaseworkerPrivatelawJudgeRAccess.class}
   )
-  private ConfidentialityDisclaimerObject confidentialityDisclaimerSubmit;
+  private ConfidentialityDisclaimer confidentialityDisclaimerSubmit;
   @CCD(
           label = "# Summary",
           searchable = false,
@@ -8983,7 +8981,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
           searchable = false,
           access = {CaseworkerApproverRPlus6RolesXmoyviAccess.class, CaseworkerPrivatelawExternaluserViewonlyRAccess.class}
   )
-  private AddCaseNoteType selectedReviewLangAndSmReq;
+  private CaseNoteDetails selectedReviewLangAndSmReq;
   @CCD(
           label = "Have you reviewed the support request above? You can't progress without reviewing",
           searchable = false,

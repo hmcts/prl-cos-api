@@ -6,15 +6,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum WithDrawTypeOfOrderEnum {
 
+    @CCD(label = "Withdrawn application")
     @JsonProperty("withdrawnApplication")
     withdrawnApplication("withdrawnApplication", "Withdrawn application"),
+    @CCD(label = "Refused application")
     @JsonProperty("refusedApplication")
     refusedApplication("refusedApplication", "Refused application"),
+    @CCD(label = "No order made")
     @JsonProperty("noOrderMade")
     noOrderMade("noOrderMade", "No order made");
 

@@ -7,17 +7,22 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum FL401ListOnNoticeDirectionsEnum {
+    @CCD(label = "Reduced notice period")
     @JsonProperty("reducedNoticedPeriod")
     reducedNoticedPeriod("reducedNoticedPeriod", "Reduced notice period"),
+    @CCD(label = "List with Child arrangements case")
     @JsonProperty("listWithChildArrangementCases")
     listWithChildArrangementCases("listWithChildArrangementCases", "List with Child arrangements case"),
+    @CCD(label = "Applicant needs to provide further information")
     @JsonProperty("applicantNeedsToProvideInfo")
     applicantNeedsToProvideInfo("applicantNeedsToProvideInfo", "Applicant needs to provide further information"),
+    @CCD(label = "The respondent needs to file a statement")
     @JsonProperty("respondentNeedsToFileStatement")
     respondentNeedsToFileStatement("respondentNeedsToFileStatement", "The respondent needs to file a statement");
 

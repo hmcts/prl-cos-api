@@ -6,28 +6,42 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ListOnNoticeReasonsEnum {
 
+    @CCD(label = "The Local Authority are currently involved with the child[ren] and family")
     @JsonProperty("localAuthorityInvolvedWithTheChildrenAndFamily")
     localAuthorityInvolvedWithTheChildrenAndFamily("The Local Authority are currently involved with the child[ren] and family"),
+    @CCD(label = "There is no evidence of immediate risk of harm to the child[ren]")
     @JsonProperty("noEvidenceOfImmediateRiskOfHarmToTheChildren")
     noEvidenceOfImmediateRiskOfHarmToTheChildren("There is no evidence of immediate risk of harm to the child[ren]"),
+    @CCD(
+            label = "Information from both parties and safeguarding is necessary to enable the court to determine the long-term arrangements."
+    )
     @JsonProperty("bothPartiesInformationAndSafeguardingNecessaryToCourt")
     bothPartiesInformationAndSafeguardingNecessaryToCourt(
         "Information from both parties and safeguarding is necessary to enable the court to determine the long-term arrangements."),
+    @CCD(label = "The child[ren] reside with applicant and both are protected by a Non-Molestation Order")
     @JsonProperty("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
     childrenResideWithApplicantAndBothProtectedByNonMolestationOrder(
         "The child[ren] reside with applicant and both are protected by a Non-Molestation Order"),
+    @CCD(
+            label = "There is no evidence to suggest that the respondent seeks to remove the child[ren] from the applicant's care and therefore there is no genuine emergency"
+    )
     @JsonProperty("noEvidenceOnRespondentSeeksToRemovetheChildrenFromApplicantsCare")
     noEvidenceOnRespondentSeeksToRemovetheChildrenFromApplicantsCare(
         "There is no evidence to suggest that the respondent seeks to remove the child[ren] from the applicant's care and therefore "
             + "there is no genuine emergency"),
+    @CCD(
+            label = "There is no evidence to suggest that the respondent would seek to frustrate the process if they were given notice"
+    )
     @JsonProperty("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice")
     noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice(
         "There is no evidence to suggest that the respondent would seek to frustrate the process if they were given notice"),
+    @CCD(label = "It is not without notice but it is urgent")
     @JsonProperty("itsNotWithoutNoticeButItsUrgent")
     itsNotWithoutNoticeButItsUrgent("It is not without notice but it is urgent");
 

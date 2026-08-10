@@ -6,17 +6,23 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "documentCategoryChecklistEnum", generate = true)
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum DocumentCategoryEnum {
 
+    @CCD(label = "Main application documents(Consent order, MIAM certificates, previous orders)")
     @JsonProperty("documentCategoryChecklistEnumValue1")
     documentCategoryChecklistEnumValue1("documentCategoryChecklistEnumValue1",
                                         "Main application documents(Consent order, MIAM certificates, previous orders)"),
+    @CCD(label = "Correspondence")
     @JsonProperty("documentCategoryChecklistEnumValue2")
     documentCategoryChecklistEnumValue2("documentCategoryChecklistEnumValue2", "Correspondence"),
+    @CCD(label = "Any other document")
     @JsonProperty("documentCategoryChecklistEnumValue3")
     documentCategoryChecklistEnumValue3("documentCategoryChecklistEnumValue3", "Any other document");
 

@@ -6,15 +6,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum DioNextStepsAllocationEnum {
 
+    @CCD(label = "Magistrates")
     @JsonProperty("magistrates")
     magistrates("magistrates", "Magistrates"),
+    @CCD(label = "District judge")
     @JsonProperty("districtJudge")
     districtJudge("districtJudge", "District judge"),
+    @CCD(label = "Circuit judge")
     @JsonProperty("circuitJudge")
     circuitJudge("circuitJudge", "Circuit judge");
 

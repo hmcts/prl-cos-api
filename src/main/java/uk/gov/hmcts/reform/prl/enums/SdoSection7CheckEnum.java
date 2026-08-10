@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoSection7CheckEnum {
+    @CCD(label = "Other direction for Section 7 report/ Child impact analysis")
     @JsonProperty("other")
     other("other", "Other direction for Section 7 report/ Child impact analysis");
 

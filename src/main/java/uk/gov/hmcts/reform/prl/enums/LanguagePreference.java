@@ -7,14 +7,19 @@ import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Optional;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "Language", generate = true)
 @RequiredArgsConstructor
 @Getter
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum LanguagePreference {
 
+    @CCD(label = "English")
     @JsonProperty("english")
     english("English"),
+    @CCD(label = "Welsh")
     @JsonProperty("welsh")
     welsh("Welsh");
 

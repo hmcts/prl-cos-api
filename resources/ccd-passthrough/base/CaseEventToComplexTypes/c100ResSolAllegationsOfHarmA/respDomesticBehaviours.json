@@ -8,14 +8,4 @@
   "EventElementLabel" : "",
   "FieldDisplayOrder" : "6",
   "DisplayContext" : "READONLY"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "RespDomesticBehaviours",
-  "CaseEventID" : "c100ResSolAllegationsOfHarmA",
-  "CaseFieldID" : "respDomesticBehaviours",
-  "ListElementCode" : "addNewRespDomesticBehavioursLabel",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "7",
-  "DisplayContext" : "READONLY"
 } ]

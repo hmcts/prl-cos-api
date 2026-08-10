@@ -43,6 +43,9 @@ public class WithdrawApplicationEvent implements CCDConfig<CaseData, State, User
             .fields();
         fields.page("1");
         fields.complex(CaseData::getWithDrawApplicationData)
+                    .mandatory(WithdrawApplication::getWithDrawApplicationHeadingLabel)
+                    .mandatory(WithdrawApplication::getWithDrawApplicationWarning)
+                    .mandatory(WithdrawApplication::getWithDrawApplicationCourtInfo)
                     .mandatory(WithdrawApplication::getWithDrawApplication)
                     .mandatory(WithdrawApplication::getWithDrawApplicationReason)
                     .fieldShowCondition("withDrawApplicationData.withDrawApplication=\"Yes\"").done();

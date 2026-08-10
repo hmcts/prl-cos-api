@@ -6,14 +6,18 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ServingRespondentsEnum {
+    @CCD(label = "Applicant's legal representative")
     @JsonProperty("applicantLegalRepresentative")
     applicantLegalRepresentative("applicantLegalRepresentative", "Applicant's legal representative"),
+    @CCD(label = "Court bailiff")
     @JsonProperty("courtBailiff")
     courtBailiff("courtBailiff", "Court bailiff"),
+    @CCD(label = "Court admin")
     @JsonProperty("courtAdmin")
     courtAdmin("courtAdmin", "Court admin");
 

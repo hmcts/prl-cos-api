@@ -233,6 +233,7 @@ public class BaseCaseData {
             label = " ",
             typeOverride = FieldType.FixedRadioList,
             typeParameterOverride = "CaseTypeOfApplicationEnum",
+            typeParameterClass = CaseTypeOfApplicationEnum.class,
             access = {CaseworkerPrivatelawSolicitorCruPlus2RolesHjbuaiAccess.class, CaseworkerPrivatelawCourtadminCrudPlus1RolesOunurxAccess.class, CaseworkerPrivatelawJudgeCruPlus2RolesZuwvtyAccess.class, CaseworkerPrivatelawBulkscanCrudPlus1RolesIkmnbhAccess.class, CaseworkerPrivatelawExternaluserViewonlyRAccess.class, CourtnavCruAccess.class}
     )
     @JsonProperty("caseTypeOfApplication")
@@ -436,6 +437,7 @@ public class BaseCaseData {
             label = "DFJ Area :",
             typeOverride = FieldType.FixedList,
             typeParameterOverride = "DFJArea",
+            typeParameterClass = DFJArea.class,
             access = {CaseworkerPrivatelawCourtadminCudPlus3RolesUbwryyAccess.class}
     )
     private String dfjArea;

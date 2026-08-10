@@ -6,13 +6,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum WhatToDoWithOrderEnum {
 
+    @CCD(label = "Save the order as a draft")
     @JsonProperty("saveAsDraft")
     saveAsDraft("saveAsDraft", "Save the order as a draft"),
+    @CCD(label = "Finalise the order, and save to serve later")
     @JsonProperty("finalizeSaveToServeLater")
     finalizeSaveToServeLater("finalizeSaveToServeLater", "Finalise the order, and save to serve later");
 

@@ -5,11 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "Fl401Consent", generate = true)
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum FL401Consent {
 
+    @CCD(
+            label = "The applicant believes that the facts stated in this form and any continuation sheets are true. I am authorised by the applicant to sign this statement. "
+    )
     @JsonProperty("fl401Consent")
     fl401Consent("The applicant believes that the facts stated in this form and any continuation "
                      + "sheets are true. I am authorised by the applicant to sign this statement. ");

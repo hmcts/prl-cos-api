@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildArrangementOrderTypeEnum2;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.FL400;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.FinalisationDetails;
 
 @Data
@@ -94,7 +94,7 @@ public class OrderDetails {
           showCondition = "orderTypeId = \"DO_NOT_SHOW\"",
           searchable = false
   )
-  private ChildArrangementOrderTypeEnum2 selectChildArrangementsOrder;
+  private ChildArrangementOrderTypeEnum selectChildArrangementsOrder;
   @CCD(
           label = " ",
           showCondition = "orderTypeId = \"DO_NOT_SHOW\"",
@@ -109,7 +109,7 @@ public class OrderDetails {
   @CCD(label = "Sos status", showCondition = "orderTypeId = \"DO_NOT_SHOW\"", searchable = false)
   private String sosStatus;
   @CCD(label = "Custom fields", showCondition = "orderTypeId = \"DO_NOT_SHOW\"", searchable = false)
-  private FL400 fl404CustomFields;
+  private FL404 fl404CustomFields;
   @CCD(label = " ", showCondition = "orderTypeId = \"DO_NOT_SHOW\"", searchable = false)
   private FinalisationDetails finalisationDetails;
   // ==== end synthesised definition-only fields ====

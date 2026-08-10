@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import java.time.LocalDateTime;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.type.FieldType;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ScannedDocumentType;
 
 @Data
 @Builder
@@ -21,7 +22,8 @@ public class ScannedDocument {
             label = "Document Type",
             searchable = false,
             typeOverride = FieldType.FixedList,
-            typeParameterOverride = "ScannedDocumentType"
+            typeParameterOverride = "ScannedDocumentType",
+            typeParameterClass = ScannedDocumentType.class
     )
     public final String type;
     @CCD(label = "Document Subtype", searchable = false)

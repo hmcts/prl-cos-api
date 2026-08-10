@@ -6,16 +6,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum TypeOfMiamAttendanceEvidenceEnum {
 
+    @CCD(label = "A MIAM certificate")
     @JsonProperty("miamCertificate")
     miamCertificate(
             "miamCertificate",
             "A MIAM certificate"
     ),
+    @CCD(label = "MIAM attendance details")
     @JsonProperty("miamAttendanceDetails")
     miamAttendanceDetails(
             "miamAttendanceDetails",

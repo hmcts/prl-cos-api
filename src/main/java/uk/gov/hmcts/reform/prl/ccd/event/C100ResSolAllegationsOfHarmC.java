@@ -74,7 +74,8 @@ public class C100ResSolAllegationsOfHarmC implements CCDConfig<CaseData, State, 
                     .optional(RespDomesticAbuseBehaviours::getRespBehavioursStartDateAndLength)
                     .optional(RespDomesticAbuseBehaviours::getRespBehavioursApplicantSoughtHelp)
                     .optional(RespDomesticAbuseBehaviours::getRespBehavioursApplicantHelpSoughtWho)
-                    .fieldShowCondition("respDomesticBehaviours.respBehavioursApplicantSoughtHelp=\"Yes\"").done().done().done();
+                    .fieldShowCondition("respDomesticBehaviours.respBehavioursApplicantSoughtHelp=\"Yes\"")
+                    .readonly(RespDomesticAbuseBehaviours::getAddNewRespDomesticBehavioursLabel).done().done().done();
         fields.complex(CaseData::getRespondentSolicitorData)
                     .complex(RespondentSolicitorData::getRespondentAllegationsOfHarmData)
                     .complexScope(RespondentAllegationsOfHarmData::getRespChildPassportDetails)

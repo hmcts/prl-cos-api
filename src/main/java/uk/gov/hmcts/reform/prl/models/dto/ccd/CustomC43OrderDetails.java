@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 import uk.gov.hmcts.ccd.sdk.api.ComplexType;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 
 /**
@@ -30,5 +31,5 @@ public class CustomC43OrderDetails {
             label = "Select type of child arrangements order",
             searchable = false
     )
-    private ChildArrangementOrderTypeEnum2 childArrangementsOrderType;
+    private ChildArrangementOrderTypeEnum childArrangementsOrderType;
 }

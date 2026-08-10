@@ -7,14 +7,17 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RespondentWelshNeedsListEnum {
+    @CCD(label = "Will want to speak Welsh")
     @JsonProperty("speakWelsh")
     speakWelsh("Will want to speak Welsh"),
 
+    @CCD(label = "Will want to read and write in Welsh")
     @JsonProperty("readAndWriteWelsh")
     readAndWriteWelsh("Will want to read and write in Welsh");
 

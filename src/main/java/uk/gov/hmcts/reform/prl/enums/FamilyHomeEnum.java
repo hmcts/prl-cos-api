@@ -5,17 +5,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum FamilyHomeEnum {
 
+    @CCD(label = "The applicant needs the respondent to pay for or contribute to repairs or maintenance to the home")
     @JsonProperty("payForRepairs")
     payForRepairs("payForRepairs", "The applicant needs the respondent to pay for or contribute to repairs or maintenance to the home"),
 
+    @CCD(label = "The applicant needs the respondent to pay for or contribute to the rent or the mortgage")
     @JsonProperty("payOrContributeRent")
     payOrContributeRent("payOrContributeRent", "The applicant needs the respondent to pay for or contribute to the rent or the mortgage"),
 
+    @CCD(label = "The applicant needs the use of the furniture or other household contents")
     @JsonProperty("useHouseholdContents")
     useHouseholdContents("useHouseholdContents", "The applicant needs the use of the furniture or other household contents");
 

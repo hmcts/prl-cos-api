@@ -72,7 +72,8 @@ public class AmendAllegationsOfHarmRevised implements CCDConfig<CaseData, State,
                     .optional(DomesticAbuseBehaviours::getNewBehavioursStartDateAndLength)
                     .optional(DomesticAbuseBehaviours::getNewBehavioursApplicantSoughtHelp)
                     .optional(DomesticAbuseBehaviours::getNewBehavioursApplicantHelpSoughtWho)
-                    .fieldShowCondition("domesticBehaviours.newBehavioursApplicantSoughtHelp=\"Yes\"").done().done();
+                    .fieldShowCondition("domesticBehaviours.newBehavioursApplicantSoughtHelp=\"Yes\"")
+                    .readonly(DomesticAbuseBehaviours::getAddNewDomesticBehavioursLabel).done().done();
         fields.complex(CaseData::getAllegationOfHarmRevised)
                     .complexScope(AllegationOfHarmRevised::getChildPassportDetails)
                     .mandatory(ChildPassportDetails::getNewChildHasMultiplePassports)

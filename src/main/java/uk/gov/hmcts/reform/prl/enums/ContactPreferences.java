@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ContactPreferences {
 
+    @CCD(label = "Email")
     @JsonProperty("email")
     email("email", "Email"),
+    @CCD(label = "Post")
     @JsonProperty("post")
     post("post", "Post");
 

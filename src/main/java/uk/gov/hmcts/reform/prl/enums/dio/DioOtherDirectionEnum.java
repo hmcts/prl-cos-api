@@ -6,10 +6,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum DioOtherDirectionEnum {
+    @CCD(label = "Other direction for the court to arrange interpreters")
     @JsonProperty("other")
     other("other", "Other direction for the court to arrange interpreters");
 

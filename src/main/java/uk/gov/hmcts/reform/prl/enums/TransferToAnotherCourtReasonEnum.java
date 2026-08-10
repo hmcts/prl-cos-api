@@ -5,14 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum TransferToAnotherCourtReasonEnum {
 
+    @CCD(label = "The child lives in another jurisdiction.")
     @JsonProperty("anotherJurisdiction")
     anotherJurisdiction("anotherJurisdiction", "The child lives in another jurisdiction."),
 
+    @CCD(label = "There is another reason for proceedings to be transferred.")
     @JsonProperty("anotherReason")
     anotherReason("anotherReason", "There is another reason for proceedings to be transferred.");
 

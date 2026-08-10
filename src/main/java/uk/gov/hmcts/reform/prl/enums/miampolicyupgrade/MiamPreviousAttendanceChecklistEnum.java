@@ -6,11 +6,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "MIAMPolicyUpgradePreviousAttendanceChecklistEnum", generate = true)
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum MiamPreviousAttendanceChecklistEnum {
 
+    @CCD(
+            label = "In the 4 months prior to making the application, the person attended a MIAM or a non-court dispute resolution process relating to the same or substantially the same dispute; and where the applicant attended a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from the dispute resolution provider."
+    )
     @JsonProperty("miamPolicyUpgradePreviousAttendance_Value_1")
     miamPolicyUpgradePreviousAttendance_Value_1(
         "miamPolicyUpgradePreviousAttendance_Value_1",
@@ -19,6 +25,9 @@ public enum MiamPreviousAttendanceChecklistEnum {
             + " a non-court dispute resolution process, there is evidence of that attendance in the form of written confirmation from"
             + " the dispute resolution provider."
     ),
+    @CCD(
+            label = "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings. You will need to upload the mediator’s certificate. If you are the respondent in existing proceedings, provide the date of the MIAM alongside the name and contact details of the MIAM provider in the text area."
+    )
     @JsonProperty("miamPolicyUpgradePreviousAttendance_Value_2")
     miamPolicyUpgradePreviousAttendance_Value_2(
         "miamPolicyUpgradePreviousAttendance_Value_2",

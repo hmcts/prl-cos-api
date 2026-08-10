@@ -7,15 +7,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
 
+@ComplexType(name = "StatementOfServiceServedType", generate = true)
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum StatementOfServiceWhatWasServed {
 
+    @CCD(label = "Application pack")
     @JsonProperty("statementOfServiceApplicationPack")
     statementOfServiceApplicationPack("statementOfServiceApplicationPack", "Application pack"),
+    @CCD(label = "Order")
     @JsonProperty("statementOfServiceOrder")
     statementOfServiceOrder("statementOfServiceOrder", "Order");
 

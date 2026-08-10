@@ -6,11 +6,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum C21OrderOptionsEnum {
 
+    @CCD(label = "Blank order or directions (C21): application refused")
     @JsonProperty("c21ApplicationRefused")
     c21ApplicationRefused(
         "c21ApplicationRefused",
@@ -19,6 +21,7 @@ public enum C21OrderOptionsEnum {
         "C21 - General order or directions: application refused"
     ),
 
+    @CCD(label = "Blank order or directions (C21): to withdraw application")
     @JsonProperty("c21WithdrawApplication")
     c21WithdrawApplication(
         "c21WithdrawApplication",
@@ -27,6 +30,7 @@ public enum C21OrderOptionsEnum {
         "C21 - General order or directions: to withdraw application"
     ),
 
+    @CCD(label = "Blank order or directions (C21): no order made")
     @JsonProperty("c21NoOrderMade")
     c21NoOrderMade(
         "c21NoOrderMade",
@@ -35,6 +39,7 @@ public enum C21OrderOptionsEnum {
         "C21 - General order or directions: no order made"
     ),
 
+    @CCD(label = "Blank order or directions (C21): Other")
     @JsonProperty("c21other")
     c21other(
         "c21other",

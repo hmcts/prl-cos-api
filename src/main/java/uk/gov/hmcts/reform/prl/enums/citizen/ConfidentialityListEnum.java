@@ -7,15 +7,19 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ConfidentialityListEnum {
+    @CCD(label = "Telephone number")
     @JsonProperty("phoneNumber")
     phoneNumber("phoneNumber", "Telephone number"),
+    @CCD(label = "Email")
     @JsonProperty("email")
     email("email", "Email"),
+    @CCD(label = "Address")
     @JsonProperty("address")
     address("address", "Address");
 

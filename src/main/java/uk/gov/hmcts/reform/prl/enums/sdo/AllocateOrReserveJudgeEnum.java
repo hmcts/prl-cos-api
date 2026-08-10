@@ -6,13 +6,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum AllocateOrReserveJudgeEnum {
 
+    @CCD(label = "Allocated to")
     @JsonProperty("allocatedTo")
     allocatedTo("allocatedTo", "Allocated to"),
+    @CCD(label = "Reserved to")
     @JsonProperty("reservedTo")
     reservedTo("reservedTo", "Reserved to");
 

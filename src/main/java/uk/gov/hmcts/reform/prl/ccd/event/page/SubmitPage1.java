@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.prl.ccd.event.page;
 import uk.gov.hmcts.ccd.sdk.api.Event;
 import uk.gov.hmcts.ccd.sdk.api.FieldCollection;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.complextypes.ConfidentialityDisclaimer;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ConfidentialityDisclaimerObject;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.UserRole;
 
 /**
@@ -25,9 +25,9 @@ public final class SubmitPage1 {
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.page("1");
         fields.complex(CaseData::getConfidentialityDisclaimerSubmit)
-                    .readonly(ConfidentialityDisclaimerObject::getConfidentialityStatementLabel)
-                    .readonly(ConfidentialityDisclaimerObject::getConfidentialityChecksLabel)
-                    .readonly(ConfidentialityDisclaimerObject::getConfidentialityChecksText)
-                    .mandatory(ConfidentialityDisclaimerObject::getConfidentialityChecksChecked).done();
+                    .readonly(ConfidentialityDisclaimer::getConfidentialityStatementLabel)
+                    .readonly(ConfidentialityDisclaimer::getConfidentialityChecksLabel)
+                    .readonly(ConfidentialityDisclaimer::getConfidentialityChecksText)
+                    .mandatory(ConfidentialityDisclaimer::getConfidentialityChecksChecked).done();
     }
 }

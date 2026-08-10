@@ -6,13 +6,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoSection7ImpactAnalysisEnum {
 
+    @CCD(label = "For interim orders before determination of facts")
     @JsonProperty("interimOrders")
     interimOrders("interimOrders", "For interim orders before determination of facts"),
+    @CCD(label = "In all cases where domestic abuse has been found to have occurred")
     @JsonProperty("daOccured")
     daOccured("daOccured", "In all cases where domestic abuse has been found to have occurred");
 

@@ -7,12 +7,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum OtherOrderRecipientsEnum {
+    @CCD(label = "XYZ")
     @JsonProperty("xyz")
     xyz("xyz", "XYZ"),
+    @CCD(label = "ABC")
     @JsonProperty("abc")
     abc("abc", "ABC");
 

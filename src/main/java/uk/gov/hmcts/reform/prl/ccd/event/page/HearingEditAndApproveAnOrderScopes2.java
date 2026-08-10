@@ -29,6 +29,12 @@ public final class HearingEditAndApproveAnOrderScopes2 {
     public static void apply(
             FieldCollection.FieldCollectionBuilder<CaseData, State, Event.EventBuilder<CaseData, UserRole, State>> fields) {
         fields.complex(CaseData::getStandardDirectionOrder)
+                    .complex(StandardDirectionOrder::getSdoInterpreterOtherDetails, SdoDioProvideOtherDetails.class)
+                    .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
+        fields.complex(CaseData::getStandardDirectionOrder)
+                    .complex(StandardDirectionOrder::getSdoCafcassFileAndServeDetails, SdoDioProvideOtherDetails.class)
+                    .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
+        fields.complex(CaseData::getStandardDirectionOrder)
                     .complex(StandardDirectionOrder::getSafeguardingCafcassCymruDetails, SdoDioProvideOtherDetails.class)
                     .mandatory(SdoDioProvideOtherDetails::getSdoDioOtherDetails).done().done();
         fields.complex(CaseData::getStandardDirectionOrder)

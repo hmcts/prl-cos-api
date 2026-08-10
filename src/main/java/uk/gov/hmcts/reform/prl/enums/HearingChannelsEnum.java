@@ -8,12 +8,15 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Optional;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum HearingChannelsEnum {
+    @CCD(label = "In person")
     @JsonProperty("INTER")
     INTER("INTER", "In person"),
+    @CCD(label = "Telephone")
     @JsonProperty("TEL")
     TEL("TEL", "Telephone"),
     @JsonProperty("TELBTM")
@@ -24,6 +27,7 @@ public enum HearingChannelsEnum {
     TELSKYP("TEL", "Telephone"),
     @JsonProperty("TELOTHER")
     TELOTHER("TEL", "Telephone"),
+    @CCD(label = "Video")
     @JsonProperty("VID")
     VID("VID", "Video"),
     @JsonProperty("VIDOTHER")
@@ -40,6 +44,7 @@ public enum HearingChannelsEnum {
     VIDPVL("VIDPVL", "Video"),
     @JsonProperty("NA")
     NA("NA", "Not in attendance"),
+    @CCD(label = "On the papers")
     @JsonProperty("ONPPRS")
     ONPPRS("ONPPRS", "On the papers"),
     @JsonProperty("DEFAULT")

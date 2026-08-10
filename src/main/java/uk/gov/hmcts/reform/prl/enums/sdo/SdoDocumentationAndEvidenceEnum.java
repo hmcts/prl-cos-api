@@ -6,25 +6,34 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoDocumentationAndEvidenceEnum {
 
+    @CCD(label = "Witness statements")
     @JsonProperty("witnessStatements")
     witnessStatements("witnessStatements", "Witness statements"),
+    @CCD(label = "Only specified documents to be filed")
     @JsonProperty("specifiedDocuments")
     specifiedDocuments("specifiedDocuments", "Only specified documents to be filed"),
+    @CCD(label = "Instructions on filing bundles")
     @JsonProperty("instructionsFiling")
     instructionsFiling("instructionsFiling", "Instructions on filing bundles"),
+    @CCD(label = "Planning Together for Children/Working Together for Children (WT4C)")
     @JsonProperty("spipAttendance")
     spipAttendance("spipAttendance", "Planning Together for Children/Working Together for Children (WT4C)"),
+    @CCD(label = "Medical disclosure")
     @JsonProperty("medicalDisclosure")
     medicalDisclosure("medicalDisclosure", "Medical disclosure"),
+    @CCD(label = "Letter from GP")
     @JsonProperty("letterFromGP")
     letterFromGP("letterFromGP", "Letter from GP"),
+    @CCD(label = "Letter from school")
     @JsonProperty("letterFromSchool")
     letterFromSchool("letterFromSchool", "Letter from school"),
+    @CCD(label = "Example schedule of allegations and responses for fact finding")
     @JsonProperty("scheduleOfAllegations")
     scheduleOfAllegations("scheduleOfAllegations", "Example schedule of allegations and responses for fact finding");
 

@@ -6,16 +6,22 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
+import uk.gov.hmcts.ccd.sdk.api.ComplexType;
 
+@ComplexType(name = "docTypeFurtherEvidence", generate = true)
 @Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum FurtherEvidenceDocumentType {
 
+    @CCD(label = "Consent order")
     @JsonProperty("consentOrder")
     consentOrder("consentOrder", "Consent order"),
+    @CCD(label = "MIAM certficate")
     @JsonProperty("miamCertificate")
     miamCertificate("miamCertificate", "MIAM certificate"),
+    @CCD(label = "Previous orders")
     @JsonProperty("previousOrders")
     previousOrders("previousOrders", "Previous orders");
 

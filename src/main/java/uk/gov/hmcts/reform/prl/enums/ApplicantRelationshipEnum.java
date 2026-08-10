@@ -5,28 +5,38 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
+import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ApplicantRelationshipEnum {
 
+    @CCD(label = "Married or in a civil partnership")
     @JsonProperty("marriedOrCivil")
     marriedOrCivil("marriedOrCivil", "Married or in a civil partnership"),
+    @CCD(label = "Formerly married or in a civil partnership")
     @JsonProperty("formerlyMarriedOrCivil")
     formerlyMarriedOrCivil("formerlyMarriedOrCivil", "Formerly married or in a civil partnership"),
+    @CCD(label = "Engaged or proposed civil partnership")
     @JsonProperty("engagedOrProposed")
     engagedOrProposed("engagedOrProposed", "Engaged or proposed civil partnership"),
+    @CCD(label = "Formerly engaged or proposed civil partnership")
     @JsonProperty("formerlyEngagedOrProposed")
     formerlyEngagedOrProposed("formerlyEngagedOrProposed", "Formerly engaged or proposed civil partnership"),
+    @CCD(label = "Live together as a couple")
     @JsonProperty("liveTogether")
     liveTogether("liveTogether", "Live together as a couple"),
+    @CCD(label = "Formerly lived together as a couple")
     @JsonProperty("foremerlyLivedTogether")
     foremerlyLivedTogether("foremerlyLivedTogether", "Formerly lived together as a couple"),
+    @CCD(label = "Boyfriend, girlfriend or partner who does not live with them")
     @JsonProperty("bfGfOrPartnerNotLivedTogether")
     bfGfOrPartnerNotLivedTogether("bfGfOrPartnerNotLivedTogether", "Boyfriend, girlfriend or partner who does not live with them"),
+    @CCD(label = "Formerly boyfriend, girlfriend or partner who has not lived with them")
     @JsonProperty("formerBfGfOrPartnerNotLivedTogether")
     formerBfGfOrPartnerNotLivedTogether("formerBfGfOrPartnerNotLivedTogether", "Formerly boyfriend, girlfriend or"
         + " partner who has not lived with them"),
+    @CCD(label = "None of the above")
     @JsonProperty("noneOfTheAbove")
     noneOfTheAbove("noneOfTheAbove", "None of the above");
 
