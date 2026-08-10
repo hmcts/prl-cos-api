@@ -1538,7 +1538,7 @@ public class ManageOrderService {
                 caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
             }
         }
-   }
+    }
 
     public DynamicMultiSelectList getChildOption(CaseData caseData) {
         return (Yes.equals(caseData.getManageOrders().getIsTheOrderAboutChildren())
