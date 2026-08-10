@@ -1,14 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.acro;
 
-
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.Response;
-import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Attachments;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.dto.acro.CsvData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -34,13 +24,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Base64;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.prl.services.SendgridService.MAIL_SEND;
 
 @Slf4j
 @Service
@@ -54,7 +42,6 @@ public class BaisDocumentUploadService {
     private final CsvWriter csvWriter;
     private final PdfExtractorService pdfExtractorService;
     private final SftpService sftpService;
-    private final SendGrid sendGrid;
 
     @Value("${acro.source-directory}")
     private String sourceDirectory;
@@ -88,40 +75,9 @@ public class BaisDocumentUploadService {
                 "*** Total time taken to run Bais Document upload task - {}s ***",
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
             );
-            sendMail(new File(archivePath));
         } catch (Exception e) {
             throw new BaisDocumentUploadRuntimeException("Document upload to Bais has failed for the run at "
                                                              + LocalDateTime.now(), e);
-        }
-    }
-
-    private void sendMail(File file) {
-        try {
-            String subject = "Bais Document Upload";
-            Content content = new Content("text/plain", " ");
-            Attachments attachments = new Attachments();
-            byte[] fileContent = Files.readAllBytes(file.toPath());
-            String encoded = Base64.getEncoder().encodeToString(fileContent);
-            log.info("Bais Document Upload encoded: [{}]", encoded);
-            attachments.setContent(encoded);
-            attachments.setFilename(subject + ".zip");
-            attachments.setType("application/zip");
-            attachments.setDisposition("attachment");
-            Mail mail = new Mail(
-                new Email("ca@mail-prl-nonprod.preview.platform.hmcts.net"), subject,
-                new Email("sanjay.parekh@hmcts.net"), content
-            );
-            mail.addAttachments(attachments);
-            Request request = new Request();
-            request.setMethod(Method.POST);
-            request.setEndpoint(MAIL_SEND);
-            request.setBody(mail.build());
-            log.info("Initiating email through sendgrid for email: luciano.marsilio@hmcts.net");
-            Response response = sendGrid.api(request);
-            log.info("Notification to RPA sent successfully for email: luciano.marsilio@hmcts.net");
-            log.info("response: {} statusCode:{}", response.getBody(), response.getStatusCode());
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
         }
     }
 
