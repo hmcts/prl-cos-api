@@ -1010,7 +1010,11 @@ public class DraftAnOrderService {
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
         caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
-        caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
+        if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
+            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirections());
+        } else {
+            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
+        }
         caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
         caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
