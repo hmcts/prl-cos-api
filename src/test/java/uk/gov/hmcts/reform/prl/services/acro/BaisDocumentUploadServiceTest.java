@@ -386,7 +386,7 @@ class BaisDocumentUploadServiceTest {
             "Case Type", new Object[]{caseData.getCaseTypeOfApplication(),
                 capturedData.getCaseTypeOfApplication(), "caseData.getCaseTypeOfApplication()"},
             "Applicant", new Object[]{caseData.getApplicant().toBuilder()
-                .dateOfBirth(null)
+                .dateOfBirth(LocalDate.of(2010, 1, 1))
                 .isAddressConfidential(YesOrNo.No)
                 .isPhoneNumberConfidential(YesOrNo.No)
                 .isEmailAddressConfidential(YesOrNo.No).build(),
