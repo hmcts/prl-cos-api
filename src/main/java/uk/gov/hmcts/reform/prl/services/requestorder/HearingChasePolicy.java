@@ -165,7 +165,8 @@ class HearingChasePolicy {
                  caseId, hearingId);
         return nullSafeCollection(orders).stream()
             .map(Element::getValue)
-            .filter(o -> hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
+            .filter(o -> hearing.getHearingDaySchedule() != null
+                && hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
                 .isBefore(o instanceof DraftOrder draft && draft.getOtherDetails().getDateCreated() != null
                     ? draft.getOtherDetails().getDateCreated()
                     : o instanceof OrderDetails or && or.getDateCreated() != null ? or.getDateCreated()
@@ -197,7 +198,8 @@ class HearingChasePolicy {
         }
         return nullSafeCollection(draftOrders).stream()
             .map(Element::getValue)
-            .filter(o -> hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
+            .filter(o -> hearing.getHearingDaySchedule() != null
+                && hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
             .isBefore(o.getOtherDetails().getDateCreated() != null
                           ? o.getOtherDetails().getDateCreated()
                           : LocalDateTime.now()))
@@ -221,7 +223,8 @@ class HearingChasePolicy {
         return nullSafeCollection(orderDetails).stream()
             .map(Element::getValue)
             .filter(order -> order.getFinalisationDetails() != null)
-            .filter(o -> hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
+            .filter(o -> hearing.getHearingDaySchedule() != null
+                && hearing.getHearingDaySchedule().get(0).getHearingStartDateTime()
                 .isBefore(o.getDateCreated() != null
                               ? o.getDateCreated()
                               : LocalDateTime.now()))
