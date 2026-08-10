@@ -74,6 +74,8 @@ public final class AmendChildDetailsPage1 {
                     .optional(Address::getCountry).done().done()
                     .complex(Child::getPersonWhoLivesWithChild, OtherPersonWhoLivesWithChild.class)
                     .optional(OtherPersonWhoLivesWithChild::getIsPersonIdentityConfidential).done()
-                    .optional(Child::getParentalResponsibilityDetails).done();
+                    .readonly(Child::getParentalResponsibility)
+                    .optional(Child::getParentalResponsibilityDetails)
+                    .mandatory(Child::getAddNewChildLabel).done();
     }
 }

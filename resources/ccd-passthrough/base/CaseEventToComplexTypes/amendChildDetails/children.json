@@ -8,24 +8,4 @@
   "EventElementLabel" : "",
   "FieldDisplayOrder" : "15",
   "DisplayContext" : "OPTIONAL"
-}, {
-  "LiveFrom" : "05/11/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "Child",
-  "CaseEventID" : "amendChildDetails",
-  "CaseFieldID" : "children",
-  "ListElementCode" : "parentalResponsibility",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "25",
-  "DisplayContext" : "READONLY"
-}, {
-  "LiveFrom" : "20/08/2021",
-  "CaseTypeID" : "PRLAPPS",
-  "ID" : "Child",
-  "CaseEventID" : "amendChildDetails",
-  "CaseFieldID" : "children",
-  "ListElementCode" : "addNewChildLabel",
-  "EventElementLabel" : "",
-  "FieldDisplayOrder" : "27",
-  "DisplayContext" : "MANDATORY"
 } ]

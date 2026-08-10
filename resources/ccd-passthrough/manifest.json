@@ -74,16 +74,6 @@
   "overwriteColumns" : [ ],
   "columnsOnly" : false
 }, {
-  "relativePath" : "CaseEventToComplexTypes/attendingTheHearing/interpreterNeeds.json",
-  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
-  "overwriteColumns" : [ ],
-  "columnsOnly" : false
-}, {
-  "relativePath" : "CaseEventToComplexTypes/amendAttendingTheHearing/interpreterNeeds.json",
-  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
-  "overwriteColumns" : [ ],
-  "columnsOnly" : false
-}, {
   "relativePath" : "CaseEventToComplexTypes/selectApplicationType/applicationConsideredInDaysAndHours.json",
   "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
   "overwriteColumns" : [ ],
@@ -309,11 +299,6 @@
   "overwriteColumns" : [ ],
   "columnsOnly" : false
 }, {
-  "relativePath" : "CaseEventToComplexTypes/manageDocuments/otherDocuments.json",
-  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
-  "overwriteColumns" : [ ],
-  "columnsOnly" : false
-}, {
   "relativePath" : "CaseEventToComplexTypes/manageDocumentsNew/manageDocuments.json",
   "primaryKeys" : [ "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
   "overwriteColumns" : [ ],
@@ -420,16 +405,6 @@
   "columnsOnly" : false
 }, {
   "relativePath" : "CaseEventToComplexTypes/amendOtherPeopleInTheCase/othersToNotify.json",
-  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
-  "overwriteColumns" : [ ],
-  "columnsOnly" : false
-}, {
-  "relativePath" : "CaseEventToComplexTypes/otherProceedings/existingProceedings.json",
-  "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
-  "overwriteColumns" : [ ],
-  "columnsOnly" : false
-}, {
-  "relativePath" : "CaseEventToComplexTypes/amendOtherProceedings/existingProceedings.json",
   "primaryKeys" : [ "ID", "CaseEventID", "CaseFieldID", "ListElementCode", "FieldShowCondition" ],
   "overwriteColumns" : [ ],
   "columnsOnly" : false

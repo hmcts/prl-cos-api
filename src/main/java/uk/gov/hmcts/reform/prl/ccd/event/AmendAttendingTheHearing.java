@@ -104,8 +104,10 @@ public class AmendAttendingTheHearing implements CCDConfig<CaseData, State, User
         fields.complex(CaseData::getAttendHearing)
                     .complex(AttendHearing::getInterpreterNeeds, InterpreterNeed.class)
                     .mandatory(InterpreterNeed::getParty)
+                    .readonly(InterpreterNeed::getNameLabel)
                     .mandatory(InterpreterNeed::getName)
                     .mandatory(InterpreterNeed::getLanguage)
+                    .readonly(InterpreterNeed::getAddNewInterpreterNeedLabel)
                     .optional(InterpreterNeed::getOtherAssistance).done().done();
         fields.complex(CaseData::getAttendHearing)
                     .complex(AttendHearing::getWelshNeeds, WelshNeed.class)

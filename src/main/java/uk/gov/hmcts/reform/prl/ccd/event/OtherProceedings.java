@@ -60,6 +60,7 @@ public class OtherProceedings implements CCDConfig<CaseData, State, UserRole> {
                     .optional(ProceedingDetails::getNameOfChildrenInvolved)
                     .optional(ProceedingDetails::getNameOfGuardian)
                     .optional(ProceedingDetails::getNameAndOffice)
-                    .optional(ProceedingDetails::getUploadRelevantOrder).done();
+                    .optional(ProceedingDetails::getUploadRelevantOrder)
+                    .readonly(ProceedingDetails::getAddNewProceedingLabel).done();
     }
 }

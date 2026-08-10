@@ -60,6 +60,7 @@ public class AmendOtherProceedings implements CCDConfig<CaseData, State, UserRol
                     .optional(ProceedingDetails::getNameOfChildrenInvolved)
                     .optional(ProceedingDetails::getNameOfGuardian)
                     .optional(ProceedingDetails::getNameAndOffice)
-                    .optional(ProceedingDetails::getUploadRelevantOrder).done();
+                    .optional(ProceedingDetails::getUploadRelevantOrder)
+                    .readonly(ProceedingDetails::getAddNewProceedingLabel).done();
     }
 }

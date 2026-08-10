@@ -33,6 +33,8 @@ public final class ManageDocumentsPage4 {
                     .optional(OtherDocuments::getNotes)
                     .mandatory(OtherDocuments::getDocumentOther)
                     .mandatory(OtherDocuments::getDocumentTypeOther)
+                    .readonly(OtherDocuments::getCheckDocumentsConfidentialLabel)
+                    .eventLabel("<br /><div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!</span><strong class='govuk-warning-text__text'>Check if documents are confidential</strong></div><br>")
                     .optional(OtherDocuments::getRestrictCheckboxOtherDocuments)
                     .eventLabel("Tick to restrict to Cafcass and HMCTS staff").done();
         fields.mandatoryNoSummary(CaseData::getCaseTypeOfApplication)
