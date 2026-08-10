@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.enums.manageorders;
 
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -15,7 +16,7 @@ public enum ManageOrdersOptionsEnum {
     createAnOrder("createAnOrder", "Create an order"),
     @JsonProperty("uploadAnOrder")
     uploadAnOrder("uploadAnOrder", "Upload an order"),
-    @JsonProperty("amendOrderUnderSlipRule")
+    @JsonIgnore
     amendOrderUnderSlipRule("amendOrderUnderSlipRule", "Amend an order"),
     @JsonProperty("servedSavedOrders")
     servedSavedOrders("servedSavedOrders", "Served saved orders"),
