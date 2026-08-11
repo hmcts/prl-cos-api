@@ -6519,7 +6519,7 @@ public class ManageOrdersControllerTest {
         assertEquals(Yes, response.getData().get("eligibleStateForMiam"));
     }
 
-    private CallbackRequest setUpCallbackRequestForMiamTest(Map<String, Object> stringObjectMap, State state){
+    private CallbackRequest setUpCallbackRequestForMiamTest(Map<String, Object> stringObjectMap, State state) {
 
         return CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -6530,7 +6530,7 @@ public class ManageOrdersControllerTest {
             .build();
     }
 
-    private CaseData setUpCaseDataForMiamTest(State state){
+    private CaseData setUpCaseDataForMiamTest(State state) {
 
         return CaseData.builder()
             .id(12345L)
