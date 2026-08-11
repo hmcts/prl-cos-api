@@ -135,6 +135,16 @@ public class NoticeOfChangePartiesService {
         return generate(caseData, representing, POPULATE);
     }
 
+    public Map<String, Object> generate(CaseData caseData,
+                                        SolicitorRole.Representing representing,
+                                        Map<String, Object> existingCaseData) {
+        Map<String, Object> data = generate(caseData, representing);
+        if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            removeExistingCaOrgPolicyPlaceholders(data, existingCaseData);
+        }
+        return data;
+    }
+
     public Map<String, Object> generate(CaseData caseData, SolicitorRole.Representing representing,
                                         NoticeOfChangeAnswersPopulationStrategy strategy) {
         Map<String, Object> data = new HashMap<>();
@@ -236,6 +246,41 @@ public class NoticeOfChangePartiesService {
                 possibleAnswer.ifPresent(answer ->
                                              data.put(representing.getNocAnswersTemplate(), answer)
                 );
+            }
+        }
+
+        generateRequiredCaOrgPoliciesForNoc(data);
+    }
+
+    private void generateRequiredCaOrgPoliciesForNoc(Map<String, Object> data) {
+        List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(CAAPPLICANT));
+        solicitorRoles.addAll(SolicitorRole.matchingRoles(CARESPONDENT));
+        for (SolicitorRole solicitorRole : solicitorRoles) {
+            OrganisationPolicy organisationPolicy = policyConverter.caGenerate(
+                solicitorRole, Optional.empty());
+            data.put(
+                String.format(
+                    solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                    (solicitorRole.getIndex() + 1)
+                ), organisationPolicy
+            );
+        }
+    }
+
+    private void removeExistingCaOrgPolicyPlaceholders(Map<String, Object> data,
+                                                       Map<String, Object> existingCaseData) {
+        if (existingCaseData == null) {
+            return;
+        }
+        List<SolicitorRole> solicitorRoles = new ArrayList<>(SolicitorRole.matchingRoles(CAAPPLICANT));
+        solicitorRoles.addAll(SolicitorRole.matchingRoles(CARESPONDENT));
+        for (SolicitorRole solicitorRole : solicitorRoles) {
+            String policyField = String.format(
+                solicitorRole.getRepresenting().getPolicyFieldTemplate(),
+                (solicitorRole.getIndex() + 1)
+            );
+            if (existingCaseData.containsKey(policyField)) {
+                data.remove(policyField);
             }
         }
     }
@@ -652,6 +697,10 @@ public class NoticeOfChangePartiesService {
                         (solicitorRole.getIndex() + 1)
                     ), organisationPolicy
                 );
+            } else if (DARESPONDENT.equals(solicitorRole.getRepresenting())) {
+                OrganisationPolicy organisationPolicy = policyConverter.daGenerate(
+                    solicitorRole, PartyDetails.builder().build());
+                data.put(solicitorRole.getRepresenting().getPolicyFieldTemplate(), organisationPolicy);
             }
         }
     }
@@ -811,7 +860,7 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateStartEventResponse,
             objectMapper
         );
-        Map<Optional<SolicitorRole>, Element<PartyDetails>> oldDetailsMap = new HashMap<>(selectedPartyDetailsMap);
+        Map<Optional<SolicitorRole>, Element<PartyDetails>> originalPartyDetailsMap = new HashMap<>(selectedPartyDetailsMap);
         for (var entry : selectedPartyDetailsMap.entrySet()) {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
@@ -835,9 +884,10 @@ public class NoticeOfChangePartiesService {
                     TypeOfNocEventEnum.removeLegalRepresentation,
                     null
                 );
-                removeBarristerFlags(oldDetailsMap.get(removeSolicitorRole),
-                                     newPartyDetailsElement,
-                                     allTabsUpdateCaseData);
+                removeSolicitorAndBarristerFlags(originalPartyDetailsMap.get(removeSolicitorRole),
+                                                 newPartyDetailsElement,
+                                                 allTabsUpdateCaseData,
+                                                 removeSolicitorRole.get());
             }
         }
 
@@ -857,7 +907,7 @@ public class NoticeOfChangePartiesService {
             Optional<SolicitorRole> removeSolicitorRole = entry.getKey();
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             sendEmailOnRemovalOfLegalRepresentation(
-                oldDetailsMap.get(removeSolicitorRole),
+                originalPartyDetailsMap.get(removeSolicitorRole),
                 newPartyDetailsElement,
                 removeSolicitorRole,
                 caseData
@@ -1014,9 +1064,11 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    void removeBarristerFlags(Element<PartyDetails> oldPartyDetails,
-                              Element<PartyDetails> newPartyDetails,
-                              CaseData caseData) {
+    void removeSolicitorAndBarristerFlags(Element<PartyDetails> oldPartyDetails,
+                                          Element<PartyDetails> newPartyDetails,
+                                          CaseData caseData,
+                                          SolicitorRole removedSolicitorRole) {
+        log.info("Removing solicitor/barrister flags for case {} and role {}", caseData.getId(), removedSolicitorRole);
         barristerHelper.setAllocatedBarrister(Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getValue)
                                                   .orElseGet(newPartyDetails::getValue),
@@ -1024,8 +1076,11 @@ public class NoticeOfChangePartiesService {
                                               Optional.ofNullable(oldPartyDetails)
                                                   .map(Element::getId)
                                                   .orElseGet(newPartyDetails::getId));
-        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(caseData,
-                                                                            partyLevelCaseFlagsService::generatePartyCaseFlagsForBarristerOnly);
+        partyLevelCaseFlagsService.updateCaseDataWithGeneratePartyCaseFlags(
+            caseData,
+            cd -> partyLevelCaseFlagsService.generateTargetedLegalRepresentativeFlagUpdates(cd, removedSolicitorRole)
+        );
+        log.info("Completed targeted solicitor/barrister flag removal for case {} and role {}", caseData.getId(), removedSolicitorRole);
     }
 
     void sendEmailOnRemovalOfLegalRepresentation(Element<PartyDetails> oldPartyDetails,

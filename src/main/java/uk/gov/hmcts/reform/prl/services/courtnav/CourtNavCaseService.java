@@ -259,8 +259,10 @@ public class CourtNavCaseService {
         Map<String, Object> data = startAllTabsUpdateDataContent.caseDataMap();
         data.put("id", caseId);
         data.putAll(documentGenService.createUpdatedCaseDataWithDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
-        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
-        data.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        data.putAll(noticeOfChangePartiesService.generate(
+            startAllTabsUpdateDataContent.caseData(), DARESPONDENT, data));
+        data.putAll(noticeOfChangePartiesService.generate(
+            startAllTabsUpdateDataContent.caseData(), DAAPPLICANT, data));
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
         data.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         data.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
@@ -287,8 +289,10 @@ public class CourtNavCaseService {
     public void updateCommonSetUpForNoCAndCaseFlags(String caseId) {
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartAllTabsUpdate(caseId);
         Map<String, Object> caseDataMap = startAllTabsUpdateDataContent.caseDataMap();
-        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DARESPONDENT));
-        caseDataMap.putAll(noticeOfChangePartiesService.generate(startAllTabsUpdateDataContent.caseData(), DAAPPLICANT));
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(
+            startAllTabsUpdateDataContent.caseData(), DARESPONDENT, caseDataMap));
+        caseDataMap.putAll(noticeOfChangePartiesService.generate(
+            startAllTabsUpdateDataContent.caseData(), DAAPPLICANT, caseDataMap));
         OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
         caseDataMap.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
         caseDataMap.putAll(partyLevelCaseFlagsService.generateFl401PartyCaseFlags(startAllTabsUpdateDataContent.caseData(),
@@ -307,4 +311,3 @@ public class CourtNavCaseService {
         log.info("Common component setup for NoC and case flags is completed");
     }
 }
-
