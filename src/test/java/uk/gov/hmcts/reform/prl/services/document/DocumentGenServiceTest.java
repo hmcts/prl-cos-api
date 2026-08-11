@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -74,10 +75,12 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -2958,8 +2961,179 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(
+            stringObjectMap,
+            DRAFT_APPLICATION_DOCUMENT_FIELD,
+            DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+            DOCUMENT_FIELD_DRAFT_C8,
+            DOCUMENT_FIELD_C8_DRAFT_WELSH,
+            DOCUMENT_FIELD_DRAFT_C1A,
+            DOCUMENT_FIELD_C1A_DRAFT_WELSH
+        );
+    }
+
+    @Test
+    public void shouldGenerateOnlyEnglishC100DraftDocument() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(
+            any(CaseData.class),
+            eq(false)
+        )).thenReturn("c100-draft-english-template");
+
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            anyString(),
+            any()
+        );
+
+        Map<String, Object> result =
+            documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            );
+
+        assertTrue(result.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+        assertNotNull(result.get(DRAFT_APPLICATION_DOCUMENT_FIELD));
+
+        assertFalse(result.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<Document>>any());
+    }
+
+
+    @Test
+    public void shouldGenerateOnlyWelshC100DraftDocument() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(false)
+            .isGenWelsh(true)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(
+            any(CaseData.class),
+            eq(true)
+        )).thenReturn("c100-draft-welsh-template");
+
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            anyString(),
+            any(CaseDetails.class),
+            anyString(),
+            any()
+        );
+
+        Map<String, Object> result =
+            documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            );
+
+        assertFalse(result.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+
+        assertTrue(result.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+        assertNotNull(result.get(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<Document>>any());
+    }
+
+    @Test
+    public void shouldCancelWelshTaskWhenEnglishGenerationFails() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(true)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        RuntimeException generationFailure =
+            new RuntimeException("Docmosis failure");
+
+        CompletableFuture<Document> englishFuture =
+            new CompletableFuture<>();
+        englishFuture.completeExceptionally(generationFailure);
+
+        CompletableFuture<Document> welshFuture =
+            new CompletableFuture<>();
+
+        doReturn(englishFuture, welshFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<Document>>any());
+
+        DocumentGenerationException exception = assertThrows(
+            DocumentGenerationException.class,
+            () -> documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            )
+        );
+
+        assertSame(generationFailure, exception.getCause());
+        assertTrue(welshFuture.isCancelled());
+        assertFalse(englishFuture.isCancelled());
+    }
+
+    @Test
+    public void shouldCancelTaskAndRestoreInterruptWhenWaitingIsInterrupted()
+        throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        @SuppressWarnings("unchecked")
+        Future<Document> englishFuture = Mockito.mock(Future.class);
+
+        when(englishFuture.get())
+            .thenThrow(new InterruptedException("Test interruption"));
+        when(englishFuture.isDone()).thenReturn(false);
+
+        doReturn(englishFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<Document>>any());
+
+        try {
+            DocumentGenerationException exception = assertThrows(
+                DocumentGenerationException.class,
+                () -> documentGenService.generateC100DraftDocuments(
+                    AUTH_TOKEN,
+                    c100CaseData
+                )
+            );
+
+            assertTrue(
+                exception.getCause() instanceof InterruptedException
+            );
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            verify(englishFuture).cancel(true);
+        } finally {
+            // Avoid leaking the interrupted state into subsequent tests.
+            Thread.interrupted();
+        }
     }
 
     @Test
