@@ -2218,7 +2218,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
@@ -2242,7 +2242,7 @@ class EditAndApproveDraftOrderControllerTest {
         Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedNotPaid() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
@@ -2266,7 +2266,7 @@ class EditAndApproveDraftOrderControllerTest {
         Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedPaid() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
@@ -2290,7 +2290,7 @@ class EditAndApproveDraftOrderControllerTest {
         Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsCaseIssued() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
@@ -2314,7 +2314,7 @@ class EditAndApproveDraftOrderControllerTest {
         Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsJudicialReview() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
@@ -2338,7 +2338,7 @@ class EditAndApproveDraftOrderControllerTest {
         Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingFl401SubmissionToHmcts() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
@@ -2362,7 +2362,7 @@ class EditAndApproveDraftOrderControllerTest {
         Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
-    @org.junit.Test
+    @Test
     public void testFlagSetToYesForMiamOrderWhenStateIsPrepareForHearingConductHearing() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
