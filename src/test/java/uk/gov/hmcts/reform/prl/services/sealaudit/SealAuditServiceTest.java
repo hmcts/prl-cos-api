@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -218,8 +219,8 @@ class SealAuditServiceTest {
 
         String expectedLt = "\"lt\": \"" + LocalDate.now().plusDays(1) + "T00:00:00\"";
 
-        assertTrue(query.contains("\"from\": 0"));
         assertTrue(query.contains("\"size\": 500"));
+        assertTrue(!query.contains("\"search_after\""));
         assertTrue(query.contains("\"created_date\""));
         assertTrue(query.contains("\"gte\": \"2025-01-15T00:00:00\""));
         assertTrue(query.contains(expectedLt));
@@ -261,10 +262,10 @@ class SealAuditServiceTest {
 
         List<String> queries = queryCaptor.getAllValues();
 
-        assertTrue(queries.get(0).contains("\"from\": 0"));
+        assertFalse(queries.get(0).contains("\"search_after\""));
         assertTrue(queries.get(0).contains("\"size\": 2"));
 
-        assertTrue(queries.get(1).contains("\"from\": 2"));
+        assertTrue(queries.get(1).contains("\"search_after\""));
         assertTrue(queries.get(1).contains("\"size\": 2"));
     }
 
@@ -651,6 +652,7 @@ class SealAuditServiceTest {
 
         return CaseDetails.builder()
             .id(caseId)
+            .createdDate(java.time.LocalDateTime.of(2025, 1, 15, 10, 0))
             .data(caseData)
             .build();
     }

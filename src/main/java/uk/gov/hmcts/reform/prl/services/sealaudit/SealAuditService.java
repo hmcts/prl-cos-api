@@ -102,7 +102,8 @@ public class SealAuditService {
         List<String> csvRows = new ArrayList<>();
 
         try {
-            int from = 0;
+            String searchAfterCreatedDate = null;
+            String searchAfterReference = null;
 
             while (true) {
                 SearchResult searchResult = searchServedOrders(
@@ -110,18 +111,19 @@ public class SealAuditService {
                     s2sToken,
                     fromDate,
                     toDate,
-                    from
+                    searchAfterCreatedDate,
+                    searchAfterReference
                 );
 
                 if (searchResult == null || searchResult.getCases() == null || searchResult.getCases().isEmpty()) {
-                    log.info("No cases returned for page from {} size {}", from, pageSize);
+                    log.info("No more cases returned, pagination complete");
                     break;
                 }
 
                 List<CaseDetails> cases = searchResult.getCases();
                 foundAnyCases = true;
 
-                log.info("Found {} cases to process from offset {}", cases.size(), from);
+                log.info("Found {} cases to process", cases.size());
 
                 for (CaseDetails caseDetails : cases) {
                     totalCasesProcessed++;
@@ -231,7 +233,15 @@ public class SealAuditService {
                     break;
                 }
 
-                from += pageSize;
+                CaseDetails lastCase = cases.getLast();
+                searchAfterCreatedDate = lastCase.getCreatedDate() != null
+                    ? lastCase.getCreatedDate().toString() : null;
+                searchAfterReference = String.valueOf(lastCase.getId());
+
+                if (searchAfterCreatedDate == null) {
+                    log.warn("Last case {} has no createdDate, cannot paginate further", lastCase.getId());
+                    break;
+                }
             }
 
             if (!foundAnyCases) {
@@ -272,11 +282,17 @@ public class SealAuditService {
         String s2sToken,
         LocalDate fromDate,
         LocalDate toDate,
-        int from
+        String searchAfterCreatedDate,
+        String searchAfterReference
     ) {
+        String searchAfterClause = "";
+        if (searchAfterCreatedDate != null && searchAfterReference != null) {
+            searchAfterClause = String.format(",\"search_after\": [\"%s\", \"%s\"]",
+                                             searchAfterCreatedDate, searchAfterReference);
+        }
+
         String query = """
             {
-              "from": %s,
               "size": %s,
               "sort": [
                 { "created_date": "asc" },
@@ -320,16 +336,13 @@ public class SealAuditService {
                 "data.courtName",
                 "reference",
                 "created_date"
-              ]
+              ]%s
             }
-            """.formatted(from, pageSize, fromDate, toDate.plusDays(1));
+            """.formatted(pageSize, fromDate, toDate.plusDays(1), searchAfterClause);
 
         log.info(
-            "Executing search query for cases created from {} to {} exclusive, from {}, size {}",
-            fromDate,
-            toDate.plusDays(1),
-            from,
-            pageSize
+            "Executing search for cases {} to {}, search_after=[{}, {}]",
+            fromDate, toDate.plusDays(1), searchAfterCreatedDate, searchAfterReference
         );
 
         return coreCaseDataApi.searchCases(userToken, s2sToken, searchCaseTypeId, query);
