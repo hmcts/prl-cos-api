@@ -996,8 +996,6 @@ public class PrlAppsConstants {
     public static final String CLIENT_CONTEXT_HEADER_PARAMETER = "client-context";
 
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
-    public static final String CREATE_SELECT_ORDER_OPTIONS = "createSelectOrderOptions";
-    public static final String CREATE_SELECT_ORDER_OPTIONS_V2 = "createSelectOrderOptionsV2";
 
     // Custom order fields
     public static final String CUSTOM_ORDER_DOC = "customOrderDoc";

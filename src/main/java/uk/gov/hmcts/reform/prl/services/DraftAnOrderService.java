@@ -2439,12 +2439,11 @@ public class DraftAnOrderService {
     }
 
     public AboutToStartOrSubmitCallbackResponse handleSelectedOrder(CallbackRequest callbackRequest, String authorisation, String language) {
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        ManageOrdersUtils.copyOrderSelectionsFromUiFields(caseDataUpdated);
         CaseData caseData = objectMapper.convertValue(
-            caseDataUpdated,
+            callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());

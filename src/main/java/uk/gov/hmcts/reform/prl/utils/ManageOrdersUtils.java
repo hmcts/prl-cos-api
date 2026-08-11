@@ -45,8 +45,6 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CREATE_SELECT_ORDER_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CREATE_SELECT_ORDER_OPTIONS_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
@@ -73,14 +71,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @Slf4j
 public class ManageOrdersUtils {
 
-    public static void copyOrderSelectionsFromUiFields(Map<String, Object> caseData) {
-        copyIfPresent(caseData, CREATE_SELECT_ORDER_OPTIONS_V2, CREATE_SELECT_ORDER_OPTIONS);
-        copyIfPresent(caseData, CUSTOM_ORDER_NAME_OPTION_V2, CUSTOM_ORDER_NAME_OPTION);
-    }
-
-    private static void copyIfPresent(Map<String, Object> caseData, String sourceField, String targetField) {
-        if (caseData != null && caseData.get(sourceField) != null) {
-            caseData.put(targetField, caseData.get(sourceField));
+    public static void copyCustomOrderSelectionFromUiField(Map<String, Object> caseData) {
+        if (caseData != null && caseData.get(CUSTOM_ORDER_NAME_OPTION_V2) != null) {
+            caseData.put(CUSTOM_ORDER_NAME_OPTION, caseData.get(CUSTOM_ORDER_NAME_OPTION_V2));
         }
     }
 

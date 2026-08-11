@@ -390,6 +390,7 @@ public class ManageOrdersControllerTest {
         objectMapper1.findAndRegisterModules();
 
         Map<String, Object> stringObjectMap = caseData.toMap(objectMapper1);
+        stringObjectMap.put("customOrderNameOptionV2", "blankOrderOrDirections");
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -412,6 +413,7 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getData());
         assertEquals("COURT_ADMIN", callbackResponse.getData().get("loggedInUserType"));
+        assertEquals("blankOrderOrDirections", callbackResponse.getData().get("customOrderNameOption"));
         // Verify hearing data is populated for Page 19
         verify(manageOrderService).getHearingData(anyString(), any(CaseData.class));
         // Verify that renderAndUploadHeaderPreview was NOT called (deferred to Page 19)

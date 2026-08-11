@@ -31,26 +31,22 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 class ManageOrdersUtilsTest {
 
     @Test
-    void shouldCopyUiOrderSelectionsToLegacyFields() {
+    void shouldCopyCustomUiOrderSelectionToLegacyField() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("createSelectOrderOptionsV2", "blankOrderOrDirections");
         caseData.put("customOrderNameOptionV2", "blankOrderOrDirections");
 
-        ManageOrdersUtils.copyOrderSelectionsFromUiFields(caseData);
+        ManageOrdersUtils.copyCustomOrderSelectionFromUiField(caseData);
 
-        assertEquals("blankOrderOrDirections", caseData.get("createSelectOrderOptions"));
         assertEquals("blankOrderOrDirections", caseData.get("customOrderNameOption"));
     }
 
     @Test
-    void shouldRetainLegacySelectionsWhenUiFieldsAreAbsent() {
+    void shouldRetainLegacyCustomSelectionWhenUiFieldIsAbsent() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("createSelectOrderOptions", "directionOnIssue");
         caseData.put("customOrderNameOption", "directionOnIssue");
 
-        ManageOrdersUtils.copyOrderSelectionsFromUiFields(caseData);
+        ManageOrdersUtils.copyCustomOrderSelectionFromUiField(caseData);
 
-        assertEquals("directionOnIssue", caseData.get("createSelectOrderOptions"));
         assertEquals("directionOnIssue", caseData.get("customOrderNameOption"));
     }
 

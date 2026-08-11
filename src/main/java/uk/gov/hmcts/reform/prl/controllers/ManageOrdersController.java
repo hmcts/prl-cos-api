@@ -145,7 +145,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            ManageOrdersUtils.copyOrderSelectionsFromUiFields(caseDataUpdated);
+            ManageOrdersUtils.copyCustomOrderSelectionFromUiField(caseDataUpdated);
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             // Custom order flow - skip preview rendering here, it will be done on Page 19 with hearing data
@@ -202,10 +202,8 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            ManageOrdersUtils.copyOrderSelectionsFromUiFields(caseDataUpdated);
             CaseData caseData = objectMapper.convertValue(
-                caseDataUpdated,
+                callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
 

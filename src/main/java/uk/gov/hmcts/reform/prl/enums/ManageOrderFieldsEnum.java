@@ -4,7 +4,6 @@ public enum ManageOrderFieldsEnum {
 
     manageOrdersOptions("manageOrdersOptions"),
     createSelectOrderOptions("createSelectOrderOptions"),
-    createSelectOrderOptionsV2("createSelectOrderOptionsV2"),
     customOrderNameOptionV2("customOrderNameOptionV2"),
     childArrangementOrders("childArrangementOrders"),
     domesticAbuseOrders("domesticAbuseOrders"),
