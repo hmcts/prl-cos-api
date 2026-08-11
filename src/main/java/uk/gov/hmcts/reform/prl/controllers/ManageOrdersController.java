@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -73,7 +72,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.HttpHeaders;
 
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -1013,44 +1011,6 @@ public class ManageOrdersController {
         }
     }
 
-
-
-    @PostMapping(path = "/manage-orders/serve-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "about to start callback for Serve Order.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed."),
-        @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
-        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Map<String, Object> caseDataUpdated = caseDetails.getData();
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            State state = caseData.getState();
-            YesOrNo eligibleStateForMiam = null;
-            if (nonNull(state)) {
-                String status = state.getValue();
-                if (status.equalsIgnoreCase(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-                    ||  status.equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())
-                    ||  status.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())
-                    ||  status.equalsIgnoreCase(State.CASE_ISSUED.getValue())
-                    ||  status.equalsIgnoreCase(State.JUDICIAL_REVIEW.getValue())
-                    ||  status.equalsIgnoreCase(State.AWAITING_FL401_SUBMISSION_TO_HMCTS.getValue())) {
-                    eligibleStateForMiam = No;
-                } else {
-                    eligibleStateForMiam = Yes;
-                }
-
-            }
-            caseDataUpdated.put("eligibleStateForMiam", eligibleStateForMiam);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
 
 
 
