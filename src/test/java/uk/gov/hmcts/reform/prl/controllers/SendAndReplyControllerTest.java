@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -81,6 +82,9 @@ public class SendAndReplyControllerTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private ManageOrderService manageOrderService;
 
     private CaseData replyCaseData;
     private Map<String, Object> caseDataMap;
@@ -519,7 +523,8 @@ public class SendAndReplyControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         // when
-        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController.sendOrReplyToMessagesSubmit(auth, callbackRequest);
+        AboutToStartOrSubmitCallbackResponse response = sendAndReplyController
+            .sendOrReplyToMessagesSubmit(auth, callbackRequest);
 
         // then
         verify(sendAndReplyCommonService).replyMessages(auth, caseData, caseDataMap);
@@ -548,17 +553,23 @@ public class SendAndReplyControllerTest {
 
     @Test
     public void testHandSubmittedSendAndReply() {
+        String clientContext = "";
         // given
         CallbackRequest callbackRequest = setUpHandleSubmitted();
 
-        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth)).thenReturn(ok(SubmittedCallbackResponse.builder().build()));
+        when(sendAndReplyService.sendAndReplySubmitted(callbackRequest, auth))
+            .thenReturn(ok(SubmittedCallbackResponse.builder().build()));
 
         // when
-        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController.handleSubmittedSendAndReply(auth, callbackRequest, null);
+        ResponseEntity<SubmittedCallbackResponse> response  = sendAndReplyController
+            .handleSubmittedSendAndReply(auth, callbackRequest, clientContext);
 
         // then
         Assertions.assertThat(response.getStatusCode().value()).isEqualTo(200);
-        verify(sendAndReplyService).sendAndReplySubmitted(callbackRequest, auth);
+        verify(sendAndReplyService)
+            .sendAndReplySubmitted(callbackRequest, auth);
+        verify(manageOrderService)
+            .reCreateCirDocumentsRequestedTask(callbackRequest, clientContext);
     }
 
 
