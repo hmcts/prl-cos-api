@@ -742,6 +742,8 @@ public class DocumentGenService {
             Thread.currentThread().interrupt();
             throw new DocumentGenerationException("C100 Draft Document generation interrupted", e);
         } catch (ExecutionException e) {
+            cancelFuture(englishFuture);
+            cancelFuture(welshFuture);
             throw new DocumentGenerationException("C100 Draft Document generation failed", e.getCause());
         }
 

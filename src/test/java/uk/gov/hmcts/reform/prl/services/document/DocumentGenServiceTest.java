@@ -71,6 +71,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -174,6 +177,8 @@ public class DocumentGenServiceTest {
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    @Mock
+    private ExecutorService documentVirtualThreadExecutorService;
 
     private static final String CASE_ID = "1234345678934523";
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
@@ -190,6 +195,14 @@ public class DocumentGenServiceTest {
 
     @Before
     public void setUp() {
+        //For testing purposes, the test threads will be executed immediately:
+        when(documentVirtualThreadExecutorService.submit(
+            Mockito.<Callable<Document>>any()
+        )).thenAnswer(invocation -> {
+            Callable<Document> task = invocation.getArgument(0);
+            return CompletableFuture.completedFuture(task.call());
+        });
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -2904,8 +2917,15 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(
+            stringObjectMap,
+            DRAFT_APPLICATION_DOCUMENT_FIELD,
+            DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+            DOCUMENT_FIELD_DRAFT_C8,
+            DOCUMENT_FIELD_C8_DRAFT_WELSH,
+            DOCUMENT_FIELD_DRAFT_C1A,
+            DOCUMENT_FIELD_C1A_DRAFT_WELSH
+        );
     }
 
     @Test
