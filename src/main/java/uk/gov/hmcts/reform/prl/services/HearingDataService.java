@@ -735,7 +735,12 @@ public class HearingDataService {
                                .hearingEstimatedDuration(getHearingDuration(
                                    hearingDaySchedule.getHearingStartDateTime(),
                                    hearingDaySchedule.getHearingEndDateTime()
-                               )).hearingType(hearingType)
+                               ))
+                               .hearingEstimatedDurationInWelsh(getHearingDurationWelsh(
+                                   hearingDaySchedule.getHearingStartDateTime(),
+                                   hearingDaySchedule.getHearingEndDateTime()
+                               ))
+                               .hearingType(hearingType)
                                .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
                                .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
                                .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
@@ -767,6 +772,33 @@ public class HearingDataService {
                 durationInText = durationInText.append(" minutes");
             } else {
                 durationInText = durationInText.append(" minute");
+            }
+        }
+        return durationInText.toString();
+    }
+
+    private String getHearingDurationWelsh(LocalDateTime start, LocalDateTime end) {
+        long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
+        long durationInHours = (minutes / 60);
+        long durationInMinutes = (minutes % 60);
+        StringBuilder durationInText = new StringBuilder();
+        if (durationInHours > 0) {
+            durationInText = durationInText.append(durationInHours);
+            if (durationInHours > 1) {
+                durationInText = durationInText.append(" oriau");
+            } else {
+                durationInText = durationInText.append(" awr");
+            }
+        }
+        if (durationInMinutes > 0) {
+            if (durationInHours > 0) {
+                durationInText = durationInText.append(COMMA + " ");
+            }
+            durationInText = durationInText.append(durationInMinutes);
+            if (durationInMinutes > 1) {
+                durationInText = durationInText.append(" munudau");
+            } else {
+                durationInText = durationInText.append(" munud");
             }
         }
         return durationInText.toString();
