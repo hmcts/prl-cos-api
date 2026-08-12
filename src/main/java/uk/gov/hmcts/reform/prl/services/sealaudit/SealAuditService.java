@@ -88,9 +88,6 @@ public class SealAuditService {
 
         log.info("Audit case created date range: {} to {}", fromDate, toDate);
 
-        String sysUserToken = systemUserService.getSysUserToken();
-        String s2sToken = authTokenGenerator.generate();
-
         int totalCasesProcessed = 0;
         int totalOrders = 0;
         int missingSeals = 0;
@@ -106,6 +103,9 @@ public class SealAuditService {
             String searchAfterReference = null;
 
             while (true) {
+                String sysUserToken = systemUserService.getSysUserToken();
+                String s2sToken = authTokenGenerator.generate();
+
                 SearchResult searchResult = searchServedOrders(
                     sysUserToken,
                     s2sToken,

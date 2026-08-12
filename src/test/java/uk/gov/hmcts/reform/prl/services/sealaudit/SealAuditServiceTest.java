@@ -260,7 +260,11 @@ class SealAuditServiceTest {
             queryCaptor.capture()
         );
 
-        List<String> queries = queryCaptor.getAllValues();
+    // NEW: token + s2s generated per page
+    verify(systemUserService, times(2)).getSysUserToken();
+    verify(authTokenGenerator, times(2)).generate();
+
+    List<String> queries = queryCaptor.getAllValues();
 
         assertFalse(queries.get(0).contains("\"search_after\""));
         assertTrue(queries.get(0).contains("\"size\": 2"));
@@ -294,7 +298,12 @@ class SealAuditServiceTest {
         sealAuditService.runAudit();
 
         verify(coreCaseDataApi, times(2)).searchCases(anyString(), anyString(), anyString(), anyString());
+        // NEW: token + s2s generated per page
+        verify(systemUserService, times(2)).getSysUserToken();
+        verify(authTokenGenerator, times(2)).generate();
+
         verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
+
     }
 
     @ParameterizedTest
