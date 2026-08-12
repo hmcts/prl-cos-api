@@ -309,6 +309,7 @@ public class EditAndApproveDraftOrderController {
             }
             if (nonNull(selectedOrder)) {
                 caseDataUpdated.put("miamForOrder", selectedOrder.getMiamForOrder());
+                caseDataUpdated.put("orderType", selectedOrder.getOrderType());
             }
             caseDataUpdated.put("eligibleStateForMiam", eligibleStateForMiam);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
