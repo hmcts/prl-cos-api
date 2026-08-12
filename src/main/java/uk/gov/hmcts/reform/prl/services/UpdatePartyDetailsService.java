@@ -171,8 +171,10 @@ public class UpdatePartyDetailsService {
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
+                caseData, DARESPONDENT, updatedCaseData));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
+                caseData, DAAPPLICANT, updatedCaseData));
 
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
@@ -545,12 +547,11 @@ public class UpdatePartyDetailsService {
     }
 
     private void setRespondentSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
-        List<Element<PartyDetails>> wrapped =
-            Optional.ofNullable(caseData.getRespondents()).orElseGet(List::of);
-
-        wrapped.forEach(e -> CommonUtils.generatePartyUuidForC100(e.getValue()));
-        // put actual list, not Optional
-        caseDetails.put(RESPONDENTS, wrapped);
+        List<Element<PartyDetails>> wrapped = caseData.getRespondents();
+        if (CollectionUtils.isNotEmpty(wrapped)) {
+            wrapped.forEach(e -> CommonUtils.generatePartyUuidForC100(e.getValue()));
+            caseDetails.put(RESPONDENTS, wrapped);
+        }
     }
 
     public void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
