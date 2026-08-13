@@ -525,7 +525,8 @@ public class SealAuditService {
             byte[] csvBytes = csvContent.toString().getBytes();
             log.info("Preparing seal audit email: rows={}, csvBytes={}, recipients={}",
                 csvRows.size(), csvBytes.length, recipients.size());
-            Object fileUpload = prepareUpload(csvBytes, true, false, "26 weeks");
+            Object fileUpload = prepareUpload(csvBytes, "seal-audit-" + dateStr,
+                                              false, "26 weeks");
             templateVars.put("link_to_file", fileUpload);
 
             for (String recipient : recipients) {
