@@ -161,6 +161,8 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsOnly;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.safeguardingCafcassCymru;
@@ -1026,10 +1028,7 @@ public class DraftAnOrderService {
             caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
 
-        if (selectedOrder.getPenalNoticeNeeded() != null && selectedOrder.getPenalNoticeNeeded().getFirst().getDisplayedValue() == "Yes") {
-            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
-            caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
-        }
+        prepopulatePenalNoticeRTFWhenYes(caseData,selectedOrder,caseDataMap);
 
         caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
 
@@ -2399,7 +2398,7 @@ public class DraftAnOrderService {
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
-        if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
+        if (!(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
             caseData))) {
@@ -2539,6 +2538,19 @@ public class DraftAnOrderService {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
+        }
+    }
+
+    public void prepopulatePenalNoticeRTFWhenYes(CaseData caseData,DraftOrder selectedOrder, Map<String, Object> caseDataUpdated) {
+        if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null) {
+            if (blankOrderOrDirections.equals(selectedOrder.getOrderType())
+                ||  childArrangementsSpecificProhibitedOrder.equals(selectedOrder.getOrderType())) {
+                String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+                if (Yes.equals(caseData.getWelshLanguageRequirement())) {
+                    penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
+                }
+                caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
+            }
         }
     }
 
