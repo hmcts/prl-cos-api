@@ -587,13 +587,13 @@ document:
       doc_cover_sheet_welsh_template: FL-PRL-APP-WEL-COVER-SHEET.docx
       doc_cover_sheet_filename: PrlPostDocumentCoverSheet.pdf
       doc_cover_sheet_welsh_filename: WelshPrlPostDocumentCoverSheet.pdf
-      prl_c21_template: FL-PRL-GOR-ENG-C21-Blank-Order-Final.docx
+      prl_c21_template: FL-PRL-GOR-ENG-C21-Blank-Order-Final-Test.docx
       prl_c21_filename: Blank_Order_Directions_C21.pdf
-      prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final.docx
+      prl_c21_welsh_template: FL-PRL-GOR-WEL-C21-Final-Test.docx
       prl_c21_welsh_filename: Blank_Order_Directions_C21_Welsh.pdf
-      prl_c21_draft_template: FL-PRL-GOR-ENG-C21-Blank-Order-Draft.docx
+      prl_c21_draft_template: FL-PRL-GOR-ENG-C21-Blank-Order-Draft-Test.docx
       prl_c21_draft_filename: Blank_Order_Directions_C21_Draft.pdf
-      prl_c21_welsh_draft_template: FL-PRL-GOR-WEL-C21-Blank-Order-Draft.docx
+      prl_c21_welsh_draft_template: FL-PRL-GOR-WEL-C21-Blank-Order-Draft-Test.docx
       prl_c21_welsh_draft_filename: Welsh_Blank_Order_Directions_C21_Draft.pdf
       prl_c43a_draft_template: FL-PRL-GOR-ENG-C43A-Special-Guardianship-Order-Draft.docx
       prl_c43a_draft_filename: Special_Guardianship_Order_C43A_Draft.pdf
