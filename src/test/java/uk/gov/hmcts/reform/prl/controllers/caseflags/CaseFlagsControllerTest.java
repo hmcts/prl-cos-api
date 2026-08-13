@@ -29,11 +29,13 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ALL_SELECTED_FLAGS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_CASE_FLAG_TASK_CREATED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -92,6 +94,20 @@ public class CaseFlagsControllerTest {
     }
 
     @Test
+    public void testHandleAboutToStartWhenReviewWrapperMissing() {
+        Map<String, Object> aboutToStartMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(aboutToStartMap).id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder().id(12345L).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToStart(AUTH_TOKEN, callbackRequest);
+
+        assertTrue(((List<?>) response.getData().get(WA_ALL_SELECTED_FLAGS)).isEmpty());
+        verify(caseFlagsWaService).setSelectedFlags(any(CaseData.class));
+    }
+
+    @Test
     public void testHandleAboutToSubmitWhenCaseFlagsStatusIsRequested() {
         Map<String, Object> caseDataMap = new HashMap<>();
         FlagDetail caseLevelDetail = FlagDetail.builder().status(REQUESTED).build();
@@ -136,6 +152,23 @@ public class CaseFlagsControllerTest {
         verify(caseFlagsWaService).validateAllFlags(caseData);
         verify(caseFlagsWaService).searchAndUpdateCaseFlags(caseData, caseDataMap, mostRecentlyModified);
 
+    }
+
+    @Test
+    public void testHandleAboutToSubmitWhenNoSelectedFlagReturned() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(caseDataMap).id(12345L).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        CaseData caseData = CaseData.builder().id(12345L).build();
+
+        when(caseFlagsWaService.validateAllFlags(caseData)).thenReturn(null);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response = caseFlagsController.handleAboutToSubmit(AUTH_TOKEN, SERVICE_TOKEN, callbackRequest);
+
+        assertEquals(1, response.getErrors().size());
+        assertEquals("No case flag selected to review", response.getErrors().getFirst());
+        verify(caseFlagsWaService, never()).searchAndUpdateCaseFlags(any(), any(), any());
     }
 
     @Test
