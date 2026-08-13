@@ -2542,7 +2542,6 @@ public class DraftAnOrderService {
     }
 
     public void prepopulatePenalNoticeWhenYes(CaseData caseData,DraftOrder selectedOrder, Map<String, Object> caseDataUpdated) {
-        if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null) {
             if (blankOrderOrDirections.equals(selectedOrder.getOrderType())
                 ||  childArrangementsSpecificProhibitedOrder.equals(selectedOrder.getOrderType())) {
                 String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
@@ -2551,7 +2550,6 @@ public class DraftAnOrderService {
                 }
                 caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
             }
-        }
     }
 
     private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList, String language) {
