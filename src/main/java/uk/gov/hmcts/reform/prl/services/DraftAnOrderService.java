@@ -1028,7 +1028,7 @@ public class DraftAnOrderService {
             caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
 
-        prepopulatePenalNoticeRTFWhenYes(caseData,selectedOrder,caseDataMap);
+        prepopulatePenalNoticeWhenYes(caseData,selectedOrder,caseDataMap);
 
         caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
 
@@ -2541,7 +2541,7 @@ public class DraftAnOrderService {
         }
     }
 
-    public void prepopulatePenalNoticeRTFWhenYes(CaseData caseData,DraftOrder selectedOrder, Map<String, Object> caseDataUpdated) {
+    public void prepopulatePenalNoticeWhenYes(CaseData caseData,DraftOrder selectedOrder, Map<String, Object> caseDataUpdated) {
         if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null) {
             if (blankOrderOrDirections.equals(selectedOrder.getOrderType())
                 ||  childArrangementsSpecificProhibitedOrder.equals(selectedOrder.getOrderType())) {
