@@ -229,7 +229,6 @@ public class RefDataUserService {
     private DynamicListElement getDisplayCategoryEntry(CategoryValues categoryValues) {
         String value = categoryValues.getValueEn();
         String key = categoryValues.getKey();
-        log.info("getDisplayCategoryEntry hearing Type key {} value {}", key, value);
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
