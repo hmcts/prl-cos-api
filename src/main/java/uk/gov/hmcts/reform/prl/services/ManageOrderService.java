@@ -1491,7 +1491,7 @@ public class ManageOrderService {
             .build();
     }
 
-    private String getPenalNotice(List<PenalNoticeOptionEnum> penalNoticeNeeded, String penalNoticeRtf) {
+    public String getPenalNotice(List<PenalNoticeOptionEnum> penalNoticeNeeded, String penalNoticeRtf) {
         if (penalNoticeNeeded != null && !penalNoticeNeeded.isEmpty()
             && penalNoticeNeeded.get(0).getDisplayedValue().equals("Yes")) {
             return penalNoticeRtf;
