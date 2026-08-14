@@ -5175,7 +5175,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Test Judge", response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals("Judge", response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, response.getData().get("judgeOrMagistrateTitle"));
     }
 
@@ -5259,7 +5259,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Jane Wilson", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Wilson", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
@@ -5307,7 +5307,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Sarah Adams", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Adams", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
