@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.court.Court;
@@ -40,9 +42,13 @@ import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorVirtualConfig.DOCUMENT_EXECUTOR_SERVICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -66,6 +72,8 @@ public class PrePopulateFeeAndSolicitorNameController {
     private final OrganisationService organisationService;
     private final DocumentLanguageService documentLanguageService;
     private final AuthorisationService authorisationService;
+    @Qualifier(DOCUMENT_EXECUTOR_SERVICE)
+    private final ExecutorService documentVirtualThreadExecutorService;
 
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
@@ -147,6 +155,34 @@ public class PrePopulateFeeAndSolicitorNameController {
         }
     }
 
+    /**
+     * Helper method to cancel Future tasks. 
+     * @param future the future task to be cancelled
+     */
+    private void cancelFuture(Future<?> future) {
+        if (future != null && !future.isDone()) {
+            future.cancel(true);
+        }
+    }
+
+    /**
+     * Helper method to extract the conversion logic.
+     * @param documentInfo the document info to retrieve the data from
+     * @param filename the file name for the document
+     * @return
+     */
+    private Document buildDocument(
+        GeneratedDocumentInfo documentInfo,
+        String filename
+    ) {
+        return Document.builder()
+            .documentUrl(documentInfo.getUrl())
+            .documentBinaryUrl(documentInfo.getBinaryUrl())
+            .documentHash(documentInfo.getHashToken())
+            .documentFileName(filename)
+            .build();
+    }
+
     private CaseData buildGeneratedDocumentCaseData(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest,
@@ -169,37 +205,99 @@ public class PrePopulateFeeAndSolicitorNameController {
             log.warn("Unable to enrich organisation details for doc generation: {}", e.getMessage());
         }
 
-        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
+        //Copy case data into an effectively final variable to be able to use it in lambdas and multithreading
+        CaseData documentCaseData = caseDataForDocs;
+        CaseDetails documentCaseDetails = CaseDetails.builder()
+            .caseData(documentCaseData)
+            .build();
 
+        DocumentLanguage documentLanguage =
+            documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
+
+        //Keep template selection outside the virtual-thread lambdas so only the remote Docmosis calls
+        //are submitted to the Executor Service
+        String englishTemplate = documentLanguage.isGenEng()
+            ? c100DocumentTemplateFinderService
+            .findFinalDraftDocumentTemplate(documentCaseData, false)
+            : null;
+
+        String welshTemplate = documentLanguage.isGenWelsh()
+            ? c100DocumentTemplateFinderService
+            .findFinalDraftDocumentTemplate(documentCaseData, true)
+            : null;
+
+        //Tasks
+        Future<GeneratedDocumentInfo> englishFuture = null;
+        Future<GeneratedDocumentInfo> welshFuture = null;
+
+        //Submit both tasks (remote Docmosis calls) before waiting for a result
         if (documentLanguage.isGenEng()) {
-            GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseDataForDocs).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForDocs, false)
+            englishFuture = documentVirtualThreadExecutorService.submit(
+                () -> dgsService.generateDocument(
+                    authorisation,
+                    documentCaseDetails,
+                    englishTemplate
+                )
             );
-
-            caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
-                .submitAndPayDownloadApplicationLink(Document.builder()
-                                                         .documentUrl(generatedDocumentInfo.getUrl())
-                                                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                         .documentHash(generatedDocumentInfo.getHashToken())
-                                                         .documentFileName(c100DraftFilename).build()).build();
         }
 
         if (documentLanguage.isGenWelsh()) {
-            GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
-                authorisation,
-                CaseDetails.builder().caseData(caseDataForDocs).build(),
-                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForDocs, true)
+            welshFuture = documentVirtualThreadExecutorService.submit(
+                () -> dgsService.generateWelshDocument(
+                    authorisation,
+                    documentCaseDetails,
+                    welshTemplate
+                )
             );
-
-            caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())
-                .submitAndPayDownloadApplicationWelshLink(Document.builder()
-                                                              .documentUrl(generatedWelshDocumentInfo.getUrl())
-                                                              .documentBinaryUrl(generatedWelshDocumentInfo.getBinaryUrl())
-                                                              .documentHash(generatedWelshDocumentInfo.getHashToken())
-                                                              .documentFileName(c100DraftWelshFilename).build()).build();
         }
+
+        //Results
+        GeneratedDocumentInfo englishDocumentInfo = null;
+        GeneratedDocumentInfo welshDocumentInfo = null;
+        //Obtain the results from the Virtual Threads
+        try {
+            if (englishFuture != null) {
+                englishDocumentInfo = englishFuture.get();
+            }
+
+            if (welshFuture != null) {
+                welshDocumentInfo = welshFuture.get();
+            }
+        } catch (InterruptedException e) {
+            cancelFuture(englishFuture);
+            cancelFuture(welshFuture);
+            Thread.currentThread().interrupt();
+            throw new DocumentGenerationException(
+                "C100 Draft document generation interrupted",
+                e
+            );
+        } catch (ExecutionException e) {
+            cancelFuture(englishFuture);
+            cancelFuture(welshFuture);
+            throw new DocumentGenerationException(
+                "C100 Draft document generation failed",
+                e.getCause()
+            );
+        }
+
+        if (englishDocumentInfo != null) {
+            caseData = caseData.toBuilder()
+                .isEngDocGen(Yes.toString())
+                .submitAndPayDownloadApplicationLink(
+                    buildDocument(englishDocumentInfo, c100DraftFilename)
+                )
+                .build();
+        }
+
+        if (welshDocumentInfo != null) {
+            caseData = caseData.toBuilder()
+                .isWelshDocGen(Yes.toString())
+                .submitAndPayDownloadApplicationWelshLink(
+                    buildDocument(welshDocumentInfo, c100DraftWelshFilename)
+                )
+                .build();
+        }
+
         return caseData;
     }
 }
