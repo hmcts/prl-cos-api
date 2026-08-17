@@ -286,15 +286,11 @@ public class EditAndApproveDraftOrderController {
             YesOrNo eligibleStateForMiam = null;
             if (nonNull(state)) {
                 String status = state.getValue();
-                if (status.equalsIgnoreCase(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-                    ||  status.equalsIgnoreCase(State.SUBMITTED_NOT_PAID.getValue())
-                    ||  status.equalsIgnoreCase(State.SUBMITTED_PAID.getValue())
-                    ||  status.equalsIgnoreCase(State.CASE_ISSUED.getValue())
-                    ||  status.equalsIgnoreCase(State.JUDICIAL_REVIEW.getValue())
-                    ||  status.equalsIgnoreCase(State.AWAITING_FL401_SUBMISSION_TO_HMCTS.getValue())) {
-                    eligibleStateForMiam = No;
-                } else {
+                if (status.equalsIgnoreCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
+                    ||  status.equalsIgnoreCase(State.DECISION_OUTCOME.getValue())) {
                     eligibleStateForMiam = Yes;
+                } else {
+                    eligibleStateForMiam = No;
                 }
 
             }
