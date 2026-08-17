@@ -632,14 +632,12 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
-        LocalDateTime hearingStartDateTime = LocalDateTime.now().plusDays(7);
+        LocalDateTime hearingStartDateTime = LocalDateTime.of(2023, 11, 8, 9, 0);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
+            .nextHearingDate(hearingStartDateTime)
             .hearingID(123L)
             .hearingTypeValue("test")
-            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
-                                    .hearingStartDateTime(hearingStartDateTime)
-                                    .build()))
             .build();
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(caseHearing);
@@ -682,14 +680,12 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
-        LocalDateTime hearingStartDateTime = LocalDateTime.now().plusDays(7);
+        LocalDateTime hearingStartDateTime = LocalDateTime.of(2023, 11, 8, 9, 0);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
+            .nextHearingDate(hearingStartDateTime)
             .hearingID(123L)
             .hearingTypeValue("test")
-            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
-                                    .hearingStartDateTime(hearingStartDateTime)
-                                    .build()))
             .build();
 
         List<CaseHearing> caseHearings = new ArrayList<>();
@@ -725,7 +721,7 @@ public class HearingDataServiceTest {
     }
 
     @Test()
-    public void testGetLinkedCasesSelectsNextScheduledListedHearing() {
+    public void testGetLinkedCasesReturnsAllListedLinkedCaseHearings() {
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
             .caseName("CaseName-Test10")
@@ -733,36 +729,36 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
-        LocalDateTime pastHearingStartDateTime = LocalDateTime.now().minusDays(2);
-        LocalDateTime nextHearingStartDateTime = LocalDateTime.now().plusDays(3);
-        LocalDateTime laterHearingStartDateTime = LocalDateTime.now().plusDays(8);
+        LocalDateTime pastHearingStartDateTime = LocalDateTime.of(2023, 11, 8, 9, 0);
+        LocalDateTime nextHearingStartDateTime = LocalDateTime.of(2023, 11, 10, 9, 0);
+        LocalDateTime laterHearingStartDateTime = LocalDateTime.of(2023, 11, 12, 9, 0);
         CaseHearing pastHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
+            .nextHearingDate(pastHearingStartDateTime)
             .hearingID(123L)
             .hearingTypeValue("past")
-            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
-                                    .hearingStartDateTime(pastHearingStartDateTime)
-                                    .build()))
             .build();
         CaseHearing laterHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
+            .nextHearingDate(laterHearingStartDateTime)
             .hearingID(456L)
             .hearingTypeValue("later")
-            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
-                                    .hearingStartDateTime(laterHearingStartDateTime)
-                                    .build()))
             .build();
         CaseHearing nextHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
+            .nextHearingDate(nextHearingStartDateTime)
             .hearingID(789L)
             .hearingTypeValue("next")
-            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
-                                    .hearingStartDateTime(nextHearingStartDateTime)
-                                    .build()))
+            .build();
+        CaseHearing unlistedHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("CANCELLED")
+            .nextHearingDate(LocalDateTime.of(2023, 11, 9, 9, 0))
+            .hearingID(987L)
+            .hearingTypeValue("cancelled")
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("1677767515750127")
-            .caseHearings(List.of(pastHearing, laterHearing, nextHearing))
+            .caseHearings(List.of(pastHearing, laterHearing, nextHearing, unlistedHearing))
             .build();
 
         when(hearingService.getHearings(any(), any())).thenReturn(hearings);
@@ -783,11 +779,21 @@ public class HearingDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals(1, expectedResponse.size());
-        assertEquals("1677767515750127_789", expectedResponse.get(0).getCode());
+        assertEquals(3, expectedResponse.size());
+        assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
+        assertEquals(
+            "1677767515750127_past - " + pastHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
+        assertEquals("1677767515750127_456", expectedResponse.get(1).getCode());
+        assertEquals(
+            "1677767515750127_later - " + laterHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(1).getLabel()
+        );
+        assertEquals("1677767515750127_789", expectedResponse.get(2).getCode());
         assertEquals(
             "1677767515750127_next - " + nextHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
-            expectedResponse.get(0).getLabel()
+            expectedResponse.get(2).getLabel()
         );
     }
 
