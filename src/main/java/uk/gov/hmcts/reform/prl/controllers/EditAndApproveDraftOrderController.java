@@ -541,6 +541,7 @@ public class EditAndApproveDraftOrderController {
                     manageOrderService
                 );
             }
+            manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             allTabService.submitAllTabsUpdate(
