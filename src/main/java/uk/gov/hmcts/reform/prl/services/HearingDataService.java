@@ -731,7 +731,6 @@ public class HearingDataService {
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                                               .getHearingStartDateTime());
             log.info("hearing start date time after converting to bst - {}", ldt);
-            log.info("hearingTypeInWelsh - {}", HearingTypeEnum.getDisplayedValueInWelshFromDisplayValueString(hearingType));
             return element(HearingDataFromTabToDocmosis.builder()
                                .hearingEstimatedDuration(getHearingDuration(
                                    hearingDaySchedule.getHearingStartDateTime(),
