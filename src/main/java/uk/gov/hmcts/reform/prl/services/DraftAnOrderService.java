@@ -1279,6 +1279,7 @@ public class DraftAnOrderService {
         Document orderDocumentWelsh = null;
         if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
             //PRL-4854 - uploaded order
+
             if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
                 orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
             } else {
@@ -1346,12 +1347,14 @@ public class DraftAnOrderService {
                 .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
                 .magistrateLastName(caseData.getMagistrateLastName())
                 .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-                .recitalsOrPreambleRtf(caseData.getManageOrders().getRecitalsOrPreambleRtf())
+                .recitalsOrPreambleRtf(!StringUtils.isEmpty(caseData.getManageOrders().getRecitalsOrPreambleRtf())
+                                           ? caseData.getManageOrders().getRecitalsOrPreambleRtf() : draftOrder.getRecitalsOrPreambleRtf())
                 .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                 .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                 .childOption(manageOrderService.getChildOption(caseData))
                 .orderDirections(caseData.getManageOrders().getOrderDirections())
-                .orderDirectionsRtf(caseData.getManageOrders().getOrderDirectionsRtf())
+                .orderDirectionsRtf(!StringUtils.isEmpty(caseData.getManageOrders().getOrderDirectionsRtf())
+                                        ? caseData.getManageOrders().getOrderDirectionsRtf() : draftOrder.getOrderDirectionsRtf())
                 .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
                 .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
                 .penalNoticeRtf(caseData.getManageOrders().getPenalNoticeRtf())
