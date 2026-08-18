@@ -1,6 +1,6 @@
 [
   {
-    "email": "prl_courtadminleader11_swansea@justice.gov.uk",
+    "email": "prl_courtadminleader11_swansea@hmcts.net",
     "id": "0b92e64e-acb5-49bb-9410-37f47bf83e93",
     "roleAssignments": [
       {
@@ -978,7 +978,7 @@
     ]
   },
   {
-    "email": "prl_aat_am_swansea_hca@justice.gov.uk",
+    "email": "prl_aat_am_swansea_hca@hmcts.net",
     "id": "930a5478-3b1d-4fed-bf9d-fdfb2f9e9eaf",
     "roleAssignments": [
       {
@@ -1055,7 +1055,7 @@
     "overrideAll": true
   },
   {
-    "email": "prl_ctscadmin24_stoke@justice.gov.uk",
+    "email": "prl_ctscadmin24_stoke@hmcts.net",
     "id": "b8bd6e3d-6e0a-42d5-ac22-22fad14ad7ca",
     "roleAssignments": [
       {
@@ -1174,7 +1174,7 @@
     "overrideAll": true
   },
   {
-    "email": "prl_case_manager_swansea@justice.gov.uk",
+    "email": "prl_case_manager_swansea@hmcts.net",
     "id": "14dd3aff-02da-46e6-acb3-a2c8756b0bd3",
     "roleAssignments": [
       {
@@ -1321,7 +1321,7 @@
     "overrideAll": true
   },
   {
-    "email": "prl_cafcass_swansea@justice.gov.uk",
+    "email": "prl_cafcass_swansea@hmcts.net",
     "id": "cdfc1bb8-5d25-46f5-af58-d1cf65a0ba8b",
     "roleAssignments": [
       {
@@ -1342,7 +1342,7 @@
     "overrideAll": true
   },
   {
-    "email": "prl_legaladvisor_swansea_three@justice.gov.uk",
+    "email": "prl_legaladvisor_swansea_three@hmcts.net",
     "id": "74bbedb2-27d4-4bd9-95c6-7d51ecabc803",
     "roleAssignments": [
       {
@@ -1431,7 +1431,7 @@
     "overrideAll": true
   },
   {
-    "email": "prl_legaladvisor_swansea@justice.gov.uk",
+    "email": "prl_legaladvisor_swansea@hmcts.net",
     "id": "5c1194cf-8b46-4b42-9c5d-ee686ced8b83",
     "roleAssignments": [
       {
@@ -1537,7 +1537,7 @@
     ]
   },
   {
-    "email": "prl_legaladvisor_swansea_four@justice.gov.uk",
+    "email": "prl_legaladvisor_swansea_four@hmcts.net",
     "id": "212eee28-10d8-47a8-a472-2305a0d14bdd",
     "roleAssignments": [
       {
@@ -1643,7 +1643,7 @@
     ]
   },
   {
-    "email": "prl-aat-superuser@justice.gov.uk",
+    "email": "prl-aat-superuser@hmcts.net",
     "id": "aaedee95-6065-481c-b2ea-59f1aa9b8355",
     "roleAssignments": [
       {
@@ -1862,7 +1862,7 @@
     ]
   },
   {
-    "email": "prl-chelmsford-hca@justice.gov.uk",
+    "email": "prl-chelmsford-hca@hmcts.net",
     "id": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
     "roleAssignments": [
       {
@@ -2019,7 +2019,7 @@
     ]
   },
   {
-    "email": "prl-chelmsford-hca@justice.gov.uk",
+    "email": "prl-chelmsford-hca@hmcts.net",
     "id": "97fc54c2-8964-4c0c-a381-dfe71162cea2",
     "roleAssignments": [
       {
