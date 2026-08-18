@@ -175,6 +175,31 @@ class HearingChasePolicyTest {
     }
 
     @Test
+    void decideNotSkipsWhenDraftOrderUsesHearingsTypeLinkageButHearingUtcBstDifference() {
+        LocalDate hearingDate = LocalDate.now();
+        String label = "Allocation - " + hearingDate.atTime(13, 00).format(
+            java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss"));
+        CaseHearing hearingWithType = CaseHearing.caseHearingWith()
+            .hearingID(Long.valueOf(HEARING_ID))
+            .hmcStatus("COMPLETED")
+            .hearingTypeValue("Allocation")
+            .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
+                                            .hearingStartDateTime(FUTURE_HEARING_DATE.minusDays(1).atTime(13, 0))
+                                            .hearingEndDateTime(FUTURE_HEARING_DATE.minusDays(1).atTime(14, 0))
+                                            .build()))
+            .build();
+        CaseData caseData = fl401Case()
+            .draftOrderCollection(List.of(draftOrderForHearingsTypeLabelAndDateCreated(label, hearingDate.atTime(13, 00))))
+            .build();
+
+        ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), LocalDate.now());
+
+        assertThat(decision.shouldFire()).isFalse();
+        assertThat(decision.description()).isNotEqualTo("skipped - linked order exists (cycle complete)");
+    }
+
+
+    @Test
     void decideSkipsWhenHearingsTypeMatchesByDateSuffixDespiteEmptyTypeValue() {
         // Cron-context: HearingService.getHearings ref-data lookup failed, so
         // hearing.getHearingTypeValue() is blank. The draft order was saved earlier
@@ -383,6 +408,17 @@ class HearingChasePolicyTest {
                 .hearingsType(DynamicList.builder()
                     .value(DynamicListElement.builder().code(label).label(label).build())
                     .build())
+                .build()
+        ).build();
+    }
+
+    private static Element<DraftOrder> draftOrderForHearingsTypeLabelAndDateCreated(String label, LocalDateTime dateCreated) {
+        return Element.<DraftOrder>builder().value(
+            DraftOrder.builder()
+                .otherDetails(OtherDraftOrderDetails.builder().dateCreated(dateCreated).build())
+                .hearingsType(DynamicList.builder()
+                                  .value(DynamicListElement.builder().code(label).label(label).build())
+                                  .build())
                 .build()
         ).build();
     }
