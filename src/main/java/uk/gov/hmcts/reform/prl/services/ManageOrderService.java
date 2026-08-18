@@ -2727,6 +2727,7 @@ public class ManageOrderService {
         }
         // Remove temporary field used for auto-selecting newly created order
         caseDataUpdated.remove("newOrderId");
+        caseDataUpdated.remove("miamForOrder");
     }
 
     /**
