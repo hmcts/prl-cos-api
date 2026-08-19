@@ -629,6 +629,8 @@ class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
+        verify(draftAnOrderService).updateCustomFieldsWithApplicantRespondentDetails(any(), any(), any(), any());
+        verify(draftAnOrderService).populateDraftOrderInformations(any(), any());
         assertNotNull(response);
     }
 

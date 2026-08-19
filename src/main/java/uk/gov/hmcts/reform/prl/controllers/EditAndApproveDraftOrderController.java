@@ -383,6 +383,7 @@ public class EditAndApproveDraftOrderController {
                     language
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
+                caseDataUpdated.putAll(draftAnOrderService.populateDraftOrderInformations(caseDataUpdated, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }

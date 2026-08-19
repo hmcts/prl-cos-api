@@ -1006,30 +1006,7 @@ public class DraftAnOrderService {
         caseDataMap.put(DA_ORDER_FOR_CA_CASE, ManageOrdersUtils.isDaOrderSelectedForCaCase(
                 String.valueOf(selectedOrder.getOrderType()),
                 caseData) ? Yes : No);
-        caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
-        caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
-        caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
-        if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
-            caseDataMap.put("penalNoticeRtf",
-                            manageOrderService.getPenalNotice(
-                                selectedOrder.getPenalNoticeNeeded(),
-                                selectedOrder.getPenalNoticeRtf()
-                            )
-            );
-        } else {
-            caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
-        }
-        if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
-            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirections());
-        } else {
-            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
-        }
-        if (selectedOrder.getRecitalsOrPreambleRtf() == null && selectedOrder.getRecitalsOrPreamble() != null) {
-            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreamble());
-        } else {
-            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
-        }
-        caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
+        populateDraftOrderInformations(caseDataMap, selectedOrder);
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
         caseDataMap.put("furtherInformationIfRequired", selectedOrder.getFurtherInformationIfRequired());
@@ -1081,6 +1058,34 @@ public class DraftAnOrderService {
         //refactored to a private method
         updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        return caseDataMap;
+    }
+
+    public Map<String, Object> populateDraftOrderInformations(Map<String, Object> caseDataMap, DraftOrder selectedOrder) {
+        caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
+        caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
+        caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
+        if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
+            caseDataMap.put("penalNoticeRtf",
+                            manageOrderService.getPenalNotice(
+                                selectedOrder.getPenalNoticeNeeded(),
+                                selectedOrder.getPenalNoticeRtf()
+                            )
+            );
+        } else {
+            caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
+        }
+        if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
+            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirections());
+        } else {
+            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
+        }
+        if (selectedOrder.getRecitalsOrPreambleRtf() == null && selectedOrder.getRecitalsOrPreamble() != null) {
+            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreamble());
+        } else {
+            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
+        }
+        caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
         return caseDataMap;
     }
 
