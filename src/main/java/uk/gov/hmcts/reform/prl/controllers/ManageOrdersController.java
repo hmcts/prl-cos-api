@@ -256,7 +256,7 @@ public class ManageOrdersController {
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
             uk.gov.hmcts.reform.idam.client.models.UserDetails userDetails = userService.getUserDetails(authorisation);
             if (userDetails != null && userDetails.getFullName() != null) {
-                JudgeOrMagistrateTitleEnum judgeTitle = null;
+                JudgeOrMagistrateTitleEnum judgeTitle;
 
                 // Legal advisers are not in JRD, so set title directly
                 if (userTypeDetails.isLegalAdviser()) {
@@ -460,7 +460,7 @@ public class ManageOrdersController {
                 List<?> orders = (List<?>) caseDataUpdated.get(ORDER_COLLECTION);
                 log.info("Before submitAllTabsUpdate: orderCollection size={}", orders.size());
                 if (!orders.isEmpty()) {
-                    Object firstOrder = orders.get(0);
+                    Object firstOrder = orders.getFirst();
                     if (firstOrder instanceof Map) {
                         @SuppressWarnings("unchecked")
                         Map<String, Object> orderMap = (Map<String, Object>) firstOrder;
