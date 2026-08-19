@@ -54,7 +54,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_P
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V3;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -169,7 +168,7 @@ public class PrePopulateFeeAndSolicitorNameController {
      * Helper method to extract the conversion logic.
      * @param documentInfo the document info to retrieve the data from
      * @param filename the file name for the document
-     * @return
+     * @return A Document with the relevant information retrieved from documentInfo and filename
      */
     private Document buildDocument(
         GeneratedDocumentInfo documentInfo,

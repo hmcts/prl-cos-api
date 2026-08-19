@@ -885,7 +885,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
                 AUTH_TOKEN,
                 S2S_TOKEN,
                 callbackRequestShared
-            );
+        );
 
         InOrder order = inOrder(
             documentVirtualThreadExecutorService,
