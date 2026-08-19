@@ -817,4 +817,99 @@ class SealAuditServiceTest {
 
         verify(notificationClient).sendEmail(anyString(), anyString(), any(), anyString());
     }
+
+    @Test
+    void shouldRetryAndSucceedWhenTransientDocumentErrorOccurs() throws IOException {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/123/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("500 INTERNAL_SERVER_ERROR broken pipe"))
+            .thenReturn(ResponseEntity.ok(new ByteArrayResource("pdf-bytes".getBytes())));
+
+        when(sealDetectionService.detectSeal(any())).thenReturn(SealStatus.PRESENT);
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1234567890123456"
+        );
+
+        assertEquals(SealStatus.PRESENT, result);
+        verify(caseDocumentClient, times(2)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, times(1)).detectSeal(any());
+    }
+
+    @Test
+    void shouldRetryUpToMaxAttemptsAndReturnErrorForTransientDocumentError() {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/123/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("503 Service unavailable timeout"));
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1234567890123456"
+        );
+
+        assertEquals(SealStatus.ERROR, result);
+        verify(caseDocumentClient, times(3)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, never()).detectSeal(any());
+    }
+
+    @Test
+    void shouldNotRetryForNonRetryableDocumentError() {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/123/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("403 forbidden"));
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1234567890123456"
+        );
+
+        assertEquals(SealStatus.ERROR, result);
+        verify(caseDocumentClient, times(1)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, never()).detectSeal(any());
+    }
+
+    @Test
+    void shouldNotRetryWhenDocumentMetadataNotFound404() {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/6c7909cb-05c7-40d6-8bfa-ada68c0f0191/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("404 Not Found Meta data does not exist for documentId"));
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1782745027109240"
+        );
+
+        assertEquals(SealStatus.ERROR, result);
+        verify(caseDocumentClient, times(1)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, never()).detectSeal(any());
+    }
 }
