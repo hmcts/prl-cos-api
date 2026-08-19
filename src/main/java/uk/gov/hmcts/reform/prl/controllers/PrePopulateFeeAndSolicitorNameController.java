@@ -156,7 +156,7 @@ public class PrePopulateFeeAndSolicitorNameController {
     }
 
     /**
-     * Helper method to cancel Future tasks. 
+     * Helper method to cancel Future tasks.
      * @param future the future task to be cancelled
      */
     private void cancelFuture(Future<?> future) {
