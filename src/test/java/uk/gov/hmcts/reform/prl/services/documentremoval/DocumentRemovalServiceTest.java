@@ -186,13 +186,43 @@ class DocumentRemovalServiceTest {
     }
 
     @Test
-    void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollection() throws IOException {
+    void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollectionWhereKeyIsNotDocument() throws IOException {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
         when(objectMapper.convertValue(
             any(QuarantineLegalDoc.class),
             ArgumentMatchers.<TypeReference<Map<String, Object>>>any()
         )).thenReturn(courtStaffUploadDoc);
+        ArgumentCaptor<Map> caseDataMapCaptor = ArgumentCaptor.forClass(Map.class);
+        when(documentRemover.removeDocument(caseDataMapCaptor.capture(), eq("doc1")))
+            .thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
+
+        Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
+
+        assertFalse(result.containsKey("documentToRemove"));
+        assertFalse(result.containsKey("documentRemovalConfirmOptions"));
+        assertEquals("someValue", result.get("someKey"));
+
+        verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
+
+        // Verify document removed from the collection
+        Map<String, Object> caseDataMap = caseDataMapCaptor.getValue();
+        assertEquals(Collections.emptyList(), caseDataMap.get("courtStaffUploadDocListDocTab"));
+    }
+
+    @Test
+    void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollectionWhereKeyIsDocument() throws IOException {
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        Document mockedDocument = mock(Document.class);
+        Map<String, Object> uploadedDocument = Map.of("document", mockedDocument);
+        when(objectMapper.convertValue(any(QuarantineLegalDoc.class),
+                                       ArgumentMatchers.<TypeReference<Map<String, Object>>>any()))
+            .thenReturn(uploadedDocument);
+
+        when(objectMapper.convertValue(null, Document.class)).thenReturn(null);
+        when(objectMapper.convertValue(mockedDocument, Document.class)).thenReturn(document);
+
         ArgumentCaptor<Map> caseDataMapCaptor = ArgumentCaptor.forClass(Map.class);
         when(documentRemover.removeDocument(caseDataMapCaptor.capture(), eq("doc1")))
             .thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
