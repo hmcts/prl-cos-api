@@ -6993,7 +6993,7 @@ class ManageOrderServiceTest {
         caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
 
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
-        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().orderClosesCase(Yes)
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().doesOrderClosesCase(Yes)
                                                      .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
                                                      .build()));
 

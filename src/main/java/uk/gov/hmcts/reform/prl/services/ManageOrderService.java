@@ -4434,11 +4434,11 @@ public class ManageOrderService {
                 OrderDetails details = orderDetails.get();
                 log.info(
                     "inside removeLocalAuthorityFromCase, order details order close case {}, {}, {}",
-                    details.getOrderClosesCase(), details.getTypeOfOrder(),
+                    details.getDoesOrderClosesCase(), details.getTypeOfOrder(),
                     caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                 );
 
-                if (Yes.equals(details.getOrderClosesCase())
+                if (Yes.equals(details.getDoesOrderClosesCase())
                     && SelectTypeOfOrderEnum.finl.getDisplayedValue().equals(details.getTypeOfOrder())
                     && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy()
                     && null != caseData.getLocalAuthoritySolicitorOrganisationPolicy().getOrganisation()) {
