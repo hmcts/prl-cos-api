@@ -35,7 +35,6 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -172,7 +171,7 @@ public class RequestOrderTaskService {
         )).build();
 
         LastModified lastModifiedRange = LastModified.builder().gte(
-            LocalDate.now().minusDays(searchMulitplier*largestCadenceWorkingDays).toString()).build();
+            LocalDate.now().minusDays(searchMulitplier * largestCadenceWorkingDays).toString()).build();
         Range range = Range.builder().lastModified(lastModifiedRange).build();
         Filter rangeFilter = Filter.builder().range(range).build();
 
