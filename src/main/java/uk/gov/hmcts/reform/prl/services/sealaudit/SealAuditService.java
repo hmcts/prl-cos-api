@@ -88,10 +88,8 @@ public class SealAuditService {
 
         log.info("Audit case created date range: {} to {}", fromDate, toDate);
 
-        String sysUserToken = systemUserService.getSysUserToken();
-        String s2sToken = authTokenGenerator.generate();
-
         int totalCasesProcessed = 0;
+        int casesWithServedOrders = 0;
         int totalOrders = 0;
         int missingSeals = 0;
         int presentSeals = 0;
@@ -102,32 +100,38 @@ public class SealAuditService {
         List<String> csvRows = new ArrayList<>();
 
         try {
-            int from = 0;
+            String searchAfterCreatedDate = null;
+            String searchAfterReference = null;
 
             while (true) {
-                SearchResult searchResult = searchServedOrders(
+                String sysUserToken = systemUserService.getSysUserToken();
+                String s2sToken = authTokenGenerator.generate();
+
+                SearchResult searchResult = searchCasesWithOrders(
                     sysUserToken,
                     s2sToken,
                     fromDate,
                     toDate,
-                    from
+                    searchAfterCreatedDate,
+                    searchAfterReference
                 );
 
                 if (searchResult == null || searchResult.getCases() == null || searchResult.getCases().isEmpty()) {
-                    log.info("No cases returned for page from {} size {}", from, pageSize);
+                    log.info("No more cases returned, pagination complete");
                     break;
                 }
 
                 List<CaseDetails> cases = searchResult.getCases();
                 foundAnyCases = true;
 
-                log.info("Found {} cases to process from offset {}", cases.size(), from);
+                log.info("Found {} cases to process", cases.size());
 
                 for (CaseDetails caseDetails : cases) {
                     totalCasesProcessed++;
                     log.info("Processing Case {}", caseDetails.getId());
 
                     try {
+                        boolean hasServedPdfOrder = false;
                         CaseData caseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class);
 
                         String caseReference = String.valueOf(caseDetails.getId());
@@ -143,6 +147,11 @@ public class SealAuditService {
 
                             if (!isServedPdfOrder(order)) {
                                 continue;
+                            }
+
+                            if (!hasServedPdfOrder) {
+                                casesWithServedOrders++;
+                                hasServedPdfOrder = true;
                             }
 
                             totalOrders++;
@@ -231,11 +240,30 @@ public class SealAuditService {
                     break;
                 }
 
-                from += pageSize;
+                CaseDetails lastCase = cases.getLast();
+                if (lastCase.getCreatedDate() == null || lastCase.getId() == null) {
+                    log.warn(
+                        "Last case is missing a pagination value: id={}, createdDate={}; cannot paginate further",
+                        lastCase.getId(),
+                        lastCase.getCreatedDate()
+                    );
+                    break;
+                }
+
+                // The query sorts by created_date then reference.keyword. CCD case reference is represented by CaseDetails.id,
+                // so keep the cursor values in exactly that order and representation.
+                searchAfterCreatedDate = lastCase.getCreatedDate().toString();
+                searchAfterReference = String.valueOf(lastCase.getId());
+
+                log.info(
+                    "Advancing pagination cursor to search_after=[{}, {}]",
+                    searchAfterCreatedDate,
+                    searchAfterReference
+                );
             }
 
             if (!foundAnyCases) {
-                log.info("No cases with served orders found");
+                log.info("No cases with order collections found");
             }
             completed = true;
 
@@ -251,8 +279,9 @@ public class SealAuditService {
         } finally {
             long duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime);
             log.info("*** Seal Audit Complete ***");
-            log.info("Total cases processed: {}", totalCasesProcessed);
-            log.info("Total orders checked: {}", totalOrders);
+            log.info("Total cases scanned: {}", totalCasesProcessed);
+            log.info("Cases containing served PDF orders: {}", casesWithServedOrders);
+            log.info("Total served PDF orders checked: {}", totalOrders);
             log.info("Seals present: {}", presentSeals);
             log.info("Seals missing: {}", missingSeals);
             log.info("Errors: {}", errors);
@@ -267,16 +296,22 @@ public class SealAuditService {
         }
     }
 
-    private SearchResult searchServedOrders(
+    private SearchResult searchCasesWithOrders(
         String userToken,
         String s2sToken,
         LocalDate fromDate,
         LocalDate toDate,
-        int from
+        String searchAfterCreatedDate,
+        String searchAfterReference
     ) {
+        String searchAfterClause = "";
+        if (searchAfterCreatedDate != null && searchAfterReference != null) {
+            searchAfterClause = String.format(",\"search_after\": [\"%s\", \"%s\"]",
+                                             searchAfterCreatedDate, searchAfterReference);
+        }
+
         String query = """
             {
-              "from": %s,
               "size": %s,
               "sort": [
                 { "created_date": "asc" },
@@ -320,16 +355,13 @@ public class SealAuditService {
                 "data.courtName",
                 "reference",
                 "created_date"
-              ]
+              ]%s
             }
-            """.formatted(from, pageSize, fromDate, toDate.plusDays(1));
+            """.formatted(pageSize, fromDate, toDate.plusDays(1), searchAfterClause);
 
         log.info(
-            "Executing search query for cases created from {} to {} exclusive, from {}, size {}",
-            fromDate,
-            toDate.plusDays(1),
-            from,
-            pageSize
+            "Executing search for cases {} to {} inclusive, search_after=[{}, {}]",
+            fromDate, toDate, searchAfterCreatedDate, searchAfterReference
         );
 
         return coreCaseDataApi.searchCases(userToken, s2sToken, searchCaseTypeId, query);
@@ -386,25 +418,65 @@ public class SealAuditService {
     }
 
     private SealStatus checkSealStatus(Document document, String userToken, String s2sToken, String caseRef) {
-        try {
-            ResponseEntity<Resource> response = caseDocumentClient.getDocumentBinary(
-                userToken,
-                s2sToken,
-                document.getDocumentBinaryUrl()
-            );
+        final int maxAttempts = 3;
+        final long backoffMillis = 500L;
 
-            if (response.getBody() == null) {
-                log.warn("Empty response body for document in case {}", caseRef);
-                return SealStatus.ERROR;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                ResponseEntity<Resource> response = caseDocumentClient.getDocumentBinary(
+                    userToken,
+                    s2sToken,
+                    document.getDocumentBinaryUrl()
+                );
+
+                if (response.getBody() == null) {
+                    log.warn(
+                        "Empty response body for document in case {} (attempt {}/{})",
+                        caseRef, attempt, maxAttempts
+                    );
+                    return SealStatus.ERROR;
+                }
+
+                try (var inputStream = response.getBody().getInputStream()) {
+                    return sealDetectionService.detectSeal(inputStream);
+                }
+
+            } catch (Exception e) {
+                boolean retryable = isRetryableDocumentError(e);
+
+                if (!retryable || attempt == maxAttempts) {
+                    log.error(
+                        "Failed to download/check document for case {} after {}/{} attempts: {}",
+                        caseRef, attempt, maxAttempts, e.getMessage()
+                    );
+                    return SealStatus.ERROR;
+                }
+
+                log.warn(
+                    "Transient document fetch failure for case {} (attempt {}/{}): {}. Retrying...",
+                    caseRef, attempt, maxAttempts, e.getMessage()
+                );
+
+                try {
+                    TimeUnit.MILLISECONDS.sleep(backoffMillis * attempt);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return SealStatus.ERROR;
+                }
             }
-
-            byte[] pdfBytes = response.getBody().getInputStream().readAllBytes();
-            return sealDetectionService.detectSeal(pdfBytes);
-
-        } catch (Exception e) {
-            log.error("Failed to download/check document for case {}: {}", caseRef, e.getMessage());
-            return SealStatus.ERROR;
         }
+
+        return SealStatus.ERROR;
+    }
+
+    private boolean isRetryableDocumentError(Exception e) {
+        String message = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+        return message.contains("broken pipe")
+            || message.contains("timeout")
+            || message.contains("connection reset")
+            || message.contains("500")
+            || message.contains("502")
+            || message.contains("503");
     }
 
     private void logOrderResult(
@@ -514,6 +586,7 @@ public class SealAuditService {
             }
 
             Map<String, Object> templateVars = new HashMap<>();
+            templateVars.put("fromDateStr", fromDateStr);
             templateVars.put("date", dateStr);
             templateVars.put("status", statusSummary);
             templateVars.put("total_orders", String.valueOf(totalOrders));
