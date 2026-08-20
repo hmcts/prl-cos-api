@@ -72,7 +72,7 @@ class HearingChasePolicy {
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
 
         int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(hearingEndDate, cronDate);
-        if (hearingEndDate != null && workingDaysSinceHearingEndDate != cadence) {
+        if (hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0)) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
 
