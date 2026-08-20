@@ -90,10 +90,10 @@ class HearingChasePolicyTest {
         CaseHearing hearing = hearing("COMPLETED", CRON_DATE.plusDays(1));
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
-        ChaseDecision decision = policy.decide(hearing, fl401Case().build(), emptyLedger(), CRON_DATE);
+        ChaseDecision decision = policy.decide(hearing, c100Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
-        assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-25 not 1 days away");
+        assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-25 not 3 days away");
     }
 
     @Test
@@ -111,10 +111,11 @@ class HearingChasePolicyTest {
 
     @Test
     void decideShouldNotSkipsWhenHearingDateInFutureAndMappedToDraftOrder() {
-        CaseData caseData = fl401Case()
+        CaseData caseData = c100Case()
             .draftOrderCollection(List.of(draftOrderForHearing(HEARING_ID)))
             .build();
 
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
         ChaseDecision decision = policy.decide(
             hearing("COMPLETED", FUTURE_HEARING_DATE.plusDays(1)), caseData, emptyLedger(), LocalDate.now());
 
@@ -164,10 +165,11 @@ class HearingChasePolicyTest {
                                             .hearingEndDateTime(FUTURE_HEARING_DATE.atTime(16, 0))
                                             .build()))
             .build();
-        CaseData caseData = fl401Case()
+        CaseData caseData = c100Case()
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabel(label)))
             .build();
 
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
         ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
@@ -188,10 +190,10 @@ class HearingChasePolicyTest {
                                             .hearingEndDateTime(FUTURE_HEARING_DATE.minusDays(1).atTime(14, 0))
                                             .build()))
             .build();
-        CaseData caseData = fl401Case()
+        CaseData caseData = c100Case()
             .draftOrderCollection(List.of(draftOrderForHearingsTypeLabelAndDateCreated(label, hearingDate.atTime(13, 00))))
             .build();
-
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
         ChaseDecision decision = policy.decide(hearingWithType, caseData, emptyLedger(), LocalDate.now());
 
         assertThat(decision.shouldFire()).isFalse();
@@ -303,10 +305,10 @@ class HearingChasePolicyTest {
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
 
         ChaseDecision decision = policy.decide(
-            hearing("COMPLETED", CRON_DATE.minusDays(1)), fl401Case().build(), emptyLedger(), CRON_DATE);
+            hearing("COMPLETED", CRON_DATE.minusDays(1)), c100Case().build(), emptyLedger(), CRON_DATE);
 
         assertThat(decision.shouldFire()).isFalse();
-        assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-23 not 1 days away");
+        assertThat(decision.description()).isEqualTo("skipped - hearingEndDate=2026-04-23 not 3 days away");
     }
 
     @Test
