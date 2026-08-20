@@ -858,7 +858,7 @@ seal-audit:
   email:
     enabled: ${SEAL_AUDIT_EMAIL_ENABLED:false}
     to: ${SEAL_AUDIT_EMAIL_TO:}
-    template-id: ${SEAL_AUDIT_EMAIL_TEMPLATE_ID:c5a62471-7538-4b05-a2f5-2c4188573087}
+    template-id: ${SEAL_AUDIT_EMAIL_TEMPLATE_ID:d252003f-5e35-420d-9cac-4a89aa5d8b2c}
 
 hwf-update-case-state-task:
   last-modified-days-threshold: ${HWF_UPDATE_CASE_STATE_TASK_LAST_MODIFIED_DAYS_THRESHOLD:3}
