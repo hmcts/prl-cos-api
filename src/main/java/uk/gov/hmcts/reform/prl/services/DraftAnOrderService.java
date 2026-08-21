@@ -1067,7 +1067,7 @@ public class DraftAnOrderService {
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
         if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
-            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF;
             caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
         } else {
             caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
