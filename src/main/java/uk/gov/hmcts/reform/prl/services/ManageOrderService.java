@@ -262,10 +262,7 @@ public class ManageOrderService {
         + " people's address is given.";
     public static final String INVALID_EMAIL_ADDRESS_ERROR = "Invalid email address. Please check the email address entered. "
         + "To send to multiple recipients please use the add new button.";
-    public static final String STATIC_PENAL_NOTICE_RTF_ENG = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
-        + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
-        + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
-    public static final String STATIC_PENAL_NOTICE_RTF_WEL = "WELSH <STRONG>IMPORTANT WARNING TO [NAME]\n\n"
+    public static final String STATIC_PENAL_NOTICE_RTF = "<STRONG>IMPORTANT WARNING TO [NAME]\n\n"
         + "If you [NAME] of [ADDRESS] disobey [this order] / [paragraph[s] [insert paragraph number(s)] of this order] "
         + "you may be held to be in contempt of court and may be imprisoned, fined or have your assets seized.</STRONG>";
 
@@ -1532,11 +1529,7 @@ public class ManageOrderService {
             || StringUtils.isBlank(caseDataUpdated.get(PENAL_NOTICE_RTF).toString())) {
             if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                 ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
-                if (Yes.equals(caseData.getWelshLanguageRequirement())) {
-                    penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
-                }
-                caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
+                caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
             }
         }
     }
