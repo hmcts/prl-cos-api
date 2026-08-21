@@ -657,7 +657,7 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     }
 
     @Test
-    public void testExceptionCourtDetailsWithoutCourtName() throws Exception {
+    public void shouldReturnNoCourtFetchedWhenCourtDetailsUnavailable() throws Exception {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         CallbackRequest callbackRequest = getCallbackRequest();
@@ -706,7 +706,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
         when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        verifyNoInteractions(documentVirtualThreadExecutorService);
 
         CallbackResponse response = prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(
             AUTH_TOKEN,
