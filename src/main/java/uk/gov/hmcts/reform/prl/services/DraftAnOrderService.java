@@ -162,7 +162,6 @@ import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HE
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
-import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsOnly;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.safeguardingCafcassCymru;
@@ -2545,23 +2544,12 @@ public class DraftAnOrderService {
         }
     }
 
-    public void prepopulatePenalNoticeWhenYes(CaseData caseData, DraftOrder selectedOrder, Map<String, Object> caseDataUpdated) {
-        if (blankOrderOrDirections.equals(selectedOrder.getOrderType())
-            || childArrangementsSpecificProhibitedOrder.equals(selectedOrder.getOrderType())) {
-            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
-            if (Yes.equals(caseData.getWelshLanguageRequirement())) {
-                penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_WEL;
-            }
-            caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
-        }
-    }
-
     public Map<String, Object> populateDraftOrderInformations(Map<String, Object> caseDataMap, DraftOrder selectedOrder) {
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
         if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
-            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF;
             caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
         } else {
             caseDataMap.put(PENAL_NOTICE_RTF, selectedOrder.getPenalNoticeRtf());
