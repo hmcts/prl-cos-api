@@ -1016,6 +1016,7 @@ public class DraftAnOrderService {
         caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
         caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
         caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
+        populateDraftOrderInformations(caseDataMap, selectedOrder);
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
         caseDataMap.put("furtherInformationIfRequired", selectedOrder.getFurtherInformationIfRequired());
@@ -1027,8 +1028,6 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
-
-        prepopulatePenalNoticeWhenYes(caseData,selectedOrder,caseDataMap);
 
         caseDataMap.put(IS_INVOKED_FROM_TASK, Yes);
 
@@ -2555,6 +2554,30 @@ public class DraftAnOrderService {
             }
             caseDataUpdated.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
         }
+    }
+
+    public Map<String, Object> populateDraftOrderInformations(Map<String, Object> caseDataMap, DraftOrder selectedOrder) {
+        caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
+        caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
+        caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
+        if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
+            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+            caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
+        } else {
+            caseDataMap.put(PENAL_NOTICE_RTF, selectedOrder.getPenalNoticeRtf());
+        }
+        if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
+            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirections());
+        } else {
+            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
+        }
+        if (selectedOrder.getRecitalsOrPreambleRtf() == null && selectedOrder.getRecitalsOrPreamble() != null) {
+            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreamble());
+        } else {
+            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
+        }
+        caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
+        return caseDataMap;
     }
 
     private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList, String language) {
