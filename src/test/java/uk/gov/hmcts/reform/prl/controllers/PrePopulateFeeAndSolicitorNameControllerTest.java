@@ -703,15 +703,19 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
             .thenReturn(generatedDocumentInfo);
 
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         when(objectMapper.convertValue(callbackRequest.getCaseDetails().getCaseData(), CaseData.class))
             .thenReturn(caseData1);
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         verifyNoInteractions(documentVirtualThreadExecutorService);
-        assertExpectedException(() -> {
-            prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(AUTH_TOKEN,
-                                                                                 S2S_TOKEN, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+
+        CallbackResponse response = prePopulateFeeAndSolicitorNameController.prePopulateSolicitorAndFees(
+            AUTH_TOKEN,
+            S2S_TOKEN,
+            callbackRequest
+        );
+        CaseData result = (CaseData) response.getData();
+        assertNotNull(result);
+        assertEquals("No Court Fetched", result.getCourtName());
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
