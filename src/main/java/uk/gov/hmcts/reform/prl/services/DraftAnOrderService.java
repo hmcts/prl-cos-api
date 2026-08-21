@@ -129,6 +129,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAIL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
@@ -1066,12 +1067,8 @@ public class DraftAnOrderService {
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
         if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
-            caseDataMap.put("penalNoticeRtf",
-                            manageOrderService.getPenalNotice(
-                                selectedOrder.getPenalNoticeNeeded(),
-                                selectedOrder.getPenalNoticeRtf()
-                            )
-            );
+            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF_ENG;
+            caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
         } else {
             caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
         }
