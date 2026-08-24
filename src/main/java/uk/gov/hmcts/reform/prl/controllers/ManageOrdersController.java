@@ -583,7 +583,7 @@ public class ManageOrdersController {
 
     /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
-     *  including serving an order
+     *  including serving an order.
      * @param caseData original
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
