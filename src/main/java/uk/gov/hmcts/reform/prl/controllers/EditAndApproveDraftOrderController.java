@@ -282,18 +282,7 @@ public class EditAndApproveDraftOrderController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            State state = caseData.getState();
-            YesOrNo eligibleStateForMiam = null;
-            if (nonNull(state)) {
-                String status = state.getValue();
-                if (status.equalsIgnoreCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
-                    ||  status.equalsIgnoreCase(State.DECISION_OUTCOME.getValue())) {
-                    eligibleStateForMiam = Yes;
-                } else {
-                    eligibleStateForMiam = No;
-                }
-
-            }
+            YesOrNo eligibleStateForMiam = obtainEligibleStateForMiam(caseData);
             String eventId = callbackRequest.getEventId();
             DraftOrder selectedOrder = null;
             if (!MANAGE_ORDERS.getId().equalsIgnoreCase(eventId)) {
@@ -314,7 +303,21 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
+    private YesOrNo obtainEligibleStateForMiam(CaseData caseData) {
+        State state = caseData.getState();
+        YesOrNo eligibleStateForMiam = null;
+        if (nonNull(state)) {
+            String status = state.getValue();
+            if (status.equalsIgnoreCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
+                ||  status.equalsIgnoreCase(State.DECISION_OUTCOME.getValue())) {
+                eligibleStateForMiam = Yes;
+            } else {
+                eligibleStateForMiam = No;
+            }
 
+        }
+        return eligibleStateForMiam;
+    }
 
 
     private String getDraftOrderIdFromContext(String clientContext) {

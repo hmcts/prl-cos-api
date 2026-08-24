@@ -78,7 +78,6 @@ import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -113,8 +112,46 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @PropertySource(value = "classpath:application.yaml")
 class EditAndApproveDraftOrderControllerTest {
 
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    private static final String authToken = "Bearer TestAuthToken";
+    private static final String s2sToken = "s2s AuthToken";
+    private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    private static final String AUTH_TOKEN = "Bearer TestAuthToken";
+    private static final String S2S_TOKEN = "s2s AuthToken";
+    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
+    private static final String ENCODEDSTRING = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
+        + "xYzcyOWEtNTYzMC0xMWVmLWEwZDMtZWFmMDM2YWQ5MjBkIiwibmFtZSI6IlJldmlldyBhbmQgQXBwcm92ZSBMZWdhbCBy"
+        + "ZXAgT3JkZXIiLCJhc3NpZ25lZSI6ImQ1YjIwOTEzLTc4ZWEtNDZkMi1iNjVjLTVlMTExZDllN2Y4NCIsInR5cGUiOiJyZXZpZXdTb2"
+        + "xpY2l0b3JPcmRlclByb3ZpZGVkIiwidGFza19zdGF0ZSI6ImFzc2lnbmVkIiwidGFza19zeXN0ZW0iOiJTRUxGIiwic2VjdXJpdHlfY"
+        + "2xhc3NpZmljYXRpb24iOiJQVUJMSUMiLCJ0YXNrX3RpdGxlIjoiUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlciAtIFBhcmV"
+        + "udGFsIHJlc3BvbnNpYmlsaXR5IG9yZGVyIChDNDVBKSAtIDkgQXVnIDIwMjQsMDk6MTggQU0iLCJjcmVhdGVkX2RhdGUiOiIyMDI0LTA4LT"
+        + "A5VDA5OjE5OjAyKzAwMDAiLCJkdWVfZGF0ZSI6IjIwMjQtMDgtMTZUMTc6MDA6MDArMDAwMCIsImxvY2F0aW9uX25hbWUiOiJTd2Fuc2V"
+        + "hIiwibG9jYXRpb24iOiIyMzQ5NDYiLCJleGVjdXRpb25fdHlwZSI6IkNhc2UgTWFuYWdlbWVudCBUYXNrIiwianVyaXNkaWN0aW9uIjoiUF"
+        + "JJVkFURUxBVyIsInJlZ2lvbiI6IjciLCJjYXNlX3R5cGVfaWQiOiJQUkxBUFBTIiwiY2FzZV9pZCI6IjE3MjI2MTAyNzYwMDE2ODMiLCJjYXN"
+        + "lX2NhdGVnb3J5IjoiUHJpdmF0ZSBMYXcgLSBDMTAwIiwiY2FzZV9uYW1lIjoiQzEwMCBXQSBMSU5LSU5HIiwiYXV0b19hc3NpZ25lZCI6ZmFsc2U"
+        + "sIndhcm5pbmdzIjpmYWxzZSwid2FybmluZ19saXN0Ijp7InZhbHVlcyI6W119LCJjYXNlX21hbmFnZW1lbnRfY2F0ZWdvcnkiOiJQcml2YXRlIExh"
+        + "dyAtIEMxMDAiLCJ3b3JrX3R5cGVfaWQiOiJkZWNpc2lvbl9tYWtpbmdfd29yayIsIndvcmtfdHlwZV9sYWJlbCI6IkRlY2lzaW9uLW1ha2luZyB3b3Jr"
+        + "IiwicGVybWlzc2lvbnMiOnsidmFsdWVzIjpbIlJlYWQiLCJPd24iLCJDbGFpbSIsIlVuY2xhaW0iLCJVbmNsYWltQXNzaWduIiwiVW5hc3NpZ25DbGF"
+        + "pbSJdfSwiZGVzY3JpcHRpb24iOiJbUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlcl0oL2Nhc2VzL2Nhc2UtZGV0YWlscy8ke1tDQVNFX1JFRk"
+        + "VSRU5DRV19L3RyaWdnZXIvZWRpdEFuZEFwcHJvdmVBbk9yZGVyL2VkaXRBbmRBcHByb3ZlQW5PcmRlcjEpIiwicm9sZV9jYXRlZ29yeSI6IkpVRElDSUFMIiwi"
+        + "YWRkaXRpb25hbF9wcm9wZXJ0aWVzIjp7Im9yZGVySWQiOiIwNDhhNmI3ZS1lMmM1LTRlNmYtOGY4MS1mNDkyNmM1OWJiNzQifSwibWlub3JfcHJpb3JpdHkiOjU"
+        + "wMCwibWFqb3JfcHJpb3JpdHkiOjUwMDAsInByaW9yaXR5X2RhdGUiOiIyMDI0LTA4LTE2VDE3OjAwOjAwKzAwMDAifSwiY29tcGxldGVfdGFzayI6dHJ1ZX19fQ==";
+
+    private static final String CLIENT_CONTEXT = """
+        {
+          "client_context": {
+            "user_task": {
+              "task_data": {
+                "additional_properties": {
+                  "hearingId": "12345"
+                }
+              },
+              "complete_task" : true
+            }
+          }
+        }
+        """;
+
+    private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
     @Mock
     private  ObjectMapper objectMapper;
@@ -150,73 +187,18 @@ class EditAndApproveDraftOrderControllerTest {
     private AuthorisationService authorisationService;
 
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Mock
-    TaskUtils taskUtils;
+    private TaskUtils taskUtils;
 
     @Mock
     private CafcassDateTimeService cafcassDateTimeService;
 
-    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
-    public static final String AUTH_TOKEN = "Bearer TestAuthToken";
-    public static final String S2S_TOKEN = "s2s AuthToken";
-    public static Map<String, Object> clientContext = new HashMap<>();
-    private static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-    private static final String ENCODEDSTRING = "eyJjbGllbnRfY29udGV4dCI6eyJ1c2VyX3Rhc2siOnsidGFza19kYXRhIjp7ImlkIjoiNmI"
-        + "xYzcyOWEtNTYzMC0xMWVmLWEwZDMtZWFmMDM2YWQ5MjBkIiwibmFtZSI6IlJldmlldyBhbmQgQXBwcm92ZSBMZWdhbCBy"
-        + "ZXAgT3JkZXIiLCJhc3NpZ25lZSI6ImQ1YjIwOTEzLTc4ZWEtNDZkMi1iNjVjLTVlMTExZDllN2Y4NCIsInR5cGUiOiJyZXZpZXdTb2"
-        + "xpY2l0b3JPcmRlclByb3ZpZGVkIiwidGFza19zdGF0ZSI6ImFzc2lnbmVkIiwidGFza19zeXN0ZW0iOiJTRUxGIiwic2VjdXJpdHlfY"
-        + "2xhc3NpZmljYXRpb24iOiJQVUJMSUMiLCJ0YXNrX3RpdGxlIjoiUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlciAtIFBhcmV"
-        + "udGFsIHJlc3BvbnNpYmlsaXR5IG9yZGVyIChDNDVBKSAtIDkgQXVnIDIwMjQsMDk6MTggQU0iLCJjcmVhdGVkX2RhdGUiOiIyMDI0LTA4LT"
-        + "A5VDA5OjE5OjAyKzAwMDAiLCJkdWVfZGF0ZSI6IjIwMjQtMDgtMTZUMTc6MDA6MDArMDAwMCIsImxvY2F0aW9uX25hbWUiOiJTd2Fuc2V"
-        + "hIiwibG9jYXRpb24iOiIyMzQ5NDYiLCJleGVjdXRpb25fdHlwZSI6IkNhc2UgTWFuYWdlbWVudCBUYXNrIiwianVyaXNkaWN0aW9uIjoiUF"
-        + "JJVkFURUxBVyIsInJlZ2lvbiI6IjciLCJjYXNlX3R5cGVfaWQiOiJQUkxBUFBTIiwiY2FzZV9pZCI6IjE3MjI2MTAyNzYwMDE2ODMiLCJjYXN"
-        + "lX2NhdGVnb3J5IjoiUHJpdmF0ZSBMYXcgLSBDMTAwIiwiY2FzZV9uYW1lIjoiQzEwMCBXQSBMSU5LSU5HIiwiYXV0b19hc3NpZ25lZCI6ZmFsc2U"
-        + "sIndhcm5pbmdzIjpmYWxzZSwid2FybmluZ19saXN0Ijp7InZhbHVlcyI6W119LCJjYXNlX21hbmFnZW1lbnRfY2F0ZWdvcnkiOiJQcml2YXRlIExh"
-        + "dyAtIEMxMDAiLCJ3b3JrX3R5cGVfaWQiOiJkZWNpc2lvbl9tYWtpbmdfd29yayIsIndvcmtfdHlwZV9sYWJlbCI6IkRlY2lzaW9uLW1ha2luZyB3b3Jr"
-        + "IiwicGVybWlzc2lvbnMiOnsidmFsdWVzIjpbIlJlYWQiLCJPd24iLCJDbGFpbSIsIlVuY2xhaW0iLCJVbmNsYWltQXNzaWduIiwiVW5hc3NpZ25DbGF"
-        + "pbSJdfSwiZGVzY3JpcHRpb24iOiJbUmV2aWV3IGFuZCBBcHByb3ZlIExlZ2FsIHJlcCBPcmRlcl0oL2Nhc2VzL2Nhc2UtZGV0YWlscy8ke1tDQVNFX1JFRk"
-        + "VSRU5DRV19L3RyaWdnZXIvZWRpdEFuZEFwcHJvdmVBbk9yZGVyL2VkaXRBbmRBcHByb3ZlQW5PcmRlcjEpIiwicm9sZV9jYXRlZ29yeSI6IkpVRElDSUFMIiwi"
-        + "YWRkaXRpb25hbF9wcm9wZXJ0aWVzIjp7Im9yZGVySWQiOiIwNDhhNmI3ZS1lMmM1LTRlNmYtOGY4MS1mNDkyNmM1OWJiNzQifSwibWlub3JfcHJpb3JpdHkiOjU"
-        + "wMCwibWFqb3JfcHJpb3JpdHkiOjUwMDAsInByaW9yaXR5X2RhdGUiOiIyMDI0LTA4LTE2VDE3OjAwOjAwKzAwMDAifSwiY29tcGxldGVfdGFzayI6dHJ1ZX19fQ==";
-
-    private static final String CLIENT_CONTEXT = """
-        {
-          "client_context": {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
-                }
-              },
-              "complete_task" : true
-            }
-          }
-        }
-        """;
-
-    private static final String CLIENT_CONTEXT_FALSE = """
-        {
-          "client_context": {
-            "user_task": {
-              "task_data": {
-                "additional_properties": {
-                  "hearingId": "12345"
-                }
-              },
-              "complete_task" : false
-            }
-          }
-        }
-        """;
-
-    private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
     @BeforeEach
     void setUp() {
-        clientContext.put("test", "test");
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1103,13 +1085,6 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -1458,13 +1433,6 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -1522,13 +1490,6 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId("adminEditAndApproveAnOrder")
@@ -1582,19 +1543,12 @@ class EditAndApproveDraftOrderControllerTest {
                                 .whatDoWithOrder(WhatToDoWithOrderEnum.finalizeSaveToServeLater)
                                 .doYouWantToServeOrder(Yes).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
-            .standardDirectionOrder(StandardDirectionOrder.builder().sdoPreamblesList(Arrays.asList(SdoPreamblesEnum.rightToAskCourt))
+            .standardDirectionOrder(StandardDirectionOrder.builder().sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
                                         .editedOrderHasDefaultCaseFields(Yes).build())
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1662,13 +1616,6 @@ class EditAndApproveDraftOrderControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1779,12 +1726,7 @@ class EditAndApproveDraftOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
-            draftOrderCollection,
-            null,
-            DraftOrder::getLabelForOrdersDynamicList
-        ));
+
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -2219,7 +2161,7 @@ class EditAndApproveDraftOrderControllerTest {
 
 
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() throws Exception {
+    public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.AWAITING_SUBMISSION_TO_HMCTS);
@@ -2238,12 +2180,12 @@ class EditAndApproveDraftOrderControllerTest {
             callbackRequest
         );
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
+        assertNotNull(response);
+        assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedNotPaid() throws Exception {
+    public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedNotPaid() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.SUBMITTED_NOT_PAID);
@@ -2267,7 +2209,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedPaid() throws Exception {
+    public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedPaid() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.SUBMITTED_PAID);
@@ -2286,12 +2228,12 @@ class EditAndApproveDraftOrderControllerTest {
             callbackRequest
         );
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
+        assertNotNull(response);
+        assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsCaseIssued() throws Exception {
+    public void testFlagSetToNoForMiamOrderWhenStateIsCaseIssued() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.CASE_ISSUED);
@@ -2315,7 +2257,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsJudicialReview() throws Exception {
+    public void testFlagSetToNoForMiamOrderWhenStateIsJudicialReview() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.JUDICIAL_REVIEW);
@@ -2339,7 +2281,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingFl401SubmissionToHmcts() throws Exception {
+    public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingFl401SubmissionToHmcts() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.AWAITING_FL401_SUBMISSION_TO_HMCTS);
@@ -2363,7 +2305,7 @@ class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testFlagSetToYesForMiamOrderWhenStateIsPrepareForHearingConductHearing() throws Exception {
+    public void testFlagSetToYesForMiamOrderWhenStateIsPrepareForHearingConductHearing() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
