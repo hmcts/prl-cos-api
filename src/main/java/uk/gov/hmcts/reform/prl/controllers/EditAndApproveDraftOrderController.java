@@ -383,6 +383,7 @@ public class EditAndApproveDraftOrderController {
                     language
                 );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
+                manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
@@ -391,6 +392,7 @@ public class EditAndApproveDraftOrderController {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, selectedOrder)).build();
         } else {

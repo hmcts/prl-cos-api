@@ -1488,7 +1488,7 @@ public class ManageOrderService {
             .build();
     }
 
-    private String getPenalNotice(List<PenalNoticeOptionEnum> penalNoticeNeeded, String penalNoticeRtf) {
+    public String getPenalNotice(List<PenalNoticeOptionEnum> penalNoticeNeeded, String penalNoticeRtf) {
         if (penalNoticeNeeded != null && !penalNoticeNeeded.isEmpty()
             && penalNoticeNeeded.get(0).getDisplayedValue().equals("Yes")) {
             return penalNoticeRtf;
@@ -1525,7 +1525,8 @@ public class ManageOrderService {
     }
 
     public void updatePrefilledOrderFields(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null) {
+        if (caseDataUpdated.get(PENAL_NOTICE_RTF) == null
+            || StringUtils.isBlank(caseDataUpdated.get(PENAL_NOTICE_RTF).toString())) {
             if (blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                 ||  childArrangementsSpecificProhibitedOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseDataUpdated.put(PENAL_NOTICE_RTF, ManageOrderService.STATIC_PENAL_NOTICE_RTF);
