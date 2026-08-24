@@ -81,6 +81,9 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
         Map<String, List<Document>> allCategoriesToMap = allCategories.stream().collect(
             Collectors.toMap(Category::getCategoryId, category -> category.getDocuments().stream()
                 .map(this::mapCategoryDocumentToPrlDocument).toList()));
+        Map<String, String> orderDocumentTitles = BundleOrderDocumentNameHelper.getOrderDocumentTitles(
+            caseData.getOrderCollection()
+        );
 
         List<Element<BundlingRequestDocument>> allOtherDocumentsFromCategory = new ArrayList<>();
         List<Element<BundlingRequestDocument>> applicationDocumentFromCategory = new ArrayList<>();
@@ -94,7 +97,8 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                     List<BundlingRequestDocument> orders = new ArrayList<>(mapBundlingRequestDocument(
                         allCategoriesToMap.get(filterProperties.getCategory()),
                         BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
-                        filterProperties
+                        filterProperties,
+                        orderDocumentTitles
                     ));
                     reverse(orders);
                     ordersFromCategory.addAll(ElementUtils.wrapElements(orders));
@@ -245,12 +249,20 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private BundlingRequestDocument mapBundlingRequestDocument(Document document,
                                                                BundlingDocGroupEnum applicationsDocGroup,
                                                                FilterProperties filterProperties) {
+        return mapBundlingRequestDocument(document, applicationsDocGroup, filterProperties, null);
+    }
+
+    private BundlingRequestDocument mapBundlingRequestDocument(Document document,
+                                                               BundlingDocGroupEnum applicationsDocGroup,
+                                                               FilterProperties filterProperties,
+                                                               Map<String, String> orderDocumentTitles) {
         // don't include redacted documents and draft documents
         if (isRedactedDocument(document) || isDraftDocument(document) || isConfidentialDocument(document)) {
             return null;
         }
 
-        return BundlingRequestDocument.builder().documentLink(document).documentFileName(document.getDocumentFileName())
+        return BundlingRequestDocument.builder().documentLink(document)
+                    .documentFileName(BundleOrderDocumentNameHelper.getBundleIndexOrderTitle(document, orderDocumentTitles))
                     .documentGroup(applicationsDocGroup).build();
     }
 
@@ -260,6 +272,22 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                                                                      FilterProperties filterProperties) {
         if (null != documents) {
             return documents.stream().map(d -> mapBundlingRequestDocument(d, applicationsDocGroup, filterProperties))
+                .filter(Objects::nonNull).toList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<BundlingRequestDocument> mapBundlingRequestDocument(List<Document> documents,
+                                                                     BundlingDocGroupEnum applicationsDocGroup,
+                                                                     FilterProperties filterProperties,
+                                                                     Map<String, String> orderDocumentTitles) {
+        if (null != documents) {
+            return documents.stream().map(d -> mapBundlingRequestDocument(
+                    d,
+                    applicationsDocGroup,
+                    filterProperties,
+                    orderDocumentTitles
+                ))
                 .filter(Objects::nonNull).toList();
         }
         return Collections.emptyList();
