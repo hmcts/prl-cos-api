@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
 import uk.gov.hmcts.reform.prl.services.payment.FeeService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -163,25 +164,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             future.cancel(true);
         }
     }
-
-    /**
-     * Helper method to extract the conversion logic.
-     * @param documentInfo the document info to retrieve the data from
-     * @param filename the file name for the document
-     * @return A Document with the relevant information retrieved from documentInfo and filename
-     */
-    private Document buildDocument(
-        GeneratedDocumentInfo documentInfo,
-        String filename
-    ) {
-        return Document.builder()
-            .documentUrl(documentInfo.getUrl())
-            .documentBinaryUrl(documentInfo.getBinaryUrl())
-            .documentHash(documentInfo.getHashToken())
-            .documentFileName(filename)
-            .build();
-    }
-
+    
     private CaseData buildGeneratedDocumentCaseData(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest,
@@ -277,7 +260,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             caseData = caseData.toBuilder()
                 .isEngDocGen(Yes.toString())
                 .submitAndPayDownloadApplicationLink(
-                    buildDocument(englishDocumentInfo, c100DraftFilename)
+                    DocumentUtils.toDocumentWithFilename(englishDocumentInfo, c100DraftFilename)
                 )
                 .build();
         }
@@ -286,7 +269,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             caseData = caseData.toBuilder()
                 .isWelshDocGen(Yes.toString())
                 .submitAndPayDownloadApplicationWelshLink(
-                    buildDocument(welshDocumentInfo, c100DraftWelshFilename)
+                    DocumentUtils.toDocumentWithFilename(welshDocumentInfo, c100DraftWelshFilename)
                 )
                 .build();
         }
