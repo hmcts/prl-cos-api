@@ -978,6 +978,71 @@
     ]
   },
   {
+    "email": "DDJ.Jason.Stewart@ejudiciary.net",
+    "id": "15cf344f-b560-4b21-9190-f50bc7054c18",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "hmcts-judiciary",
+        "classification": "PRIVATE",
+        "grantType": "BASIC",
+        "roleCategory": "JUDICIAL",
+        "readOnly": true,
+        "beginTime": "2020-05-18T00:00:00Z",
+        "endTime": "2028-05-18T00:00:00Z",
+        "created": "2026-08-21T10:13:52.343501Z",
+        "attributes": {
+          "substantive": "N",
+          "contractType": "Fee-Paid"
+        }
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "fee-paid-judge",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-05-18T00:00:00Z",
+        "endTime": "2028-05-18T00:00:00Z",
+        "created": "2026-08-21T10:13:52.35301Z",
+        "attributes": {
+          "bookable": "true",
+          "substantive": "N",
+          "contractType": "Fee-Paid",
+          "primaryLocation": "234850",
+          "jurisdiction": "PRIVATELAW",
+          "workTypes": "hearing_work,decision_making_work,applications,routine_work"
+        },
+        "authorisations": [
+          "294",
+          "315"
+        ]
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "hearing-viewer",
+        "classification": "PUBLIC",
+        "grantType": "STANDARD",
+        "roleCategory": "JUDICIAL",
+        "readOnly": false,
+        "beginTime": "2020-05-18T00:00:00Z",
+        "endTime": "2028-05-18T00:00:00Z",
+        "created": "2026-08-21T10:13:52.353426Z",
+        "attributes": {
+          "substantive": "N",
+          "primaryLocation": "234850",
+          "jurisdiction": "PRIVATELAW"
+        },
+        "authorisations": [
+          "294",
+          "315"
+        ]
+      }
+    ],
+    "overrideAll": true
+  },
+  {
     "email": "prl_aat_am_swansea_hca@hmcts.net",
     "id": "930a5478-3b1d-4fed-bf9d-fdfb2f9e9eaf",
     "roleAssignments": [
