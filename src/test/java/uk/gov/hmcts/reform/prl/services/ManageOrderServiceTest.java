@@ -8673,7 +8673,7 @@ class ManageOrderServiceTest {
 
         HashMap<String, Object> dataMap = new HashMap<>();
         manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
-        assertEquals(STATIC_PENAL_NOTICE_RTF, dataMap.get("penalNoticeRtf").toString()));
+        assertEquals(STATIC_PENAL_NOTICE_RTF, dataMap.get("penalNoticeRtf").toString());
     }
 
 }
