@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
 import uk.gov.hmcts.reform.prl.models.court.Court;
-import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -164,7 +163,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             future.cancel(true);
         }
     }
-    
+
     private CaseData buildGeneratedDocumentCaseData(
         @RequestHeader("Authorization") String authorisation,
         @RequestBody CallbackRequest callbackRequest,
