@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
@@ -108,11 +109,7 @@ public class DocumentRemovalService {
         // Remove documents where the parent collection item should also be removed
         // as it serves no purpose without a document
         // e.g. Documents to be reviewed, Draft orders
-        DocumentManagementDetails docMgmt = Optional.ofNullable(caseData.getDocumentManagementDetails())
-            .orElseGet(() -> DocumentManagementDetails.builder().build());
-        ReviewDocuments reviewDocs = Optional.ofNullable(caseData.getReviewDocuments())
-            .orElseGet(() -> ReviewDocuments.builder().build());
-        updateDocumentCollections(caseDetails.getData(), docMgmt, reviewDocs, documentIdToRemove);
+        updateDocumentCollections(caseDetails.getData(), caseData, documentIdToRemove);
 
         Map<String, Object> updatedCaseData = documentRemover.removeDocument(caseDetails.getData(), documentIdToRemove);
 
@@ -128,10 +125,17 @@ public class DocumentRemovalService {
         return updatedCaseData;
     }
 
-    private void updateDocumentCollections(Map<String, Object> updatedCaseData,
-                                           DocumentManagementDetails docMgmt,
-                                           ReviewDocuments reviewDocs,
+    private void updateDocumentCollections(Map<String, Object> updatedCaseData, CaseData caseData,
                                            String documentIdToRemove) {
+
+        DocumentManagementDetails docMgmt = Optional.ofNullable(caseData.getDocumentManagementDetails())
+            .orElseGet(() -> DocumentManagementDetails.builder().build());
+        ReviewDocuments reviewDocs = Optional.ofNullable(caseData.getReviewDocuments())
+            .orElseGet(() -> ReviewDocuments.builder().build());
+
+        List<Element<ScannedDocument>> scannedDocuments = caseData.getScannedDocuments();
+        putUpdatedScannedDocs(updatedCaseData, scannedDocuments, documentIdToRemove);
+
         putIfNotNull(updatedCaseData, LEGAL_PROF_QUARANTINE_DOC_LIST,
                      docMgmt.getLegalProfQuarantineDocsList(), documentIdToRemove);
         putIfNotNull(updatedCaseData, COURT_STAFF_QUARANTINE_DOC_LIST,
@@ -171,6 +175,30 @@ public class DocumentRemovalService {
                 log.info("Updated {} collection in case data after removing document with id {}", key, documentIdToRemove);
             }
         }
+    }
+
+    private void putUpdatedScannedDocs(Map<String, Object> data, List<Element<ScannedDocument>> source,
+                              String documentIdToRemove) {
+        if (source != null) {
+            List<Element<ScannedDocument>> updatedDocs = source.stream()
+                .filter(doc -> shouldKeepScannedDocument(doc, documentIdToRemove))
+                .toList();
+
+            if (source.size() != updatedDocs.size()) {
+                data.put("scannedDocuments", updatedDocs);
+                log.info("Updated scannedDocuments collection in case data after removing scanned document with id {}",
+                         documentIdToRemove);
+            }
+        }
+    }
+
+    private boolean shouldKeepScannedDocument(Element<ScannedDocument> element, String documentIdToRemove) {
+        ScannedDocument scanned = element.getValue();
+        if (scanned == null || scanned.url == null) {
+            return true;
+        }
+        String docId = scanned.url.getDocumentId();
+        return docId == null || !docId.equals(documentIdToRemove);
     }
 
     private List<Element<QuarantineLegalDoc>> removeById(List<Element<QuarantineLegalDoc>> source, String toRemove) {

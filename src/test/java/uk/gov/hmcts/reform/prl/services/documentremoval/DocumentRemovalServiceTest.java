@@ -11,9 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentRemovalWrapper;
@@ -238,6 +240,41 @@ class DocumentRemovalServiceTest {
         // Verify document removed from the collection
         Map<String, Object> caseDataMap = caseDataMapCaptor.getValue();
         assertEquals(Collections.emptyList(), caseDataMap.get("courtStaffUploadDocListDocTab"));
+    }
+
+    @Test
+    void testRemoveScannedDocuments() throws IOException {
+        Element<ScannedDocument> scannedDocumentToRemove = element(ScannedDocument.builder()
+                                                                      .url(Document.builder()
+                                                                               .documentUrl("http://someserver/doc1")
+                                                                               .documentFileName("file1.pdf")
+                                                                               .build())
+                                                                      .build());
+        Element<ScannedDocument> scannedDocumentToKeep = element(ScannedDocument.builder()
+                                                                      .url(Document.builder()
+                                                                               .documentUrl("http://someserver/doc2")
+                                                                               .documentFileName("file2.pdf")
+                                                                               .build())
+                                                                      .build());
+
+        caseData.setScannedDocuments(List.of(scannedDocumentToKeep, scannedDocumentToRemove));
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        ArgumentCaptor<Map<String, Object>> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        when(documentRemover.removeDocument(mapCaptor.capture(), eq("doc1"))).thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
+
+        Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
+
+        assertFalse(result.containsKey("documentToRemove"));
+        assertFalse(result.containsKey("documentRemovalConfirmOptions"));
+        assertEquals("someValue", result.get("someKey"));
+
+        verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
+
+        Map<String, Object> mapCaptorValue = mapCaptor.getValue();
+        List<Element<ScannedDocument>> updatedScannedDocuments = (List<Element<ScannedDocument>>) mapCaptorValue.get("scannedDocuments");
+        assertEquals(1, updatedScannedDocuments.size());
+        assertEquals(scannedDocumentToKeep, updatedScannedDocuments.getFirst());
     }
 
     @Test
