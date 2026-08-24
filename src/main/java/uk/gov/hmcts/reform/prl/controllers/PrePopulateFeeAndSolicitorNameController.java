@@ -213,24 +213,16 @@ public class PrePopulateFeeAndSolicitorNameController {
         DocumentLanguage documentLanguage =
             documentLanguageService.docGenerateLang(callbackRequest.getCaseDetails().getCaseData());
 
-        //Keep template selection outside the virtual-thread lambdas so only the remote Docmosis calls
-        //are submitted to the Executor Service
-        String englishTemplate = documentLanguage.isGenEng()
-            ? c100DocumentTemplateFinderService
-            .findFinalDraftDocumentTemplate(documentCaseData, false)
-            : null;
-
-        String welshTemplate = documentLanguage.isGenWelsh()
-            ? c100DocumentTemplateFinderService
-            .findFinalDraftDocumentTemplate(documentCaseData, true)
-            : null;
-
         //Tasks
         Future<GeneratedDocumentInfo> englishFuture = null;
         Future<GeneratedDocumentInfo> welshFuture = null;
 
+        //Keep template selection outside the virtual-thread lambdas so only the remote Docmosis calls
+        //are submitted to the Executor Service
         //Submit both tasks (remote Docmosis calls) before waiting for a result
         if (documentLanguage.isGenEng()) {
+            String englishTemplate = c100DocumentTemplateFinderService
+                .findFinalDraftDocumentTemplate(documentCaseData, false);
             englishFuture = documentVirtualThreadExecutorService.submit(
                 () -> dgsService.generateDocument(
                     authorisation,
@@ -241,6 +233,8 @@ public class PrePopulateFeeAndSolicitorNameController {
         }
 
         if (documentLanguage.isGenWelsh()) {
+            String welshTemplate = c100DocumentTemplateFinderService
+                .findFinalDraftDocumentTemplate(documentCaseData, true);
             welshFuture = documentVirtualThreadExecutorService.submit(
                 () -> dgsService.generateWelshDocument(
                     authorisation,
