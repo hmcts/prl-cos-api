@@ -64,6 +64,11 @@ public class HearingService {
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             if (hearings != null) {
+                log.info(
+                    "Fetched {} hearings from HMC for case {}",
+                    nullSafeCollection(hearings.getCaseHearings()).size(),
+                    caseReferenceNumber
+                );
                 Map<String, String> refDataCategoryValueMap = getRefDataMap(
                     userToken,
                     authTokenGenerator.generate(),
@@ -75,6 +80,11 @@ public class HearingService {
                     eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
                     eachHearing.setHearingTypeValue(getHearingTypeValueWithInHearing(eachHearing,refDataCategoryValueMap));
                 }
+                log.info(
+                    "HMC hearing summary for case {} before bundle/next-hearing selection: {}",
+                    caseReferenceNumber,
+                    getHearingSummary(hearings.getCaseHearings())
+                );
 
                 List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
                     .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder())))
@@ -87,6 +97,32 @@ public class HearingService {
         } catch (FeignException e) {
             throw new HearingException("Error in getting hearings for case " + caseReferenceNumber,  e);
         }
+    }
+
+    private String getHearingSummary(List<CaseHearing> caseHearings) {
+        return nullSafeCollection(caseHearings).stream()
+            .map(hearing -> String.format(
+                "{hearingId=%s, hmcStatus=%s, nextHearingDate=%s, schedules=%s}",
+                hearing.getHearingID(),
+                hearing.getHmcStatus(),
+                hearing.getNextHearingDate(),
+                getScheduleSummary(hearing)
+            ))
+            .toList()
+            .toString();
+    }
+
+    private String getScheduleSummary(CaseHearing hearing) {
+        return nullSafeCollection(hearing.getHearingDaySchedule()).stream()
+            .map(schedule -> String.format(
+                "{start=%s, end=%s, venue=%s, judge=%s}",
+                schedule.getHearingStartDateTime(),
+                schedule.getHearingEndDateTime(),
+                schedule.getHearingVenueName(),
+                schedule.getHearingJudgeName()
+            ))
+            .toList()
+            .toString();
     }
 
 
