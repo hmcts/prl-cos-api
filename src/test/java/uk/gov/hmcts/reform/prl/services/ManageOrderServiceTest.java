@@ -8645,7 +8645,7 @@ class ManageOrderServiceTest {
         HashMap<String, Object> dataMap = new HashMap<>();
         dataMap.put("penalNoticeRtf", "originalValue");
         manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
-        assertTrue(dataMap.get("penalNoticeRtf").toString().equals("originalValue"));
+        assertEquals("originalValue", dataMap.get("penalNoticeRtf").toString());
     }
 
     @Test
@@ -8673,7 +8673,7 @@ class ManageOrderServiceTest {
 
         HashMap<String, Object> dataMap = new HashMap<>();
         manageOrderService.updatePrefilledOrderFields(caseData, dataMap);
-        assertTrue(dataMap.get("penalNoticeRtf").toString().equals(STATIC_PENAL_NOTICE_RTF));
+        assertEquals(STATIC_PENAL_NOTICE_RTF, dataMap.get("penalNoticeRtf").toString()));
     }
 
 }

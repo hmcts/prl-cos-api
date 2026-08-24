@@ -581,13 +581,13 @@ public class ManageOrdersController {
         return newDraftOrderCollectionId;
     }
 
-    /*
+    /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
      *  including serving an order
      * @param caseData original
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
-     */
+     **/
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         try {
             doSetHearingData(caseData, caseDataUpdated, authorisation);
