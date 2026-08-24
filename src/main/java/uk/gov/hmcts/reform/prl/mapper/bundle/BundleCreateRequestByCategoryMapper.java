@@ -282,8 +282,8 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
                                                                      FilterProperties filterProperties,
                                                                      Map<String, String> orderDocumentTitles) {
         if (null != documents) {
-            return documents.stream().map(d -> mapBundlingRequestDocument(
-                    d,
+            return documents.stream().map(bundleDoc -> mapBundlingRequestDocument(
+                    bundleDoc,
                     applicationsDocGroup,
                     filterProperties,
                     orderDocumentTitles
@@ -296,10 +296,10 @@ public class BundleCreateRequestByCategoryMapper implements IBundleCreateRequest
     private List<BundlingRequestDocument> mapBundlingRequestDocumentAwp(List<Document> documents,
                                                                      Map<String, FilterProperties> bundleAllCategoriesMap) {
         if (null != documents) {
-            return documents.stream().map(d -> {
-                FilterProperties filterProperties = bundleAllCategoriesMap.get(d.getCategoryId());
+            return documents.stream().map(docToBundle -> {
+                FilterProperties filterProperties = bundleAllCategoriesMap.get(docToBundle.getCategoryId());
                 if (null != filterProperties) {
-                    return mapBundlingRequestDocument(d,
+                    return mapBundlingRequestDocument(docToBundle,
                                                BundlingDocGroupEnum.valueOf(filterProperties.getValue()),
                                                filterProperties);
                 }

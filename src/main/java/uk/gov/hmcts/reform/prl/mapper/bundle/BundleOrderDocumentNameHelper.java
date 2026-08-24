@@ -32,10 +32,7 @@ final class BundleOrderDocumentNameHelper {
     }
 
     static String getBundleIndexOrderTitle(Document document, OrderDetails orderDetails) {
-        String orderTitle = Optional.ofNullable(orderDetails)
-            .map(OrderDetails::getOrderTypeId)
-            .filter(StringUtils::isNotBlank)
-            .orElse(document.getDocumentFileName());
+        String orderTitle = document.getDocumentFileName();
 
         return Optional.ofNullable(orderDetails)
             .map(OrderDetails::getOtherDetails)

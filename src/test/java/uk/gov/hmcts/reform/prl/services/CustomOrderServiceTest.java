@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -3916,6 +3917,40 @@ class CustomOrderServiceTest {
         assertEquals(1, updatedList.size());
         assertEquals("final.docx", updatedList.get(0).getValue().getOrderDocument().getDocumentFileName());
         assertEquals("Final Custom Order", updatedList.get(0).getValue().getOrderTypeId());
+    }
+
+    @Test
+    void testUpdateFinalOrderCollection_setsOrderMadeDateWhenMissing() {
+        uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+            .orderTypeId("Old Order")
+            .otherDetails(OtherOrderDetails.builder()
+                              .orderCreatedBy("Court Admin")
+                              .build())
+            .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(UUID.randomUUID())
+            .value(existingOrder)
+            .build());
+
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(LocalDate.of(2026, 8, 24))
+            .orderCollection(orderList)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("final.docx")
+            .documentUrl("http://url")
+            .build();
+
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Final Custom Order");
+
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+        OtherOrderDetails otherDetails = updatedList.get(0).getValue().getOtherDetails();
+        assertEquals("24 Aug 2026", otherDetails.getOrderMadeDate());
+        assertEquals("Court Admin", otherDetails.getOrderCreatedBy());
     }
 
 
