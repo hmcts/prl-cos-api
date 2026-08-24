@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_CLOSED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_STATUS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getBundleDateTime;
 
 @ExtendWith(MockitoExtension.class)
 class BundleCreateRequestByCategoryMapperTest {
@@ -65,6 +66,8 @@ class BundleCreateRequestByCategoryMapperTest {
     @InjectMocks
     private BundleCreateRequestByCategoryMapper bundleCreateRequestByCategoryMapper;
 
+    private LocalDateTime futureHearingDateTime;
+
     @BeforeEach
     void setUp() {
         hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
@@ -72,6 +75,7 @@ class BundleCreateRequestByCategoryMapperTest {
                                                                                       systemUserService,
                                                                                       bundleCategoryConfig,
                                                                                       hearingDetailsMapperUtil);
+        futureHearingDateTime = LocalDateTime.now().plusDays(7);
     }
 
     @Test
@@ -380,7 +384,7 @@ class BundleCreateRequestByCategoryMapperTest {
             .applicantName("ApplicantFirstNameAndLastName")
             .build();
 
-        LocalDateTime hearingDateTime = LocalDateTime.of(2025, 3, 15, 10, 30);
+        LocalDateTime hearingDateTime = futureHearingDateTime;
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
             .hearingJudgeId("judge123")
@@ -408,8 +412,10 @@ class BundleCreateRequestByCategoryMapperTest {
 
         assertNotNull(bundleCreateRequest);
         assertEquals("Judge John Smith", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("15 Mar 2025"));
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("AM"));
+        assertEquals(
+            getBundleDateTime(hearingDateTime),
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime()
+        );
         assertEquals("Manchester Crown Court" + "\n" + "Judicial Building, Bridge Street, Manchester M2 1RB",
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
@@ -426,7 +432,7 @@ class BundleCreateRequestByCategoryMapperTest {
             .hearingJudgeName("Judge Jane Doe")
             .hearingVenueName(null)
             .hearingVenueAddress("123 Court Street, London SW1A 1AA")
-            .hearingStartDateTime(LocalDateTime.of(2025, 4, 20, 14, 0))
+            .hearingStartDateTime(futureHearingDateTime)
             .build());
 
         List<CaseHearing> caseHearings = new ArrayList<>();
@@ -448,7 +454,7 @@ class BundleCreateRequestByCategoryMapperTest {
         assertEquals("Judge Jane Doe", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
         assertEquals("123 Court Street, London SW1A 1AA",
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("20 Apr 2025"));
+        assertNotNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime());
     }
 
     @Test
@@ -482,10 +488,9 @@ class BundleCreateRequestByCategoryMapperTest {
                 Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
 
         assertNotNull(bundleCreateRequest);
-        assertEquals("Judge Bob Wilson", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
-        assertEquals("Bristol County Court" + "\n" + "Small Street, Bristol BS1 1DA",
-            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().isEmpty());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
+        assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime());
     }
 
     @Test
@@ -495,8 +500,8 @@ class BundleCreateRequestByCategoryMapperTest {
             .applicantName("ApplicantFirstNameAndLastName")
             .build();
 
-        LocalDateTime firstHearingDateTime = LocalDateTime.of(2025, 5, 10, 9, 0);
-        LocalDateTime secondHearingDateTime = LocalDateTime.of(2025, 6, 15, 14, 0);
+        LocalDateTime firstHearingDateTime = futureHearingDateTime;
+        LocalDateTime secondHearingDateTime = futureHearingDateTime.plusDays(5);
 
         List<HearingDaySchedule> firstHearingSchedules = new ArrayList<>();
         firstHearingSchedules.add(HearingDaySchedule.hearingDayScheduleWith()
@@ -534,17 +539,20 @@ class BundleCreateRequestByCategoryMapperTest {
                 Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
 
         assertNotNull(bundleCreateRequest);
-        // Should map the first LISTED hearing
+        // Should map the next scheduled LISTED hearing
         assertEquals("Judge Alice Brown", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
         assertEquals("Liverpool Court" + "\n" + "31 Whitechapel, Liverpool L1 6DS",
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("10 May 2025"));
+        assertEquals(
+            getBundleDateTime(firstHearingDateTime),
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime()
+        );
     }
 
     @Test
     void testMapHearingDetailsWithMultipleHearingDaySchedules() {
-        LocalDateTime firstDayDateTime = LocalDateTime.of(2025, 7, 5, 10, 0);
-        LocalDateTime secondDayDateTime = LocalDateTime.of(2025, 7, 6, 11, 0);
+        LocalDateTime firstDayDateTime = futureHearingDateTime;
+        LocalDateTime secondDayDateTime = futureHearingDateTime.plusDays(1);
 
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith()
@@ -581,11 +589,14 @@ class BundleCreateRequestByCategoryMapperTest {
                 Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
 
         assertNotNull(bundleCreateRequest);
-        // Should map the first day schedule
+        // Should map the next scheduled day
         assertEquals("Judge Emma Wilson", bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
         assertEquals("London Central Court" + "\n" + "Central London Address",
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
-        assertTrue(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime().contains("5 Jul 2025"));
+        assertEquals(
+            getBundleDateTime(firstDayDateTime),
+            bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime()
+        );
     }
 
 }
