@@ -1110,11 +1110,7 @@ public class ManageOrderService {
                                                                                PrlAppsConstants.D_MMM_YYYY,
                                                                                Locale.ENGLISH
                                                                            )))
-                                                     .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(
-                                                         DateTimeFormatter.ofPattern(
-                                                             PrlAppsConstants.D_MMM_YYYY,
-                                                             Locale.ENGLISH
-                                                         )) : null)
+                                                     .orderMadeDate(getOrderMadeDate(caseData))
                                                      .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate().format(
                                                          DateTimeFormatter.ofPattern(
                                                              PrlAppsConstants.D_MMM_YYYY,
@@ -1145,6 +1141,12 @@ public class ManageOrderService {
                                    .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                    .build()));
         return newOrderDetails;
+    }
+
+    private String getOrderMadeDate(CaseData caseData) {
+        return caseData.getDateOrderMade() != null
+            ? caseData.getDateOrderMade().format(DateTimeFormatter.ofPattern(PrlAppsConstants.D_MMM_YYYY, Locale.ENGLISH))
+            : null;
     }
 
     public static ServeOrderDetails buildServeOrderDetails(ServeOrderData serveOrderData) {
@@ -2452,11 +2454,7 @@ public class ManageOrderService {
                                                  PrlAppsConstants.D_MMM_YYYY,
                                                  Locale.ENGLISH
                                              )))
-                                             .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade()
-                                                 .format(DateTimeFormatter.ofPattern(
-                                                     PrlAppsConstants.D_MMM_YYYY,
-                                                     Locale.ENGLISH
-                                                 )) : null)
+                                             .orderMadeDate(getOrderMadeDate(caseData))
                                              .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate()
                                                  .format(DateTimeFormatter.ofPattern(
                                                      PrlAppsConstants.D_MMM_YYYY,
