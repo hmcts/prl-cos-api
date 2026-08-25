@@ -180,7 +180,7 @@ class BundleCreateRequestByCategoryMapperTest {
             .map(Element::getValue)
             .map(BundlingRequestDocument::getDocumentFileName).toList();
 
-        assertEquals(List.of("fileName 21-08-26"), orderDocs);
+        assertEquals(List.of("fileName : 21-08-26"), orderDocs);
 
 
     }

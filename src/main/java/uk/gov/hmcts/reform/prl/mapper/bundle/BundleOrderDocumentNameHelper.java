@@ -39,7 +39,7 @@ final class BundleOrderDocumentNameHelper {
             .map(OtherOrderDetails::getOrderMadeDate)
             .map(BundleOrderDocumentNameHelper::formatOrderMadeDateForBundleIndex)
             .filter(StringUtils::isNotBlank)
-            .map(orderMadeDate -> orderTitle + " " + orderMadeDate)
+            .map(orderMadeDate -> orderTitle + " : " + orderMadeDate)
             .orElse(orderTitle);
     }
 

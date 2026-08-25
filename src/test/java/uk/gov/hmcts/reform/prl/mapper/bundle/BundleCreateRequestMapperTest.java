@@ -256,8 +256,8 @@ public class BundleCreateRequestMapperTest {
         List<Element<OrderDetails>> orders = new ArrayList<>(List.of(ElementUtils.element(orderDetails)));
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
         assertEquals(2, result.size());
-        assertEquals("valid-file.pdf 05-08-26", result.get(0).getValue().getDocumentFileName());
-        assertEquals("valid-file2.pdf 05-08-26", result.get(1).getValue().getDocumentFileName());
+        assertEquals("valid-file.pdf : 05-08-26", result.get(0).getValue().getDocumentFileName());
+        assertEquals("valid-file2.pdf : 05-08-26", result.get(1).getValue().getDocumentFileName());
     }
 
     @Test

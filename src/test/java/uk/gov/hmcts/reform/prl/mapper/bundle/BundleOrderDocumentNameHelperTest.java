@@ -98,10 +98,10 @@ class BundleOrderDocumentNameHelperTest {
             Element.<OrderDetails>builder().id(UUID.randomUUID()).value(orderDetails).build()
         ));
 
-        assertEquals("English_Order.pdf 24-08-26", result.get("english-url"));
-        assertEquals("English_Order.pdf 24-08-26", result.get("english-binary-url"));
-        assertEquals("Welsh_English_Order.pdf 24-08-26", result.get("welsh-url"));
-        assertEquals("Welsh_English_Order.pdf 24-08-26", result.get("welsh-binary-url"));
+        assertEquals("English_Order.pdf : 24-08-26", result.get("english-url"));
+        assertEquals("English_Order.pdf : 24-08-26", result.get("english-binary-url"));
+        assertEquals("Welsh_English_Order.pdf : 24-08-26", result.get("welsh-url"));
+        assertEquals("Welsh_English_Order.pdf : 24-08-26", result.get("welsh-binary-url"));
     }
 
     @Test
