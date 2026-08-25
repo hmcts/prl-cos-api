@@ -3953,6 +3953,37 @@ class CustomOrderServiceTest {
         assertEquals("Court Admin", otherDetails.getOrderCreatedBy());
     }
 
+    @Test
+    void testUpdateFinalOrderCollection_setsOrderMadeDateWhenBlank() {
+        uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
+            .otherDetails(OtherOrderDetails.builder()
+                              .orderMadeDate(" ")
+                              .build())
+            .build();
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(Element.<uk.gov.hmcts.reform.prl.models.OrderDetails>builder()
+            .id(UUID.randomUUID())
+            .value(existingOrder)
+            .build());
+
+        CaseData caseData = CaseData.builder()
+            .dateOrderMade(LocalDate.of(2026, 8, 24))
+            .orderCollection(orderList)
+            .build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("final.docx")
+            .documentUrl("http://url")
+            .build();
+
+        customOrderService.updateFinalOrderCollection(caseData, caseDataUpdated, doc, "Final Custom Order");
+
+        @SuppressWarnings("unchecked")
+        List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
+            (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
+        assertEquals("24 Aug 2026", updatedList.get(0).getValue().getOtherDetails().getOrderMadeDate());
+    }
+
 
     // ========== Additional condition coverage tests ==========
 

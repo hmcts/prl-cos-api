@@ -2236,7 +2236,7 @@ public class CustomOrderService {
     private OtherOrderDetails buildFinalOrderOtherDetails(uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails,
                                                           CaseData caseData) {
         OtherOrderDetails existingOtherDetails = orderDetails.getOtherDetails();
-        if (existingOtherDetails != null && existingOtherDetails.getOrderMadeDate() != null) {
+        if (existingOtherDetails != null && StringUtils.isNotBlank(existingOtherDetails.getOrderMadeDate())) {
             return existingOtherDetails;
         }
 

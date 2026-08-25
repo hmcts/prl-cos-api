@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MM_YY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 
 final class BundleOrderDocumentNameHelper {
@@ -24,7 +25,7 @@ final class BundleOrderDocumentNameHelper {
         Locale.ENGLISH
     );
     private static final DateTimeFormatter BUNDLE_INDEX_ORDER_DATE_FORMATTER = DateTimeFormatter.ofPattern(
-        "dd-MM-yy",
+        DD_MM_YY,
         Locale.ENGLISH
     );
 
