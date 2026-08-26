@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.Document;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.OrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
@@ -56,6 +57,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -71,6 +74,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeList;
 public class CafcassCaseDataService {
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
+    public static final String NOTICE_OF_HEARING = "noticeOfHearing";
+    private static final Set<String> NOTICE_OF_HEARING_ORDER_TYPES = Set.of(
+        NOTICE_OF_HEARING,
+        "noticeOfHearingParties"
+    );
+
     @Value("${cafcaas.search-case-type-id}")
     private String cafCassSearchCaseTypeId;
 
@@ -215,8 +224,8 @@ public class CafcassCaseDataService {
             CafCassCaseData caseData = cafCassCaseDetail.getCaseData();
             if (caseData != null && CollectionUtils.isNotEmpty(caseData.getOtherDocuments())) {
                 caseData.setOtherDocuments(caseData.getOtherDocuments().stream()
-                                           .filter(element -> isNotRedactedDocument(element, this::getOtherDocumentId))
-                                           .toList());
+                                               .filter(element -> isNotRedactedDocument(element, this::getOtherDocumentId))
+                                               .toList());
             }
             if (caseData != null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
                 cafCassCaseDetail.setCaseData(caseData.toBuilder()
@@ -251,6 +260,11 @@ public class CafcassCaseDataService {
             orderCollection.forEach(order -> {
                 if (null != order.getValue()) {
                     order.getValue().setServeOrderDetails(null);
+                    try {
+                        order.getValue().setOrderDocumentWelsh(null);
+                    } catch (MalformedURLException e) {
+                        log.error("Error clearing orderDocumentWelsh for case order: {}", e.getMessage());
+                    }
                 }
             });
         }
@@ -339,6 +353,25 @@ public class CafcassCaseDataService {
         populateStatementOfServiceDocs(caseData, otherDocsList);
     }
 
+    private boolean isNoticeOfHearingOrder(CafCassCaseData caseData,
+                                           uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
+        if (CollectionUtils.isEmpty(caseData.getOrderCollection()) || null == uploadOrderDoc) {
+            return false;
+        }
+        return caseData.getOrderCollection().stream()
+            .map(Element::getValue)
+            .anyMatch(order ->
+                          (matchesDocumentId(order.getOrderDocument(), uploadOrderDoc)
+                              || matchesDocumentId(order.getOrderDocumentWelsh(), uploadOrderDoc))
+                              && NOTICE_OF_HEARING_ORDER_TYPES.contains(order.getOrderType())
+            );
+    }
+
+    private boolean matchesDocumentId(OrderDocument orderDocument, uk.gov.hmcts.reform.prl.models.documents.Document uploadOrderDoc) {
+        return null != orderDocument
+            && Objects.equals(orderDocument.getDocumentId(), uploadOrderDoc.getDocumentId());
+    }
+
     private void populateStatementOfServiceDocs(CafCassCaseData caseData, List<Element<OtherDocuments>> otherDocsList) {
         if (CollectionUtils.isNotEmpty(caseData.getStmtOfServiceForOrder())) {
             caseData.getStmtOfServiceForOrder().parallelStream().forEach(
@@ -384,7 +417,7 @@ public class CafcassCaseDataService {
         }
         if (null != caseData.getAdditionalDocuments()) {
             addInOtherDocuments(ANY_OTHER_DOC, caseData.getAdditionalDocuments(),
-                otherDocsList
+                                otherDocsList
             );
         }
         if (CollectionUtils.isNotEmpty(caseData.getAdditionalDocumentsList())) {
@@ -401,13 +434,13 @@ public class CafcassCaseDataService {
                 servedApplicationDetails -> {
                     nullSafeList(servedApplicationDetails.getValue().getBulkPrintDetails()).forEach(
                         bulkPrintDetailsElement ->
-                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList)
+                            processServiceOfApplicationBulkPrintDocs(bulkPrintDetailsElement.getValue(), otherDocsList, caseData)
                     );
                     nullSafeList(servedApplicationDetails.getValue().getEmailNotificationDetails())
                         .forEach(
                             emailNotificationDetailsElement ->
                                 processServiceOfApplicationEmailedDocs(
-                                    emailNotificationDetailsElement.getValue(), otherDocsList)
+                                    emailNotificationDetailsElement.getValue(), otherDocsList, caseData)
                         );
                 }
             );
@@ -415,38 +448,31 @@ public class CafcassCaseDataService {
     }
 
     private void processServiceOfApplicationBulkPrintDocs(BulkPrintDetails bulkPrintDetails,
-                                                          List<Element<OtherDocuments>> otherDocsList) {
+                                                          List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
         bulkPrintDetails.getPrintDocs().forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
-                    addInOtherDocuments(
-                        ANY_OTHER_DOC,
-                        docElement.getValue(),
-                        otherDocsList
-                    );
+                    String category = isNoticeOfHearingOrder(caseData, docElement.getValue()) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
+                    addInOtherDocuments(category, docElement.getValue(), otherDocsList);
                 }
             }
         );
     }
 
     private void processServiceOfApplicationEmailedDocs(EmailNotificationDetails emailNotificationDetails,
-                                                        List<Element<OtherDocuments>> otherDocsList) {
-
+                                                        List<Element<OtherDocuments>> otherDocsList, CafCassCaseData caseData) {
         nullSafeList(emailNotificationDetails.getDocs()).forEach(
             docElement -> {
                 if (!isDocumentPresent(docElement.getValue(), otherDocsList)) {
-                    addInOtherDocuments(
-                        ANY_OTHER_DOC,
-                        docElement.getValue(),
-                        otherDocsList
-                    );
+                    String category = isNoticeOfHearingOrder(caseData, docElement.getValue()) ? NOTICE_OF_HEARING : ANY_OTHER_DOC;
+                    addInOtherDocuments(category, docElement.getValue(), otherDocsList);
                 }
             }
         );
     }
 
     private boolean isDocumentPresent(uk.gov.hmcts.reform.prl.models.documents.Document caseDocument,
-                                   List<Element<OtherDocuments>> otherDocsList) {
+                                      List<Element<OtherDocuments>> otherDocsList) {
         if (isNotEmpty(caseDocument)) {
             return otherDocsList.stream().anyMatch(el -> {
                 try {
@@ -655,7 +681,6 @@ public class CafcassCaseDataService {
             addInOtherDocuments(category, caseDocument, otherDocsList);
 
         }
-
     }
 
     private void addInOtherDocuments(String category,
@@ -678,7 +703,6 @@ public class CafcassCaseDataService {
             log.error("Error in populating otherDocsList for CAFCASS {}", e.getMessage());
         }
     }
-
 
     public boolean checkIfDocumentsNeedToExclude(List<String> excludedDocumentList, String documentFilename) {
         boolean isExcluded = false;
