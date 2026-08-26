@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +12,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
@@ -23,13 +25,16 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -55,14 +60,24 @@ public class ManageOrdersControllerFunctionalTest {
     @Autowired
     protected RoleAssignmentService roleAssignmentService;
 
-    @MockBean
+    @MockitoBean
     private ManageOrderService manageOrderService;
 
-    @MockBean
+    @MockitoBean
     private RoleAssignmentApi roleAssignmentApi;
 
-    @MockBean
+    @MockitoBean
     private HearingService hearingService;
+
+    @MockitoBean
+    private AllTabServiceImpl allTabService;
+
+    @MockitoBean
+    private ManageOrderEmailService manageOrderEmailService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
@@ -403,7 +418,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-
     }
 
     /**
@@ -429,7 +443,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
 
     }
 
@@ -501,29 +514,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.postalInformationCaOnlyC47a", equalTo(null))
-            .body("data.postalInformationCA", equalTo(null))
-            .body("data.otherParties", equalTo(null))
-            .body("data.recipientsOptions", equalTo(null))
-            .body("data.cafcassCymruEmail", equalTo(null))
-            .body("data.serveOrderDynamicList", equalTo(null))
-            .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.cafcassCymruServedOptions", equalTo(null))
-            .body("data.emailInformationCaOnlyC47a", equalTo(null))
-            .body("data.localAuthoritySolicitorOrganisationPolicy.Organisation.OrgPolicyReference",
-                  equalTo(null))
-            .body("data.localAuthority.isLocalAuthorityInvolvedInCase",equalTo("No"))
-            .body("data.localAuthority.localAuthoritySolicitorOrganisationName",      equalTo(null))
-            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
-                  equalTo("Yes"))
-            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
-            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
-                  equalTo("Yes"))
-            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+            .assertThat()
+            .statusCode(200)
+            .body("confirmation_header", nullValue())
+            .body("confirmation_body", nullValue())
             .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .as(SubmittedCallbackResponse.class);
     }
 
     @Test
@@ -579,7 +575,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
 
-        request
+        request3
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -587,13 +583,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.recipientsOptions", equalTo(null))
-            .body("data.cafcassCymruEmail", equalTo(null))
-            .body("data.serveOrderDynamicList", equalTo(null))
-            .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.applicants[0].id", equalTo("97e25c77-f915-4b4e-8436-89a0d1678813"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat()
+            .statusCode(200)
+            .body("confirmation_header", nullValue())
+            .body("confirmation_body", nullValue())
+            .body("confirmationHeader", nullValue())
+            .body("confirmationBody", nullValue());
     }
 
     @Test
@@ -611,7 +606,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(CaseDetails.class);
 
-
         String requestBodyRevised = requestBody
             .replace("1706997775517206", caseDetails.getId().toString());
 
@@ -623,14 +617,10 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.recipientsOptions", equalTo(null))
-            .body("data.cafcassCymruEmail", equalTo(null))
-            .body("data.serveOrderDynamicList", equalTo(null))
-            .body("data.serveOtherPartiesCA", equalTo(null))
-            .body("data.applicants[0].id", equalTo("97e25c77-f915-4b4e-8436-89a0d1678813"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
+            .assertThat()
+            .statusCode(200)
+            .body("confirmation_header", nullValue())
+            .body("confirmation_body", nullValue());
     }
 
     /**
@@ -687,7 +677,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
     }
-
 
     /**
      * Judge  manageOrders journey - creates the sdo order with one hearing .

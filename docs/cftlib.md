@@ -14,6 +14,24 @@ There is currently no support for
 - Work Allocation
 - Hearings
 
+XUI still tries to call the Work Allocation task API on port 9193 even when the feature is
+disabled. Without a stub running on that port, submit-and-pay crashes the XUI process with
+`ECONNREFUSED`. Run this stub in a separate terminal **before** starting `bootWithCCD`:
+
+```bash
+docker run --rm -p 9193:8080 \
+  -e MOCK_PORT=8080 \
+  rodolpheche/wiremock &
+# once wiremock is up, register the stub:
+curl -s -X POST http://localhost:9193/__admin/mappings \
+  -H 'Content-Type: application/json' \
+  -d '{"request":{"method":"ANY","urlPattern":".*"},"response":{"status":200,"body":"{\"tasks\":[],\"task_required_for_event\":false}","headers":{"Content-Type":"application/json"}}}'
+```
+
+Alternatively, the simplest one-liner if you have `nc` (netcat):
+```bash
+while true; do echo -e "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"tasks\":[],\"task_required_for_event\":false}" | nc -l 9193; done &
+```
 ## Prerequisites
 1. Java 21.
 2. The [prl-ccd-definitions](https://github.com/hmcts/prl-ccd-definitions) repository must be cloned in the same parent directory as `prl-cos-api`.
