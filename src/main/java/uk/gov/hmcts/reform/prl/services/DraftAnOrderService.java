@@ -124,16 +124,20 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_DIRECTIONS_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RECITALS_OR_PREAMBLE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SCHEDULE_TO_ORDER_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_CROSS_EXAMINATION_EX741;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_DIRECTIONS_FOR_FACT_FINDING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_DRA_HEARING_DETAILS;
@@ -1010,11 +1014,6 @@ public class DraftAnOrderService {
                 caseData) ? Yes : No);
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
-        caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
-        caseDataMap.put("penalNoticeRtf", selectedOrder.getPenalNoticeRtf());
-        caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
-        caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
-        caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
         populateDraftOrderInformations(caseDataMap, selectedOrder);
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
@@ -2547,7 +2546,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderInformations(Map<String, Object> caseDataMap, DraftOrder selectedOrder) {
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
-        caseDataMap.put("penalNoticeNeeded", selectedOrder.getPenalNoticeNeeded());
+        caseDataMap.put(PENAL_NOTICE_NEEDED, selectedOrder.getPenalNoticeNeeded());
         if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
             String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF;
             caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
@@ -2555,16 +2554,16 @@ public class DraftAnOrderService {
             caseDataMap.put(PENAL_NOTICE_RTF, selectedOrder.getPenalNoticeRtf());
         }
         if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
-            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirections());
+            caseDataMap.put(ORDER_DIRECTIONS_RTF, selectedOrder.getOrderDirections());
         } else {
-            caseDataMap.put("orderDirectionsRtf", selectedOrder.getOrderDirectionsRtf());
+            caseDataMap.put(ORDER_DIRECTIONS_RTF, selectedOrder.getOrderDirectionsRtf());
         }
         if (selectedOrder.getRecitalsOrPreambleRtf() == null && selectedOrder.getRecitalsOrPreamble() != null) {
-            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreamble());
+            caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreamble());
         } else {
-            caseDataMap.put("recitalsOrPreambleRtf", selectedOrder.getRecitalsOrPreambleRtf());
+            caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreambleRtf());
         }
-        caseDataMap.put("scheduleToOrderRtf", selectedOrder.getScheduleToOrderRtf());
+        caseDataMap.put(SCHEDULE_TO_ORDER_RTF, selectedOrder.getScheduleToOrderRtf());
         return caseDataMap;
     }
 

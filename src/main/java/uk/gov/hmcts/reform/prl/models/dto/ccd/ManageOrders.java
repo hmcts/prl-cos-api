@@ -69,10 +69,10 @@ public class ManageOrders implements MappableObject {
     private final List<PenalNoticeOptionEnum> penalNoticeNeeded;
     @JsonProperty("penalNoticeRtf")
     private final String penalNoticeRtf;
-    @JsonProperty("orderDirectionsRtf")
-    private final String orderDirectionsRtf;
     @JsonProperty("recitalsOrPreambleRtf")
     private final String recitalsOrPreambleRtf;
+    @JsonProperty("orderDirectionsRtf")
+    private final String orderDirectionsRtf;
     @JsonProperty("scheduleToOrderRtf")
     private final String scheduleToOrderRtf;
     @JsonProperty("furtherDirectionsIfRequired")
