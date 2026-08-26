@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.prl.enums.DocTypeOtherDocumentsEnum;
 import uk.gov.hmcts.reform.prl.filter.cafcaas.CafCassFilter;
 import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -857,4 +858,292 @@ class CafcassCaseDataServiceTest {
         assertTrue(otherDocs.contains("testEmail"));
     }
 
+    @Test
+    void shouldCategoriseEmailedNoticeOfHearingDocumentAsNoticeOfHearing() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String documentId = "11111111-1111-1111-1111-111111111111";
+        Document emailedDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + documentId)
+            .documentFileName("NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(documentId)
+            .documentFilename("NoticeOfHearing(CA).pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("noticeOfHearingParties")
+            .orderDocument(orderDocument)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .orderCollection(List.of(
+                uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(caseOrder)
+                    .build()
+            ))
+            .finalServedApplicationDetailsList(List.of(element(ServedApplicationDetails.builder()
+                                                                   .emailNotificationDetails(List.of(element(
+                                                                       EmailNotificationDetails.builder()
+                                                                           .docs(List.of(element(emailedDoc)))
+                                                                           .build()
+                                                                   )))
+                                                                   .build())))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.noticeOfHearing, otherDocuments.get(0).getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldCategoriseEmailedWelshNoticeOfHearingDocumentAsNoticeOfHearing() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String englishDocumentId = "22222222-2222-2222-2222-222222222222";
+        String welshDocumentId = "33333333-3333-3333-3333-333333333333";
+        Document emailedWelshDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + welshDocumentId)
+            .documentFileName("Welsh_NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(englishDocumentId)
+            .documentFilename("NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocumentWelsh = OrderDocument.builder()
+            .documentId(welshDocumentId)
+            .documentFilename("Welsh_NoticeOfHearing(CA).pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("noticeOfHearingParties")
+            .orderDocument(orderDocument)
+            .orderDocumentWelsh(orderDocumentWelsh)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .orderCollection(List.of(
+                uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(caseOrder)
+                    .build()
+            ))
+            .finalServedApplicationDetailsList(List.of(element(ServedApplicationDetails.builder()
+                                                                   .emailNotificationDetails(List.of(element(
+                                                                       EmailNotificationDetails.builder()
+                                                                           .docs(List.of(element(emailedWelshDoc)))
+                                                                           .build()
+                                                                   )))
+                                                                   .build())))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.noticeOfHearing, otherDocuments.get(0).getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldCategoriseEmailedNonNoticeOfHearingDocumentAsAnyOtherDoc() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String documentId = "44444444-4444-4444-4444-444444444444";
+        Document emailedDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + documentId)
+            .documentFileName("C100FinalDocument.pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(documentId)
+            .documentFilename("C100FinalDocument.pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("someOtherOrderType")
+            .orderDocument(orderDocument)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .orderCollection(List.of(
+                uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(caseOrder)
+                    .build()
+            ))
+            .finalServedApplicationDetailsList(List.of(element(ServedApplicationDetails.builder()
+                                                                   .emailNotificationDetails(List.of(element(
+                                                                       EmailNotificationDetails.builder()
+                                                                           .docs(List.of(element(emailedDoc)))
+                                                                           .build()
+                                                                   )))
+                                                                   .build())))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.anyOtherDoc, otherDocuments.get(0).getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldCategoriseBulkPrintNoticeOfHearingDocumentAsNoticeOfHearing() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String documentId = "55555555-5555-5555-5555-555555555555";
+        Document printedDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + documentId)
+            .documentFileName("NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(documentId)
+            .documentFilename("NoticeOfHearing(CA).pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("noticeOfHearing")
+            .orderDocument(orderDocument)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .orderCollection(List.of(
+                uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(caseOrder)
+                    .build()
+            ))
+            .finalServedApplicationDetailsList(List.of(element(ServedApplicationDetails.builder()
+                                                                   .bulkPrintDetails(List.of(element(
+                                                                       BulkPrintDetails.builder()
+                                                                           .printDocs(List.of(element(printedDoc)))
+                                                                           .build()
+                                                                   )))
+                                                                   .build())))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.noticeOfHearing, otherDocuments.get(0).getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldCategoriseBulkPrintWelshNoticeOfHearingDocumentAsNoticeOfHearing() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        String englishDocumentId = "66666666-6666-6666-6666-666666666666";
+        String welshDocumentId = "77777777-7777-7777-7777-777777777777";
+        Document printedWelshDoc = Document.builder()
+            .documentUrl("http://dm-store:8080/documents/" + welshDocumentId)
+            .documentFileName("Welsh_NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId(englishDocumentId)
+            .documentFilename("NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocumentWelsh = OrderDocument.builder()
+            .documentId(welshDocumentId)
+            .documentFilename("Welsh_NoticeOfHearing(CA).pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("noticeOfHearingParties")
+            .orderDocument(orderDocument)
+            .orderDocumentWelsh(orderDocumentWelsh)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .orderCollection(List.of(
+                uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(caseOrder)
+                    .build()
+            ))
+            .finalServedApplicationDetailsList(List.of(element(ServedApplicationDetails.builder()
+                                                                   .bulkPrintDetails(List.of(element(
+                                                                       BulkPrintDetails.builder()
+                                                                           .printDocs(List.of(element(printedWelshDoc)))
+                                                                           .build()
+                                                                   )))
+                                                                   .build())))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "addSpecificDocumentsFromCaseFileViewBasedOnCategories",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals(DocTypeOtherDocumentsEnum.noticeOfHearing, otherDocuments.get(0).getValue().getDocumentTypeOther());
+    }
+
+    @Test
+    void shouldRemoveOrderDocumentWelshFromResponse() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        OrderDocument orderDocument = OrderDocument.builder()
+            .documentId("88888888-8888-8888-8888-888888888888")
+            .documentFilename("NoticeOfHearing(CA).pdf")
+            .build();
+        OrderDocument orderDocumentWelsh = OrderDocument.builder()
+            .documentId("99999999-9999-9999-9999-999999999999")
+            .documentFilename("Welsh_NoticeOfHearing(CA).pdf")
+            .build();
+        CaseOrder caseOrder = CaseOrder.builder()
+            .orderType("noticeOfHearingParties")
+            .orderDocument(orderDocument)
+            .orderDocumentWelsh(orderDocumentWelsh)
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .applicants(List.of())
+            .respondents(List.of())
+            .orderCollection(List.of(
+                uk.gov.hmcts.reform.prl.models.dto.cafcass.Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(caseOrder)
+                    .build()
+            ))
+            .build();
+        CafCassCaseDetail cafCassCaseDetail = CafCassCaseDetail.builder().caseData(cafCassCaseData).build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder().cases(List.of(cafCassCaseDetail)).build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "removeUnnecessaryFieldsFromResponse",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        CaseOrder resultOrder = cafCassResponse.getCases().get(0).getCaseData().getOrderCollection().get(0).getValue();
+        assertNull(resultOrder.getOrderDocumentWelsh());
+        assertNotNull(resultOrder.getOrderDocument());
+    }
 }
