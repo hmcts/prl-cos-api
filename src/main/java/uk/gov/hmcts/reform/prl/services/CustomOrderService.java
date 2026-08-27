@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CustomOrderNameOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
@@ -40,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -49,7 +47,6 @@ import java.util.stream.Collectors;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C21_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_C43_ORDER_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 /**
@@ -79,9 +76,6 @@ public class CustomOrderService {
     private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-    private static final java.time.format.DateTimeFormatter ORDER_MADE_DATE_FORMATTER =
-        java.time.format.DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH);
-
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingDataService hearingDataService;
@@ -2211,7 +2205,6 @@ public class CustomOrderService {
         uk.gov.hmcts.reform.prl.models.OrderDetails updatedOrder = firstElement.getValue().toBuilder()
             .orderDocument(docToStore)
             .orderTypeId(orderName)
-            .otherDetails(buildFinalOrderOtherDetails(firstElement.getValue(), caseData))
             .doesOrderDocumentNeedSeal(YesOrNo.No)
             .build();
 
@@ -2231,28 +2224,6 @@ public class CustomOrderService {
         caseDataUpdated.put(ORDER_COLLECTION, updatedOrders);
         log.info("Updated orderCollection[0] with doc: {}, orderTypeId: {}. Total orders: {}",
             docToStore.getDocumentFileName(), orderName, updatedOrders.size());
-    }
-
-    private OtherOrderDetails buildFinalOrderOtherDetails(uk.gov.hmcts.reform.prl.models.OrderDetails orderDetails,
-                                                          CaseData caseData) {
-        OtherOrderDetails existingOtherDetails = orderDetails.getOtherDetails();
-        if (existingOtherDetails != null && StringUtils.isNotBlank(existingOtherDetails.getOrderMadeDate())) {
-            return existingOtherDetails;
-        }
-
-        String orderMadeDate = caseData.getDateOrderMade() != null
-            ? caseData.getDateOrderMade().format(ORDER_MADE_DATE_FORMATTER)
-            : null;
-
-        if (existingOtherDetails != null) {
-            return existingOtherDetails.toBuilder()
-                .orderMadeDate(orderMadeDate)
-                .build();
-        }
-
-        return OtherOrderDetails.builder()
-            .orderMadeDate(orderMadeDate)
-            .build();
     }
 
     C21OrderOptionsEnum getC21OrderOption(Map<String, Object> caseDataMap) {

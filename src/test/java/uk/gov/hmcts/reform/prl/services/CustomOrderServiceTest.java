@@ -3920,7 +3920,7 @@ class CustomOrderServiceTest {
     }
 
     @Test
-    void testUpdateFinalOrderCollection_setsOrderMadeDateWhenMissing() {
+    void testUpdateFinalOrderCollection_doesNotSetOrderMadeDateWhenMissing() {
         uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
             .orderTypeId("Old Order")
             .otherDetails(OtherOrderDetails.builder()
@@ -3949,12 +3949,12 @@ class CustomOrderServiceTest {
         List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
             (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
         OtherOrderDetails otherDetails = updatedList.get(0).getValue().getOtherDetails();
-        assertEquals("24 Aug 2026", otherDetails.getOrderMadeDate());
+        assertNull(otherDetails.getOrderMadeDate());
         assertEquals("Court Admin", otherDetails.getOrderCreatedBy());
     }
 
     @Test
-    void testUpdateFinalOrderCollection_setsOrderMadeDateWhenBlank() {
+    void testUpdateFinalOrderCollection_preservesBlankOrderMadeDate() {
         uk.gov.hmcts.reform.prl.models.OrderDetails existingOrder = uk.gov.hmcts.reform.prl.models.OrderDetails.builder()
             .otherDetails(OtherOrderDetails.builder()
                               .orderMadeDate(" ")
@@ -3981,7 +3981,7 @@ class CustomOrderServiceTest {
         @SuppressWarnings("unchecked")
         List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>> updatedList =
             (List<Element<uk.gov.hmcts.reform.prl.models.OrderDetails>>) caseDataUpdated.get("orderCollection");
-        assertEquals("24 Aug 2026", updatedList.get(0).getValue().getOtherDetails().getOrderMadeDate());
+        assertEquals(" ", updatedList.get(0).getValue().getOtherDetails().getOrderMadeDate());
     }
 
 
