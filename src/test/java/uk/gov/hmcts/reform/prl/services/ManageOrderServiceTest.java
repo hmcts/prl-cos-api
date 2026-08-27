@@ -61,9 +61,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.CafcassCymruDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.LocalAuthorityDocumentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -205,6 +203,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@SuppressWarnings("unchecked")
 class ManageOrderServiceTest {
 
     @InjectMocks
@@ -703,7 +702,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -739,7 +738,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -775,7 +774,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -811,7 +810,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -847,7 +846,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -883,7 +882,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1000,7 +999,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1036,7 +1035,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1071,7 +1070,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1108,7 +1107,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1414,7 +1413,7 @@ class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
 
         manageOrderService.updateCaseDataWithAppointedGuardianNames(caseDetails, namesList);
-        assertEquals("Full Name", caseDataNameList.get(0).getValue().getGuardianFullName());
+        assertEquals("Full Name", caseDataNameList.getFirst().getValue().getGuardianFullName());
     }
 
 
@@ -1545,7 +1544,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1582,7 +1581,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1615,7 +1614,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1652,8 +1651,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -1700,7 +1698,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1737,7 +1735,7 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated;
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2160,32 +2158,13 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-
-        List<DynamicMultiselectListElement> elements = new ArrayList<>();
-        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
-            .code("1234")
-            .label("test label").build();
-        elements.add(element);
-        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
-                                                                                          .builder()
-                                                                                          .orderDocument(Document
-                                                                                                             .builder()
-                                                                                                             .build())
-                                                                                          .dateCreated(now)
-                                                                                          .orderTypeId(TEST_UUID)
-                                                                                          .otherDetails(
-                                                                                              OtherOrderDetails.builder().build())
-                                                                                          .build()).build();
-        List<Element<OrderDetails>> orderList = new ArrayList<>();
-        orderList.add(orders);
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(hearingService.createAutomatedHearing(authToken, null))
             .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
-        Exception exception = assertThrows(ManageOrderRuntimeException.class, () -> {
-            hearingService.createAutomatedHearing(authToken, null);
-        });
+        Exception exception = assertThrows(ManageOrderRuntimeException.class,
+                                           () -> hearingService.createAutomatedHearing(authToken, null));
         String expectedMessage = "Invalid Json";
         assertTrue(expectedMessage.contains(exception.getMessage()));
     }
@@ -2219,8 +2198,6 @@ class ManageOrderServiceTest {
                                                       .build())))
             .build();
 
-        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
-        Element<OrderDetails> orders1 = element(orderDetails);
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
                                                                                           .orderTypeId(TEST_UUID)
@@ -2280,8 +2257,6 @@ class ManageOrderServiceTest {
                                                       .build())))
             .build();
 
-        OrderDetails orderDetails = OrderDetails.builder().typeOfOrder("kkkkk").dateCreated(LocalDateTime.now()).build();
-        Element<OrderDetails> orders1 = element(orderDetails);
         Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
                                                                                           .builder()
                                                                                           .orderType("null")
@@ -3639,7 +3614,7 @@ class ManageOrderServiceTest {
         when(hearingService.getHearings(authToken, "123")).thenReturn(hearings);
 
         //invoke
-        DynamicList dynamicList1 = manageOrderService.populateHearingsDropdown(authToken, caseData);
+        manageOrderService.populateHearingsDropdown(authToken, caseData);
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
@@ -3755,7 +3730,7 @@ class ManageOrderServiceTest {
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         manageOrderService.resetChildOptions(callbackRequest);
-        assertEquals(null, callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
+        assertNull(callbackRequest.getCaseDetails().getData().get(CHILD_OPTION));
     }
 
     @Test
@@ -3812,15 +3787,6 @@ class ManageOrderServiceTest {
 
     @Test
     void testGetJudgeFullName() {
-        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
-            .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("1234").personalCode("ABC").build())
-            .sdoLocalAuthorityList(of(SdoLocalAuthorityEnum.localAuthorityLetter))
-            .sdoFurtherList(of(SdoFurtherInstructionsEnum.newDirection))
-            .build();
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .standardDirectionOrder(standardDirectionOrder)
-            .build();
         List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
         JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
             .fullName("Test")
@@ -3957,7 +3923,7 @@ class ManageOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(of(dynamicMultiselectListElementUpdated));
 
         CaseData caseData1 = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-        assertEquals("John (Child 1)", caseData1.getManageOrders().getChildOption().getListItems().get(0).getLabel());
+        assertEquals("John (Child 1)", caseData1.getManageOrders().getChildOption().getListItems().getFirst().getLabel());
     }
 
     @Test
@@ -4018,7 +3984,7 @@ class ManageOrderServiceTest {
     void testCleanUpSelectedManageOrderOptions() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("manageOrdersOptions","manageOrdersOptions");
-        manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         assertNull(caseDataUpdated.get("manageOrdersOptions"));
 
     }
@@ -4126,7 +4092,7 @@ class ManageOrderServiceTest {
         assertNotNull(caseDataUpdated.get("additionalOrderDocuments"));
         List<Element<AdditionalOrderDocument>> additionalOrderDocuments =
             (List<Element<AdditionalOrderDocument>>) caseDataUpdated.get("additionalOrderDocuments");
-        assertEquals(2, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
+        assertEquals(2, additionalOrderDocuments.getFirst().getValue().getAdditionalDocuments().size());
     }
 
     @Test
@@ -4160,7 +4126,7 @@ class ManageOrderServiceTest {
     void testCleanUpServeOrderOptions() {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("serveOrderAdditionalDocuments","serveOrderAdditionalDocuments");
-        manageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+        ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
         assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
     }
 
@@ -4574,7 +4540,6 @@ class ManageOrderServiceTest {
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
 
-        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
             .representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
@@ -4944,7 +4909,7 @@ class ManageOrderServiceTest {
                                  .code("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1")
                                  .label("Sam Nolan")
                                  .build());
-        CaseData caseData = CaseData.builder()
+        return CaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesNoNotApplicable.No)
                               .recipientsOptions(DynamicMultiSelectList.builder()
@@ -4957,7 +4922,6 @@ class ManageOrderServiceTest {
                                                 .build())
                               .build())
             .build();
-        return caseData;
     }
 
     @Test
@@ -5306,7 +5270,7 @@ class ManageOrderServiceTest {
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) response.get("orderCollection");
 
         assertEquals("Financial compensation order following C79 enforcement application (C82)",
-                     orderCollection.get(0).getValue().getOrderTypeId());
+                     orderCollection.getFirst().getValue().getOrderTypeId());
         assertNotNull(response);
 
     }
@@ -5727,7 +5691,7 @@ class ManageOrderServiceTest {
         CaseData caseDataResp = manageOrderService.setHearingDataForSdo(caseData, hearings, "auth");
         assertNull(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab());
         assertEquals(uuid, caseDataResp.getStandardDirectionOrder()
-            .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().get(0).getId());
+            .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().getFirst().getId());
     }
 
     @Test
@@ -5830,14 +5794,14 @@ class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList);
         assertNotNull(orderDetails);
-        assertNotNull(orderDetails.get(0));
-        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails());
-        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties());
-        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0));
+        assertNotNull(orderDetails.getFirst());
+        assertNotNull(orderDetails.getFirst().getValue().getServeOrderDetails());
+        assertNotNull(orderDetails.getFirst().getValue().getServeOrderDetails().getServedParties());
+        assertNotNull(orderDetails.getFirst().getValue().getServeOrderDetails().getServedParties().getFirst());
         assertEquals(
-            orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0).getValue()
+            orderDetails.getFirst().getValue().getServeOrderDetails().getServedParties().getFirst().getValue()
                 .getPartyId(),
-            (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId())
+            (orders.getValue().getServeOrderDetails().getServedParties().getFirst().getValue().getPartyId())
         );
     }
 
@@ -6319,9 +6283,8 @@ class ManageOrderServiceTest {
         List<Element<HearingData>> hearingsList = manageOrders1.getOrdersHearingDetails();
         when(hearingService.createAutomatedHearing(eq(authToken), any()))
             .thenThrow(new ManageOrderRuntimeException("Invalid Json"));
-        Exception exception = assertThrows(ManageOrderRuntimeException.class, () -> {
-            manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingsList);
-        });
+        Exception exception = assertThrows(ManageOrderRuntimeException.class,
+                                           () -> manageOrderService.createAutomatedHearingManagement(authToken, caseData, hearingsList));
         String expectedMessage = "Invalid Json";
         assertTrue(expectedMessage.contains(exception.getMessage()));
     }
@@ -6858,11 +6821,6 @@ class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
-        List<DynamicMultiselectListElement> elements = new ArrayList<>();
-        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
-            .code("1234")
-            .label("test label").build();
-        elements.add(element);
         ManageOrders manageOrders = ManageOrders.builder()
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
             .build();
@@ -6895,14 +6853,6 @@ class ManageOrderServiceTest {
                                                                                           .build()).build();
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
-
-        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
-        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
-            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
-            .build();
-        Element<PartyDetails> partyDetailsElement = element(details);
-        partyDetails.add(partyDetailsElement);
-
 
 
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
@@ -7860,7 +7810,7 @@ class ManageOrderServiceTest {
         assertNotNull(serveOrderList);
         assertNotNull(serveOrderList.getValue());
         assertEquals(1, serveOrderList.getValue().size());
-        assertEquals(secondOrderId, serveOrderList.getValue().get(0).getCode());
+        assertEquals(secondOrderId, serveOrderList.getValue().getFirst().getCode());
     }
 
     @Test
@@ -7900,7 +7850,7 @@ class ManageOrderServiceTest {
         assertNotNull(serveOrderList);
         assertNotNull(serveOrderList.getValue());
         assertEquals(1, serveOrderList.getValue().size());
-        assertEquals(firstOrderId, serveOrderList.getValue().get(0).getCode());
+        assertEquals(firstOrderId, serveOrderList.getValue().getFirst().getCode());
     }
 
     @Test
@@ -7934,7 +7884,7 @@ class ManageOrderServiceTest {
         List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
         assertNotNull(draftOrders);
         assertFalse(draftOrders.isEmpty());
-        assertEquals(Yes, draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+        assertEquals(Yes, draftOrders.getFirst().getValue().getIsAutoHearingReqPending());
     }
 
     @Test
@@ -7970,7 +7920,7 @@ class ManageOrderServiceTest {
         List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
         assertNotNull(draftOrders);
         assertFalse(draftOrders.isEmpty());
-        assertEquals(Yes, draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+        assertEquals(Yes, draftOrders.getFirst().getValue().getIsAutoHearingReqPending());
     }
 
     @Test
@@ -8006,7 +7956,7 @@ class ManageOrderServiceTest {
         assertNotNull(draftOrders);
         assertFalse(draftOrders.isEmpty());
         // uploadAnOrder does not have Page 19, so AHR should not be triggered
-        assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+        assertNull(draftOrders.getFirst().getValue().getIsAutoHearingReqPending());
     }
 
     @Test
@@ -8041,11 +7991,11 @@ class ManageOrderServiceTest {
         assertNotNull(draftOrders);
         assertFalse(draftOrders.isEmpty());
         // Only COURT_ADMIN should trigger AHR
-        assertNull(draftOrders.get(0).getValue().getIsAutoHearingReqPending());
+        assertNull(draftOrders.getFirst().getValue().getIsAutoHearingReqPending());
     }
 
     @Test
-    void testSetFinalOrderCollection_courtAdmin_noCheck_eligibleForAhr_setsAutoHearingPending() throws Exception {
+    void testSetFinalOrderCollection_courtAdmin_noCheck_eligibleForAhr_setsAutoHearingPending() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .forename("Test")
             .surname("Admin")
@@ -8091,11 +8041,11 @@ class ManageOrderServiceTest {
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) result.get(ORDER_COLLECTION);
         assertNotNull(orderCollection);
         assertFalse(orderCollection.isEmpty());
-        assertEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
+        assertEquals(Yes, orderCollection.getFirst().getValue().getIsAutoHearingReqPending());
     }
 
     @Test
-    void testSetFinalOrderCollection_courtAdmin_noCheck_notEligibleForAhr_doesNotSetAutoHearingPending() throws Exception {
+    void testSetFinalOrderCollection_courtAdmin_noCheck_notEligibleForAhr_doesNotSetAutoHearingPending() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .forename("Test")
             .surname("Admin")
@@ -8138,7 +8088,7 @@ class ManageOrderServiceTest {
         assertNotNull(orderCollection);
         assertFalse(orderCollection.isEmpty());
         // When not eligible for AHR, flag should not be Yes (can be null or No)
-        assertNotEquals(Yes, orderCollection.get(0).getValue().getIsAutoHearingReqPending());
+        assertNotEquals(Yes, orderCollection.getFirst().getValue().getIsAutoHearingReqPending());
     }
 
     @ParameterizedTest(name = "Testing LA CIR document: {0}")
@@ -8158,6 +8108,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().checkIsThisUrgent(Yes).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder()
                                 .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
@@ -8169,7 +8120,7 @@ class ManageOrderServiceTest {
             authToken,
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
-            new HashMap<String, Object>(),
+            new HashMap<>(),
             caseData,
             null
         );
@@ -8331,6 +8282,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().checkIsThisUrgent(Yes).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder()
                                 .whenReportsMustBeFiled(LocalDate.now())
@@ -8342,7 +8294,7 @@ class ManageOrderServiceTest {
             authToken,
             EventRequestData.builder().build(),
             StartEventResponse.builder().build(),
-            new HashMap<String, Object>(),
+            new HashMap<>(),
             caseData,
             null
         );
@@ -8405,6 +8357,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().checkIsThisUrgent(Yes).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder()
                                 .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
@@ -8477,6 +8430,7 @@ class ManageOrderServiceTest {
             .applicantCaseName("Test Case")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().checkIsThisUrgent(Yes).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder()
                                 .whenReportsMustBeFiledByLocalAuthority(LocalDate.now())
