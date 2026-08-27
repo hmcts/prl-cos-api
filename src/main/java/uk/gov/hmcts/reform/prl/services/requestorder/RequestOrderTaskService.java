@@ -171,7 +171,7 @@ public class RequestOrderTaskService {
         )).build();
 
         LastModified lastModifiedRange = LastModified.builder().gte(
-            LocalDate.now().minusDays(searchMulitplier * largestCadenceWorkingDays).toString()).build();
+            LocalDate.now().minusDays(Integer.toUnsignedLong(searchMulitplier * largestCadenceWorkingDays)).toString()).build();
         Range range = Range.builder().lastModified(lastModifiedRange).build();
         Filter rangeFilter = Filter.builder().range(range).build();
 
