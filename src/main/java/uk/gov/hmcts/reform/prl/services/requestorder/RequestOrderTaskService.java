@@ -76,6 +76,11 @@ public class RequestOrderTaskService {
     private final HearingChasePolicy chasePolicy;
     private final ObjectMapper objectMapper;
 
+    @Value("${request-order-task.cadence-working-days.searchMulitplier}")
+    private int searchMulitplier;
+    @Value("${request-order-task.cadence-working-days.c100}")
+    private int largestCadenceWorkingDays;
+
     public void processRequestOrderTasks() {
         log.info("Running Request Order task cron job...");
 
@@ -165,9 +170,9 @@ public class RequestOrderTaskService {
             Should.builder().match(Match.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getValue()).build()).build()
         )).build();
 
-        //qry for lastModified>=deployDate
-        LastModified lastModified = LastModified.builder().gte(LocalDate.now().toString()).build();
-        Range range = Range.builder().lastModified(lastModified).build();
+        LastModified lastModifiedRange = LastModified.builder().gte(
+            LocalDate.now().minusDays(searchMulitplier * largestCadenceWorkingDays).toString()).build();
+        Range range = Range.builder().lastModified(lastModifiedRange).build();
         Filter rangeFilter = Filter.builder().range(range).build();
 
         Bool filter = Bool.builder()
