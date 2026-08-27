@@ -25,6 +25,10 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -289,8 +293,15 @@ public class DocumentRemovalService {
     }
 
     private String formatSelectDocumentLabel(Document caseDocument) {
-        return caseDocument.getUploadTimeStamp() != null
-            ? caseDocument.getDocumentFileName() + " (" + UPLOAD_TIMESTAMP_FORMATTER.format(caseDocument.getUploadTimeStamp()) + ")"
-            : caseDocument.getDocumentFileName();
+        LocalDateTime uploadedTimestamp = caseDocument.getUploadTimeStamp();
+
+        if (uploadedTimestamp != null) {
+            ZonedDateTime ukDateTime = uploadedTimestamp
+                .atZone(ZoneOffset.UTC)
+                .withZoneSameInstant(ZoneId.of("Europe/London"));
+            return caseDocument.getDocumentFileName() + " (" + UPLOAD_TIMESTAMP_FORMATTER.format(ukDateTime) + ")";
+        } else {
+            return caseDocument.getDocumentFileName();
+        }
     }
 }
