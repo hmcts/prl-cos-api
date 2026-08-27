@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
@@ -18,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentRemovalWrapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
@@ -31,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,6 +46,12 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService.CAFCASS_QUARANTINE_DOC_LIST;
+import static uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService.CITIZEN_QUARANTINE_DOC_LIST;
+import static uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService.COURT_NAV_QUARANTINE_DOCUMENT_LIST;
+import static uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService.COURT_STAFF_QUARANTINE_DOC_LIST;
+import static uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService.LEGAL_PROF_QUARANTINE_DOC_LIST;
+import static uk.gov.hmcts.reform.prl.services.documentremoval.DocumentRemovalService.LOCAL_AUTHORITY_QUARANTINE_DOC_LIST;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
@@ -101,15 +112,6 @@ class DocumentRemovalServiceTest {
             .documentRemovalWrapper(DocumentRemovalWrapper.builder()
                 .documentRemovalCaseDocuments(dynamicList)
                 .build())
-            .reviewDocuments(
-                ReviewDocuments.builder()
-                    .courtStaffUploadDocListDocTab(
-                        List.of(element(QuarantineLegalDoc.builder()
-                            .respondentStatementsDocument(document)
-                            .categoryId("respondentStatements")
-                            .build()
-                        )))
-                    .build())
             .build();
 
         courtStaffUploadDoc = Map.of(
@@ -170,6 +172,16 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testRemoveDocumentFromCaseData() throws IOException {
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtStaffUploadDocListDocTab(
+                List.of(element(QuarantineLegalDoc.builder()
+                                    .respondentStatementsDocument(document)
+                                    .categoryId("respondentStatements")
+                                    .build()
+                )))
+            .build();
+        caseData.setReviewDocuments(reviewDocuments);
+
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
         when(objectMapper.convertValue(
@@ -189,6 +201,16 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollectionWhereKeyIsNotDocument() throws IOException {
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtStaffUploadDocListDocTab(
+                List.of(element(QuarantineLegalDoc.builder()
+                                    .respondentStatementsDocument(document)
+                                    .categoryId("respondentStatements")
+                                    .build()
+                )))
+            .build();
+        caseData.setReviewDocuments(reviewDocuments);
+
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
         when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
         when(objectMapper.convertValue(
@@ -214,6 +236,16 @@ class DocumentRemovalServiceTest {
 
     @Test
     void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollectionWhereKeyIsDocument() throws IOException {
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder()
+            .courtStaffUploadDocListDocTab(
+                List.of(element(QuarantineLegalDoc.builder()
+                                    .respondentStatementsDocument(document)
+                                    .categoryId("respondentStatements")
+                                    .build()
+                )))
+            .build();
+        caseData.setReviewDocuments(reviewDocuments);
+
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
 
         Document mockedDocument = mock(Document.class);
@@ -240,6 +272,101 @@ class DocumentRemovalServiceTest {
         // Verify document removed from the collection
         Map<String, Object> caseDataMap = caseDataMapCaptor.getValue();
         assertEquals(Collections.emptyList(), caseDataMap.get("courtStaffUploadDocListDocTab"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("testRemoveQuarantineDocument")
+    void testRemoveQuarantineDocument(String field, DocumentManagementDetails documentManagementDetails) throws IOException {
+        caseData.setDocumentManagementDetails(documentManagementDetails);
+
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+
+        ArgumentCaptor<Map> caseDataMapCaptor = ArgumentCaptor.forClass(Map.class);
+        when(documentRemover.removeDocument(caseDataMapCaptor.capture(), eq("doc1")))
+            .thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
+
+        Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
+
+        assertFalse(result.containsKey("documentToRemove"));
+        assertFalse(result.containsKey("documentRemovalConfirmOptions"));
+        assertEquals("someValue", result.get("someKey"));
+
+        verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
+
+        // Verify document removed from the collection
+        Map<String, Object> caseDataMap = caseDataMapCaptor.getValue();
+        assertEquals(Collections.emptyList(), caseDataMap.get(field));
+    }
+
+    private static Stream<Arguments> testRemoveQuarantineDocument() {
+        Document document = Document.builder()
+            .documentUrl("http://someserver/doc1")
+            .documentFileName("file1.pdf")
+            .uploadTimeStamp(LocalDateTime.parse("2007-12-03T10:15:30"))
+            .build();
+
+        DocumentManagementDetails solicitor = DocumentManagementDetails.builder()
+            .legalProfQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
+                                                             .document(document)
+                                                             .build()))
+            ).build();
+
+        DocumentManagementDetails courtStaff = DocumentManagementDetails.builder()
+            .courtStaffQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
+                                                              .courtStaffQuarantineDocument(document)
+                                                              .build()))
+            ).build();
+
+        DocumentManagementDetails cafcass = DocumentManagementDetails.builder()
+            .cafcassQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
+                                                           .cafcassQuarantineDocument(document)
+                                                           .build()))
+            ).build();
+
+        DocumentManagementDetails citizen = DocumentManagementDetails.builder()
+            .citizenQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
+                                                           .citizenQuarantineDocument(document)
+                                                           .build()))
+            ).build();
+
+        DocumentManagementDetails courtNav = DocumentManagementDetails.builder()
+            .courtNavQuarantineDocumentList(List.of(element(QuarantineLegalDoc.builder()
+                                                                .courtNavQuarantineDocument(document)
+                                                                .build()))
+            ).build();
+
+        DocumentManagementDetails localAuthority = DocumentManagementDetails.builder()
+            .localAuthorityQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
+                                                                  .localAuthorityQuarantineDocument(document)
+                                                                  .build()))
+            ).build();
+
+        return Stream.of(
+            Arguments.of(
+                LEGAL_PROF_QUARANTINE_DOC_LIST,
+                solicitor
+            ),
+            Arguments.of(
+                COURT_STAFF_QUARANTINE_DOC_LIST,
+                courtStaff
+            ),
+            Arguments.of(
+                CAFCASS_QUARANTINE_DOC_LIST,
+                cafcass
+            ),
+            Arguments.of(
+                CITIZEN_QUARANTINE_DOC_LIST,
+                citizen
+            ),
+            Arguments.of(
+                COURT_NAV_QUARANTINE_DOCUMENT_LIST,
+                courtNav
+            ),
+            Arguments.of(
+                LOCAL_AUTHORITY_QUARANTINE_DOC_LIST,
+                localAuthority
+            )
+        );
     }
 
     @Test
