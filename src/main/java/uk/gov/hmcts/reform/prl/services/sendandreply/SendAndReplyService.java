@@ -2024,7 +2024,7 @@ public class SendAndReplyService {
     private Document getCoverSheet(String authorization, CaseData caseData, Address address, String name, String fileName) {
 
         try {
-            return DocumentUtils.toCoverSheetDocument(
+            return DocumentUtils.toDocumentWithFilename(
                 getCoverLetterGeneratedDocInfo(caseData, authorization, address, name), fileName);
         } catch (Exception e) {
             log.error("Failed to generate cover sheet {}", e);
