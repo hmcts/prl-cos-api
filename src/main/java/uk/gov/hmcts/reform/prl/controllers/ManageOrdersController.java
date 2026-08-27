@@ -61,8 +61,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +85,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
@@ -253,7 +250,6 @@ public class ManageOrdersController {
 
     private void prepopulateHeaderFields(Map<String, Object> caseData, String authorisation) {
         caseData.put(IS_INVOKED_FROM_TASK, No);
-        caseData.put("dateOrderMade", LocalDate.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
 
         ManageOrderService.LoggedInUserTypeDetails userTypeDetails = manageOrderService.getLoggedInUserTypeDetails(authorisation);
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
@@ -519,7 +515,6 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
-            caseData = ensureDateOrderMade(caseData, caseDataUpdated);
 
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
             // Clear doYouWantToServeOrder if order needs judge/manager review (stale value from previous order)
@@ -564,18 +559,6 @@ public class ManageOrdersController {
         } else {
             throw (new InvalidClientException(INVALID_CLIENT));
         }
-    }
-
-    private CaseData ensureDateOrderMade(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (caseData.getDateOrderMade() != null) {
-            return caseData;
-        }
-
-        LocalDate dateOrderMade = LocalDate.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-        caseDataUpdated.put("dateOrderMade", dateOrderMade);
-        return caseData.toBuilder()
-            .dateOrderMade(dateOrderMade)
-            .build();
     }
 
     private UUID getDraftOrderId(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {

@@ -3875,7 +3875,7 @@ public class ManageOrderService {
         //PRL-3254 - Populate hearing details dropdown for create order
         log.info("About to call populateHearingsDropdown for case {}", caseData.getId());
         caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
-        caseDataUpdated.put("dateOrderMade", LocalDate.now());
+        caseDataUpdated.put("dateOrderMade", LocalDate.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE)));
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : List.of(element(MagistrateLastName.builder().build())));
     }
