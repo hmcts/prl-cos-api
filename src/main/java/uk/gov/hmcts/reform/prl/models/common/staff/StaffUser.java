@@ -15,16 +15,8 @@ public class StaffUser {
         return idamId;
     }
 
-    public String getPersonalCode() {
-        return personalCode;
-    }
-
-    private String personalCode;
-
     @JsonCreator
-    public StaffUser(@JsonProperty("idamId") String idamId,
-                     @JsonProperty("personalCode") String personalCode) {
+    public StaffUser(@JsonProperty("idamId") String idamId) {
         this.idamId = idamId;
-        this.personalCode = personalCode;
     }
 }
