@@ -52,7 +52,6 @@ import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,11 +62,13 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
 @Slf4j
 @SuppressWarnings({"squid:S5665"})
@@ -162,6 +163,8 @@ public class EditAndApproveDraftOrderController {
 
     }
 
+
+
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Callback to generate draft order collection")
@@ -238,6 +241,8 @@ public class EditAndApproveDraftOrderController {
                 if (draftOrderId == null) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(List.of(ERROR_RETRIEVE_DRAFT_ORDER)).build();
+                } else {
+                    caseDataUpdated.put(WA_ORDER_COLLECTION_ID, draftOrderId);
                 }
                 editAndApproveOrder(
                     authorisation,
@@ -379,19 +384,28 @@ public class EditAndApproveDraftOrderController {
             caseData.getDraftOrderCollection(),
             UUID.fromString(draftOrderId)
         );
+
         caseDataUpdated.put(
             WA_ORDER_NAME_JUDGE_APPROVED,
             selectedOrder != null ? selectedOrder.getLabelForOrdersDynamicList() : null
         );
 
-        caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
+
+        Map<String, Object> dataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             authorisation,
             callbackRequest.getEventId(),
-            draftOrderId
-        ));
+            draftOrderId,
+            caseDataUpdated
+        );
+
+        caseDataUpdated.putAll(dataMap);
+
+
 
     }
+
+
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
@@ -542,7 +556,7 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList, language)
                 && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList, language)) {
-                if (Objects.nonNull(caseData.getStandardDirectionOrder())
+                if (nonNull(caseData.getStandardDirectionOrder())
                     && Yes.equals(caseData.getStandardDirectionOrder().getEditedOrderHasDefaultCaseFields())) {
                     draftAnOrderService.populateStandardDirectionOrderDefaultFields(
                         authorisation,
@@ -611,7 +625,9 @@ public class EditAndApproveDraftOrderController {
                 startAllTabsUpdateDataContent.eventRequestData(),
                 caseDataUpdated
             );
-            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation);
+
+            UUID newDraftOrderCollectionId = getOrderId(caseDataUpdated);
+            manageOrderService.orchestrateCirDocumentsRequestedTask(caseData, authorisation, newDraftOrderCollectionId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
