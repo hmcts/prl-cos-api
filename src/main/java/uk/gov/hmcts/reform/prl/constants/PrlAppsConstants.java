@@ -806,6 +806,7 @@ public class PrlAppsConstants {
     public static final String SOA_NOTICE_SAFETY = "Notice-safety.pdf";
     public static final String SOA_C9_PERSONAL_SERVICE_FILENAME = "C9_personal_service.pdf";
     public static final String SOA_FL415_FILENAME = "FL415.pdf";
+    public static final String SOA_FL415_FILENAME_WELSH = "CY_FL415.pdf";
 
 
     public static final String SOA_MULTIPART_FILE = "files";

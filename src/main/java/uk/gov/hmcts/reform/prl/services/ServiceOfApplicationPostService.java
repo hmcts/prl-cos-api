@@ -50,6 +50,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -139,15 +140,8 @@ public class ServiceOfApplicationPostService {
         List<MultipartFile> files = new ArrayList<>();
 
         attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+        attachStaticFileToTheDocuments(documentLanguage, files, SOA_FL415_FILENAME, SOA_FL415_FILENAME_WELSH);
 
-        if (documentLanguage.isGenEng()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                SOA_FL415_FILENAME,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
-            ));
-        }
         // FPET-1147 Annex 1 file inclusion
         if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
             attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
