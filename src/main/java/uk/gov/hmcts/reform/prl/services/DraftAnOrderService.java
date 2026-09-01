@@ -1364,6 +1364,7 @@ public class DraftAnOrderService {
                 .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                 .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                 .childOption(manageOrderService.getChildOption(caseData))
+                .partiesAndRepresentation(caseData.getManageOrders().getPartiesAndRepresentation())
                 .orderDirections(caseData.getManageOrders().getOrderDirections())
                 .orderDirectionsRtf(!StringUtils.isEmpty(caseData.getManageOrders().getOrderDirectionsRtf())
                                         ? caseData.getManageOrders().getOrderDirectionsRtf()
