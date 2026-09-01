@@ -100,6 +100,7 @@ public enum ManageOrderFieldsEnum {
     orderDirections("orderDirections"),
     penalNoticeNeeded("penalNoticeNeeded"),
     penalNoticeRtf("penalNoticeRtf"),
+    partiesAndRepresentation("partiesAndRepresentation"),
     recitalsOrPreambleRtf("recitalsOrPreambleRtf"),
     orderDirectionsRtf("orderDirectionsRtf"),
     scheduleToOrderRtf("scheduleToOrderRtf"),
