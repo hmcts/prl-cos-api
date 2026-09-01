@@ -1429,6 +1429,7 @@ public class ManageOrderService {
             .judgeOrMagistratesLastName(caseData.getJudgeOrMagistratesLastName())
             .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
             .magistrateLastName(caseData.getMagistrateLastName())
+            .partiesAndRepresentation(caseData.getManageOrders().getPartiesAndRepresentation())
             .recitalsOrPreamble(getRecitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble(),
                                                       caseData.getManageOrders().getRecitalsOrPreambleRtf()))
             .recitalsOrPreambleRtf(getRecitalsOrPreambleForRtf(caseData.getManageOrders().getRecitalsOrPreamble(),

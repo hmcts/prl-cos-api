@@ -68,6 +68,8 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("orderDirections")
     private final String orderDirections;
     @JsonProperty("penalNoticeNeeded")
+    private final String partiesAndRepresentation;
+    @JsonProperty("partiesAndRepresentation")
     private final List<PenalNoticeOptionEnum> penalNoticeNeeded;
     @JsonProperty("penalNoticeRtf")
     private final String penalNoticeRtf;

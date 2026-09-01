@@ -63,6 +63,8 @@ public class DraftOrder {
     private final YesOrNo checkIsThisUrgent;
     @JsonProperty("orderDirections")
     private final String orderDirections;
+    @JsonProperty("partiesAndRepresentation")
+    private final String partiesAndRepresentation;
     @JsonProperty("penalNoticeNeeded")
     private final List<PenalNoticeOptionEnum> penalNoticeNeeded;
     @JsonProperty("penalNoticeRtf")
