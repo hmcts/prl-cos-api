@@ -901,6 +901,7 @@ public class PrlAppsConstants {
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
+    public static final String PARTIES_AND_REPRESENTATION = "partiesAndRepresentation";
     public static final String PENAL_NOTICE_NEEDED = "penalNoticeNeeded";
     public static final String PENAL_NOTICE_RTF = "penalNoticeRtf";
     public static final String ORDER_DIRECTIONS_RTF = "orderDirectionsRtf";
