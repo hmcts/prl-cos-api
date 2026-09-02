@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -172,6 +173,11 @@ public class CaseController {
             if (userInfo.isPresent() && userInfo.get().getRoles().contains(CITIZEN_ROLE)) {
                 log.info("Citizen Dashboard: retrieving cases for citizen user id: {}", userInfo.get().getUid());
                 caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+                log.info(
+                    "Citizen Dashboard: retrievedCasesCount={} caseIdsAndStates={}",
+                    caseDataList.size(),
+                    caseDataList.stream().map(this::toCaseLogValue).collect(Collectors.joining(","))
+                );
             } else {
                 throw (new RuntimeException(INVALID_ROLE));
             }
@@ -183,6 +189,12 @@ public class CaseController {
 
     private CitizenCaseData buildCitizenCaseData(CaseData caseData) {
         return new CitizenCaseData(caseData, caseData.getState().getLabel());
+    }
+
+    private String toCaseLogValue(CaseData caseData) {
+        String caseId = String.valueOf(caseData.getId());
+        String caseState = caseData.getState() != null ? caseData.getState().getValue() : "unknown-state";
+        return caseId + ":" + caseState;
     }
 
     @PostMapping("/case/create")
