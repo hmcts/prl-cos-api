@@ -157,12 +157,6 @@ public class RequestOrderTaskService {
         }
     }
 
-    private Long getWorkingDay() {
-        return Integer.toUnsignedLong(workingDayIndicator.workingDaysBetween(LocalDate.now(),
-                                                                             LocalDate.now()
-                                                                                 .plusDays(searchMulitplier * largestCadenceWorkingDays)));
-    }
-
     /**
      * Matches C100/FL401 cases in one of the three hearing states.
      */
@@ -179,7 +173,10 @@ public class RequestOrderTaskService {
         )).build();
 
         LastModified lastModifiedRange = LastModified.builder().gte(
-            LocalDate.now().minusDays(getWorkingDay()).toString()).build();
+            LocalDate.now().minusDays(Integer.toUnsignedLong(workingDayIndicator
+                                                                 .getPreviousWorkingDays(LocalDate.now(),
+                                                                                         searchMulitplier * largestCadenceWorkingDays)))
+                .toString()).build();
         Range range = Range.builder().lastModified(lastModifiedRange).build();
         Filter rangeFilter = Filter.builder().range(range).build();
 

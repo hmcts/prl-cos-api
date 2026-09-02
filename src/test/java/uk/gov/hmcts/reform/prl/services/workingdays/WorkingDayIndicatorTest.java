@@ -77,4 +77,18 @@ class WorkingDayIndicatorTest {
             LocalDate.of(2026, 12, 24),
             LocalDate.of(2026, 12, 29))).isEqualTo(1);
     }
+
+    @Test
+    void getPreviousWorkingDays() {
+        assertThat(workingDayIndicator.getPreviousWorkingDays(
+            LocalDate.of(2026, 9, 1), 3))
+            .isEqualTo(6);
+    }
+
+    @Test
+    void getPreviousWorkingDaysWithDays1() {
+        assertThat(workingDayIndicator.getPreviousWorkingDays(
+            LocalDate.of(2026, 9, 1), 1))
+            .isEqualTo(4);
+    }
 }
