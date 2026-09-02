@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "payment_api", port = "5002")
-@TestPropertySource(properties = {"payments.api.url=http://localhost:5002"})
+@TestPropertySource(properties = {"payments.api.url=http://localhost:5002", "bankHolidays.api.url="})
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
