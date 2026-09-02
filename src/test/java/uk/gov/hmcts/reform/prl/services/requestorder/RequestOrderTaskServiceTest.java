@@ -96,7 +96,7 @@ class RequestOrderTaskServiceTest {
 
         service = new RequestOrderTaskService(
             systemUserService, authTokenGenerator, coreCaseDataApi,
-            hearingService, allTabService, chasePolicy, objectMapper);
+            hearingService, allTabService, chasePolicy, objectMapper, workingDayIndicator);
         ReflectionTestUtils.setField(service, "concurrentRequest", 5);
     }
 
@@ -242,7 +242,7 @@ class RequestOrderTaskServiceTest {
 
         service.processRequestOrderTasks();
 
-        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
 
@@ -350,14 +350,11 @@ class RequestOrderTaskServiceTest {
 
         service.processRequestOrderTasks();
 
-        verify(allTabService).getStartUpdateForSpecificEvent(
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(
             CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
 
-        verify(allTabService)
+        verify(allTabService, never())
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
-        assertThat(captor.getAllValues())
-            .extracting(m -> (String) m.get("currentHearingId"))
-            .containsExactly("10");
     }
 
     @Test

@@ -87,7 +87,7 @@ class HearingChasePolicy {
 
         if (lastCompletedDate != null) {
             int workingDaysSinceLastCompletedDate = workingDayIndicator.workingDaysBetween(lastCompletedDate, cronDate);
-            if (workingDaysSinceLastCompletedDate != cadence) {
+            if (!(cadence > 0 && workingDaysSinceLastCompletedDate % cadence != 0)) {
                 return ChaseDecision.skipInFlight();
             }
         }

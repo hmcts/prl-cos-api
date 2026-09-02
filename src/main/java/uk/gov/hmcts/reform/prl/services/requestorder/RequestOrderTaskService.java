@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -75,6 +76,7 @@ public class RequestOrderTaskService {
     private final AllTabServiceImpl allTabService;
     private final HearingChasePolicy chasePolicy;
     private final ObjectMapper objectMapper;
+    private final WorkingDayIndicator workingDayIndicator;
 
     @Value("${request-order-task.cadence-working-days.searchMulitplier}")
     private int searchMulitplier;
@@ -155,6 +157,12 @@ public class RequestOrderTaskService {
         }
     }
 
+    private Long getWorkingDay() {
+        return Integer.toUnsignedLong(workingDayIndicator.workingDaysBetween(LocalDate.now(),
+                                                                             LocalDate.now()
+                                                                                 .plusDays(searchMulitplier * largestCadenceWorkingDays)));
+    }
+
     /**
      * Matches C100/FL401 cases in one of the three hearing states.
      */
@@ -171,7 +179,7 @@ public class RequestOrderTaskService {
         )).build();
 
         LastModified lastModifiedRange = LastModified.builder().gte(
-            LocalDate.now().minusDays(Integer.toUnsignedLong(searchMulitplier * largestCadenceWorkingDays)).toString()).build();
+            LocalDate.now().minusDays(getWorkingDay()).toString()).build();
         Range range = Range.builder().lastModified(lastModifiedRange).build();
         Filter rangeFilter = Filter.builder().range(range).build();
 
