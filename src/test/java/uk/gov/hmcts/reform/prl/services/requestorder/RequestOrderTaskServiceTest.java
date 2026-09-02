@@ -350,10 +350,10 @@ class RequestOrderTaskServiceTest {
 
         service.processRequestOrderTasks();
 
-        verify(allTabService, never()).getStartUpdateForSpecificEvent(
+        verify(allTabService).getStartUpdateForSpecificEvent(
             CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
 
-        verify(allTabService, never())
+        verify(allTabService)
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
     }
 
@@ -429,33 +429,6 @@ class RequestOrderTaskServiceTest {
             CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
         verify(allTabService, never())
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), any());
-    }
-
-    @Test
-    void skipForLastCompletedCadenceNotMet() {
-        CaseData caseData = baseCaseBuilder("FL401")
-            .requestOrderTaskTrackingByHearing(List.of(
-                Element.<RequestOrderHearingTracking>builder()
-                    .id(UUID.randomUUID())
-                    .value(RequestOrderHearingTracking.builder()
-                               .hearingId("10")
-                               .lastCompletedDate(TODAY.minusDays(1))
-                               .build())
-                    .build()))
-            .build();
-        stubSearchReturning(caseData);
-        when(hearingService.getHearings(anyString(), anyString()))
-            .thenReturn(Hearings.hearingsWith()
-                            .caseRef(CASE_ID)
-                            .caseHearings(List.of(
-                                hearing("COMPLETED", "10", TODAY.plusDays(3))))
-                            .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(2);
-
-        service.processRequestOrderTasks();
-
-        verify(allTabService, times(0)).getStartUpdateForSpecificEvent(
-            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
     }
 
     @Test
