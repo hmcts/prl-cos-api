@@ -597,6 +597,7 @@ public class PrlAppsConstants {
 
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
+    public static final String LEGAL_ADVISER_NAME = "legalAdviserName";
 
     public static final String JUDGE = "Judge";
     public static final String CASEWORKER = "CaseWorker";

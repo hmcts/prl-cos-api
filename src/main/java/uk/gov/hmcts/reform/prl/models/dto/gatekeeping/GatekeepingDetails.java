@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 
 @Data
 @Builder
@@ -23,6 +24,9 @@ public class GatekeepingDetails {
 
     @JsonProperty("judgeName")
     private final JudicialUser judgeName;
+
+    @JsonProperty("legalAdviserName")
+    private final StaffUser legalAdviserName;
 
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;

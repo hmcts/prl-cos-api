@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_NAME;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 
@@ -30,13 +31,13 @@ public class GatekeepingDetailsService {
 
     private final RoleAssignmentService roleAssignmentService;
 
-    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated,
                                                     RefDataUserService refDataUserService) {
-        return mapGatekeepingDetails(caseDataUpdated, legalAdviserList, refDataUserService);
+        return mapGatekeepingDetails(caseDataUpdated, refDataUserService);
 
     }
 
-    private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated,
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
@@ -58,10 +59,14 @@ public class GatekeepingDetailsService {
                     gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
 
                 }
-            } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
+            } else if (SendToGatekeeperTypeEnum.legalAdviser.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
+                && null != caseDataUpdated.get("legalAdviserName")) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
-                gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
+                gatekeepingDetailsBuilder.legalAdviserName(StaffUser.builder()
+                                                               .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_NAME))[0])
+                                                               .personalCode(getPersonalCode(caseDataUpdated.get(LEGAL_ADVISER_NAME))[0]).build());
             }
         }
         return gatekeepingDetailsBuilder.build();
