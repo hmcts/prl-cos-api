@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,18 +19,21 @@ import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
 import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffResponse;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -166,6 +170,24 @@ public class RefDataUserService {
         }
     }
 
+    public Optional<StaffProfile> getLegalAdvisorUserDetails(StaffUser legalAdvisorUser) {
+        if (legalAdvisorUser == null || StringUtils.isBlank(legalAdvisorUser.getIdamId())) {
+            return Optional.empty();
+        }
+        try {
+            List<StaffResponse> staffUserList = staffRefDataService.getAllStaffDetails();
+            return staffUserList.stream()
+                .map(StaffResponse::getStaffProfile)
+                .filter(Objects::nonNull)
+                .filter(staffProfile -> legalAdvisorUser.getIdamId().equals(staffProfile.getId()))
+                .findFirst();
+        } catch (Exception e) {
+            log.error("Staff details Lookup Failed for idamId {} - {}", legalAdvisorUser.getIdamId(), e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
         if (null != listOfStaffResponse && !listOfStaffResponse.isEmpty()) {
             return listOfStaffResponse.stream()
@@ -256,5 +278,6 @@ public class RefDataUserService {
         String key = categorySubValues.getKey();
         return DynamicListElement.builder().code(key).label(value).build();
     }
+
 
 }
