@@ -76,7 +76,6 @@ public class CustomOrderService {
     private static final String APPLICANT_NAME = "applicantName";
     private static final java.time.format.DateTimeFormatter DATE_FORMATTER =
         java.time.format.DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final HearingDataService hearingDataService;

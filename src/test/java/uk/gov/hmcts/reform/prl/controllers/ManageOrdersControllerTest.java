@@ -1829,7 +1829,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         List<Element<OrderDetails>> orderDetailsList = List.of(Element.<OrderDetails>builder().value(
             OrderDetails.builder().build()).build());
-        when(amendOrderService.updateOrder(caseData, authToken))
+        when(amendOrderService.updateOrder(any(CaseData.class), eq(authToken)))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
@@ -1847,6 +1847,9 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertEquals(orderDetailsList,aboutToStartOrSubmitCallbackResponse.getData().get("orderCollection"));
+        ArgumentCaptor<CaseData> caseDataCaptor = ArgumentCaptor.forClass(CaseData.class);
+        verify(amendOrderService).updateOrder(caseDataCaptor.capture(), eq(authToken));
+        assertNull(caseDataCaptor.getValue().getDateOrderMade());
     }
 
     @Test
