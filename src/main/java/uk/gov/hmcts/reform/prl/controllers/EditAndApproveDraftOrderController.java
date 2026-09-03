@@ -285,7 +285,6 @@ public class EditAndApproveDraftOrderController {
 
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Map<String, Object> caseDataUpdated = caseDetails.getData();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             State state = caseData.getState();
             YesOrNo eligibleStateForMiam = null;
@@ -308,19 +307,25 @@ public class EditAndApproveDraftOrderController {
                     clientContext, eventId
                 );
             }
+            String language = CaseUtils.getLanguage(clientContext);
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
+                authorisation,
+                caseData,
+                selectedOrder,
+                language,
+                Optional.ofNullable(clientContext)
+            );
+
             if (nonNull(selectedOrder)) {
-                caseDataUpdated.put("miamForOrder", selectedOrder.getMiamForOrder());
-                caseDataUpdated.put("orderType", selectedOrder.getOrderType());
+                response.put("miamForOrder", selectedOrder.getMiamForOrder());
+                response.put("orderType", selectedOrder.getOrderType());
             }
-            caseDataUpdated.put("eligibleStateForMiam", eligibleStateForMiam);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            response.put("eligibleStateForMiam", eligibleStateForMiam);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(response).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
-
-
 
     private String getDraftOrderIdFromContext(String clientContext) {
         String draftOrderId = null;
