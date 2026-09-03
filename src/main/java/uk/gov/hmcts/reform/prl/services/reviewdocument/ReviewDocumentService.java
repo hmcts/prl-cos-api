@@ -737,6 +737,10 @@ public class ReviewDocumentService {
     private void appendQuarantineDocumentDetails(StringBuilder reviewDetailsBuilder,
                                                  QuarantineLegalDoc quarantineDoc,
                                                  String submittedBy) {
+        if (quarantineDoc == null) {
+            log.warn("Quarantine document is null, cannot append details");
+            return;
+        }
         if (CommonUtils.isNotEmpty(quarantineDoc.getNotes())) {
             reviewDetailsBuilder.append(format(
                 DOCUMENT_COMMENTS_LABEL,
