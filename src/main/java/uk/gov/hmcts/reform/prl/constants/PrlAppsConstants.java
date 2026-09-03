@@ -1001,6 +1001,7 @@ public class PrlAppsConstants {
     public static final String CUSTOM_ORDER_DOC = "customOrderDoc";
     public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
     public static final String CUSTOM_ORDER_NAME_OPTION = "customOrderNameOption";
+    public static final String CUSTOM_ORDER_NAME_OPTION_V2 = "customOrderNameOptionV2";
     public static final String NAME_OF_ORDER = "nameOfOrder";
     public static final String AMEND_ORDER_SELECT_CHECK_OPTIONS = "amendOrderSelectCheckOptions";
     public static final String WHAT_DO_WITH_ORDER = "whatDoWithOrder";

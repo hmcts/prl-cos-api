@@ -45,6 +45,8 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
@@ -68,6 +70,12 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 public class ManageOrdersUtils {
+
+    public static void copyCustomOrderSelectionFromUiField(Map<String, Object> caseData) {
+        if (caseData != null && caseData.get(CUSTOM_ORDER_NAME_OPTION_V2) != null) {
+            caseData.put(CUSTOM_ORDER_NAME_OPTION, caseData.get(CUSTOM_ORDER_NAME_OPTION_V2));
+        }
+    }
 
     private static final String[] HEARING_ORDER_IDS_NEED_SINGLE_HEARING =
         {"noticeOfProceedingsParties","noticeOfProceedingsNonParties","noticeOfProceedings"};
@@ -669,4 +677,3 @@ public class ManageOrdersUtils {
         return errorList;
     }
 }
-

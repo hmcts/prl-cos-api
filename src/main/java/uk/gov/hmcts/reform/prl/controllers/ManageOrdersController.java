@@ -84,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DATE_ENDS_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_ORDER_NAME_OPTION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DO_YOU_WANT_TO_SERVE_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
@@ -153,6 +154,7 @@ public class ManageOrdersController {
 
             // Custom order flow - skip preview rendering here, it will be done on Page 19 with hearing data
             if (caseData.getManageOrdersOptions() != null && caseData.getManageOrdersOptions().equals(createCustomOrder)) {
+                ManageOrdersUtils.copyCustomOrderSelectionFromUiField(caseDataUpdated);
                 // Set loggedInUserType for field show conditions
                 String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
                 caseDataUpdated.put(LOGGED_IN_USER_TYPE, loggedInUserType);
@@ -859,6 +861,7 @@ public class ManageOrdersController {
                 // This prevents stale data from a cancelled custom order flow affecting other flows
                 caseDataUpdated.put(CUSTOM_ORDER_DOC, null);
                 caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION, null);
+                caseDataUpdated.put(CUSTOM_ORDER_NAME_OPTION_V2, null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
