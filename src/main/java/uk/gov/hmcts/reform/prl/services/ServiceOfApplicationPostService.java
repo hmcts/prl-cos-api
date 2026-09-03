@@ -47,9 +47,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FAMILY_PRESIDENTS_NOTE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
@@ -139,15 +141,8 @@ public class ServiceOfApplicationPostService {
         List<MultipartFile> files = new ArrayList<>();
 
         attachStaticFileToTheDocuments(documentLanguage, files, PRIVACY_DOCUMENT_FILENAME, PRIVACY_DOCUMENT_FILENAME_WELSH);
+        attachStaticFileToTheDocuments(documentLanguage, files, SOA_FL415_FILENAME, SOA_FL415_FILENAME_WELSH);
 
-        if (documentLanguage.isGenEng()) {
-            files.add(new InMemoryMultipartFile(
-                SOA_MULTIPART_FILE,
-                SOA_FL415_FILENAME,
-                APPLICATION_PDF_VALUE,
-                DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
-            ));
-        }
         // FPET-1147 Annex 1 file inclusion
         if (Objects.nonNull(caseData.getServiceOfApplication()) && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
             attachStaticFileToTheDocuments(documentLanguage, files, ANNEX1_FILENAME, ANNEX1_FILENAME_WELSH);
@@ -173,23 +168,14 @@ public class ServiceOfApplicationPostService {
         //PRL-5360 - Remove mediation voucher & add new President note
         attachStaticFileToTheDocuments(documentLanguage, files, SOA_FAMILY_PRESIDENTS_NOTE, SOA_FAMILY_PRESIDENTS_NOTE_WELSH);
 
-        files.addAll(
-            List.of(
-                new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    C7_BLANK_DOCUMENT_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
-                ),
-                new InMemoryMultipartFile(
-                    SOA_MULTIPART_FILE,
-                    SOA_C9_PERSONAL_SERVICE_FILENAME,
-                    APPLICATION_PDF_VALUE,
-                    DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
-                )
-            )
-        );
+        files.add(new InMemoryMultipartFile(
+            SOA_MULTIPART_FILE,
+            C7_BLANK_DOCUMENT_FILENAME,
+            APPLICATION_PDF_VALUE,
+            DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+        ));
 
+        attachStaticFileToTheDocuments(documentLanguage, files, SOA_C9_PERSONAL_SERVICE_FILENAME, SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH);
         attachStaticFileToTheDocuments(documentLanguage, files, C1A_BLANK_DOCUMENT_FILENAME, C1A_BLANK_DOCUMENT_WELSH_FILENAME);
 
         return caseDocumentClient.uploadDocuments(
