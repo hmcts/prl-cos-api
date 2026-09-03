@@ -2163,7 +2163,7 @@ class EditAndApproveDraftOrderControllerTest {
     @Test
     public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() {
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 12345L);
+        stringObjectMap.put("id", 123L);
         stringObjectMap.put("state", State.AWAITING_SUBMISSION_TO_HMCTS);
 
         CaseData customCaseData = setUpCaseDataForMiamTest(State.AWAITING_SUBMISSION_TO_HMCTS);
@@ -2307,7 +2307,7 @@ class EditAndApproveDraftOrderControllerTest {
     @Test
     public void testFlagSetToYesForMiamOrderWhenStateIsPrepareForHearingConductHearing() {
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 12345L);
+        stringObjectMap.put("id", 123L);
         stringObjectMap.put("state", State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
 
         CaseData customCaseData = setUpCaseDataForMiamTest(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
@@ -2320,7 +2320,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
