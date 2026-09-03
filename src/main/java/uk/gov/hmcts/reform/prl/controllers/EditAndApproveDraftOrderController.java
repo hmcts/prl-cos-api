@@ -285,7 +285,6 @@ public class EditAndApproveDraftOrderController {
 
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Map<String, Object> caseDataUpdated = caseDetails.getData();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             YesOrNo eligibleStateForMiam = obtainEligibleStateForMiam(caseData);
             String eventId = callbackRequest.getEventId();
@@ -297,6 +296,15 @@ public class EditAndApproveDraftOrderController {
                     clientContext, eventId
                 );
             }
+
+            String language = CaseUtils.getLanguage(clientContext);
+            Map<String, Object> caseDataUpdated = draftAnOrderService.populateCommonDraftOrderFields(
+                authorisation,
+                caseData,
+                selectedOrder,
+                language,
+                Optional.ofNullable(clientContext)
+            );
             if (nonNull(selectedOrder)) {
                 caseDataUpdated.put("miamForOrder", selectedOrder.getMiamForOrder());
                 caseDataUpdated.put("orderType", selectedOrder.getOrderType());
