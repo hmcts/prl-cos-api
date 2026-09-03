@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.core.HttpHeaders;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -46,7 +44,6 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 public class ReviewDocumentsController {
     private final ObjectMapper objectMapper;
     private final ReviewDocumentService reviewDocumentService;
-    private final SystemUserService systemUserService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
@@ -55,7 +52,6 @@ public class ReviewDocumentsController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -84,9 +80,22 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
+        reviewDocumentService.getReviewedDocumentDetailsNew(authorisation, caseData, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
+
+
+
+    @PostMapping(path = "/review-documents/validate-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to amend order mid-event")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse handleValidateMidEvent(
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<String> errors = reviewDocumentService.validateEvent(caseDataUpdated);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).errors(errors).build();
+    }
+
 
 
     @PostMapping(path = "/review-documents/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -96,7 +105,6 @@ public class ReviewDocumentsController {
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         objectMapper.registerModule(new JavaTimeModule());
@@ -122,9 +130,7 @@ public class ReviewDocumentsController {
 
 
     @PostMapping(path = "/review-documents/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
-                                                                     @Parameter(hidden = true) String authorisation,
-                                                                     @RequestBody CallbackRequest callbackRequest) {
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         CaseData oldCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);

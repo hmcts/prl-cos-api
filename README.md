@@ -168,6 +168,18 @@ No changes are needed in this repository, and everything will be set automatical
 ### If your ticket includes changes in the prl-ccd-definition
 Create a new label in lines of `"pr-defs:pr-2878` # Replace `2878` with the PR number of the prl-ccd-definition update you want to test against this repo
 
+## Running Functional Tests Locally
+It's possible to run functional tests locally against your local prl-cos-api instance. To do this you'll need to run the following
+
+Spin up a local instance of prl-cos-api with the following command:
+`./gradlew bootWithCCD`
+
+Afterwords in a different Terminal window or within IntelliJ you can run the functional tests with the following command:
+`./gradlew localFunctionalTests`
+
+You'll get a report of the functional tests in the `build/reports/tests/test/index.html` file.
+This method also allows for individual functional tests to be run as long as bootWithCCD is running in the background.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details

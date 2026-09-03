@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         "fis_hearing.api.url=localhost:5000",
         "refdata.api.url=localhost:8894",
         "courtfinder.api.url=",
-        "prl-dgs-api.url=",
         "fees-register.api.url=",
         "fis_hearing.api.url=",
         "judicialUsers.api.url=",

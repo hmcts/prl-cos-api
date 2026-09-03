@@ -207,7 +207,8 @@ class CaseDataMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
+    @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json",
+        "classpath:c100-rebuild/ra4.json", "classpath:c100-rebuild/ra5.json", "classpath:c100-rebuild/ra6.json", "classpath:c100-rebuild/ra7.json"})
     void testCaseDataMapperReasonableAdjustmentsExtraFields1(String resourcePath) throws IOException {
         CaseData caseData1 = caseData
             .toBuilder()

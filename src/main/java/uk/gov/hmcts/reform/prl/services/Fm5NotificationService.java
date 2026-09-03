@@ -247,9 +247,11 @@ public class Fm5NotificationService {
         if (isNotEmpty(party.getValue().getAddress())
             && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
             //generate cover sheets & add to documents
-            List<Document> documents = new ArrayList<>(generateCoverSheets(authorization, caseData, party.getValue()));
+            List<Document> documents = new ArrayList<>();
             //generate LTR-FM5 letter & add to documents
             documents.add(generateFm5CoverLetter(authorization, caseData, party));
+            documents.addAll(generateCoverSheets(authorization, caseData, party.getValue()));
+
             //get blank fm5 form & add to documents
             documents.addAll(getBlankFm5Form(authorization));
 
@@ -363,7 +365,7 @@ public class Fm5NotificationService {
                 DOCUMENT_COVER_SHEET_SERVE_ORDER_HINT
             );
         } catch (Exception e) {
-            log.error("Error occurred in generating cover sheets {}", e.getMessage());
+            log.error("Error occurred in generating cover sheets for case {}", caseData.getId(), e);
         }
         return coverSheets;
     }

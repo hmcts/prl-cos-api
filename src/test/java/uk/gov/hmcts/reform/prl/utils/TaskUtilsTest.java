@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 
 import java.io.IOException;
@@ -126,5 +127,26 @@ public class TaskUtilsTest {
         Optional<Long> actualHearingId = getHearingId(waMapper, caseDataMap);
 
         assertThat(actualHearingId).isNotPresent();
+    }
+
+    @Test
+    public void testAdditionalPropertiesReturnedWhenPresentInClientContext() throws JsonProcessingException {
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT, WaMapper.class);
+        String encodedString = base64Encode(waMapper, mapper);
+        Optional<AdditionalProperties> taskAdditionalProperties = taskUtils.getTaskAdditionalProperties(encodedString);
+        AdditionalProperties expectedAdditionalProperties = AdditionalProperties.builder()
+            .hearingId("12345")
+            .build();
+        assertThat(taskAdditionalProperties)
+            .contains(expectedAdditionalProperties);
+    }
+
+    @Test
+    public void testAdditionalPropertiesNotReturnedWhenNotPresentInClientContext() throws JsonProcessingException {
+        WaMapper waMapper = mapper.readValue(CLIENT_CONTEXT_WITH_LANGUAGE, WaMapper.class);
+        String encodedString = base64Encode(waMapper, mapper);
+        Optional<AdditionalProperties> taskAdditionalProperties = taskUtils.getTaskAdditionalProperties(encodedString);
+        assertThat(taskAdditionalProperties)
+            .isNotPresent();
     }
 }

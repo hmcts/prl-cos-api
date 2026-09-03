@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import feign.FeignException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +20,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -33,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -62,6 +62,8 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationRequest;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
@@ -71,22 +73,31 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
+import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorVirtualConfig.DOCUMENT_EXECUTOR_SERVICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
@@ -159,7 +170,7 @@ public class DocumentGenServiceTest {
     @Mock
     private CaseDocumentClient caseDocumentClient;
     @Mock
-    private DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
     @Mock
     private AuthTokenGenerator authTokenGenerator;
     @Mock
@@ -171,7 +182,11 @@ public class DocumentGenServiceTest {
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    @Mock
+    @Qualifier(DOCUMENT_EXECUTOR_SERVICE)
+    private ExecutorService documentVirtualThreadExecutorService;
 
+    private static final String CASE_ID = "1234345678934523";
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
     private GeneratedDocumentInfo generatedDocumentInfo;
     private CaseData c100CaseData;
@@ -186,6 +201,14 @@ public class DocumentGenServiceTest {
 
     @Before
     public void setUp() {
+        //For testing purposes, the test threads will be executed immediately:
+        when(documentVirtualThreadExecutorService.submit(
+            Mockito.<Callable<Document>>any()
+        )).thenAnswer(invocation -> {
+            Callable<Document> task = invocation.getArgument(0);
+            return CompletableFuture.completedFuture(task.call());
+        });
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -385,14 +408,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         c100CaseData = c100CaseData.toBuilder().allegationOfHarmRevised(AllegationOfHarmRevised
                                                                             .builder().newAllegationsOfHarmYesNo(Yes).build()).allegationOfHarm(
@@ -407,14 +430,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -424,12 +449,12 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
             any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
             any()
         );
@@ -445,13 +470,15 @@ public class DocumentGenServiceTest {
         verifyDocumentsNotUpdated(stringObjectMap, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_FINAL_WELSH, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verify(dgsService).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -462,14 +489,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
@@ -483,14 +510,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A, DOCUMENT_FIELD_C1A_WELSH);
 
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -498,7 +527,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateDraftDocumentEng() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(Yes).build()).build();
+                                                                           .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -509,7 +538,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateDraftDocumentWelsh() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(Yes).build()).build();
+                                                                           .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -522,14 +551,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -540,14 +569,16 @@ public class DocumentGenServiceTest {
         verifyDocumentsUpdated(stringObjectMap, DRAFT_APPLICATION_DOCUMENT_FIELD, DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD);
 
         verify(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -557,14 +588,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
@@ -579,14 +610,16 @@ public class DocumentGenServiceTest {
         );
 
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -596,14 +629,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
@@ -615,14 +648,16 @@ public class DocumentGenServiceTest {
         verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
 
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -632,14 +667,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
@@ -652,14 +687,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -739,7 +776,7 @@ public class DocumentGenServiceTest {
             .state(State.SUBMITTED_PAID)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -750,14 +787,16 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -833,7 +872,7 @@ public class DocumentGenServiceTest {
             .state(State.CASE_ISSUED)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -844,14 +883,16 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -910,7 +951,7 @@ public class DocumentGenServiceTest {
             .state(State.JUDICIAL_REVIEW)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any(), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -922,14 +963,16 @@ public class DocumentGenServiceTest {
 
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -974,7 +1017,7 @@ public class DocumentGenServiceTest {
             .state(State.SUBMITTED_PAID)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -986,14 +1029,16 @@ public class DocumentGenServiceTest {
 
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
         verify(dgsService).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1038,7 +1083,7 @@ public class DocumentGenServiceTest {
             .state(State.JUDICIAL_REVIEW)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
@@ -1050,9 +1095,10 @@ public class DocumentGenServiceTest {
 
         documentGenService.createUpdatedCaseDataWithDocuments(AUTH_TOKEN, fl401CaseData);
         verify(dgsService).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1110,9 +1156,10 @@ public class DocumentGenServiceTest {
 
         // then
         verify(dgsService).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1128,16 +1175,16 @@ public class DocumentGenServiceTest {
             respondentDetails
         );
         verify(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any()
+            anyString(),
+            anyString(),
+            any(),
+            any()
         );
     }
 
     @Test
     public void testDocGenerationWithNoName() {
-        documentGenService.convertToPdf("auth", Document.builder().build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -1145,7 +1192,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoPeriods() {
-        documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().documentFileName("i").build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -1154,14 +1201,14 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
     public void testSingleDocGenerationC1A() throws Exception {
         c100CaseData = c100CaseData.toBuilder().taskListVersion(TASK_LIST_VERSION_V2).build();
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_HINT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -1173,7 +1220,12 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", emptyCaseData, DOCUMENT_PRIVACY_NOTICE_HINT, false);
         documentGenService.generateSingleDocument("auth", emptyCaseData, CITIZEN_HINT, false);
 
-        verify(dgsService, times(5)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService, times(5)).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
+        );
     }
 
     @Test
@@ -1233,9 +1285,9 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
 
         Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(
@@ -1254,9 +1306,9 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
 
         Map<String, Object> updatedCaseData = documentGenService.generateDocumentsForCitizenSubmission(
@@ -1286,31 +1338,129 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_RESPONDENT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
     public void testSingleDocGenerationForWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C7_FINAL_WELSH, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
     public void testSingleDocGenerationDefault() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, "", false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
     public void testSingleDocGenerationC8DraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_DRAFT_HINT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithPartyDetailsEnglishFinal() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(c100CaseData, false, false).getDocumentFileName(), false, false);
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithPartyDetailsWelshFinal() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(c100CaseData, true, false).getDocumentFileName(), true, false);
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithPartyDetailsEnglishDraft() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(c100CaseData, false, true).getDocumentFileName(), false, true);
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithPartyDetailsWelshDraft() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(c100CaseData, true, true).getDocumentFileName(), true, true);
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithoutPartyDetailsEnglishFinal() throws Exception {
+        setFallbackC8Filenames();
+        CaseData c100CaseDataWithoutApplicants = c100CaseData.toBuilder().applicants(Collections.emptyList()).build();
+        assertEquals("c100-c8-final-en.pdf", generateSingleC8Document(c100CaseDataWithoutApplicants, false, false).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithoutPartyDetailsWelshFinal() throws Exception {
+        setFallbackC8Filenames();
+        CaseData c100CaseDataWithoutApplicants = c100CaseData.toBuilder().applicants(Collections.emptyList()).build();
+        assertEquals("c100-c8-final-cy.pdf", generateSingleC8Document(c100CaseDataWithoutApplicants, true, false).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithoutPartyDetailsEnglishDraft() throws Exception {
+        setFallbackC8Filenames();
+        CaseData c100CaseDataWithoutApplicants = c100CaseData.toBuilder().applicants(Collections.emptyList()).build();
+        assertEquals("c100-c8-draft-en.pdf", generateSingleC8Document(c100CaseDataWithoutApplicants, false, true).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForC100WithoutPartyDetailsWelshDraft() throws Exception {
+        setFallbackC8Filenames();
+        CaseData c100CaseDataWithoutApplicants = c100CaseData.toBuilder().applicants(Collections.emptyList()).build();
+        assertEquals("c100-c8-draft-cy.pdf", generateSingleC8Document(c100CaseDataWithoutApplicants, true, true).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithPartyDetailsEnglishFinal() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(fl401CaseData, false, false).getDocumentFileName(), false, false);
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithPartyDetailsWelshFinal() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(fl401CaseData, true, false).getDocumentFileName(), true, false);
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithPartyDetailsEnglishDraft() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(fl401CaseData, false, true).getDocumentFileName(), false, true);
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithPartyDetailsWelshDraft() throws Exception {
+        assertGeneratedC8FilenameForParty(generateSingleC8Document(fl401CaseData, true, true).getDocumentFileName(), true, true);
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithoutPartyDetailsEnglishFinal() throws Exception {
+        setFallbackC8Filenames();
+        CaseData fl401CaseDataWithoutApplicant = fl401CaseData.toBuilder().applicantsFL401(null).build();
+        assertEquals("fl401-c8-final-en.pdf", generateSingleC8Document(fl401CaseDataWithoutApplicant, false, false).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithoutPartyDetailsWelshFinal() throws Exception {
+        setFallbackC8Filenames();
+        CaseData fl401CaseDataWithoutApplicant = fl401CaseData.toBuilder().applicantsFL401(null).build();
+        assertEquals("fl401-c8-final-cy.pdf", generateSingleC8Document(fl401CaseDataWithoutApplicant, true, false).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithoutPartyDetailsEnglishDraft() throws Exception {
+        setFallbackC8Filenames();
+        CaseData fl401CaseDataWithoutApplicant = fl401CaseData.toBuilder().applicantsFL401(null).build();
+        // FL401 draft fallback currently reuses the C100 draft filenames.
+        assertEquals("c100-c8-draft-en.pdf", generateSingleC8Document(fl401CaseDataWithoutApplicant, false, true).getDocumentFileName());
+    }
+
+    @Test
+    public void testFindC8FilenameForFl401WithoutPartyDetailsWelshDraft() throws Exception {
+        setFallbackC8Filenames();
+        CaseData fl401CaseDataWithoutApplicant = fl401CaseData.toBuilder().applicantsFL401(null).build();
+        // FL401 draft fallback currently reuses the C100 draft filenames.
+        assertEquals("c100-c8-draft-cy.pdf", generateSingleC8Document(fl401CaseDataWithoutApplicant, true, true).getDocumentFileName());
     }
 
     @Test
     public void testSingleDocGenerationC1ADraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_DRAFT_HINT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -1325,10 +1475,10 @@ public class DocumentGenServiceTest {
             respondentDetails
         );
         verify(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any()
+            anyString(),
+            anyString(),
+            any(),
+            any()
         );
     }
 
@@ -1337,14 +1487,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataNotIssued);
@@ -1359,14 +1509,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_DRAFT_C1A);
 
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1386,16 +1538,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1415,16 +1567,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1444,16 +1596,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1473,16 +1625,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1502,16 +1654,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1531,16 +1683,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1560,16 +1712,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1589,16 +1741,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1618,16 +1770,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1647,16 +1799,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1676,16 +1828,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1705,16 +1857,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1734,16 +1886,16 @@ public class DocumentGenServiceTest {
             .build();
 
         doReturn(generatedDocumentInfo).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
 
         documentGenService.generateCitizenStatementDocument(AUTH_TOKEN, generateAndUploadDocumentRequest, 1);
         verify(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(GenerateAndUploadDocumentRequest.class),
-            Mockito.any()
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1776,7 +1928,12 @@ public class DocumentGenServiceTest {
         documentGenService.generateSingleDocument("auth", c100CaseData, SOLICITOR_C1A_WELSH_FINAL_DOCUMENT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_DRAFT_HINT, false);
         documentGenService.generateSingleDocument("auth", c100CaseData, C8_RESP_FINAL_HINT, false);
-        verify(dgsService, times(8)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService, times(8)).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
+        );
     }
 
     @Test
@@ -1784,14 +1941,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(c100CaseData);
@@ -1805,14 +1962,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(6)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(6)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1822,12 +1981,12 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
             any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
             any()
         );
@@ -1843,13 +2002,15 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(4)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verify(dgsService, times(4)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
@@ -1860,14 +2021,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
@@ -1883,14 +2044,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1900,14 +2063,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class))).thenReturn(
             c100CaseDataC1A);
@@ -1923,14 +2086,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_C8, DOCUMENT_FIELD_FINAL, DOCUMENT_FIELD_C1A);
 
         verify(dgsService, times(6)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(6)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1940,14 +2105,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
@@ -1962,14 +2127,16 @@ public class DocumentGenServiceTest {
         verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_C8_WELSH, DOCUMENT_FIELD_C8);
 
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -1979,14 +2146,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
@@ -2002,14 +2169,16 @@ public class DocumentGenServiceTest {
                                DOCUMENT_FIELD_FINAL);
 
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2089,7 +2258,7 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -2100,14 +2269,16 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         documentGenService.generateDocumentsForTestingSupport(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2183,7 +2354,7 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -2194,14 +2365,16 @@ public class DocumentGenServiceTest {
             .thenReturn(caseData);
         documentGenService.generateDocumentsForTestingSupport(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2260,7 +2433,7 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -2272,14 +2445,16 @@ public class DocumentGenServiceTest {
 
         documentGenService.generateDocumentsForTestingSupport(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(3)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2324,7 +2499,7 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -2336,14 +2511,16 @@ public class DocumentGenServiceTest {
 
         documentGenService.generateDocumentsForTestingSupport(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2389,7 +2566,7 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any()))
             .thenReturn(generatedDocumentInfo);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
@@ -2401,9 +2578,10 @@ public class DocumentGenServiceTest {
 
         documentGenService.generateDocumentsForTestingSupport(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2457,9 +2635,10 @@ public class DocumentGenServiceTest {
 
         documentGenService.generateDocumentsForTestingSupport(AUTH_TOKEN, fl401CaseData);
         verify(dgsService, times(2)).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
-            Mockito.any()
+            any(),
+            any()
         );
         verifyNoMoreInteractions(dgsService);
     }
@@ -2467,7 +2646,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForFl404b() throws Exception {
         documentGenService.generateSingleDocument("auth", fl401CaseData, DA_LIST_ON_NOTICE_FL404B_DOCUMENT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
@@ -2500,7 +2679,7 @@ public class DocumentGenServiceTest {
             .build();
 
         assertExpectedException(() -> documentGenService
-            .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
+                                    .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
                                 "Resource is invalid TestUrl");
     }
 
@@ -2547,11 +2726,10 @@ public class DocumentGenServiceTest {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("FL401-Final.docx")
             .build();
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class))).thenReturn(document);
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenReturn(generatedDocumentInfo);
-
-        documentGenService.convertToPdf(AUTH_TOKEN, document);
+        Document result = documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document);
+        assertEquals(document, result);
 
         verify(caseDocumentClient).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
@@ -2580,16 +2758,14 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenReturn(generatedDocumentInfo);
-
         assertExpectedException(() -> documentGenService
-            .convertToPdf(AUTH_TOKEN, document), InvalidResourceException.class, "Doc name FL401-Final.docx");
+            .convertToPdf(CASE_ID, AUTH_TOKEN, document), InvalidResourceException.class,
+                                "Case ID 1234345678934523: Doc name FL401-Final.docx");
+        verifyNoInteractions(pdfGenerationService);
     }
 
-    // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
     @Test
-    public void testForConvertToPdfFeignException() {
+    public void testForConvertToPdfConversionException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2610,40 +2786,11 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenThrow(FeignException.class);
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class)))
+            .thenThrow(new PdfConversionException("Failed to generate and store PDF"));
 
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
-                                "PDF Conversion error");
-    }
-
-    @Test
-    public void testForConvertToPdfRuntimeException() {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("TestUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Resource expectedResource = new ClassPathResource("documents/document.pdf");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(authTokenGenerator.generate()).thenReturn("s2s token");
-        when(caseDocumentClient.getDocumentBinary(AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()))
-            .thenReturn(expectedResponse);
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("FL401-Final.docx")
-            .build();
-
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenThrow(RuntimeException.class);
-
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
-                                "PDF Conversion error");
+        assertExpectedException(() -> documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document), PdfConversionException.class,
+                                "Failed to generate and store PDF");
     }
 
     @Test
@@ -2710,9 +2857,9 @@ public class DocumentGenServiceTest {
 
         //When
         doReturn(List.of(generatedDocumentInfo)).when(dgsService).generateCitizenDocument(
-            Mockito.anyString(),
+            anyString(),
             Mockito.any(DocumentRequest.class),
-            Mockito.any(),
+            any(),
             any(DocumentCategory.class)
         );
         when(dateTime.now()).thenReturn(LocalDateTime.now());
@@ -2754,14 +2901,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         c100CaseData = c100CaseData.toBuilder().allegationOfHarmRevised(AllegationOfHarmRevised
                                                                             .builder()
@@ -2776,8 +2923,15 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(
+            stringObjectMap,
+            DRAFT_APPLICATION_DOCUMENT_FIELD,
+            DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+            DOCUMENT_FIELD_DRAFT_C8,
+            DOCUMENT_FIELD_C8_DRAFT_WELSH,
+            DOCUMENT_FIELD_DRAFT_C1A,
+            DOCUMENT_FIELD_C1A_DRAFT_WELSH
+        );
     }
 
     @Test
@@ -2786,14 +2940,14 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
-            Mockito.any(CaseDetails.class),
-            Mockito.any()
+            anyString(),
+            any(CaseDetails.class),
+            any()
         );
 
         c100CaseData = c100CaseData.toBuilder()
@@ -2810,8 +2964,179 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(
+            stringObjectMap,
+            DRAFT_APPLICATION_DOCUMENT_FIELD,
+            DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+            DOCUMENT_FIELD_DRAFT_C8,
+            DOCUMENT_FIELD_C8_DRAFT_WELSH,
+            DOCUMENT_FIELD_DRAFT_C1A,
+            DOCUMENT_FIELD_C1A_DRAFT_WELSH
+        );
+    }
+
+    @Test
+    public void shouldGenerateOnlyEnglishC100DraftDocument() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(
+            any(CaseData.class),
+            eq(false)
+        )).thenReturn("c100-draft-english-template");
+
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            anyString(),
+            any()
+        );
+
+        Map<String, Object> result =
+            documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            );
+
+        assertTrue(result.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+        assertNotNull(result.get(DRAFT_APPLICATION_DOCUMENT_FIELD));
+
+        assertFalse(result.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<Document>>any());
+    }
+
+
+    @Test
+    public void shouldGenerateOnlyWelshC100DraftDocument() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(false)
+            .isGenWelsh(true)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(
+            any(CaseData.class),
+            eq(true)
+        )).thenReturn("c100-draft-welsh-template");
+
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            anyString(),
+            any(CaseDetails.class),
+            anyString(),
+            any()
+        );
+
+        Map<String, Object> result =
+            documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            );
+
+        assertFalse(result.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+
+        assertTrue(result.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+        assertNotNull(result.get(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<Document>>any());
+    }
+
+    @Test
+    public void shouldCancelWelshTaskWhenEnglishGenerationFails() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(true)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        RuntimeException generationFailure =
+            new RuntimeException("Docmosis failure");
+
+        CompletableFuture<Document> englishFuture =
+            new CompletableFuture<>();
+        englishFuture.completeExceptionally(generationFailure);
+
+        CompletableFuture<Document> welshFuture =
+            new CompletableFuture<>();
+
+        doReturn(englishFuture, welshFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<Document>>any());
+
+        DocumentGenerationException exception = assertThrows(
+            DocumentGenerationException.class,
+            () -> documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            )
+        );
+
+        assertSame(generationFailure, exception.getCause());
+        assertTrue(welshFuture.isCancelled());
+        assertFalse(englishFuture.isCancelled());
+    }
+
+    @Test
+    public void shouldCancelTaskAndRestoreInterruptWhenWaitingIsInterrupted()
+        throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        @SuppressWarnings("unchecked")
+        Future<Document> englishFuture = Mockito.mock(Future.class);
+
+        when(englishFuture.get())
+            .thenThrow(new InterruptedException("Test interruption"));
+        when(englishFuture.isDone()).thenReturn(false);
+
+        doReturn(englishFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<Document>>any());
+
+        try {
+            DocumentGenerationException exception = assertThrows(
+                DocumentGenerationException.class,
+                () -> documentGenService.generateC100DraftDocuments(
+                    AUTH_TOKEN,
+                    c100CaseData
+                )
+            );
+
+            assertTrue(
+                exception.getCause() instanceof InterruptedException
+            );
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            verify(englishFuture).cancel(true);
+        } finally {
+            // Avoid leaking the interrupted state into subsequent tests.
+            Thread.interrupted();
+        }
     }
 
     @Test
@@ -2852,13 +3177,13 @@ public class DocumentGenServiceTest {
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftEnglish() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, false);
-        verify(dgsService).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
     @Test
     public void testSingleDocGenerationForCitizenDocumentC1aDraftWelsh() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_C1A_DRAFT_HINT, true);
-        verify(dgsService).generateWelshDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+        verify(dgsService).generateWelshDocument(anyString(), any(CaseDetails.class), any(), any());
     }
 
 
@@ -3026,12 +3351,12 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
         doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
             any()
         );
         doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
-            Mockito.anyString(),
+            anyString(),
             any(CaseDetails.class),
             any()
         );
@@ -3050,14 +3375,97 @@ public class DocumentGenServiceTest {
         verify(dgsService, times(3)).generateDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verify(dgsService, times(3)).generateWelshDocument(
             anyString(),
             any(CaseDetails.class),
+            any(),
             any()
         );
         verifyNoMoreInteractions(dgsService);
+    }
+
+    @Test
+    public void testGenerateCoverLetterBothEnglishAndWelsh() throws Exception {
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetterWelsh");
+
+        Address address = Address.builder()
+            .addressLine1("addressLine1")
+            .postCode("postcode")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        GeneratedDocumentInfo englishDocInfo = GeneratedDocumentInfo.builder()
+            .url("coverLetterUrl")
+            .binaryUrl("coverLetterBinaryUrl")
+            .docName("coverLetter.pdf")
+            .build();
+
+        GeneratedDocumentInfo welshDocInfo = GeneratedDocumentInfo.builder()
+            .url("coverLetterWelshUrl")
+            .binaryUrl("coverLetterWelshBinaryUrl")
+            .docName("coverLetterWelsh.pdf")
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        doReturn(englishDocInfo).when(dgsService).generateDocument(
+            anyString(),
+            anyString(),
+            eq("coverLetter"),
+            anyMap()
+        );
+        doReturn(welshDocInfo).when(dgsService).generateDocument(
+            anyString(),
+            anyString(),
+            eq("coverLetterWelsh"),
+            anyMap()
+        );
+
+        List<Document> results = documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address);
+
+        assertNotNull(results);
+        assertEquals(2, results.size()); // both English and Welsh
+        assertEquals("coverLetter.pdf", results.get(0).getDocumentFileName());
+        assertEquals("coverLetterWelsh.pdf", results.get(1).getDocumentFileName());
+
+        verify(dgsService, times(2)).generateDocument(anyString(), anyString(), anyString(), anyMap());
+    }
+
+    @Test
+    public void testGenerateCoverLetterThrowsWhenDocumentGenerationFails() {
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterTemplate", "coverLetter");
+        ReflectionTestUtils.setField(documentGenService, "docBlankCoverLetterWelshTemplate", "coverLetter");
+
+        Address address = Address.builder()
+            .addressLine1("addressLine1")
+            .postCode("postcode")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(
+            anyString(),
+            anyString(),
+            anyString(),
+            anyMap()
+        )).thenThrow(new RuntimeException("Document generation failed"));
+
+        assertThrows(RuntimeException.class, () ->
+            documentGenService.generateCoverLetter(AUTH_TOKEN, caseData, "Test Name", address)
+        );
     }
 
     private Map<String, String> createDocumentValues(String documentType) {
@@ -3075,6 +3483,40 @@ public class DocumentGenServiceTest {
         return documentValues;
     }
 
+    private Document generateSingleC8Document(CaseData caseData, boolean isWelsh, boolean draft) throws Exception {
+        when(dgsService.generateDocument(anyString(), any(CaseDetails.class), any(), any())).thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(anyString(), any(CaseDetails.class), any(), any())).thenReturn(generatedDocumentInfo);
+        when(c100DocumentTemplateFinderService.findC8DocumentTemplate(any(CaseData.class), Mockito.anyBoolean()))
+            .thenReturn("c8-template");
+        when(c100DocumentTemplateFinderService.findC8DraftDocumentTemplate(any(CaseData.class), Mockito.anyBoolean()))
+            .thenReturn("c8-draft-template");
+        ReflectionTestUtils.setField(documentGenService, "fl401C8Template", "fl401-c8-template");
+        ReflectionTestUtils.setField(documentGenService, "fl401C8WelshTemplate", "fl401-c8-template-welsh");
+
+        return documentGenService.generateSingleDocument(
+            AUTH_TOKEN,
+            caseData,
+            draft ? C8_DRAFT_HINT : PrlAppsConstants.C8_HINT,
+            isWelsh
+        );
+    }
+
+    private void setFallbackC8Filenames() {
+        ReflectionTestUtils.setField(documentGenService, "c100C8Filename", "c100-c8-final-en.pdf");
+        ReflectionTestUtils.setField(documentGenService, "c100C8WelshFilename", "c100-c8-final-cy.pdf");
+        ReflectionTestUtils.setField(documentGenService, "c100C8DraftFilename", "c100-c8-draft-en.pdf");
+        ReflectionTestUtils.setField(documentGenService, "c100C8DraftWelshFilename", "c100-c8-draft-cy.pdf");
+        ReflectionTestUtils.setField(documentGenService, "fl401C8Filename", "fl401-c8-final-en.pdf");
+        ReflectionTestUtils.setField(documentGenService, "fl401C8WelshFilename", "fl401-c8-final-cy.pdf");
+    }
+
+    private void assertGeneratedC8FilenameForParty(String fileName, boolean isWelsh, boolean draft) {
+        assertTrue(fileName.startsWith("Confidential_C8 of TestFirst TestLast"));
+        assertEquals(isWelsh, fileName.contains(" Welsh"));
+        assertEquals(draft, fileName.contains(" Draft"));
+        assertTrue(fileName.endsWith(".pdf"));
+    }
+
     private void verifyDocumentsUpdated(Map<String, Object> caseData, String... documentFields) {
         for (String documentField : documentFields) {
             assertTrue(caseData.containsKey(documentField));
@@ -3087,4 +3529,3 @@ public class DocumentGenServiceTest {
         }
     }
 }
-

@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getBundleDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -98,10 +99,13 @@ public class BundleCreateRequestMapperTest {
 
     private BundleCreateRequestMapper bundleCreateRequestMapper;
 
+    private LocalDateTime futureHearingDateTime;
+
     @Before
     public void setUp() {
         hearingDetailsMapperUtil = new HearingDetailsMapperUtil();
         bundleCreateRequestMapper = new BundleCreateRequestMapper(hearingDetailsMapperUtil);
+        futureHearingDateTime = LocalDateTime.now().plusDays(7);
     }
 
     @Test
@@ -742,7 +746,7 @@ public class BundleCreateRequestMapperTest {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
                                     .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
-                                    .hearingStartDateTime(LocalDateTime.of(2024, 9, 16, 14, 0)).build());
+                                    .hearingStartDateTime(futureHearingDateTime).build());
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
 
@@ -766,7 +770,7 @@ public class BundleCreateRequestMapperTest {
             .mapCaseDataToBundleCreateRequest(c100CaseData, "eventI", Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
         assertEquals(
-            "16 Sep 2024 3:00 PM",
+            getBundleDateTime(futureHearingDateTime),
             bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime()
         );
     }
@@ -777,7 +781,7 @@ public class BundleCreateRequestMapperTest {
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName(
                 "hearingJudgeName")
                                     .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
-                                    .hearingStartDateTime(LocalDateTime.of(2024, 9, 16, 14, 0)).build());
+                                    .hearingStartDateTime(futureHearingDateTime).build());
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
         List<FL401Proceedings> fl401Docs = new ArrayList<>();
@@ -830,7 +834,7 @@ public class BundleCreateRequestMapperTest {
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName(
                 "hearingJudgeName")
                                     .hearingVenueId("venueId").hearingVenueAddress("venueAddress")
-                                    .hearingStartDateTime(LocalDateTime.of(2024, 9, 16, 14, 0)).build());
+                                    .hearingStartDateTime(futureHearingDateTime).build());
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
         List<ProceedingDetails> c100Docs = new ArrayList<>();
@@ -881,7 +885,7 @@ public class BundleCreateRequestMapperTest {
         List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>();
         hearingDaySchedules.add(HearingDaySchedule.hearingDayScheduleWith().hearingJudgeId("123").hearingJudgeName("hearingJudgeName")
             .hearingVenueName("venueName").hearingVenueId("venueId").hearingVenueAddress("venueAddress")
-            .hearingStartDateTime(LocalDateTime.now()).build());
+            .hearingStartDateTime(futureHearingDateTime).build());
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(CaseHearing.caseHearingWith().hmcStatus(LISTED).hearingDaySchedule(hearingDaySchedules).build());
 
@@ -933,7 +937,7 @@ public class BundleCreateRequestMapperTest {
         BundleCreateRequest bundleCreateRequest = bundleCreateRequestMapper.mapCaseDataToBundleCreateRequest(c100CaseData,"eventI",
             Hearings.hearingsWith().caseHearings(caseHearings).build(), "sample.yaml");
         assertNotNull(bundleCreateRequest);
-        Assert.assertEquals("",bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime());
+        Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingDateAndTime());
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingJudgeName());
         Assert.assertNull(bundleCreateRequest.getCaseDetails().getCaseData().getData().getHearingDetails().getHearingVenueAddress());
     }
@@ -1275,6 +1279,56 @@ public class BundleCreateRequestMapperTest {
         assertFalse(result.isEmpty());
         assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
         assertEquals(BundlingDocGroupEnum.laOtherDocuments, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testCafcassEnforcementOrderSuitabilityReportUpdatedInMap() {
+        final String categoryId = "enforcementOrderSuitabilityReport";
+        final String categoryName = "Enforcement Order Suitability Report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .enforcementOrderSuitabilityReportDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.enforcementOrderSuitabilityReport, result.get(0).getValue().getDocumentGroup());
+    }
+
+    @Test
+    public void testCafcassParentalOrderReporterReportUpdatedInMap() {
+        final String categoryId = "parentalOrderReporterReport";
+        final String categoryName = "Parental Order Reporter Report";
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .parentalOrderReporterReportDocument(createDoc(categoryId))
+            .documentParty(DocumentPartyEnum.CAFCASS.getDisplayedValue())
+            .categoryName(categoryName)
+            .categoryId(categoryId)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .courtStaffUploadDocListDocTab(Collections.singletonList(element(
+                                     quarantineLegalDoc))).build())
+            .build();
+
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapAllOtherDocuments(caseData);
+
+        assertFalse(result.isEmpty());
+        assertEquals(categoryId, result.get(0).getValue().getDocumentFileName());
+        assertEquals(BundlingDocGroupEnum.parentalOrderReporterReport, result.get(0).getValue().getDocumentGroup());
     }
 
 }

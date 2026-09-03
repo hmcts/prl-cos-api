@@ -5,16 +5,14 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -29,11 +27,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.controllers.ManageOrdersControllerFunctionalTest.VALID_CAFCASS_REQUEST_JSON;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CallbackControllerFunctionalTest {
-
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -95,9 +90,8 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-
     @Test
-    @Ignore
+    @Disabled
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
@@ -109,7 +103,6 @@ public class CallbackControllerFunctionalTest {
             .post("/generate-save-draft-document")
             .then().assertThat().statusCode(200);
     }
-
 
     @Test
     public void givenRequestWithApplicantOrRespondentCaseName_whenEndPointCalled_ResponseContainsApplicantCaseName() throws Exception {
@@ -187,8 +180,8 @@ public class CallbackControllerFunctionalTest {
             .as(CaseDetails.class);
 
         log.info("givenRequestWithCaseNumberAdded_ResponseContainsIssueDate caseId:" + caseDetails.getId());
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
 
         String requestBodyB = ResourceLoader.loadJson(FL401_VALID_REQUEST_BODY);
         request

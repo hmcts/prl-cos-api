@@ -51,6 +51,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManageOrders implements MappableObject {
 
+    @JsonProperty("checkIsThisUrgent")
+    private final YesOrNo checkIsThisUrgent;
     private final String childListForSpecialGuardianship;
     @JsonProperty("cafcassOfficeDetails")
     private final String cafcassOfficeDetails;
@@ -312,6 +314,8 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("checkForAutomatedHearing")
     private YesOrNo checkForAutomatedHearing;
 
+    private final YesOrNo isOrderCreatedBySolicitor;
+
     /*
     * Unused fields
     * */
@@ -323,4 +327,5 @@ public class ManageOrders implements MappableObject {
     private final DynamicMultiSelectList otherPartiesOnlyC47a;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
+
 }

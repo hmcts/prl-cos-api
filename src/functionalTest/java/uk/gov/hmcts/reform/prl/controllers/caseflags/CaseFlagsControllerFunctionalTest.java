@@ -4,13 +4,11 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -18,9 +16,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.util.Base64;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class CaseFlagsControllerFunctionalTest {
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -41,7 +37,7 @@ public class CaseFlagsControllerFunctionalTest {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
-    @Ignore
+    @Disabled
     public void givenBodyWithCaseFlags_whenAboutToStartCallback() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
         request
@@ -85,7 +81,7 @@ public class CaseFlagsControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void givenRequestBodyReviewAndSm_whenAboutToSubmit_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_FLAGS);
         request

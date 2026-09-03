@@ -110,8 +110,7 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
         MvcResult result = mockMvc.perform(buildRequest("case-document-solicitor-uploaded.json"))
             .andExpect(status().isOk())
             .andExpect(jsonPath(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE).doesNotExist())
-            .andExpect(jsonPath("$.data.legalProfUploadDocListDocTab", hasSize(1)))
-            .andExpect(jsonPath("$.data.legalProfUploadDocListDocTab[0].value.policeDisclosuresDocument").doesNotExist())
+            .andExpect(jsonPath("$.data.legalProfUploadDocListDocTab", hasSize(0)))
             .andReturn();
 
         verifyResponseDeserialises(result);

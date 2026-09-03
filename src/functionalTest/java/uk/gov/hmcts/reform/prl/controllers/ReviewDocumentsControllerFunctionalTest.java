@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -9,20 +8,18 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
@@ -43,9 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 
 @Slf4j
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ContextConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
 public class ReviewDocumentsControllerFunctionalTest {
 
     @Autowired
@@ -66,7 +61,6 @@ public class ReviewDocumentsControllerFunctionalTest {
             "http://localhost:4044"
         );
 
-
     private static final String REVIEW_DOCUMENT_REQUEST_SOLICITOR = "requests/review-doc-body-solicitor.json";
 
     private static final String REVIEW_DOCUMENT_REQUEST_CAFCASS = "requests/review-doc-body-cafcass.json";
@@ -83,15 +77,13 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     private String requestBodyForCourtAdmin;
 
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         objectMapper.registerModule(new JavaTimeModule());
         requestBodyForSolitior = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST_SOLICITOR);
         requestBodyForCafcass = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST_CAFCASS);
         requestBodyForCourtAdmin = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST_COURT);
     }
-
 
     @Test//f1
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForSol() throws Exception {
@@ -205,8 +197,6 @@ public class ReviewDocumentsControllerFunctionalTest {
                                                                                          .documentCreatedOn(stampedDocument.createdOn)
                                                                                          .build()).build();
 
-
-
     }
 
     @Test
@@ -233,7 +223,6 @@ public class ReviewDocumentsControllerFunctionalTest {
                   "data.restrictedDocuments", equalTo(null),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200);
-
 
     }
 
@@ -395,7 +384,6 @@ public class ReviewDocumentsControllerFunctionalTest {
                   "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200);
-
 
     }
 

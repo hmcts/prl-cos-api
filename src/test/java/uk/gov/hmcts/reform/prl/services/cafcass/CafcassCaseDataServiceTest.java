@@ -47,6 +47,8 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseDetail;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.OtherDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.CaseOrder;
+import uk.gov.hmcts.reform.prl.models.dto.cafcass.manageorder.OrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
@@ -82,6 +84,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REDACTED_DOCUMENT_UUID;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -703,6 +706,88 @@ class CafcassCaseDataServiceTest {
 
         assertTrue(otherDocsList.isEmpty());
 
+    }
+
+    @Test
+    void testRedactedDocumentIdsRemovedFromResponseOtherDocuments() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        uk.gov.hmcts.reform.prl.models.dto.cafcass.Document redactedDocument =
+            uk.gov.hmcts.reform.prl.models.dto.cafcass.Document.builder()
+                .documentId(REDACTED_DOCUMENT_UUID)
+                .documentFileName("*Redacted*")
+                .build();
+        uk.gov.hmcts.reform.prl.models.dto.cafcass.Document document =
+            uk.gov.hmcts.reform.prl.models.dto.cafcass.Document.builder()
+                .documentId("11111111-1111-1111-1111-111111111111")
+                .documentFileName("test.pdf")
+                .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .otherDocuments(List.of(
+                Element.<OtherDocuments>builder()
+                    .id(UUID.randomUUID())
+                    .value(OtherDocuments.builder().documentName("*Redacted*").documentOther(redactedDocument).build())
+                    .build(),
+                Element.<OtherDocuments>builder()
+                    .id(UUID.randomUUID())
+                    .value(OtherDocuments.builder().documentName("test.pdf").documentOther(document).build())
+                    .build()
+            ))
+            .build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder()
+            .cases(List.of(CafCassCaseDetail.builder().caseData(cafCassCaseData).build()))
+            .build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "removeRedactedDocumentsFromResponse",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<OtherDocuments>> otherDocuments = cafCassResponse.getCases().get(0).getCaseData().getOtherDocuments();
+        assertEquals(1, otherDocuments.size());
+        assertEquals("test.pdf", otherDocuments.get(0).getValue().getDocumentName());
+    }
+
+    @Test
+    void testRedactedDocumentIdsRemovedFromResponseOrderCollection() throws NoSuchMethodException,
+        InvocationTargetException, IllegalAccessException {
+        OrderDocument redactedDocument = OrderDocument.builder()
+            .documentId(REDACTED_DOCUMENT_UUID)
+            .documentFilename("*Redacted*")
+            .build();
+        OrderDocument document = OrderDocument.builder()
+            .documentId("11111111-1111-1111-1111-111111111111")
+            .documentFilename("order.pdf")
+            .build();
+
+        CafCassCaseData cafCassCaseData = CafCassCaseData.builder()
+            .orderCollection(List.of(
+                Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(CaseOrder.builder().orderDocument(redactedDocument).build())
+                    .build(),
+                Element.<CaseOrder>builder()
+                    .id(UUID.randomUUID())
+                    .value(CaseOrder.builder().orderDocument(document).build())
+                    .build()
+            ))
+            .build();
+        CafCassResponse cafCassResponse = CafCassResponse.builder()
+            .cases(List.of(CafCassCaseDetail.builder().caseData(cafCassCaseData).build()))
+            .build();
+
+        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+            "removeRedactedDocumentsFromResponse",
+            CafCassResponse.class
+        );
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(cafcassCaseDataService, cafCassResponse);
+
+        List<Element<CaseOrder>> orderCollection = cafCassResponse.getCases().get(0).getCaseData().getOrderCollection();
+        assertEquals(1, orderCollection.size());
+        assertEquals("order.pdf", orderCollection.get(0).getValue().getOrderDocument().getDocumentFilename());
     }
 
     @Test

@@ -11,15 +11,14 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
-import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.AssignRoleRequest;
-import uk.gov.hmcts.reform.prl.services.sendandreply.roleallocation.LegalAdviserRoleAllocator;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class LegalAdviserMessageHandler implements MessageHandler {
 
-    private final LegalAdviserRoleAllocator legalAdviserRoleAllocator;
     private final LegalAdviserDynamicListElementBiConverter legalAdviserDynamicListElementBiConverter;
 
     @Override
@@ -37,25 +36,15 @@ public class LegalAdviserMessageHandler implements MessageHandler {
 
     @Override
     public void handle(MessageRequest messageRequest) {
-        AssignRoleRequest assignRoleRequest = createAssignRoleRequest(
-            messageRequest, getSelectedLegalAdviserIdamId(messageRequest.getCaseData()));
-        legalAdviserRoleAllocator.handleRequest(assignRoleRequest);
-
         Message message = messageRequest.getMessage();
         DynamicListElement selectedElement = getLegalAdviserSelection(messageRequest.getCaseData());
         LegalAdviserIdamId selectedLegalAdviser = legalAdviserDynamicListElementBiConverter
             .convertFromDynamicListElement(selectedElement);
         message.setLegalAdviserEmail(selectedLegalAdviser.getEmail());
         message.setLegalAdviserName(selectedLegalAdviser.getFullName());
-    }
 
-    private AssignRoleRequest createAssignRoleRequest(MessageRequest messageRequest, String idamId) {
-        return AssignRoleRequest.builder()
-            .idamId(idamId)
-            .caseData(messageRequest.getCaseData())
-            .caseDataMap(messageRequest.getCaseDataMap())
-            .message(messageRequest.getMessage())
-            .build();
+        String idamId = getSelectedLegalAdviserIdamId(messageRequest.getCaseData());
+        messageRequest.getCaseDataMap().put(TASK_ASSIGNEE_IDAM_ID, idamId);
     }
 
     private String getSelectedLegalAdviserIdamId(CaseData caseData) {

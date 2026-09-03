@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ public class CallbackControllerFT {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-
     private static final String MIAM_VALIDATION_REQUEST_ERROR = "requests/call-back-controller-miam-request-error.json";
     private static final String MIAM_VALIDATION_REQUEST_NO_ERROR = "requests/call-back-controller-miam-request-no-error.json";
     private static final String C100_GENERATE_DRAFT_DOC = "requests/call-back-controller-generate-save-doc.json";
@@ -54,7 +53,6 @@ public class CallbackControllerFT {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
 
     @Test
     public void givenMiamAttendance_whenPostRequestToMiamValidatation_then200ResponseAndNoErrors() throws Exception {
@@ -168,8 +166,8 @@ public class CallbackControllerFT {
             .as(CaseDetails.class);
 
         log.info("givenC100Case_whenCaseWithdrawnEndpoint_then200ResponseAndDataContainsUpdatedTabData caseId:" + caseDetails.getId());
-        Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getId());
+        Assertions.assertNotNull(caseDetails);
+        Assertions.assertNotNull(caseDetails.getId());
 
         String withdrawRequestBody = ResourceLoader.loadJson(C100_WITHDRAW_APPLICATION);
         RequestSpecification requestB = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
@@ -280,7 +278,6 @@ public class CallbackControllerFT {
             .assertThat().statusCode(200)
             .body("data.caseTypeOfApplication", equalTo("C100"));
 
-
     }
 
     @Test
@@ -339,6 +336,5 @@ public class CallbackControllerFT {
                   "data.manageDocumentsTriggeredBy", equalTo(STAFF));
 
     }
-
 
 }

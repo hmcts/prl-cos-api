@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 @Data
 @Builder(toBuilder = true)
@@ -24,8 +25,16 @@ public class C100RebuildReasonableAdjustmentsElements {
     private String[] specialArrangements;
     @JsonProperty("ra_specialArrangementsOther_subfield")
     private String specialArrangementsOtherSubField;
+    @JsonProperty("ra_intermediaryRequirements")
+    private YesOrNo intermediaryRequirements;
+    @JsonProperty("ra_intermediaryRequired_subfield")
+    private String intermediaryRequiredSubField;
     @JsonProperty("ra_disabilityRequirements")
     private String[] disabilityRequirements;
+    @JsonProperty("ra_assistanceRequirements")
+    private YesOrNo assistanceRequirements;
+    @JsonProperty("ra_assistanceRequirements_subfield")
+    private String assistanceRequirementsSubField;
     @JsonProperty("ra_documentInformation")
     private String[] documentInformation;
     @JsonProperty("ra_specifiedColorDocuments_subfield")

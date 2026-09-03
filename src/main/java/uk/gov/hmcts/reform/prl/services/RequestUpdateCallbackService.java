@@ -34,6 +34,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_WA_TASK_NAME;
@@ -63,10 +64,22 @@ public class RequestUpdateCallbackService {
         CaseDetails caseDetails
             = coreCaseDataService.findCaseById(systemAuthorisation, serviceRequestUpdateDto.getCcdCaseNumber());
 
-        boolean isCasePayment = verifyCaseCreationPaymentReference(
+        CaseData currentCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        if (isDuplicatePayment(caseDetails, serviceRequestUpdateDto)) {
+            log.info(
+                "Payment already processed for case {} with service request reference {}, and incoming payment reference {}, skipping update.",
+                serviceRequestUpdateDto.getCcdCaseNumber(),
+                currentCaseData.getPaymentServiceRequestReferenceNumber(),
+                serviceRequestUpdateDto.getPayment().getPaymentReference()
+            );
+            return;
+        }
+
+        boolean isCasePayment = isRootServiceRequest(
             caseDetails,
             serviceRequestUpdateDto.getServiceRequestReference()
         );
+
         CaseEvent caseEvent;
         if (isCasePayment) {
             caseEvent = PAID.equalsIgnoreCase(serviceRequestUpdateDto.getServiceRequestStatus())
@@ -162,14 +175,40 @@ public class RequestUpdateCallbackService {
         }
     }
 
-    private boolean verifyCaseCreationPaymentReference(CaseDetails caseDetails, String serviceRequestReference) {
+    private boolean isRootServiceRequest(CaseDetails caseDetails, String serviceRequestReference) {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         return !StringUtils.isEmpty(serviceRequestReference)
-                && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+            && serviceRequestReference.equalsIgnoreCase(caseData.getPaymentServiceRequestReferenceNumber());
+    }
+
+    private boolean isDuplicatePayment(CaseDetails caseDetails, ServiceRequestUpdateDto paymentUpdateDto) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+
+        String incomingRef = paymentUpdateDto.getServiceRequestReference();
+
+        // Root Case Payment Request
+        if (isRootServiceRequest(caseDetails, paymentUpdateDto.getServiceRequestReference())) {
+            // If the database already shows a recorded callback and it was successful, it's a duplicate
+            return caseData.getPaymentCallbackServiceRequestUpdate() != null
+                && PAID.equalsIgnoreCase(caseData.getPaymentCallbackServiceRequestUpdate().getServiceRequestStatus());
+        }
+
+        if (caseData.getAdditionalApplicationsBundle() != null) {
+            return caseData.getAdditionalApplicationsBundle().stream()
+                .filter(Objects::nonNull)
+                .map(Element::getValue)
+                .filter(Objects::nonNull)
+                .map(AdditionalApplicationsBundle::getPayment)
+                .filter(Objects::nonNull)
+                .anyMatch(existingPayment -> PAID.equalsIgnoreCase(existingPayment.getStatus())
+                    && incomingRef.equalsIgnoreCase(existingPayment.getPaymentServiceRequestReferenceNumber()));
+        }
+
+        return false;
     }
 
     public CaseData getCaseDataWithStateAndDateSubmitted(ServiceRequestUpdateDto serviceRequestUpdateDto,
-                                                          CaseData caseData) {
+                                                         CaseData caseData) {
         try {
             Court closestChildArrangementsCourt = courtFinderService.getNearestFamilyCourt(caseData);
             if (serviceRequestUpdateDto.getServiceRequestStatus().equalsIgnoreCase(PAID)) {
@@ -238,7 +277,7 @@ public class RequestUpdateCallbackService {
                         ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .otherApplicationsBundle(null != additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
                                                  ? additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
-                        .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
+                                                   .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .build();
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
@@ -253,11 +292,19 @@ public class RequestUpdateCallbackService {
                             )
                         );
                 }
-                caseDataUpdated.put(WA_ADDITIONAL_APPLICATION_COLLECTION_ID, additionalApplicationsBundleElement.get().getId());
-                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    WA_ADDITIONAL_APPLICATION_COLLECTION_ID,
+                    additionalApplicationsBundleElement.get().getId()
+                );
+                caseDataUpdated.put(
+                    "additionalApplicationsBundle",
+                    startEventResponseData.getAdditionalApplicationsBundle()
+                );
                 caseDataUpdated.put(
                     AWP_WA_TASK_NAME,
-                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(updatedAdditionalApplicationsBundleElement));
+                    uploadAdditionalApplicationUtils.getAwPTaskNameWhenPaymentCompleted(
+                        updatedAdditionalApplicationsBundleElement)
+                );
                 caseDataUpdated.put(AWP_WA_TASK_TO_BE_CREATED, YES);
             }
         }

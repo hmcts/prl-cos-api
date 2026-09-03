@@ -51,6 +51,7 @@ public class Document {
         this.uploadTimeStamp = uploadTimeStamp;
     }
 
+
     public static Document buildFromDocument(uk.gov.hmcts.reform.ccd.document.am.model.Document document) {
         return Document.builder()
             .documentUrl(document.links.self.href)

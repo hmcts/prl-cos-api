@@ -1,18 +1,22 @@
 package uk.gov.hmcts.reform.prl.services.documentremoval;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentRemovalWrapper;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.DeleteDocumentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.documentremoval.postabouttosubmitaction.DocumentRemovalAboutToSubmitAction;
@@ -33,6 +37,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentRemovalServiceTest {
@@ -58,6 +63,7 @@ class DocumentRemovalServiceTest {
 
     private Document document;
     private CaseData caseData;
+    private Map<String, Object> courtStaffUploadDoc;
 
     @BeforeEach
     void setUp() {
@@ -85,7 +91,27 @@ class DocumentRemovalServiceTest {
             .documentRemovalWrapper(DocumentRemovalWrapper.builder()
                 .documentRemovalCaseDocuments(dynamicList)
                 .build())
+            .reviewDocuments(
+                ReviewDocuments.builder()
+                    .courtStaffUploadDocListDocTab(
+                        List.of(element(QuarantineLegalDoc.builder()
+                            .respondentStatementsDocument(document)
+                            .categoryId("respondentStatements")
+                            .build()
+                        )))
+                    .build())
             .build();
+
+        courtStaffUploadDoc = Map.of(
+            "id", "1",
+            "value", Map.of(
+                    "categoryId", "respondentStatements",
+                    "respondentStatementsDocument", Map.of(
+                        "document_url", "http://someserver/doc1",
+                        "document_filename", "file1.pdf"
+                    )
+            )
+        );
     }
 
     @Test
@@ -135,6 +161,11 @@ class DocumentRemovalServiceTest {
     @Test
     void testRemoveDocumentFromCaseData() throws IOException {
         when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
+        when(objectMapper.convertValue(
+            any(QuarantineLegalDoc.class),
+            ArgumentMatchers.<TypeReference<Map<String, Object>>>any()
+        )).thenReturn(courtStaffUploadDoc);
         when(documentRemover.removeDocument(anyMap(), eq("doc1"))).thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
 
         Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
@@ -142,6 +173,26 @@ class DocumentRemovalServiceTest {
         assertFalse(result.containsKey("documentToRemove"));
         assertFalse(result.containsKey("documentRemovalConfirmOptions"));
         assertEquals("someValue", result.get("someKey"));
+
+        verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
+    }
+
+    @Test
+    void testRemoveDocumentFromCaseDataAlsoRemovesDocumentFromCollection() throws IOException {
+        when(objectMapper.convertValue(any(), eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(any(), eq(Document.class))).thenReturn(document);
+        when(objectMapper.convertValue(
+            any(QuarantineLegalDoc.class),
+            ArgumentMatchers.<TypeReference<Map<String, Object>>>any()
+        )).thenReturn(courtStaffUploadDoc);
+        when(documentRemover.removeDocument(anyMap(), eq("doc1"))).thenReturn(new HashMap<>(Map.of("someKey", "someValue")));
+
+        Map<String, Object> result = documentRemovalService.removeDocumentFromCaseData(caseDetails);
+
+        assertFalse(result.containsKey("documentToRemove"));
+        assertFalse(result.containsKey("documentRemovalConfirmOptions"));
+        assertEquals("someValue", result.get("someKey"));
+        assertEquals("[]", result.get("courtStaffUploadDocListDocTab").toString());
 
         verify(documentRemovalAboutToSubmitAction).onAboutToSubmit(any(CaseData.class), anyMap());
     }

@@ -7,20 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.wa.WaMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
-import static java.util.Comparator.comparing;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 
 @Slf4j
@@ -30,8 +23,6 @@ public class FlagsService {
 
     public static final String SELECTED_REVIEW_LANG_AND_SM_REQ = "selectedReviewLangAndSmReq";
     public static final String IS_REVIEW_LANG_AND_SM_REQ_REVIEWED = "isReviewLangAndSmReqReviewed";
-    public static final String REQUESTED = "Requested";
-    public static final String REQUESTED_STATUS_IS_NOT_ALLOWED = "Requested status is not allowed";
     private final ObjectMapper objectMapper;
 
     public void prepareSelectedReviewLangAndSmReq(Map<String, Object> caseDataMap, String clientContext) {
@@ -57,113 +48,4 @@ public class FlagsService {
             null);
     }
 
-    public List<String> validateNewFlagStatus(Map<String, Object> caseDataCurrent) {
-        List<String> errors = new ArrayList<>();
-
-        getAllFlagsToValidate().stream()
-            .map(flag -> objectMapper.convertValue(
-                caseDataCurrent.get(flag), new TypeReference<Flags>() {
-                }
-            ))
-            .filter(Objects::nonNull)
-            .map(Flags::getDetails)
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream)
-            .map(Element::getValue)
-            .max(comparing(FlagDetail::getDateTimeCreated))
-            .filter(flagDetail -> REQUESTED.equals(flagDetail.status))
-            .ifPresent(flagDetail -> errors.add(REQUESTED_STATUS_IS_NOT_ALLOWED));
-
-        return errors;
-    }
-
-
-
-    private static List<String> getAllFlagsToValidate() {
-        return asList(
-            "caseFlags",
-            "caApplicant1InternalFlags",
-            "caApplicantSolicitor1InternalFlags",
-            "caApplicantBarrister1InternalFlags",
-            "caApplicant2InternalFlags",
-            "caApplicantSolicitor2InternalFlags",
-            "caApplicantBarrister2InternalFlags",
-            "caApplicant3InternalFlags",
-            "caApplicantSolicitor3InternalFlags",
-            "caApplicantBarrister3InternalFlags",
-            "caApplicant4InternalFlags",
-            "caApplicantSolicitor4InternalFlags",
-            "caApplicantBarrister4InternalFlags",
-            "caApplicant5InternalFlags",
-            "caApplicantSolicitor5InternalFlags",
-            "caApplicantBarrister5InternalFlags",
-            "caRespondent1InternalFlags",
-            "caRespondentSolicitor1InternalFlags",
-            "caRespondentBarrister1InternalFlags",
-            "caRespondent2InternalFlags",
-            "caRespondentSolicitor2InternalFlags",
-            "caRespondentBarrister2InternalFlags",
-            "caRespondent3InternalFlags",
-            "caRespondentSolicitor3InternalFlags",
-            "caRespondentBarrister3InternalFlags",
-            "caRespondent4InternalFlags",
-            "caRespondentSolicitor4InternalFlags",
-            "caRespondentBarrister4InternalFlags",
-            "caRespondent5InternalFlags",
-            "caRespondentSolicitor5InternalFlags",
-            "caRespondentBarrister5InternalFlags",
-            "caOtherParty1InternalFlags",
-            "caOtherParty2InternalFlags",
-            "caOtherParty3InternalFlags",
-            "caOtherParty4InternalFlags",
-            "caOtherParty5InternalFlags",
-            "caApplicant1ExternalFlags",
-            "caApplicantSolicitor1ExternalFlags",
-            "caApplicantBarrister1ExternalFlags",
-            "caApplicant2ExternalFlags",
-            "caApplicantSolicitor2ExternalFlags",
-            "caApplicantBarrister2ExternalFlags",
-            "caApplicant3ExternalFlags",
-            "caApplicantSolicitor3ExternalFlags",
-            "caApplicantBarrister3ExternalFlags",
-            "caApplicant4ExternalFlags",
-            "caApplicantSolicitor4ExternalFlags",
-            "caApplicantBarrister4ExternalFlags",
-            "caApplicant5ExternalFlags",
-            "caApplicantSolicitor5ExternalFlags",
-            "caApplicantBarrister5ExternalFlags",
-            "caRespondent1ExternalFlags",
-            "caRespondentSolicitor1ExternalFlags",
-            "caRespondentBarrister1ExternalFlags",
-            "caRespondent2ExternalFlags",
-            "caRespondentSolicitor2ExternalFlags",
-            "caRespondentBarrister2ExternalFlags",
-            "caRespondent3ExternalFlags",
-            "caRespondentSolicitor3ExternalFlags",
-            "caRespondentBarrister3ExternalFlags",
-            "caRespondent4ExternalFlags",
-            "caRespondentSolicitor4ExternalFlags",
-            "caRespondentBarrister4ExternalFlags",
-            "caRespondent5ExternalFlags",
-            "caRespondentSolicitor5ExternalFlags",
-            "caRespondentBarrister5ExternalFlags",
-            "caOtherParty1ExternalFlags",
-            "caOtherParty2ExternalFlags",
-            "caOtherParty3ExternalFlags",
-            "caOtherParty4ExternalFlags",
-            "caOtherParty5ExternalFlags",
-            "daApplicantInternalFlags",
-            "daApplicantSolicitorInternalFlags",
-            "daApplicantBarristerInternalFlags",
-            "daRespondentInternalFlags",
-            "daRespondentSolicitorInternalFlags",
-            "daRespondentBarristerInternalFlags",
-            "daApplicantExternalFlags",
-            "daApplicantSolicitorExternalFlags",
-            "daApplicantBarristerExternalFlags",
-            "daRespondentExternalFlags",
-            "daRespondentSolicitorExternalFlags",
-            "daRespondentBarristerExternalFlags"
-        );
-    }
 }

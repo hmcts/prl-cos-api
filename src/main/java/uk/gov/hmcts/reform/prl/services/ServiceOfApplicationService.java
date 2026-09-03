@@ -62,6 +62,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -73,6 +74,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
+import uk.gov.hmcts.reform.prl.utils.MaskEmail;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -89,6 +91,7 @@ import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C100_AP7;
@@ -216,6 +219,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "confirmationHeader";
     public static final String TEMPLATE = "template";
     public static final String PLEASE_SELECT_AT_LEAST_ONE_PARTY_TO_SERVE = "Please select at least one party to serve";
+    public static final String IS_CITIZEN = "isCitizen";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -312,6 +316,10 @@ public class ServiceOfApplicationService {
     private final LaunchDarklyClient launchDarklyClient;
     private final ConfidentialityCheckService confidentialityCheckService;
     private final HearingService hearingService;
+    private final OrganisationService organisationService;
+    private final MaskEmail maskEmail;
+    private final AssignCaseAccessService assignCaseAccessService;
+    private final RespondentOrgPolicyService respondentOrgPolicyService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -361,18 +369,17 @@ public class ServiceOfApplicationService {
 
                 if (null != other.getValue().getAddress()
                     && null != other.getValue().getAddress().getAddressLine1()) {
-                    List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
-                                                              .getCoverSheets(caseData, authorization,
-                                                                              other.getValue().getAddress(),
-                                                                              other.getValue().getLabelForDynamicList(),
-                                                                              DOCUMENT_COVER_SHEET_HINT
-                                                              ));
-                    docs.addAll(packN);
+                    packN.addAll(serviceOfApplicationPostService
+                                     .getCoverSheets(caseData, authorization,
+                                                     other.getValue().getAddress(),
+                                                     other.getValue().getLabelForDynamicList(),
+                                                     DOCUMENT_COVER_SHEET_HINT
+                                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
                         caseData,
                         authorization,
                         other,
-                        docs,
+                        packN,
                         servedParty
                     )));
                 }
@@ -2013,16 +2020,18 @@ public class ServiceOfApplicationService {
             //TEMP SOLUTION TO GET ACCESS CODES - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         }
 
+
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, caseDataMap, caseData, startAllTabsUpdateDataContent);
+        } else {
+            return processNonConfidentialSoa(
+                authorisation,
+                caseData,
+                caseDataMap,
+                startAllTabsUpdateDataContent,
+                String.valueOf(callbackRequest.getCaseDetails().getId())
+            );
         }
-        return processNonConfidentialSoa(
-            authorisation,
-            caseData,
-            caseDataMap,
-            startAllTabsUpdateDataContent,
-            String.valueOf(callbackRequest.getCaseDetails().getId())
-        );
     }
 
     private ResponseEntity<SubmittedCallbackResponse> processNonConfidentialSoa(String authorisation, CaseData caseData,
@@ -2064,6 +2073,10 @@ public class ServiceOfApplicationService {
             updatedCaseDataContent.eventRequestData(),
             caseDataMap
         );
+        // Populate respondent org policies and grant respondent solicitor case access
+        // (no-op if respondents/details not present).
+        respondentOrgPolicyService.populateRespondentOrganisations(caseDataMap, caseData);
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(confirmationBanner.get(CONFIRMATION_HEADER))
                       .confirmationBody(confirmationBody).build());
@@ -2148,6 +2161,10 @@ public class ServiceOfApplicationService {
                                                 manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
                                                     + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Confidential details are present, case needs to be reviewed and served later");
+        // Respondent solicitor access is NOT granted here: confidential info is still present
+        // and the confidentiality check has not yet been completed. Access is granted in
+        // handleConfidentialCheckSuccessful once court admin approves the check.
+
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
                       .confirmationBody(confirmationBody).build());
@@ -2497,17 +2514,18 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, List<Document> coverLetter,
                                                      String servedParty) {
-
         try {
-            List<Document> docs = new ArrayList<>(serviceOfApplicationPostService
+            List<Document> docs = new ArrayList<>();
+            if (coverLetter != null) {
+                docs.addAll(coverLetter);
+            }
+            docs.addAll(serviceOfApplicationPostService
                                                       .getCoverSheets(caseData, authorization,
                                                                       party.getValue().getAddress(),
                                                                       party.getValue().getLabelForDynamicList(),
                                                                       DOCUMENT_COVER_SHEET_HINT
                                                       ));
-            if (coverLetter != null) {
-                docs.addAll(coverLetter);
-            }
+
             docs.addAll(packDocs);
             log.info("*** Sending docs to party Lip post");
             bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -3236,15 +3254,15 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put("applicantName", caseData.getApplicants().get(0).getValue().getLabelForDynamicList());
         }
-        dataMap.put("isCitizen", false);
+        dataMap.put(IS_CITIZEN, false);
         if (launchDarklyClient.isFeatureEnabled(ENABLE_CITIZEN_ACCESS_CODE_IN_COVER_LETTER)) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
             // This check is added to disable or enable DA citizen journey as needed
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && launchDarklyClient.isFeatureEnabled(PrlAppsConstants.CITIZEN_ALLOW_DA_JOURNEY)) {
-                dataMap.put("isCitizen", !CaseUtils.hasLegalRepresentation(party.getValue()));
+                dataMap.put(IS_CITIZEN, !CaseUtils.hasLegalRepresentation(party.getValue()));
             }
         }
         return dataMap;
@@ -4312,16 +4330,19 @@ public class ServiceOfApplicationService {
             log.info("Reject reason list not empty");
             // get existing reject reason
             confidentialCheckFailedList.addAll(caseData.getServiceOfApplication().getConfidentialCheckFailed());
-            //The confidentiality check reason text is mandatory on Manage Case, therefore we only add it to the
-            //case when it has a value to avoid null entries.
-            log.info("Adding reject reason list to the case");
-            caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
-        } else {
-            //No rejection reasons = not an actual rejection  since the user interface does not allow proceeding with
-            //a rejection without writing at least one reason.
-            log.info("Reject reason list empty, therefore not an actual rejection but"
-                         + " likely timeout on update all tabs");
         }
+        if (!isEmpty(caseData.getServiceOfApplication().getRejectionReason())
+            && No.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
+            final ConfidentialCheckFailed confidentialCheckFailed = ConfidentialCheckFailed.builder().confidentialityCheckRejectReason(
+                    caseData.getServiceOfApplication().getRejectionReason())
+                .dateRejected(CaseUtils.getCurrentDate())
+                .build();
+
+            confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
+
+        }
+        caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
+
 
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
@@ -4369,6 +4390,9 @@ public class ServiceOfApplicationService {
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
         caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
+        // Deferred from SOA aboutToSubmit: populate respondent org policies and grant respondent
+        // solicitor case access now that the confidentiality check has passed.
+        respondentOrgPolicyService.populateRespondentOrganisations(caseDataMap, caseData);
         response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(confirmationHeader)
                           .confirmationBody(

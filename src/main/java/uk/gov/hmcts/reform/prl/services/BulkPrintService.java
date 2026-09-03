@@ -57,7 +57,7 @@ public class BulkPrintService {
 
         try {
             for (Document doc:documents) {
-                pdfDocuments.add(documentGenService.convertToPdf(userToken, doc));
+                pdfDocuments.add(documentGenService.convertToPdf(caseId, userToken, doc));
             }
         } catch (PdfConversionException e) {
             throw new BulkPrintException("PDF Conversion Exception at bulk print send : " + e);

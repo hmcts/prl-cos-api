@@ -35,4 +35,17 @@ class CommonUtilsTest {
         assertNotNull(result);
         assertEquals("15 Jul 2024 11:30 AM", result);
     }
+
+    @Test
+    void shouldFormatDateAfterBstConversionWhenUtcTimeCrossesMidnight() {
+        // Given - 23:30 UTC is 00:30 next day in London during BST
+        LocalDateTime utcDateTime = LocalDateTime.of(2024, Month.AUGUST, 5, 23, 30, 0);
+
+        // When
+        String result = CommonUtils.getBundleDateTime(utcDateTime);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("6 Aug 2024 12:30 AM", result);
+    }
 }

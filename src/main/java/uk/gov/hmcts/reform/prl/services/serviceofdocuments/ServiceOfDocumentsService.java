@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationPostService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -124,6 +125,7 @@ public class ServiceOfDocumentsService {
     private final UserService userService;
     private final AllTabServiceImpl allTabService;
     private final DocumentLanguageService documentLanguageService;
+    private final DocumentGenService documentGenService;
     private final EmailService emailService;
     private final BulkPrintService bulkPrintService;
     private final ConfidentialityCheckService confidentialityCheckService;
@@ -662,16 +664,17 @@ public class ServiceOfDocumentsService {
                                                   String name,
                                                   Address address,
                                                   String servedParty) throws Exception {
-        List<Document> documents = new ArrayList<>(serviceOfApplicationPostService
-                                                       .getCoverSheets(
-                                                           caseData,
-                                                           authorisation,
-                                                           address,
-                                                           name,
-                                                           DOCUMENT_COVER_SHEET_HINT
-                                                       ));
+        List<Document> documents = new ArrayList<>();
+        documents.addAll(documentGenService.generateCoverLetter(authorisation, caseData, name, address));
+        documents.addAll(serviceOfApplicationPostService
+                             .getCoverSheets(
+                                 caseData,
+                                 authorisation,
+                                 address,
+                                 name,
+                                 DOCUMENT_COVER_SHEET_HINT
+                             ));
         documents.addAll(unwrapElements(docs));
-
         UUID bulkPrintId = bulkPrintService.send(
             String.valueOf(caseData.getId()),
             authorisation,

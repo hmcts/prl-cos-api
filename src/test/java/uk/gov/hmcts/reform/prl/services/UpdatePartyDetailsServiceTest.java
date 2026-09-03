@@ -74,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService.HISTORICAL_DOC_TO_RETAIN_FOR_EVENTS;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
@@ -178,7 +179,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -382,7 +383,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -489,7 +490,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -595,7 +596,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -710,7 +711,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -765,7 +766,7 @@ class UpdatePartyDetailsServiceTest {
 
         Map<String, Object> nocMap = Map.of("some", "stuff");
 
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1082,7 +1083,7 @@ class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff",
                                             "applicantOrganisationPolicy", organisationPolicy
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1151,7 +1152,7 @@ class UpdatePartyDetailsServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1227,7 +1228,7 @@ class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -1420,7 +1421,7 @@ class UpdatePartyDetailsServiceTest {
         Map<String, Object> nocMap = Map.of("some", "stuff");
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, true);
-        when(noticeOfChangePartiesService.generate(caseData, CARESPONDENT)).thenReturn(nocMap);
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(nocMap);
         when(confidentialDetailsMapper.mapConfidentialData(
             Mockito.any(CaseData.class),
             Mockito.anyBoolean()
@@ -2867,6 +2868,60 @@ class UpdatePartyDetailsServiceTest {
         List<String> validationErrorList = updatePartyDetailsService.validateUpdatePartyDetails(callbackRequest);
 
         assertTrue(validationErrorList.isEmpty());
+    }
+
+    @Test
+    void shouldNotReturnEmptyRespondentsWhenUpdatingC100ApplicantDetailsBeforeRespondentsEntered() {
+        Element<PartyDetails> applicant = element(PartyDetails.builder()
+                                                      .firstName("Applicant")
+                                                      .lastName("One")
+                                                      .build());
+        List<Element<PartyDetails>> applicants = List.of(applicant);
+        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
+            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .applicantOrganisationPolicy(applicantOrganisationPolicy)
+            .build();
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicants(applicants)
+            .applicantOrganisationPolicy(applicantOrganisationPolicy)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Map<String, Object> caseDataBeforeMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("applicantsDetails")
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+                                   .data(caseDataBeforeMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenAnswer(invocation ->
+            invocation.getArgument(0) == caseDataBeforeMap ? caseDataBefore : caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, false)).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(caseData)).thenReturn(Map.of());
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT)).thenReturn(Map.of());
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest,
+            BEARER_TOKEN
+        );
+
+        assertThat(updatedCaseData).containsKey("applicants");
+        assertThat(updatedCaseData).doesNotContainKey("respondents");
     }
 
     private Element<ResponseDocuments> existingResponseDocument() {

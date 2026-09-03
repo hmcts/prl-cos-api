@@ -44,6 +44,9 @@ public class QuarantineLegalDoc {
     private final Document safeguardingLetterDocument;
     private final Document childImpactReport1Document;
     private final Document childImpactReport2Document;
+    private final Document section7AddendumReportDocument;
+    private final Document enforcementOrderSuitabilityReportDocument;
+    private final Document parentalOrderReporterReportDocument;
     private final Document section7ReportDocument;
     private final Document section37ReportDocument;
     private final Document sixteenARiskAssessmentDocument; // 16aRiskAssessment
@@ -133,6 +136,14 @@ public class QuarantineLegalDoc {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
             "applicationsWithinProceedings", "applicationsWithinProceedingsRes", "applicationsFromOtherProceedings",
             "courtnavQuarantine", "c8ArchivedDocuments", "bulkScanQuarantine", "draftOrders", "localAuthorityQuarantine"
+        };
+    }
+
+
+    public static String[] allQuarantineCategoriesToRemove() {
+        return new String [] {
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine",
+            "courtnavQuarantine", "bulkScanQuarantine", "localAuthorityQuarantine"
         };
     }
 }
