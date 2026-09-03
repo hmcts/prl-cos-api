@@ -6971,6 +6971,48 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    public void shouldRemoveLocalAuthorityFromCaseWhenDoesOrderClosesCaseIsYes() {
+        OrganisationPolicy organisationPolicy = OrganisationPolicy.builder()
+            .organisation(Organisation.builder().organisationName("OrgName").build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("id", 12345L);
+        caseDataUpdated.put("caseTypeOfApplication", "C100");
+        caseDataUpdated.put(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY, organisationPolicy);
+        LocalAuthority localAuthority = LocalAuthority.builder()
+            .localAuthoritySolicitorOrganisationName("OrgName").isLocalAuthorityInvolvedInCase(Yes).build();
+
+        caseDataUpdated.put(LOCAL_AUTHORITY_DATA, localAuthority);
+
+        List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
+        newOrderDetails.add(ElementUtils.element(OrderDetails.builder().doesOrderClosesCase(Yes)
+                                                     .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue())
+                                                     .build()));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .orderCollection(newOrderDetails)
+            .localAuthoritySolicitorOrganisationPolicy(organisationPolicy)
+            .localAuthority(localAuthority)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(Yes)
+            .build();
+
+        manageOrderService.removeLocalAuthorityFromCase(caseData, caseDataUpdated);
+
+        verify(removeLocalAuthoritySolicitorService, atLeast(1)).removeLocalAuthoritySolicitor(eq(caseData));
+        assertEquals(OrganisationPolicy.builder().organisation(
+                         Organisation.builder().build()).orgPolicyCaseAssignedRole(LOCAL_AUTHORITY_SOLICITOR_CASE_ROLE).build(),
+                     caseDataUpdated.get(LOCAL_AUTHORITY_SOLICITOR_ORGANISATION_POLICY));
+        LocalAuthority updated = (LocalAuthority) caseDataUpdated.get(LOCAL_AUTHORITY_DATA);
+        assertNull(updated.getLocalAuthoritySolicitorOrganisationName());
+        assertEquals(No, updated.getIsLocalAuthorityInvolvedInCase());
+
+    }
+
+    @Test
     public void shouldNotRemoveLocalAuthorityWhenOrgPolicyIsNotSet() {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();

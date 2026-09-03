@@ -279,13 +279,13 @@ public class ManageOrdersController {
 
                 if (JudgeOrMagistrateTitleEnum.justicesLegalAdviser == judgeTitle
                     || JudgeOrMagistrateTitleEnum.justicesClerk == judgeTitle) {
-                    caseData.put("justiceLegalAdviserFullName", userDetails.getFullName());
+                    caseData.put("justiceLegalAdviserFullName", userDetails.getSurname().orElse(userDetails.getForename()));
                 } else if (JudgeOrMagistrateTitleEnum.magistrate == judgeTitle) {
                     caseData.put("magistrateLastName", List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
                         uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
-                            .lastName(userDetails.getFullName()).build())));
+                            .lastName(userDetails.getSurname().orElse(userDetails.getForename())).build())));
                 } else {
-                    caseData.put("judgeOrMagistratesLastName", userDetails.getFullName());
+                    caseData.put("judgeOrMagistratesLastName", userDetails.getSurname().orElse(userDetails.getForename()));
                 }
             }
         }
