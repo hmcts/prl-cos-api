@@ -9,8 +9,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
@@ -47,21 +45,6 @@ public class GatekeepingDetailsServiceTest {
     Object idamId;
 
     @Test
-    public void testGatekeepingWhenLegalAdvisorDetailsProvided() {
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.legalAdviser);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
-                                                                       .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
-        GatekeepingDetails expectedResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,legalAdviserList,null);
-        assertEquals(SendToGatekeeperTypeEnum.legalAdviser,expectedResponse.getIsJudgeOrLegalAdviserGatekeeping());
-        assertNotNull(expectedResponse.getLegalAdviserList());
-    }
-
-    @Test
     public void testGatekeepingWhenJudgeDetailsProvided() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
@@ -77,7 +60,7 @@ public class GatekeepingDetailsServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
                                                               .personalCode(personalCodes).build())).thenReturn(apiResponseList);
-        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,refDataUserService);
+        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,refDataUserService);
         assertNotNull(actualResponse);
         assertEquals(SendToGatekeeperTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificGateKeeperNeeded());
@@ -100,7 +83,7 @@ public class GatekeepingDetailsServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
                                                               .personalCode(personalCodes).build())).thenReturn(null);
-        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,refDataUserService);
+        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,refDataUserService);
         assertNotNull(actualResponse);
         assertEquals(SendToGatekeeperTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificGateKeeperNeeded());
@@ -121,7 +104,7 @@ public class GatekeepingDetailsServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
                                                               .personalCode(personalCodes).build())).thenReturn(new ArrayList<>());
-        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,refDataUserService);
+        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,refDataUserService);
         assertNotNull(actualResponse);
         assertEquals(SendToGatekeeperTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificGateKeeperNeeded());
