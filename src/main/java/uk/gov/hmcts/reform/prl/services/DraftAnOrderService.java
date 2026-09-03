@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -663,6 +664,7 @@ public class DraftAnOrderService {
             .otherDetails(
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
                     .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
+                    .rejectionInstructionsHistory(draftOrder.getOtherDetails().getRejectionInstructionsHistory())
                     .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                         PrlAppsConstants.D_MMM_YYYY,
@@ -1264,11 +1266,26 @@ public class DraftAnOrderService {
                 instructionssToLegalRep = "";
             }
         }
+
+
+        OtherDraftOrderDetails otherDetails = draftOrder.getOtherDetails();
+        String instructionsToLegalRepresentative = otherDetails.getInstructionsToLegalRepresentative();
+        String rejectionInstructionsHistory = otherDetails.getRejectionInstructionsHistory();
+        if (StringUtils.isNotBlank(instructionsToLegalRepresentative)) {
+            if (StringUtils.isNotBlank(rejectionInstructionsHistory)) {
+                rejectionInstructionsHistory = Objects.toString(rejectionInstructionsHistory, "") + ", "
+                    + Objects.toString(instructionsToLegalRepresentative, "");
+            } else {
+                rejectionInstructionsHistory = instructionsToLegalRepresentative;
+            }
+        }
+
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
+                              .rejectionInstructionsHistory(rejectionInstructionsHistory)
                               .instructionsToLegalRepresentative(instructionssToLegalRep)
                               .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
                               //PRL-4857 - clear this field as order is reviewed by judge/manager already.
