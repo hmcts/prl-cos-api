@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -34,11 +35,13 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.FeatureToggleService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.cafcass.CafcassCaseDataHelper;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -53,6 +56,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -115,6 +119,12 @@ public class ManageOrderControllerIntegrationTest {
 
     @MockBean
     HearingService hearingService;
+
+    @MockBean
+    FeatureToggleService featureToggleService;
+
+    @MockBean
+    CafcassCaseDataHelper cafcassCaseDataHelper;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -238,6 +248,44 @@ public class ManageOrderControllerIntegrationTest {
                     .contentType(APPLICATION_JSON)
                     .content(jsonRequest))
             .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void testManageOrdersAboutToSubmitUpdatesCafcassDateTimeWhenCafcassDataChanged() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(true);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
+
+        mockMvc.perform(
+                post(manageOrdersEndpoint)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(manageOrdersAboutToSubmitRequest()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.cafcassDateTime").exists())
+            .andReturn();
+    }
+
+    @Test
+    public void testManageOrdersAboutToSubmitDoesNotUpdateCafcassDateTimeWhenCafcassDataUnchanged() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+        when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(false);
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
+
+        mockMvc.perform(
+                post(manageOrdersEndpoint)
+                    .header(AUTHORISATION_HEADER, "testAuthToken")
+                    .header(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER, "testServiceAuthToken")
+                    .accept(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
+                    .content(manageOrdersAboutToSubmitRequest()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.cafcassDateTime").doesNotExist())
             .andReturn();
     }
 
@@ -461,5 +509,28 @@ public class ManageOrderControllerIntegrationTest {
                     .content(jsonRequest))
             .andExpect(status().isOk())
             .andReturn();
+    }
+
+    private String manageOrdersAboutToSubmitRequest() throws Exception {
+        ObjectNode request = (ObjectNode) objectMapper.readTree(ResourceLoader.loadJson(
+            "requests/judge-draft-sdo-order-request.json"
+        ));
+        ObjectNode caseDetails = (ObjectNode) request.get("case_details");
+        caseDetails.put("state", State.DECISION_OUTCOME.getValue());
+        request.set("case_details_before", caseDetails.deepCopy());
+        return objectMapper.writeValueAsString(request);
+    }
+
+    private CaseData manageOrderCaseData() {
+        return CaseData.builder()
+            .id(nextLong())
+            .state(State.DECISION_OUTCOME)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrders(ManageOrders.builder()
+                              .isCaseWithdrawn(No)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .build())
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .build();
     }
 }
