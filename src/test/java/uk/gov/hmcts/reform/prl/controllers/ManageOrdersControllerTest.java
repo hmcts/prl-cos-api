@@ -1625,6 +1625,13 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
 
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
         manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
             authToken,
             s2sToken,
