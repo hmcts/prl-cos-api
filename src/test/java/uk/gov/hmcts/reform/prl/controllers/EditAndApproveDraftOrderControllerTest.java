@@ -2176,7 +2176,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
@@ -2200,7 +2200,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
@@ -2224,7 +2224,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
@@ -2248,7 +2248,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
@@ -2272,7 +2272,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
@@ -2296,7 +2296,7 @@ class EditAndApproveDraftOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
             authToken,
             s2sToken,
-            CLIENT_CONTEXT,
+            ENCRYPTED_CLIENT_CONTEXT,
             callbackRequest
         );
 
