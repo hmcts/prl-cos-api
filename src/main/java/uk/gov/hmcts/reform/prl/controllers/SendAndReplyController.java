@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.wa.AdditionalProperties;
 import uk.gov.hmcts.reform.prl.services.EventService;
+import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyCommonService;
 import uk.gov.hmcts.reform.prl.services.sendandreply.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -64,6 +65,7 @@ public class SendAndReplyController extends AbstractCallbackController {
     private final ElementUtils elementUtils;
     private final AllTabServiceImpl allTabService;
     private final SendAndReplyCommonService sendAndReplyCommonService;
+    private final ManageOrderService manageOrderService;
     private final TaskUtils taskUtils;
 
     @Autowired
@@ -73,12 +75,14 @@ public class SendAndReplyController extends AbstractCallbackController {
                                   ElementUtils elementUtils,
                                   AllTabServiceImpl allTabService,
                                   SendAndReplyCommonService sendAndReplyCommonService,
+                                  ManageOrderService manageOrderService,
                                   TaskUtils taskUtils) {
         super(objectMapper, eventPublisher);
         this.sendAndReplyService = sendAndReplyService;
         this.elementUtils = elementUtils;
         this.allTabService = allTabService;
         this.sendAndReplyCommonService = sendAndReplyCommonService;
+        this.manageOrderService = manageOrderService;
         this.taskUtils = taskUtils;
     }
 
@@ -209,7 +213,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             .build();
     }
 
-
     @PostMapping("/send-or-reply-to-messages/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStartNextStep(@RequestHeader("Authorization")
                                                                                 @Parameter(hidden = true) String authorisation,
@@ -226,7 +229,6 @@ public class SendAndReplyController extends AbstractCallbackController {
             .data(caseDataMap)
             .build();
     }
-
 
     @PostMapping("/send-or-reply-to-messages/about-to-start-task")
     public AboutToStartOrSubmitCallbackResponse handleSendOrMessageAboutToStart(@RequestHeader("Authorization")
@@ -286,7 +288,7 @@ public class SendAndReplyController extends AbstractCallbackController {
             .map(AdditionalProperties::getHearingId)
             .orElse(null);
 
-        log.info("task: hearingId Associated with the task==> {}", lockToHearingId);
+        log.info("midevent: hearingId={} for case={}", lockToHearingId, caseData.getId());
         return processSendOrReplyMidEvent(authorisation, caseData, true, lockToHearingId);
     }
 
@@ -378,6 +380,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         Optional.ofNullable(clientContext)
             .ifPresent(value -> log.info("Submitted request client context {}", new String(Base64.getDecoder().decode(value))));
 
+        manageOrderService.reCreateCirDocumentsRequestedTask(callbackRequest, clientContext);
         return sendAndReplyService.sendAndReplySubmitted(callbackRequest, authorisation);
     }
 
@@ -390,8 +393,6 @@ public class SendAndReplyController extends AbstractCallbackController {
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         return sendAndReplyService.sendAndReplySubmittedTask(callbackRequest, authorisation);
     }
-
-
 
     @PostMapping("/send-or-reply-to-messages/clear-dynamic-lists")
     public AboutToStartOrSubmitCallbackResponse clearDynamicLists(@RequestHeader("Authorization")

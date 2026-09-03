@@ -31,4 +31,6 @@ public class AdditionalProperties {
     private String taskTriggeredBy;
     @JsonProperty("messageIdentifier")
     private String messageIdentifier;
+    @JsonProperty("isCirUpdateFollowUp")
+    private String isCirUpdateFollowUp;
 }

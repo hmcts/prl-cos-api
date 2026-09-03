@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.RequestOrderHearingTracking;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.HearingLabelUtils;
 
 import java.time.LocalDate;
@@ -55,7 +56,7 @@ class HearingChasePolicy {
         return hearing.getHearingID() == null ? null : String.valueOf(hearing.getHearingID());
     }
 
-    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate today) {
+    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate cronDate) {
         String hearingId = hearingIdOf(hearing);
         if (hearingId == null) {
             return ChaseDecision.skipUnknownHearingId(hearing.getHmcStatus());
@@ -63,28 +64,38 @@ class HearingChasePolicy {
         if (!allowedStatuses().contains(hearing.getHmcStatus())) {
             return ChaseDecision.skipStatusNotInFilter(hearing.getHmcStatus());
         }
-        LocalDate hearingEndDate = computeHearingEndDate(hearing);
-        if (hearingEndDate == null || hearingEndDate.isAfter(today)) {
-            return ChaseDecision.skipHearingNotEnded(hearingEndDate);
-        }
         if (isHearingMappedToOrder(caseData, hearing)) {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
+        LocalDate hearingEndDate = computeHearingEndDate(hearing);
+        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
+
+        int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(hearingEndDate, cronDate);
+        if (hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0)) {
+            return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
+        }
+
         Optional<RequestOrderHearingTracking> tracking = ledger.find(hearingId);
-        if (tracking.map(t -> t.getLastFiredDate() != null).orElse(false)) {
+        LocalDate lastCompletedDate = tracking.map(RequestOrderHearingTracking::getLastCompletedDate)
+            .orElse(null);
+        LocalDate lastFiredDate = tracking.map(RequestOrderHearingTracking::getLastFiredDate)
+            .orElse(null);
+        if (cronDate.equals(lastFiredDate)) {
             return ChaseDecision.skipInFlight();
         }
 
-        LocalDate anchor = tracking
-            .map(RequestOrderHearingTracking::getLastCompletedDate)
-            .orElse(hearingEndDate);
-        int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
-        int workingDaysSinceAnchor = workingDayIndicator.workingDaysBetween(anchor, today);
-        if (workingDaysSinceAnchor < cadence) {
-            return ChaseDecision.skipBeforeCadence(workingDaysSinceAnchor, anchor, cadence);
+
+        if (lastCompletedDate == null && lastFiredDate != null) {
+            int workingDaysSinceLastFired = workingDayIndicator.workingDaysBetween(lastFiredDate, cronDate);
+            if (workingDaysSinceLastFired < cadence) {
+                return ChaseDecision.skipInFlight();
+            } else if (workingDaysSinceLastFired == cadence) {
+                return ChaseDecision.fireCadenceMetDone(); //every cadence days it will fire a new Task
+            }
         }
-        return ChaseDecision.fire();
+
+        return ChaseDecision.fireCadenceMet();//order still not added
     }
 
     private List<String> allowedStatuses() {
@@ -126,28 +137,36 @@ class HearingChasePolicy {
             // any saved order's "<type> - <date>" code cannot match on the full label.
             // Falling back to date-suffix matching keeps the chase correct while the
             // upstream ref-data issue is investigated.
-            log.warn("Request Order link-check: hearingTypeValue empty for hearingId={} — "
-                    + "ref-data lookup likely failed; falling back to date-suffix match",
+            log.warn("Request Order link-check: hearingTypeValue empty for caseId={}, hearingId={} — "
+                    + "ref-data lookup likely failed; falling back to date-suffix match", caseData.getId(),
                 hearingId);
         }
 
-        return isHearingReferencedByManageOrderHearingDetails(caseData.getDraftOrderCollection(),
-                                                              DraftOrder::getManageOrderHearingDetails, hearingId)
-            || isHearingReferencedByManageOrderHearingDetails(caseData.getOrderCollection(),
-                                                              OrderDetails::getManageOrderHearingDetails, hearingId)
-            || isDraftOrderReferencedByHearingsType(
-                caseData.getDraftOrderCollection(), hearingLabels, hearingDateSuffixes)
-
-            || isFinalisedOrderReferencedByHearingsType(caseData.getOrderCollection(), hearingLabels);
+        Long caseId = caseData.getId();
+        return isHearingReferencedByManageOrderHearingDetails(caseId, caseData.getDraftOrderCollection(),
+                                                              DraftOrder::getManageOrderHearingDetails, hearing)
+            || isHearingReferencedByManageOrderHearingDetails(caseId, caseData.getOrderCollection(),
+                                                              OrderDetails::getManageOrderHearingDetails, hearing)
+            || isDraftOrderReferencedByHearingsType(caseId, caseData.getDraftOrderCollection(), hearing,
+                                                    hearingLabels, hearingDateSuffixes)
+            || isFinalisedOrderReferencedByHearingsType(caseId, caseData.getOrderCollection(), hearing, hearingLabels);
     }
 
-    private static <T> boolean isHearingReferencedByManageOrderHearingDetails(
+    private static <T> boolean isHearingReferencedByManageOrderHearingDetails(Long caseId,
             List<Element<T>> orders,
             Function<T, List<Element<HearingData>>> hearingDetailsExtractor,
-            String hearingId) {
-        log.info("trying isHearingReferencedByManageOrderHearingDetails for {}", hearingId);
+            CaseHearing hearing) {
+        String hearingId = hearingIdOf(hearing);
+        log.info("trying isHearingReferencedByManageOrderHearingDetails for caseId={}, hearingId={}",
+                 caseId, hearingId);
         return nullSafeCollection(orders).stream()
             .map(Element::getValue)
+            .filter(o -> hearing.getHearingDaySchedule() != null
+                && CaseUtils.convertUtcToBst(hearing.getHearingDaySchedule().get(0).getHearingStartDateTime())
+                .isBefore(o instanceof DraftOrder draft && draft.getOtherDetails().getDateCreated() != null
+                    ? draft.getOtherDetails().getDateCreated()
+                    : o instanceof OrderDetails or && or.getDateCreated() != null ? or.getDateCreated()
+                    : LocalDateTime.now()))
             .anyMatch(order -> orderReferencesHearing(order, hearingDetailsExtractor, hearingId));
     }
 
@@ -165,15 +184,21 @@ class HearingChasePolicy {
             .anyMatch(hearingId::equals);
     }
 
-    private static boolean isDraftOrderReferencedByHearingsType(List<Element<DraftOrder>> draftOrders,
+    private static boolean isDraftOrderReferencedByHearingsType(Long caseId, List<Element<DraftOrder>> draftOrders,
+                                                                 CaseHearing hearing,
                                                                  Set<String> hearingLabels,
                                                                  Set<String> hearingDateSuffixes) {
-        log.info("trying isDraftOrderReferencedByHearingsType");
+        log.info("trying isDraftOrderReferencedByHearingsType for caseId={}", caseId);
         if (hearingLabels.isEmpty() && hearingDateSuffixes.isEmpty()) {
             return false;
         }
         return nullSafeCollection(draftOrders).stream()
             .map(Element::getValue)
+            .filter(o -> hearing.getHearingDaySchedule() != null
+                && CaseUtils.convertUtcToBst(hearing.getHearingDaySchedule().get(0).getHearingStartDateTime())
+            .isBefore(o.getOtherDetails().getDateCreated() != null
+                          ? o.getOtherDetails().getDateCreated()
+                          : LocalDateTime.now()))
             .map(DraftOrder::getHearingsType)
             .filter(Objects::nonNull)
             .map(DynamicList::getValue)
@@ -184,15 +209,21 @@ class HearingChasePolicy {
                 || hearingDateSuffixes.contains(HearingLabelUtils.extractDateSuffix(code)));
     }
 
-    private static boolean isFinalisedOrderReferencedByHearingsType(List<Element<OrderDetails>> orderDetails,
+    private static boolean isFinalisedOrderReferencedByHearingsType(Long caseId, List<Element<OrderDetails>> orderDetails,
+                                                                CaseHearing hearing,
                                                                 Set<String> hearingLabels) {
-        log.info("trying isFinalisedOrderReferencedByHearingsType");
+        log.info("trying isFinalisedOrderReferencedByHearingsType for caseId={}", caseId);
         if (hearingLabels.isEmpty()) {
             return false;
         }
         return nullSafeCollection(orderDetails).stream()
             .map(Element::getValue)
             .filter(order -> order.getFinalisationDetails() != null)
+            .filter(o -> hearing.getHearingDaySchedule() != null
+                && CaseUtils.convertUtcToBst(hearing.getHearingDaySchedule().get(0).getHearingStartDateTime())
+                .isBefore(o.getDateCreated() != null
+                              ? o.getDateCreated()
+                              : LocalDateTime.now()))
             .map(OrderDetails::getSelectedHearingType)
             .filter(Objects::nonNull)
             .anyMatch(code -> hearingLabels.contains(code));

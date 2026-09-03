@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.Fm5PendingParty;
@@ -29,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notification.NotificationType;
 import uk.gov.hmcts.reform.prl.models.dto.notification.PartyType;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.List;
@@ -93,11 +93,8 @@ public class Fm5NotificationServiceTest {
     @Mock
     private DocumentUtils documentUtils;
 
-
-
-
     @Mock
-    DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
 
     @Before
     public void setUp() throws Exception {

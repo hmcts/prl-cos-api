@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.document;
 
-import feign.FeignException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +20,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
@@ -33,6 +32,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.exception.InvalidResourceException;
 import uk.gov.hmcts.reform.prl.exception.PdfConversionException;
+import uk.gov.hmcts.reform.prl.framework.exceptions.DocumentGenerationException;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -62,6 +62,8 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationRequest;
+import uk.gov.hmcts.reform.prl.services.document.pdf.PdfGenerationService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.time.LocalDate;
@@ -71,10 +73,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -86,9 +93,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
+import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorVirtualConfig.DOCUMENT_EXECUTOR_SERVICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
@@ -161,7 +170,7 @@ public class DocumentGenServiceTest {
     @Mock
     private CaseDocumentClient caseDocumentClient;
     @Mock
-    private DgsApiClient dgsApiClient;
+    private PdfGenerationService pdfGenerationService;
     @Mock
     private AuthTokenGenerator authTokenGenerator;
     @Mock
@@ -173,7 +182,11 @@ public class DocumentGenServiceTest {
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     @Mock
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    @Mock
+    @Qualifier(DOCUMENT_EXECUTOR_SERVICE)
+    private ExecutorService documentVirtualThreadExecutorService;
 
+    private static final String CASE_ID = "1234345678934523";
     private static final String AUTH_TOKEN = "Bearer TestAuthToken";
     private GeneratedDocumentInfo generatedDocumentInfo;
     private CaseData c100CaseData;
@@ -188,6 +201,14 @@ public class DocumentGenServiceTest {
 
     @Before
     public void setUp() {
+        //For testing purposes, the test threads will be executed immediately:
+        when(documentVirtualThreadExecutorService.submit(
+            Mockito.<Callable<Document>>any()
+        )).thenAnswer(invocation -> {
+            Callable<Document> task = invocation.getArgument(0);
+            return CompletableFuture.completedFuture(task.call());
+        });
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -506,7 +527,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateDraftDocumentEng() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(Yes).build()).build();
+                                                                           .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -517,7 +538,7 @@ public class DocumentGenServiceTest {
     @Test
     public void testGenerateDraftDocumentWelsh() throws Exception {
         CaseData caseData = CaseData.builder().allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                .newAllegationsOfHarmYesNo(Yes).build()).build();
+                                                                           .newAllegationsOfHarmYesNo(Yes).build()).build();
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(documentLanguage);
 
@@ -1163,7 +1184,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoName() {
-        documentGenService.convertToPdf("auth", Document.builder().build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -1171,7 +1192,7 @@ public class DocumentGenServiceTest {
 
     @Test
     public void testDocGenerationWithNoPeriods() {
-        documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
+        documentGenService.convertToPdf(CASE_ID, "auth", Document.builder().documentFileName("i").build());
         verify(caseDocumentClient, times(0)).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
         );
@@ -2658,7 +2679,7 @@ public class DocumentGenServiceTest {
             .build();
 
         assertExpectedException(() -> documentGenService
-            .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
+                                    .getDocumentBytes(generatedDocumentInfo.getUrl(), AUTH_TOKEN, "s2s token"), InvalidResourceException.class,
                                 "Resource is invalid TestUrl");
     }
 
@@ -2705,11 +2726,10 @@ public class DocumentGenServiceTest {
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("FL401-Final.docx")
             .build();
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class))).thenReturn(document);
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenReturn(generatedDocumentInfo);
-
-        documentGenService.convertToPdf(AUTH_TOKEN, document);
+        Document result = documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document);
+        assertEquals(document, result);
 
         verify(caseDocumentClient).getDocumentBinary(
             AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()
@@ -2738,16 +2758,14 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenReturn(generatedDocumentInfo);
-
         assertExpectedException(() -> documentGenService
-            .convertToPdf(AUTH_TOKEN, document), InvalidResourceException.class, "Doc name FL401-Final.docx");
+            .convertToPdf(CASE_ID, AUTH_TOKEN, document), InvalidResourceException.class,
+                                "Case ID 1234345678934523: Doc name FL401-Final.docx");
+        verifyNoInteractions(pdfGenerationService);
     }
 
-    // write test similar to testForConvertToPdfException covering convertToPdf method validating the FeignException
     @Test
-    public void testForConvertToPdfFeignException() {
+    public void testForConvertToPdfConversionException() {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("TestUrl")
@@ -2768,40 +2786,11 @@ public class DocumentGenServiceTest {
             .documentFileName("FL401-Final.docx")
             .build();
 
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenThrow(FeignException.class);
+        when(pdfGenerationService.generateAndStore(any(PdfGenerationRequest.class)))
+            .thenThrow(new PdfConversionException("Failed to generate and store PDF"));
 
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
-                                "PDF Conversion error");
-    }
-
-    @Test
-    public void testForConvertToPdfRuntimeException() {
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("TestUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Resource expectedResource = new ClassPathResource("documents/document.pdf");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(authTokenGenerator.generate()).thenReturn("s2s token");
-        when(caseDocumentClient.getDocumentBinary(AUTH_TOKEN, "s2s token", generatedDocumentInfo.getUrl()))
-            .thenReturn(expectedResponse);
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("FL401-Final.docx")
-            .build();
-
-        when(dgsApiClient.convertDocToPdf(anyString(), anyString(), any()))
-            .thenThrow(RuntimeException.class);
-
-        assertExpectedException(() -> documentGenService.convertToPdf(AUTH_TOKEN, document), PdfConversionException.class,
-                                "PDF Conversion error");
+        assertExpectedException(() -> documentGenService.convertToPdf(CASE_ID, AUTH_TOKEN, document), PdfConversionException.class,
+                                "Failed to generate and store PDF");
     }
 
     @Test
@@ -2934,8 +2923,15 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(
+            stringObjectMap,
+            DRAFT_APPLICATION_DOCUMENT_FIELD,
+            DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+            DOCUMENT_FIELD_DRAFT_C8,
+            DOCUMENT_FIELD_C8_DRAFT_WELSH,
+            DOCUMENT_FIELD_DRAFT_C1A,
+            DOCUMENT_FIELD_C1A_DRAFT_WELSH
+        );
     }
 
     @Test
@@ -2968,8 +2964,179 @@ public class DocumentGenServiceTest {
             c100CaseData
         );
 
-        verifyDocumentsUpdated(stringObjectMap, DOCUMENT_FIELD_DRAFT_C8, DOCUMENT_FIELD_C8_DRAFT_WELSH, DOCUMENT_FIELD_DRAFT_C8,
-                               DOCUMENT_FIELD_C1A_DRAFT_WELSH);
+        verifyDocumentsUpdated(
+            stringObjectMap,
+            DRAFT_APPLICATION_DOCUMENT_FIELD,
+            DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD,
+            DOCUMENT_FIELD_DRAFT_C8,
+            DOCUMENT_FIELD_C8_DRAFT_WELSH,
+            DOCUMENT_FIELD_DRAFT_C1A,
+            DOCUMENT_FIELD_C1A_DRAFT_WELSH
+        );
+    }
+
+    @Test
+    public void shouldGenerateOnlyEnglishC100DraftDocument() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(
+            any(CaseData.class),
+            eq(false)
+        )).thenReturn("c100-draft-english-template");
+
+        doReturn(generatedDocumentInfo).when(dgsService).generateDocument(
+            anyString(),
+            any(CaseDetails.class),
+            anyString(),
+            any()
+        );
+
+        Map<String, Object> result =
+            documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            );
+
+        assertTrue(result.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+        assertNotNull(result.get(DRAFT_APPLICATION_DOCUMENT_FIELD));
+
+        assertFalse(result.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<Document>>any());
+    }
+
+
+    @Test
+    public void shouldGenerateOnlyWelshC100DraftDocument() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(false)
+            .isGenWelsh(true)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        when(c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(
+            any(CaseData.class),
+            eq(true)
+        )).thenReturn("c100-draft-welsh-template");
+
+        doReturn(generatedDocumentInfo).when(dgsService).generateWelshDocument(
+            anyString(),
+            any(CaseDetails.class),
+            anyString(),
+            any()
+        );
+
+        Map<String, Object> result =
+            documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            );
+
+        assertFalse(result.containsKey(DRAFT_APPLICATION_DOCUMENT_FIELD));
+
+        assertTrue(result.containsKey(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+        assertNotNull(result.get(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD));
+
+        verify(documentVirtualThreadExecutorService, times(1))
+            .submit(Mockito.<Callable<Document>>any());
+    }
+
+    @Test
+    public void shouldCancelWelshTaskWhenEnglishGenerationFails() {
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(true)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        RuntimeException generationFailure =
+            new RuntimeException("Docmosis failure");
+
+        CompletableFuture<Document> englishFuture =
+            new CompletableFuture<>();
+        englishFuture.completeExceptionally(generationFailure);
+
+        CompletableFuture<Document> welshFuture =
+            new CompletableFuture<>();
+
+        doReturn(englishFuture, welshFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<Document>>any());
+
+        DocumentGenerationException exception = assertThrows(
+            DocumentGenerationException.class,
+            () -> documentGenService.generateC100DraftDocuments(
+                AUTH_TOKEN,
+                c100CaseData
+            )
+        );
+
+        assertSame(generationFailure, exception.getCause());
+        assertTrue(welshFuture.isCancelled());
+        assertFalse(englishFuture.isCancelled());
+    }
+
+    @Test
+    public void shouldCancelTaskAndRestoreInterruptWhenWaitingIsInterrupted()
+        throws Exception {
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder()
+            .isGenEng(true)
+            .isGenWelsh(false)
+            .build();
+
+        when(allegationOfHarmRevisedService.updateChildAbusesForDocmosis(c100CaseData))
+            .thenReturn(c100CaseData);
+        when(documentLanguageService.docGenerateLang(c100CaseData))
+            .thenReturn(documentLanguage);
+
+        @SuppressWarnings("unchecked")
+        Future<Document> englishFuture = Mockito.mock(Future.class);
+
+        when(englishFuture.get())
+            .thenThrow(new InterruptedException("Test interruption"));
+        when(englishFuture.isDone()).thenReturn(false);
+
+        doReturn(englishFuture)
+            .when(documentVirtualThreadExecutorService)
+            .submit(Mockito.<Callable<Document>>any());
+
+        try {
+            DocumentGenerationException exception = assertThrows(
+                DocumentGenerationException.class,
+                () -> documentGenService.generateC100DraftDocuments(
+                    AUTH_TOKEN,
+                    c100CaseData
+                )
+            );
+
+            assertTrue(
+                exception.getCause() instanceof InterruptedException
+            );
+            assertTrue(Thread.currentThread().isInterrupted());
+
+            verify(englishFuture).cancel(true);
+        } finally {
+            // Avoid leaking the interrupted state into subsequent tests.
+            Thread.interrupted();
+        }
     }
 
     @Test

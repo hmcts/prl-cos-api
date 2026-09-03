@@ -632,9 +632,10 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        LocalDateTime hearingStartDateTime = LocalDateTime.of(2023, 11, 8, 9, 0);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
-            .nextHearingDate(LocalDateTime.of(2023, 11, 8, 9, 0))
+            .nextHearingDate(hearingStartDateTime)
             .hearingID(123L)
             .hearingTypeValue("test")
             .build();
@@ -664,7 +665,10 @@ public class HearingDataServiceTest {
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
         assertEquals("1677767515750127_123",expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.get(0).getLabel());
+        assertEquals(
+            "1677767515750127_test - " + hearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
     }
 
     @Test()
@@ -676,9 +680,10 @@ public class HearingDataServiceTest {
             .build();
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        LocalDateTime hearingStartDateTime = LocalDateTime.of(2023, 11, 8, 9, 0);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
             .hmcStatus("LISTED")
-            .nextHearingDate(LocalDateTime.of(2023, 11, 8, 9, 0))
+            .nextHearingDate(hearingStartDateTime)
             .hearingID(123L)
             .hearingTypeValue("test")
             .build();
@@ -709,7 +714,87 @@ public class HearingDataServiceTest {
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
         assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
-        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.get(0).getLabel());
+        assertEquals(
+            "1677767515750127_test - " + hearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
+    }
+
+    @Test()
+    public void testGetLinkedCasesReturnsAllListedLinkedCaseHearings() {
+        List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
+        CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
+            .caseName("CaseName-Test10")
+            .caseReference("1677767515750127")
+            .build();
+        caseLinkedDataList.add(caseLinkedData);
+        when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        LocalDateTime pastHearingStartDateTime = LocalDateTime.of(2023, 11, 8, 9, 0);
+        LocalDateTime nextHearingStartDateTime = LocalDateTime.of(2023, 11, 10, 9, 0);
+        LocalDateTime laterHearingStartDateTime = LocalDateTime.of(2023, 11, 12, 9, 0);
+        CaseHearing pastHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .nextHearingDate(pastHearingStartDateTime)
+            .hearingID(123L)
+            .hearingTypeValue("past")
+            .build();
+        CaseHearing laterHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .nextHearingDate(laterHearingStartDateTime)
+            .hearingID(456L)
+            .hearingTypeValue("later")
+            .build();
+        CaseHearing nextHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .nextHearingDate(nextHearingStartDateTime)
+            .hearingID(789L)
+            .hearingTypeValue("next")
+            .build();
+        CaseHearing unlistedHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("CANCELLED")
+            .nextHearingDate(LocalDateTime.of(2023, 11, 9, 9, 0))
+            .hearingID(987L)
+            .hearingTypeValue("cancelled")
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("1677767515750127")
+            .caseHearings(List.of(pastHearing, laterHearing, nextHearing, unlistedHearing))
+            .build();
+
+        when(hearingService.getHearings(any(), any())).thenReturn(hearings);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .baseLocationId("123")
+                                        .regionId("1111")
+                                        .build()).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1677767515750127L).data(stringObjectMap).build();
+
+        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
+        assertEquals(3, expectedResponse.size());
+        assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
+        assertEquals(
+            "1677767515750127_past - " + pastHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(0).getLabel()
+        );
+        assertEquals("1677767515750127_456", expectedResponse.get(1).getCode());
+        assertEquals(
+            "1677767515750127_later - " + laterHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(1).getLabel()
+        );
+        assertEquals("1677767515750127_789", expectedResponse.get(2).getCode());
+        assertEquals(
+            "1677767515750127_next - " + nextHearingStartDateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy")),
+            expectedResponse.get(2).getLabel()
+        );
     }
 
     @Test()

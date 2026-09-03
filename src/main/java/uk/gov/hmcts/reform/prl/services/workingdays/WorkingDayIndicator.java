@@ -48,4 +48,22 @@ public class WorkingDayIndicator {
         }
         return count;
     }
+
+    public int getPreviousWorkingDays(LocalDate from, int days) {
+        requireNonNull(from);
+
+        if (days < 0) {
+            throw new IllegalArgumentException("days must not be negative");
+        }
+        int totalDays = 0;
+        LocalDate cursor = from;
+        while (days > 0) {
+            cursor = cursor.minusDays(1);
+            totalDays++;
+            if (isWorkingDay(cursor)) {
+                days--;
+            }
+        }
+        return totalDays;
+    }
 }

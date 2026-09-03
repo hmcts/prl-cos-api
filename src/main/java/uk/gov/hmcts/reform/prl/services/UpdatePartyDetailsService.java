@@ -171,8 +171,10 @@ public class UpdatePartyDetailsService {
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
+                caseData, DARESPONDENT, updatedCaseData));
+            updatedCaseData.putAll(noticeOfChangePartiesService.generate(
+                caseData, DAAPPLICANT, updatedCaseData));
 
             PartyDetails fl401Applicant = caseData
                 .getApplicantsFL401();
@@ -216,8 +218,8 @@ public class UpdatePartyDetailsService {
             cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
             findAndListRefugeDocsForFL401(callbackRequest, caseData, updatedCaseData);
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
-            updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CARESPONDENT));
+            updatedCaseData.putAll(noticeOfChangePartiesService.syncNocAnswerFields(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             setC100ApplicantPartyName(applicantsWrapped, updatedCaseData);
             // set applicant and respondent case flag
@@ -545,17 +547,10 @@ public class UpdatePartyDetailsService {
     }
 
     private void setRespondentSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
-        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
-        if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
-            List<PartyDetails> respondents = respondentsWrapped.get()
-                .stream()
-                .map(Element::getValue)
-                .toList();
-
-            for (PartyDetails respondent : respondents) {
-                CommonUtils.generatePartyUuidForC100(respondent);
-            }
-            caseDetails.put(RESPONDENTS, respondentsWrapped);
+        List<Element<PartyDetails>> wrapped = caseData.getRespondents();
+        if (CollectionUtils.isNotEmpty(wrapped)) {
+            wrapped.forEach(e -> CommonUtils.generatePartyUuidForC100(e.getValue()));
+            caseDetails.put(RESPONDENTS, wrapped);
         }
     }
 

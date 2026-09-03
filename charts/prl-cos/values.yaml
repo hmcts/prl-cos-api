@@ -17,7 +17,7 @@ java:
     CORE_CASE_DATA_API_URL: http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    DOCMOSIS_SERVICE_BASE_URL: https://docmosis.aat.platform.hmcts.net
+    DOCMOSIS_SERVICE_BASE_URL: https://docmosis.{{ .Values.global.environment }}.platform.hmcts.net
     CCD_CASE_DOCS_AM_API: http://ccd-case-document-am-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     XUI_URL: https://manage-case.{{ .Values.global.environment }}.platform.hmcts.net/cases/case-details
     REFORM_SERVICE_NAME: prl_cos_api
@@ -26,7 +26,6 @@ java:
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_CALLBACK_URL: http://prl-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal/service-request-update
-    PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,payment_app,ccd_data
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -104,3 +103,5 @@ java:
           alias: ACRO_SFTP_USER_PASSWORD
         - name: seal-audit-email-to
           alias: SEAL_AUDIT_EMAIL_TO
+        - name: docmosis-api-key
+          alias: DOCMOSIS_ACCESS_KEY

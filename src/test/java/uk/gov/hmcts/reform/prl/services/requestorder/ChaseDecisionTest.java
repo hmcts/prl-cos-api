@@ -2,18 +2,26 @@ package uk.gov.hmcts.reform.prl.services.requestorder;
 
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ChaseDecisionTest {
 
     @Test
     void fireFactoryProducesShouldFireWithFiringDescription() {
-        ChaseDecision decision = ChaseDecision.fire();
+        String reason = "cadence met - firing";
+        ChaseDecision decision = ChaseDecision.fireCadenceMet();
 
         assertThat(decision.shouldFire()).isTrue();
-        assertThat(decision.description()).isEqualTo("cadence met - firing");
+        assertThat(decision.description()).isEqualTo(reason);
+    }
+
+    @Test
+    void fireFactoryProducesShouldFireWithFiringMarkAsDoneDescription() {
+        String reason = "cadence met task Done action flow - firing";
+        ChaseDecision decision = ChaseDecision.fireCadenceMetDone();
+
+        assertThat(decision.shouldFire()).isTrue();
+        assertThat(decision.description()).isEqualTo(reason);
     }
 
     @Test
@@ -21,10 +29,8 @@ class ChaseDecisionTest {
         ChaseDecision[] decisions = {
             ChaseDecision.skipUnknownHearingId("LISTED"),
             ChaseDecision.skipStatusNotInFilter("LISTED"),
-            ChaseDecision.skipHearingNotEnded(LocalDate.of(2026, 5, 1)),
             ChaseDecision.skipLinkedOrderExists(),
-            ChaseDecision.skipInFlight(),
-            ChaseDecision.skipBeforeCadence(2, LocalDate.of(2026, 4, 22), 3),
+            ChaseDecision.skipInFlight()
         };
 
         assertThat(decisions).allSatisfy(d -> {
@@ -46,12 +52,6 @@ class ChaseDecisionTest {
     }
 
     @Test
-    void skipHearingNotEndedEmbedsDate() {
-        assertThat(ChaseDecision.skipHearingNotEnded(LocalDate.of(2026, 5, 1)).description())
-            .isEqualTo("skipped - hearingEndDate=2026-05-01 not in past");
-    }
-
-    @Test
     void skipLinkedOrderExistsHasFixedDescription() {
         assertThat(ChaseDecision.skipLinkedOrderExists().description())
             .isEqualTo("skipped - linked order exists (cycle complete)");
@@ -63,9 +63,4 @@ class ChaseDecisionTest {
             .isEqualTo("skipped - previous fire awaiting completion");
     }
 
-    @Test
-    void skipBeforeCadenceEmbedsWorkingDaysAnchorAndCadence() {
-        assertThat(ChaseDecision.skipBeforeCadence(2, LocalDate.of(2026, 4, 22), 3).description())
-            .isEqualTo("skipped - 2 working day(s) since anchor 2026-04-22 (need 3)");
-    }
 }

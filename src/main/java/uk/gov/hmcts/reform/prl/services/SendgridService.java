@@ -101,6 +101,12 @@ public class SendgridService {
         Mail mail = new Mail();
         addCustomArgsCaseReference(mail, sendgridEmailConfig.getCaseReference());
         long attachDocsStartTime = System.currentTimeMillis();
+        log.info(
+            "Preparing SendGrid template email templateName={} caseReference={} attachmentCount={}",
+            sendgridEmailTemplateNames,
+            sendgridEmailConfig.getCaseReference(),
+            CollectionUtils.size(sendgridEmailConfig.getListOfAttachments())
+        );
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }

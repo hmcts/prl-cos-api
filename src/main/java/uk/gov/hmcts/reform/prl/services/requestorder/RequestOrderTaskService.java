@@ -17,10 +17,13 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Bool;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Filter;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.LastModified;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Match;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Range;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Sort;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
@@ -29,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDate;
@@ -72,6 +76,12 @@ public class RequestOrderTaskService {
     private final AllTabServiceImpl allTabService;
     private final HearingChasePolicy chasePolicy;
     private final ObjectMapper objectMapper;
+    private final WorkingDayIndicator workingDayIndicator;
+
+    @Value("${request-order-task.cadence-working-days.searchMulitplier}")
+    private int searchMulitplier;
+    @Value("${request-order-task.cadence-working-days.c100}")
+    private int largestCadenceWorkingDays;
 
     public void processRequestOrderTasks() {
         log.info("Running Request Order task cron job...");
@@ -83,7 +93,8 @@ public class RequestOrderTaskService {
                 "data.caseTypeOfApplication",
                 "data.draftOrderCollection",
                 "data.orderCollection",
-                "data.requestOrderTaskTrackingByHearing"
+                "data.requestOrderTaskTrackingByHearing",
+                "data.customOrderHearingsType"
             ));
 
         Semaphore semaphore = new Semaphore(concurrentRequest);
@@ -157,10 +168,20 @@ public class RequestOrderTaskService {
         StateFilter stateFilter = StateFilter.builder().should(List.of(
             Should.builder().match(Match.builder().state(State.JUDICIAL_REVIEW.getValue()).build()).build(),
             Should.builder().match(Match.builder().state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue()).build()).build(),
-            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build()
+            Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build(),
+            Should.builder().match(Match.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getValue()).build()).build()
         )).build();
 
+        LastModified lastModifiedRange = LastModified.builder().gte(
+            LocalDate.now().minusDays(Integer.toUnsignedLong(workingDayIndicator
+                                                                 .getPreviousWorkingDays(LocalDate.now(),
+                                                                                         searchMulitplier * largestCadenceWorkingDays)))
+                .toString()).build();
+        Range range = Range.builder().lastModified(lastModifiedRange).build();
+        Filter rangeFilter = Filter.builder().range(range).build();
+
         Bool filter = Bool.builder()
+            .filter(rangeFilter)
             .should(caseTypes)
             .minimumShouldMatch(1)
             .must(Must.builder().stateFilter(stateFilter).build())
@@ -245,7 +266,8 @@ public class RequestOrderTaskService {
         String hearingId = hearingIdOf(hearing);
         HearingTrackingLedger ledger = HearingTrackingLedger.from(caseData);
         ChaseDecision decision = chasePolicy.decide(hearing, caseData, ledger, LocalDate.now(UK_ZONE));
-        log.info("Request Order: caseId={} hearingId={} {}", caseData.getId(), hearingId, decision.description());
+        log.info("Request Order: caseId={} hearingId={} decision={}",
+                 caseData.getId(), hearingId, decision.description());
         if (decision.shouldFire()) {
             return Optional.of(ledger);
         }

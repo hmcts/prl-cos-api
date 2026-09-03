@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,7 +83,6 @@ class SealAuditServiceTest {
         ReflectionTestUtils.setField(sealAuditService, "batchDelaySeconds", 1);
         ReflectionTestUtils.setField(sealAuditService, "pageSize", 500);
         ReflectionTestUtils.setField(sealAuditService, "fromDateStr", "2025-01-15");
-        ReflectionTestUtils.setField(sealAuditService, "toDateStr", "2025-01-15");
         ReflectionTestUtils.setField(sealAuditService, "emailEnabled", false);
         ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "");
         ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "");
@@ -217,11 +217,13 @@ class SealAuditServiceTest {
 
         String query = queryCaptor.getValue();
 
-        assertTrue(query.contains("\"from\": 0"));
+        String expectedLt = "\"lt\": \"" + LocalDate.now().plusDays(1) + "T00:00:00\"";
+
         assertTrue(query.contains("\"size\": 500"));
+        assertTrue(!query.contains("\"search_after\""));
         assertTrue(query.contains("\"created_date\""));
         assertTrue(query.contains("\"gte\": \"2025-01-15T00:00:00\""));
-        assertTrue(query.contains("\"lt\": \"2025-01-16T00:00:00\""));
+        assertTrue(query.contains(expectedLt));
         assertTrue(query.contains("\"data.orderCollection\""));
         assertTrue(query.contains("\"reference.keyword\""));
     }
@@ -258,12 +260,16 @@ class SealAuditServiceTest {
             queryCaptor.capture()
         );
 
+        // NEW: token + s2s generated per page
+        verify(systemUserService, times(2)).getSysUserToken();
+        verify(authTokenGenerator, times(2)).generate();
+
         List<String> queries = queryCaptor.getAllValues();
 
-        assertTrue(queries.get(0).contains("\"from\": 0"));
+        assertFalse(queries.get(0).contains("\"search_after\""));
         assertTrue(queries.get(0).contains("\"size\": 2"));
 
-        assertTrue(queries.get(1).contains("\"from\": 2"));
+        assertTrue(queries.get(1).contains("\"search_after\""));
         assertTrue(queries.get(1).contains("\"size\": 2"));
     }
 
@@ -292,7 +298,12 @@ class SealAuditServiceTest {
         sealAuditService.runAudit();
 
         verify(coreCaseDataApi, times(2)).searchCases(anyString(), anyString(), anyString(), anyString());
+        // NEW: token + s2s generated per page
+        verify(systemUserService, times(2)).getSysUserToken();
+        verify(authTokenGenerator, times(2)).generate();
+
         verifyNoInteractions(caseDocumentClient, sealDetectionService, notificationClient);
+
     }
 
     @ParameterizedTest
@@ -325,6 +336,7 @@ class SealAuditServiceTest {
         assertEquals(sealsPresent, templateVars.get("seals_present"));
         assertEquals(sealsMissing, templateVars.get("seals_missing"));
         assertEquals(errors, templateVars.get("errors"));
+        assertEquals("2025-01-15", templateVars.get("fromDateStr"));
     }
 
     private static Stream<Arguments> provideSealStatusesForEmailTest() {
@@ -498,6 +510,73 @@ class SealAuditServiceTest {
     }
 
     @Test
+    void shouldSendEmailWithIncompleteStatusWhenSearchFails() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("CCD unavailable"));
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+
+        String status = (String) templateVarsCaptor.getValue().get("status");
+        assertNotNull(status);
+        assertTrue(status.startsWith("INCOMPLETE RUN"),
+            "Expected INCOMPLETE RUN prefix, got: " + status);
+        assertTrue(status.contains("fatal error"),
+            "Expected fatal error reason, got: " + status);
+        assertTrue(status.contains("CCD unavailable"),
+            "Expected underlying error message, got: " + status);
+        assertTrue(status.contains("NOT a full report"),
+            "Expected caveat about partial results, got: " + status);
+    }
+
+    @Test
+    void shouldSendEmailWithAllSealsPresentStatusWhenNoIssues() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of()).build());
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+        assertEquals("All seals present", templateVarsCaptor.getValue().get("status"));
+    }
+
+    @Test
+    void shouldSendEmailWithIssuesFoundStatusWhenMissingSeals() throws NotificationClientException, IOException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of(createCaseDetailsWithServedOrder())).build());
+
+        mockDocumentSealStatus(SealStatus.MISSING);
+
+        sealAuditService.runAudit();
+
+        ArgumentCaptor<Map<String, Object>> templateVarsCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(notificationClient).sendEmail(anyString(), anyString(), templateVarsCaptor.capture(), anyString());
+        assertEquals("Issues found", templateVarsCaptor.getValue().get("status"));
+    }
+
+    @Test
     void shouldBuildCsvRowAndEscapeCommasAndQuotes() {
         String result = ReflectionTestUtils.invokeMethod(
             sealAuditService,
@@ -582,6 +661,7 @@ class SealAuditServiceTest {
 
         return CaseDetails.builder()
             .id(caseId)
+            .createdDate(java.time.LocalDateTime.of(2025, 1, 15, 10, 0))
             .data(caseData)
             .build();
     }
@@ -622,6 +702,214 @@ class SealAuditServiceTest {
         when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
             .thenReturn(ResponseEntity.ok(resource));
 
-        when(sealDetectionService.detectSeal(mockPdfBytes)).thenReturn(sealStatus);
+        when(sealDetectionService.detectSeal(any(java.io.InputStream.class))).thenReturn(sealStatus);
+    }
+
+    @Test
+    void shouldSendSummaryEmailToMultipleRecipients() throws Exception {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(
+            sealAuditService,
+            "toEmailAddress",
+            "test1@example.com, test2@example.com, test3@example.com"
+        );
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        SearchResult searchResult = SearchResult.builder()
+            .cases(List.of())
+            .build();
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(searchResult);
+
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test1@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test2@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test3@example.com"),
+            any(),
+            anyString()
+        );
+        verify(notificationClient, times(3)).sendEmail(anyString(), anyString(), any(), anyString());
+    }
+
+
+    @Test
+    void shouldStillSendSummaryEmailWhenSearchThrows() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("CCD unavailable"));
+
+        sealAuditService.runAudit();
+
+        // finally block should still attempt to send a summary email with zero counts
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test@example.com"),
+            any(),
+            anyString()
+        );
+    }
+
+    @Test
+    void shouldStillSendSummaryEmailWhenLoopThrowsError() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        // Simulate a Throwable (Error) escaping from the search
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenThrow(new OutOfMemoryError("simulated"));
+
+        sealAuditService.runAudit();
+
+        // finally block should still attempt to send a summary email even for Error
+        verify(notificationClient).sendEmail(
+            eq("template-id"),
+            eq("test@example.com"),
+            any(),
+            anyString()
+        );
+    }
+
+    @Test
+    void shouldSwallowUnexpectedExceptionFromNotificationClient() throws NotificationClientException {
+        ReflectionTestUtils.setField(sealAuditService, "emailEnabled", true);
+        ReflectionTestUtils.setField(sealAuditService, "toEmailAddress", "test@example.com");
+        ReflectionTestUtils.setField(sealAuditService, "emailTemplateId", "template-id");
+
+        when(systemUserService.getSysUserToken()).thenReturn("test-token");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        when(coreCaseDataApi.searchCases(anyString(), anyString(), anyString(), anyString()))
+            .thenReturn(SearchResult.builder().cases(List.of()).build());
+
+        // Non-NotificationClientException failure inside sendEmail must not propagate
+        when(notificationClient.sendEmail(anyString(), anyString(), any(), anyString()))
+            .thenThrow(new RuntimeException("notify broken"));
+
+        // Should not throw
+        sealAuditService.runAudit();
+
+        verify(notificationClient).sendEmail(anyString(), anyString(), any(), anyString());
+    }
+
+    @Test
+    void shouldRetryAndSucceedWhenTransientDocumentErrorOccurs() throws IOException {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/123/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("500 INTERNAL_SERVER_ERROR broken pipe"))
+            .thenReturn(ResponseEntity.ok(new ByteArrayResource("pdf-bytes".getBytes())));
+
+        when(sealDetectionService.detectSeal(any())).thenReturn(SealStatus.PRESENT);
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1234567890123456"
+        );
+
+        assertEquals(SealStatus.PRESENT, result);
+        verify(caseDocumentClient, times(2)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, times(1)).detectSeal(any());
+    }
+
+    @Test
+    void shouldRetryUpToMaxAttemptsAndReturnErrorForTransientDocumentError() {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/123/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("503 Service unavailable timeout"));
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1234567890123456"
+        );
+
+        assertEquals(SealStatus.ERROR, result);
+        verify(caseDocumentClient, times(3)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, never()).detectSeal(any());
+    }
+
+    @Test
+    void shouldNotRetryForNonRetryableDocumentError() {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/123/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("403 forbidden"));
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1234567890123456"
+        );
+
+        assertEquals(SealStatus.ERROR, result);
+        verify(caseDocumentClient, times(1)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, never()).detectSeal(any());
+    }
+
+    @Test
+    void shouldNotRetryWhenDocumentMetadataNotFound404() {
+        Document document = Document.builder()
+            .documentBinaryUrl("http://dm-store/documents/6c7909cb-05c7-40d6-8bfa-ada68c0f0191/binary")
+            .build();
+
+        when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), anyString()))
+            .thenThrow(new RuntimeException("404 Not Found Meta data does not exist for documentId"));
+
+        SealStatus result = ReflectionTestUtils.invokeMethod(
+            sealAuditService,
+            "checkSealStatus",
+            document,
+            "user-token",
+            "s2s-token",
+            "1782745027109240"
+        );
+
+        assertEquals(SealStatus.ERROR, result);
+        verify(caseDocumentClient, times(1)).getDocumentBinary(anyString(), anyString(), anyString());
+        verify(sealDetectionService, never()).detectSeal(any());
     }
 }

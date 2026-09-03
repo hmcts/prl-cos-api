@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.requestorder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -38,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.workingdays.WorkingDayIndicator;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +72,10 @@ class RequestOrderTaskServiceTest {
     @Mock AllTabServiceImpl allTabService;
     @Mock HearingService hearingService;
     @Mock WorkingDayIndicator workingDayIndicator;
-
     RequestOrderTaskService service;
+
+    @Captor
+    ArgumentCaptor<Map<String, Object>> captor;
 
     @BeforeEach
     void setUp() {
@@ -91,7 +96,7 @@ class RequestOrderTaskServiceTest {
 
         service = new RequestOrderTaskService(
             systemUserService, authTokenGenerator, coreCaseDataApi,
-            hearingService, allTabService, chasePolicy, objectMapper);
+            hearingService, allTabService, chasePolicy, objectMapper, workingDayIndicator);
         ReflectionTestUtils.setField(service, "concurrentRequest", 5);
     }
 
@@ -237,8 +242,10 @@ class RequestOrderTaskServiceTest {
 
         service.processRequestOrderTasks();
 
-        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
+
+
 
     @Test
     void firedEventCarriesCurrentHearingIdAndUpdatedCollectionWithTodayAsLastFiredDate() {
@@ -249,17 +256,26 @@ class RequestOrderTaskServiceTest {
 
         service.processRequestOrderTasks();
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+
         verify(allTabService).submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
         Map<String, Object> payload = captor.getValue();
-        assertThat(payload.get("currentHearingId")).isEqualTo(HEARING_ID);
-        @SuppressWarnings("unchecked")
+        assertThat(payload)
+            .containsEntry("currentHearingId",HEARING_ID);
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
         List<Element<RequestOrderHearingTracking>> collection =
-            (List<Element<RequestOrderHearingTracking>>) payload.get("requestOrderTaskTrackingByHearing");
-        assertThat(collection).hasSize(1);
-        assertThat(collection.get(0).getValue().getHearingId()).isEqualTo(HEARING_ID);
-        assertThat(collection.get(0).getValue().getLastFiredDate()).isEqualTo(LocalDate.now());
+            mapper.convertValue(
+                payload.get("requestOrderTaskTrackingByHearing"),
+                new TypeReference<>() {});
+
+        assertThat(collection)
+            .singleElement()
+            .extracting(Element::getValue)
+            .satisfies(tracking -> {
+                assertThat(tracking.getHearingId()).isEqualTo(HEARING_ID);
+                assertThat(tracking.getLastFiredDate()).isEqualTo(LocalDate.now());
+            });
     }
 
     @Test
@@ -274,7 +290,7 @@ class RequestOrderTaskServiceTest {
                     hearing("COMPLETED", "20", TODAY.minusDays(2)),
                     hearing("COMPLETED", "30", TODAY.minusDays(2))))
                 .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
         when(allTabService
                  .getStartUpdateForSpecificEvent(
                      CASE_ID,
@@ -290,9 +306,8 @@ class RequestOrderTaskServiceTest {
         service.processRequestOrderTasks();
 
         verify(allTabService, times(3)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+
         verify(allTabService, times(3))
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
         assertThat(captor.getAllValues())
@@ -301,14 +316,14 @@ class RequestOrderTaskServiceTest {
     }
 
     @Test
-    void inMixedCaseFiresOnlyForHearingsNotAlreadyInFlight() {
+    void inLastCompletedCadence() {
         CaseData caseData = baseCaseBuilder("FL401")
             .requestOrderTaskTrackingByHearing(List.of(
                 Element.<RequestOrderHearingTracking>builder()
                     .id(UUID.randomUUID())
                     .value(RequestOrderHearingTracking.builder()
                         .hearingId("10")
-                        .lastFiredDate(LocalDate.now().minusDays(1))
+                        .lastCompletedDate(TODAY.minusDays(1))
                         .build())
                     .build()))
             .build();
@@ -317,11 +332,9 @@ class RequestOrderTaskServiceTest {
             .thenReturn(Hearings.hearingsWith()
                 .caseRef(CASE_ID)
                 .caseHearings(List.of(
-                    hearing("COMPLETED", "10", TODAY.minusDays(2)),
-                    hearing("COMPLETED", "20", TODAY.minusDays(2)),
-                    hearing("COMPLETED", "30", TODAY.minusDays(2))))
+                    hearing("COMPLETED", "10", TODAY.plusDays(3))))
                 .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(2);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
 
         when(allTabService
                  .getStartUpdateForSpecificEvent(
@@ -335,18 +348,87 @@ class RequestOrderTaskServiceTest {
                 caseData,
                 null));
 
+        service.processRequestOrderTasks();
+
+        verify(allTabService).getStartUpdateForSpecificEvent(
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+
+        verify(allTabService)
+            .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
+    }
+
+    @Test
+    void whenDoneActionNoLastCompletedDateSoFireCadence() {
+        CaseData caseData = baseCaseBuilder("FL401")
+            .requestOrderTaskTrackingByHearing(List.of(
+                Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                               .hearingId("10")
+                               .lastFiredDate(LocalDate.now().minusDays(1))
+                        .build())
+                    .build()))
+            .build();
+
+        stubSearchReturning(caseData);
+        when(hearingService.getHearings(anyString(), anyString()))
+            .thenReturn(Hearings.hearingsWith()
+                .caseRef(CASE_ID)
+                .caseHearings(List.of(
+                    hearing("COMPLETED", "10", TODAY.plusDays(3))))
+                .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+
+        when(allTabService
+                 .getStartUpdateForSpecificEvent(
+                     CASE_ID,
+                     CaseEvent.ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()))
+            .thenReturn(new StartAllTabsUpdateDataContent(
+                "s2sToken",
+                EventRequestData.builder().build(),
+                StartEventResponse.builder().build(),
+                null,
+                caseData,
+                null));
 
         service.processRequestOrderTasks();
 
-        verify(allTabService, times(2)).getStartUpdateForSpecificEvent(
-            eq(CASE_ID), eq(ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue()));
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
-        verify(allTabService, times(2))
+        verify(allTabService).getStartUpdateForSpecificEvent(
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(allTabService)
             .submitAllTabsUpdate(anyString(), anyString(), any(), any(), captor.capture());
-        assertThat(captor.getAllValues())
-            .extracting(m -> (String) m.get("currentHearingId"))
-            .containsExactly("20", "30");
+        assertThat(captor.getValue())
+            .containsEntry("currentHearingId", "10");
+    }
+
+    @Test
+    void whenLastFiredDateIsTodaySkipTaskCreation() {
+        CaseData caseData = baseCaseBuilder("FL401")
+            .requestOrderTaskTrackingByHearing(List.of(
+                Element.<RequestOrderHearingTracking>builder()
+                    .id(UUID.randomUUID())
+                    .value(RequestOrderHearingTracking.builder()
+                               .hearingId("10")
+                               .lastFiredDate(LocalDate.now())
+                               .build())
+                    .build()))
+            .build();
+
+        stubSearchReturning(caseData);
+        when(hearingService.getHearings(anyString(), anyString()))
+            .thenReturn(Hearings.hearingsWith()
+                            .caseRef(CASE_ID)
+                            .caseHearings(List.of(
+                                hearing("COMPLETED", "10", TODAY.plusDays(3))))
+                            .build());
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+
+        service.processRequestOrderTasks();
+
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(
+            CASE_ID, ENABLE_REQUEST_SOLICITOR_ORDER_TASK.getValue());
+        verify(allTabService, never())
+            .submitAllTabsUpdate(anyString(), anyString(), any(), any(), any());
     }
 
     @Test
@@ -359,10 +441,10 @@ class RequestOrderTaskServiceTest {
     }
 
     @Test
-    void exceptionFromOneCaseDoesNotPreventProcessingOfTheNextCase() throws JsonProcessingException {
+    void exceptionFromOneCaseDoesNotPreventProcessingOfTheNextCase() {
         String secondCaseId = "456";
         CaseData firstCase = baseCaseBuilder("FL401").build();
-        CaseData secondCase = baseCaseBuilder("FL401").id(Long.valueOf(secondCaseId)).build();
+        CaseData secondCase = baseCaseBuilder("FL401").id(Long.parseLong(secondCaseId)).build();
         stubSearchReturningCases(firstCase, secondCase);
         stubHearings(completedHearingEndingDaysAgo(1));
         when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
@@ -397,19 +479,86 @@ class RequestOrderTaskServiceTest {
         verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
+    @Test
+    void skipFiringWhenOrderReceivedForCustomOrderHearingsType() {
+        int days = 1;
+        DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String hearingTypeValue = "Case Management Hearing";
+        String hearingTypeLabel = String.join(" ",
+                                              hearingTypeValue,
+                                              "-",
+                                              formatter.format(TODAY.minusDays(days)),
+                                              "09:00:00");
+
+        CaseData caseData = baseCaseBuilder("C100")
+            .customOrderHearingsType(
+                DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                               .code(hearingTypeLabel)
+                               .label(hearingTypeLabel)
+                               .build())
+                    .build())
+            .build();
+        stubSearchReturning(caseData);
+        stubHearings(completedHearingEndingDaysAgo(1, hearingTypeValue));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
+
+        service.processRequestOrderTasks();
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
+    }
+
+    @Test
+    void shouldFireWhenNoMatchingCustomOrderHearingsType() {
+        int days = 1;
+        DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String hearingTypeValue = "Case Management Hearing";
+        String hearingTypeLabel = String.join(" ",
+                                              "No match Hearing",
+                                              "-",
+                                              formatter.format(TODAY.minusDays(days)),
+                                              "09:00:00");
+
+        CaseData caseData = baseCaseBuilder("C100")
+            .customOrderHearingsType(
+                DynamicList.builder()
+                    .value(DynamicListElement.builder()
+                               .code(hearingTypeLabel)
+                               .label(hearingTypeLabel)
+                               .build())
+                    .build())
+            .build();
+        stubSearchReturning(caseData);
+        stubHearings(completedHearingEndingDaysAgo(1, hearingTypeValue));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3).thenReturn(3);
+
+        service.processRequestOrderTasks();
+        verify(allTabService).getStartUpdateForSpecificEvent(anyString(), anyString());
+    }
+
     private CaseData.CaseDataBuilder<?, ?> baseCaseBuilder(String caseType) {
         return CaseData.builder()
-            .id(Long.valueOf(CASE_ID))
+            .id(Long.parseLong(CASE_ID))
             .state(State.JUDICIAL_REVIEW)
             .caseTypeOfApplication(caseType);
     }
 
     private CaseHearing completedHearingEndingDaysAgo(int days) {
-        return hearing("COMPLETED", HEARING_ID, TODAY.minusDays(days));
+        return completedHearingEndingDaysAgo(days, null);
+    }
+
+    private CaseHearing completedHearingEndingDaysAgo(int days, String hearingTypeValue) {
+        return hearing("COMPLETED", HEARING_ID, TODAY.minusDays(days), hearingTypeValue);
     }
 
     private CaseHearing hearing(String status, String hearingId, LocalDate endDate) {
+        return hearing(status, hearingId, endDate, null);
+    }
+
+    private CaseHearing hearing(String status, String hearingId, LocalDate endDate, String hearingTypeValue) {
         return CaseHearing.caseHearingWith()
+            .hearingTypeValue(hearingTypeValue)
             .hearingID(Long.valueOf(hearingId))
             .hmcStatus(status)
             .hearingDaySchedule(List.of(HearingDaySchedule.hearingDayScheduleWith()
