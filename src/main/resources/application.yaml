@@ -25,6 +25,50 @@ prl:
     username: ${PRL_IDAM_REFDATA_USERNAME:xxxxxx}
     password: ${PRL_IDAM_REFDATA_PASSWORD:xxxxxx}
 
+testing-support-data:
+  demo:
+    org:
+      org1:
+        id: 6RUBIJM
+        name: Private law NOC Applicant organisation
+      org2:
+        id: 9SCQJOI
+        name: Private law Applicant organisation
+      org3:
+        id: 52IWCVT
+        name: PRL Barrister Org2
+      org4:
+        id: UYLJCAI
+        name: PRL Barrister Org3
+  aat:
+    org:
+      org1:
+        id: LM6OZX0
+        name: Private law NOC solution
+      org2:
+        id: QO4A1Q8
+        name: FPRL-test-organisation
+      org3:
+        id: F9I5I7G
+        name: Private law test organisation
+      org4:
+        id: 5S5EJUH
+        name: KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q
+  preview:
+    org:
+      org1:
+        id: LM6OZX0
+        name: Private law NOC solution
+      org2:
+        id: QO4A1Q8
+        name: FPRL-test-organisation
+      org3:
+        id: F9I5I7G
+        name: Private law test organisation
+      org4:
+        id: 5S5EJUH
+        name: KapilYAIEIiGGpEN7XAjg9Tdy JainsAspDFHin7J9kTF3TV3Q
+
 management:
   endpoint:
     health:

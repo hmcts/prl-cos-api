@@ -70,6 +70,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
@@ -140,6 +141,9 @@ public class TestingSupportServiceTest {
     @Mock
     private TaskListService taskListService;
 
+    @Mock
+    private TestingSupportFixtureLoader fixtureLoader;
+
     private CourtNavFl401 courtNavFl401;
 
     Map<String, Object> caseDataMap;
@@ -152,6 +156,9 @@ public class TestingSupportServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        lenient().when(fixtureLoader.loadJson(anyString()))
+            .thenAnswer(invocation -> uk.gov.hmcts.reform.prl.utils.ResourceLoader.loadJson(invocation.getArgument(0)));
+
         List<ContactInformation> contactInformation = new ArrayList<>();
         List<DxAddress> dxAddress = new ArrayList<>();
         dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
