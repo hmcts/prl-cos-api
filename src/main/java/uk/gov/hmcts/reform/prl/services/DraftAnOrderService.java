@@ -125,15 +125,21 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_DIRECTIONS_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FOR_DRAFT_ERROR_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTIES_AND_REPRESENTATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENAL_NOTICE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PLEASE_SELECT_ONE_OPTION_WELSH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RECITALS_OR_PREAMBLE_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SCHEDULE_TO_ORDER_RTF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_CROSS_EXAMINATION_EX741;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_DIRECTIONS_FOR_FACT_FINDING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_DRA_HEARING_DETAILS;
@@ -161,6 +167,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 import static uk.gov.hmcts.reform.prl.enums.State.PREPARE_FOR_HEARING_CONDUCT_HEARING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsOnly;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.safeguardingCafcassCymru;
@@ -1010,6 +1017,7 @@ public class DraftAnOrderService {
                 caseData) ? Yes : No);
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
+        populateDraftOrderInformations(caseDataMap, selectedOrder);
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
         caseDataMap.put("furtherInformationIfRequired", selectedOrder.getFurtherInformationIfRequired());
@@ -1282,6 +1290,7 @@ public class DraftAnOrderService {
         Document orderDocumentWelsh = null;
         if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
             //PRL-4854 - uploaded order
+
             if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
                 orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
             } else {
@@ -1349,10 +1358,21 @@ public class DraftAnOrderService {
                 .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
                 .magistrateLastName(caseData.getMagistrateLastName())
                 .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
+                .recitalsOrPreambleRtf(!StringUtils.isEmpty(caseData.getManageOrders().getRecitalsOrPreambleRtf())
+                                           ? caseData.getManageOrders().getRecitalsOrPreambleRtf()
+                                           : caseData.getManageOrders().getRecitalsOrPreamble())
                 .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                 .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                 .childOption(manageOrderService.getChildOption(caseData))
+                .partiesAndRepresentation(caseData.getManageOrders().getPartiesAndRepresentation())
                 .orderDirections(caseData.getManageOrders().getOrderDirections())
+                .orderDirectionsRtf(!StringUtils.isEmpty(caseData.getManageOrders().getOrderDirectionsRtf())
+                                        ? caseData.getManageOrders().getOrderDirectionsRtf()
+                                        : caseData.getManageOrders().getOrderDirections())
+                .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
+                .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
+                .penalNoticeRtf(caseData.getManageOrders().getPenalNoticeRtf())
+                .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
                 .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                 .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
                 .fl404CustomFields(caseData.getManageOrders().getFl404CustomFields())
@@ -2395,7 +2415,7 @@ public class DraftAnOrderService {
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
-        if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
+        if (!(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             || ManageOrdersUtils.isDaOrderSelectedForCaCase(String.valueOf(caseData.getCreateSelectOrderOptions()),
             caseData))) {
@@ -2536,6 +2556,31 @@ public class DraftAnOrderService {
                 .data(caseDataUpdated)
                 .build();
         }
+    }
+
+    public Map<String, Object> populateDraftOrderInformations(Map<String, Object> caseDataMap, DraftOrder selectedOrder) {
+        caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
+        caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
+        caseDataMap.put(PARTIES_AND_REPRESENTATION, selectedOrder.getPartiesAndRepresentation());
+        caseDataMap.put(PENAL_NOTICE_NEEDED, selectedOrder.getPenalNoticeNeeded());
+        if (StringUtils.isEmpty(selectedOrder.getPenalNoticeRtf())) {
+            String penalNoticeRtfValue = ManageOrderService.STATIC_PENAL_NOTICE_RTF;
+            caseDataMap.put(PENAL_NOTICE_RTF, penalNoticeRtfValue);
+        } else {
+            caseDataMap.put(PENAL_NOTICE_RTF, selectedOrder.getPenalNoticeRtf());
+        }
+        if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
+            caseDataMap.put(ORDER_DIRECTIONS_RTF, selectedOrder.getOrderDirections());
+        } else {
+            caseDataMap.put(ORDER_DIRECTIONS_RTF, selectedOrder.getOrderDirectionsRtf());
+        }
+        if (selectedOrder.getRecitalsOrPreambleRtf() == null && selectedOrder.getRecitalsOrPreamble() != null) {
+            caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreamble());
+        } else {
+            caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreambleRtf());
+        }
+        caseDataMap.put(SCHEDULE_TO_ORDER_RTF, selectedOrder.getScheduleToOrderRtf());
+        return caseDataMap;
     }
 
     private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList, String language) {

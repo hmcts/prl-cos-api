@@ -174,6 +174,8 @@ public class ManageOrdersController {
                 return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
 
+            manageOrderService.updatePrefilledOrderFields(caseData, caseDataUpdated);
+
             String language = CaseUtils.getLanguage(clientContext);
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData, CaseUtils.getLanguage(clientContext));
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions(), language));
@@ -594,13 +596,13 @@ public class ManageOrdersController {
 
 
 
-    /*
+    /**
      *  setHearingData is a misnomer this does setHearingData but then goes on to other action based on selection
-     *  including serving an order
+     *  including serving an order.
      * @param caseData original
      * @param caseDataUpdated updated
      * @param authorisation need auth for changes
-     */
+     **/
     private void setHearingData(CaseData caseData, Map<String, Object> caseDataUpdated, String authorisation) {
         try {
             doSetHearingData(caseData, caseDataUpdated, authorisation);

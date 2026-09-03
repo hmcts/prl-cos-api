@@ -901,6 +901,13 @@ public class PrlAppsConstants {
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
+    public static final String PARTIES_AND_REPRESENTATION = "partiesAndRepresentation";
+    public static final String PENAL_NOTICE_NEEDED = "penalNoticeNeeded";
+    public static final String PENAL_NOTICE_RTF = "penalNoticeRtf";
+    public static final String ORDER_DIRECTIONS_RTF = "orderDirectionsRtf";
+    public static final String RECITALS_OR_PREAMBLE_RTF = "recitalsOrPreambleRtf";
+    public static final String SCHEDULE_TO_ORDER_RTF = "scheduleToOrderRtf";
+
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
