@@ -20,11 +20,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -63,6 +65,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
@@ -260,6 +264,64 @@ public class EditAndApproveDraftOrderController {
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+
+
+
+    @PostMapping(path = "/manage-orders/serve-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "about to start callback for Serve Order.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleServeOrderAboutToStart(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            State state = caseData.getState();
+            YesOrNo eligibleStateForMiam = null;
+            if (nonNull(state)) {
+                String status = state.getValue();
+                if (status.equalsIgnoreCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
+                    ||  status.equalsIgnoreCase(State.DECISION_OUTCOME.getValue())) {
+                    eligibleStateForMiam = Yes;
+                } else {
+                    eligibleStateForMiam = No;
+                }
+
+            }
+            String eventId = callbackRequest.getEventId();
+            DraftOrder selectedOrder = null;
+            if (!MANAGE_ORDERS.getId().equalsIgnoreCase(eventId)) {
+                selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                    caseData.getDraftOrderCollection(),
+                    caseData.getDraftOrdersDynamicList(),
+                    clientContext, eventId
+                );
+            }
+            String language = CaseUtils.getLanguage(clientContext);
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
+                authorisation,
+                caseData,
+                selectedOrder,
+                language,
+                Optional.ofNullable(clientContext)
+            );
+
+            if (nonNull(selectedOrder)) {
+                response.put("miamForOrder", selectedOrder.getMiamForOrder());
+                response.put("orderType", selectedOrder.getOrderType());
+            }
+            response.put("eligibleStateForMiam", eligibleStateForMiam);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(response).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
