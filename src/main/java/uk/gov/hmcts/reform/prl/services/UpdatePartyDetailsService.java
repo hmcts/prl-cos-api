@@ -215,8 +215,8 @@ public class UpdatePartyDetailsService {
                         List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)),
                         false
                     );
-                    generateC8.accept(caseData);
                 }
+                generateC8.accept(caseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}, Error: {}",
                           callbackRequest.getCaseDetails().getId(), e.getMessage());
