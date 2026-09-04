@@ -1598,7 +1598,6 @@ class UpdatePartyDetailsServiceTest {
         assertTrue(bool);
     }
 
-
     @Test
     void checkIfDetailsChangedFl401AddressOnly() {
         PartyDetails respondentBefore = PartyDetails.builder()
