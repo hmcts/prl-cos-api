@@ -205,13 +205,18 @@ public class UpdatePartyDetailsService {
                     .build();
             }
             try {
-                generateC8DocumentsForRespondents(updatedCaseData,
-                                                  callbackRequest,
-                                                  authorisation,
-                                                  caseData,
-                                                  List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)),
-                                                  false);
-                generateC8.accept(caseData);
+                // If the respondent has not been added (e.g. when adding applicant), do not generate a respondent C8
+                if (isNotEmpty(fl401respondent)) {
+                    generateC8DocumentsForRespondents(
+                        updatedCaseData,
+                        callbackRequest,
+                        authorisation,
+                        caseData,
+                        List.of(ElementUtils.element(fl401respondent.getPartyId(), fl401respondent)),
+                        false
+                    );
+                    generateC8.accept(caseData);
+                }
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}, Error: {}",
                           callbackRequest.getCaseDetails().getId(), e.getMessage());
