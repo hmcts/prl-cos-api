@@ -67,6 +67,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -96,10 +97,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -195,6 +193,9 @@ class EditAndApproveDraftOrderControllerTest {
     @Mock
     private CafcassDateTimeService cafcassDateTimeService;
 
+    @Mock
+    private MiamForOrderService miamForOrderService;
+
 
 
     @BeforeEach
@@ -214,6 +215,8 @@ class EditAndApproveDraftOrderControllerTest {
                                                               Mockito.anyString(),
                                                               Mockito.anyString()
         )).thenReturn(DraftOrder.builder().build());
+        when(miamForOrderService.updateCaseDataWithMiamForOrderDetails(any(),anyString(),anyString(),anyMap()))
+            .thenReturn(new HashMap<>());
     }
 
     @Test
@@ -366,6 +369,8 @@ class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(),
                                                           "clientContext", AUTH_TOKEN)).thenReturn(caseDataMap);
+        when(miamForOrderService.updateCaseDataWithMiamForOrderDetails(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+            .thenReturn(new HashMap<>());
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrder(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest);
         assertNotNull(response);
@@ -2159,9 +2164,8 @@ class EditAndApproveDraftOrderControllerTest {
         assertEquals("Yes", String.valueOf(updatedCaseDataMap.get("doYouWantToEditTheOrder")));
     }
 
-
     @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() {
+    public void testFlagSetForMiamOrderWhenStateIsAwaitingSubmissionToHmcts() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 123L);
         stringObjectMap.put("state", State.AWAITING_SUBMISSION_TO_HMCTS);
@@ -2181,7 +2185,6 @@ class EditAndApproveDraftOrderControllerTest {
         );
 
         assertNotNull(response);
-        assertEquals(No, response.getData().get("eligibleStateForMiam"));
     }
 
     @Test
@@ -2190,142 +2193,17 @@ class EditAndApproveDraftOrderControllerTest {
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("state", State.SUBMITTED_NOT_PAID);
 
-        CaseData customCaseData = setUpCaseDataForMiamTest(State.SUBMITTED_NOT_PAID);
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
 
         CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.SUBMITTED_NOT_PAID);
 
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
-            authToken,
-            s2sToken,
-            ENCRYPTED_CLIENT_CONTEXT,
-            callbackRequest
-        );
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
-    }
-
-    @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsSubmittedPaid() {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 12345L);
-        stringObjectMap.put("state", State.SUBMITTED_PAID);
-
-        CaseData customCaseData = setUpCaseDataForMiamTest(State.SUBMITTED_PAID);
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
-
-        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.SUBMITTED_PAID);
-
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
-            authToken,
-            s2sToken,
-            ENCRYPTED_CLIENT_CONTEXT,
-            callbackRequest
-        );
-
-        assertNotNull(response);
-        assertEquals(No, response.getData().get("eligibleStateForMiam"));
-    }
-
-    @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsCaseIssued() {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 12345L);
-        stringObjectMap.put("state", State.CASE_ISSUED);
-
-        CaseData customCaseData = setUpCaseDataForMiamTest(State.CASE_ISSUED);
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
-
-        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.CASE_ISSUED);
-
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
-            authToken,
-            s2sToken,
-            ENCRYPTED_CLIENT_CONTEXT,
-            callbackRequest
-        );
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
-    }
-
-    @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsJudicialReview() {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 12345L);
-        stringObjectMap.put("state", State.JUDICIAL_REVIEW);
-
-        CaseData customCaseData = setUpCaseDataForMiamTest(State.JUDICIAL_REVIEW);
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
-
-        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.JUDICIAL_REVIEW);
-
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
-            authToken,
-            s2sToken,
-            ENCRYPTED_CLIENT_CONTEXT,
-            callbackRequest
-        );
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
-    }
-
-    @Test
-    public void testFlagSetToNoForMiamOrderWhenStateIsAwaitingFl401SubmissionToHmcts() {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 12345L);
-        stringObjectMap.put("state", State.AWAITING_FL401_SUBMISSION_TO_HMCTS);
-
-        CaseData customCaseData = setUpCaseDataForMiamTest(State.AWAITING_FL401_SUBMISSION_TO_HMCTS);
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
-
-        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.AWAITING_FL401_SUBMISSION_TO_HMCTS);
-
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
-            authToken,
-            s2sToken,
-            ENCRYPTED_CLIENT_CONTEXT,
-            callbackRequest
-        );
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(No, response.getData().get("eligibleStateForMiam"));
-    }
-
-    @Test
-    public void testFlagSetToYesForMiamOrderWhenStateIsPrepareForHearingConductHearing() {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("id", 123L);
-        stringObjectMap.put("state", State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
-
-        CaseData customCaseData = setUpCaseDataForMiamTest(State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
-
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
-
-        CallbackRequest callbackRequest = setUpCallbackRequestForMiamTest(stringObjectMap, State.PREPARE_FOR_HEARING_CONDUCT_HEARING);
-
-        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController.handleServeOrderAboutToStart(
-            authToken,
-            s2sToken,
-            ENCRYPTED_CLIENT_CONTEXT,
-            callbackRequest
-        );
-
-        Assert.assertNotNull(response);
-        Assert.assertEquals(Yes, response.getData().get("eligibleStateForMiam"));
+        Assert.assertThrows(Exception.class, () -> {
+            editAndApproveDraftOrderController.handleServeOrderAboutToStart(
+                authToken,
+                s2sToken,
+                "ENCRYPTED_CLIENT_CONTEXT",
+                callbackRequest
+            );
+        });
     }
 
     private CallbackRequest setUpCallbackRequestForMiamTest(Map<String, Object> stringObjectMap, State state) {

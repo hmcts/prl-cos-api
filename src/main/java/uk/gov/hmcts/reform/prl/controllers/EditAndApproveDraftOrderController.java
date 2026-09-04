@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
@@ -49,11 +50,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -65,8 +62,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_COLLECTION_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
-import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.OrderUtils.getOrderId;
 
@@ -86,6 +81,7 @@ public class EditAndApproveDraftOrderController {
     private final AllTabServiceImpl allTabService;
     private final TaskUtils taskUtils;
     private final CafcassDateTimeService cafcassDateTimeService;
+    private final MiamForOrderService miamForOrderService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -270,8 +266,6 @@ public class EditAndApproveDraftOrderController {
     }
 
 
-
-
     @PostMapping(path = "/manage-orders/serve-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "about to start callback for Serve Order.")
     @ApiResponses(value = {
@@ -285,44 +279,16 @@ public class EditAndApproveDraftOrderController {
 
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            Map<String, Object> caseDataUpdated = caseDetails.getData();
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            YesOrNo eligibleStateForMiam = obtainEligibleStateForMiam(caseData);
-            String eventId = callbackRequest.getEventId();
-            DraftOrder selectedOrder = null;
-            if (!MANAGE_ORDERS.getId().equalsIgnoreCase(eventId)) {
-                selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
-                    caseData.getDraftOrderCollection(),
-                    caseData.getDraftOrdersDynamicList(),
-                    clientContext, eventId
-                );
-            }
-
-            if (nonNull(selectedOrder)) {
-                caseDataUpdated.put("miamForOrder", selectedOrder.getMiamForOrder());
-                caseDataUpdated.put("orderType", selectedOrder.getOrderType());
-            }
-            caseDataUpdated.put("eligibleStateForMiam", eligibleStateForMiam);
+            Map<String, Object> caseDataUpdated = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+                caseDetails,
+                callbackRequest.getEventId(),
+                clientContext,
+                caseDetails.getData()
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private YesOrNo obtainEligibleStateForMiam(CaseData caseData) {
-        State state = caseData.getState();
-        YesOrNo eligibleStateForMiam = null;
-        if (nonNull(state)) {
-            String status = state.getValue();
-            if (status.equalsIgnoreCase(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue())
-                ||  status.equalsIgnoreCase(State.DECISION_OUTCOME.getValue())) {
-                eligibleStateForMiam = Yes;
-            } else {
-                eligibleStateForMiam = No;
-            }
-
-        }
-        return eligibleStateForMiam;
     }
 
 
@@ -511,11 +477,14 @@ public class EditAndApproveDraftOrderController {
                 Optional.ofNullable(clientContext)
             );
 
+            // Fpvtl 3512 MIAM for order
+            Map<String, Object> updatedResponse = miamForOrderService.updateCaseDataWithMiamForOrderDetails(callbackRequest.getCaseDetails(), callbackRequest.getEventId(), clientContext, response);
+
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                response.put("doYouWantToEditTheOrder", Yes);
+                updatedResponse.put("doYouWantToEditTheOrder", Yes);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(response).build();
+                .data(updatedResponse).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
