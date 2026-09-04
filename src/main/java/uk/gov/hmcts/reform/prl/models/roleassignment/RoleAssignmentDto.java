@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 
 @Data
 @AllArgsConstructor
@@ -19,4 +20,7 @@ public class RoleAssignmentDto {
 
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;
+
+    @JsonProperty("legalAdviserUser")
+    private final StaffUser legalAdviserUser;
 }
