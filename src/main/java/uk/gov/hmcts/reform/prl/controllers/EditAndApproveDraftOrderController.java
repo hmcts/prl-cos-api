@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -82,6 +84,7 @@ public class EditAndApproveDraftOrderController {
     private final AllTabServiceImpl allTabService;
     private final TaskUtils taskUtils;
     private final CafcassDateTimeService cafcassDateTimeService;
+    private final MiamForOrderService miamForOrderService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -264,6 +267,33 @@ public class EditAndApproveDraftOrderController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
+    @PostMapping(path = "/manage-orders/serve-order-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "about to start callback for Serve Order.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed."),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse handleServeOrderAboutToStart(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestHeader(value = CLIENT_CONTEXT_HEADER_PARAMETER, required = false) String clientContext,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            Map<String, Object> caseDataUpdated = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+                caseDetails,
+                callbackRequest.getEventId(),
+                clientContext,
+                caseDetails.getData()
+            );
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
 
     private String getDraftOrderIdFromContext(String clientContext) {
         String draftOrderId = null;
@@ -450,11 +480,16 @@ public class EditAndApproveDraftOrderController {
                 Optional.ofNullable(clientContext)
             );
 
+            // Fpvtl 3512 MIAM for order
+            Map<String, Object> updatedResponse = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+                callbackRequest.getCaseDetails(), callbackRequest.getEventId(), clientContext, response
+            );
+
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
-                response.put("doYouWantToEditTheOrder", Yes);
+                updatedResponse.put("doYouWantToEditTheOrder", Yes);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(response).build();
+                .data(updatedResponse).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
