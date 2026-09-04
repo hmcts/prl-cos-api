@@ -2514,6 +2514,47 @@ class UpdatePartyDetailsServiceTest {
                                                                             Mockito.anyBoolean(), anyMap());
     }
 
+    @Test
+    void shouldNotAttemptToGenerateRespondentC8WhenFl401RespondentNotYetAdded() throws Exception {
+        PartyDetails applicant = PartyDetails.builder().firstName("App").lastName("One").build();
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId("applicantDetails")
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .id(12345L)
+                                   .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.name())
+                                   .data(caseDataMap)
+                                   .build())
+            .caseDetails(CaseDetails.builder()
+                             .id(12345L)
+                             .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING.name())
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        when(confidentialDetailsMapper.mapConfidentialData(any(CaseData.class), Mockito.anyBoolean())).thenReturn(caseData);
+        when(confidentialityTabService.updateConfidentialityDetails(caseData)).thenReturn(Map.of());
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(Map.of());
+        when(noticeOfChangePartiesService.generate(any(CaseData.class), any(), anyMap())).thenReturn(Map.of());
+        when(documentGenService.createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class))).thenReturn(Map.of());
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.updateApplicantRespondentAndChildData(
+            callbackRequest,
+            BEARER_TOKEN
+        );
+
+        assertNotNull(updatedCaseData);
+        verify(documentGenService, Mockito.times(1)).createUpdatedCaseDataWithDocuments(anyString(), any(CaseData.class));
+        verify(c100RespondentSolicitorService, Mockito.never()).populateDataMap(any(), any(), anyString());
+    }
+
     @ParameterizedTest
     @CsvSource({"PREPARE_FOR_HEARING_CONDUCT_HEARING, 1", "DECISION_OUTCOME, 1", "SUBMITTED_PAID, 0", "CASE_ISSUED, 0", "JUDICIAL_REVIEW, 0" })
     void shouldInvokeGenerateC8DocumentsForApplicantOnlyInHearingStates(State state, int times) throws Exception {
