@@ -63,7 +63,7 @@ public class RoleAssignmentService {
         String actorId = populateActorIdFromDto(authorization, roleAssignmentDto);
         String roleCategory = RoleCategory.JUDICIAL.name();
         if (null != actorId) {
-            if (null != roleAssignmentDto.getLegalAdviserList()) {
+            if (null != roleAssignmentDto.getLegalAdviserList() || null != roleAssignmentDto.getLegalAdviserUser()) {
                 roleName = "allocated-legal-adviser";
                 roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
             }
@@ -165,6 +165,8 @@ public class RoleAssignmentService {
     private String populateActorIdFromDto(String authorization, RoleAssignmentDto roleAssignmentDto) {
         if (null != roleAssignmentDto.getLegalAdviserList()) {
             return fetchActorIdFromSelectedLegalAdviser(authorization, roleAssignmentDto.getLegalAdviserList());
+        } else if (null != roleAssignmentDto.getLegalAdviserUser()) {
+            return roleAssignmentDto.getLegalAdviserUser().getIdamId();
         } else if (null != roleAssignmentDto.getJudicialUser()) {
             return getIdamId(roleAssignmentDto.getJudicialUser())[0];
         } else if (null != roleAssignmentDto.getJudgeEmail()) {
