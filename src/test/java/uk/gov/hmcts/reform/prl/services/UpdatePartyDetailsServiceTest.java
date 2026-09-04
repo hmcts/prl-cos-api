@@ -1582,6 +1582,24 @@ class UpdatePartyDetailsServiceTest {
     }
 
     @Test
+    void checkThatIfFL401RespondentIsBrandNewThenDetailsMarkedAsChanged() {
+        CaseData caseDataBefore = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .respondentsFL401(null)
+            .build();
+        PartyDetails respondent = PartyDetails.builder()
+            .email("test1")
+            .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(
+            caseDataBefore,
+            wrappedRespondent
+        );
+        assertTrue(bool);
+    }
+
+
+    @Test
     void checkIfDetailsChangedFl401AddressOnly() {
         PartyDetails respondentBefore = PartyDetails.builder()
             .address(Address.builder()
