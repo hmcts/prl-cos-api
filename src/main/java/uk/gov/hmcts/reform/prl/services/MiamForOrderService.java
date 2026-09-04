@@ -27,7 +27,8 @@ public class MiamForOrderService {
     private final DraftAnOrderService draftAnOrderService;
     private final ObjectMapper objectMapper;
 
-    public Map<String, Object> updateCaseDataWithMiamForOrderDetails(CaseDetails caseDetails, String eventId, String clientContext, Map<String, Object> response){
+    public Map<String, Object> updateCaseDataWithMiamForOrderDetails(
+        CaseDetails caseDetails, String eventId, String clientContext, Map<String, Object> response) {
 
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         YesOrNo eligibleStateForMiam = obtainEligibleStateForMiam(caseData);

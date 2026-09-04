@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -41,8 +40,8 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingUtils;
@@ -50,7 +49,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.TaskUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -478,7 +481,9 @@ public class EditAndApproveDraftOrderController {
             );
 
             // Fpvtl 3512 MIAM for order
-            Map<String, Object> updatedResponse = miamForOrderService.updateCaseDataWithMiamForOrderDetails(callbackRequest.getCaseDetails(), callbackRequest.getEventId(), clientContext, response);
+            Map<String, Object> updatedResponse = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+                callbackRequest.getCaseDetails(), callbackRequest.getEventId(), clientContext, response
+            );
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
                 updatedResponse.put("doYouWantToEditTheOrder", Yes);

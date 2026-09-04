@@ -66,8 +66,8 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.MiamForOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassDateTimeService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -97,7 +97,10 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
@@ -1776,7 +1779,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .generateDraftOrderDropDown(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -1806,7 +1809,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrder(AUTH_TOKEN, S2S_TOKEN, "clientContext", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -1836,7 +1839,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .prepareDraftOrderCollection(AUTH_TOKEN, S2S_TOKEN, PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -1866,7 +1869,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(
             () -> editAndApproveDraftOrderController
                 .saveServeOrderDetails(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest),
@@ -1900,7 +1903,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .sendEmailNotificationToRecipientsServeOrder(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2006,7 +2009,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2019,7 +2022,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .populateCommonFields(AUTH_TOKEN, S2S_TOKEN, "clcx", callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2032,7 +2035,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .editAndServeOrderMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
     }
@@ -2045,7 +2048,7 @@ class EditAndApproveDraftOrderControllerTest {
                              .id(123L)
                              .build())
             .build();
-        Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
+        when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(false);
         assertExpectedException(() -> editAndApproveDraftOrderController
             .editAndServeOrderMidEvent(AUTH_TOKEN, S2S_TOKEN, callbackRequest), RuntimeException.class, "Invalid Client");
     }
