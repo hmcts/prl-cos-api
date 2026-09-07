@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.bundle.BundlingDocGroupEnum;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401OtherProceedingDetails;
@@ -222,7 +223,7 @@ public class BundleCreateRequestMapperTest {
             .orderDocumentWelsh(Document.builder().documentUrl("validUrl").documentBinaryUrl(BundleCreateRequestMapper.REDACTED_DOCUMENT_URL_BINARY)
                                     .documentFileName("valid-file.pdf").build())
             .build();
-        List<Element<OrderDetails>> orders = List.of(ElementUtils.element(orderDetails));
+        List<Element<OrderDetails>> orders = new ArrayList<>(List.of(ElementUtils.element(orderDetails)));
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
         assertTrue(result.isEmpty());
     }
@@ -235,9 +236,28 @@ public class BundleCreateRequestMapperTest {
             .orderDocumentWelsh(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
                                     .documentFileName("valid-file2.pdf").build())
             .build();
-        List<Element<OrderDetails>> orders = List.of(ElementUtils.element(orderDetails));
+        List<Element<OrderDetails>> orders = new ArrayList<>(List.of(ElementUtils.element(orderDetails)));
         List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
         assertEquals(2, result.size());
+        assertEquals("valid-file.pdf", result.get(0).getValue().getDocumentFileName());
+        assertEquals("valid-file2.pdf", result.get(1).getValue().getDocumentFileName());
+    }
+
+    @Test
+    public void testMapOrdersFromCaseData_includesOrderTitleAndMadeDateForBundleIndex() {
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("Directions on issue")
+            .otherDetails(OtherOrderDetails.builder().orderMadeDate("5 Aug 2026").build())
+            .orderDocument(Document.builder().documentUrl("validUrl").documentBinaryUrl("validBinaryUrl")
+                               .documentFileName("valid-file.pdf").build())
+            .orderDocumentWelsh(Document.builder().documentUrl("validUrl2").documentBinaryUrl("validBinaryUrl2")
+                                    .documentFileName("valid-file2.pdf").build())
+            .build();
+        List<Element<OrderDetails>> orders = new ArrayList<>(List.of(ElementUtils.element(orderDetails)));
+        List<Element<BundlingRequestDocument>> result = bundleCreateRequestMapper.mapOrdersFromCaseData(orders);
+        assertEquals(2, result.size());
+        assertEquals("valid-file.pdf : 05-08-26", result.get(0).getValue().getDocumentFileName());
+        assertEquals("valid-file2.pdf : 05-08-26", result.get(1).getValue().getDocumentFileName());
     }
 
     @Test
