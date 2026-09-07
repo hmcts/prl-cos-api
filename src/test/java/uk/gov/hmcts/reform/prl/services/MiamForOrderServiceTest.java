@@ -30,6 +30,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -84,7 +85,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             stringObjectMap
         );
@@ -107,7 +108,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             stringObjectMap
         );
@@ -130,7 +131,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             stringObjectMap
         );
@@ -153,7 +154,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             stringObjectMap
         );
@@ -176,7 +177,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             stringObjectMap
         );
@@ -200,7 +201,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             stringObjectMap
         );
@@ -221,7 +222,7 @@ public class MiamForOrderServiceTest {
 
         Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
             caseDetails,
-            "EditAndApproveOrder",
+            "adminEditAndApproveAnOrder",
             CLIENT_CONTEXT,
             caseDetails.getData()
         );
@@ -229,6 +230,48 @@ public class MiamForOrderServiceTest {
         assertNotNull(response);
         assertEquals(Yes, response.get("eligibleStateForMiam"));
         assertEquals(No, response.get("miamForOrder"));
+    }
+
+    @Test
+    public void testStateIsPrepareForHearingDecisionOutcomeAndUserSelectsNoMiamForOrder() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = setUpCaseDetailsForMiamTest(stringObjectMap, State.DECISION_OUTCOME);
+        CaseData customCaseData = setUpCaseDataForMiamTest(State.DECISION_OUTCOME);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(any(), any(), any(), any())).thenReturn(DraftOrder.builder().miamForOrder(No).build());
+
+        Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+            caseDetails,
+            "adminEditAndApproveAnOrder",
+            CLIENT_CONTEXT,
+            caseDetails.getData()
+        );
+
+        assertNotNull(response);
+        assertEquals(Yes, response.get("eligibleStateForMiam"));
+        assertEquals(No, response.get("miamForOrder"));
+    }
+
+    @Test
+    public void testStateIsManageOrdersDoesNotAddMiamForOrderField() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CaseDetails caseDetails = setUpCaseDetailsForMiamTest(stringObjectMap, State.DECISION_OUTCOME);
+        CaseData customCaseData = setUpCaseDataForMiamTest(State.DECISION_OUTCOME);
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(customCaseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(any(), any(), any(), any())).thenReturn(DraftOrder.builder().miamForOrder(No).build());
+
+        Map<String, Object> response = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
+            caseDetails,
+            "manageOrders",
+            CLIENT_CONTEXT,
+            caseDetails.getData()
+        );
+
+        assertNotNull(response);
+        assertEquals(Yes, response.get("eligibleStateForMiam"));
+        assertNull(response.get("miamForOrder"));
     }
 
 
