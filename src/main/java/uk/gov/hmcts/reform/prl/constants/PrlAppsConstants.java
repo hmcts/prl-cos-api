@@ -134,6 +134,7 @@ public class PrlAppsConstants {
 
     public static final String URL_STRING = "/";
     public static final String D_MMM_YYYY = "d MMM yyyy";
+    public static final String DD_MM_YY = "dd-MM-yy";
 
     public static final String APPLICANT_SOLICITOR = " (Applicant's Solicitor)";
     public static final String RESPONDENT_SOLICITOR = " (Respondent's Solicitor)";
