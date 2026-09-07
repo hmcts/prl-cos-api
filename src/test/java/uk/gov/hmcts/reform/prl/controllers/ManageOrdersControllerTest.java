@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.records.StartAllTabsUpdateDataContent;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -55,7 +54,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
@@ -112,6 +110,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CLIENT_CONTEXT_HEADER_PARAMETER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENT_ORDER_A_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_INVOKED_FROM_TASK;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum.dateConfirmedByListingTeam;
@@ -125,31 +124,15 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
+import static uk.gov.hmcts.reform.prl.models.user.UserRoles.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrdersControllerTest {
 
-    @InjectMocks
-    private ManageOrdersController manageOrdersController;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private TaskUtils taskUtils;
-
-    private CaseData caseData;
-
-    @Mock
-    private AuthorisationService authorisationService;
-
-    @Mock
-    private CafcassDateTimeService cafcassDateTimeService;
-
-    public static final String authToken = "Bearer TestAuthToken";
-    public static final String s2sToken = "s2s AuthToken";
+    private static final String authToken = "Bearer TestAuthToken";
+    private static final String s2sToken = "s2s AuthToken";
     private static final String CLIENT_CONTEXT = """
         {
           "client_context": {
@@ -182,6 +165,23 @@ public class ManageOrdersControllerTest {
 
     private static final String ENCRYPTED_CLIENT_CONTEXT = Base64.getEncoder().encodeToString(CLIENT_CONTEXT.getBytes());
 
+    @InjectMocks
+    private ManageOrdersController manageOrdersController;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private TaskUtils taskUtils;
+
+    private CaseData caseData;
+
+    @Mock
+    private AuthorisationService authorisationService;
+
+    @Mock
+    private CafcassDateTimeService cafcassDateTimeService;
+
     @Mock
     private ManageOrderEmailService manageOrderEmailService;
 
@@ -204,8 +204,6 @@ public class ManageOrdersControllerTest {
     private UserDetails userDetails;
 
     @Mock
-    private IdamClient idamClient;
-    @Mock
     private AmendOrderService amendOrderService;
 
     @Mock
@@ -216,22 +214,22 @@ public class ManageOrdersControllerTest {
 
     @Mock
     @Qualifier("caseSummaryTab")
-    CaseSummaryTabService caseSummaryTabService;
+    private CaseSummaryTabService caseSummaryTabService;
 
-    PartyDetails applicant;
+    private PartyDetails applicant;
 
-    PartyDetails respondent;
+    private PartyDetails respondent;
 
     @Mock
-    RefDataUserService refDataUserService;
+    private RefDataUserService refDataUserService;
     @Mock
-    RoleAssignmentService roleAssignmentService;
+    private RoleAssignmentService roleAssignmentService;
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
 
     @Before
     public void setUp() {
-        List<String> roles = new ArrayList();
+        List<String> roles = new ArrayList<>();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
@@ -294,7 +292,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testSubmitApplicationEventValidation() throws Exception {
+    public void testSubmitApplicationEventValidation() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
@@ -334,7 +332,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOrderUploaded() throws Exception {
+    public void testPopulatePreviewOrderWhenOrderUploaded() {
         // Ensure customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders is called for custom order
         when(customOrderService.renderUploadedCustomOrderAndStoreOnManageOrders(any(), any(), any(), any(), any(), any()))
             .thenReturn(new HashMap<>());
@@ -419,7 +417,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWithError() throws Exception {
+    public void testPopulatePreviewOrderWithError() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
@@ -458,7 +456,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWithErrorblank() throws Exception {
+    public void testPopulatePreviewOrderWithErrorblank() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .justiceLegalAdviserFullName(" ")
@@ -499,7 +497,7 @@ public class ManageOrdersControllerTest {
 
 
     @Test
-    public void testManageOrderApplicationEventValidation() throws Exception {
+    public void testManageOrderApplicationEventValidation() {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -527,9 +525,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -549,7 +544,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderFL404bApplicationEventValidation() throws Exception {
+    public void testManageOrderFL404bApplicationEventValidation() {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -577,9 +572,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -600,18 +592,6 @@ public class ManageOrdersControllerTest {
 
     @Test
     public void testFetchFl401DataNoticeOfProceedings() {
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().c21OrderOptions(C21OrderOptionsEnum.c21other).build())
@@ -1122,7 +1102,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     @Ignore
-    public void testSubmitAmanageorderEmailValidation() throws Exception {
+    public void testSubmitAmanageorderEmailValidation() {
 
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
@@ -1153,7 +1133,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest() throws Exception {
+    public void saveOrderDetailsTest() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1187,8 +1167,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -1258,7 +1236,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when((manageOrderService.getLoggedInUserType(anyString()))).thenReturn(UserRoles.COURT_ADMIN.name());
+        when((manageOrderService.getLoggedInUserType(anyString()))).thenReturn(COURT_ADMIN.name());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             s2sToken,
@@ -1268,7 +1246,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsJudgeTest() throws Exception {
+    public void saveOrderDetailsJudgeTest() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1303,24 +1281,8 @@ public class ManageOrdersControllerTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
-            .cafcassEmailAddress(listOfCafcassEmail)
-            .isCaseWithdrawn(No)
-            .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1378,7 +1340,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsNoOneApprovesTest() throws Exception {
+    public void saveOrderDetailsNoOneApprovesTest() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1413,24 +1375,8 @@ public class ManageOrdersControllerTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
-            .cafcassEmailAddress(listOfCafcassEmail)
-            .isCaseWithdrawn(No)
-            .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1488,7 +1434,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void populateHeaderTest() throws Exception {
+    public void populateHeaderTest() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -1516,7 +1462,7 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
             callbackRequest, authToken, s2sToken
         );
@@ -1524,7 +1470,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testShowPreviewOrderWhenOrderCreated() throws Exception {
+    public void testShowPreviewOrderWhenOrderCreated() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1604,7 +1550,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     @Ignore
-    public void testSubmitManageOrderCafacassEmailNotification() throws Exception {
+    public void testSubmitManageOrderCafacassEmailNotification() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1626,10 +1572,6 @@ public class ManageOrdersControllerTest {
             .solicitorEmail("test@test.com")
             .build();
 
-        CaseDetails caseDetails = CaseDetails.builder()
-            .state(State.CASE_ISSUED.getValue())
-            .build();
-
         Element<PartyDetails> wrappedApplicants = Element.<PartyDetails>builder().value(applicant).build();
         List<Element<PartyDetails>> listOfApplicants = Collections.singletonList(wrappedApplicants);
 
@@ -1643,19 +1585,8 @@ public class ManageOrdersControllerTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        String cafcassEmail = "testing@cafcass.com";
-
-        Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
-        List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        ManageOrders manageOrders = ManageOrders.builder()
-            .cafcassEmailAddress(listOfCafcassEmail)
-            .build();
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1689,24 +1620,24 @@ public class ManageOrdersControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .state(State.CASE_ISSUED.getValue())
-                             .build())
-            .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
         verify(manageOrderService, times(1))
@@ -1748,8 +1679,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -1802,17 +1731,18 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
+
+        manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
             s2sToken,
             callbackRequest
         );
-        verify(manageOrderService, times(1))
-            .getOrderToAmendDownloadLink(caseData);
+
+        verify(manageOrderService, times(1)).getOrderToAmendDownloadLink(caseData);
     }
 
     @Test
-    public void saveOrderDetailsTestWithResetChildOptions() throws Exception {
+    public void saveOrderDetailsTestWithResetChildOptions() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1846,8 +1776,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -1925,7 +1853,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEventWithNullDoYouWantToServeOrder() throws Exception {
+    public void testManageOrderMidEventWithNullDoYouWantToServeOrder() {
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -1955,7 +1883,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEventForAmendOrderSelection() throws Exception {
+    public void testManageOrderMidEventForAmendOrderSelection() {
 
         caseData = CaseData.builder()
             .id(12345L)
@@ -1980,7 +1908,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrder() throws Exception {
+    public void testAddUploadOrder() {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -2037,7 +1965,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testWhenToServeOrder_customOrder_shouldSetNameOfOrderBeforeAddingToCollection() throws Exception {
+    public void testWhenToServeOrder_customOrder_shouldSetNameOfOrderBeforeAddingToCollection() {
         // Test that when createCustomOrder with serve now, nameOfOrder is set from customOrderNameOption
         // before calling addOrderDetailsAndReturnReverseSortedList, ensuring correct orderTypeId label
 
@@ -2097,7 +2025,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrderWithNullDoYouWantToServeOrder() throws Exception {
+    public void testAddUploadOrderWithNullDoYouWantToServeOrder() {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -2154,7 +2082,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrderDoesntAmmendSlipRule() throws Exception {
+    public void testAddUploadOrderDoesntAmmendSlipRule() {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -2211,7 +2139,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testAddUploadOrderDoesntNeedServing() throws Exception {
+    public void testAddUploadOrderDoesntNeedServing() {
 
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(Yes)
@@ -2422,19 +2350,7 @@ public class ManageOrdersControllerTest {
 
 
     @Test
-    public void testupdateManageOrdersisSdoSelectedNo() throws Exception {
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+    public void testupdateManageOrdersisSdoSelectedNo() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -2491,19 +2407,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testupdateManageOrdersisSdoSelectedYes() throws Exception {
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+    public void testupdateManageOrdersisSdoSelectedYes() {
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -2560,7 +2464,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForPopulatePreviewOrderWhenOrderUploaded() throws Exception {
+    public void testExceptionForPopulatePreviewOrderWhenOrderUploaded() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2586,13 +2490,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken,
+                                PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForPrepopulateFL401CaseDetails() throws Exception {
+    public void testExceptionForPrepopulateFL401CaseDetails() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2618,13 +2521,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.prepopulateCaseDetails(authToken, s2sToken, null, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.prepopulateCaseDetails(authToken, s2sToken, null, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForPopulateHeader() throws Exception {
+    public void testExceptionForPopulateHeader() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2650,14 +2552,13 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken),
+                                RuntimeException.class, "Invalid Client");
     }
 
 
     @Test
-    public void testExceptionForPopulateHeaderFL401() throws Exception {
+    public void testExceptionForPopulateHeaderFL401() {
 
         CaseData caseDataFL401 = CaseData.builder()
             .id(12345L)
@@ -2686,7 +2587,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
@@ -2697,7 +2598,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForPopulateHeaderC100() throws Exception {
+    public void testExceptionForPopulateHeaderC100() {
 
         CaseData caseDataC100 = CaseData.builder()
             .id(12345L)
@@ -2727,7 +2628,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController.populateHeader(
             callbackRequest,
             authToken,
@@ -2738,7 +2639,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForFinalizeOrderSubmissionAndSendNotifications() throws Exception {
+    public void testExceptionForFinalizeOrderSubmissionAndSendNotifications() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2764,13 +2665,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.finalizeOrderSubmissionAndSendNotifications(authToken, s2sToken, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForshowPreviewOrderWhenOrderCreated() throws Exception {
+    public void testExceptionForshowPreviewOrderWhenOrderCreated() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2796,13 +2696,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.showPreviewOrderWhenOrderCreated(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.showPreviewOrderWhenOrderCreated(authToken, s2sToken, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForshowPreviewOrderWhenOrderCreatedWithHearingData() throws Exception {
+    public void testExceptionForshowPreviewOrderWhenOrderCreatedWithHearingData() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2818,11 +2717,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails =
-            uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                .id(12345L)
-                .data(stringObjectMap)
-                .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -2841,7 +2735,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForpopulateOrderToAmendDownloadLink() throws Exception {
+    public void testExceptionForpopulateOrderToAmendDownloadLink() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2867,13 +2761,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.populateOrderToAmendDownloadLink(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.populateOrderToAmendDownloadLink(authToken, s2sToken, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForAddUploadOrder() throws Exception {
+    public void testExceptionForAddUploadOrder() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2899,13 +2792,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.whenToServeOrder(authToken, s2sToken, null,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.whenToServeOrder(authToken, s2sToken, null, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForManageOrderMidEvent() throws Exception {
+    public void testExceptionForManageOrderMidEvent() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2931,13 +2823,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.manageOrderMidEvent(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.manageOrderMidEvent(authToken, s2sToken, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForServeOrderMidEvent() throws Exception {
+    public void testExceptionForServeOrderMidEvent() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2963,13 +2854,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.serveOrderMidEvent(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.serveOrderMidEvent(authToken, s2sToken, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testExceptionForprePopulateJudgeOrLegalAdviser() throws Exception {
+    public void testExceptionForprePopulateJudgeOrLegalAdviser() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2995,9 +2885,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
@@ -3007,7 +2896,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testNoHearingDataValidation() throws Exception {
+    public void testNoHearingDataValidation() {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder().build())
@@ -3032,11 +2921,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testNoHearingDataSelectedValidation() throws Exception {
+    public void testNoHearingDataSelectedValidation() {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder()
@@ -3062,11 +2951,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testMoreThanOneHearingsSelectedValidation() throws Exception {
+    public void testMoreThanOneHearingsSelectedValidation() {
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(dateConfirmedByListingTeam)
             .build();
@@ -3098,11 +2987,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Only one hearing can be created", callbackResponse.getErrors().get(0));
+        assertEquals("Only one hearing can be created", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
+    public void testHearingTypeAndEstimatedTimingsValidations() {
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(dateReservedWithListAssit)
             .hearingEstimatedDays("ABC")
@@ -3141,7 +3030,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testValidateAndPopulateHearingData() throws Exception {
+    public void testValidateAndPopulateHearingData() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .courtName("Horsham Court")
@@ -3222,7 +3111,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestForServedSavedOrder() throws Exception {
+    public void saveOrderDetailsTestForServedSavedOrder() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3256,8 +3145,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -3341,7 +3228,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestForUploadOrder() throws Exception {
+    public void saveOrderDetailsTestForUploadOrder() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3376,8 +3263,6 @@ public class ManageOrdersControllerTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-        String childNames = "child1 child2";
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -3385,9 +3270,6 @@ public class ManageOrdersControllerTest {
 
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
-
-        List<Element<HearingData>> hearingElementList = new ArrayList<>();
-        hearingElementList.add(element(HearingData.builder().build()));
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
             .build()).build();
@@ -3458,7 +3340,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testHearingTypeAndEstimatedTimingsValidationsForSdo() throws Exception {
+    public void testHearingTypeAndEstimatedTimingsValidationsForSdo() {
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(dateReservedWithListAssit)
             .hearingEstimatedDays("ABC")
@@ -3496,11 +3378,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(0));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testManageOrderApplication() throws Exception {
+    public void testManageOrderApplication() {
 
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
@@ -3529,9 +3411,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -3631,7 +3510,6 @@ public class ManageOrdersControllerTest {
         assertThat(responseResponseEntity.getHeaders())
             .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
 
-        ObjectMapper mapper = new ObjectMapper();
         assertThat(objectMapper.readTree(
             responseResponseEntity.getHeaders().getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))
             .isEqualTo(objectMapper.readTree(CLIENT_CONTEXT));
@@ -3689,7 +3567,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testExceptionForPrePopulateJudgeOrLegalAdviser() throws Exception {
+    public void testExceptionForPrePopulateJudgeOrLegalAdviser() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3715,13 +3593,12 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, null, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOccupationOrderCreated() throws Exception {
+    public void testPopulatePreviewOrderWhenOccupationOrderCreated() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder()
@@ -3763,7 +3640,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOccupationOrderAndAppOrRespPresent() throws Exception {
+    public void testPopulatePreviewOrderWhenOccupationOrderAndAppOrRespPresent() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrders(ManageOrders.builder()
@@ -3806,7 +3683,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestWithHearing() throws Exception {
+    public void saveOrderDetailsTestWithHearing() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3840,8 +3717,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -3917,7 +3792,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTestWithSdo() throws Exception {
+    public void saveOrderDetailsTestWithSdo() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -3951,8 +3826,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -4031,7 +3904,7 @@ public class ManageOrdersControllerTest {
 
 
     @Test
-    public void saveOrderDetailsTestFailedToAutherisation() throws Exception {
+    public void saveOrderDetailsTestFailedToAutherisation() {
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -4065,8 +3938,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
-        String childNames = "child1 child2";
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -4131,14 +4002,13 @@ public class ManageOrdersControllerTest {
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(manageOrderService.setHearingDataForSdo(any(),any(),any())).thenReturn(caseData);
-        assertExpectedException(() -> {
-            manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
-        }, InvalidClientException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest),
+                                InvalidClientException.class, "Invalid Client");
 
     }
 
     @Test
-    public void testNoHearingDataValidationFailedToAutherisation() throws Exception {
+    public void testNoHearingDataValidationFailedToAutherisation() {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder().build())
@@ -4155,13 +4025,13 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
-        assertExpectedException(() -> {
-            manageOrdersController.validateAndPopulateHearingData(authToken, s2sToken, callbackRequest); }, RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.validateAndPopulateHearingData(authToken, s2sToken, callbackRequest),
+                                RuntimeException.class, "Invalid Client");
 
     }
 
     @Test
-    public void testAddressValidationError() throws Exception {
+    public void testAddressValidationError() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
@@ -4186,11 +4056,11 @@ public class ManageOrdersControllerTest {
 
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getErrors());
-        assertEquals(errors.get(0), callbackResponse.getErrors().get(0));
+        assertEquals(errors.getFirst(), callbackResponse.getErrors().getFirst());
     }
 
     @Test
-    public void testCaseDataWhenNoValidationErrorReturned() throws Exception {
+    public void testCaseDataWhenNoValidationErrorReturned() {
         CaseData caseData = CaseData.builder()
             .id(123L)
             .build();
@@ -4219,7 +4089,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testValidateAddressFailedToAuthorisation() throws Exception {
+    public void testValidateAddressFailedToAuthorisation() {
         CaseData caseData1 = CaseData.builder()
             .build();
 
@@ -4234,9 +4104,8 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
-        assertExpectedException(() -> {
-            manageOrdersController
-                .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
+        assertExpectedException(() -> manageOrdersController
+            .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest),
                                 RuntimeException.class, "Invalid Client");
 
     }
@@ -4407,7 +4276,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldStillAddOrder() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withServeOrder_shouldStillAddOrder() {
         // Test that when createCustomOrder with doYouWantToServeOrder=Yes,
         // the order IS still added in aboutToSubmit because CCD doesn't persist mid-event data.
         // This ensures the order is in orderCollection for the submitted callback to update.
@@ -4447,7 +4316,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", List.of()));
@@ -4472,7 +4341,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createAnOrder_withoutServeOrder_shouldAddOrder() throws Exception {
+    public void saveOrderDetailsTest_createAnOrder_withoutServeOrder_shouldAddOrder() {
         // Test that createAnOrder without serving adds order in about-to-submit
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -4498,7 +4367,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(new java.util.HashMap<>());
@@ -4523,7 +4392,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withoutServeOrder_shouldAddOrder() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withoutServeOrder_shouldAddOrder() {
         // Test that when createCustomOrder with doYouWantToServeOrder=No,
         // the order IS added in aboutToSubmit
 
@@ -4565,7 +4434,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithoutServe);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithoutServe);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -4591,7 +4460,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withNullServeOrderData_shouldAddOrder() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withNullServeOrderData_shouldAddOrder() {
         // Test that when createCustomOrder with null serveOrderData,
         // the order IS added in aboutToSubmit (backward compatibility)
 
@@ -4629,7 +4498,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataNoServeData);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoServeData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -4654,7 +4523,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withNoExistingOrders_shouldCreateOrderCollection() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withNoExistingOrders_shouldCreateOrderCollection() {
         // REGRESSION TEST: Proves orderCollection won't be null after custom order creation
         // This was the root cause of NullPointerException in ManageOrderEmailService.getServedOrderDocumentsAndAdditionalDocuments
         // when custom orders were created on cases with no existing orders
@@ -4707,7 +4576,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataNoOrders);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataNoOrders);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", newOrderCollection));
@@ -4745,7 +4614,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldUseCallbackDataNotDatabase() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldUseCallbackDataNotDatabase() {
         // Test that custom order fields are retrieved from callback request data, not database
         // This is critical because the database won't have these fields until after the event completes
 
@@ -4805,7 +4674,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Call the method
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
@@ -4821,7 +4690,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_nonCustomOrder_shouldNotCallCombine() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_nonCustomOrder_shouldNotCallCombine() {
         // Test that when manageOrdersOptions is not createCustomOrder, combineAndFinalizeCustomOrder is not called
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -4875,7 +4744,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_staleCustomOrderDoc_shouldNotTriggerCustomOrderFlow() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_staleCustomOrderDoc_shouldNotTriggerCustomOrderFlow() {
         // Test that stale customOrderDoc from a previous custom order does NOT trigger custom order flow.
         // Only customOrderNameOption in callback data should trigger it.
         // This prevents upload orders from being incorrectly treated as custom orders.
@@ -4941,7 +4810,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyAllFieldsFromCallbackData() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyAllFieldsFromCallbackData() {
         // Test that all custom order fields are copied from callback data to caseDataUpdated
 
         Document customOrderDoc = Document.builder()
@@ -4981,7 +4850,7 @@ public class ManageOrdersControllerTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -5009,7 +4878,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Use doAnswer to capture the map contents AT THE TIME combineAndFinalizeCustomOrder is called
         // (before cleanup removes them)
@@ -5053,7 +4922,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyDateEndsToFl404ForNonMolestation() throws Exception {
+    public void finalizeOrderSubmissionAndSendNotifications_customOrder_shouldCopyDateEndsToFl404ForNonMolestation() {
         // Test that customOrderDateEnds is copied to fl404CustomFields.fl404bDateOrderEnd for FL404-related orders
 
         Document customOrderDoc = Document.builder()
@@ -5105,7 +4974,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture fl404CustomFields to verify date was copied
         Map<String, Object> capturedFl404Fields = new HashMap<>();
@@ -5135,7 +5004,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderPreFillsJudgeTitleWhenJudgeLoggedIn() throws Exception {
+    public void testPopulateHeaderPreFillsJudgeTitleWhenJudgeLoggedIn() {
         // Given - a judge is logged in
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5178,12 +5047,12 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Test Judge", response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals("Judge", response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, response.getData().get("judgeOrMagistrateTitle"));
     }
 
     @Test
-    public void testPopulateHeaderDoesNotPreFillJudgeTitleWhenCourtAdminLoggedIn() throws Exception {
+    public void testPopulateHeaderDoesNotPreFillJudgeTitleWhenCourtAdminLoggedIn() {
         // Given - a court admin is logged in (not a judge)
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5204,7 +5073,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
 
         // When
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.populateHeader(
@@ -5220,7 +5089,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderPreFillsLegalAdviserNameWhenLegalAdviserLoggedIn() throws Exception {
+    public void testPopulateHeaderPreFillsLegalAdviserNameWhenLegalAdviserLoggedIn() {
         // Given - a legal adviser is logged in
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5262,13 +5131,13 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Jane Wilson", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Wilson", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
 
     @Test
-    public void testPopulateHeaderDetectsLegalAdviserViaAmRoles() throws Exception {
+    public void testPopulateHeaderDetectsLegalAdviserViaAmRoles() {
         // Given - a legal adviser is logged in and detected via AM roles
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5310,13 +5179,13 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Sarah Adams", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Adams", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
 
     @Test
-    public void testPopulateHeaderPreFillsMagistrateNameWhenMagistrateLoggedIn() throws Exception {
+    public void testPopulateHeaderPreFillsMagistrateNameWhenMagistrateLoggedIn() {
         // Given - a magistrate is logged in
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -5366,7 +5235,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withJudgeReview_shouldAddOrderDespiteStaleDoYouWantToServe() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withJudgeReview_shouldAddOrderDespiteStaleDoYouWantToServe() {
         // Test that when createCustomOrder with judgeOrLegalAdvisorCheck,
         // the order IS added even if doYouWantToServeOrder=Yes (stale value from previous order)
         // This is because judge review flow skips the serve page, so doYouWantToServeOrder is stale
@@ -5410,7 +5279,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithJudgeReview);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithJudgeReview);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
             .thenReturn(Map.of("orderCollection", orderDetailsList));
@@ -5436,7 +5305,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createCustomOrder_withHearingDetails_shouldProcessHearingData() throws Exception {
+    public void saveOrderDetailsTest_createCustomOrder_withHearingDetails_shouldProcessHearingData() {
         // Test that when createCustomOrder has ordersHearingDetails populated,
         // hearingDataService.getHearingDataForSelectedHearing is called to process future hearing data
 
@@ -5487,7 +5356,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithHearing);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithHearing);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.getHearingDataForSelectedHearing(any(), any(), any())).thenReturn(hearingDetailsList);
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
@@ -5514,7 +5383,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void saveOrderDetailsTest_createAnOrder_withManagerCheck_shouldAddOrderDespiteStaleDoYouWantToServe() throws Exception {
+    public void saveOrderDetailsTest_createAnOrder_withManagerCheck_shouldAddOrderDespiteStaleDoYouWantToServe() {
         // Test that when createAnOrder with managerCheck,
         // the order IS added even if doYouWantToServeOrder=Yes (stale value from previous order)
 
@@ -5545,9 +5414,9 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataWithManagerReview);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseDataWithManagerReview);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(manageOrderService.addOrderDetailsAndReturnReverseSortedList(any(), any(), any()))
-            .thenReturn(Map.of("orderCollection", orderDetailsList));
+            .thenReturn(Map.of("orderCollection", orderDetailsList, CURRENT_ORDER_A_DRAFT_ORDER, false));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -5570,7 +5439,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateHeaderTask_shouldSetIsInvokedFromTask() throws Exception {
+    public void testPopulateHeaderTask_shouldSetIsInvokedFromTask() {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -5581,9 +5450,9 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(manageOrderService.getLoggedInUserTypeDetails(authToken))
-            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(UserRoles.COURT_ADMIN.name(), false));
+            .thenReturn(new ManageOrderService.LoggedInUserTypeDetails(COURT_ADMIN.name(), false));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -5624,7 +5493,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateFromHearing_forCustomOrder_shouldCopyFieldsWhenApprovedAtHearing() throws Exception {
+    public void testPopulateFromHearing_forCustomOrder_shouldCopyFieldsWhenApprovedAtHearing() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("customOrderWasApprovedAtHearing", "Yes");
@@ -5660,7 +5529,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateFromHearing_forCustomOrder_shouldClearHearingsTypeWhenNotApproved() throws Exception {
+    public void testPopulateFromHearing_forCustomOrder_shouldClearHearingsTypeWhenNotApproved() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("customOrderWasApprovedAtHearing", "No");
@@ -5697,7 +5566,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateFromHearing_forNonCustomOrder_shouldNotCopyCustomFields() throws Exception {
+    public void testPopulateFromHearing_forNonCustomOrder_shouldNotCopyCustomFields() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("customOrderWasApprovedAtHearing", "Yes");
@@ -5752,7 +5621,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testManageOrderMidEvent_forCustomOrder_shouldPopulateHearingsDropdown() throws Exception {
+    public void testManageOrderMidEvent_forCustomOrder_shouldPopulateHearingsDropdown() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
 
@@ -5828,11 +5697,11 @@ public class ManageOrdersControllerTest {
         assertNotNull(response);
         assertNotNull(response.getErrors());
         assertEquals(1, response.getErrors().size());
-        assertThat(response.getErrors().get(0)).contains("Failed to render custom order preview");
+        assertThat(response.getErrors().getFirst()).contains("Failed to render custom order preview");
     }
 
     @Test
-    public void testSaveOrderDetails_shouldReturnErrorWhenSetHearingDataFails() throws Exception {
+    public void testSaveOrderDetails_shouldReturnErrorWhenSetHearingDataFails() {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .build();
@@ -5851,7 +5720,7 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         // Make setHearingData throw an exception by making hearingService.getHearings fail
         when(hearingService.getHearings(anyString(), anyString()))
             .thenThrow(new RuntimeException("Template placeholder error"));
@@ -5876,7 +5745,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testSaveOrderDetails_shouldReturnDefaultErrorMessageWhenExceptionMessageIsBlank() throws Exception {
+    public void testSaveOrderDetails_shouldReturnDefaultErrorMessageWhenExceptionMessageIsBlank() {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .build();
@@ -5895,10 +5764,9 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         // Throw exception with blank message
-        when(hearingService.getHearings(anyString(), anyString()))
-            .thenThrow(new RuntimeException(""));
+        when(hearingService.getHearings(anyString(), anyString())).thenThrow(new RuntimeException(""));
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -5921,7 +5789,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void finalizeOrderSubmission_customOrder_withNullAmendCheck_shouldProcessAsDraft() throws Exception {
+    public void finalizeOrderSubmission_customOrder_withNullAmendCheck_shouldProcessAsDraft() {
         // Test covers the amendCheck = null path when amendOrderSelectCheckOptions is null
         Document customOrderDoc = Document.builder()
             .documentUrl("http://custom.url")
@@ -5962,7 +5830,7 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
         when(objectMapper.convertValue(any(Map.class), eq(CaseData.class))).thenReturn(caseData);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
         when(manageOrderService.isSaveAsDraft(any(CaseData.class))).thenReturn(false);
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -5990,7 +5858,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void finalizeOrderSubmission_customOrder_shouldAddOnlyNewOrderToExistingCollection() throws Exception {
+    public void finalizeOrderSubmission_customOrder_shouldAddOnlyNewOrderToExistingCollection() {
         // Test that when database has existing orders and callback has existing + new order,
         // only the new order is added (existing orders preserved)
 
@@ -6027,7 +5895,7 @@ public class ManageOrdersControllerTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.judgeOrLegalAdvisorCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -6056,7 +5924,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture the map when combineAndFinalizeCustomOrder is called
         Map<String, Object> capturedMap = new HashMap<>();
@@ -6081,7 +5949,7 @@ public class ManageOrdersControllerTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void finalizeOrderSubmission_customOrder_shouldPreserveExistingOrdersWhenNoNewOrder() throws Exception {
+    public void finalizeOrderSubmission_customOrder_shouldPreserveExistingOrdersWhenNoNewOrder() {
         // Test that when callback has same orders as database (same UUIDs), nothing is modified
 
         // Database has one existing order
@@ -6107,11 +5975,11 @@ public class ManageOrdersControllerTest {
         callbackDataMap.put("customOrderDoc", customOrderDoc);
         callbackDataMap.put("customOrderNameOption", "blankOrderOrDirections");
         callbackDataMap.put("orderCollection", callbackOrderCollection);
-
+        when(manageOrderService.getLoggedInUserType(authToken)).thenReturn(COURT_ADMIN.name());
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -6120,7 +5988,7 @@ public class ManageOrdersControllerTest {
             .manageOrders(manageOrders)
             .build();
         Map<String, Object> databaseMap = new HashMap<>();
-        databaseMap.put("orderCollection", dbOrderCollection);
+        databaseMap.put("draftOrderCollection", dbOrderCollection);
         StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
             authToken,
             EventRequestData.builder().build(),
@@ -6140,7 +6008,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture the map when combineAndFinalizeCustomOrder is called
         Map<String, Object> capturedMap = new HashMap<>();
@@ -6156,12 +6024,12 @@ public class ManageOrdersControllerTest {
         List<Map<String, Object>> resultCollection = (List<Map<String, Object>>) capturedMap.get("orderCollection");
         assertNotNull(resultCollection);
         assertEquals(1, resultCollection.size());
-        assertEquals(existingOrderId, resultCollection.get(0).get("id"));
+        assertEquals(existingOrderId, resultCollection.getFirst().get("id"));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void finalizeOrderSubmission_customOrder_shouldNotLoseOrdersWhenCallbackHasFewer() throws Exception {
+    public void finalizeOrderSubmission_customOrder_shouldNotLoseOrdersWhenCallbackHasFewer() {
         // CRITICAL TEST: Ensures we never lose existing orders even if callback somehow has fewer orders
 
         // Database has TWO existing orders
@@ -6200,7 +6068,7 @@ public class ManageOrdersControllerTest {
         ManageOrders manageOrders = ManageOrders.builder()
             .isCaseWithdrawn(No)
             .markedToServeEmailNotification(No)
-            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.managerCheck)
             .build();
         CaseData caseDataFromDb = CaseData.builder()
             .id(12345L)
@@ -6229,7 +6097,7 @@ public class ManageOrdersControllerTest {
 
         when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         when(allTabService.getStartAllTabsUpdate(anyString())).thenReturn(startAllTabsUpdateDataContent);
-        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(UserRoles.COURT_ADMIN.name());
+        when(manageOrderService.getLoggedInUserType(anyString())).thenReturn(COURT_ADMIN.name());
 
         // Capture the map when combineAndFinalizeCustomOrder is called
         Map<String, Object> capturedMap = new HashMap<>();
@@ -6256,7 +6124,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOrderUploadedForCustomOrder_withExistingMagistrateLastName() throws Exception {
+    public void testPopulatePreviewOrderWhenOrderUploadedForCustomOrder_withExistingMagistrateLastName() {
         List<Element<uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName>> magistrateLastNames =
             List.of(uk.gov.hmcts.reform.prl.utils.ElementUtils.element(
                 uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName.builder()
@@ -6296,7 +6164,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulatePreviewOrderWhenOrderUploaded_whenManageOrdersOptionsIsNull() throws Exception {
+    public void testPopulatePreviewOrderWhenOrderUploaded_whenManageOrdersOptionsIsNull() {
         CaseData expectedCaseData = CaseData.builder()
             .id(12345L)
             .manageOrdersOptions(null)
@@ -6327,7 +6195,7 @@ public class ManageOrdersControllerTest {
     }
 
     @Test
-    public void testPopulateFromHearing_forCustomOrder_whenCustomWasApprovedIsNull() throws Exception {
+    public void testPopulateFromHearing_forCustomOrder_whenCustomWasApprovedIsNull() {
         Map<String, Object> stringObjectMap = new HashMap<>();
         stringObjectMap.put("id", 12345L);
         stringObjectMap.put("customOrderHearingsType", "hearingTypeValue");
