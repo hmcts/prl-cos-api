@@ -273,12 +273,28 @@ public class SendAndReplyService {
         """;
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n Your message has been sent.";
 
+    /**
+     * Helper method to send the line breaks in Markdown to Gov Notify.
+     * @param messageContent the email message content to preserve new lines
+     * @return the email message content with the new lines preserved
+     */
+    private String formatMessageContentForEmail(String messageContent) {
+        if (messageContent == null) {
+            return null;
+        }
+
+        return messageContent
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .replaceAll("\n+", "\n\n");
+    }
+
     public EmailTemplateVars buildNotificationEmail(CaseData caseData, Message message) {
         String caseName = caseData.getApplicantCaseName();
         String subject = message.getMessageSubject();
         String senderEmail = message.getSenderEmail();
         String urgency = message.getMessageUrgency();
-        String content = message.getLatestMessage();
+        String content = formatMessageContentForEmail(message.getLatestMessage());
         String caseLink = manageCaseUrl + "/" + caseData.getId();
 
         return SendAndReplyNotificationEmail.builder()
