@@ -65,8 +65,7 @@ public class GatekeepingDetailsService {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
                 gatekeepingDetailsBuilder.legalAdviserName(StaffUser.builder()
-                                                               .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_NAME))[0])
-                                                               .personalCode(getPersonalCode(caseDataUpdated.get(LEGAL_ADVISER_NAME))[0]).build());
+                                                               .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_NAME))[0]).build());
             }
         }
         return gatekeepingDetailsBuilder.build();

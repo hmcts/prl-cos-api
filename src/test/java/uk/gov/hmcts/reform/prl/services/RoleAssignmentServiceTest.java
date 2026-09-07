@@ -157,7 +157,7 @@ public class RoleAssignmentServiceTest {
         when(systemUserService.getUserId("sys-token")).thenReturn("sys-user-id");
         when(authTokenGenerator.generate()).thenReturn("s2s-token");
 
-        StaffUser legalAdviserUser = StaffUser.builder().idamId("staff-idam-id").personalCode("PC-1").build();
+        StaffUser legalAdviserUser = StaffUser.builder().idamId("staff-idam-id").build();
 
         roleAssignmentService.createRoleAssignment(
             auth,
