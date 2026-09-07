@@ -218,7 +218,6 @@ class HearingChasePolicy {
         }
         return nullSafeCollection(orderDetails).stream()
             .map(Element::getValue)
-            .filter(order -> order.getFinalisationDetails() != null)
             .filter(o -> hearing.getHearingDaySchedule() != null
                 && CaseUtils.convertUtcToBst(hearing.getHearingDaySchedule().get(0).getHearingStartDateTime())
                 .isBefore(o.getDateCreated() != null
