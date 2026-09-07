@@ -48,6 +48,33 @@ public class DocumentRemovalControllerAboutToSubmitIntegrationTest {
     }
 
     @Test
+    public void testSingleDocumentToBeReviewed() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        MvcResult result = mockMvc.perform(buildRequest("documents-to-be-reviewed-single.json"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE).doesNotExist())
+            .andExpect(jsonPath("$.data.legalProfQuarantineDocsList").isEmpty())
+            .andReturn();
+
+        verifyResponseDeserialises(result);
+    }
+
+    @Test
+    public void testMultipleDocumentsToBeReviewed() throws Exception {
+        when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
+
+        MvcResult result = mockMvc.perform(buildRequest("documents-to-be-reviewed-multiple.json"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(DOCUMENT_REMOVAL_DOCUMENT_TO_REMOVE).doesNotExist())
+            .andExpect(jsonPath("$.data.legalProfQuarantineDocsList", hasSize(1)))
+            .andExpect(jsonPath("$.data.courtStaffUploadDocListDocTab", hasSize(1)))
+            .andReturn();
+
+        verifyResponseDeserialises(result);
+    }
+
+    @Test
     public void testC100FinalDocument() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
 
