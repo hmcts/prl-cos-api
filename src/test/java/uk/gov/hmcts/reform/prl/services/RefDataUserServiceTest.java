@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.exception.NoStaffResponseException;
 import uk.gov.hmcts.reform.prl.mapper.staffresponse.StaffResponseToDynamicListElementFilter;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.Flag;
 import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail;
@@ -235,6 +236,56 @@ public class RefDataUserServiceTest {
         assertEquals(1, staffDetails.getListItems().size());
         assertEquals(mockDynamicListElement, staffDetails.getListItems().getFirst());
         assertNull(staffDetails.getValue());
+    }
+
+    @Test
+    public void shouldGetLegalAdvisorUserDetails() {
+        StaffProfile staffProfile1 = StaffProfile.builder()
+            .id("idam-id-1")
+            .userType(LEGALOFFICE)
+            .firstName("Bob")
+            .lastName("David")
+            .emailId("test2@com")
+            .build();
+        StaffProfile staffProfile2 = StaffProfile.builder()
+            .id("idam-id-2")
+            .userType(LEGALOFFICE)
+            .firstName("Alice")
+            .lastName("John")
+            .emailId("test1@com")
+            .build();
+        StaffResponse staffResponse1 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile1).build();
+        StaffResponse staffResponse2 = StaffResponse.builder().ccdServiceName("PRIVATELAW").staffProfile(staffProfile2).build();
+        List<StaffResponse> listOfStaffResponse = new ArrayList<>();
+        listOfStaffResponse.add(staffResponse1);
+        listOfStaffResponse.add(staffResponse2);
+        ResponseEntity<List<StaffResponse>> staffResponse = ResponseEntity.ok().body(listOfStaffResponse);
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(AUTH_TOKEN);
+        when(authTokenGenerator.generate()).thenReturn("s2sToken");
+        when(staffResponseDetailsApi.getAllStaffResponseDetails(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            SERVICENAME,
+            STAFFSORTCOLUMN,
+            STAFFORDERASC,
+            Integer.MAX_VALUE,
+            0
+        )).thenReturn(staffResponse);
+        staffRefDataService.refreshStaffDetailsCache();
+
+        Optional<StaffProfile> found = refDataUserService.getLegalAdvisorUserDetails(
+            StaffUser.builder().idamId("idam-id-2").personalCode("PC-2").build());
+        assertTrue(found.isPresent());
+        assertEquals("John", found.get().getLastName());
+        assertEquals("test1@com", found.get().getEmailId());
+
+        Optional<StaffProfile> notFound = refDataUserService.getLegalAdvisorUserDetails(
+            StaffUser.builder().idamId("no-such-idam-id").personalCode("PC-9").build());
+        assertTrue(notFound.isEmpty());
+
+        assertTrue(refDataUserService.getLegalAdvisorUserDetails(null).isEmpty());
+        assertTrue(refDataUserService.getLegalAdvisorUserDetails(
+            StaffUser.builder().idamId("").personalCode("PC-1").build()).isEmpty());
     }
 
     @Test

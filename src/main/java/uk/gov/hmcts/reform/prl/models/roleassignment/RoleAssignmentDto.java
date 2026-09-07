@@ -18,8 +18,8 @@ public class RoleAssignmentDto {
     @JsonProperty("judgeEmail")
     private final String judgeEmail;
 
-    @JsonProperty("staffUser")
-    private final StaffUser staffUser;
+    @JsonProperty("legalAdviserUser")
+    private final StaffUser legalAdviserUser;
 
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;

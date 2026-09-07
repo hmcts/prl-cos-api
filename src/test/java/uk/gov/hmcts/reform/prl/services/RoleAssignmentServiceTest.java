@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -18,7 +19,9 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentQueryRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
@@ -146,6 +149,32 @@ public class RoleAssignmentServiceTest {
             "TEST EVENT", true, "Judge"
         );
         assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentWithLegalAdviserUser() {
+        when(systemUserService.getSysUserToken()).thenReturn("sys-token");
+        when(systemUserService.getUserId("sys-token")).thenReturn("sys-user-id");
+        when(authTokenGenerator.generate()).thenReturn("s2s-token");
+
+        StaffUser legalAdviserUser = StaffUser.builder().idamId("staff-idam-id").personalCode("PC-1").build();
+
+        roleAssignmentService.createRoleAssignment(
+            auth,
+            caseDetails,
+            RoleAssignmentDto.builder().legalAdviserUser(legalAdviserUser).build(),
+            "TEST EVENT",
+            true,
+            "Judge"
+        );
+
+        ArgumentCaptor<RoleAssignmentRequest> requestCaptor = ArgumentCaptor.forClass(RoleAssignmentRequest.class);
+        verify(roleAssignmentApi).updateRoleAssignment(eq("sys-token"), eq("s2s-token"), eq(null), requestCaptor.capture());
+
+        RequestedRoles requestedRole = requestCaptor.getValue().getRequestedRoles().getFirst();
+        assertEquals("staff-idam-id", requestedRole.getActorId());
+        assertEquals("allocated-legal-adviser", requestedRole.getRoleName());
+        assertEquals(RoleCategory.LEGAL_OPERATIONS.name(), requestedRole.getRoleCategory());
     }
 
     @Test

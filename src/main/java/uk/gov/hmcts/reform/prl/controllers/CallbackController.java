@@ -492,7 +492,7 @@ public class CallbackController {
                 || (gatekeepingDetails.getLegalAdviserName() != null))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
-                    .staffUser(gatekeepingDetails.getLegalAdviserName())
+                    .legalAdviserUser(gatekeepingDetails.getLegalAdviserName())
                     .build();
 
                 roleAssignmentService.createRoleAssignment(
