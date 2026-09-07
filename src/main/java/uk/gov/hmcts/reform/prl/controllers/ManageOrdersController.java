@@ -254,7 +254,6 @@ public class ManageOrdersController {
 
     private void prepopulateHeaderFields(Map<String, Object> caseData, String authorisation) {
         caseData.put(IS_INVOKED_FROM_TASK, No);
-        caseData.put("dateOrderMade", java.time.LocalDate.now());
 
         ManageOrderService.LoggedInUserTypeDetails userTypeDetails = manageOrderService.getLoggedInUserTypeDetails(authorisation);
         if (UserRoles.JUDGE.name().equals(userTypeDetails.userType())) {
