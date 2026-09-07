@@ -25,9 +25,9 @@ public class ManageOrders {
     private final String recitalsOrPreamble;
     @JsonProperty("orderDirections")
     private final String orderDirections;
-    @JsonProperty("penalNoticeNeeded")
-    private final String partiesAndRepresentation;
     @JsonProperty("partiesAndRepresentation")
+    private final String partiesAndRepresentation;
+    @JsonProperty("penalNoticeNeeded")
     private final List<PenalNoticeOptionEnum> penalNoticeNeeded;
     @JsonProperty("penalNoticeRtf")
     private final String penalNoticeRtf;
