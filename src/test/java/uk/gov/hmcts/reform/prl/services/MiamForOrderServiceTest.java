@@ -68,7 +68,6 @@ public class MiamForOrderServiceTest {
     public void setUp() {
         DraftOrder draftOrder = mock(DraftOrder.class);
         when(draftAnOrderService.getSelectedDraftOrderDetails(any(), any(), any(), any())).thenReturn(draftOrder);
-        // Set up any necessary test data or configurations here
     }
 
 

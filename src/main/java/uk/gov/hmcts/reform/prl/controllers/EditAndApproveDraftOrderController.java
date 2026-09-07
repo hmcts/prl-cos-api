@@ -480,7 +480,6 @@ public class EditAndApproveDraftOrderController {
                 Optional.ofNullable(clientContext)
             );
 
-            // Fpvtl 3512 MIAM for order
             Map<String, Object> updatedResponse = miamForOrderService.updateCaseDataWithMiamForOrderDetails(
                 callbackRequest.getCaseDetails(), callbackRequest.getEventId(), clientContext, response
             );
