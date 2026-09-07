@@ -1624,6 +1624,20 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        manageOrdersController.finalizeOrderSubmissionAndSendNotifications(
+            authToken,
+            s2sToken,
+            callbackRequest
+        );
+
         verify(manageOrderEmailService, times(1))
             .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
         verify(manageOrderService, times(1))
@@ -1717,13 +1731,14 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
+
+        manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
             s2sToken,
             callbackRequest
         );
-        verify(manageOrderService, times(1))
-            .getOrderToAmendDownloadLink(caseData);
+
+        verify(manageOrderService, times(1)).getOrderToAmendDownloadLink(caseData);
     }
 
     @Test
@@ -2472,9 +2487,8 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        assertExpectedException(
-            () -> manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken,
-                            PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
+        assertExpectedException(() -> manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken,
+                                PrlAppsConstants.ENGLISH, callbackRequest), RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -3129,7 +3143,6 @@ public class ManageOrdersControllerTest {
             .childLiveWith(childLiveWithList)
             .build();
 
-
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
@@ -3246,7 +3259,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -3396,9 +3408,6 @@ public class ManageOrdersControllerTest {
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
-        Map<String, String> dataFieldMap = new HashMap<>();
-        dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
-        dataFieldMap.put(PrlAppsConstants.FILE_NAME, "fileName");
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
@@ -3497,7 +3506,6 @@ public class ManageOrdersControllerTest {
         assertThat(responseResponseEntity.getBody().getData().get("nameOfLaToReviewOrder")).isNotNull();
         assertThat(responseResponseEntity.getHeaders())
             .containsKey(CLIENT_CONTEXT_HEADER_PARAMETER);
-
 
         assertThat(objectMapper.readTree(
             responseResponseEntity.getHeaders().getFirst(CLIENT_CONTEXT_HEADER_PARAMETER)))
@@ -3927,7 +3935,6 @@ public class ManageOrdersControllerTest {
         Child child = Child.builder()
             .childLiveWith(childLiveWithList)
             .build();
-
 
         Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
@@ -5037,7 +5044,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Test Judge", response.getData().get("judgeOrMagistratesLastName"));
+        assertEquals("Judge", response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.circuitJudge, response.getData().get("judgeOrMagistrateTitle"));
     }
 
@@ -5121,7 +5128,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Jane Wilson", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Wilson", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
@@ -5169,7 +5176,7 @@ public class ManageOrdersControllerTest {
 
         // Then
         assertNotNull(response);
-        assertEquals("Sarah Adams", response.getData().get("justiceLegalAdviserFullName"));
+        assertEquals("Adams", response.getData().get("justiceLegalAdviserFullName"));
         assertNull(response.getData().get("judgeOrMagistratesLastName"));
         assertEquals(JudgeOrMagistrateTitleEnum.justicesLegalAdviser, response.getData().get("judgeOrMagistrateTitle"));
     }
