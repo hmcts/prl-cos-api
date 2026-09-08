@@ -277,6 +277,7 @@ public class SendAndReplyController extends AbstractCallbackController {
                                                                          required = false) String clientContext,
                                                           @RequestBody CallbackRequest callbackRequest) {
 
+        log.info("In task midevent");
         CaseData caseData = getCaseData(callbackRequest);
         sendAndReplyService.checkTaskAssociatedWithMessage(caseData);
         // WA-task chase flow: include past hearings so the user can message about a
