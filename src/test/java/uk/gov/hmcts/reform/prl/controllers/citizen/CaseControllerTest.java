@@ -1,23 +1,27 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.controllers.testingsupport.TestLogAppender;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -104,8 +108,8 @@ public class CaseControllerTest {
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String TEST_CASE_ID = "1234567891234567";
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
     }
@@ -319,11 +323,13 @@ public class CaseControllerTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
+            .state(State.CASE_ISSUED)
             .build();
 
         caseDataList.add(CaseData.builder()
                              .id(1234567891234567L)
                              .applicantCaseName("test")
+                             .state(State.CASE_ISSUED)
                              .build());
 
         when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
@@ -355,34 +361,56 @@ public class CaseControllerTest {
 
     @Test
     public void testretrieveCitizenCases() {
-        List<CaseData> caseDataList = new ArrayList<>();
+        Logger logger = (Logger) LoggerFactory.getLogger(CaseController.class);
+        TestLogAppender appender = new TestLogAppender();
+        appender.start();
+        logger.addAppender(appender);
 
-        caseData = CaseData.builder()
-            .id(1234567891234567L)
-            .applicantCaseName("test")
-            .build();
+        try {
+            List<CaseData> caseDataList = new ArrayList<>();
 
-        caseDataList.add(CaseData.builder()
-                             .id(1234567891234567L)
-                             .applicantCaseName("test")
-                             .build());
+            caseData = CaseData.builder()
+                .id(1234567891234567L)
+                .applicantCaseName("test")
+                .state(State.CASE_ISSUED)
+                .build();
 
-        when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
-        when(userInfo.getRoles()).thenReturn(List.of(CITIZEN_ROLE));
-        when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+            caseDataList.add(CaseData.builder()
+                                 .id(1234567891234567L)
+                                 .applicantCaseName("test")
+                                 .state(State.CASE_ISSUED)
+                                 .build());
 
-        List<CaseDetails> caseDetails = new ArrayList<>();
+            when(authorisationService.isAuthorized(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(true);
+            when(userInfo.getRoles()).thenReturn(List.of(CITIZEN_ROLE));
+            when(userInfo.getUid()).thenReturn("12345");
+            when(authorisationService.authoriseUser(AUTH_TOKEN)).thenReturn(Optional.of(userInfo));
+            when(authTokenGenerator.generate()).thenReturn(SERV_AUTH_TOKEN);
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        caseDetails.add(CaseDetails.builder().id(
-            1234567891234567L).data(stringObjectMap).build());
+            List<CaseDetails> caseDetails = new ArrayList<>();
 
-        List<CitizenCaseData> citizenCaseDataList;
+            Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+            caseDetails.add(CaseDetails.builder().id(
+                1234567891234567L).data(stringObjectMap).build());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(caseService.retrieveCases(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(caseDataList);
-        citizenCaseDataList = caseController.retrieveCitizenCases(AUTH_TOKEN, SERV_AUTH_TOKEN);
-        assertNotNull(citizenCaseDataList);
+            List<CitizenCaseData> citizenCaseDataList;
+
+            when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+            when(caseService.retrieveCases(AUTH_TOKEN, SERV_AUTH_TOKEN)).thenReturn(caseDataList);
+            citizenCaseDataList = caseController.retrieveCitizenCases(AUTH_TOKEN, SERV_AUTH_TOKEN);
+            assertNotNull(citizenCaseDataList);
+            assertEquals(1, citizenCaseDataList.size());
+            Assert.assertTrue(appender.getEvents().stream().anyMatch(
+                e -> e.getFormattedMessage().contains("Citizen Dashboard: retrieving cases for citizen user id: 12345")
+            ));
+            Assert.assertTrue(appender.getEvents().stream().anyMatch(
+                e -> e.getFormattedMessage().contains(
+                    "Citizen Dashboard: retrievedCasesCount=1 caseIdsAndStates=1234567891234567:CASE_ISSUED"
+                )
+            ));
+        } finally {
+            logger.detachAppender(appender);
+        }
     }
 
     @Test
