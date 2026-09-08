@@ -665,9 +665,9 @@ public class ManageOrdersController {
                 .judicialUser(JudgeOrLegalAdvisorCheckEnum.judge
                                   .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                   ? caseData.getManageOrders().getNameOfJudgeToReviewOrder() : null)
-                .legalAdviserList(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
+                .legalAdviserUser(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
                                       .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
-                                      ? caseData.getManageOrders().getNameOfLaToReviewOrder() : null)
+                                      ? caseData.getManageOrders().getLegalAdviserNameToReviewOrder() : null)
                 .build();
 
             roleAssignmentService.createRoleAssignment(
