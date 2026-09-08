@@ -663,6 +663,7 @@ public class ManageOrderService {
     private final ElementUtils elementUtils;
 
     private final RefDataUserService refDataUserService;
+    private final PopulateRichTextFieldsService populateRichTextFieldsService;
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
@@ -1515,7 +1516,7 @@ public class ManageOrderService {
 
     private String getRecitalsOrPreambleForRtf(String recitalsOrPreamble, String recitalsOrPreambleRtf) {
         if (StringUtils.isNotBlank(recitalsOrPreamble)) {
-            return recitalsOrPreamble;
+            return populateRichTextFieldsService.populateRichTextFieldAsParagraph(recitalsOrPreamble);
         }
         return recitalsOrPreambleRtf;
     }
@@ -1529,7 +1530,7 @@ public class ManageOrderService {
 
     private String getOrderDirectionsForRtf(String orderDirections, String orderDirectionsRtf) {
         if (StringUtils.isNotBlank(orderDirections)) {
-            return orderDirections;
+            return populateRichTextFieldsService.populateRichTextFieldAsParagraph(orderDirections);
         }
         return orderDirectionsRtf;
     }
