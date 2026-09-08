@@ -216,17 +216,7 @@ class HearingChasePolicy {
         if (hearingLabels.isEmpty()) {
             return false;
         }
-        log.info("isFinalisedOrderReferencedByHearingsType return {}", nullSafeCollection(orderDetails).stream()
-            .map(Element::getValue)
-            .filter(o -> hearing.getHearingDaySchedule() != null
-                && CaseUtils.convertUtcToBst(hearing.getHearingDaySchedule().get(0).getHearingStartDateTime())
-                .isBefore(o.getDateCreated() != null
-                              ? o.getDateCreated()
-                              : LocalDateTime.now()))
-            .map(OrderDetails::getSelectedHearingType)
-            .filter(Objects::nonNull)
-            .anyMatch(code -> hearingLabels.contains(code)));
-        return nullSafeCollection(orderDetails).stream()
+        boolean result = nullSafeCollection(orderDetails).stream()
             .map(Element::getValue)
             .filter(o -> hearing.getHearingDaySchedule() != null
                 && CaseUtils.convertUtcToBst(hearing.getHearingDaySchedule().get(0).getHearingStartDateTime())
@@ -236,5 +226,7 @@ class HearingChasePolicy {
             .map(OrderDetails::getSelectedHearingType)
             .filter(Objects::nonNull)
             .anyMatch(code -> hearingLabels.contains(code));
+        log.info("isFinalisedOrderReferencedByHearingsType return {}", result);
+        return result;
     }
 }
