@@ -228,6 +228,7 @@ public class DraftAnOrderService {
     private final HearingDataService hearingDataService;
     private final HearingService hearingService;
     private final RoleAssignmentService roleAssignmentService;
+    private final PopulateRichTextFieldsService populateRichTextFieldsService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private static final String ORDER_NAME = "orderName";
@@ -1015,8 +1016,6 @@ public class DraftAnOrderService {
         caseDataMap.put(DA_ORDER_FOR_CA_CASE, ManageOrdersUtils.isDaOrderSelectedForCaCase(
                 String.valueOf(selectedOrder.getOrderType()),
                 caseData) ? Yes : No);
-        caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
-        caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
         populateDraftOrderInformations(caseDataMap, selectedOrder);
         caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
@@ -1358,17 +1357,19 @@ public class DraftAnOrderService {
                 .justiceLegalAdviserFullName(caseData.getJusticeLegalAdviserFullName())
                 .magistrateLastName(caseData.getMagistrateLastName())
                 .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-                .recitalsOrPreambleRtf(!StringUtils.isEmpty(caseData.getManageOrders().getRecitalsOrPreambleRtf())
+                .recitalsOrPreambleRtf(StringUtils.isNotBlank(caseData.getManageOrders().getRecitalsOrPreambleRtf())
                                            ? caseData.getManageOrders().getRecitalsOrPreambleRtf()
-                                           : caseData.getManageOrders().getRecitalsOrPreamble())
+                                           : populateRichTextFieldsService.populateRichTextFieldAsParagraph(
+                                               caseData.getManageOrders().getRecitalsOrPreamble()))
                 .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                 .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                 .childOption(manageOrderService.getChildOption(caseData))
                 .partiesAndRepresentation(caseData.getManageOrders().getPartiesAndRepresentation())
                 .orderDirections(caseData.getManageOrders().getOrderDirections())
-                .orderDirectionsRtf(!StringUtils.isEmpty(caseData.getManageOrders().getOrderDirectionsRtf())
+                .orderDirectionsRtf(StringUtils.isNotBlank(caseData.getManageOrders().getOrderDirectionsRtf())
                                         ? caseData.getManageOrders().getOrderDirectionsRtf()
-                                        : caseData.getManageOrders().getOrderDirections())
+                                        : populateRichTextFieldsService.populateRichTextFieldAsParagraph(
+                                            caseData.getManageOrders().getOrderDirections()))
                 .scheduleToOrderRtf(caseData.getManageOrders().getScheduleToOrderRtf())
                 .penalNoticeNeeded(caseData.getManageOrders().getPenalNoticeNeeded())
                 .penalNoticeRtf(caseData.getManageOrders().getPenalNoticeRtf())
@@ -2569,13 +2570,16 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.put(PENAL_NOTICE_RTF, selectedOrder.getPenalNoticeRtf());
         }
-        if (selectedOrder.getOrderDirectionsRtf() == null && selectedOrder.getOrderDirections() != null) {
-            caseDataMap.put(ORDER_DIRECTIONS_RTF, selectedOrder.getOrderDirections());
+        if (StringUtils.isBlank(selectedOrder.getOrderDirectionsRtf()) && StringUtils.isNotBlank(selectedOrder.getOrderDirections())) {
+            caseDataMap.put(ORDER_DIRECTIONS_RTF, populateRichTextFieldsService.populateRichTextFieldAsParagraph(
+                selectedOrder.getOrderDirections()));
         } else {
             caseDataMap.put(ORDER_DIRECTIONS_RTF, selectedOrder.getOrderDirectionsRtf());
         }
-        if (selectedOrder.getRecitalsOrPreambleRtf() == null && selectedOrder.getRecitalsOrPreamble() != null) {
-            caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreamble());
+        if (StringUtils.isBlank(selectedOrder.getRecitalsOrPreambleRtf()) && StringUtils.isNotBlank(selectedOrder.getRecitalsOrPreamble())) {
+            caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, populateRichTextFieldsService.populateRichTextFieldAsParagraph(
+                selectedOrder.getRecitalsOrPreamble()
+            ));
         } else {
             caseDataMap.put(RECITALS_OR_PREAMBLE_RTF, selectedOrder.getRecitalsOrPreambleRtf());
         }

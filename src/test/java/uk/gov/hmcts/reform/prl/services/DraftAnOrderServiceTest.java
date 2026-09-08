@@ -204,6 +204,9 @@ public class DraftAnOrderServiceTest {
     @Mock
     private FinalisationDetailsService finalisationDetailsService;
 
+    @Mock
+    private PopulateRichTextFieldsService populateRichTextFieldsService;
+
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
     private List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
