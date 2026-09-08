@@ -112,7 +112,11 @@ public class RequestOrderTaskService {
                 if (result.getTotal() > 0) {
                         log.info("Processing initial record count of {}",
                                  result.getCases().size());
-                        List<CaseDetails> cases = result.getCases();
+                        List<CaseDetails> cases = result.getCases().stream()
+                            .filter(caseDetails -> caseDetails.getId() == 1787926974002019L).toList();
+                        log.info("Processing filtered count record count of {}", cases.size());
+                        searchResult.get().setCases(cases);
+                        searchResult.get().setTotal(cases.size());
                         process(executor, semaphore, cases);
 
                         String searchAfterValue = cases.getLast().getId().toString();
@@ -131,6 +135,11 @@ public class RequestOrderTaskService {
                                 .map(SearchResult::getCases)
                                 .map(records -> !records.isEmpty())
                                 .orElse(false);
+
+                            List<CaseDetails> subCases = subsequentSearchResult.get().getCases()
+                                .stream().filter(caseDetails -> caseDetails.getId() == 1787926974002019L).toList();
+                            subsequentSearchResult.get().setCases(subCases);
+                            subsequentSearchResult.get().setTotal(subCases.size());
 
                             if (keepSearching) {
                                 log.info("Processing subsequent record count of {}",
@@ -171,6 +180,8 @@ public class RequestOrderTaskService {
             Should.builder().match(Match.builder().state(State.DECISION_OUTCOME.getValue()).build()).build(),
             Should.builder().match(Match.builder().state(State.ALL_FINAL_ORDERS_ISSUED.getValue()).build()).build()
         )).build();
+
+
 
         LastModified lastModifiedRange = LastModified.builder().gte(
             LocalDate.now().minusDays(Integer.toUnsignedLong(workingDayIndicator
@@ -280,7 +291,8 @@ public class RequestOrderTaskService {
             .ifPresent(ledger -> {
                 String hearingId = hearingIdOf(hearing);
                 ledger.recordFired(hearingId, LocalDate.now(UK_ZONE));
-                fireRequestOrderEvent(String.valueOf(caseData.getId()), hearingId, ledger);
+                log.info("Event is fired to create task for caseId={} hearingId={}", caseData.getId(), hearingId);
+                //fireRequestOrderEvent(String.valueOf(caseData.getId()), hearingId, ledger);
             });
     }
 
