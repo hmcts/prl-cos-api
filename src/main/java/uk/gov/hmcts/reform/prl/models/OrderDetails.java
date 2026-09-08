@@ -40,6 +40,7 @@ public class OrderDetails {
     private final YesOrNo isTheOrderAboutAllChildren;
     private final String childrenList;
     private final YesOrNo orderClosesCase;
+    private final YesOrNo checkIsThisUrgent;
     private final Document orderDocument;
     private final Document orderDocumentWelsh;
     private final OtherOrderDetails otherDetails;
