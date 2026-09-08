@@ -255,7 +255,7 @@ public class ManageOrderControllerIntegrationTest {
     public void testManageOrdersAboutToSubmitUpdatesCafcassDateTimeWhenCafcassDataChanged() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
-        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(true);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any(), anyString())).thenReturn(true);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
 
         mockMvc.perform(
@@ -274,7 +274,7 @@ public class ManageOrderControllerIntegrationTest {
     public void testManageOrdersAboutToSubmitDoesNotUpdateCafcassDateTimeWhenCafcassDataUnchanged() throws Exception {
         when(authorisationService.isAuthorized(anyString(), anyString())).thenReturn(true);
         when(featureToggleService.isCafcassDateTimeFeatureEnabled()).thenReturn(true);
-        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any())).thenReturn(false);
+        when(cafcassCaseDataHelper.hasCafcassCaseDataChanged(any(), any(), anyString())).thenReturn(false);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(any())).thenReturn(manageOrderCaseData());
 
         mockMvc.perform(
