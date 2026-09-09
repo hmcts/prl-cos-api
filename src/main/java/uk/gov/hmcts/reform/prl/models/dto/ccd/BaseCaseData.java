@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.reopenclosedcases.ValidReopenClosedCasesStatusEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.RemovableDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -179,6 +180,8 @@ public class BaseCaseData {
     @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
+    private List<Element<UpdateHearingActualTracking>> updateHearingActualTracking;
+
     private LocalAuthority localAuthority;
 
     @JsonUnwrapped
@@ -195,8 +198,11 @@ public class BaseCaseData {
         return documentRemovalWrapper;
     }
 
+    private List<Element<RequestOrderHearingTracking>> requestOrderTaskTrackingByHearing;
+
     private List<Element<ApplicantConfidentialityDetails>> otherPeopleConfidentialDetails;
 
     private List<Element<ResponseDocuments>> otherPartyC8Documents;
     private List<Element<ResponseDocuments>> otherPartyC8DocumentsArchived;
+    private DynamicList customOrderHearingsType;
 }
