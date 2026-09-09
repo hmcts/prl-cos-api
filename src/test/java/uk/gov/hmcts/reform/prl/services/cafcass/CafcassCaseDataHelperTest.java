@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -320,8 +322,9 @@ class CafcassCaseDataHelperTest {
         ));
     }
 
-    @Test
-    void shouldReturnFalseWhenRelationshipSubmitOnlyClearsStaleOtherDetails() {
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldReturnFalseWhenRelationshipSubmitOnlyClearsStaleOtherDetails(String eventId) {
         Map<String, Object> currentRelation = Map.of(
             "applicantId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             "applicantFullName", "Alex Green",
@@ -350,12 +353,13 @@ class CafcassCaseDataHelperTest {
         assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
-            "amendChildrenAndApplicants"
+            eventId
         ));
     }
 
-    @Test
-    void shouldReturnFalseWhenOnlyChildAndRelatedRelationshipIdsAreRegenerated() {
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildDetailsRevised", "childDetailsRevised"})
+    void shouldReturnFalseWhenOnlyChildAndRelatedRelationshipIdsAreRegenerated(String eventId) {
         Map<String, Object> child = Map.of(
             "firstName", "Case",
             "lastName", "Child",
@@ -403,7 +407,7 @@ class CafcassCaseDataHelperTest {
         assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
-            "amendChildDetailsRevised"
+            eventId
         ));
     }
 
@@ -436,8 +440,9 @@ class CafcassCaseDataHelperTest {
         ));
     }
 
-    @Test
-    void shouldReturnFalseWhenOnlyOtherPersonAndRelatedRelationshipIdsAreRegenerated() {
+    @ParameterizedTest
+    @ValueSource(strings = {"amendOtherPeopleInTheCaseRevised", "otherPeopleInTheCaseRevised"})
+    void shouldReturnFalseWhenOnlyOtherPersonAndRelatedRelationshipIdsAreRegenerated(String eventId) {
         Map<String, Object> otherPerson = Map.of(
             "firstName", "Sam",
             "lastName", "Taylor",
@@ -485,12 +490,13 @@ class CafcassCaseDataHelperTest {
         assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
-            "amendOtherPeopleInTheCaseRevised"
+            eventId
         ));
     }
 
-    @Test
-    void shouldReturnFalseWhenOnlyRespondentRelationshipIdsAreRegenerated() {
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildDetailsRevised", "childDetailsRevised"})
+    void shouldReturnFalseWhenOnlyRespondentRelationshipIdsAreRegenerated(String eventId) {
         Map<String, Object> currentRelation = Map.of(
             "respondentId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             "respondentFullName", "Robin Brown",
@@ -525,12 +531,13 @@ class CafcassCaseDataHelperTest {
         assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
-            "amendChildDetailsRevised"
+            eventId
         ));
     }
 
-    @Test
-    void shouldReturnFalseWhenOtherPeopleSubmitOnlyClearsStaleOtherGender() {
+    @ParameterizedTest
+    @ValueSource(strings = {"amendOtherPeopleInTheCaseRevised", "otherPeopleInTheCaseRevised"})
+    void shouldReturnFalseWhenOtherPeopleSubmitOnlyClearsStaleOtherGender(String eventId) {
         Map<String, Object> currentOtherPerson = Map.of(
             "firstName", "Sam",
             "lastName", "Taylor",
@@ -556,7 +563,7 @@ class CafcassCaseDataHelperTest {
         assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
-            "amendOtherPeopleInTheCaseRevised"
+            eventId
         ));
     }
 
@@ -582,8 +589,9 @@ class CafcassCaseDataHelperTest {
         ));
     }
 
-    @Test
-    void shouldReturnTrueWhenRelationshipDetailsReallyChange() {
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldReturnTrueWhenRelationshipDetailsReallyChange(String eventId) {
         Map<String, Object> relation = Map.of(
             "applicantId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
             "applicantFullName", "Alex Green",
@@ -612,7 +620,7 @@ class CafcassCaseDataHelperTest {
         assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
-            "amendChildrenAndApplicants"
+            eventId
         ));
     }
 

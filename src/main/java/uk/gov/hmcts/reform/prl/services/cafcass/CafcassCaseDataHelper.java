@@ -65,7 +65,10 @@ public class CafcassCaseDataHelper {
     private static final List<String> AMEND_PARTY_AND_RELATIONSHIP_EVENTS = List.of(
         "amendChildDetailsRevised",
         "amendOtherPeopleInTheCaseRevised",
-        "amendChildrenAndApplicants"
+        "amendChildrenAndApplicants",
+        "childDetailsRevised",
+        "otherPeopleInTheCaseRevised",
+        "childrenAndApplicants"
     );
 
     private final CafCassFilter cafCassFilter;
