@@ -669,6 +669,9 @@ acro:
     remote-directory: /
     password: ${ACRO_SFTP_USER_PASSWORD:some_password}
 
+update-hearing-actuals:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+
 docmosis:
   url: ${DOCMOSIS_SERVICE_BASE_URL:https://docmosis.aat.platform.hmcts.net}
   access-key: ${DOCMOSIS_ACCESS_KEY:}

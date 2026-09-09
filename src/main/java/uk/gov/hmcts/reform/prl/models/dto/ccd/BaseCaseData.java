@@ -179,6 +179,8 @@ public class BaseCaseData {
     @JsonProperty("localAuthoritySolicitorOrganisationPolicy")
     private OrganisationPolicy localAuthoritySolicitorOrganisationPolicy;
 
+    private List<Element<UpdateHearingActualTracking>> updateHearingActualTracking;
+
     private LocalAuthority localAuthority;
 
     @JsonUnwrapped
