@@ -1,4 +1,5 @@
 import groovy.xml.XmlParser
+import java.util.regex.Pattern
 
 tasks.register("testWithCoverage") {
   group = "verification"
@@ -16,37 +17,16 @@ tasks.register("testWithCoverage") {
     def orange = "\u001B[38;5;208m"
 
     def runGit = { List<String> args ->
-      def stdout = new ByteArrayOutputStream()
-      def stderr = new ByteArrayOutputStream()
-      def result = exec {
+      def output = providers.exec {
         commandLine(['git'] + args)
-        standardOutput = stdout
-        errorOutput = stderr
         ignoreExitValue = true
       }
-      result.exitValue == 0 ? stdout.toString().trim() : null
+      output.result.get().exitValue == 0 ? output.standardOutput.asText.get().trim() : null
     }
 
     def changedLineNumbersBySourcePath = [:].withDefault { [] as Set }
 
-    def coverageExclusions = [
-      '**uk/gov/hmcts/reform/prl/models/**/*',
-      '**uk/gov/hmcts/reform/prl/exception/*',
-      '**uk/gov/hmcts/reform/prl/enums/**/*',
-      '**uk/gov/hmcts/reform/prl/config/**/*',
-      '**uk/gov/hmcts/reform/prl/utils/*',
-      '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
-      '**uk/gov/hmcts/reform/prl/Application.*',
-      '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
-      '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
-      '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
-      '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
-      '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
-      '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
-      '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
-      '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
-      '**uk/gov/hmcts/reform/prl/services/sealaudit/SealAuditService.java'
-    ]
+    def coverageExclusions = project.findProperty('coverageGateExclusions') ?: []
 
     def globToRegex = { String pattern ->
       def regex = new StringBuilder()
@@ -65,7 +45,7 @@ tasks.register("testWithCoverage") {
           regex.append('[^/]*')
           i++
         } else {
-          regex.append(java.util.regex.Pattern.quote(pattern.charAt(i).toString()))
+          regex.append(Pattern.quote(pattern.charAt(i).toString()))
           i++
         }
       }
@@ -84,53 +64,57 @@ tasks.register("testWithCoverage") {
         return
       }
 
-      String currentFile = null
-      Integer currentNewLine = null
+      def diffState = [
+        currentFile: (String) null,
+        currentNewLine: (Integer) null
+      ]
+
       diffText.readLines().each { line ->
         if (line.startsWith('+++ b/') && line.endsWith('.java')) {
-          currentFile = line.substring('+++ b/'.length())
-          if (!currentFile.startsWith('src/main/java/')) {
-            currentFile = null
-            currentNewLine = null
+          def nextFile = line.substring('+++ b/'.length())
+          if (!nextFile.startsWith('src/main/java/')) {
+            diffState.currentFile = null
+            diffState.currentNewLine = null
             return
           }
-          if (!isCoverageExcluded(currentFile)) {
-            changedLineNumbersBySourcePath[currentFile]
+          diffState.currentFile = nextFile
+          if (!isCoverageExcluded(nextFile)) {
+            changedLineNumbersBySourcePath[nextFile]
           }
-          currentNewLine = null
+          diffState.currentNewLine = null
           return
         }
 
         if (line.startsWith('+++ /dev/null')) {
-          currentFile = null
-          currentNewLine = null
+          diffState.currentFile = null
+          diffState.currentNewLine = null
           return
         }
 
-        if (currentFile == null) {
+        if (diffState.currentFile == null) {
           return
         }
 
         def matcher = line =~ /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@.*/
         if (matcher.matches()) {
-          currentNewLine = matcher[0][1].toInteger()
+          diffState.currentNewLine = matcher.group(1).toInteger()
           return
         }
 
-        if (currentNewLine == null) {
+        if (diffState.currentNewLine == null) {
           return
         }
 
         if (line.startsWith('+') && !line.startsWith('+++')) {
-          if (!isCoverageExcluded(currentFile)) {
-            changedLineNumbersBySourcePath[currentFile].add(currentNewLine)
+          if (!isCoverageExcluded(diffState.currentFile)) {
+            changedLineNumbersBySourcePath[diffState.currentFile].add(diffState.currentNewLine)
           }
-          currentNewLine++
+          diffState.currentNewLine++
           return
         }
 
         if (line.startsWith(' ') || line.startsWith('\\')) {
-          currentNewLine++
+          diffState.currentNewLine++
         }
       }
     }
@@ -412,6 +396,10 @@ tasks.register("testWithCoverage") {
       logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
       logger.lifecycle("━" * 85 + "\n")
       logger.lifecycle("${white} 📁 Full Report: file://${reportFile.parentFile.path}/html/index.html\n${reset}")
+
+      if (grandPct < 80) {
+        throw new GradleException("Coverage is below 80% threshold!")
+      }
     } else {
       logger.lifecycle("${yellow}No JaCoCo XML report found at ${reportFile.path}. Nothing to summarise.${reset}")
     }

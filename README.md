@@ -101,6 +101,7 @@ To maintain our 80% coverage standard and reduce CI/CD feedback loops, this proj
 By default, local commits remain fast. You can "Opt-In" to the coverage gate so it runs automatically every time you hit commit.
 
 Note on Workflow: By default, the Quality Gate is DISABLED to keep your local development fast. We recommend enabling it `gate-on` when working on feature-complete code to catch coverage gaps early and avoid CI failures.
+
 ### 📊 Local Coverage Reports
 Run these commands to get instant, color-coded coverage feedback in your terminal:
 
@@ -139,13 +140,13 @@ UI Refresh: If you toggle the gate in the terminal and IntelliJ doesn't seem to 
 ### ⚓ Git Pre-commit Hook (Opt-In)
 A Git Pre-commit Hook is included to prevent "Red" builds in SonarQube. By default, local commits remain fast and skip the coverage check.
 
-* **Installation:** Automatically installed/updated when you run `./gradlew build`.
+* **Installation:** Run `./gradlew installCoverageGateHook` to install or refresh the local hook.
+* **Enable the gate:** Run `gate-on`. Commits will then run `./gradlew testWithCoverage`.
+* **Disable the gate:** Run `gate-off`. Commits will skip the local coverage check.
 * The "Emergency" Skip: If the gate is ON but you need to bypass it for a single commit (e.g., a README typo), click the Gear Icon ⚙️ in the Commit window and uncheck "Run Git hooks".
 
 UI Refresh: If you toggle the gate and IntelliJ doesn't notice, right-click the project root and select "Reload from Disk".
-* **How to Run:** To verify your coverage during a commit, set the `VERIFY_COVERAGE` flag:
-  ```bash
-  VERIFY_COVERAGE=true git commit -m "My verified feature"
+
 There is no need to remove postgres and java or similar core images.
 
 ### Troubleshooting & Performance
@@ -155,7 +156,7 @@ JVM Crashes (Apple Silicon): If you encounter a SIGSEGV during the coverage task
 `./gradlew build -Dorg.gradle.jvmargs="-XX:-TieredCompilation"`
 
 Manual Refresh: If the hook isn't firing as expected, you can force a fresh installation of the logic with:
-`./gradlew installGitHooks`
+`./gradlew installCoverageGateHook`
 
 ### Managing Preview environment PODs
 Make sure you have added the label 'enable_keep_helm' while creating the PR. Otherwise, add the label and re-trigger the build.
