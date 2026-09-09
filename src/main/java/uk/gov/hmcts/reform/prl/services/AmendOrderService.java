@@ -180,7 +180,7 @@ public class AmendOrderService {
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
-                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getLegalAdviserNameToReviewOrder()))
+                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getLegalAdviser()))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
 

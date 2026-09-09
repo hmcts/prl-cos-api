@@ -238,8 +238,8 @@ public class ManageOrders implements MappableObject {
     private final JudicialUser nameOfJudgeToReviewOrder;
     @JsonProperty("nameOfLaToReviewOrder")
     private final DynamicList nameOfLaToReviewOrder;
-    @JsonProperty("legalAdviserNameToReviewOrder")
-    private final StaffUser legalAdviserNameToReviewOrder;
+    @JsonProperty("legalAdviser")
+    private final StaffUser legalAdviser;
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;
     @JsonProperty("orderUploadedAsDraftFlag")
