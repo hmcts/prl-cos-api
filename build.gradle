@@ -43,7 +43,7 @@ def versions = [
   jodaTime                     : '2.13.1',
   junit                        : '6.1.0',
   lombok                       : '1.18.46',
-  pact                         : '4.1.11',
+  pact                         : '4.7.5',
   pitest                       : '1.25.5',
   puppyCrawl                   : '13.6.0',
   reformsJavaLogging           : '8.0.0',
