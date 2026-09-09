@@ -669,7 +669,7 @@ public class ManageOrdersController {
                 .judicialUser(JudgeOrLegalAdvisorCheckEnum.judge
                                   .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                   ? caseData.getManageOrders().getNameOfJudgeToReviewOrder() : null)
-                .legalAdviserUser(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
+                .legalAdviser(JudgeOrLegalAdvisorCheckEnum.legalAdvisor
                                       .equals(caseData.getManageOrders().getAmendOrderSelectJudgeOrLa())
                                       ? caseData.getManageOrders().getLegalAdviserNameToReviewOrder() : null)
                 .build();
