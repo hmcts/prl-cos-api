@@ -166,6 +166,7 @@ public class AmendOrderService {
             .orderDocument(amendedDocument)
             .orderSelectionType(orderSelectionType)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
+            .miamForOrder(caseData.getMiamForOrder())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .orderCreatedBy(currentUserFullName)
