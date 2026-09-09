@@ -4351,4 +4351,153 @@ public class SendAndReplyServiceTest {
                        .build())
             .build();
     }
+
+    private PartyDetails getEmailApplicant() {
+        return PartyDetails.builder()
+            .partyId(UUID.randomUUID())
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .firstName("Applicant firstname")
+            .lastName("Applicant lastName")
+            .email("abc@xyz.com")
+            .solicitorEmail("testSolicitor@xyz.com")
+            .contactPreferences(ContactPreferences.email)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+    }
+
+    @Test
+    public void shouldPreserveMessageLineBreaksForSendgridEmail() {
+        String messageContent =
+            "Test message\n\nSpace above\nNew line\n\n\nEnd message";
+
+        PartyDetails applicant = getEmailApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code(wrappedApplicant.getId().toString())
+                    .label(applicant.getFirstName() + " " + applicant.getLastName())
+                    .build()
+            ))
+            .build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.APPLICATION)
+            .messageSubject("message subject")
+            .messageContent(messageContent)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(emptyList())
+                    .build()
+            )
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(
+            caseData,
+            "authorisation"
+        );
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor =
+            ArgumentCaptor.forClass(SendgridEmailConfig.class);
+
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+
+        SendgridEmailConfig capturedConfig =
+            sendgridEmailConfigCaptor.getValue();
+
+        assertEquals(
+            "Test message<br><br>Space above<br>New line<br><br><br>End message",
+            capturedConfig.getDynamicTemplateData().get("messageContent")
+        );
+    }
+
+    @Test
+    public void shouldEscapeHtmlInMessageContentBeforeAddingLineBreaks() {
+        String messageContent =
+            "<strong>hello</strong>\nNext line";
+
+        PartyDetails applicant = getEmailApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code(wrappedApplicant.getId().toString())
+                    .label(applicant.getFirstName() + " " + applicant.getLastName())
+                    .build()
+            ))
+            .build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.APPLICATION)
+            .messageSubject("message subject")
+            .messageContent(messageContent)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(emptyList())
+                    .build()
+            )
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(
+            caseData,
+            "authorisation"
+        );
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor =
+            ArgumentCaptor.forClass(SendgridEmailConfig.class);
+
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+
+        SendgridEmailConfig capturedConfig =
+            sendgridEmailConfigCaptor.getValue();
+
+        assertEquals(
+            "&lt;strong&gt;hello&lt;/strong&gt;<br>Next line",
+            capturedConfig.getDynamicTemplateData().get("messageContent")
+        );
+    }
+
 }
