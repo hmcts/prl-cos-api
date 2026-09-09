@@ -13,6 +13,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,8 +26,8 @@ public class OtherDetails {
 
     public String createdBy;
     public String orderRecipients;
-
     public String orderCreatedDate;
+    public String orderMadeDate;
 
     public void setOrderCreatedDate(String orderCreatedDate) {
         if (orderCreatedDate != null) {
@@ -34,12 +36,12 @@ public class OtherDetails {
                 dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
             } catch (DateTimeParseException dateTimeParseException) {
                 try {
-                    dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK));
+                    dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK));
                 } catch (DateTimeParseException e) {
                     try {
                         dateTime = LocalDate.parse(
                             orderCreatedDate,
-                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                            DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)
                         );
                     } catch (DateTimeParseException exception) {
                         log.info("orderCreatedDate received {}", orderCreatedDate);
@@ -53,8 +55,6 @@ public class OtherDetails {
         }
     }
 
-    public String orderMadeDate;
-
     public void setOrderMadeDate(String orderMadeDate) {
         if (orderMadeDate != null) {
             LocalDate dateTime = null;
@@ -62,12 +62,12 @@ public class OtherDetails {
                 dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
             } catch (DateTimeParseException e) {
                 try {
-                    dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK));
+                    dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK));
                 } catch (DateTimeParseException ex) {
                     try {
                         dateTime = LocalDate.parse(
                             orderMadeDate,
-                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                            DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)
                         );
                     } catch (DateTimeParseException exception) {
                         log.info("orderMadeDate received {}", orderMadeDate);
