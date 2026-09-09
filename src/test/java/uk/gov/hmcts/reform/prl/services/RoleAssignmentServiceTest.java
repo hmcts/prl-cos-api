@@ -162,7 +162,7 @@ public class RoleAssignmentServiceTest {
         roleAssignmentService.createRoleAssignment(
             auth,
             caseDetails,
-            RoleAssignmentDto.builder().legalAdviserUser(legalAdviserUser).build(),
+            RoleAssignmentDto.builder().legalAdviser(legalAdviserUser).build(),
             "TEST EVENT",
             true,
             "Judge"

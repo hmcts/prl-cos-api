@@ -273,18 +273,18 @@ public class RefDataUserServiceTest {
         )).thenReturn(staffResponse);
         staffRefDataService.refreshStaffDetailsCache();
 
-        Optional<StaffProfile> found = refDataUserService.getLegalAdvisorUserDetails(
+        Optional<StaffProfile> found = refDataUserService.getLegalAdviserUserDetails(
             StaffUser.builder().idamId("idam-id-2").build());
         assertTrue(found.isPresent());
         assertEquals("John", found.get().getLastName());
         assertEquals("test1@com", found.get().getEmailId());
 
-        Optional<StaffProfile> notFound = refDataUserService.getLegalAdvisorUserDetails(
+        Optional<StaffProfile> notFound = refDataUserService.getLegalAdviserUserDetails(
             StaffUser.builder().idamId("no-such-idam-id").build());
         assertTrue(notFound.isEmpty());
 
-        assertTrue(refDataUserService.getLegalAdvisorUserDetails(null).isEmpty());
-        assertTrue(refDataUserService.getLegalAdvisorUserDetails(
+        assertTrue(refDataUserService.getLegalAdviserUserDetails(null).isEmpty());
+        assertTrue(refDataUserService.getLegalAdviserUserDetails(
             StaffUser.builder().idamId("").build()).isEmpty());
     }
 

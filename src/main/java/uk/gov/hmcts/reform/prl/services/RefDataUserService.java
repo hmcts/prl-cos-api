@@ -170,8 +170,8 @@ public class RefDataUserService {
         }
     }
 
-    public Optional<StaffProfile> getLegalAdvisorUserDetails(StaffUser legalAdvisorUser) {
-        if (legalAdvisorUser == null || StringUtils.isBlank(legalAdvisorUser.getIdamId())) {
+    public Optional<StaffProfile> getLegalAdviserUserDetails(StaffUser legalAdviser) {
+        if (legalAdviser == null || StringUtils.isBlank(legalAdviser.getIdamId())) {
             return Optional.empty();
         }
         try {
@@ -179,10 +179,10 @@ public class RefDataUserService {
             return staffUserList.stream()
                 .map(StaffResponse::getStaffProfile)
                 .filter(Objects::nonNull)
-                .filter(staffProfile -> legalAdvisorUser.getIdamId().equals(staffProfile.getId()))
+                .filter(staffProfile -> legalAdviser.getIdamId().equals(staffProfile.getId()))
                 .findFirst();
         } catch (Exception e) {
-            log.error("Staff details Lookup Failed for idamId {} - {}", legalAdvisorUser.getIdamId(), e.getMessage());
+            log.error("Staff details Lookup Failed for idamId {} - {}", legalAdviser.getIdamId(), e.getMessage());
             return Optional.empty();
         }
     }

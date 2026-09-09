@@ -167,7 +167,7 @@ public class BaseCaseData {
 
     private String messageIdentifier;
 
-    private StaffUser legalAdviserUser;
+    private StaffUser legalAdviser;
 
     @JsonProperty("TTL")
     private TTL retainAndDisposeTimeToLive;
