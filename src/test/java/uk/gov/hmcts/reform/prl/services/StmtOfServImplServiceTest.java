@@ -59,8 +59,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -260,7 +260,7 @@ public class StmtOfServImplServiceTest {
             .value(stmtOfServiceAddRecipient).build();
         List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
         Document c9Doc = Document.builder()
-            .documentFileName(C9_DOCUMENT_FILENAME)
+            .documentFileName(SOA_C9_PERSONAL_SERVICE_FILENAME)
             .build();
         Document finalDocument = Document.builder()
             .documentFileName("C100.pdf")
@@ -304,7 +304,7 @@ public class StmtOfServImplServiceTest {
     @Test
     public void testToExcludeWelshAndEnglishC9FromPersonalServiceRespondentPack() {
         Document c9Doc = Document.builder()
-            .documentFileName(C9_DOCUMENT_FILENAME)
+            .documentFileName(SOA_C9_PERSONAL_SERVICE_FILENAME)
             .build();
         Document welshC9Doc = Document.builder()
             .documentFileName(SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH)
@@ -341,7 +341,7 @@ public class StmtOfServImplServiceTest {
         assertEquals(1, servedApplicationDetails.getEmailNotificationDetails().size());
         String attachedDocs = servedApplicationDetails.getEmailNotificationDetails().get(0).getValue().getAttachedDocs();
         assertTrue(attachedDocs.contains("C100.pdf"));
-        assertFalse(attachedDocs.contains(C9_DOCUMENT_FILENAME));
+        assertFalse(attachedDocs.contains(SOA_C9_PERSONAL_SERVICE_FILENAME));
         assertFalse(attachedDocs.contains(SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH));
     }
 
@@ -648,7 +648,7 @@ public class StmtOfServImplServiceTest {
             .value(stmtOfServiceAddRecipient).build();
         List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
         Document c9Doc = Document.builder()
-            .documentFileName(C9_DOCUMENT_FILENAME)
+            .documentFileName(SOA_C9_PERSONAL_SERVICE_FILENAME)
             .build();
         Document finalDocument = Document.builder()
             .documentFileName("C100.pdf")
