@@ -244,7 +244,9 @@ tasks.register("testWithCoverage") {
 
             def changedLinesForTarget = changedLineNumbersBySourcePath[sourcePath]
             def scoredLines = sourceFile.'line'.findAll { line ->
-              checkAllCoverage || changedLinesForTarget.contains((line.attribute('nr')?.toString() ?: "0").toInteger())
+              checkAllCoverage
+                || targetProperty != null
+                || changedLinesForTarget.contains((line.attribute('nr')?.toString() ?: "0").toInteger())
             }
 
             scoredLines.each { line ->
@@ -270,14 +272,15 @@ tasks.register("testWithCoverage") {
             grandCoveredConditions += fileCoveredBranch
 
             if (!checkAllCoverage && isTargeted) {
-              double fileTotal = fileLinesToCover + fileMissedBranch + fileCoveredBranch
-              double fileCovered = fileCoveredLines + fileCoveredBranch
-              double filePct = fileTotal > 0 ? fileCovered / fileTotal * 100 : 0
+              int fileTotal = fileLinesToCover + fileMissedBranch + fileCoveredBranch
+              int fileCovered = fileCoveredLines + fileCoveredBranch
+              double filePct = fileTotal > 0 ? fileCovered / (double)fileTotal * 100 : 100.0
               def color = filePct >= 80 ? green : red
 
               logger.lifecycle("\n" + "━" * 85)
               logger.lifecycle(" 🎯 TARGET REPORT: ${fileName}")
               logger.lifecycle(" 📈 Score: ${color}${String.format("%.2f", filePct)}%${reset} | Threshold: 80%")
+              logger.lifecycle(" 🔢 Covered Units: ${fileCovered}/${fileTotal} ${gray}(lines + conditions)${reset}")
               logger.lifecycle("━" * 85)
 
               logger.lifecycle(String.format(" %-20s | %-12s | %-12s | %-10s", "METRIC", "MISSED", "COVERED", "SCORE"))
@@ -384,9 +387,9 @@ tasks.register("testWithCoverage") {
         return
       }
 
-      double grandTotal = grandLinesToCover + grandConditionsToCover
-      double grandCovered = grandCoveredLines + grandCoveredConditions
-      double grandPct = grandTotal > 0 ? (grandCovered / grandTotal) * 100 : 0
+      int grandTotal = grandLinesToCover + grandConditionsToCover
+      int grandCovered = grandCoveredLines + grandCoveredConditions
+      double grandPct = grandTotal > 0 ? (grandCovered / (double)grandTotal) * 100 : 0
       def grandColor = grandPct >= 80 ? green : red
       def statusLabel = grandPct >= 80 ? "${green}✅ PASS${reset}" : "${red}⚠️  BELOW THRESHOLD${reset}"
 
@@ -394,6 +397,8 @@ tasks.register("testWithCoverage") {
       def title = checkAllCoverage ? "🏁 TOTAL PROJECT COVERAGE (Aggregate)" : "🏁 COMBINED TARGET SCORE"
       logger.lifecycle(" ${title}")
       logger.lifecycle("${white} 📊 Score: ${grandColor}${String.format("%.2f", grandPct)}%${reset}${white} | Threshold: 80% | Status: ${statusLabel}${reset}")
+      logger.lifecycle("${white} 🔢 Covered Units: ${grandCovered}/${grandTotal} ${gray}(lines + conditions)${reset}")
+      logger.lifecycle("${white} ℹ️  Local score is a JaCoCo/diff approximation. Sonar remains the authoritative CI score.${reset}")
       logger.lifecycle("━" * 85 + "\n")
       logger.lifecycle("${white} 📁 Full Report: file://${reportFile.parentFile.path}/html/index.html\n${reset}")
 

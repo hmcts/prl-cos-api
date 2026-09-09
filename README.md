@@ -111,6 +111,8 @@ Check Multiple Classes: `./gradlew testWithCoverage -Ptarget=ClassA,ClassB`
 
 > Note: The "Targeted" mode provides a line-by-line breakdown of missed instructions and branches.
 >
+> Note: The local coverage score is a JaCoCo/diff approximation intended to catch obvious gaps before CI. It reports covered units as executable lines plus conditions. Sonar remains the authoritative CI score, so very small percentage differences can occur.
+>
 🕹️ Control Aliases
 To make toggling the gate easy, add these to your shell profile (~/.zshrc or ~/.bash_profile):
 
