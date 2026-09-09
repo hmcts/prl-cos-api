@@ -1058,9 +1058,9 @@ public class CallbackControllerTest {
         when(organisationService.findUserOrganisation(Mockito.anyString()))
             .thenReturn(Optional.of(org));
         CaseData caseData = CaseData.builder().id(123L).applicantCaseName("abcd")
-                .taskListVersion(TASK_LIST_VERSION_V2)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .applicantOrganisationPolicy(
-            applicantOrganisationPolicy).build();
+                applicantOrganisationPolicy).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
 
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
@@ -1148,23 +1148,23 @@ public class CallbackControllerTest {
     public void testAddCaseNumberStateSubmittedPaid() throws Exception {
 
         CaseData caseData = CaseData.builder()
-                .issueDate(LocalDate.now())
-                .build();
+            .issueDate(LocalDate.now())
+            .build();
 
         Map<String, Object> stringObjectMap = new HashMap<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseEventService.findEventsForCase("1"))
-                .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
+            .thenReturn(List.of(CaseEventDetail.builder().stateId(SUBMITTED_STATE).build()));
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                        .id(1L)
-                        .data(stringObjectMap).build()).build();
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
-                .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
+            .addCaseNumberSubmitted(AUTH_TOKEN, S2S_TOKEN, callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("issueDate"));
         assertEquals(Yes.getDisplayedValue(),aboutToStartOrSubmitCallbackResponse.getData().get("isAddCaseNumberAdded"));
     }
@@ -1589,11 +1589,11 @@ public class CallbackControllerTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder().mpuClaimingExemptionMiam(Yes).build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newAllegationsOfHarmYesNo(Yes)
-                                  .newAllegationsOfHarmChildAbductionYesNo(Yes)
-                                  .newAllegationsOfHarmChildAbuseYesNo(Yes)
-                                  .newAllegationsOfHarmDomesticAbuseYesNo(Yes).build())
-                .taskListVersion(TASK_LIST_VERSION_V2)
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .newAllegationsOfHarmChildAbductionYesNo(Yes)
+                                         .newAllegationsOfHarmChildAbuseYesNo(Yes)
+                                         .newAllegationsOfHarmDomesticAbuseYesNo(Yes).build())
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(Yes)
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
@@ -1610,7 +1610,7 @@ public class CallbackControllerTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
-                PaymentServiceResponse.builder().serviceRequestReference("1234").build());
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
@@ -1691,7 +1691,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 AUTH_TOKEN,
-                    S2S_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c8Document"));
@@ -1767,8 +1767,8 @@ public class CallbackControllerTest {
             .applicants(applicantList)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
-                .mpuClaimingExemptionMiam(Yes)
-                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse)).build())
+                                          .mpuClaimingExemptionMiam(Yes)
+                                          .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuDomesticAbuse)).build())
             .consentOrder(Yes)
             .id(123L)
             .build();
@@ -1892,9 +1892,9 @@ public class CallbackControllerTest {
             .applicants(applicantList)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
-                .mpuClaimingExemptionMiam(Yes)
-                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuUrgency))
-                .build())
+                                          .mpuClaimingExemptionMiam(Yes)
+                                          .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuUrgency))
+                                          .build())
             .allegationOfHarm(AllegationOfHarm.builder()
                                   .allegationsOfHarmYesNo(Yes)
                                   .allegationsOfHarmChildAbductionYesNo(Yes)
@@ -2237,15 +2237,15 @@ public class CallbackControllerTest {
             .applicants(applicantList)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newAllegationsOfHarmYesNo(Yes)
-                                  .newAllegationsOfHarmChildAbductionYesNo(Yes)
-                                  .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
-                                  .newAllegationsOfHarmChildAbuseYesNo(Yes).build())
-                .taskListVersion(TASK_LIST_VERSION_V2)
+                                         .newAllegationsOfHarmYesNo(Yes)
+                                         .newAllegationsOfHarmChildAbductionYesNo(Yes)
+                                         .newAllegationsOfHarmDomesticAbuseYesNo(Yes)
+                                         .newAllegationsOfHarmChildAbuseYesNo(Yes).build())
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .welshLanguageRequirement(Yes)
             .miamPolicyUpgradeDetails(MiamPolicyUpgradeDetails.builder()
-                .mpuClaimingExemptionMiam(Yes)
-                .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance)).build())
+                                          .mpuClaimingExemptionMiam(Yes)
+                                          .mpuExemptionReasons(List.of(MiamExemptionsChecklistEnum.mpuPreviousMiamAttendance)).build())
             .welshLanguageRequirementApplication(english)
             .languageRequirementApplicationNeedWelsh(Yes)
             .applicantsConfidentialDetails(Collections.emptyList())
@@ -2258,7 +2258,7 @@ public class CallbackControllerTest {
         when(organisationService.getRespondentOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
-                PaymentServiceResponse.builder().serviceRequestReference("1234").build());
+            PaymentServiceResponse.builder().serviceRequestReference("1234").build());
 
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(CaseData.builder()
@@ -2316,7 +2316,7 @@ public class CallbackControllerTest {
                                    .data(stringObjectMap).build()).caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                                                                                    .state(State.AWAITING_SUBMISSION_TO_HMCTS.getLabel()).id(
                     123L)
-                                                       .data(stringObjectMap).build()).build();
+                                                                                   .data(stringObjectMap).build()).build();
         when(miamPolicyUpgradeService.updateMiamPolicyUpgradeDetails(any(), anyMap())).thenReturn(caseData);
         when(organisationService.getApplicantOrganisationDetails(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
@@ -2345,7 +2345,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 AUTH_TOKEN,
-                    S2S_TOKEN,
+                S2S_TOKEN,
                 callbackRequest
             );
         Assertions.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("c1ADocument"));
@@ -2502,8 +2502,8 @@ public class CallbackControllerTest {
                            .personalCode("testCode")
                            .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,
+                                                             refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
@@ -2547,28 +2547,28 @@ public class CallbackControllerTest {
             .build();
         List<Element<ApplicantConfidentialityDetails>> applicants = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
-                .value(ApplicantConfidentialityDetails.builder()
-                    .firstName("ABC 1")
-                    .lastName("XYZ 2")
-                    .email("abc1@xyz.com")
-                    .phoneNumber("09876543211")
-                    .address(address)
-                    .build()).build());
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
 
         List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
             Element.<ChildConfidentialityDetails>builder()
                 .value(ChildConfidentialityDetails
-                    .builder()
-                    .firstName("Test")
-                    .lastName("Name")
-                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
-                        OtherPersonConfidentialityDetails.builder()
-                            .firstName("Confidential First Name")
-                            .lastName("Confidential Last Name")
-                            .relationshipToChildDetails("test")
-                            .address(address)
-                            .build()).build()))
-                    .build()).build());
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                               OtherPersonConfidentialityDetails.builder()
+                                   .firstName("Confidential First Name")
+                                   .lastName("Confidential Last Name")
+                                   .relationshipToChildDetails("test")
+                                   .address(address)
+                                   .build()).build()))
+                           .build()).build());
         CaseData caseData = CaseData.builder()
             .children(listOfChildren)
             .applicants(applicantList)
@@ -2581,7 +2581,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         String[] personalCodes = new String[3];
         personalCodes[0] = "123456";
         List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
@@ -2589,16 +2589,16 @@ public class CallbackControllerTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+                                                              .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
             .isSpecificGateKeeperNeeded(Yes)
             .judgeName(JudicialUser.builder()
-                .idamId("testId")
-                .personalCode("testCode")
-                .build())
+                           .idamId("testId")
+                           .personalCode("testCode")
+                           .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,
+                                                             refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
@@ -2641,28 +2641,28 @@ public class CallbackControllerTest {
             .build();
         List<Element<ApplicantConfidentialityDetails>> applicants = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
-                .value(ApplicantConfidentialityDetails.builder()
-                    .firstName("ABC 1")
-                    .lastName("XYZ 2")
-                    .email("abc1@xyz.com")
-                    .phoneNumber("09876543211")
-                    .address(address)
-                    .build()).build());
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
 
         List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
             Element.<ChildConfidentialityDetails>builder()
                 .value(ChildConfidentialityDetails
-                    .builder()
-                    .firstName("Test")
-                    .lastName("Name")
-                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
-                        OtherPersonConfidentialityDetails.builder()
-                            .firstName("Confidential First Name")
-                            .lastName("Confidential Last Name")
-                            .relationshipToChildDetails("test")
-                            .address(address)
-                            .build()).build()))
-                    .build()).build());
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                               OtherPersonConfidentialityDetails.builder()
+                                   .firstName("Confidential First Name")
+                                   .lastName("Confidential Last Name")
+                                   .relationshipToChildDetails("test")
+                                   .address(address)
+                                   .build()).build()))
+                           .build()).build());
         CaseData caseData = CaseData.builder()
             .children(listOfChildren)
             .applicants(applicantList)
@@ -2675,7 +2675,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         String[] personalCodes = new String[3];
         personalCodes[0] = "123456";
         List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
@@ -2684,13 +2684,13 @@ public class CallbackControllerTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+                                                              .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
             .isSpecificGateKeeperNeeded(Yes)
             .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,
+                                                             refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
@@ -2734,28 +2734,28 @@ public class CallbackControllerTest {
             .build();
         List<Element<ApplicantConfidentialityDetails>> applicants = List
             .of(Element.<ApplicantConfidentialityDetails>builder()
-                .value(ApplicantConfidentialityDetails.builder()
-                    .firstName("ABC 1")
-                    .lastName("XYZ 2")
-                    .email("abc1@xyz.com")
-                    .phoneNumber("09876543211")
-                    .address(address)
-                    .build()).build());
+                    .value(ApplicantConfidentialityDetails.builder()
+                               .firstName("ABC 1")
+                               .lastName("XYZ 2")
+                               .email("abc1@xyz.com")
+                               .phoneNumber("09876543211")
+                               .address(address)
+                               .build()).build());
 
         List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
             Element.<ChildConfidentialityDetails>builder()
                 .value(ChildConfidentialityDetails
-                    .builder()
-                    .firstName("Test")
-                    .lastName("Name")
-                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
-                        OtherPersonConfidentialityDetails.builder()
-                            .firstName("Confidential First Name")
-                            .lastName("Confidential Last Name")
-                            .relationshipToChildDetails("test")
-                            .address(address)
-                            .build()).build()))
-                    .build()).build());
+                           .builder()
+                           .firstName("Test")
+                           .lastName("Name")
+                           .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                               OtherPersonConfidentialityDetails.builder()
+                                   .firstName("Confidential First Name")
+                                   .lastName("Confidential Last Name")
+                                   .relationshipToChildDetails("test")
+                                   .address(address)
+                                   .build()).build()))
+                           .build()).build());
         CaseData caseData = CaseData.builder()
             .children(listOfChildren)
             .applicants(applicantList)
@@ -2766,7 +2766,7 @@ public class CallbackControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                .data(stringObjectMap).build()).build();
+                                                       .data(stringObjectMap).build()).build();
         String[] personalCodes = new String[3];
         personalCodes[0] = "123456";
         List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
@@ -2775,16 +2775,16 @@ public class CallbackControllerTest {
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
-            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+                                                              .personalCode(personalCodes).build())).thenReturn(apiResponseList);
         DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
-            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+                                                                       .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
         GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
             .isSpecificGateKeeperNeeded(Yes)
             .legalAdviserList(legalAdviserList)
             .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
-            refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,
+                                                             refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(AUTH_TOKEN, S2S_TOKEN)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(AUTH_TOKEN,S2S_TOKEN,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
@@ -3139,7 +3139,7 @@ public class CallbackControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
             .fetchRoleAssignmentForUser(AUTH_TOKEN, CallbackRequest.builder().build());
         assertEquals("The selected user does not have right roles to assign this case",
-            aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+                     aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
     }
 
     @Test
