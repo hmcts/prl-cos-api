@@ -109,7 +109,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_WELSH_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -561,7 +560,7 @@ public class ServiceOfApplicationService {
 
         if ("No".equalsIgnoreCase(selection) && hasRecipients(soa)) {
             List<Document> filteredDocs = staticDocs.stream()
-                .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getDocumentFileName())).toList();
+                .filter(d -> !isC9Document(d)).toList();
             sendNotificationsSoaC100NonPersonal(caseData, auth, emails, bulk, filteredDocs);
             caseDataMap.put(UNSERVED_APPLICANT_LIP_RESPONDENT_PACK, null);
             return responsibleParty;
@@ -2699,7 +2698,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(staticDocs.stream()
                         .filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY)
-                        || d.getDocumentFileName().equalsIgnoreCase(C9_DOCUMENT_FILENAME)))
+                        || isC9Document(d)))
                         .toList());
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -3554,8 +3553,7 @@ public class ServiceOfApplicationService {
                                                                       Map<String, Object> caseDataUpdated,
                                                                       CaseData caseData,
                                                                       List<Document> c100StaticDocs) {
-        c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            C9_DOCUMENT_FILENAME)).collect(
+        c100StaticDocs = c100StaticDocs.stream().filter(d -> !isC9Document(d)).collect(
             Collectors.toList());
         log.info("serving applicants or respondents");
         List<DynamicMultiselectListElement> selectedApplicants = getSelectedApplicantsOrRespondents(

@@ -49,7 +49,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -59,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -296,6 +299,50 @@ public class StmtOfServImplServiceTest {
             .thenReturn(BulkPrintDetails.builder().bulkPrintId(TEST_UUID).build());
         Map<String, Object> updatedCaseData = stmtOfServImplService.handleSosAboutToSubmit(caseDetails, authToken);
         assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testToExcludeWelshAndEnglishC9FromPersonalServiceRespondentPack() {
+        Document c9Doc = Document.builder()
+            .documentFileName(C9_DOCUMENT_FILENAME)
+            .build();
+        Document welshC9Doc = Document.builder()
+            .documentFileName(SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH)
+            .build();
+        Document finalDocument = Document.builder()
+            .documentFileName("C100.pdf")
+            .build();
+        List<Element<Document>> documentList = new ArrayList<>();
+        documentList.add(element(c9Doc));
+        documentList.add(element(welshC9Doc));
+        documentList.add(element(finalDocument));
+
+        UUID partyId = UUID.fromString(TEST_UUID);
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondents(Collections.singletonList(Element.<PartyDetails>builder()
+                                                .id(partyId)
+                                                .value(listOfRespondents.get(0).getValue())
+                                                .build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
+                                                                                         .courtAdmin.toString())
+                                                                  .packDocument(documentList)
+                                                                  .build()).build())
+            .build();
+
+        when(serviceOfApplicationService.removeCoverLettersFromThePacks(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+
+        ServedApplicationDetails servedApplicationDetails = stmtOfServImplService
+            .checkAndServeRespondentPacksPersonalService(caseData, authToken);
+
+        assertEquals(1, servedApplicationDetails.getEmailNotificationDetails().size());
+        String attachedDocs = servedApplicationDetails.getEmailNotificationDetails().get(0).getValue().getAttachedDocs();
+        assertTrue(attachedDocs.contains("C100.pdf"));
+        assertFalse(attachedDocs.contains(C9_DOCUMENT_FILENAME));
+        assertFalse(attachedDocs.contains(SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH));
     }
 
     @Test
