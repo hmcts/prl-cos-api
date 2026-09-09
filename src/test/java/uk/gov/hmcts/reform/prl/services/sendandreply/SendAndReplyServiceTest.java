@@ -4500,4 +4500,67 @@ public class SendAndReplyServiceTest {
         );
     }
 
+    @Test
+    public void shouldSetNullMessageContentInSendgridDataWhenMessageContentIsNull() {
+        PartyDetails applicant = getEmailApplicant();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder()
+            .id(applicant.getPartyId())
+            .value(applicant)
+            .build();
+
+        DynamicMultiSelectList externalMessageWhoToSendTo = DynamicMultiSelectList.builder()
+            .value(List.of(
+                DynamicMultiselectListElement.builder()
+                    .code(wrappedApplicant.getId().toString())
+                    .label(applicant.getFirstName() + " " + applicant.getLastName())
+                    .build()
+            ))
+            .build();
+
+        Message message = Message.builder()
+            .internalOrExternalMessage(InternalExternalMessageEnum.EXTERNAL)
+            .externalMessageWhoToSendTo(externalMessageWhoToSendTo)
+            .messageAbout(MessageAboutEnum.APPLICATION)
+            .messageSubject("message subject")
+            .messageContent(null)
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .chooseSendOrReply(SEND)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(wrappedApplicant))
+            .respondents(emptyList())
+            .sendOrReplyMessage(
+                SendOrReplyMessage.builder()
+                    .sendMessageObject(message)
+                    .respondToMessage(YesOrNo.No)
+                    .messages(emptyList())
+                    .build()
+            )
+            .build();
+
+        sendAndReplyService.sendNotificationToExternalParties(
+            caseData,
+            "authorisation"
+        );
+
+        ArgumentCaptor<SendgridEmailConfig> sendgridEmailConfigCaptor =
+            ArgumentCaptor.forClass(SendgridEmailConfig.class);
+
+        verify(sendgridService).sendEmailUsingTemplateWithAttachments(
+            eq(SendgridEmailTemplateNames.SEND_EMAIL_TO_EXTERNAL_PARTY),
+            eq("authorisation"),
+            sendgridEmailConfigCaptor.capture()
+        );
+
+        SendgridEmailConfig capturedConfig =
+            sendgridEmailConfigCaptor.getValue();
+
+        assertNull(
+            capturedConfig.getDynamicTemplateData().get("messageContent")
+        );
+    }
+
 }
