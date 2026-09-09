@@ -1182,7 +1182,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviserNameToReviewOrder(legalAdviser)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .build();
@@ -1195,7 +1195,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().legalAdviserNameToReviewOrder(legalAdviser).build())
+            .manageOrders(ManageOrders.builder().legalAdviser(legalAdviser).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1794,7 +1794,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviserNameToReviewOrder(legalAdviser)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(Yes)
             .build();
@@ -3165,7 +3165,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviserNameToReviewOrder(legalAdviser)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(YesOrNo.No)
             .ordersHearingDetails(hearingElementList)
@@ -3278,7 +3278,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviserNameToReviewOrder(legalAdviser)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(YesOrNo.No)
             .build();
@@ -3732,7 +3732,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviserNameToReviewOrder(legalAdviser)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
@@ -3840,7 +3840,7 @@ public class ManageOrdersControllerTest {
         StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .legalAdviserNameToReviewOrder(legalAdviser)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
