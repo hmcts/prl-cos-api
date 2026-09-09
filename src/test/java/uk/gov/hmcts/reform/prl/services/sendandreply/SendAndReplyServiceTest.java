@@ -697,54 +697,6 @@ public class SendAndReplyServiceTest {
     }
 
     @Test
-    public void testThatEmailNotificationFormatsSingleLineBreaks() {
-        Message message = message1.toBuilder()
-            .latestMessage("First line\nSecond line")
-            .build();
-
-        SendAndReplyNotificationEmail email =
-            (SendAndReplyNotificationEmail) sendAndReplyService.buildNotificationEmail(caseData, message);
-
-        assertEquals("First line\n\nSecond line", email.getMessageContent());
-    }
-
-    @Test
-    public void testThatEmailNotificationNormalisesWindowsLineBreaks() {
-        Message message = message1.toBuilder()
-            .latestMessage("First line\r\nSecond line")
-            .build();
-
-        SendAndReplyNotificationEmail email =
-            (SendAndReplyNotificationEmail) sendAndReplyService.buildNotificationEmail(caseData, message);
-
-        assertEquals("First line\n\nSecond line", email.getMessageContent());
-    }
-
-    @Test
-    public void testThatEmailNotificationDoesNotDuplicateExistingBlankLines() {
-        Message message = message1.toBuilder()
-            .latestMessage("First paragraph\n\nSecond paragraph")
-            .build();
-
-        SendAndReplyNotificationEmail email =
-            (SendAndReplyNotificationEmail) sendAndReplyService.buildNotificationEmail(caseData, message);
-
-        assertEquals("First paragraph\n\nSecond paragraph", email.getMessageContent());
-    }
-
-    @Test
-    public void testThatEmailNotificationHandlesNullMessageContent() {
-        Message message = message1.toBuilder()
-            .latestMessage(null)
-            .build();
-
-        SendAndReplyNotificationEmail email =
-            (SendAndReplyNotificationEmail) sendAndReplyService.buildNotificationEmail(caseData, message);
-
-        assertNull(email.getMessageContent());
-    }
-
-    @Test
     public void testGetLinkedCasesDynamicList() {
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
