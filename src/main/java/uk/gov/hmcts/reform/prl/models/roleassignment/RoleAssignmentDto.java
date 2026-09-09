@@ -21,6 +21,6 @@ public class RoleAssignmentDto {
     @JsonProperty("legalAdviserList")
     private final DynamicList legalAdviserList;
 
-    @JsonProperty("legalAdviserUser")
-    private final StaffUser legalAdviserUser;
+    @JsonProperty("legalAdviser")
+    private final StaffUser legalAdviser;
 }
