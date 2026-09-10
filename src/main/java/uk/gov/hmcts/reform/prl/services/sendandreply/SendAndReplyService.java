@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -2090,13 +2091,30 @@ public class SendAndReplyService {
         return dynamicData;
     }
 
+    /**
+     * Formats the message content for email by escaping HTML characters and replacing line breaks with <br> tags.
+     *
+     * @param messageContent The original message content.
+     * @return The formatted message content suitable for email.
+     */
+    private String formatMessageContentForEmail(String messageContent) {
+        if (messageContent == null) {
+            return null;
+        }
+
+        return HtmlUtils.htmlEscape(messageContent)
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+            .replace("\n", "<br>");
+    }
+
     private void setMessageDataForEmail(CaseData caseData, Message message, List<Document> allSelectedDocuments, Map<String, Object> dynamicData) {
         int documentSize = 0;
         if (CollectionUtils.isNotEmpty(allSelectedDocuments)) {
             documentSize = allSelectedDocuments.size();
         }
         dynamicData.put("subject", message.getMessageSubject());
-        dynamicData.put("messageContent", message.getMessageContent());
+        dynamicData.put("messageContent", formatMessageContentForEmail(message.getMessageContent()));
         dynamicData.put("attachmentType", "pdf");
         dynamicData.put("disposition", "attachment");
         dynamicData.put("documentSize", documentSize);
