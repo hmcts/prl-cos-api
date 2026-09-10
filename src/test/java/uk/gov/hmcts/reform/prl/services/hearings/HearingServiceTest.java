@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.clients.HmcHearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingException;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -33,6 +34,9 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 
@@ -51,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +75,18 @@ class HearingServiceTest {
 
     @Mock
     private HearingApiClient hearingApiClient;
+
+    @Mock
+    private HmcHearingApiClient hmcHearingApiClient;
+
+    @Mock
+    private LocationRefDataService locationRefDataService;
+
+    @Mock
+    private RefDataUserService refDataUserService;
+
+    @Mock
+    private SystemUserService systemUserService;
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
@@ -130,7 +147,10 @@ class HearingServiceTest {
     void getHearingsTestSuccess() {
 
         setUpHearingsMock();
-        when(hearingApiClient.getHearingDetails(
+        when(hmcHearingApiClient.getHearingDetails(
+            any(),
+            any(),
+            any(),
             any(),
             any(),
             any()
@@ -147,7 +167,7 @@ class HearingServiceTest {
     void getHearingsTestNoHearingReturned() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(null);
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
         assertEquals(null, hearingsResp);
@@ -157,7 +177,10 @@ class HearingServiceTest {
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
     void getHearingsTestException() {
-        when(hearingApiClient.getHearingDetails(
+        when(hmcHearingApiClient.getHearingDetails(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
             Mockito.any(),
             Mockito.any(),
             Mockito.any()
@@ -181,10 +204,8 @@ class HearingServiceTest {
 
         setUpHearingsMock();
 
-        when(hearingApiClient.getHearingDetails(
-            any(),
-            any(),
-            any()
+        when(hmcHearingApiClient.getHearingDetails(
+            any(), any(), any(), any(), any(), any()
         )).thenReturn(hearings);
 
         refDataCategoryValueMap.put("ABA5-FFH", "Full/Final hearing");
@@ -495,6 +516,165 @@ class HearingServiceTest {
             .caseHearings(Collections.singletonList(caseHearing))
             .build();
 
+    }
+
+    @Test
+    @DisplayName("getHearings enriches venue details from LocationRefDataService")
+    void getHearingsEnrichesVenueDetails() {
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
+            .hearingVenueId("VENUE1")
+            .build();
+        CaseHearing ch = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingID(1L)
+            .hearingDaySchedule(new ArrayList<>(List.of(schedule)))
+            .build();
+        Hearings hmcResponse = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber).hmctsServiceCode("ABA5")
+            .caseHearings(new ArrayList<>(List.of(ch))).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(hmcResponse);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(eq("VENUE1"), any()))
+            .thenReturn(java.util.Optional.of(uk.gov.hmcts.reform.prl.models.court.CourtVenue.builder()
+                .courtEpimmsId("VENUE1").venueName("Test Court").courtAddress("1 Test St").build()));
+
+        Hearings result = hearingService.getHearings(auth, caseReferenceNumber);
+
+        HearingDaySchedule enriched = result.getCaseHearings().get(0).getHearingDaySchedule().get(0);
+        assertEquals("Test Court", enriched.getHearingVenueName());
+        assertEquals("1 Test St", enriched.getHearingVenueAddress());
+        assertEquals("VENUE1", enriched.getHearingVenueLocationCode());
+    }
+
+    @Test
+    @DisplayName("getHearings enriches judge name from RefDataUserService")
+    void getHearingsEnrichesJudgeName() {
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
+            .hearingJudgeId("JUDGE1")
+            .build();
+        CaseHearing ch = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(1L)
+            .hearingDaySchedule(new ArrayList<>(List.of(schedule))).build();
+        Hearings hmcResponse = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber).hmctsServiceCode("ABA5")
+            .caseHearings(new ArrayList<>(List.of(ch))).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(hmcResponse);
+        when(refDataUserService.getAllJudicialUserDetails(any()))
+            .thenReturn(List.of(uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse.builder()
+                .personalCode("JUDGE1").fullName("Judge Test").build()));
+
+        Hearings result = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertEquals("Judge Test", result.getCaseHearings().get(0).getHearingDaySchedule().get(0).getHearingJudgeName());
+    }
+
+    @Test
+    @DisplayName("getHearings tolerates venue lookup failure")
+    void getHearingsSwallowsVenueLookupError() {
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
+            .hearingVenueId("VENUE1")
+            .build();
+        CaseHearing ch = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(1L)
+            .hearingDaySchedule(new ArrayList<>(List.of(schedule))).build();
+        Hearings hmcResponse = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber).hmctsServiceCode("ABA5")
+            .caseHearings(new ArrayList<>(List.of(ch))).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(hmcResponse);
+        when(locationRefDataService.getCourtDetailsFromEpimmsId(any(), any()))
+            .thenThrow(new RuntimeException("boom"));
+
+        Hearings result = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertNotNull(result);
+        // venue name stays null because lookup failed but call did not blow up
+        assertEquals(null, result.getCaseHearings().get(0).getHearingDaySchedule().get(0).getHearingVenueName());
+    }
+
+    @Test
+    @DisplayName("getHearings tolerates judge lookup failure")
+    void getHearingsSwallowsJudgeLookupError() {
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
+            .hearingJudgeId("JUDGE1")
+            .build();
+        CaseHearing ch = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(1L)
+            .hearingDaySchedule(new ArrayList<>(List.of(schedule))).build();
+        Hearings hmcResponse = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber).hmctsServiceCode("ABA5")
+            .caseHearings(new ArrayList<>(List.of(ch))).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(hmcResponse);
+        when(refDataUserService.getAllJudicialUserDetails(any())).thenThrow(new RuntimeException("boom"));
+
+        Hearings result = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertNotNull(result);
+        assertEquals(null, result.getCaseHearings().get(0).getHearingDaySchedule().get(0).getHearingJudgeName());
+    }
+
+    @Test
+    @DisplayName("getHearings skips enrichment when venueId and judgeId are null")
+    void getHearingsSkipsEnrichmentWhenIdsMissing() {
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
+            .build();
+        CaseHearing ch = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED").hearingType("ABA5-FFH").hearingID(1L)
+            .hearingDaySchedule(new ArrayList<>(List.of(schedule))).build();
+        Hearings hmcResponse = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber).hmctsServiceCode("ABA5")
+            .caseHearings(new ArrayList<>(List.of(ch))).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(hmcResponse);
+
+        Hearings result = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertNotNull(result);
+        Mockito.verifyNoInteractions(locationRefDataService);
+        Mockito.verifyNoInteractions(refDataUserService);
+    }
+
+    @Test
+    @DisplayName("getHearings skips enrichment for non-LISTED/AWAITING/COMPLETED hearings")
+    void getHearingsSkipsEnrichmentForOtherStatuses() {
+        HearingDaySchedule schedule = HearingDaySchedule.hearingDayScheduleWith()
+            .hearingStartDateTime(LocalDateTime.now().plusDays(1))
+            .hearingVenueId("VENUE1")
+            .hearingJudgeId("JUDGE1")
+            .build();
+        CaseHearing ch = CaseHearing.caseHearingWith()
+            .hmcStatus("CANCELLED").hearingType("ABA5-FFH").hearingID(1L)
+            .hearingDaySchedule(new ArrayList<>(List.of(schedule))).build();
+        Hearings hmcResponse = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber).hmctsServiceCode("ABA5")
+            .caseHearings(new ArrayList<>(List.of(ch))).build();
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(systemUserService.getSysUserToken()).thenReturn(auth);
+        when(hmcHearingApiClient.getHearingDetails(any(), any(), any(), any(), any(), any())).thenReturn(hmcResponse);
+
+        hearingService.getHearings(auth, caseReferenceNumber);
+
+        Mockito.verifyNoInteractions(locationRefDataService);
+        Mockito.verifyNoInteractions(refDataUserService);
     }
 }
 
