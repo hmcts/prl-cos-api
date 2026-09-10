@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
+import uk.gov.hmcts.reform.prl.clients.HmcHearingApiClient;
 import uk.gov.hmcts.reform.prl.exception.HearingException;
+import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AutomatedHearingResponse;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
@@ -23,6 +25,11 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
 import java.time.LocalDate;
@@ -37,6 +44,8 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -50,7 +59,15 @@ public class HearingService {
 
     private final HearingApiClient hearingApiClient;
 
+    private final HmcHearingApiClient hmcHearingApiClient;
+
     private final RefDataService refDataService;
+
+    private final SystemUserService systemUserService;
+
+    private final LocationRefDataService locationRefDataService;
+
+    private final RefDataUserService refDataUserService;
 
     @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
     private List<String> futureHearingStatusList;
@@ -58,11 +75,29 @@ public class HearingService {
     @Value("${refdata.category-id}")
     private String hearingTypeCategoryId;
 
+    @Value("${hearing_component.api.deployment-id:#{null}}")
+    private String hmctsDeploymentId;
+
+    @Value("${role-assignment.api.url:#{null}}")
+    private String roleAssignmentUrl;
+
+    @Value("${core_case_data.api.url:#{null}}")
+    private String dataStoreUrl;
+
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
 
         Hearings hearings = null;
         try {
-            hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
+            final String hmcUserToken = systemUserService.getSysUserToken();
+            hearings = hmcHearingApiClient.getHearingDetails(
+                hmcUserToken,
+                authTokenGenerator.generate(),
+                hmctsDeploymentId,
+                dataStoreUrl,
+                roleAssignmentUrl,
+                caseReferenceNumber
+            );
+            integrateVenueAndJudgeDetails(hearings);
             if (hearings != null) {
                 log.info(
                     "Fetched {} hearings from HMC for case {}",
@@ -211,6 +246,55 @@ public class HearingService {
         return !refDataCategoryValueMap.isEmpty() ? refDataCategoryValueMap.get(
             hearing.getHearingType()) : EMPTY_STRING;
 
+    }
+
+    private void integrateVenueAndJudgeDetails(Hearings hearings) {
+        if (hearings == null || hearings.getCaseHearings() == null) {
+            return;
+        }
+        String userToken = systemUserService.getSysUserToken();
+        for (CaseHearing caseHearing : hearings.getCaseHearings()) {
+            if (List.of(LISTED, AWAITING_HEARING_DETAILS, COMPLETED).contains(caseHearing.getHmcStatus())
+                && caseHearing.getHearingDaySchedule() != null) {
+                for (HearingDaySchedule hearingSchedule : caseHearing.getHearingDaySchedule()) {
+                    setHearingVenueDetails(hearingSchedule, hearingSchedule.getHearingVenueId(), userToken);
+                    setHearingJudgeName(hearingSchedule, hearingSchedule.getHearingJudgeId());
+                }
+            }
+        }
+    }
+
+    private void setHearingVenueDetails(HearingDaySchedule hearingSchedule, String venueId, String userToken) {
+        if (venueId == null) {
+            return;
+        }
+        try {
+            Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(venueId, userToken);
+            if (courtVenue.isPresent()) {
+                CourtVenue venue = courtVenue.get();
+                hearingSchedule.setHearingVenueName(venue.getVenueName());
+                hearingSchedule.setHearingVenueAddress(venue.getCourtAddress());
+                hearingSchedule.setHearingVenueLocationCode(venue.getCourtEpimmsId());
+            }
+        } catch (Exception e) {
+            log.error("Error while fetching court venue details for venueId {} - {}", venueId, e.getMessage());
+        }
+    }
+
+    private void setHearingJudgeName(HearingDaySchedule hearingSchedule, String judgeId) {
+        if (judgeId == null) {
+            return;
+        }
+        try {
+            List<JudicialUsersApiResponse> judgeDetails = refDataUserService.getAllJudicialUserDetails(
+                JudicialUsersApiRequest.builder().personalCode(new String[]{judgeId}).build()
+            );
+            if (judgeDetails != null && !judgeDetails.isEmpty()) {
+                hearingSchedule.setHearingJudgeName(judgeDetails.get(0).getFullName());
+            }
+        } catch (Exception e) {
+            log.error("Error while fetching judge details for judgeId {} - {}", judgeId, e.getMessage());
+        }
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
