@@ -117,7 +117,7 @@ class LegalAdviserMessageHandlerTest {
             .build();
     }
 
-    private static StaffUser createStaffUser(){
+    private static StaffUser createStaffUser() {
         return new StaffUser(SELECTED_LEGAL_ADVISER_IDAM_ID);
     }
 }
