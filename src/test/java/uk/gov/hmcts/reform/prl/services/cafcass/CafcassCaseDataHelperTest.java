@@ -495,6 +495,82 @@ class CafcassCaseDataHelperTest {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"amendOtherPeopleInTheCaseRevised", "otherPeopleInTheCaseRevised"})
+    void shouldReturnFalseWhenOtherPeopleSubmitOnlyReordersRegeneratedRelations(String eventId) {
+        Map<String, Object> firstRelation = Map.of(
+            "otherPeopleId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "otherPeopleFullName", "Sam Taylor",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndOtherPeopleRelation", "guardian",
+            "childLivesWith", "No"
+        );
+        Map<String, Object> secondRelation = Map.of(
+            "otherPeopleId", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "otherPeopleFullName", "Pat Taylor",
+            "childId", "dddddddd-dddd-dddd-dddd-dddddddddddd",
+            "childFullName", "Other Child",
+            "childAndOtherPeopleRelation", "grandParent",
+            "childLivesWith", "No"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("childAndOtherPeopleRelations", List.of(
+            element("11111111-1111-1111-1111-111111111111", secondRelation),
+            element("22222222-2222-2222-2222-222222222222", firstRelation)
+        ));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndOtherPeopleRelations", List.of(
+            element("33333333-3333-3333-3333-333333333333", firstRelation),
+            element("44444444-4444-4444-4444-444444444444", secondRelation)
+        ));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            eventId
+        ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"amendOtherPeopleInTheCaseRevised", "otherPeopleInTheCaseRevised"})
+    void shouldReturnFalseWhenOtherPeopleSubmitOnlyClearsInapplicableConfidentiality(String eventId) {
+        Map<String, Object> currentRelation = Map.of(
+            "otherPeopleId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "otherPeopleFullName", "Sam Taylor",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndOtherPeopleRelation", "guardian",
+            "childLivesWith", "No"
+        );
+        Map<String, Object> relationBefore = new HashMap<>(currentRelation);
+        relationBefore.put("isChildLivesWithPersonConfidential", "Yes");
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("childAndOtherPeopleRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            currentRelation
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndOtherPeopleRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            relationBefore
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            eventId
+        ));
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"amendChildDetailsRevised", "childDetailsRevised"})
     void shouldReturnFalseWhenOnlyRespondentRelationshipIdsAreRegenerated(String eventId) {
         Map<String, Object> currentRelation = Map.of(
@@ -618,6 +694,47 @@ class CafcassCaseDataHelperTest {
         )));
 
         assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            eventId
+        ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldReturnFalseWhenChildrenAndApplicantsSubmitOnlyReordersRegeneratedRelations(String eventId) {
+        Map<String, Object> firstRelation = Map.of(
+            "applicantId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "applicantFullName", "Alex Green",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndApplicantRelation", "mother",
+            "childLivesWith", "Yes"
+        );
+        Map<String, Object> secondRelation = Map.of(
+            "applicantId", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "applicantFullName", "Robin Brown",
+            "childId", "dddddddd-dddd-dddd-dddd-dddddddddddd",
+            "childFullName", "Other Child",
+            "childAndApplicantRelation", "father",
+            "childLivesWith", "No"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("childAndApplicantRelations", List.of(
+            element("11111111-1111-1111-1111-111111111111", secondRelation),
+            element("22222222-2222-2222-2222-222222222222", firstRelation)
+        ));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndApplicantRelations", List.of(
+            element("33333333-3333-3333-3333-333333333333", firstRelation),
+            element("44444444-4444-4444-4444-444444444444", secondRelation)
+        ));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
             caseDetails(caseData),
             caseDetails(caseDataBefore),
             eventId

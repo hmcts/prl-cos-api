@@ -108,6 +108,8 @@ public class CafcassCaseDataHelper {
             if (amendPartyAndRelationshipEvent) {
                 normaliseChildElementIds(caseDataMap);
                 removeElementIds(caseDataMap, "otherPeopleInTheCaseTable");
+                sortElementCollectionByValue(caseDataMap, "children");
+                sortElementCollectionByValue(caseDataMap, "otherPeopleInTheCaseTable");
             }
             normaliseRelationshipElementIds(caseDataMap, "childAndApplicantRelations", amendPartyAndRelationshipEvent);
             normaliseRelationshipElementIds(caseDataMap, "childAndRespondentRelations", amendPartyAndRelationshipEvent);
@@ -116,8 +118,30 @@ public class CafcassCaseDataHelper {
                 "childAndOtherPeopleRelations",
                 amendPartyAndRelationshipEvent
             );
+            sortElementCollectionByValue(caseDataMap, "childAndApplicantRelations");
+            sortElementCollectionByValue(caseDataMap, "childAndRespondentRelations");
+            sortElementCollectionByValue(caseDataMap, "childAndOtherPeopleRelations");
         }
         return caseDetailMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sortElementCollectionByValue(Map<?, ?> caseDataMap, String fieldName) {
+        Object collection = caseDataMap.get(fieldName);
+        if (collection instanceof List<?> elements) {
+            List<?> sortedElements = elements.stream()
+                .sorted((first, second) -> String.valueOf(getElementValue(first))
+                    .compareTo(String.valueOf(getElementValue(second))))
+                .toList();
+            ((Map<String, Object>) caseDataMap).put(fieldName, sortedElements);
+        }
+    }
+
+    private Object getElementValue(Object element) {
+        if (element instanceof Map<?, ?> elementMap) {
+            return elementMap.get("value");
+        }
+        return element;
     }
 
     @SuppressWarnings("unchecked")
@@ -171,6 +195,9 @@ public class CafcassCaseDataHelper {
         relationship.remove("childId");
         if (!"other".equalsIgnoreCase(String.valueOf(relationship.get("relationType")))) {
             relationship.remove("otherRelationDetails");
+        }
+        if (!"Yes".equalsIgnoreCase(String.valueOf(relationship.get("childLivesWith")))) {
+            relationship.remove("isChildLivesWithPersonConfidential");
         }
     }
 
