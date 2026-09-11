@@ -45,7 +45,8 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
     }
 
     private boolean isLastNameAndEmailAvailable(String[] judgeOrLegalAdvisorDetails) {
-        return (null != judgeOrLegalAdvisorDetails && judgeOrLegalAdvisorDetails.length == 2);
+        return null != judgeOrLegalAdvisorDetails && judgeOrLegalAdvisorDetails.length == 2
+            && null != judgeOrLegalAdvisorDetails[0] && null != judgeOrLegalAdvisorDetails[1];
     }
 
     private String[] splitLastNameAndEmailAddress(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
@@ -58,10 +59,10 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                 judgeOrLegalAdvisorDetails[1] = allocatedJudge.getJudgeEmail();
                 return judgeOrLegalAdvisorDetails;
             } else if (AllocatedJudgeTypeEnum.legalAdviser.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
-                String legalAdviserNameAndEmail = allocatedJudge.getLegalAdviserList().getValueLabel();
-                if (null != legalAdviserNameAndEmail) {
-                    return legalAdviserNameAndEmail.split("\\)")[0].split("\\(");
-                }
+                String[] judgeOrLegalAdvisorDetails = new String[2];
+                judgeOrLegalAdvisorDetails[0] = allocatedJudge.getLegalAdviserName();
+                judgeOrLegalAdvisorDetails[1] = allocatedJudge.getLegalAdviserEmail();
+                return judgeOrLegalAdvisorDetails;
             }
 
         }
