@@ -11,26 +11,28 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.Appointment;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUDGE_OR_LA_NEEDED;
+import static uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum.legalAdviser;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AllocatedJudgeServiceTest {
@@ -106,14 +108,18 @@ public class AllocatedJudgeServiceTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
+        StaffUser legalAdviserUser = StaffUser.builder().idamId("staff-id-1").build();
+
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        stringObjectMap.put("isJudgeOrLegalAdviser", AllocatedJudgeTypeEnum.legalAdviser);
+        stringObjectMap.put("isJudgeOrLegalAdviser", legalAdviser);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
-            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
-        AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,legalAdviserList,null);
-        assertEquals(AllocatedJudgeTypeEnum.legalAdviser,expectedResponse.getIsJudgeOrLegalAdviser());
-        assertNotNull(expectedResponse.getLegalAdviserList());
+        when(refDataUserService.getLegalAdviserDetails(legalAdviserUser)).thenReturn(
+            Optional.of(StaffProfile.builder().lastName("test1").emailId("test1@test.com").build()));
+
+        AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap, legalAdviserUser, refDataUserService);
+
+        assertEquals(legalAdviser, expectedResponse.getIsJudgeOrLegalAdviser());
+        assertNotNull(expectedResponse.getLegalAdviser());
     }
 
     @Test

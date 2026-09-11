@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -33,13 +33,13 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 public class AllocatedJudgeService {
 
 
-    public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, StaffUser legalAdviser,
                                                    RefDataUserService refDataUserService) {
-        return mapAllocatedJudge(caseDataUpdated, legalAdviserList, refDataUserService);
+        return mapAllocatedJudge(caseDataUpdated, legalAdviser, refDataUserService);
 
     }
 
-    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, StaffUser legalAdviser,
                                              RefDataUserService refDataUserService) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
         if (YesOrNo.No.getDisplayedValue().equals(caseDataUpdated.get(IS_SPECIFIC_JUDGE_OR_LA_NEEDED))
@@ -47,12 +47,12 @@ public class AllocatedJudgeService {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
-            buildAllocatedJudgeOrLegalAdvisor(caseDataUpdated, legalAdviserList, refDataUserService, allocatedJudgeBuilder);
+            buildAllocatedJudgeOrLegalAdvisor(caseDataUpdated, legalAdviser, refDataUserService, allocatedJudgeBuilder);
         }
         return allocatedJudgeBuilder.build();
     }
 
-    private static void buildAllocatedJudgeOrLegalAdvisor(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    private static void buildAllocatedJudgeOrLegalAdvisor(Map<String, Object> caseDataUpdated, StaffUser legalAdviser,
                                                           RefDataUserService refDataUserService,
                                                           AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder) {
         if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
@@ -73,9 +73,9 @@ public class AllocatedJudgeService {
                                                           ? judgeDetails.get(0).getAppointments().get(0).getAppointment()
                                                           : null);
                 }
-            } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
+            } else if (null != legalAdviser && null != legalAdviser.getIdamId()) {
                 allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
-                allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
+                allocatedJudgeBuilder.legalAdviser(legalAdviser);
             }
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
         }
