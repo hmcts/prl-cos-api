@@ -70,6 +70,7 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -5931,8 +5932,64 @@ public class ServiceOfApplicationServiceTest {
             caseDataMap1, Event.SOA.getId()
         );
         assertNull(caseDataMap1.get(APPLICANTS));
+    }
 
+    @Test
+    public void shouldSendOtherPackSuccessfully() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
 
+        PartyDetails otherParty = PartyDetails.builder()
+            .partyId(testUuid)
+            .firstName("Other")
+            .lastName("Party")
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+        List<Element<PartyDetails>> selectedOthers = List.of(element(otherParty));
+
+        Document packDocument = Document.builder().documentFileName("pack.pdf").build();
+        List<Document> unmodifiableList = List.of(packDocument);
+
+        Document coverSheet = Document.builder().documentFileName("cover-sheet.pdf").build();
+        when(serviceOfApplicationPostService.getCoverSheets(
+            eq(caseData),
+            eq(TEST_AUTH),
+            eq(otherParty.getAddress()),
+            eq(otherParty.getLabelForDynamicList()),
+            anyString()
+        )).thenReturn(List.of(coverSheet));
+
+        when(serviceOfApplicationPostService.sendPostNotificationToParty(
+            eq(caseData),
+            eq(TEST_AUTH),
+            eq(selectedOthers.getFirst()),
+            anyList(),
+            eq("others")
+        )).thenAnswer(invocation -> {
+            List<Document> documentsSentInPost = invocation.getArgument(3);
+            assertEquals(2, documentsSentInPost.size());
+            assertTrue(documentsSentInPost.contains(packDocument));
+            assertTrue(documentsSentInPost.contains(coverSheet));
+            return BulkPrintDetails.builder().bulkPrintId("bulk-print-id").build();
+        });
+
+        List<Element<BulkPrintDetails>> result = serviceOfApplicationService.sendPostToOtherPeopleInCase(
+            caseData,
+            TEST_AUTH,
+            selectedOthers,
+            unmodifiableList,
+            "others"
+        );
+
+        assertEquals(1, result.size());
+        verify(serviceOfApplicationPostService, times(1)).sendPostNotificationToParty(
+            eq(caseData),
+            eq(TEST_AUTH),
+            eq(selectedOthers.getFirst()),
+            anyList(),
+            eq("others")
+        );
     }
 }
 
