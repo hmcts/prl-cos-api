@@ -279,5 +279,4 @@ public class RefDataUserService {
         return DynamicListElement.builder().code(key).label(value).build();
     }
 
-
 }

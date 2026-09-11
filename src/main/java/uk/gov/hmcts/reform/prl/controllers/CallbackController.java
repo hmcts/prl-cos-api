@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -473,7 +472,6 @@ public class CallbackController {
 
             GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
                 caseDataUpdated,
-                caseData.getLegalAdviserList(),
                 refDataUserService
             );
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
@@ -490,11 +488,10 @@ public class CallbackController {
             caseDataUpdated.putAll(allTabsFields);
             if (caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING) != null
                 && (gatekeepingDetails.getJudgeName() != null
-                || (gatekeepingDetails.getLegalAdviserList() != null
-                && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems())))) {
+                || (gatekeepingDetails.getLegalAdviser() != null))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
-                    .legalAdviserList(gatekeepingDetails.getLegalAdviserList())
+                    .legalAdviser(gatekeepingDetails.getLegalAdviser())
                     .build();
 
                 roleAssignmentService.createRoleAssignment(
