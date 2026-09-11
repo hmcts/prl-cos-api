@@ -369,7 +369,8 @@ public class ServiceOfApplicationService {
 
                 if (null != other.getValue().getAddress()
                     && null != other.getValue().getAddress().getAddressLine1()) {
-                    packN.addAll(serviceOfApplicationPostService
+                    ArrayList<Document> packWithCoverSheets = new ArrayList<>(packN);
+                    packWithCoverSheets.addAll(serviceOfApplicationPostService
                                      .getCoverSheets(caseData, authorization,
                                                      other.getValue().getAddress(),
                                                      other.getValue().getLabelForDynamicList(),
@@ -379,7 +380,7 @@ public class ServiceOfApplicationService {
                         caseData,
                         authorization,
                         other,
-                        packN,
+                        packWithCoverSheets,
                         servedParty
                     )));
                 }
