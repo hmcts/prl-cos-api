@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.sendmessages.InternalMessageWhoToSendToEnum;
-import uk.gov.hmcts.reform.prl.mapper.dynamiclistelement.LegalAdviserDynamicListElementBiConverter;
-import uk.gov.hmcts.reform.prl.mapper.dynamiclistelement.LegalAdviserIdamId;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_IDAM_ID;
 
@@ -19,7 +20,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_ASSIGNEE_I
 @Slf4j
 public class LegalAdviserMessageHandler implements MessageHandler {
 
-    private final LegalAdviserDynamicListElementBiConverter legalAdviserDynamicListElementBiConverter;
+    private final RefDataUserService refDataUserService;
 
     @Override
     public boolean canHandle(MessageRequest messageRequest) {
@@ -31,35 +32,32 @@ public class LegalAdviserMessageHandler implements MessageHandler {
     }
 
     private boolean isMessageToSelectedLegalAdviser(MessageRequest request) {
-        return getSelectedLegalAdviserIdamId(request.getCaseData()) != null;
+        StaffUser legalAdviser = getLegalAdviserSelection(request.getCaseData());
+        return legalAdviser != null && legalAdviser.getIdamId() != null;
     }
 
     @Override
     public void handle(MessageRequest messageRequest) {
         Message message = messageRequest.getMessage();
-        DynamicListElement selectedElement = getLegalAdviserSelection(messageRequest.getCaseData());
-        LegalAdviserIdamId selectedLegalAdviser = legalAdviserDynamicListElementBiConverter
-            .convertFromDynamicListElement(selectedElement);
-        message.setLegalAdviserEmail(selectedLegalAdviser.getEmail());
-        message.setLegalAdviserName(selectedLegalAdviser.getFullName());
-
-        String idamId = getSelectedLegalAdviserIdamId(messageRequest.getCaseData());
+        StaffUser legalAdviser = getLegalAdviserSelection(messageRequest.getCaseData());
+        String idamId = null;
+        if (legalAdviser != null) {
+            Optional<StaffProfile> la = refDataUserService.getLegalAdviserUserDetails(legalAdviser);
+            if (la.isPresent()) {
+                message.setLegalAdviserEmail(la.get().getEmailId());
+                message.setLegalAdviserName(String.format("%s %s", la.get().getFirstName(), la.get().getLastName()));
+                idamId = la.get().getId();
+            }
+        }
         messageRequest.getCaseDataMap().put(TASK_ASSIGNEE_IDAM_ID, idamId);
     }
 
-    private String getSelectedLegalAdviserIdamId(CaseData caseData) {
-        DynamicListElement selectedElement = getLegalAdviserSelection(caseData);
-        return selectedElement != null ? selectedElement.getCode() : null;
-    }
-
-    private DynamicListElement getLegalAdviserSelection(CaseData caseData) {
+    private StaffUser getLegalAdviserSelection(CaseData caseData) {
         SendOrReplyMessage sendOrReplyMessage = caseData.getSendOrReplyMessage();
 
-        DynamicList legalAdviserList = switch (caseData.getChooseSendOrReply()) {
-            case SEND -> sendOrReplyMessage.getSendMessageObject().getLegalAdviserList();
-            case REPLY -> sendOrReplyMessage.getReplyMessageObject().getLegalAdviserList();
+        return switch (caseData.getChooseSendOrReply()) {
+            case SEND -> sendOrReplyMessage.getSendMessageObject().getLegalAdviser();
+            case REPLY -> sendOrReplyMessage.getReplyMessageObject().getLegalAdviser();
         };
-
-        return legalAdviserList != null ? legalAdviserList.getValue() : null;
     }
 }
