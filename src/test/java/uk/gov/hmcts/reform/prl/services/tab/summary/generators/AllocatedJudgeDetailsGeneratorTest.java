@@ -6,8 +6,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -42,7 +41,7 @@ public class AllocatedJudgeDetailsGeneratorTest {
         CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").allocatedJudge(
             uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge.builder().isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
                 .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes)
-                .legalAdviserList(DynamicList.builder().value(DynamicListElement.builder().code("test1").label("legalAdvisor1").build()).build())
+                .legalAdviser(StaffUser.builder().idamId("123").build())
                 .build()).build());
 
         assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(

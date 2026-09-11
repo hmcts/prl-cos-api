@@ -164,7 +164,7 @@ public class ListOnNoticeControllerTest {
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
             .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
             .thenReturn(allocatedJudge);
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
         String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
@@ -208,7 +208,7 @@ public class ListOnNoticeControllerTest {
             "field4", "value4",
             "field5", "value5"
         );
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
             .thenReturn(allocatedJudge);
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
