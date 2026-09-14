@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -38,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "createBundleApi", port = "8899")
 @ContextConfiguration(
-    classes = {BundleApiConsumerApplication.class, IdamApiConsumerApplication.class}
+    classes = {BundleApiConsumerApplication.class, IdamApiConsumerApplication.class},
+    initializers = ConfigDataApplicationContextInitializer.class
 )
 @TestPropertySource(
     properties = {"bundle.api.url=http://localhost:8899","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
-        "hearing_component.api.feign-url=",
         "refdata.api.url=",
         "courtfinder.api.url=",
         "fees-register.api.url=",
