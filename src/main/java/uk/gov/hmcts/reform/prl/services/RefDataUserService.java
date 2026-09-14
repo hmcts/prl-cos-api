@@ -170,7 +170,7 @@ public class RefDataUserService {
         }
     }
 
-    public Optional<StaffProfile> getLegalAdviserUserDetails(StaffUser legalAdviser) {
+    public Optional<StaffProfile> getLegalAdviserDetails(StaffUser legalAdviser) {
         if (legalAdviser == null || StringUtils.isBlank(legalAdviser.getIdamId())) {
             return Optional.empty();
         }
