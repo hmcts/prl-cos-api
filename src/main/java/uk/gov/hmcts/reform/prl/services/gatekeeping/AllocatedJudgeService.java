@@ -12,10 +12,12 @@ import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.models.dto.legalofficer.StaffProfile;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
@@ -74,8 +76,16 @@ public class AllocatedJudgeService {
                                                           : null);
                 }
             } else if (null != legalAdviser && null != legalAdviser.getIdamId()) {
-                allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
+                allocatedJudgeBuilder.isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser);
                 allocatedJudgeBuilder.legalAdviser(legalAdviser);
+
+                Optional<StaffProfile> legalAdviserDetails =
+                    refDataUserService.getLegalAdviserDetails(legalAdviser);
+
+                legalAdviserDetails.ifPresent(details -> {
+                    allocatedJudgeBuilder.legalAdviserName(details.getLastName());
+                    allocatedJudgeBuilder.legalAdviserEmail(details.getEmailId());
+                });
             }
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
         }
