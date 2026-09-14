@@ -74,7 +74,7 @@ class LegalAdviserMessageHandlerTest {
     void testHandle(SendOrReply sendOrReply) {
         StaffProfile la = new StaffProfile(SELECTED_LEGAL_ADVISER_IDAM_ID, "John", "Smith", "userType", "legaladviser@justice.gov.uk");
         MessageRequest messageRequest = messageRequest(sendOrReply, LEGAL_ADVISER, createStaffUser());
-        when(refDataUserService.getLegalAdviserUserDetails(any(StaffUser.class)))
+        when(refDataUserService.getLegalAdviserDetails(any(StaffUser.class)))
             .thenReturn(java.util.Optional.of(la));
         legalAdviserMessageHandler.handle(messageRequest);
 

@@ -42,7 +42,7 @@ public class LegalAdviserMessageHandler implements MessageHandler {
         StaffUser legalAdviser = getLegalAdviserSelection(messageRequest.getCaseData());
         String idamId = null;
         if (legalAdviser != null) {
-            Optional<StaffProfile> la = refDataUserService.getLegalAdviserUserDetails(legalAdviser);
+            Optional<StaffProfile> la = refDataUserService.getLegalAdviserDetails(legalAdviser);
             if (la.isPresent()) {
                 message.setLegalAdviserEmail(la.get().getEmailId());
                 message.setLegalAdviserName(String.format("%s %s", la.get().getFirstName(), la.get().getLastName()));
