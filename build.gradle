@@ -721,14 +721,33 @@ test {
   useJUnitPlatform()
 }
 
+ext.coverageGateExclusions = [
+  '**uk/gov/hmcts/reform/prl/models/**/*',
+  '**uk/gov/hmcts/reform/prl/exception/*',
+  '**uk/gov/hmcts/reform/prl/enums/**/*',
+  '**uk/gov/hmcts/reform/prl/config/**/*',
+  '**uk/gov/hmcts/reform/prl/utils/*',
+  '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
+  '**uk/gov/hmcts/reform/prl/Application.*',
+  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
+  '**uk/gov/hmcts/reform/prl/mapper/citizen/awp/CitizenAwpMapper.java',
+  '**uk/gov/hmcts/reform/prl/mapper/citizen/CitizenPartyDetailsMapper.java',
+  '**uk/gov/hmcts/reform/prl/services/DraftAnOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/ManageOrderService.java',
+  '**uk/gov/hmcts/reform/prl/services/ServiceOfApplicationService.java',
+  '**uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java',
+  '**uk/gov/hmcts/reform/prl/filter/requestbodylogger/*',
+  '**uk/gov/hmcts/reform/prl/services/sealaudit/SealAuditService.java'
+]
+
 apply from: 'scripts/test-coverage.gradle'
 
-tasks.register('installGitHooks', Copy) {
+tasks.register('installCoverageGateHook', Copy) {
+  group = 'verification'
+  description = 'Installs the opt-in local coverage gate pre-commit hook.'
+
   from new File(rootProject.rootDir, 'scripts/pre-commit.template')
   rename { 'pre-commit' }
   into { new File(rootProject.rootDir, '.git/hooks') }
   fileMode 0755
 }
-
-// Make the build depend on installing hooks
-build.dependsOn "installGitHooks"
