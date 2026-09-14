@@ -14,51 +14,32 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import uk.gov.hmcts.reform.idam.client.IdamApi;
 import uk.gov.hmcts.reform.prl.clients.FeesRegisterApi;
-import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 
 import java.math.BigDecimal;
 
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.clients"})
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "feeRegister_lookUp", port = "8881")
-@ContextConfiguration(
-    classes = {FeesRegisterApiConsumerApplication.class, IdamApiConsumerApplication.class}
-)
-@TestPropertySource(
-    properties = {"bundle.api.url=http://localhost:8899","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
-        "fis_hearing.api.url=localhost:5000",
-        "refdata.api.url=",
-        "courtfinder.api.url=",
-        "fees-register.api.url=http://localhost:8881",
-        "fis_hearing.api.url=",
-        "judicialUsers.api.url=",
-        "locationfinder.api.url=",
-        "rd_professional.api.url=",
-        "payments.api.url=",
-        "pba.validation.service.api.baseurl=",
-        "staffDetails.api.url=",
-        "amRoleAssignment.api.url=",
-        "core_case_data.api.url=",
-        "postcodelookup.api.url="
-    }
-)
-
+@TestPropertySource(properties = {"fees-register.api.url=http://localhost:8881"})
 @PactFolder("pacts")
+@SpringBootTest
+@ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class FeeApiConsumerTest {
 
     @Autowired
     FeesRegisterApi feesRegisterApi;
 
-    @Autowired
-    IdamApi idamApi;
 
     @Pact(provider = "feeRegister_lookUp", consumer = "prl_cos")
     private RequestResponsePact generateFeeWithHearingPact(PactDslWithProvider builder) {

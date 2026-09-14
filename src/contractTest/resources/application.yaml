@@ -645,7 +645,8 @@ sendandreply:
 
 hearing_component:
   api:
-    feign-url: http://localhost:5000
+    feign-url: ${HMC_HEARING_API_BASEURL:http://localhost:5000}
+    deployment-id: ${HMC_DEPLOYMENT_ID:}
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
   hearingStatusesToFilter: COMPLETED, AWAITING_ACTUALS
 
