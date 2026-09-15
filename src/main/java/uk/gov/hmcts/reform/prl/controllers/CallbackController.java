@@ -472,6 +472,7 @@ public class CallbackController {
 
             GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
                 caseDataUpdated,
+                caseData.getLegalAdviserList(),
                 refDataUserService
             );
             caseData = caseData.toBuilder().gatekeepingDetails(gatekeepingDetails).build();
@@ -491,6 +492,7 @@ public class CallbackController {
                 || (gatekeepingDetails.getLegalAdviser() != null))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
+                    .legalAdviserList(gatekeepingDetails.getLegalAdviserList())
                     .legalAdviser(gatekeepingDetails.getLegalAdviser())
                     .build();
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
@@ -31,13 +32,13 @@ public class GatekeepingDetailsService {
 
     private final RoleAssignmentService roleAssignmentService;
 
-    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated,
+    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                     RefDataUserService refDataUserService) {
-        return mapGatekeepingDetails(caseDataUpdated, refDataUserService);
+        return mapGatekeepingDetails(caseDataUpdated, legalAdviserList, refDataUserService);
 
     }
 
-    private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated,
+    private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
@@ -64,6 +65,7 @@ public class GatekeepingDetailsService {
                 && null != caseDataUpdated.get("legalAdviser")) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
+                gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
                 gatekeepingDetailsBuilder.legalAdviser(StaffUser.builder()
                                                                .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_USER))[0]).build());
             }
