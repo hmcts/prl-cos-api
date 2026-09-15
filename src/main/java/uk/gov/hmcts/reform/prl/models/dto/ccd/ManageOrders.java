@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
@@ -237,7 +238,8 @@ public class ManageOrders implements MappableObject {
     private final JudicialUser nameOfJudgeToReviewOrder;
     @JsonProperty("nameOfLaToReviewOrder")
     private final DynamicList nameOfLaToReviewOrder;
-
+    @JsonProperty("legalAdviser")
+    private final StaffUser legalAdviser;
     @JsonProperty("previewUploadedOrder")
     private Document previewUploadedOrder;
     @JsonProperty("orderUploadedAsDraftFlag")

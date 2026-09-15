@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_USER;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 
@@ -62,6 +64,13 @@ public class GatekeepingDetailsService {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
                 gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
+            } else if (SendToGatekeeperTypeEnum.legalAdviser.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
+                && null != caseDataUpdated.get("legalAdviser")) {
+                gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
+                gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
+                gatekeepingDetailsBuilder.legalAdviser(StaffUser.builder()
+                                                               .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_USER))[0]).build());
             }
         }
         return gatekeepingDetailsBuilder.build();

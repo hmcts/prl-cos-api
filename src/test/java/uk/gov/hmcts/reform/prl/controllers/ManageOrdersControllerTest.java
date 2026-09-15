@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
@@ -1178,11 +1179,10 @@ public class ManageOrdersControllerTest {
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+        StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .build();
@@ -1195,7 +1195,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().nameOfLaToReviewOrder(dynamicList).build())
+            .manageOrders(ManageOrders.builder().legalAdviser(legalAdviser).build())
             .applicantCaseName("TestCaseName")
             .applicantSolicitorEmailAddress("test@test.com")
             .applicants(listOfApplicants)
@@ -1791,11 +1791,10 @@ public class ManageOrdersControllerTest {
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+        StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(Yes)
             .build();
@@ -3163,11 +3162,10 @@ public class ManageOrdersControllerTest {
         List<Element<HearingData>> hearingElementList = new ArrayList<>();
         hearingElementList.add(element(HearingData.builder().build()));
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+        StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(YesOrNo.No)
             .ordersHearingDetails(hearingElementList)
@@ -3277,11 +3275,10 @@ public class ManageOrdersControllerTest {
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+        StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(YesOrNo.No)
             .build();
@@ -3732,11 +3729,10 @@ public class ManageOrdersControllerTest {
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+        StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
@@ -3841,11 +3837,10 @@ public class ManageOrdersControllerTest {
         Element<String> wrappedCafcass = Element.<String>builder().value(cafcassEmail).build();
         List<Element<String>> listOfCafcassEmail = Collections.singletonList(wrappedCafcass);
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-            .build()).build();
+        StaffUser legalAdviser = new StaffUser("Geoff");
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .nameOfLaToReviewOrder(dynamicList)
+            .legalAdviser(legalAdviser)
             .cafcassEmailAddress(listOfCafcassEmail)
             .isCaseWithdrawn(No)
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
