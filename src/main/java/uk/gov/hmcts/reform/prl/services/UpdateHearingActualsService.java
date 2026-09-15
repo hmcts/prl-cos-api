@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Must;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Query;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.QueryParam;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Should;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.request.Sort;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.request.StateFilter;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -36,18 +37,21 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -56,7 +60,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 public class UpdateHearingActualsService {
 
     private static final ZoneId UK_ZONE = ZoneId.of("Europe/London");
-    private static final String C100 = "C100";
+    @Value("${update-hearing-actuals.concurrent-request}")
+    private int concurrentRequest;
 
     private final SystemUserService systemUserService;
     private final AuthTokenGenerator authTokenGenerator;
@@ -66,132 +71,287 @@ public class UpdateHearingActualsService {
 
     private final ObjectMapper objectMapper;
 
-    @Value("${ccd.elastic-search-api.result-size}")
-    private String ccdElasticSearchApiResultSize;
+    private static final String ES_PAGE_SIZE = "100";
 
 
     public void updateHearingActuals() {
 
         //Fetch all cases in Hearing state with a hearing today
         log.info("Running Hearing actual task cron job...");
-        List<CaseDetails> caseDetailsList = retrieveCasesWithHearingToday();
-        try {
-            if (isNotEmpty(caseDetailsList)) {
-                log.info("Cases exist with current hearing");
-                Map<String, List<String>> hearingsForToday = fetchAndFilterHearingsForTodaysDate(
-                    getListOfCaseidsForHearings(caseDetailsList));
-                hearingsForToday.forEach(processHearings(caseDetailsList));
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        QueryParam.QueryParamBuilder queryParamBuilder = QueryParam.builder();
+        Semaphore hearingSemaphore = new Semaphore(concurrentRequest);
+        Semaphore caseSemaphore = new Semaphore(concurrentRequest);
+        String userToken = systemUserService.getSysUserToken();
+        String s2sToken = authTokenGenerator.generate();
+        LocalDate currentDate = LocalDate.now();
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            String searchAfter = "";
+
+            while (true) {
+                Function<String, QueryParam.QueryParamBuilder> queryParamFunction =  caseId -> caseId.isEmpty()
+                    ? queryParamBuilder
+                    : queryParamBuilder.searchAfter(List.of(caseId));
+
+                List<CaseDetails> caseDetails = retrieveCasesWithHearingToday(
+                    queryParamFunction,
+                    searchAfter
+                );
+
+                if (caseDetails.isEmpty()) {
+                    break;
+                }
+
+                processCaseBatch(
+                    executor,
+                    hearingSemaphore,
+                    caseSemaphore,
+                    userToken,
+                    s2sToken,
+                    currentDate,
+                    caseDetails
+                );
+
+                searchAfter = caseDetails.getLast().getId().toString();
+                log.info("search after value {}", searchAfter);
             }
         } catch (Exception e) {
             log.error("Error while updating hearing actuals", e);
         }
+
     }
 
-    private BiConsumer<String, List<String>> processHearings(List<CaseDetails> caseDetailsList) {
+    private void processCaseBatch(
+        ExecutorService executor,
+        Semaphore hearingSemaphore,
+        Semaphore caseSemaphore,
+        String userToken,
+        String s2sToken,
+        LocalDate currentDate,
+        List<CaseDetails> caseDetails) {
+
+        Map<String, List<String>> hearingsForToday = fetchAndFilterHearingsForTodaysDate(
+                executor,
+                hearingSemaphore,
+                userToken,
+                s2sToken,
+                getListOfCaseidsForHearings(caseDetails));
+
+        Map<String, CaseDetails> caseDetailsById = caseDetails.stream()
+                .collect(Collectors.toMap(
+                    caseDetail -> String.valueOf(caseDetail.getId()),
+                    Function.identity()));
+
+        hearingsForToday.forEach(
+            process(
+                executor,
+                caseSemaphore,
+                caseDetailsById,
+                currentDate));
+    }
+
+    private BiConsumer<String, List<String>> process(ExecutorService executor,
+                                                     Semaphore caseSemaphore,
+                                                     Map<String, CaseDetails> caseDetailsById,
+                                                     LocalDate currentDate) {
         return (caseId, hearingIds) -> {
-            CaseDetails caseDetail = caseDetailsList.stream()
-                .filter(caseDetails -> String.valueOf(caseDetails.getId()).equals(caseId))
-                .findFirst().orElse(null);
-
-            if (nonNull(caseDetail)) {
-                CaseData caseData = CaseUtils.getCaseData(caseDetail, objectMapper);
-
-                Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId = new LinkedHashMap<>();
-                nullSafeCollection(caseData.getUpdateHearingActualTracking())
-                    .forEach(e -> trackingByHearingId.put(e.getValue().getHearingId(), e));
-                hearingIds.forEach(hearingId -> processIndividualHearing(caseId, hearingId, trackingByHearingId));
+            CaseDetails caseDetails = caseDetailsById.get(caseId);
+            if (caseDetails != null) {
+                submitCaseProcessing(
+                    executor,
+                    caseSemaphore,
+                    caseDetails,
+                    hearingIds,
+                    currentDate
+                );
             }
-
         };
     }
 
-    private void processIndividualHearing(String caseId, String hearingId, Map<String, Element<UpdateHearingActualTracking>> trackingByHearingId) {
-        Element<UpdateHearingActualTracking> entry = trackingByHearingId.get(hearingId);
-
-        if (isNull(entry) || isNull(entry.getValue().getLastFiredDate())) {
-            LocalDate today = LocalDate.now();
-            if (entry != null) {
-                entry.getValue().setLastFiredDate(today);
-            } else {
-                UpdateHearingActualTracking updateHearingActualTracking = UpdateHearingActualTracking.builder()
-                    .hearingId(hearingId)
-                    .lastFiredDate(today)
-                    .build();
-                trackingByHearingId.put(
-                    hearingId,
-                    Element.<UpdateHearingActualTracking>builder().id(UUID.randomUUID())
-                        .value(updateHearingActualTracking)
-                        .build()
-                );
-            }
-            Map<String, Object> caseDataUpdated = new HashMap<>();
-            caseDataUpdated.put(
-                "updateHearingActualTracking",
-                new ArrayList<>(trackingByHearingId.values())
-            );
-
-            triggerSystemEventForWorkAllocationTask(
-                caseId, CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue(), caseDataUpdated);
-        } else {
-            log.info("UpdateHearingActual Task has already been created for hearingId {}", hearingId);
+    private void submitCaseProcessing(
+        ExecutorService executor,
+        Semaphore semaphore,
+        CaseDetails caseDetails,
+        List<String> hearingIds,
+        LocalDate currentDate) {
+        try {
+            log.info("case semaphore permit count {}", semaphore.availablePermits());
+            semaphore.acquire();
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            executor.submit(() -> {
+                try {
+                    processHearing(caseData, hearingIds, currentDate);
+                } catch (Exception e) {
+                    log.error("Error while processing case {}", caseDetails.getId(), e);
+                } finally {
+                    semaphore.release();
+                }
+            });
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Interrupted while submitting case {}", caseDetails.getId(), e);
         }
     }
 
+    private void processHearing(CaseData searchCaseData,
+                                List<String> hearingIds,
+                                LocalDate currentDate) {
+        for (String hearingId : hearingIds) {
+            if (isAlreadyProcessedToday(searchCaseData, hearingId, currentDate)) {
+                log.info("Skipping case {} and hearing {} as it has already been processed today",
+                         searchCaseData.getId(),
+                         hearingId);
+                continue;
 
+            }
+            log.info("Firing for case {} and hearing {}",
+                     searchCaseData.getId(),
+                     hearingId);
+            String caseId = String.valueOf(searchCaseData.getId());
+            StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(
+                caseId,
+                CaseEvent.ENABLE_UPDATE_HEARING_ACTUAL_TASK.getValue()
+            );
+            CaseData caseData = startAllTabsUpdateDataContent.caseData();
+            List<Element<UpdateHearingActualTracking>> trackingByHearingIds = Optional.ofNullable(caseData.getUpdateHearingActualTracking())
+                .orElse(new ArrayList<>());
 
-    private Map<String, List<String>> fetchAndFilterHearingsForTodaysDate(List<String> listOfCaseidsForHearings) {
-        return hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(
-            systemUserService.getSysUserToken(),
-            authTokenGenerator.generate(),
-            listOfCaseidsForHearings
-        );
+            Map<String, Object> updatedCaseData = getUpdatedCaseData(hearingId, trackingByHearingIds, currentDate);
+            allTabService.submitAllTabsUpdate(
+                startAllTabsUpdateDataContent.authorisation(),
+                caseId,
+                startAllTabsUpdateDataContent.startEventResponse(),
+                startAllTabsUpdateDataContent.eventRequestData(),
+                updatedCaseData
+            );
+        }
+    }
+
+    private static boolean isAlreadyProcessedToday(CaseData searchCaseData,
+                                                   String hearingId,
+                                                   LocalDate currentDate) {
+        return Optional.ofNullable(searchCaseData.getUpdateHearingActualTracking())
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(Element::getValue)
+            .anyMatch(tracking ->
+                          hearingId.equals(tracking.getHearingId())
+                              && currentDate.equals(tracking.getLastFiredDate()));
+    }
+
+    private  Map<String, Object> getUpdatedCaseData(String hearingId,
+                                                    List<Element<UpdateHearingActualTracking>> trackingByHearingIds,
+                                                    LocalDate currentDate) {
+        UpdateHearingActualTracking updateHearingActualTracking = trackingByHearingIds.stream()
+            .map(Element::getValue)
+            .filter(value -> hearingId.equals(value.getHearingId()))
+            .findFirst()
+            .orElseGet(() -> {
+                UpdateHearingActualTracking newTracking = UpdateHearingActualTracking.builder()
+                    .hearingId(hearingId)
+                    .build();
+                trackingByHearingIds.add(Element.<UpdateHearingActualTracking>builder().id(UUID.randomUUID())
+                                             .value(newTracking)
+                                             .build());
+                return newTracking;
+            });
+        updateHearingActualTracking.setLastFiredDate(currentDate);
+
+        return Map.of("updateHearingActualTracking",
+                      trackingByHearingIds);
     }
 
 
-    private void triggerSystemEventForWorkAllocationTask(String caseId, String caseEvent, Map<String, Object> caseDataUpdated) {
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = allTabService.getStartUpdateForSpecificEvent(caseId, caseEvent);
-        allTabService.submitAllTabsUpdate(
-            startAllTabsUpdateDataContent.authorisation(),
-            caseId,
-            startAllTabsUpdateDataContent.startEventResponse(),
-            startAllTabsUpdateDataContent.eventRequestData(),
-            caseDataUpdated
-        );
+    private Map<String, List<String>> fetchAndFilterHearingsForTodaysDate(ExecutorService executor,
+                                                                          Semaphore hearingSemaphore,
+                                                                          String userToken,
+                                                                          String s2sToken,
+                                                                          List<String> listOfCaseidsForHearings) {
+        List<Future<Map<String, List<String>>>> futures = new ArrayList<>();
+        Map<String, List<String>> caseHearingMap = new ConcurrentHashMap<>();
+
+        for (int i = 0; i < listOfCaseidsForHearings.size(); i += concurrentRequest) {
+            List<String> caseIds = List.copyOf(
+                listOfCaseidsForHearings.subList(
+                    i,
+                    Math.min(i + concurrentRequest, listOfCaseidsForHearings.size())
+                ));
+
+            log.info("hearing semaphore permit count {}", hearingSemaphore.availablePermits());
+            try {
+                hearingSemaphore.acquire();
+                futures.add(executor.submit(() -> {
+                    try {
+                        return hearingApiClient.getListedHearingsForAllCaseIdsOnCurrentDate(
+                            userToken,
+                            s2sToken,
+                            caseIds
+                        );
+                    } catch (Exception e) {
+                        log.info("Exception while processing case starting with {} and ending with {}",
+                                 caseIds.getFirst(),
+                                 caseIds.getLast(),
+                                 e);
+                        return Collections.emptyMap();
+                    } finally {
+                        hearingSemaphore.release();
+                    }
+                }));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("Interrupted while submitting hearing batch {}", caseIds, e);
+            }
+        }
+        for (Future<Map<String, List<String>>> future : futures) {
+            try {
+                caseHearingMap.putAll(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt(); // restore interrupt status
+                log.error("Interrupted while processing case", e);
+            }
+        }
+        return caseHearingMap;
     }
 
     private List<String> getListOfCaseidsForHearings(List<CaseDetails> caseDetailsList) {
         return caseDetailsList.stream().map(CaseDetails::getId).map(String::valueOf).toList();
-
     }
 
 
-    public List<CaseDetails> retrieveCasesWithHearingToday() {
-        return runCcdSearch(buildTodaysHearingQueryParam());
+    private List<CaseDetails> retrieveCasesWithHearingToday(Function<String, QueryParam.QueryParamBuilder> queryParamFunction,
+                                                           String searchAfter) {
+        return runCcdSearch(buildTodaysHearingQueryParam(queryParamFunction, searchAfter));
     }
 
     private List<CaseDetails> runCcdSearch(QueryParam ccdQueryParam) {
-        SearchResultResponse response = SearchResultResponse.builder().cases(new ArrayList<>()).build();
         try {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
             String searchString = objectMapper.writeValueAsString(ccdQueryParam);
+            log.info("json query {}",searchString);
             String userToken = systemUserService.getSysUserToken();
             final String s2sToken = authTokenGenerator.generate();
             SearchResult searchResult = coreCaseDataApi.searchCases(userToken, s2sToken, CASE_TYPE, searchString);
-            response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
+            SearchResultResponse response = objectMapper.convertValue(searchResult, SearchResultResponse.class);
+
+            List<CaseDetails> caseDetails = Optional.ofNullable(response.getCases())
+                .orElseGet(Collections::emptyList);
+
+            log.info(
+                "Total no. of cases {}, cases in current run {}",
+                response.getTotal(),
+                caseDetails.size()
+            );
+
+            return caseDetails;
         } catch (JsonProcessingException e) {
             log.error("Exception happened in parsing query param ", e);
+            return Collections.emptyList();
         }
-        if (null != response) {
-            log.info("Total no. of cases retrieved {}", response.getTotal());
-            return response.getCases();
-        }
-        return Collections.emptyList();
     }
 
 
-    private QueryParam buildTodaysHearingQueryParam() {
+    private QueryParam buildTodaysHearingQueryParam(Function<String, QueryParam.QueryParamBuilder> queryParamFunction, String searchAfter) {
         List<Should> shoulds = List.of(
                 Should.builder().match(Match.builder().caseTypeOfApplication("C100").build()).build(),
                 Should.builder().match(Match.builder().caseTypeOfApplication("FL401").build()).build(),
@@ -208,10 +368,11 @@ public class UpdateHearingActualsService {
 
         Bool finalFilter = Bool.builder().should(shoulds).minimumShouldMatch(2).must(mustFilter).build();
 
-        return QueryParam.builder()
+        return queryParamFunction.apply(searchAfter)
                 .query(Query.builder().bool(finalFilter).build())
-                .size("100")
+                .size(ES_PAGE_SIZE)
             .dataToReturn(fetchFieldsRequiredForHearingActualTask())
+            .sort(List.of(Sort.builder().referenceKeyword("asc").build()))
                 .build();
     }
 
@@ -219,6 +380,7 @@ public class UpdateHearingActualsService {
 
     private List<String> fetchFieldsRequiredForHearingActualTask() {
         return List.of(
+            "reference",
             "data.nextHearingDate",
             "data.updateHearingActualTracking"
         );
