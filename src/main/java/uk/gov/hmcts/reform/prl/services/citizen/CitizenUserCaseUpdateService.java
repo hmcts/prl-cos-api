@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -19,15 +20,47 @@ public class CitizenUserCaseUpdateService {
                                                       String caseId,
                                                       CaseEvent caseEvent,
                                                       Consumer<StartAllTabsUpdateDataContent> updater) {
-        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent =
-            allTabService.getStartUpdateForSpecificUserEvent(
-                caseId,
-                caseEvent.getValue(),
-                authorisation
-            );
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = startCitizenUserEvent(
+            authorisation,
+            caseId,
+            caseEvent
+        );
 
         updater.accept(startAllTabsUpdateDataContent);
 
+        return submitCitizenUserEvent(caseId, startAllTabsUpdateDataContent);
+    }
+
+    public <T> T updateCaseUsingCitizenUserAuthAndReturn(String authorisation,
+                                                         String caseId,
+                                                         CaseEvent caseEvent,
+                                                         Function<StartAllTabsUpdateDataContent, T> updater) {
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = startCitizenUserEvent(
+            authorisation,
+            caseId,
+            caseEvent
+        );
+
+        T result = updater.apply(startAllTabsUpdateDataContent);
+
+        submitCitizenUserEvent(caseId, startAllTabsUpdateDataContent);
+
+        return result;
+    }
+
+    private StartAllTabsUpdateDataContent startCitizenUserEvent(String authorisation,
+                                                               String caseId,
+                                                               CaseEvent caseEvent) {
+
+        return allTabService.getStartUpdateForSpecificUserEvent(
+            caseId,
+            caseEvent.getValue(),
+            authorisation
+        );
+    }
+
+    private CaseDetails submitCitizenUserEvent(String caseId,
+                                               StartAllTabsUpdateDataContent startAllTabsUpdateDataContent) {
         return allTabService.submitUpdateForSpecificUserEvent(
             startAllTabsUpdateDataContent.authorisation(),
             caseId,

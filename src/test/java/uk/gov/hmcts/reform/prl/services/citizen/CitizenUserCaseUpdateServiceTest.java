@@ -88,4 +88,62 @@ public class CitizenUserCaseUpdateServiceTest {
             userDetails
         );
     }
+
+    @Test
+    public void shouldStartSubmitAndReturnValueFromCitizenUserAuthUpdate() {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseData caseData = CaseData.builder().build();
+        EventRequestData eventRequestData = EventRequestData.builder().build();
+        StartEventResponse startEventResponse = StartEventResponse.builder().build();
+        UserDetails userDetails = UserDetails.builder().id("citizen-user-id").build();
+        CaseDetails caseDetails = CaseDetails.builder().id(123L).data(caseDataMap).build();
+        StartAllTabsUpdateDataContent startAllTabsUpdateDataContent = new StartAllTabsUpdateDataContent(
+            AUTHORISATION,
+            eventRequestData,
+            startEventResponse,
+            caseDataMap,
+            caseData,
+            userDetails
+        );
+
+        when(allTabService.getStartUpdateForSpecificUserEvent(
+            CASE_ID,
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+            AUTHORISATION
+        )).thenReturn(startAllTabsUpdateDataContent);
+        when(allTabService.submitUpdateForSpecificUserEvent(
+            AUTHORISATION,
+            CASE_ID,
+            startEventResponse,
+            eventRequestData,
+            caseDataMap,
+            userDetails
+        )).thenReturn(caseDetails);
+
+        String actual = citizenUserCaseUpdateService.updateCaseUsingCitizenUserAuthAndReturn(
+            AUTHORISATION,
+            CASE_ID,
+            CaseEvent.CITIZEN_CASE_UPDATE,
+            startUpdateDataContent -> {
+                startUpdateDataContent.caseDataMap().put("testKey", "testValue");
+                return "custom-response";
+            }
+        );
+
+        assertEquals("custom-response", actual);
+        assertEquals("testValue", caseDataMap.get("testKey"));
+        verify(allTabService).getStartUpdateForSpecificUserEvent(
+            CASE_ID,
+            CaseEvent.CITIZEN_CASE_UPDATE.getValue(),
+            AUTHORISATION
+        );
+        verify(allTabService).submitUpdateForSpecificUserEvent(
+            AUTHORISATION,
+            CASE_ID,
+            startEventResponse,
+            eventRequestData,
+            caseDataMap,
+            userDetails
+        );
+    }
 }
