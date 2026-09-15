@@ -50,17 +50,17 @@ public class UpdateHearingActualsServiceTest {
     private final String authToken = "authToken";
     private final String s2sAuthToken = "s2sAuthToken";
     @Mock
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Mock
-    SystemUserService systemUserService;
+    private SystemUserService systemUserService;
     @Mock
-    AuthTokenGenerator authTokenGenerator;
+    private AuthTokenGenerator authTokenGenerator;
     @Mock
-    CoreCaseDataApi coreCaseDataApi;
+    private CoreCaseDataApi coreCaseDataApi;
     @Mock
-    AllTabServiceImpl allTabService;
+    private AllTabServiceImpl allTabService;
     @Mock
-    HearingApiClient hearingApiClient;
+    private HearingApiClient hearingApiClient;
     private CaseDetails caseDetails;
     private CaseData caseData;
     private StartAllTabsUpdateDataContent startAllTabsUpdateDataContent;
