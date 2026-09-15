@@ -91,7 +91,6 @@ public class AllocateJudgeController extends AbstractCallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-
     }
 
     @PostMapping(path = "/allocatedJudgeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -108,7 +107,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
                 caseDataUpdated,
-                caseData.getLegalAdviserList(),
+                caseData.getLegalAdviser(),
                 refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
@@ -117,7 +116,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
             if (allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded().equals(YesOrNo.Yes)) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judgeEmail(allocatedJudge.getJudgeEmail())
-                    .legalAdviserList(allocatedJudge.getLegalAdviserList())
+                    .legalAdviser(allocatedJudge.getLegalAdviser())
                     .build();
                 roleAssignmentService.createRoleAssignment(
                     authorisation,

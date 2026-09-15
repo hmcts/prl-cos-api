@@ -127,7 +127,7 @@ public class AllocateJudgeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService)).thenReturn(
             allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
@@ -174,7 +174,7 @@ public class AllocateJudgeControllerTest {
         );
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService)).thenReturn(
             allocatedJudge);
 
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
