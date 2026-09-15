@@ -76,6 +76,11 @@ public class AllocatedJudgeService {
             } else if (null != legalAdviser && null != legalAdviser.getIdamId()) {
                 allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
                 allocatedJudgeBuilder.legalAdviser(legalAdviser);
+                refDataUserService.getLegalAdviserDetails(legalAdviser)
+                    .ifPresent(staffProfile -> {
+                        allocatedJudgeBuilder.legalAdviserName(staffProfile.getLastName());
+                        allocatedJudgeBuilder.legalAdviserEmail(staffProfile.getEmailId());
+                    });
             }
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
         }
