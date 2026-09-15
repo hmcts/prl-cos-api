@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 )
 @TestPropertySource(
     properties = {"bundle.api.url=http://localhost:8899","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
-        "fis_hearing.api.url=localhost:5000",
+        "hearing_component.api.feign-url=",
         "refdata.api.url=",
         "courtfinder.api.url=",
         "fees-register.api.url=",
@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @PactFolder("pacts")
 public class CreateBundleConsumerTest {
     @Autowired
-    BundleApiClient bundleApiClient;
+    private BundleApiClient bundleApiClient;
 
     private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";

@@ -806,6 +806,9 @@ sendandreply:
 hearing_component:
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
   hearingStatusesToFilter: COMPLETED, AWAITING_ACTUALS
+  api:
+    feign-url: ${HMC_HEARING_API_BASEURL:http://hmc-cft-hearing-service-aat.service.core-compute-aat.internal}
+    deployment-id: ${HMC_DEPLOYMENT_ID:}
 
 refdata:
   api:
