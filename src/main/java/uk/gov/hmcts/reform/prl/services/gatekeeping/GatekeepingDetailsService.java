@@ -60,12 +60,15 @@ public class GatekeepingDetailsService {
                     gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);
 
                 }
+            } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
+                gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
+                gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
+                gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
             } else if (SendToGatekeeperTypeEnum.legalAdviser.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
                 IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))
                 && null != caseDataUpdated.get("legalAdviser")) {
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.legalAdviser));
-                gatekeepingDetailsBuilder.legalAdviserList(legalAdviserList);
                 gatekeepingDetailsBuilder.legalAdviser(StaffUser.builder()
                                                                .idamId(getIdamId(caseDataUpdated.get(LEGAL_ADVISER_USER))[0]).build());
             }
