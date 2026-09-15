@@ -192,7 +192,9 @@ public class CafcassCaseDataHelper {
 
     private void removeGeneratedRelationshipIds(Map<String, Object> relationship) {
         relationship.remove("partyId");
+        relationship.remove("partyFullName");
         relationship.remove("childId");
+        relationship.remove("childFullName");
         if (!"other".equalsIgnoreCase(String.valueOf(relationship.get("relationType")))) {
             relationship.remove("otherRelationDetails");
         }
