@@ -488,12 +488,11 @@ public class CallbackController {
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
-            boolean hasLegalAdviser = gatekeepingDetails.getLegalAdviser() != null
-                || (gatekeepingDetails.getLegalAdviserList() != null
-                && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems()));
-
             if (caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING) != null
-                && (gatekeepingDetails.getJudgeName() != null || hasLegalAdviser)) {
+                && (gatekeepingDetails.getJudgeName() != null
+                || gatekeepingDetails.getLegalAdviser() != null
+                || (gatekeepingDetails.getLegalAdviserList() != null
+                && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems())))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
                     .legalAdviserList(gatekeepingDetails.getLegalAdviserList())
