@@ -7929,6 +7929,41 @@ class ManageOrderServiceTest {
     }
 
     @Test
+    void testSetDraftOrderCollectionLegalAdviserDynamicListIsPopulated() {
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        UserDetails userDetails = UserDetails.builder()
+            .forename("Test")
+            .surname("Admin")
+            .email("test@admin.com")
+            .build();
+
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrders(ManageOrders.builder()
+                              .nameOfLaToReviewOrder(dynamicList)
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .build())
+            .build();
+
+        Map<String, Object> result = manageOrderService.setDraftOrderCollection(
+            caseData, UserRoles.COURT_ADMIN.name(), userDetails);
+
+        assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        assertNotNull(draftOrders);
+        assertFalse(draftOrders.isEmpty());
+        assertEquals("DynamicList(value=DynamicListElement(code=12345:, label=test), listItems=null)",
+                     draftOrders.getFirst().getValue().getOtherDetails().getNameOfLaForReviewOrder());
+    }
+
+    @Test
     void testSetDraftOrderCollection_createAnOrder_courtAdmin_eligibleForAhr_setsAutoHearingPending() {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         UserDetails userDetails = UserDetails.builder()
