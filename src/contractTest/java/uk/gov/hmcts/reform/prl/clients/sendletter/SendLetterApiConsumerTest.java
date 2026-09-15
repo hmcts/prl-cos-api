@@ -42,11 +42,11 @@ import static org.testng.AssertJUnit.assertNotNull;
 @TestPropertySource(
     properties = {"bundle.api.url=http://localhost:8899","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
         "fis_hearing.api.url=localhost:5000",
+        "hearing_component.api.feign-url=",
         "refdata.api.url=",
         "courtfinder.api.url=",
         "fees-register.api.url=",
         "send-letter.url=http://localhost:8881",
-        "fis_hearing.api.url=",
         "judicialUsers.api.url=",
         "locationfinder.api.url=",
         "rd_professional.api.url=",
