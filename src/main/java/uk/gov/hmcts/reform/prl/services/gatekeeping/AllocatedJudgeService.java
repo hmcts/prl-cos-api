@@ -76,16 +76,13 @@ public class AllocatedJudgeService {
                                                           : null);
                 }
             } else if (null != legalAdviser && null != legalAdviser.getIdamId()) {
-                allocatedJudgeBuilder.isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser);
+                allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
                 allocatedJudgeBuilder.legalAdviser(legalAdviser);
-
-                Optional<StaffProfile> legalAdviserDetails =
-                    refDataUserService.getLegalAdviserDetails(legalAdviser);
-
-                legalAdviserDetails.ifPresent(details -> {
-                    allocatedJudgeBuilder.legalAdviserName(details.getLastName());
-                    allocatedJudgeBuilder.legalAdviserEmail(details.getEmailId());
-                });
+                refDataUserService.getLegalAdviserDetails(legalAdviser)
+                    .ifPresent(staffProfile -> {
+                        allocatedJudgeBuilder.legalAdviserName(staffProfile.getLastName());
+                        allocatedJudgeBuilder.legalAdviserEmail(staffProfile.getEmailId());
+                    });
             }
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
         }

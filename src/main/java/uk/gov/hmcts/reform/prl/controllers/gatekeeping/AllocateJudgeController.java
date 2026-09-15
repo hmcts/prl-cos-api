@@ -91,7 +91,6 @@ public class AllocateJudgeController extends AbstractCallbackController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-
     }
 
     @PostMapping(path = "/allocatedJudgeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
