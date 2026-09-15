@@ -112,6 +112,8 @@ class CafcassCaseDataServiceTest {
     @InjectMocks
     private CafcassCaseDataService cafcassCaseDataService;
 
+    private CafcassCaseDataHelper cafcassCaseDataHelper;
+
     @Mock
     SystemUserService systemUserService;
 
@@ -133,6 +135,17 @@ class CafcassCaseDataServiceTest {
     @BeforeEach
     void setUp() {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        cafcassCaseDataHelper = new CafcassCaseDataHelper(
+            cafCassFilter,
+            hearingService,
+            systemUserService,
+            objMapper
+        );
+        ReflectionTestUtils.setField(
+            cafcassCaseDataService,
+            "cafcassCaseDataHelper",
+            cafcassCaseDataHelper
+        );
     }
 
     @Nested
@@ -361,10 +374,13 @@ class CafcassCaseDataServiceTest {
         List<String> excludedDocumentCategoryList = new ArrayList<>();
         excludedDocumentCategoryList.add("draftOrders");
         ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentCategoryList", excludedDocumentCategoryList);
+        ReflectionTestUtils.setField(cafcassCaseDataHelper, "excludedDocumentCategoryList", excludedDocumentCategoryList);
         List<String> excludedDocumentList = new ArrayList<>();
         excludedDocumentList.add("Draft_C100_application");
         ReflectionTestUtils.setField(cafcassCaseDataService, "excludedDocumentList", excludedDocumentList);
+        ReflectionTestUtils.setField(cafcassCaseDataHelper, "excludedDocumentList", excludedDocumentList);
         ReflectionTestUtils.setField(cafcassCaseDataService, "objMapper", objectMapper);
+        ReflectionTestUtils.setField(cafcassCaseDataHelper, "objMapper", objectMapper);
         uk.gov.hmcts.reform.ccd.client.model.Document documents =
             new uk.gov.hmcts.reform.ccd.client.model
                 .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
@@ -697,7 +713,7 @@ class CafcassCaseDataServiceTest {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl(REDACTED_DOCUMENT_URL).documentFileName("*Redacted*").build();
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
-        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassUpdateHelperUtils.class.getDeclaredMethod(
             "addInOtherDocuments",
             String.class, Document.class, List.class
         );
@@ -796,7 +812,7 @@ class CafcassCaseDataServiceTest {
         String category = "MIAMCertificate";
         Document document = Document.builder().documentUrl("http://test").documentFileName("test").build();
         List<Element<OtherDocuments>> otherDocsList = new ArrayList<>();
-        Method privateMethod = CafcassCaseDataService.class.getDeclaredMethod(
+        Method privateMethod = CafcassUpdateHelperUtils.class.getDeclaredMethod(
             "addInOtherDocuments",
             String.class, Document.class, List.class
         );
