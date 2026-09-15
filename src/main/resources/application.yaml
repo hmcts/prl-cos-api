@@ -300,6 +300,17 @@ send-grid:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
       from: ${RPA_NOTIFY_FROM_EMAIL:xxxxxxxx}
 
+bankHolidays:
+  api:
+    url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
+
+request-order-task:
+  concurrent-request: ${CONCURRENT_REQUEST:5}
+  cadence-working-days:
+    c100: ${REQUEST_ORDER_TASK_C100_CADENCE:1}
+    fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
+    searchMulitplier: ${REQUEST_ORDER_TASK_CADENCE_MULTIPLIER:1}
+
 update-hearing-actuals:
   concurrent-request: ${CONCURRENT_REQUEST:5}
 
