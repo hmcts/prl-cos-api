@@ -20,6 +20,7 @@ plugins {
   id 'org.springframework.boot' version '3.5.15'
   id 'au.com.dius.pact' version '4.2.6'
   id 'com.github.hmcts.rse-cft-lib' version '0.19.2342'
+  id 'uk.gov.hmcts.reform.coverage-gate' version '1.0.1'
 }
 
 def versions = [
@@ -721,14 +722,7 @@ test {
   useJUnitPlatform()
 }
 
-apply from: 'scripts/test-coverage.gradle'
-
-tasks.register('installGitHooks', Copy) {
-  from new File(rootProject.rootDir, 'scripts/pre-commit.template')
-  rename { 'pre-commit' }
-  into { new File(rootProject.rootDir, '.git/hooks') }
-  fileMode 0755
+coverageGate {
+  threshold = 80
+  exclusions = sonarExclusions
 }
-
-// Make the build depend on installing hooks
-build.dependsOn "installGitHooks"
