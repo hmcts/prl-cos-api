@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
@@ -188,6 +189,43 @@ public class ListOnNoticeControllerTest {
     }
 
     @Test
+    public void testListOnNoticeSubmissionNewLegalAdviser() throws Exception {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<String> reasonsSelected = new ArrayList<>();
+        reasonsSelected.add("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder");
+        reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
+
+        StaffUser legalAdviser = StaffUser.builder().idamId("test1(test1@test.com)").build();
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviser(legalAdviser)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
+            .build();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
+            .thenReturn(allocatedJudge);
+        caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
+        String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
+            + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n";
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedString + "testAdditionalReasons\n");
+        List<CaseNoteDetails> caseNoteDetails = new ArrayList<>();
+        CaseNoteDetails caseNoteDetails1 = CaseNoteDetails.builder()
+            .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE).caseNote((String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS))
+            .dateAdded(LocalDate.now().toString()).dateCreated(LocalDateTime.now()).build();
+        caseNoteDetails.add(caseNoteDetails1);
+        when(listOnNoticeService.getReasonsSelected(any(), anyLong())).thenReturn(reasonsSelectedString);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.getCurrentCaseNoteDetails(anyString(), anyString(),any(UserDetails.class)))
+            .thenReturn(caseNoteDetails1);
+        when(addCaseNoteService.getCaseNoteDetails(any(CaseData.class),any(CaseNoteDetails.class)))
+            .thenReturn(ElementUtils.wrapElements(caseNoteDetails));
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
+        assertNotNull(response);
+        assertEquals(reasonsSelectedString + "testAdditionalReasons\n",response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertEquals(ElementUtils.wrapElements(caseNoteDetails), response.getData().get(CASE_NOTES));
+    }
+
+    @Test
     public void testListOnNoticeSubmissionWithoutSelectingAnyReasons() throws Exception {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,null);
@@ -201,6 +239,34 @@ public class ListOnNoticeControllerTest {
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
+            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
+            .build();
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviser(), refDataUserService))
+            .thenReturn(allocatedJudge);
+        AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
+        assertNotNull(response);
+        assertNull(response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertNull(response.getData().get(CASE_NOTES));
+    }
+
+    @Test
+    public void testListOnNoticeSubmissionWithoutSelectingAnyReasonsNewLegalAdviser() throws Exception {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,null);
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,null);
+        when(listOnNoticeService.getReasonsSelected(null, Long.valueOf("123"))).thenReturn("");
+        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
+            .thenReturn(null);
+        StaffUser legalAdviser = StaffUser.builder().idamId("test1(test1@test.com)").build();
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviser(legalAdviser)
             .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
             .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
             .build();
