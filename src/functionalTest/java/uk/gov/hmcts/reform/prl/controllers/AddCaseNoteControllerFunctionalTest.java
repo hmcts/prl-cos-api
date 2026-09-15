@@ -14,6 +14,9 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@org.springframework.test.context.TestPropertySource(properties = {
+    "hearing_component.api.feign-url=http://localhost:4044"
+})
 public class AddCaseNoteControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
