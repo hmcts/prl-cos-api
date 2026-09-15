@@ -57,7 +57,6 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_C10
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE8;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
@@ -67,6 +66,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOS_COMPLETED;
@@ -363,8 +364,7 @@ public class StmtOfServImplService {
         List<Element<Document>> docs = new ArrayList<>(unServedRespondentPack.getPackDocument()
                                                            .stream()
                                                            .filter(d -> !SOA_FL415_FILENAME.equalsIgnoreCase(d.getValue().getDocumentFileName()))
-                                                           .filter(d -> !C9_DOCUMENT_FILENAME.equalsIgnoreCase(d.getValue()
-                                                                                                                   .getDocumentFileName()))
+                                                           .filter(d -> !isC9Document(d.getValue()))
                                                            .toList());
         docs = wrapElements(serviceOfApplicationService.removeCoverLettersFromThePacks(unwrapElements(docs)));
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -449,6 +449,12 @@ public class StmtOfServImplService {
                            .format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
             .partyIds(partyId)
             .build();
+    }
+
+    private boolean isC9Document(Document document) {
+        return document != null
+            && (SOA_C9_PERSONAL_SERVICE_FILENAME.equalsIgnoreCase(document.getDocumentFileName())
+            || SOA_C9_PERSONAL_SERVICE_FILENAME_WELSH.equalsIgnoreCase(document.getDocumentFileName()));
     }
 
     public void saveCitizenSos(String caseId, String eventId,String authorisation, CitizenSos sosObject) {
