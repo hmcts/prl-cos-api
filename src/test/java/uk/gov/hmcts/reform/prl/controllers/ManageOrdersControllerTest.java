@@ -351,6 +351,7 @@ public class ManageOrdersControllerTest {
         objectMapper1.findAndRegisterModules();
 
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
+        stringObjectMap.put("customOrderNameOptionV2", "blankOrderOrDirections");
 
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().build())
@@ -374,6 +375,7 @@ public class ManageOrdersControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken, PrlAppsConstants.ENGLISH, callbackRequest);
         assertNotNull(callbackResponse);
+        assertNull(stringObjectMap.get("customOrderNameOption"));
     }
 
     @Test
@@ -390,6 +392,7 @@ public class ManageOrdersControllerTest {
         objectMapper1.findAndRegisterModules();
 
         Map<String, Object> stringObjectMap = caseData.toMap(objectMapper1);
+        stringObjectMap.put("customOrderNameOptionV2", "blankOrderOrDirections");
 
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -412,6 +415,7 @@ public class ManageOrdersControllerTest {
         assertNotNull(callbackResponse);
         assertNotNull(callbackResponse.getData());
         assertEquals("COURT_ADMIN", callbackResponse.getData().get("loggedInUserType"));
+        assertEquals("blankOrderOrDirections", callbackResponse.getData().get("customOrderNameOption"));
         // Verify hearing data is populated for Page 19
         verify(manageOrderService).getHearingData(anyString(), any(CaseData.class));
         // Verify that renderAndUploadHeaderPreview was NOT called (deferred to Page 19)
@@ -1871,6 +1875,7 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isTheOrderAboutAllChildren", Yes);
         stringObjectMap.put("isTheOrderAboutChildren", No);
+        stringObjectMap.put("customOrderNameOptionV2", "blankOrderOrDirections");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1886,6 +1891,8 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        assertTrue(aboutToStartOrSubmitCallbackResponse.getData().containsKey("customOrderNameOptionV2"));
+        assertNull(aboutToStartOrSubmitCallbackResponse.getData().get("customOrderNameOptionV2"));
     }
 
     @Test

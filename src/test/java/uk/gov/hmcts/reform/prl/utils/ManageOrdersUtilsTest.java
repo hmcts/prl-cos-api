@@ -16,7 +16,9 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,6 +29,26 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 class ManageOrdersUtilsTest {
+
+    @Test
+    void shouldCopyCustomUiOrderSelectionToLegacyField() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("customOrderNameOptionV2", "blankOrderOrDirections");
+
+        ManageOrdersUtils.copyCustomOrderSelectionFromUiField(caseData);
+
+        assertEquals("blankOrderOrDirections", caseData.get("customOrderNameOption"));
+    }
+
+    @Test
+    void shouldRetainLegacyCustomSelectionWhenUiFieldIsAbsent() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("customOrderNameOption", "directionOnIssue");
+
+        ManageOrdersUtils.copyCustomOrderSelectionFromUiField(caseData);
+
+        assertEquals("directionOnIssue", caseData.get("customOrderNameOption"));
+    }
 
     @Test
     void testBuildC43OrderName_singleChildArrangementsWithSubType() {
