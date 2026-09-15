@@ -45,7 +45,8 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
     }
 
     private boolean isLastNameAndEmailAvailable(String[] judgeOrLegalAdvisorDetails) {
-        return (null != judgeOrLegalAdvisorDetails && judgeOrLegalAdvisorDetails.length == 2);
+        return null != judgeOrLegalAdvisorDetails && judgeOrLegalAdvisorDetails.length == 2
+            && null != judgeOrLegalAdvisorDetails[0] && null != judgeOrLegalAdvisorDetails[1];
     }
 
     private String[] splitLastNameAndEmailAddress(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
@@ -58,9 +59,12 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                 judgeOrLegalAdvisorDetails[1] = allocatedJudge.getJudgeEmail();
                 return judgeOrLegalAdvisorDetails;
             } else if (AllocatedJudgeTypeEnum.legalAdviser.equals(allocatedJudge.getIsJudgeOrLegalAdviser())) {
-                String legalAdviserNameAndEmail = allocatedJudge.getLegalAdviserList().getValueLabel();
-                if (null != legalAdviserNameAndEmail) {
-                    return legalAdviserNameAndEmail.split("\\)")[0].split("\\(");
+                if (null != allocatedJudge.getLegalAdviserName() || null != allocatedJudge.getLegalAdviserEmail()) {
+                    return new String[]{allocatedJudge.getLegalAdviserName(), allocatedJudge.getLegalAdviserEmail()};
+                }
+                // pre-migration cases: fall back to the old dynamic list label
+                if (null != allocatedJudge.getLegalAdviserList() && null != allocatedJudge.getLegalAdviserList().getValueLabel()) {
+                    return allocatedJudge.getLegalAdviserList().getValueLabel().split("\\)")[0].split("\\(");
                 }
             }
 

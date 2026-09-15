@@ -134,7 +134,7 @@ public class ListOnNoticeController {
             }
             AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
                 caseDataUpdated,
-                caseData.getLegalAdviserList(),
+                caseData.getLegalAdviser(),
                 refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
