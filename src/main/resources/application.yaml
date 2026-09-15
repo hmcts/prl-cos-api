@@ -304,8 +304,6 @@ bankHolidays:
   api:
     url: ${BANK_HOLIDAYS_API_URL:https://www.gov.uk}
 
-# FPVTL-2408/2409 - Request Order task re-trigger cadence in working days.
-# Override per env (e.g. 0 in preview for fast E2E testing).
 request-order-task:
   concurrent-request: ${CONCURRENT_REQUEST:5}
   cadence-working-days:
