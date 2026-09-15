@@ -1382,6 +1382,12 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        String legalAdviserName;
+        if (caseData.getManageOrders().getNameOfLaToReviewOrder() != null) {
+            legalAdviserName = String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder());
+        } else {
+            legalAdviserName = String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder());
+        }
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
@@ -1408,7 +1414,7 @@ public class ManageOrderService {
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
-                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder()))
+                              .nameOfLaForReviewOrder(legalAdviserName)
                               .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                                            true,

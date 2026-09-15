@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -11,6 +12,8 @@ import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -27,15 +30,20 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmendOrderServiceTest {
@@ -266,6 +274,36 @@ public class AmendOrderServiceTest {
             .manageOrders(caseData.getManageOrders().toBuilder().currentOrderCreatedDateTime(LocalDateTime.now()).build())
             .build();
         assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
+    }
+
+    @Test
+    public void documentUpdateAndReturnedInMapLegalAdviserList() {
+
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+
+        originalOrder = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("amended_filename.pdf")
+            .build();
+        Element<DraftOrder> orders = ElementUtils.element(uuid, DraftOrder.builder()
+            .orderDocument(originalOrder)
+            .dateOrderMade(LocalDate.now())
+            .otherDetails(OtherDraftOrderDetails.builder().dateCreated(LocalDateTime.now()).build()).build());
+        List<Element<DraftOrder>> orderList = new ArrayList<>();
+        orderList.add(orders);
+        caseData = caseData.toBuilder()
+            .draftOrderCollection(orderList)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
+            .manageOrders(caseData.getManageOrders().toBuilder().nameOfLaToReviewOrder(dynamicList).currentOrderCreatedDateTime(LocalDateTime.now()).build())
+            .build();
+        Map<String,Object> result = amendOrderService.updateOrder(caseData, validAuth);
+        Assertions.assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Element<DraftOrder>> draftOrders = (List<Element<DraftOrder>>) result.get("draftOrderCollection");
+        Assertions.assertNotNull(draftOrders);
+        Assertions.assertFalse(draftOrders.isEmpty());
+        Assertions.assertEquals("DynamicList(value=DynamicListElement(code=12345:, label=test), listItems=null)",
+                     draftOrders.get(1).getValue().getOtherDetails().getNameOfLaForReviewOrder());
     }
 
     public static Document testDocument() {

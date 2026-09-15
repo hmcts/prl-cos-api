@@ -158,6 +158,12 @@ public class AmendOrderService {
         String orderType = orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderType()).orElse(
             null);
 
+        String legalAdviserName;
+        if (caseData.getManageOrders().getNameOfLaToReviewOrder() != null) {
+            legalAdviserName = String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder());
+        } else {
+            legalAdviserName = String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder());
+        }
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)
@@ -180,7 +186,7 @@ public class AmendOrderService {
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
-                              .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder()))
+                              .nameOfLaForReviewOrder(legalAdviserName)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
 
