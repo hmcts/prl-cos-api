@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -47,6 +48,7 @@ public class AmendOrderService {
     private final Time time;
     private final ManageOrderService manageOrderService;
     private final UserService userService;
+    private final LegalAdviserChecker legalAdviserChecker;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
         ManageOrders eventData = caseData.getManageOrders();
@@ -158,12 +160,8 @@ public class AmendOrderService {
         String orderType = orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderType()).orElse(
             null);
 
-        String legalAdviserName;
-        if (caseData.getManageOrders().getNameOfLaToReviewOrder() != null) {
-            legalAdviserName = String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder());
-        } else {
-            legalAdviserName = String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder());
-        }
+        String legalAdviserName = legalAdviserChecker.returnLegalAdviserNameForManageOrders(caseData);
+
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)

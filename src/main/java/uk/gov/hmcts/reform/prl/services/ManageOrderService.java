@@ -101,6 +101,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.localauthority.RemoveLocalAuthoritySolicitorService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.time.Time;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 import uk.gov.hmcts.reform.prl.utils.AutomatedHearingTransactionRequestMapper;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -673,6 +674,7 @@ public class ManageOrderService {
     private final RemoveLocalAuthoritySolicitorService removeLocalAuthoritySolicitorService;
     private final AllTabServiceImpl allTabService;
     private final TaskUtils taskUtils;
+    private final LegalAdviserChecker legalAdviserChecker;
 
     public boolean isSaveAsDraft(CaseData caseData) {
         return isNotEmpty(caseData.getServeOrderData()) && No.equals(
@@ -1382,12 +1384,7 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String legalAdviserName;
-        if (caseData.getManageOrders().getNameOfLaToReviewOrder() != null) {
-            legalAdviserName = String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder());
-        } else {
-            legalAdviserName = String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder());
-        }
+        String legalAdviserName = legalAdviserChecker.returnLegalAdviserNameForManageOrders(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
