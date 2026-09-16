@@ -13,7 +13,7 @@ public class LegalAdviserCheckerTest {
     private final LegalAdviserChecker legalAdviserChecker = new LegalAdviserChecker();
 
     @Test
-    public void checkNullCaseDataReturnsNull(){
+    public void checkNullCaseDataReturnsNull() {
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
            null
         );
@@ -21,7 +21,7 @@ public class LegalAdviserCheckerTest {
     }
 
     @Test
-    public void checkNullManageOrdersReturnsNull(){
+    public void checkNullManageOrdersReturnsNull() {
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
             CaseData.builder().manageOrders(null).build()
@@ -30,7 +30,7 @@ public class LegalAdviserCheckerTest {
     }
 
     @Test
-    public void checkNullLegalAdviserListAndNullLegalAdviserUserReturnsNull(){
+    public void checkNullLegalAdviserListAndNullLegalAdviserUserReturnsNull() {
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
             CaseData.builder().manageOrders(
@@ -40,7 +40,7 @@ public class LegalAdviserCheckerTest {
     }
 
     @Test
-    public void checkNullLegalAdviserListAndPopulatedLegalAdviserUserReturnsLegalAdviserUser(){
+    public void checkNullLegalAdviserListAndPopulatedLegalAdviserUserReturnsLegalAdviserUser() {
 
         StaffUser Geoff = new StaffUser("Geoff");
 
@@ -52,7 +52,7 @@ public class LegalAdviserCheckerTest {
     }
 
     @Test
-    public void checkPopulatedLegalAdviserListAndNullLegalAdviserUserReturnsLegalAdviserList(){
+    public void checkPopulatedLegalAdviserListAndNullLegalAdviserUserReturnsLegalAdviserList() {
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -67,11 +67,11 @@ public class LegalAdviserCheckerTest {
     }
 
     @Test
-    public void checkPopulatedLegalAdviserListAndPopulatedLegalAdviserUserReturnsLegalAdviserUser(){
+    public void checkPopulatedLegalAdviserListAndPopulatedLegalAdviserUserReturnsLegalAdviserUser() {
 
         StaffUser Geoff = new StaffUser("Geoff");
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
-                                                                  .build()).build();
+        DynamicList dynamicList = DynamicList.builder().value(
+            DynamicListElement.builder().code("12345:").label("test").build()).build();
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
             CaseData.builder().manageOrders(

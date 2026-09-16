@@ -14,7 +14,7 @@ import java.util.Objects;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LegalAdviserChecker {
 
-    public String returnLegalAdviserNameForManageOrders(CaseData caseData){
+    public String returnLegalAdviserNameForManageOrders(CaseData caseData) {
         if (caseData == null || caseData.getManageOrders() == null) {
             return null;
         }
