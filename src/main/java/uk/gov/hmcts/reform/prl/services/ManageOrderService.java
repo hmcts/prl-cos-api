@@ -1384,7 +1384,7 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String legalAdviserName = legalAdviserChecker.returnLegalAdviserName(
+        Optional<String> legalAdviserName = legalAdviserChecker.validateLegalAdviserName(
             caseData.getManageOrders().getNameOfLaToReviewOrder(),
             caseData.getManageOrders().getLegalAdviserToReviewOrder()
         );
@@ -1414,7 +1414,7 @@ public class ManageOrderService {
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
-                              .nameOfLaForReviewOrder(legalAdviserName)
+                              .nameOfLaForReviewOrder(legalAdviserName.orElse(null))
                               .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                                            true,

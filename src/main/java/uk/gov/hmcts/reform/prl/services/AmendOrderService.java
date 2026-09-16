@@ -160,7 +160,7 @@ public class AmendOrderService {
         String orderType = orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderType()).orElse(
             null);
 
-        String legalAdviserName = legalAdviserChecker.returnLegalAdviserName(
+        Optional<String> legalAdviserName = legalAdviserChecker.validateLegalAdviserName(
             caseData.getManageOrders().getNameOfLaToReviewOrder(),
             caseData.getManageOrders().getLegalAdviserToReviewOrder()
         );
@@ -186,7 +186,7 @@ public class AmendOrderService {
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
-                              .nameOfLaForReviewOrder(legalAdviserName)
+                              .nameOfLaForReviewOrder(legalAdviserName.orElse(null))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
 
