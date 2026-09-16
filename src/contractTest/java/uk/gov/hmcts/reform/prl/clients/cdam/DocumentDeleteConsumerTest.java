@@ -27,7 +27,7 @@ import java.util.UUID;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "case-document-am-client-api", port = "5003")
-@TestPropertySource(properties = {"case_document_am.url=http://localhost:5003"})
+@TestPropertySource(properties = {"case_document_am.url=http://localhost:5003", "bankHolidays.api.url="})
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
