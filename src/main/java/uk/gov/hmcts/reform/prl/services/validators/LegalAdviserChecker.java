@@ -13,7 +13,7 @@ import java.util.Objects;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LegalAdviserChecker {
 
-    public String returnLegalAdviserNameForManageOrders(DynamicList laList, StaffUser legalAdviser) {
+    public String returnLegalAdviserName(DynamicList laList, StaffUser legalAdviser) {
         if (!isLegalAdviserListPresent(laList) && legalAdviser == null) {
             return null;
         } else {

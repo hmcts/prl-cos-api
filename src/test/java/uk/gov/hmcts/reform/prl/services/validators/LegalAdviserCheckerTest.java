@@ -14,7 +14,7 @@ public class LegalAdviserCheckerTest {
     public void checkNullLegalAdviserListAndNullLegalAdviserUserReturnsNull() {
 
         String result = legalAdviserChecker.
-            returnLegalAdviserNameForManageOrders(null, null);
+            returnLegalAdviserName(null, null);
         Assertions.assertNull(result);
     }
 
@@ -23,7 +23,7 @@ public class LegalAdviserCheckerTest {
 
         StaffUser Geoff = new StaffUser("Geoff");
 
-        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
+        String result = legalAdviserChecker.returnLegalAdviserName(
             null, Geoff
         );
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);
@@ -36,7 +36,7 @@ public class LegalAdviserCheckerTest {
             .value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
 
-        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
+        String result = legalAdviserChecker.returnLegalAdviserName(
             dynamicList, null
         );
         Assertions.assertEquals("DynamicList(value=DynamicListElement(code=12345:, label=test), listItems=null)",
@@ -50,7 +50,7 @@ public class LegalAdviserCheckerTest {
         DynamicList dynamicList = DynamicList.builder().value(
             DynamicListElement.builder().code("12345:").label("test").build()).build();
 
-        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
+        String result = legalAdviserChecker.returnLegalAdviserName(
             dynamicList, Geoff
         );
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);

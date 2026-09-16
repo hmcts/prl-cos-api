@@ -160,7 +160,7 @@ public class AmendOrderService {
         String orderType = orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderType()).orElse(
             null);
 
-        String legalAdviserName = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
+        String legalAdviserName = legalAdviserChecker.returnLegalAdviserName(
             caseData.getManageOrders().getNameOfLaToReviewOrder(),
             caseData.getManageOrders().getLegalAdviserToReviewOrder()
         );
