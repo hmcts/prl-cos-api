@@ -21,7 +21,7 @@ public class LegalAdviserChecker {
         }
     }
 
-    public boolean isLegalAdviserListPresent(DynamicList legalAdviserList) {
+    public static boolean isLegalAdviserListPresent(DynamicList legalAdviserList) {
         return legalAdviserList != null && StringUtils.isNotBlank(legalAdviserList.getValueLabel());
     }
 }
