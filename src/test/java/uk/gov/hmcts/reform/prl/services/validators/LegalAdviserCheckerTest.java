@@ -9,6 +9,8 @@ import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 public class LegalAdviserCheckerTest {
 
     private final LegalAdviserChecker legalAdviserChecker = new LegalAdviserChecker();
+    private StaffUser geoff = new StaffUser("Geoff");
+
 
     @Test
     public void checkNullLegalAdviserListAndNullLegalAdviserUserReturnsNull() {
@@ -21,10 +23,8 @@ public class LegalAdviserCheckerTest {
     @Test
     public void checkNullLegalAdviserListAndPopulatedLegalAdviserUserReturnsLegalAdviserUser() {
 
-        StaffUser Geoff = new StaffUser("Geoff");
-
         String result = legalAdviserChecker.returnLegalAdviserName(
-            null, Geoff
+            null, geoff
         );
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);
     }
@@ -46,12 +46,11 @@ public class LegalAdviserCheckerTest {
     @Test
     public void checkPopulatedLegalAdviserListAndPopulatedLegalAdviserUserReturnsLegalAdviserUser() {
 
-        StaffUser Geoff = new StaffUser("Geoff");
         DynamicList dynamicList = DynamicList.builder().value(
             DynamicListElement.builder().code("12345:").label("test").build()).build();
 
         String result = legalAdviserChecker.returnLegalAdviserName(
-            dynamicList, Geoff
+            dynamicList, geoff
         );
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);
     }

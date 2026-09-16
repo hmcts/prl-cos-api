@@ -271,6 +271,7 @@ public class AmendOrderServiceTest {
             .build();
         assertNotNull(amendOrderService.updateOrder(caseData, validAuth));
     }
+
     public static Document testDocument() {
         Document.Link binaryLink = new Document.Link();
         binaryLink.href = randomAlphanumeric(10);
