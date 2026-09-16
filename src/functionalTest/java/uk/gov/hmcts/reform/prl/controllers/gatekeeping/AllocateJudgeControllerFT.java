@@ -39,8 +39,6 @@ public class AllocateJudgeControllerFT {
 
     private static final String ALLOCATE_TIER_OF_JUDICIARY_VALID_REQUEST_BODY = "requests/gatekeeping/AllocateJudgeDetailsRequest2.json";
 
-    private final String prePopulateLegalAdvisersEndpoint = "/allocateJudge/pre-populate-legalAdvisor-details";
-
     private final String allocateJudgeEndpoint = "/allocateJudge/allocatedJudgeDetails";
 
     private final String userToken = "Bearer testToken";
@@ -71,23 +69,6 @@ public class AllocateJudgeControllerFT {
         Assertions.assertTrue(res.getData().containsValue("circuitJudge"));
     }
 
-    @Test
-    public void testAllocateJudgeWhenLegalAdvisorOptionSelected_200ResponseAndNoErrors() throws Exception {
-        String requestBody = ResourceLoader.loadJson(ALLOCATE_LEGAL_ADVISER_VALID_REQUEST_BODY);
-
-        Response response = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post(prePopulateLegalAdvisersEndpoint);
-        response.then().assertThat().statusCode(200);
-        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
-        Assertions.assertNotNull(res.getData());
-        Assertions.assertTrue(res.getData().containsKey("legalAdviserList"));
-
-    }
 
     @Test
     @Disabled

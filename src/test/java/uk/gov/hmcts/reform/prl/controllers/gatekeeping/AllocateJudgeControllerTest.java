@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -25,7 +24,6 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -33,7 +31,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -67,31 +64,6 @@ public class AllocateJudgeControllerTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
 
-    @Test
-    public void shouldSeeLegalAdvisorDetails() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = allocateJudgeController.prePopulateLegalAdvisorDetails(
-            authToken, s2sToken, callbackRequest);
-        assertFalse(response.getData().containsKey("legalAdvisorList"));
-    }
 
 
     @Test
@@ -180,39 +152,6 @@ public class AllocateJudgeControllerTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         assertNotNull(allocateJudgeController.allocateJudge(authToken, s2sToken, callbackRequest));
-
-    }
-
-    @Test
-    public void testExceptionForPrePopulateLegalAdvisorDetails() throws Exception {
-
-        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
-            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.districtJudge)
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
-            .welshLanguageRequirement(Yes)
-            .welshLanguageRequirementApplication(english)
-            .languageRequirementApplicationNeedWelsh(Yes)
-            .allocatedJudge(allocatedJudge)
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            allocateJudgeController.prePopulateLegalAdvisorDetails(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
 
     }
 
