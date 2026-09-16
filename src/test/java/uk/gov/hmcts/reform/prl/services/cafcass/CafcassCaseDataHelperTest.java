@@ -849,6 +849,94 @@ class CafcassCaseDataHelperTest {
     }
 
     @Test
+    void shouldReturnFalseWhenAmendChildrenAndApplicantsHasOnlyGeneratedCaseDataChanges() {
+        Map<String, Object> relation = Map.of(
+            "applicantId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "applicantFullName", "Alex Green",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndApplicantRelation", "mother",
+            "childLivesWith", "Yes"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("childAndApplicantRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            relation
+        )));
+        Map<String, Object> emailedDocument = caseDocument(
+            "http://dm-store/documents/55555555-5555-5555-5555-555555555555",
+            "emailed-application.pdf"
+        );
+        caseData.put("finalServedApplicationDetailsList", List.of(element(Map.of(
+            "emailNotificationDetails", List.of(element(Map.of("docs", List.of(element(emailedDocument)))))
+        ))));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndApplicantRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            relation
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            "amendChildrenAndApplicants"
+        ));
+    }
+
+    @Test
+    void shouldReturnFalseWhenAmendOtherPeopleHasOnlyGeneratedCaseDataChanges() {
+        Map<String, Object> otherPerson = Map.of(
+            "firstName", "Sam",
+            "lastName", "Taylor",
+            "gender", "male"
+        );
+        Map<String, Object> relation = Map.of(
+            "otherPeopleId", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "otherPeopleFullName", "Sam Taylor",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndOtherPeopleRelation", "guardian",
+            "childLivesWith", "No"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("otherPartyInTheCaseRevised", List.of(element(
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            otherPerson
+        )));
+        caseData.put("childAndOtherPeopleRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            relation
+        )));
+        caseData.put("otherPartyC8Documents", List.of(responseDocuments(
+            "http://dm-store/documents/66666666-6666-6666-6666-666666666666",
+            "other-party-c8.pdf"
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("otherPartyInTheCaseRevised", List.of(element(
+            "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            otherPerson
+        )));
+        caseDataBefore.put("childAndOtherPeopleRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            relation
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            "amendOtherPeopleInTheCaseRevised"
+        ));
+    }
+
+    @Test
     void shouldReturnTrueWhenReviewDocumentIsAddedFromCaseFileView() {
         String documentUrl = "http://dm-store/documents/22222222-2222-2222-2222-222222222222";
         Map<String, Object> caseData = new HashMap<>();

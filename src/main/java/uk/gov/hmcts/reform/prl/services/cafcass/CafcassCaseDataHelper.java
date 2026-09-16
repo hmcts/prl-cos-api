@@ -62,13 +62,21 @@ public class CafcassCaseDataHelper {
 
     public static final String CONFIDENTIAL = "confidential";
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
+    private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED = "amendOtherPeopleInTheCaseRevised";
+    private static final String AMEND_CHILDREN_AND_APPLICANTS = "amendChildrenAndApplicants";
     private static final List<String> AMEND_PARTY_AND_RELATIONSHIP_EVENTS = List.of(
         "amendChildDetailsRevised",
-        "amendOtherPeopleInTheCaseRevised",
-        "amendChildrenAndApplicants",
+        AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
+        AMEND_CHILDREN_AND_APPLICANTS,
         "childDetailsRevised",
         "otherPeopleInTheCaseRevised",
         "childrenAndApplicants"
+    );
+    private static final Map<String, List<String>> EVENT_SPECIFIC_COMPARISON_FIELDS = Map.of(
+        AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
+        List.of("otherPeopleInTheCaseTable", "childAndOtherPeopleRelations"),
+        AMEND_CHILDREN_AND_APPLICANTS,
+        List.of("childAndApplicantRelations")
     );
 
     private final CafCassFilter cafCassFilter;
@@ -121,8 +129,27 @@ public class CafcassCaseDataHelper {
             sortElementCollectionByValue(caseDataMap, "childAndApplicantRelations");
             sortElementCollectionByValue(caseDataMap, "childAndRespondentRelations");
             sortElementCollectionByValue(caseDataMap, "childAndOtherPeopleRelations");
+            retainEventSpecificComparisonFields(caseDataMap, eventId);
         }
         return caseDetailMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void retainEventSpecificComparisonFields(Map<?, ?> caseDataMap, String eventId) {
+        if (eventId == null) {
+            return;
+        }
+        List<String> comparisonFields = EVENT_SPECIFIC_COMPARISON_FIELDS.get(eventId);
+        if (comparisonFields == null) {
+            return;
+        }
+
+        Map<String, Object> eventCaseData = new HashMap<>();
+        comparisonFields.stream()
+            .filter(caseDataMap::containsKey)
+            .forEach(fieldName -> eventCaseData.put(fieldName, caseDataMap.get(fieldName)));
+        ((Map<String, Object>) caseDataMap).clear();
+        ((Map<String, Object>) caseDataMap).putAll(eventCaseData);
     }
 
     @SuppressWarnings("unchecked")

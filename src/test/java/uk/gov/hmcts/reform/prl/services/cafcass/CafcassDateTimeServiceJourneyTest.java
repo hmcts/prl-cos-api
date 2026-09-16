@@ -84,6 +84,33 @@ class CafcassDateTimeServiceJourneyTest {
         assertEquals(EXISTING_CAFCASS_DATE_TIME, updatedCaseData.get(CAFCASS_DATE_TIME));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"amendOtherPeopleInTheCaseRevised", "amendChildrenAndApplicants"})
+    void shouldNotUpdateCafcassDateTimeWhenNoOpAmendEventOnlyHasGeneratedJourneyDataChange(String eventId) {
+        Map<String, Object> caseData = caseDataAfterNoOpAmend(eventId);
+        caseData.put("finalServedApplicationDetailsList", List.of(element(
+            "99999999-9999-9999-9999-999999999999",
+            Map.of("emailNotificationDetails", List.of(element(
+                "88888888-8888-8888-8888-888888888888",
+                Map.of("docs", List.of(element(
+                    "77777777-7777-7777-7777-777777777777",
+                    caseDocument("http://dm-store/documents/66666666-6666-6666-6666-666666666666", "served-application.pdf")
+                )))
+            )))
+        )));
+
+        CaseDetails caseDetails = journeyCaseDetails(caseData);
+        CaseDetails caseDetailsBefore = journeyCaseDetails(caseDataBeforeNoOpAmend(eventId));
+
+        Map<String, Object> updatedCaseData = cafcassDateTimeService.updateCafcassDateTime(CallbackRequest.builder()
+            .eventId(eventId)
+            .caseDetails(caseDetails)
+            .caseDetailsBefore(caseDetailsBefore)
+            .build());
+
+        assertEquals(EXISTING_CAFCASS_DATE_TIME, updatedCaseData.get(CAFCASS_DATE_TIME));
+    }
+
     private CaseDetails journeyCaseDetails(Map<String, Object> caseData) {
         return CaseDetails.builder()
             .id(1234567890123456L)
@@ -195,6 +222,14 @@ class CafcassDateTimeServiceJourneyTest {
             "childFullName", childFullName,
             "childAndOtherPeopleRelation", "guardian",
             "childLivesWith", "No"
+        );
+    }
+
+    private Map<String, Object> caseDocument(String documentUrl, String documentName) {
+        return Map.of(
+            "document_url", documentUrl,
+            "document_binary_url", documentUrl + "/binary",
+            "document_filename", documentName
         );
     }
 
