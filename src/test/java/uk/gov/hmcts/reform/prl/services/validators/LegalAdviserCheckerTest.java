@@ -15,8 +15,8 @@ public class LegalAdviserCheckerTest {
     @Test
     public void checkNullLegalAdviserListAndNullLegalAdviserUserReturnsNull() {
 
-        String result = legalAdviserChecker.
-            returnLegalAdviserName(null, null);
+        String result = legalAdviserChecker
+            .returnLegalAdviserName(null, null);
         Assertions.assertNull(result);
     }
 
