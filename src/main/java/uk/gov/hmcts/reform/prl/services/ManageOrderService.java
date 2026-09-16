@@ -1384,7 +1384,10 @@ public class ManageOrderService {
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        String legalAdviserName = legalAdviserChecker.returnLegalAdviserNameForManageOrders(caseData);
+        String legalAdviserName = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
+            caseData.getManageOrders().getNameOfLaToReviewOrder(),
+            caseData.getManageOrders().getLegalAdviserToReviewOrder()
+        );
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)

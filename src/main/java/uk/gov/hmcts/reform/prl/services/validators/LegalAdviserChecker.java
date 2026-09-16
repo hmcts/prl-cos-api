@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Objects;
 
@@ -14,12 +13,7 @@ import java.util.Objects;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LegalAdviserChecker {
 
-    public String returnLegalAdviserNameForManageOrders(CaseData caseData) {
-        if (caseData == null || caseData.getManageOrders() == null) {
-            return null;
-        }
-        DynamicList laList = caseData.getManageOrders().getNameOfLaToReviewOrder();
-        StaffUser legalAdviser = caseData.getManageOrders().getLegalAdviserToReviewOrder();
+    public String returnLegalAdviserNameForManageOrders(DynamicList laList, StaffUser legalAdviser) {
         if (!isLegalAdviserListPresent(laList) && legalAdviser == null) {
             return null;
         } else {

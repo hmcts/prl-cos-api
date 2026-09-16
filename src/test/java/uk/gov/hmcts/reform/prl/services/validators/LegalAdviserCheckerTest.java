@@ -5,37 +5,16 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 
 public class LegalAdviserCheckerTest {
 
     private final LegalAdviserChecker legalAdviserChecker = new LegalAdviserChecker();
 
     @Test
-    public void checkNullCaseDataReturnsNull() {
-        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
-           null
-        );
-        Assertions.assertNull(result);
-    }
-
-    @Test
-    public void checkNullManageOrdersReturnsNull() {
-
-        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
-            CaseData.builder().manageOrders(null).build()
-        );
-        Assertions.assertNull(result);
-    }
-
-    @Test
     public void checkNullLegalAdviserListAndNullLegalAdviserUserReturnsNull() {
 
-        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
-            CaseData.builder().manageOrders(
-            ManageOrders.builder().build()
-            ).build());
+        String result = legalAdviserChecker.
+            returnLegalAdviserNameForManageOrders(null, null);
         Assertions.assertNull(result);
     }
 
@@ -45,23 +24,21 @@ public class LegalAdviserCheckerTest {
         StaffUser Geoff = new StaffUser("Geoff");
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
-            CaseData.builder().manageOrders(
-            ManageOrders.builder().legalAdviserToReviewOrder(Geoff).build()
-            ).build());
+            null, Geoff
+        );
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);
     }
 
     @Test
     public void checkPopulatedLegalAdviserListAndNullLegalAdviserUserReturnsLegalAdviserList() {
 
-        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+        DynamicList dynamicList = DynamicList.builder()
+            .value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
-            CaseData.builder().manageOrders(
-                ManageOrders.builder()
-                    .nameOfLaToReviewOrder(dynamicList).build()
-            ).build());
+            dynamicList, null
+        );
         Assertions.assertEquals("DynamicList(value=DynamicListElement(code=12345:, label=test), listItems=null)",
                                 result);
     }
@@ -74,11 +51,8 @@ public class LegalAdviserCheckerTest {
             DynamicListElement.builder().code("12345:").label("test").build()).build();
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
-            CaseData.builder().manageOrders(
-                ManageOrders.builder()
-                    .legalAdviserToReviewOrder(Geoff)
-                    .nameOfLaToReviewOrder(dynamicList).build()
-            ).build());
+            dynamicList, Geoff
+        );
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);
     }
 
