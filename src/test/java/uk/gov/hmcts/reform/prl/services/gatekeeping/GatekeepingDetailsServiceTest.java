@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
+import uk.gov.hmcts.reform.prl.services.validators.LegalAdviserChecker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,9 @@ public class GatekeepingDetailsServiceTest {
 
     @Mock
     RoleAssignmentService roleAssignmentService;
+
+    @Mock
+    LegalAdviserChecker legalAdviserChecker;
 
     @Mock
     ObjectMapper objectMapper;
