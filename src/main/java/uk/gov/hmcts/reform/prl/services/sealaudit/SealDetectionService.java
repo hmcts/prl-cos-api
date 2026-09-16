@@ -11,6 +11,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 @Slf4j
@@ -22,12 +23,12 @@ public class SealDetectionService {
         ERROR
     }
 
-    public SealStatus detectSeal(byte[] pdfBytes) {
-        if (pdfBytes == null || pdfBytes.length == 0) {
+    public SealStatus detectSeal(InputStream pdfStream) {
+        if (pdfStream == null) {
             return SealStatus.ERROR;
         }
 
-        try (PDDocument document = PDDocument.load(pdfBytes)) {
+        try (PDDocument document = PDDocument.load(pdfStream)) {
             if (document.getNumberOfPages() == 0) {
                 log.warn("PDF has no pages");
                 return SealStatus.ERROR;

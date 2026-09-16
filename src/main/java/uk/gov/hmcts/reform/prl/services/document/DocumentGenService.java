@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -56,12 +57,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.DocumentGenerationExecutorVirtualConfig.DOCUMENT_EXECUTOR_SERVICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_FINAL_RESPONSE_DOCUMENT;
@@ -370,6 +375,8 @@ public class DocumentGenService {
     private final PdfGenerationService pdfGenerationService;
     private final AuthTokenGenerator authTokenGenerator;
     private final Time dateTime;
+    @Qualifier(DOCUMENT_EXECUTOR_SERVICE)
+    private final ExecutorService documentVirtualThreadExecutorService;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
@@ -680,6 +687,16 @@ public class DocumentGenService {
         return updatedCaseData;
     }
 
+    /**
+     * Helper method to avoid code repetition when cancelling tasks submitted to the Executor Service.
+     * @param future the Future task to be cancelled.
+     */
+    private void cancelFuture(Future<?> future) {
+        if (future != null && !future.isDone()) {
+            future.cancel(true);
+        }
+    }
+
     public Map<String, Object> generateC100DraftDocuments(String authorisation, CaseData caseData) {
 
         Map<String, Object> updatedCaseData = new HashMap<>();
@@ -687,13 +704,47 @@ public class DocumentGenService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
+        //Docmosis parallel calls logic
+        //About the Executor Service used: Spring owns it so there is no need to shut it down from this Service
+        //First, submit the getDocument (Docmosis generation) tasks to the Executor Service so they can overlap,
+        //this keeps the pre-existing conditional logic around documentLanguage.isGenEng and .isGenWelsh:
+        //Assign caseData to a variable, lambdas require it to be effectively final
+        CaseData documentCaseData = caseData;
+        Future<Document> englishFuture = null;
         if (documentLanguage.isGenEng()) {
-            updatedCaseData.put(ENGDOCGEN, Yes.toString());
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, false));
+            englishFuture =
+                documentVirtualThreadExecutorService.submit(() -> getDocument(
+                    authorisation, documentCaseData, DRAFT_HINT, false)
+                );
         }
+        Future<Document> welshFuture = null;
         if (documentLanguage.isGenWelsh()) {
-            updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
-            updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, getDocument(authorisation, caseData, DRAFT_HINT, true));
+            welshFuture = documentVirtualThreadExecutorService.submit(() -> getDocument(
+                authorisation, documentCaseData, DRAFT_HINT, true)
+            );
+        }
+
+        //Second, await results from the tasks (one virtual thread per task) and update case data:
+        try {
+            if (englishFuture != null) {
+                Document englishDocument = englishFuture.get();
+                updatedCaseData.put(ENGDOCGEN, Yes.toString());
+                updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_FIELD, englishDocument);
+            }
+            if (welshFuture != null) {
+                Document welshDocument = welshFuture.get();
+                updatedCaseData.put(IS_WELSH_DOC_GEN, Yes.toString());
+                updatedCaseData.put(DRAFT_APPLICATION_DOCUMENT_WELSH_FIELD, welshDocument);
+            }
+        } catch (InterruptedException e) {
+            cancelFuture(englishFuture);
+            cancelFuture(welshFuture);
+            Thread.currentThread().interrupt();
+            throw new DocumentGenerationException("C100 Draft Document generation interrupted", e);
+        } catch (ExecutionException e) {
+            cancelFuture(englishFuture);
+            cancelFuture(welshFuture);
+            throw new DocumentGenerationException("C100 Draft Document generation failed", e.getCause());
         }
 
         return updatedCaseData;
