@@ -13,6 +13,14 @@ public class LegalAdviserCheckerTest {
     private final LegalAdviserChecker legalAdviserChecker = new LegalAdviserChecker();
 
     @Test
+    public void checkNullCaseDataReturnsNull(){
+        String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
+           null
+        );
+        Assertions.assertNull(result);
+    }
+
+    @Test
     public void checkNullManageOrdersReturnsNull(){
 
         String result = legalAdviserChecker.returnLegalAdviserNameForManageOrders(
@@ -72,6 +80,26 @@ public class LegalAdviserCheckerTest {
                     .nameOfLaToReviewOrder(dynamicList).build()
             ).build());
         Assertions.assertEquals("StaffUser(idamId=Geoff)", result);
+    }
+
+    @Test
+    public void isLegalAdviserListPresentReturnsFalseForNullList() {
+        boolean result = legalAdviserChecker.isLegalAdviserListPresent(null);
+        Assertions.assertFalse(result);
+    }
+
+    @Test
+    public void isLegalAdviserListPresentReturnsFalseForBlankValueLabel() {
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("").build()).build();
+        boolean result = legalAdviserChecker.isLegalAdviserListPresent(dynamicList);
+        Assertions.assertFalse(result);
+    }
+
+    @Test
+    public void isLegalAdviserListPresentReturnsTrueForPopulatedValueLabel() {
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test").build()).build();
+        boolean result = legalAdviserChecker.isLegalAdviserListPresent(dynamicList);
+        Assertions.assertTrue(result);
     }
 
 }

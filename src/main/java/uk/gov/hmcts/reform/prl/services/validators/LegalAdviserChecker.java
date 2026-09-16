@@ -1,30 +1,33 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.staff.StaffUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LegalAdviserChecker {
 
     public String returnLegalAdviserNameForManageOrders(CaseData caseData){
-        if (!isLegalAdviserPresent(caseData.getManageOrders())) {
+        if (caseData == null || caseData.getManageOrders() == null) {
+            return null;
+        }
+        DynamicList laList = caseData.getManageOrders().getNameOfLaToReviewOrder();
+        StaffUser legalAdviser = caseData.getManageOrders().getLegalAdviserToReviewOrder();
+        if (!isLegalAdviserListPresent(laList) && legalAdviser == null) {
             return null;
         } else {
-            if (caseData.getManageOrders().getLegalAdviserToReviewOrder() != null){
-                return String.valueOf(caseData.getManageOrders().getLegalAdviserToReviewOrder());
-            } else {
-                return String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder());
-            }
+            return String.valueOf(Objects.requireNonNullElse(legalAdviser, laList));
         }
     }
 
-    private boolean isLegalAdviserPresent(ManageOrders manageOrders){
-        return manageOrders != null &&
-            (manageOrders.getNameOfLaToReviewOrder() != null
-                || manageOrders.getLegalAdviserToReviewOrder() != null);
+    public boolean isLegalAdviserListPresent(DynamicList legalAdviserList) {
+        return legalAdviserList != null && StringUtils.isNotBlank(legalAdviserList.getValueLabel());
     }
 }
