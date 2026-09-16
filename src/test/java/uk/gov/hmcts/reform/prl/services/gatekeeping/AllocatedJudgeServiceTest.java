@@ -104,7 +104,7 @@ public class AllocatedJudgeServiceTest {
     }
 
     @Test
-    public void testWhenLegalAdvisorDetailsProvided() {
+    public void testWhenLegalAdviserDetailsProvided() {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
@@ -120,6 +120,43 @@ public class AllocatedJudgeServiceTest {
 
         assertEquals(legalAdviser, expectedResponse.getIsJudgeOrLegalAdviser());
         assertNotNull(expectedResponse.getLegalAdviser());
+        assertEquals("test1", expectedResponse.getLegalAdviserName());
+        assertEquals("test1@test.com", expectedResponse.getLegalAdviserEmail());
+    }
+
+    @Test
+    public void testWhenLegalAdviserDetailsNotPresent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+
+        StaffUser legalAdviserUser = StaffUser.builder().build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("isJudgeOrLegalAdviser", legalAdviser);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getLegalAdviserDetails(legalAdviserUser)).thenReturn(
+            Optional.of(StaffProfile.builder().lastName("test1").emailId("test1@test.com").build()));
+
+        AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap, legalAdviserUser, refDataUserService);
+
+        assertNotNull(expectedResponse);
+        assertEquals(YesOrNo.Yes,expectedResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
+        assertNull(expectedResponse.getIsJudgeOrLegalAdviser());
+        assertNull(expectedResponse.getLegalAdviserName());
+        assertNull(expectedResponse.getLegalAdviserEmail());
+    }
+
+    @Test
+    public void testWhenLegalAdviserDetailsIsNull() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("isJudgeOrLegalAdviser", legalAdviser);
+        when(refDataUserService.getLegalAdviserDetails(Mockito.any())).thenReturn(null);
+        AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null, refDataUserService);
+        assertNotNull(expectedResponse);
+        assertEquals(YesOrNo.Yes,expectedResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
+        assertNull(expectedResponse.getIsJudgeOrLegalAdviser());
+        assertNull(expectedResponse.getLegalAdviserName());
+        assertNull(expectedResponse.getLegalAdviserEmail());
     }
 
     @Test
