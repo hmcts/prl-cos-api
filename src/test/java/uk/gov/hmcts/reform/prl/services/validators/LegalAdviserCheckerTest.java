@@ -98,7 +98,8 @@ public class LegalAdviserCheckerTest {
     public void checkPopulatedLegalAdviserListAndNullLegalAdviserUserReturnsLegalAdviserList() {
 
         DynamicList dynamicList = DynamicList.builder()
-            .value(DynamicListElement.builder().code("legaladvisor-swansea-two(prl_legaladvisor_swansea@hmcts.net)").label("legaladvisor-swansea-two(prl_legaladvisor_swansea@hmcts.net)")
+            .value(DynamicListElement.builder().code("legaladvisor-swansea-two(prl_legaladvisor_swansea@hmcts.net)")
+                       .label("legaladvisor-swansea-two(prl_legaladvisor_swansea@hmcts.net)")
                                                                   .build()).build();
 
         Optional<String> result = legalAdviserChecker.validateLegalAdviserName(
@@ -124,21 +125,21 @@ public class LegalAdviserCheckerTest {
 
     @Test
     public void isLegalAdviserListPresentReturnsFalseForNullList() {
-        boolean result = legalAdviserChecker.isLegalAdviserListPresent(null);
+        boolean result = LegalAdviserChecker.isLegalAdviserListPresent(null);
         Assertions.assertFalse(result);
     }
 
     @Test
     public void isLegalAdviserListPresentReturnsFalseForBlankValueLabel() {
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("").build()).build();
-        boolean result = legalAdviserChecker.isLegalAdviserListPresent(dynamicList);
+        boolean result = LegalAdviserChecker.isLegalAdviserListPresent(dynamicList);
         Assertions.assertFalse(result);
     }
 
     @Test
     public void isLegalAdviserListPresentReturnsTrueForPopulatedValueLabel() {
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test").build()).build();
-        boolean result = legalAdviserChecker.isLegalAdviserListPresent(dynamicList);
+        boolean result = LegalAdviserChecker.isLegalAdviserListPresent(dynamicList);
         Assertions.assertTrue(result);
     }
 
