@@ -189,10 +189,10 @@ public class CourtNavCaseService {
     }
 
     /**
-     * Check if the document with the given documentId is already present on the case, ignoring nulls
-     * @param caseData
-     * @param documentId
-     * @return
+     * Check if the document with the given documentId is already present on the case, ignoring nulls.
+     * @param caseData current version of the case data prior to this request.
+     * @param documentId the courtnav-provided ID of the document to check for.
+     * @return true if a document with that ID has already been saved on the case.
      */
     private boolean courtNavDocumentAlreadyPresentOnCase(CaseData caseData, String documentId) {
         if (isEmpty(caseData.getDocumentManagementDetails()) || documentId == null) {
