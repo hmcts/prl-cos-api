@@ -56,7 +56,7 @@ class HearingChasePolicy {
         return hearing.getHearingID() == null ? null : String.valueOf(hearing.getHearingID());
     }
 
-    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate cronDate) {
+    ChaseDecision decide(CaseHearing hearing, CaseData caseData, HearingTrackingLedger ledger, LocalDate cronDate, LocalDate releaseDate) {
         String hearingId = hearingIdOf(hearing);
         if (hearingId == null) {
             return ChaseDecision.skipUnknownHearingId(hearing.getHmcStatus());
@@ -64,15 +64,18 @@ class HearingChasePolicy {
         if (!allowedStatuses().contains(hearing.getHmcStatus())) {
             return ChaseDecision.skipStatusNotInFilter(hearing.getHmcStatus());
         }
+        LocalDate hearingEndDate = computeHearingEndDate(hearing);
+        if (releaseDate.isAfter(hearingEndDate)) {
+            return ChaseDecision.skipHearingDateIsLessThanReleaseDate(hearingEndDate, hearingId, releaseDate);
+        }
         if (isHearingMappedToOrder(caseData, hearing)) {
             return ChaseDecision.skipLinkedOrderExists();
         }
 
-        LocalDate hearingEndDate = computeHearingEndDate(hearing);
         int cadence = cadenceFor(caseData.getCaseTypeOfApplication());
 
         int workingDaysSinceHearingEndDate = workingDayIndicator.workingDaysBetween(hearingEndDate, cronDate);
-        if (hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0)) {
+        if (workingDaysSinceHearingEndDate == 0 || hearingEndDate != null && (cadence > 0 && workingDaysSinceHearingEndDate % cadence != 0)) {
             return ChaseDecision.skipHearingNotAtCadence(hearingEndDate, cadence);
         }
 

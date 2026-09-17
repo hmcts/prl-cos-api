@@ -98,6 +98,7 @@ class RequestOrderTaskServiceTest {
             systemUserService, authTokenGenerator, coreCaseDataApi,
             hearingService, allTabService, chasePolicy, objectMapper, workingDayIndicator);
         ReflectionTestUtils.setField(service, "concurrentRequest", 5);
+        ReflectionTestUtils.setField(service, "releaseDateStr", "2026-01-01");
     }
 
     @ParameterizedTest
@@ -224,7 +225,7 @@ class RequestOrderTaskServiceTest {
     }
 
     @Test
-    void reTriggerAnchorsFromLastCompletedDateIgnoringHearingEndDate() {
+    void skipsHearingWhenItHasSameDayHearingDate() {
         LocalDate lastCompleted = LocalDate.now().minusDays(1);
         CaseData caseData = baseCaseBuilder("C100")
             .requestOrderTaskTrackingByHearing(List.of(
@@ -237,12 +238,12 @@ class RequestOrderTaskServiceTest {
                     .build()))
             .build();
         stubSearchReturning(caseData);
-        stubHearings(completedHearingEndingDaysAgo(14));
-        when(workingDayIndicator.workingDaysBetween(eq(lastCompleted), any())).thenReturn(1);
+        stubHearings(completedHearingEndingDaysAgo(1));
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(0);
 
         service.processRequestOrderTasks();
 
-        verify(allTabService).getStartUpdateForSpecificEvent(anyString(), anyString());
+        verify(allTabService, never()).getStartUpdateForSpecificEvent(anyString(), anyString());
     }
 
 
@@ -334,7 +335,7 @@ class RequestOrderTaskServiceTest {
                 .caseHearings(List.of(
                     hearing("COMPLETED", "10", TODAY.plusDays(3))))
                 .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         when(allTabService
                  .getStartUpdateForSpecificEvent(
@@ -377,7 +378,7 @@ class RequestOrderTaskServiceTest {
                 .caseHearings(List.of(
                     hearing("COMPLETED", "10", TODAY.plusDays(3))))
                 .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         when(allTabService
                  .getStartUpdateForSpecificEvent(
@@ -421,7 +422,7 @@ class RequestOrderTaskServiceTest {
                             .caseHearings(List.of(
                                 hearing("COMPLETED", "10", TODAY.plusDays(3))))
                             .build());
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1).thenReturn(1);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(1);
 
         service.processRequestOrderTasks();
 
@@ -531,7 +532,7 @@ class RequestOrderTaskServiceTest {
             .build();
         stubSearchReturning(caseData);
         stubHearings(completedHearingEndingDaysAgo(1, hearingTypeValue));
-        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3).thenReturn(3);
+        when(workingDayIndicator.workingDaysBetween(any(), any())).thenReturn(3);
 
         service.processRequestOrderTasks();
         verify(allTabService).getStartUpdateForSpecificEvent(anyString(), anyString());

@@ -671,6 +671,7 @@ acro:
 
 request-order-task:
   concurrent-request: ${CONCURRENT_REQUEST:5}
+  release-date: ${RELEASE_DATE:2026-09-15}
   cadence-working-days:
     c100: ${REQUEST_ORDER_TASK_C100_CADENCE:3}
     fl401: ${REQUEST_ORDER_TASK_FL401_CADENCE:1}
