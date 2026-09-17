@@ -64,25 +64,32 @@ public class CafcassCaseDataHelper {
     public static final String ANY_OTHER_DOC = "anyOtherDoc";
     private static final String AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED = "amendOtherPeopleInTheCaseRevised";
     private static final String AMEND_CHILDREN_AND_APPLICANTS = "amendChildrenAndApplicants";
+    private static final String CHILDREN_AND_APPLICANTS = "childrenAndApplicants";
+    private static final String CHILD_AND_APPLICANT_RELATIONS = "childAndApplicantRelations";
+    private static final String BUFF_CHILD_AND_APPLICANT_RELATIONS = "buffChildAndApplicantRelations";
     private static final List<String> AMEND_PARTY_AND_RELATIONSHIP_EVENTS = List.of(
         "amendChildDetailsRevised",
         AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
         AMEND_CHILDREN_AND_APPLICANTS,
         "childDetailsRevised",
         "otherPeopleInTheCaseRevised",
-        "childrenAndApplicants"
+        CHILDREN_AND_APPLICANTS
     );
     private static final Map<String, List<String>> EVENT_SPECIFIC_COMPARISON_FIELDS = Map.of(
         AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
         List.of("otherPeopleInTheCaseTable", "childAndOtherPeopleRelations"),
         AMEND_CHILDREN_AND_APPLICANTS,
-        List.of("childAndApplicantRelations")
+        List.of(CHILD_AND_APPLICANT_RELATIONS),
+        CHILDREN_AND_APPLICANTS,
+        List.of(CHILD_AND_APPLICANT_RELATIONS)
     );
     private static final Map<String, List<String>> EVENT_SPECIFIC_SOURCE_FIELDS = Map.of(
         AMEND_OTHER_PEOPLE_IN_THE_CASE_REVISED,
         List.of("otherPartyInTheCaseRevised", "childAndOtherPeopleRelations"),
         AMEND_CHILDREN_AND_APPLICANTS,
-        List.of("childAndApplicantRelations")
+        List.of(CHILD_AND_APPLICANT_RELATIONS),
+        CHILDREN_AND_APPLICANTS,
+        List.of(CHILD_AND_APPLICANT_RELATIONS)
     );
     private static final List<String> OTHER_PARTY_COMPARISON_FIELDS = List.of(
         "firstName",
@@ -158,10 +165,25 @@ public class CafcassCaseDataHelper {
 
         Map<String, Object> eventData = new HashMap<>();
         EVENT_SPECIFIC_SOURCE_FIELDS.get(eventId).stream()
-            .filter(caseData::containsKey)
-            .forEach(fieldName -> eventData.put(fieldName, normaliseSourceField(fieldName, caseData.get(fieldName))));
+            .map(fieldName -> normaliseEventSourceField(caseData, fieldName))
+            .filter(Objects::nonNull)
+            .forEach(field -> eventData.put(field.name(), normaliseSourceField(field.name(), field.value())));
         removeEmptyValues(eventData);
         return eventData;
+    }
+
+    private EventSourceField normaliseEventSourceField(Map<String, Object> caseData, String fieldName) {
+        if (CHILD_AND_APPLICANT_RELATIONS.equals(fieldName)) {
+            Object relationValue = caseData.get(CHILD_AND_APPLICANT_RELATIONS);
+            if (relationValue == null) {
+                relationValue = caseData.get(BUFF_CHILD_AND_APPLICANT_RELATIONS);
+            }
+            return relationValue == null ? null : new EventSourceField(CHILD_AND_APPLICANT_RELATIONS, relationValue);
+        }
+        return caseData.containsKey(fieldName) ? new EventSourceField(fieldName, caseData.get(fieldName)) : null;
+    }
+
+    private record EventSourceField(String name, Object value) {
     }
 
     private boolean hasCafcassEnglandLocation(CaseDetails caseDetails) {
@@ -253,7 +275,7 @@ public class CafcassCaseDataHelper {
     }
 
     private void normaliseRelationshipSourceValue(String fieldName, Map<String, Object> relationship) {
-        if ("childAndApplicantRelations".equals(fieldName)) {
+        if (CHILD_AND_APPLICANT_RELATIONS.equals(fieldName)) {
             relationship.keySet().removeIf(field -> !CHILD_AND_APPLICANT_RELATION_COMPARISON_FIELDS.contains(field));
             normaliseValues(relationship, "childAndApplicantRelation", "childLivesWith");
             removeOtherDetailsWhenNotOther(relationship, "childAndApplicantRelation", "childAndApplicantRelationOtherDetails");

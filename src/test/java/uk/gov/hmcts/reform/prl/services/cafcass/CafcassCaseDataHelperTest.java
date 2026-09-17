@@ -887,6 +887,77 @@ class CafcassCaseDataHelperTest {
         ));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldReturnFalseWhenChildrenAndApplicantsCurrentPayloadContainsOnlySubmittedBuffer(String eventId) {
+        Map<String, Object> submittedRelation = Map.of(
+            "applicantId", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "applicantFullName", "Alex Green",
+            "childId", "cccccccc-cccc-cccc-cccc-cccccccccccc",
+            "childFullName", "Case Child",
+            "childAndApplicantRelation", "mother",
+            "childLivesWith", "Yes"
+        );
+        Map<String, Object> savedRelation = Map.of(
+            "applicantId", "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "applicantFullName", "Stale Applicant Name",
+            "childId", "dddddddd-dddd-dddd-dddd-dddddddddddd",
+            "childFullName", "Stale Child Name",
+            "childAndApplicantRelation", "mother",
+            "childLivesWith", "Yes"
+        );
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("buffChildAndApplicantRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            submittedRelation
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndApplicantRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            savedRelation
+        )));
+
+        assertFalse(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            eventId
+        ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"amendChildrenAndApplicants", "childrenAndApplicants"})
+    void shouldReturnTrueWhenChildrenAndApplicantsSubmittedBufferHasRealChange(String eventId) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("caseManagementLocation", caseManagementLocation());
+        caseData.put("buffChildAndApplicantRelations", List.of(element(
+            "11111111-1111-1111-1111-111111111111",
+            Map.of(
+                "childAndApplicantRelation", "mother",
+                "childLivesWith", "Yes"
+            )
+        )));
+
+        Map<String, Object> caseDataBefore = new HashMap<>();
+        caseDataBefore.put("caseManagementLocation", caseManagementLocation());
+        caseDataBefore.put("childAndApplicantRelations", List.of(element(
+            "22222222-2222-2222-2222-222222222222",
+            Map.of(
+                "childAndApplicantRelation", "father",
+                "childLivesWith", "Yes"
+            )
+        )));
+
+        assertTrue(cafcassCaseDataHelper.hasCafcassCaseDataChanged(
+            caseDetails(caseData),
+            caseDetails(caseDataBefore),
+            eventId
+        ));
+    }
+
     @Test
     void shouldReturnFalseWhenAmendOtherPeopleHasOnlyGeneratedCaseDataChanges() {
         Map<String, Object> otherPerson = Map.of(
